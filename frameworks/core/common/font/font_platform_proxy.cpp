@@ -19,6 +19,8 @@
 
 namespace OHOS::Ace {
 
+SINGLETON_INSTANCE_IMPL(FontPlatformProxy);
+
 FontPlatformProxy::FontPlatformProxy() = default;
 
 FontPlatformProxy::~FontPlatformProxy() = default;

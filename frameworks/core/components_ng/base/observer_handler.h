@@ -232,6 +232,11 @@ enum class GestureListenerType { TAP = 0, LONG_PRESS, PAN, PINCH, SWIPE, ROTATIO
 
 enum class GestureActionPhase { WILL_START = 0, WILL_END = 1, UNKNOWN = 2 };
 
+using PanListenerCallback =
+    std::function<void(const GestureEvent&, const RefPtr<NG::PanRecognizer>&, const RefPtr<NG::FrameNode>&)>;
+using GestureListenerCallback =
+    std::function<void(const GestureEvent&, const RefPtr<NG::FrameNode>&)>;
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
@@ -270,7 +275,8 @@ public:
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
     void NotifyRouterPageSizeChange(const RefPtr<PageInfo>& pageInfo,
         RouterPageState state, const std::optional<SizeF>& size);
-    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern,
+        NavDestinationState state, const std::optional<SizeF>& size);
     void NotifySwiperContentUpdate(const SwiperContentInfo& info);
     bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
@@ -303,6 +309,9 @@ public:
     using RouterPageSizeChangeHandleFunc = void (*)(const RouterPageInfoNG&);
     using NavDestinationSizeChangeHandleFunc = void (*)(const NavDestinationInfo&);
     using NavDestinationSizeChangeByUniqueIdHandleFunc = void (*)(const NavDestinationInfo&);
+    using RouterPageSizeChangeHandleFuncForAni = std::function<void(const RouterPageInfoNG&)>;
+    using NavDestinationSizeChangeHandleFuncForAni = std::function<void(const NavDestinationInfo&)>;
+    using NavDestinationSizeChangeByUniqueIdHandleFuncForAni = std::function<void(const NavDestinationInfo&)>;
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
@@ -313,11 +322,14 @@ public:
     void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
     using WinSizeLayoutBreakpointHandleFunc = void (*)(int32_t instanceId, const WindowSizeBreakpoint& info);
+    using WinSizeLayoutBreakpointHandleFuncAni = std::function<void(int32_t instanceId,
+        const WindowSizeBreakpoint& info)>;
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
     void SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func);
     void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
+    void SetWinSizeLayoutBreakpointChangeFuncAni(WinSizeLayoutBreakpointHandleFuncAni func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -351,6 +363,50 @@ public:
     void SetRouterPageSizeChangeHandleFunc(RouterPageSizeChangeHandleFunc func);
     void SetNavDestinationSizeChangeHandleFunc(NavDestinationSizeChangeHandleFunc func);
     void SetNavDestinationSizeChangeByUniqueIdHandleFunc(NavDestinationSizeChangeByUniqueIdHandleFunc func);
+    void SetRouterPageSizeChangeHandleFuncForAni(RouterPageSizeChangeHandleFuncForAni&& func);
+    void SetNavDestinationSizeChangeHandleFuncForAni(NavDestinationSizeChangeHandleFuncForAni&& func);
+    void SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
+        NavDestinationSizeChangeByUniqueIdHandleFuncForAni&& func);
+
+    static void AddBeforePanStartListenerCallback(
+        int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback);
+    static void AddBeforePanEndListenerCallback(
+        int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback);
+    static void AddAfterPanStartListenerCallback(
+        int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback);
+    static void AddAfterPanEndListenerCallback(int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback);
+
+    static void RemoveBeforePanStartListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+    static void RemoveBeforePanEndListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+    static void RemoveAfterPanStartListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+    static void RemoveAfterPanEndListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+
+    void TriggerBeforePanStart(const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current,
+        const RefPtr<FrameNode>& frameNode);
+    void TriggerBeforePanEnd(const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current,
+        const RefPtr<FrameNode>& frameNode);
+    void TriggerAfterPanStart(const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current,
+        const RefPtr<FrameNode>& frameNode);
+    void TriggerAfterPanEnd(const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current,
+        const RefPtr<FrameNode>& frameNode);
+
+    static void AddWillClickListenerCallback(
+        int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback);
+    static void AddDidClickListenerCallback(
+        int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback);
+    static void AddWillTapListenerCallback(int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback);
+    static void AddDidTapListenerCallback(int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback);
+
+    static void RemoveWillClickListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+    static void RemoveDidClickListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+    static void RemoveWillTapListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+    static void RemoveDidTapListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll);
+
+    void TriggerWillClick(const GestureEvent& clickInfo, const RefPtr<FrameNode>& frameNode);
+    void TriggerDidClick(const GestureEvent& clickInfo, const RefPtr<FrameNode>& frameNode);
+    void TriggerWillTap(const GestureEvent& gestureEvent, const RefPtr<FrameNode>& frameNode);
+    void TriggerDidTap(const GestureEvent& gestureEvent, const RefPtr<FrameNode>& frameNode);
+
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -362,6 +418,7 @@ private:
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;
     WinSizeLayoutBreakpointHandleFunc winSizeLayoutBreakpointHandleFunc_ = nullptr;
+    WinSizeLayoutBreakpointHandleFuncAni winSizeLayoutBreakpointHandleFuncAni_ = nullptr;
     DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     NavDestinationSwitchHandleFuncForAni navDestinationSwitchHandleFuncForAni_ = nullptr;
@@ -388,6 +445,28 @@ private:
     RouterPageSizeChangeHandleFunc routerPageSizeChangeHandleFunc_ = nullptr;
     NavDestinationSizeChangeHandleFunc navDestinationSizeChangeHandleFunc_ = nullptr;
     NavDestinationSizeChangeByUniqueIdHandleFunc navDestinationSizeChangeByUniqueIdHandleFunc_ = nullptr;
+    RouterPageSizeChangeHandleFuncForAni routerPageSizeChangeHandleFuncForAni_;
+    NavDestinationSizeChangeHandleFuncForAni navDestinationSizeChangeHandleFuncForAni_;
+    NavDestinationSizeChangeByUniqueIdHandleFuncForAni navDestinationSizeChangeByUniqueIdHandleFuncForAni_;
+
+    PanListenerCallback beforePanStartHandleFunc_ = nullptr;
+    static std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>>
+ 	    beforePanStartCallbackMap_;
+    static std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>>
+ 	    beforePanEndCallbackMap_;
+    static std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>>
+ 	    afterPanStartCallbackMap_;
+    static std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>>
+ 	    afterPanEndCallbackMap_;
+
+    static std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>>
+ 	    willClickCallbackMap_;
+    static std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>>
+ 	    didClickCallbackMap_;
+    static std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>>
+ 	    willTapCallbackMap_;
+    static std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>>
+ 	    didTapCallbackMap_;
 
     napi_value GetUIContextValue();
 };

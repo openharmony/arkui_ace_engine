@@ -98,7 +98,8 @@ public:
         return latestElementId_;
     }
 
-    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
+    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(
+        const std::string& key, bool willGetAll = false, int32_t instanceId = -1);
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node, int32_t nodeId);
 
@@ -135,7 +136,7 @@ private:
     std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
 
     // Map for inspectorId
-    std::unordered_map<std::string, std::unordered_map<int32_t, WeakPtr<NG::FrameNode>>> inspectorIdMap_;
+    std::unordered_map<std::string, std::list<std::pair<int32_t, WeakPtr<NG::FrameNode>>>> inspectorIdMap_;
 
     RemovedElementsType removedItems_;
 
@@ -417,7 +418,8 @@ void ElementRegisterImpl::ClearPendingRemoveNodes()
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(
+    const std::string& key, bool willGetAll, int32_t instanceId)
 {
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
@@ -431,7 +433,8 @@ RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::s
         }
         auto depOfNode = uiNode->GetDepth();
         bool withInScope = willGetAll || uiNode->IsOnMainTree();
-        if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
+        bool checkInstanceId = instanceId == -1 ? true : uiNode->GetInstanceId() == instanceId;
+        if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode && checkInstanceId) {
             depth = depOfNode;
             frameNode = uiNode;
         }
@@ -442,7 +445,14 @@ RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::s
 void ElementRegisterImpl::AddFrameNodeByInspectorId(const std::string& key,
     const WeakPtr<NG::FrameNode>& node, int32_t nodeId)
 {
-    inspectorIdMap_[key][nodeId] = node;
+    auto it = inspectorIdMap_.find(key);
+    std::pair<int32_t, WeakPtr<NG::FrameNode>> nodePair = { nodeId, node };
+    if (it != inspectorIdMap_.end()) {
+        it->second.push_back(nodePair);
+    } else {
+        std::list<std::pair<int32_t, WeakPtr<NG::FrameNode>>> nodeList = { nodePair };
+        inspectorIdMap_.try_emplace(key, nodeList);
+    }
 }
 
 void ElementRegisterImpl::RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId)
@@ -450,9 +460,11 @@ void ElementRegisterImpl::RemoveFrameNodeByInspectorId(const std::string& key, i
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_VOID(it != inspectorIdMap_.end());
     CHECK_NULL_VOID(!it->second.empty());
-    auto& innerMap = it->second;
-    innerMap.erase(nodeId);
-    if (it->second.empty()) {
+    auto& innerPair = it->second;
+    innerPair.remove_if([nodeId](const std::pair<int32_t, WeakPtr<NG::FrameNode>>& p) {
+        return p.first == nodeId;
+    });
+    if (innerPair.empty()) {
         inspectorIdMap_.erase(it);
     }
 }
@@ -626,9 +638,10 @@ ElementIdType ElementRegister::GetLatestElementId() const
     DELEGATE(GetLatestElementId(), ElementRegister::UndefinedElementId);
 }
 
-RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(
+    const std::string& key, bool willGetAll, int32_t instanceId)
 {
-    DELEGATE(GetAttachedFrameNodeById(key, willGetAll), nullptr);
+    DELEGATE(GetAttachedFrameNodeById(key, willGetAll, instanceId), nullptr);
 }
 
 void ElementRegister::AddFrameNodeByInspectorId(const std::string& key,

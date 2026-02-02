@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -25,6 +26,9 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
 
 #include "rect_shape_peer.h"
 
@@ -59,6 +63,17 @@ RefPtr<ShapeRect> Convert(const Ark_RectShape& src)
     CHECK_NULL_RETURN(src, nullptr);
     return src->rectShape;
 }
+
+template<>
+ScrollBarMargin Convert(const Ark_ScrollBarMargin& src)
+{
+    ScrollBarMargin ret;
+    auto start = Converter::Convert<CalcDimension>(src.start.value);
+    auto end = Converter::Convert<CalcDimension>(src.end.value);
+    ret.start_ = GreatOrEqual(start.Value(), 0.0) ? start : ret.start_;
+    ret.end_ = GreatOrEqual(end.Value(), 0.0) ? end : ret.end_;
+    return ret;
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -77,7 +92,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String* value)
+                           const Opt_Union_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,6 +108,15 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
+}
+void SetScrollBarMarginImpl(Ark_NativePointer node,
+                            const Opt_ScrollBarMargin* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollBarMargin scrollBarMargin;
+    auto convValue = Converter::OptConvertPtr<ScrollBarMargin>(value);
+    ScrollableModelStatic::SetScrollBarMargin(frameNode, convValue.value_or(scrollBarMargin));
 }
 void SetNestedScrollImpl(Ark_NativePointer node,
                          const Opt_NestedScrollOptions* value)
@@ -124,7 +148,9 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     } else if (ScrollLayoutProperty::TypeId() == id) {
         ScrollModelStatic::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (WaterFlowLayoutProperty::TypeId() == id) {
-        WaterFlowModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
+        auto* modifier = NG::NodeModifier::GetWaterFlowModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->setScrollEnabled(reinterpret_cast<ArkUINodeHandle>(frameNode), convValue.value_or(true));
     }
 }
 void SetFrictionImpl(Ark_NativePointer node,
@@ -134,6 +160,99 @@ void SetFrictionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<float>(value);
     ScrollableModelStatic::SetFriction(frameNode, convValue);
+}
+void SetContentStartOffsetImpl(Ark_NativePointer node,
+                               const Opt_Union_F64_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    ScrollableModelStatic::SetContentStartOffset(frameNode, convValue);
+}
+void SetContentEndOffsetImpl(Ark_NativePointer node,
+                             const Opt_Union_F64_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    ScrollableModelStatic::SetContentEndOffset(frameNode, convValue);
+}
+void SetOnWillStartDraggingImpl(Ark_NativePointer node,
+                                const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollableModelStatic::SetOnWillStartDragging(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    ScrollableModelStatic::SetOnWillStartDragging(frameNode, std::move(onEvent));
+}
+void SetOnWillStopDraggingImpl(Ark_NativePointer node,
+                               const Opt_OnWillStopDraggingCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollableModelStatic::SetOnWillStopDragging(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](Dimension velocity) {
+        auto arkVelocity = Converter::ArkValue<Ark_Float64>(velocity.ConvertToVp());
+        arkCallback.Invoke(arkVelocity);
+    };
+    ScrollableModelStatic::SetOnWillStopDragging(frameNode, std::move(onEvent));
+}
+void SetOnDidStopDraggingImpl(Ark_NativePointer node,
+                              const Opt_OnDidStopDraggingCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollableModelStatic::SetOnDidStopDragging(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](bool willFling) {
+        Ark_Boolean arkWillFling = Converter::ArkValue<Ark_Boolean>(willFling);
+        arkCallback.Invoke(arkWillFling);
+    };
+    ScrollableModelStatic::SetOnDidStopDragging(frameNode, std::move(onEvent));
+}
+void SetOnWillStartFlingImpl(Ark_NativePointer node,
+                             const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollableModelStatic::SetOnWillStartFling(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    ScrollableModelStatic::SetOnWillStartFling(frameNode, std::move(onEvent));
+}
+void SetOnDidStopFlingImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollableModelStatic::SetOnDidStopFling(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
 }
 void SetOnReachStartImpl(Ark_NativePointer node,
                          const Opt_Callback_Void* value)
@@ -288,9 +407,17 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetScrollBarImpl,
         ScrollableCommonMethodModifier::SetScrollBarColorImpl,
         ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
+        ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
         ScrollableCommonMethodModifier::SetNestedScrollImpl,
         ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::SetFrictionImpl,
+        ScrollableCommonMethodModifier::SetContentStartOffsetImpl,
+        ScrollableCommonMethodModifier::SetContentEndOffsetImpl,
+        ScrollableCommonMethodModifier::SetOnWillStartDraggingImpl,
+        ScrollableCommonMethodModifier::SetOnWillStopDraggingImpl,
+        ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
+        ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
+        ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
         ScrollableCommonMethodModifier::SetOnReachStartImpl,
         ScrollableCommonMethodModifier::SetOnReachEndImpl,
         ScrollableCommonMethodModifier::SetOnScrollStartImpl,

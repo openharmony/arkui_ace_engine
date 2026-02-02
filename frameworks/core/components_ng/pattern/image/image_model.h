@@ -31,7 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
+#include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/drawable/drawable_descriptor.h"

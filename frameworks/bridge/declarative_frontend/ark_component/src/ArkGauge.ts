@@ -43,7 +43,7 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     return this;
   }
   description(value: CustomBuilder): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'description function not supported in attributeModifier scenario.');
   }
   trackShadow(value: GaugeShadowOptions): this {
     modifierWithKey(this._modifiersWithKeys, GaugeTrackShadowModifier.identity, GaugeTrackShadowModifier, value);

@@ -39,6 +39,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -55,6 +56,8 @@ constexpr int DEFAULT_PREDICT_ERROR_TIMES = 50;
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
 } // namespace
+
+ListPattern::~ListPattern() = default;
 
 void ListPattern::OnModifyDone()
 {
@@ -145,6 +148,7 @@ void ListPattern::ChangeAxis(RefPtr<UINode> node)
             }
             auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
             if (listItemGroupPattern) {
+                listItemGroupPattern->SetAxisChanged(true);
                 listItemGroupPattern->ResetLayoutedInfo();
                 frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 ChangeAxis(child);
@@ -199,6 +203,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    bool prevStackEnd = isStackFromEnd_;
     isStackFromEnd_ = listLayoutAlgorithm->GetStackFromEnd();
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
@@ -208,6 +213,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             if (item) {
                 item->ResetSwipeStatus();
             }
+        }
+        if (prevStackEnd != isStackFromEnd_) {
+            lanesItemRange_.clear();
         }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
         laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
@@ -448,7 +456,9 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetItemsPosition(itemPosition_, cachedItemPosition_, noDividerItems_, showCached, clip);
     paint->SetLaneIdx(laneIdx4Divider_);
     paint->SetContentModifier(listContentModifier_);
-    paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
+    auto parentAdjust = geometryNode->GetParentAdjust().GetOffset().GetY();
+    auto selfAdjust = geometryNode->GetSelfAdjust().GetOffset().GetY();
+    paint->SetAdjustOffset(parentAdjust - selfAdjust);
     paint->UpdateBoundsRect(frameRect, clip);
     UpdateFadingEdge(paint);
     return paint;
@@ -580,6 +590,7 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
+            ReportOnItemListEvent("onReachStart");
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:List",
                 scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -607,6 +618,7 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
         auto scrollSource = GetScrollSource();
         if (scrollUpToEnd || (scrollDownToEnd && scrollSource != SCROLL_FROM_NONE)) {
             FireObserverOnReachEnd();
+            ReportOnItemListEvent("onReachEnd");
             CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, scrollSource:%d, id:%d, tag:List",
                 scrollUpToEnd, scrollDownToEnd, scrollSource, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -630,6 +642,7 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
         endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(endIndex);
     }
     onScrollIndex(startIndex, endIndex, centerIndex_);
+    ReportOnItemListScrollEvent("onScrollIndex", startIndex, endIndex);
 }
 
 void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
@@ -1055,7 +1068,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
 
-    if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_CROWN) {
+    if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_CROWN || source == SCROLL_FROM_BAR_OVER_DRAG) {
         auto res = GetOutBoundaryOffset(currentDelta_);
         // over scroll in drag update from normal to over scroll.
         float overScroll = std::max(res.start, res.end);
@@ -1223,7 +1236,7 @@ int32_t ListPattern::GetEndIndexExcludeEndOffset()
     while (iter != itemPosition_.rend() && GreatOrEqual(iter->second.startPos, endPos)) {
         iter++;
     }
-    return iter->first;
+    return iter == itemPosition_.rend() ? endIndex_ : iter->first;
 }
 
 int32_t ListPattern::GetStartIndexExcludeStartOffset()
@@ -1232,7 +1245,7 @@ int32_t ListPattern::GetStartIndexExcludeStartOffset()
     while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
         iter++;
     }
-    return iter->first;
+    return iter == itemPosition_.end() ? startIndex_ : iter->first;
 }
 
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
@@ -1779,6 +1792,7 @@ void ListPattern::ScrollTo(float position)
     SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 void ListPattern::ResetScrollToIndexParams()
@@ -1812,6 +1826,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
+            ContentChangeReport(GetHost());
         }
         MarkDirtyNodeSelf();
     }
@@ -2920,7 +2935,7 @@ std::string static FocusWrapModeToString(FocusWrapMode mode)
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json, filter);
+    SelectableContainerPattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
@@ -3294,6 +3309,7 @@ void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listE
     if (onScrollVisibleContentChange) {
         if (indexChanged || startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
+            ReportOnItemListScrollEvent("onScrollVisibleContentChange", startInfo_.index, endInfo_.index);
             groupIndexChanged_ = true;
         }
     }
@@ -3421,6 +3437,19 @@ void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("isScrollEnd", isScrollEnd_);
     json->Put("IsAtTop", IsAtTop());
     json->Put("IsAtBottom", IsAtBottom());
+}
+
+void ListPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    json->Put("isScrollable",
+        isScrollable_ ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                      : "false");
+    json->Put("scrollDirection", (axis == Axis::VERTICAL) ? "vertical" : "horizontal");
 }
 
 SizeF ListPattern::GetChildrenExpandedSize()
@@ -4403,5 +4432,117 @@ void ListPattern::UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, i
 void ListPattern::ResetForExtScroll()
 {
     currentDelta_ = 0;
+}
+
+void ListPattern::ReportOnItemListEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto listEvent = std::string("List.") + event;
+    params->Put("name", listEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string value = std::string("List.") + event;
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("StartX", startindex);
+    params->Put("StartY", endindex);
+
+    auto eventData = JsonUtil::Create();
+    CHECK_NULL_VOID(eventData);
+    eventData->Put("name", value.c_str());
+    eventData->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", host->GetId());
+    json->Put("event", eventData);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t ListPattern::OnInjectionEvent(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        if (isScrollByRatio) {
+            ScrollPageByRatio(true, ratio, reportEventId);
+        } else {
+            ScrollPage(true);
+        }
+    } else if (ret == "scrollBackward") {
+        if (isScrollByRatio) {
+            ScrollPageByRatio(false, ratio, reportEventId);
+        } else {
+            ScrollPage(false);
+        }
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void ListPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
+{
+    float height = GetMainContentSize();
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    StopAnimate();
+    SetIsOverScroll(false);
+    HandleListScroll(distance, reportEventId);
+    isScrollEnd_ = true;
+}
+
+void ListPattern::HandleListScroll(float distance, int32_t reportEventId)
+{
+    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        return;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (!IsScrollable()) {
+        error = ScrollError::SCROLL_NOT_SCROLLABLE_ERROR;
+    } else if (IsAtTop()) {
+        error = ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom()) {
+        error = ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+    ReportScroll(false, error, reportEventId);
 }
 } // namespace OHOS::Ace::NG

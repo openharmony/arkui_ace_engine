@@ -361,6 +361,22 @@ int32_t DragDropFuncWrapper::NotifyDragResult(int32_t requestId, int32_t result)
     return DragDropGlobalController::GetInstance().NotifyDragResult(requestId, result);
 }
 
+int32_t DragDropFuncWrapper::NotifySuggestedDropOperation(int32_t requestId, int32_t operation)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifySuggestedDropOperation(requestId, operation);
+}
+
+int32_t DragDropFuncWrapper::NotifyDisableDropAnimation(int32_t requestId, bool disable)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDisableDropAnimation(requestId, disable);
+}
+
 int32_t DragDropFuncWrapper::NotifyDragEndPendingDone(int32_t requestId)
 {
     if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
@@ -426,9 +442,9 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
         }
     }
     auto material = imageContext->GetSystemMaterial();
-    CHECK_NULL_VOID(material);
-    if (Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
+    if (material && Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Not support uiMaterial.");
+        option.options.material = nullptr;
         return;
     }
     option.options.material = material;
@@ -1414,11 +1430,14 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto dragPreviewInfo = frameNode->GetDragPreview();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [id = Container::CurrentId(), pipeline, gestureHub, pixelMapCallback](
+    // Use weak reference to avoid RefPtr destruction in non-UI thread
+    auto callback = [id = Container::CurrentId(),
+                        weakGestureHub = AceType::WeakClaim(AceType::RawPtr(gestureHub)),
+                        pixelMapCallback](
                         std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()> finishCallback) {
         ContainerScope scope(id);
+        // Get pipeline from container by id to avoid RefPtr destruction in non-UI thread
+        auto pipeline = PipelineContext::GetContextByContainerId(id);
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
@@ -1432,7 +1451,8 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
         if (pixelMap != nullptr) {
             auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             taskScheduler->PostTask(
-                [gestureHub, customPixelMap, pixelMapCallback]() {
+                [weakGestureHub, customPixelMap, pixelMapCallback]() {
+                    auto gestureHub = weakGestureHub.Upgrade();
                     CHECK_NULL_VOID(gestureHub);
                     gestureHub->SetPixelMap(customPixelMap);
                     gestureHub->SetDragPreviewPixelMap(customPixelMap);
@@ -1528,26 +1548,17 @@ bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
 }
 
 RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
-    const RefPtr<PipelineBase>& context, const RefPtr<PipelineBase>& nodeContext,
-    const RefPtr<Subwindow>& subWindow, bool isExpandDisplay, int32_t instanceId)
+    const RefPtr<PipelineBase>& context, const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow)
 {
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dragDropManager = pipeline->GetDragDropManager();
+    bool isReceiveDragEnabled = subWindow ? subWindow->GetIsReceiveDragEventEnabled() : false;
     auto nodePipeline = AceType::DynamicCast<PipelineContext>(nodeContext);
-    CHECK_NULL_RETURN(nodePipeline, dragDropManager);
-    if (nodePipeline == pipeline || isExpandDisplay) {
+    if (nodePipeline == pipeline || isReceiveDragEnabled) {
         return dragDropManager;
     }
-    auto mainContainerId = instanceId >= MIN_SUBCONTAINER_ID ?
-        SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
-    auto container = Container::GetContainer(mainContainerId);
-    CHECK_NULL_RETURN(container, dragDropManager);
-    if (!container->IsSceneBoardWindow()) {
-        return dragDropManager;
-    }
-    CHECK_NULL_RETURN(subWindow, dragDropManager);
-    subWindow->SetWindowTouchable(false);
+    CHECK_NULL_RETURN(nodePipeline, nullptr);
     auto pixelMapOffset = dragDropManager->GetPixelMapOffset();
     dragDropManager = nodePipeline->GetDragDropManager();
     dragDropManager->SetPixelMapOffset(pixelMapOffset);

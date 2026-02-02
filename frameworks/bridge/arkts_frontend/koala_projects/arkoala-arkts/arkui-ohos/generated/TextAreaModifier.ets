@@ -28,10 +28,11 @@ import { ResourceColor, Font, Length, ResourceStr, Dimension } from "./component
 import { Color, TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent, ContentType } from "./component/textInput"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection, IMEClient, LineSpacingOptions, MaxLinesOptions } from "./component/textCommon"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
-import { LengthMetrics } from "arkui.Graphics"
+import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
+import { ComponentContentBase } from "arkui.ComponentContent"
 export class TextAreaModifier extends CommonMethodModifier implements TextAreaAttribute,AttributeModifier<TextAreaAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -112,6 +113,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxLines_0_0value?: int32 | undefined
+    _maxLines_0_1value?: MaxLinesOptions | undefined
     _wordBreak_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _wordBreak_0_0value?: WordBreak | undefined
     _lineBreakStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -122,6 +124,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _letterSpacing_0_0value?: double | string | Resource | undefined
     _lineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineSpacing_0_0value?: LengthMetrics | undefined
+    _lineSpacing_0_1value?: LineSpacingOptions | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineHeight_0_0value?: double | string | Resource | undefined
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -158,6 +161,22 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _minLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minLines_0_0value?: int32 | undefined
+    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAutoSpacing_0_0value?: boolean | undefined
+    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeWidth_0_0value?: LengthMetrics | undefined
+    _strokeColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeColor_0_0value?: ResourceColor | undefined
+    _onWillAttachIME_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillAttachIME_0_0value?: ((value0: IMEClient) => void) | undefined
+    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarColor_0_0value?: ColorMetrics | undefined
+    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableSelectedDataDetector_0_0value?: boolean | undefined
+    _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compressLeadingPunctuation_0_0value?: boolean | undefined
     _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -173,7 +192,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _showCounter_0_0value?: boolean | undefined
     _showCounter_0_1value?: InputCounterOptions | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | undefined
+    _customKeyboard_0_0value?: CustomBuilder | ComponentContentBase | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
@@ -777,7 +796,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined), (this._maxLines_0_1value as MaxLinesOptions | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -787,7 +806,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined), (undefined as MaxLinesOptions | undefined));
                 }
             }
         }
@@ -867,7 +886,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._lineSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined));
+                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined), (this._lineSpacing_0_1value as LineSpacingOptions | undefined));
                     this._lineSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -877,7 +896,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._lineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined));
+                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
                 }
             }
         }
@@ -1277,6 +1296,150 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
+        if (this._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
+                }
+            }
+        }
+        if (this._minLines_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minLines_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinLinesAttribute((this._minLines_0_0value as int32 | undefined));
+                    this._minLines_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minLines_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minLines_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinLinesAttribute((undefined as int32 | undefined));
+                }
+            }
+        }
+        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAutoSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as LengthMetrics | undefined));
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeWidthAttribute((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
+        if (this._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeColorAttribute((this._strokeColor_0_0value as ResourceColor | undefined));
+                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillAttachIME_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as ((value0: IMEClient) => void) | undefined));
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillAttachIMEAttribute((undefined as ((value0: IMEClient) => void) | undefined));
+                }
+            }
+        }
+        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as ColorMetrics | undefined));
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._inputFilter_0_flag) {
@@ -1317,7 +1480,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1327,7 +1490,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined));
                 }
             }
         }
@@ -1769,11 +1932,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             switch (modifier._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.maxLines(modifier._maxLines_0_0value);
+                    this.maxLines(modifier._maxLines_0_0value, modifier._maxLines_0_1value);
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as int32 | undefined));
+                    this.maxLines((undefined as int32 | undefined), (undefined as MaxLinesOptions | undefined));
                 }
             }
         }
@@ -1834,11 +1997,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             switch (modifier._lineSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.lineSpacing(modifier._lineSpacing_0_0value);
+                    this.lineSpacing(modifier._lineSpacing_0_0value, modifier._lineSpacing_0_1value);
                     break;
                 }
                 default: {
-                    this.lineSpacing((undefined as LengthMetrics | undefined));
+                    this.lineSpacing((undefined as LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
                 }
             }
         }
@@ -2128,6 +2291,110 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
+        if (modifier._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textDirection(modifier._textDirection_0_0value);
+                    break;
+                }
+                default: {
+                    this.textDirection((undefined as TextDirection | undefined));
+                }
+            }
+        }
+        if (modifier._minLines_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minLines_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minLines(modifier._minLines_0_0value);
+                    break;
+                }
+                default: {
+                    this.minLines((undefined as int32 | undefined));
+                }
+            }
+        }
+        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAutoSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAutoSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeWidth(modifier._strokeWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeWidth((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeColor(modifier._strokeColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillAttachIME_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillAttachIME(modifier._onWillAttachIME_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillAttachIME((undefined as ((value0: IMEClient) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableSelectedDataDetector((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._inputFilter_0_flag) {
@@ -2163,7 +2430,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.customKeyboard((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined));
+                    this.customKeyboard((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined));
                 }
             }
         }
@@ -2173,6 +2440,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._placeholderColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._placeholderColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2184,6 +2452,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._placeholderFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholderFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._placeholderFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -2195,6 +2464,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.UPDATE
             this._enterKeyType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.SKIP
@@ -2206,6 +2476,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._textAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -2217,6 +2488,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2228,6 +2500,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2239,6 +2512,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -2250,6 +2524,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -2261,6 +2536,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -2272,6 +2548,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -2283,6 +2560,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._textOverflow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textOverflow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textOverflow_0_flag = AttributeUpdaterFlag.SKIP
@@ -2294,6 +2572,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.UPDATE
             this._textIndent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.SKIP
@@ -2305,6 +2584,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._caretStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -2316,6 +2596,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2327,6 +2608,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSubmit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.SKIP
@@ -2338,6 +2620,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2349,6 +2632,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTextSelectionChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2360,6 +2644,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -2371,6 +2656,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onEditChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onEditChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onEditChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2382,6 +2668,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCopy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
@@ -2393,6 +2680,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onCut_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCut_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCut_0_flag = AttributeUpdaterFlag.SKIP
@@ -2404,6 +2692,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPaste_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.SKIP
@@ -2415,6 +2704,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOption_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
@@ -2426,6 +2716,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableKeyboardOnFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -2437,6 +2728,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -2448,6 +2740,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._style_0_flag = AttributeUpdaterFlag.UPDATE
             this._style_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._style_0_flag = AttributeUpdaterFlag.SKIP
@@ -2459,6 +2752,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._barState_0_flag = AttributeUpdaterFlag.UPDATE
             this._barState_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barState_0_flag = AttributeUpdaterFlag.SKIP
@@ -2470,6 +2764,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._selectionMenuHidden_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectionMenuHidden_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectionMenuHidden_0_flag = AttributeUpdaterFlag.SKIP
@@ -2481,6 +2776,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -2492,6 +2788,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -2503,6 +2800,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -2514,6 +2812,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -2525,17 +2824,20 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.UPDATE
             this._heightAdaptivePolicy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    maxLines(value: int32 | undefined): this {
-        if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
+    maxLines(value: int32 | undefined, options: MaxLinesOptions | undefined): this {
+        if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)) || (true))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLines_0_0value = value
+            this._maxLines_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
@@ -2547,6 +2849,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._wordBreak_0_flag = AttributeUpdaterFlag.UPDATE
             this._wordBreak_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._wordBreak_0_flag = AttributeUpdaterFlag.SKIP
@@ -2558,6 +2861,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineBreakStrategy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.SKIP
@@ -2569,6 +2873,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
             this._decoration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._decoration_0_flag = AttributeUpdaterFlag.SKIP
@@ -2580,17 +2885,20 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._letterSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    lineSpacing(value: LengthMetrics | undefined): this {
-        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
+        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._lineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineSpacing_0_0value = value
+            this._lineSpacing_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._lineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -2602,6 +2910,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -2613,6 +2922,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._type_0_flag = AttributeUpdaterFlag.UPDATE
             this._type_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._type_0_flag = AttributeUpdaterFlag.SKIP
@@ -2624,6 +2934,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._enableAutoFill_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAutoFill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAutoFill_0_flag = AttributeUpdaterFlag.SKIP
@@ -2635,6 +2946,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._contentType_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentType_0_flag = AttributeUpdaterFlag.SKIP
@@ -2646,6 +2958,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFeature_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
@@ -2657,6 +2970,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onWillInsert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillInsert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillInsert_0_flag = AttributeUpdaterFlag.SKIP
@@ -2668,6 +2982,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onDidInsert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidInsert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidInsert_0_flag = AttributeUpdaterFlag.SKIP
@@ -2679,6 +2994,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onWillDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -2690,6 +3006,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onDidDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -2701,6 +3018,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMenuOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -2712,6 +3030,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.UPDATE
             this._enablePreviewText_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.SKIP
@@ -2723,6 +3042,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -2734,6 +3054,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._autoCapitalizationMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoCapitalizationMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoCapitalizationMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -2745,6 +3066,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.UPDATE
             this._halfLeading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.SKIP
@@ -2756,6 +3078,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._ellipsisMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._ellipsisMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._ellipsisMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -2767,6 +3090,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.UPDATE
             this._stopBackPress_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.SKIP
@@ -2778,6 +3102,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2789,6 +3114,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.UPDATE
             this._keyboardAppearance_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
@@ -2800,6 +3126,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
             this._compressLeadingPunctuation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
@@ -2811,6 +3138,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
             this._includeFontPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
@@ -2822,6 +3150,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._fallbackLineSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -2833,9 +3162,99 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedDragPreviewStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textDirection(value: TextDirection | undefined): this {
+        if (((this._textDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textDirection_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    minLines(value: int32 | undefined): this {
+        if (((this._minLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minLines_0_0value) !== (value)))
+        {
+            this._minLines_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minLines_0_0value = value
+        } else
+        {
+            this._minLines_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
+        {
+            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAutoSpacing_0_0value = value
+        } else
+        {
+            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    strokeWidth(value: LengthMetrics | undefined): this {
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeWidth_0_0value = value
+        } else
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    strokeColor(value: ResourceColor | undefined): this {
+        if (((this._strokeColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeColor_0_0value = value
+        } else
+        {
+            this._strokeColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        if (((this._onWillAttachIME_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillAttachIME_0_0value = value
+        } else
+        {
+            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarColor_0_0value = value
+        } else
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableSelectedDataDetector_0_0value = value
+        } else
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -2845,6 +3264,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             this._inputFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._inputFilter_0_0value = value
             this._inputFilter_0_1value = error
+            this._state.fireChange()
         } else
         {
             this._inputFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -2857,18 +3277,20 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             this._showCounter_0_flag = AttributeUpdaterFlag.UPDATE
             this._showCounter_0_0value = value
             this._showCounter_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._showCounter_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE
             this._customKeyboard_0_0value = value
             this._customKeyboard_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.SKIP

@@ -26,6 +26,7 @@ StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
+    HandleStackContentOverflow(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
     }

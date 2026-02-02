@@ -1031,45 +1031,53 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
     const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme,
     const RefPtr<FrameNode>& dialogNode)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
-        CHECK_NULL_VOID(calendarTheme);
-        auto contentRenderContext = dialogNode->GetRenderContext();
-        CHECK_NULL_VOID(contentRenderContext);
-        auto pipeLineContext = dialogNode->GetContext();
-        CHECK_NULL_VOID(pipeLineContext);
-        BlurStyleOption styleOption;
-        if (dialogProperties.blurStyleOption.has_value()) {
-            styleOption = dialogProperties.blurStyleOption.value();
-            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-                pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
-            } else {
-                pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
-            }
-        }
-        styleOption.blurStyle = static_cast<BlurStyle>(
-            dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
-        if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
-            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
-        }
-        renderContext->UpdateBackBlurStyle(styleOption);
-        if (dialogProperties.effectOption.has_value()) {
-            if (dialogProperties.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-                pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
-            } else {
-                pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
-            }
-            if (contentRenderContext->GetBackBlurStyle().has_value()) {
-                contentRenderContext->UpdateBackBlurStyle(std::nullopt);
-            }
-            // Clear and re-render to avoid previous impact, when using backgroundEffect
-            contentRenderContext->UpdateBackgroundEffect(std::nullopt);
-            contentRenderContext->UpdateBackgroundEffect(dialogProperties.effectOption.value());
-        }
-        // Clear and re-render to avoid previous impact
-        // Because when policy is BlurStyleActivePolicy.ALWAYS_INACTIVE, the background color shows inactiveColor
-        renderContext->ResetBackgroundColor();
-        renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
+    bool enabled = false;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    enabled = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
+#else
+    enabled = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled();
+#endif
+    if (!enabled) {
+        return;
     }
+
+    CHECK_NULL_VOID(calendarTheme);
+    auto contentRenderContext = dialogNode->GetRenderContext();
+    CHECK_NULL_VOID(contentRenderContext);
+    auto pipeLineContext = dialogNode->GetContext();
+    CHECK_NULL_VOID(pipeLineContext);
+    BlurStyleOption styleOption;
+    if (dialogProperties.blurStyleOption.has_value()) {
+        styleOption = dialogProperties.blurStyleOption.value();
+        if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+            pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
+        } else {
+            pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
+        }
+    }
+    styleOption.blurStyle = static_cast<BlurStyle>(
+        dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
+    if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
+        contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+    }
+    renderContext->UpdateBackBlurStyle(styleOption);
+    if (dialogProperties.effectOption.has_value()) {
+        if (dialogProperties.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+            pipeLineContext->AddWindowFocusChangedCallback(dialogNode->GetId());
+        } else {
+            pipeLineContext->RemoveWindowFocusChangedCallback(dialogNode->GetId());
+        }
+        if (contentRenderContext->GetBackBlurStyle().has_value()) {
+            contentRenderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        // Clear and re-render to avoid previous impact, when using backgroundEffect
+        contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+        contentRenderContext->UpdateBackgroundEffect(dialogProperties.effectOption.value());
+    }
+    // Clear and re-render to avoid previous impact
+    // Because when policy is BlurStyleActivePolicy.ALWAYS_INACTIVE, the background color shows inactiveColor
+    renderContext->ResetBackgroundColor();
+    renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
 }
 
 void CalendarDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
@@ -1299,7 +1307,8 @@ bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& co
     value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
     return true;
 }
 

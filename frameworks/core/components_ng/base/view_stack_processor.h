@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,23 +249,9 @@ public:
         return frameNode->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const
-    {
-        auto frameNode = GetMainFrameNode();
-        if (!frameNode) {
-            return nullptr;
-        }
-        return frameNode->GetOrCreateFocusHub();
-    }
+    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const;
 
-    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
-    {
-        auto frameNode = GetMainFrameNode();
-        if (!frameNode) {
-            return nullptr;
-        }
-        return frameNode->GetFocusHub();
-    }
+    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const;
     
     ACE_FORCE_EXPORT FrameNode* GetMainFrameNode() const;
 
@@ -303,7 +289,7 @@ public:
     // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
     // When the polymorphic style is set on the front end, true is returned only if the current node state is the same
     // as the polymorphic style.
-    bool IsCurrentVisualStateProcess();
+    ACE_FORCE_EXPORT bool IsCurrentVisualStateProcess();
 
     void SetVisualState(VisualState state);
 

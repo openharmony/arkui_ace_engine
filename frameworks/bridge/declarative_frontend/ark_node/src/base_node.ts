@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/common/ace_console.native.d.ts" />
+/// <reference path="../types/state_mgmt.d.ts" />
+/// <reference path="../types/ace_console.native.d.ts" />
 enum LogTag {
   ARK_COMPONENT = 1,
 }
@@ -60,12 +60,10 @@ abstract class BaseNode extends ViewBuildNodeBase {
     this.builderBaseNode_ = baseNode;
 
     if (uiContext === undefined) {
-      throw Error('Node constructor error, param uiContext error');
+      throw new BusinessError(401, 'Node constructor error, param uiContext error');
     } else {
       if (!(typeof uiContext === 'object') || !('instanceId_' in uiContext)) {
-        throw Error(
-          'Node constructor error, param uiContext is invalid'
-        );
+        throw new BusinessError(401, 'Node constructor error, param uiContext is invalid');
       }
     }
     this.instanceId_ = uiContext.instanceId_;

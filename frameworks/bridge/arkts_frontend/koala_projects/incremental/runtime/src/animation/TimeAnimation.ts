@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, float64toInt64, int32, int64, isFiniteNumber, uint32 } from '@koalaui/common'
+import { float64, float64toInt64, int32, int64, uint32 } from '@koalaui/common'
 import { AnimationRange, NumberAnimationRange } from './AnimationRange'
 import { Easing, EasingCurve } from './Easing'
 import { scheduleCallback } from '../states/GlobalStateManager'
@@ -83,7 +83,7 @@ export function constAnimation<Value>(value: Value): TimeAnimation<Value> {
  * @returns simple time-based animation that starts with 0
  */
 export function timeAnimation<Value>(compute: (time: int64) => Value, initialTime: int64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(initialTime)) {
+    if (!isFinite(initialTime)) {
         throw new Error('illegal initial time: ' + initialTime)
     }
     return new TimeAnimationImpl<Value>(compute, initialTime)
@@ -99,7 +99,7 @@ export function timeAnimation<Value>(compute: (time: int64) => Value, initialTim
  * @returns animated value in 0.0 to 1.0 range
  */
 export function smoothAnimation(period: uint32, from: float64 = 0.0, to: float64 = 1.0): TimeAnimation<float64> {
-    if (!isFiniteNumber(period) || (period < 1)) {
+    if (!isFinite(period) || (period < 1)) {
         throw new Error('illegal period: ' + period)
     }
     if (from >= to) {
@@ -133,10 +133,10 @@ export function countAnimation(period: uint32, initialCount: int64 = 0): TimeAni
  * @returns animation of integer value that is computed periodically from counter
  */
 export function periodicAnimation<Value>(period: uint32, compute: (count: int64) => Value, initialCount: int64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(period) || (period < 1)) {
+    if (!isFinite(period) || (period < 1)) {
         throw new Error('illegal time period: ' + period)
     }
-    if (!isFiniteNumber(initialCount)) {
+    if (!isFinite(initialCount)) {
         throw new Error('illegal initial count: ' + initialCount)
     }
     return new PeriodicAnimationImpl<Value>(0, period, compute, initialCount)
@@ -150,13 +150,13 @@ export function periodicAnimation<Value>(period: uint32, compute: (count: int64)
  * @returns animation of integer value that is computed periodically from counter
  */
 export function periodicAnimationWithDelay<Value>(delay: uint32, period: uint32, compute: (count: int64) => Value, initialCount: int64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(period) || (period < 1)) {
+    if (!isFinite(period) || (period < 1)) {
         throw new Error('illegal time period: ' + period)
     }
-    if (!isFiniteNumber(delay) || (delay < 1)) {
+    if (!isFinite(delay) || (delay < 1)) {
         throw new Error('illegal time delay: ' + delay)
     }
-    if (!isFiniteNumber(initialCount)) {
+    if (!isFinite(initialCount)) {
         throw new Error('illegal initial count: ' + initialCount)
     }
     return new PeriodicAnimationImpl<Value>(delay - period, period, compute, initialCount)
@@ -179,7 +179,7 @@ export function frameAnimation<Value>(frameTime: ReadonlyArray<uint32>, compute:
     const time = new Array<uint32>(count)
     for (let index = 0; index < count; index++) {
         const value = frameTime[index]
-        if (!isFiniteNumber(value) || (value < 1)) {
+        if (!isFinite(value) || (value < 1)) {
             throw new Error('illegal time of frame ' + index + ': ' + value)
         }
         time[index] = index > 0 ? time[index - 1] + value : value
@@ -205,15 +205,15 @@ export function numberAnimation(spec: Partial<AnimationSpec>, to: float64 = 1.0,
  * @returns duration-based animation
  */
 export function animation<Value>(spec: Partial<AnimationSpec>, compute: AnimationRange<Value>, initialState: float64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(initialState) || (initialState <= -1) || (initialState > 1)) {
+    if (!isFinite(initialState) || (initialState <= -1) || (initialState > 1)) {
         throw new Error('illegal initial state: ' + initialState)
     }
     let duration: uint32 = spec?.duration ?? DEFAULT_ANIMATION_DURATION
-    if (!isFiniteNumber(duration) || (duration < 0)) {
+    if (!isFinite(duration) || (duration < 0)) {
         throw new Error('duration must not be negative, but is ' + spec.duration)
     }
     let delay: uint32 = spec?.delay ?? 0
-    if (!isFiniteNumber(delay) || (delay < 0)) {
+    if (!isFinite(delay) || (delay < 0)) {
         throw new Error('delay must not be negative, but is ' + spec.delay)
     }
     let easing = spec.easing ?? Easing.Linear
@@ -253,10 +253,10 @@ export function animation<Value>(spec: Partial<AnimationSpec>, compute: Animatio
  * @returns duration-based value transition
  */
 export function transition<Value>(duration: uint32, easing: EasingCurve, compute: AnimationRange<Value>, initialState: int64 = 0): TimeAnimation<Value> {
-    if (!isFiniteNumber(initialState) || (initialState <= -1) || (initialState > 1)) {
+    if (!isFinite(initialState) || (initialState <= -1) || (initialState > 1)) {
         throw new Error('illegal initial state: ' + initialState)
     }
-    if (!isFiniteNumber(duration) || (duration <= 0)) {
+    if (!isFinite(duration) || (duration <= 0)) {
         throw new Error('duration must be positive, but is ' + duration)
     }
     return new AnimationImpl<Value>(duration, 0, easing, OnEdge.Nothing, OnPause.Fade, undefined, undefined, undefined, compute, initialState)

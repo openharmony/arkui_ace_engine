@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
+import { ArkTabsPeer, BarPosition, AnimationMode, TabsNestedScrollMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
 import { Length, ResourceColor } from "./component/units"
@@ -64,6 +64,8 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _onTabBarClick_0_0value?: ((value0: int32) => void) | undefined
     _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUnselected_0_0value?: ((value0: int32) => void) | undefined
+    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _nestedScroll_0_0value?: TabsNestedScrollMode | undefined
     _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAnimationStart_0_0value?: OnTabsAnimationStartCallback | undefined
     _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -97,7 +99,9 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _barMode_0_1value?: ScrollableBarModeOptions | undefined
     _barHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barHeight_0_0value?: Length | undefined
-    _barHeight_0_1value?: boolean | undefined
+    _barHeight_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barHeight_1_0value?: Length | undefined
+    _barHeight_1_1value?: boolean | undefined
     _barBackgroundBlurStyle_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
     _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
@@ -321,6 +325,24 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 default: {
                     this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnUnselectedAttribute((undefined as ((value0: int32) => void) | undefined));
+                }
+            }
+        }
+        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as TabsNestedScrollMode | undefined));
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNestedScrollAttribute((undefined as TabsNestedScrollMode | undefined));
                 }
             }
         }
@@ -598,7 +620,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._barHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarHeightAttribute((this._barHeight_0_0value as Length | undefined), (this._barHeight_0_1value as boolean | undefined));
+                    peer.setBarHeight0Attribute((this._barHeight_0_0value as Length | undefined));
                     this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -608,7 +630,25 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._barHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarHeightAttribute((undefined as Length | undefined), (undefined as boolean | undefined));
+                    peer.setBarHeight0Attribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._barHeight_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barHeight_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarHeight1Attribute((this._barHeight_1_0value as Length | undefined), (this._barHeight_1_1value as boolean | undefined));
+                    this._barHeight_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barHeight_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barHeight_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarHeight1Attribute((undefined as Length | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -805,6 +845,19 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this.onUnselected((undefined as ((value0: int32) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.nestedScroll(modifier._nestedScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.nestedScroll((undefined as TabsNestedScrollMode | undefined));
                 }
             }
         }
@@ -1008,7 +1061,20 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
             switch (modifier._barHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.barHeight(modifier._barHeight_0_0value, modifier._barHeight_0_1value);
+                    this.barHeight(modifier._barHeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.barHeight((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._barHeight_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barHeight_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barHeight(modifier._barHeight_1_0value, modifier._barHeight_1_1value);
                     break;
                 }
                 default: {
@@ -1048,6 +1114,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
             this._vertical_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._vertical_0_flag = AttributeUpdaterFlag.SKIP
@@ -1059,6 +1126,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._barPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1070,6 +1138,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._scrollable_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1081,6 +1150,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._barWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -1092,6 +1162,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._animationCurve_0_flag = AttributeUpdaterFlag.UPDATE
             this._animationCurve_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._animationCurve_0_flag = AttributeUpdaterFlag.SKIP
@@ -1103,6 +1174,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._animationDuration_0_flag = AttributeUpdaterFlag.UPDATE
             this._animationDuration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._animationDuration_0_flag = AttributeUpdaterFlag.SKIP
@@ -1114,6 +1186,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._animationMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._animationMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._animationMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1125,6 +1198,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1136,6 +1210,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1147,6 +1222,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelected_0_flag = AttributeUpdaterFlag.SKIP
@@ -1158,6 +1234,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onTabBarClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTabBarClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTabBarClick_0_flag = AttributeUpdaterFlag.SKIP
@@ -1169,9 +1246,22 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
             this._onUnselected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._nestedScroll_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1180,6 +1270,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onAnimationStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAnimationStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAnimationStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1191,6 +1282,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onAnimationEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAnimationEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAnimationEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1202,6 +1294,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onGestureSwipe_0_flag = AttributeUpdaterFlag.UPDATE
             this._onGestureSwipe_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onGestureSwipe_0_flag = AttributeUpdaterFlag.SKIP
@@ -1213,6 +1306,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
@@ -1224,6 +1318,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP
@@ -1235,6 +1330,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barOverlap_0_flag = AttributeUpdaterFlag.UPDATE
             this._barOverlap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barOverlap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1246,6 +1342,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._barBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1257,6 +1354,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barGridAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._barGridAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barGridAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -1268,6 +1366,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._customContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._customContentTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._customContentTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1279,6 +1378,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._barBackgroundBlurStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1290,6 +1390,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._pageFlipMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._pageFlipMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pageFlipMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1301,6 +1402,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._barBackgroundEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1312,6 +1414,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onContentWillChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentWillChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentWillChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1323,6 +1426,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1335,21 +1439,35 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
             this._barMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._barMode_0_0value = value
             this._barMode_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._barMode_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
-        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._barHeight_0_1value) !== (noMinHeightLimit)))
+    barHeight(value: Length | undefined): this {
+        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._barHeight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barHeight_0_0value = height
-            this._barHeight_0_1value = noMinHeightLimit
+            this._barHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barHeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        if (((this._barHeight_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._barHeight_1_1value) !== (noMinHeightLimit)))
+        {
+            this._barHeight_1_flag = AttributeUpdaterFlag.UPDATE
+            this._barHeight_1_0value = height
+            this._barHeight_1_1value = noMinHeightLimit
+            this._state.fireChange()
+        } else
+        {
+            this._barHeight_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1359,6 +1477,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
             this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.UPDATE
             this._barBackgroundBlurStyle_1_0value = style
             this._barBackgroundBlurStyle_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.SKIP
@@ -1371,6 +1490,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
             this._cachedMaxCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedMaxCount_0_0value = count
             this._cachedMaxCount_0_1value = mode
+            this._state.fireChange()
         } else
         {
             this._cachedMaxCount_0_flag = AttributeUpdaterFlag.SKIP

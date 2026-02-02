@@ -68,14 +68,14 @@ public:
     {
         return sideBarInfo_;
     }
-    void SetSideBarInfo(const ToolbarInfo& info);
+    ACE_FORCE_EXPORT void SetSideBarInfo(const ToolbarInfo& info);
 
     ToolbarInfo GetSideBarDividerInfo() const
     {
         return sideBarDividerInfo_;
     }
 
-    void SetSideBarDividerInfo(const ToolbarInfo& info);
+    ACE_FORCE_EXPORT void SetSideBarDividerInfo(const ToolbarInfo& info);
 
     ToolbarInfo GetNavBarInfo() const
     {
@@ -130,11 +130,11 @@ public:
 
     void SetSideBarColorChangeCallback(
         const std::function<void(const Color&, const Color&, const BlurStyle&)>&& callback);
-    void OnChangeSideBarColor();
+    ACE_FORCE_EXPORT void OnChangeSideBarColor();
     void SetToolBarChangeCallback(const std::function<void()>&& callback);
     void OnChange();
     void SetModifyDoneCallback(const std::function<void()>&& callback);
-    void OnToolBarManagerModifyDone();
+    ACE_FORCE_EXPORT void OnToolBarManagerModifyDone();
     void SetNavigationModeChangeCallback(const std::function<void()>&& callback);
     void OnNavigationModeChange();
 

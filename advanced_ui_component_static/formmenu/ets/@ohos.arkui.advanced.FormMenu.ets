@@ -29,7 +29,7 @@ import Want from '@ohos.app.ability.Want';
 const tag = 'AddFormMenuItem::ets::';
 
 async function querySnapshot (want: Want, componentId: string): Promise<void> {
-    let uiContext = UIContext.getFocusedUIContext();
+    let uiContext = UIContext.resolveUIContext();
     let compInfo = uiContext?.getComponentUtils().getRectangleById(componentId);
     let imagePackageApi: image.ImagePacker = image.createImagePacker();
     try {

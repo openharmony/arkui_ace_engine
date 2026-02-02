@@ -436,7 +436,8 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReceivePageModeRequestCallbackTe
      */
     pattern->RegisterReceivePageModeRequestCallback();
     AAFwk::Want want;
-    auto ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
+    auto ret =
+        pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
     EXPECT_EQ(ret, -1);
 
     std::string value = "testuec";
@@ -1499,6 +1500,39 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
     context->frontendType_ = FrontendType::DECLARATIVE_JS;
     pattern2->OnAttachContext(rawContext);
     EXPECT_EQ(pattern2->hasAttachContext_, false);
+}
+
+/**
+ * @tc.name: PluginComponentTest001
+ * @tc.desc: Test PluginComponent Creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, PluginComponentTest001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::PLUGIN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::PLUGIN_ETS_TAG);
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: EmbeddedComponentTest001
+ * @tc.desc: Test EmbeddedComponent Creation
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, EmbeddedComponentTest001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
+        [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::EMBEDDED_COMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
 }
 
 /**

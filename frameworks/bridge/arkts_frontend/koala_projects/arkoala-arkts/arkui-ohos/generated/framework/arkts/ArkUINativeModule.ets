@@ -32,7 +32,6 @@ export class ArkUINativeModule {
     native static _DumpTreeNode(ptr0: KPointer): void
     @ani.unsafe.Direct
     native static _AddChild(ptr1: KPointer, ptr2: KPointer): int32
-    @ani.unsafe.Direct
     native static _RemoveChild(ptr0: KPointer, ptr2: KPointer): void
     @ani.unsafe.Direct
     native static _InsertChildAfter(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): int32
@@ -40,7 +39,6 @@ export class ArkUINativeModule {
     native static _InsertChildBefore(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): int32
     @ani.unsafe.Direct
     native static _InsertChildAt(ptr0: KPointer, ptr1: KPointer, arg: int32): int32
-    @ani.unsafe.Direct
     native static _ApplyModifierFinish(ptr0: KPointer): void
     @ani.unsafe.Direct
     native static _MarkDirty(ptr0: KPointer, arg: int32): void

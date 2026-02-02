@@ -41,7 +41,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ScrollPattern : public ScrollablePattern {
+class ACE_FORCE_EXPORT ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:
@@ -191,7 +191,7 @@ public:
         return false;
     }
     bool ScrollPageCheck(float delta, int32_t source);
-    void AdjustOffset(float& delta, int32_t source);
+    void AdjustOffset(float& delta, int32_t source) override;
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
@@ -373,6 +373,7 @@ public:
     void GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     const SizeF& GetViewSize() const
     {
@@ -404,6 +405,12 @@ public:
     {
         return contentStartOffset_;
     }
+
+    bool FreeOverScrollWithDelta(Axis axis, double delta) override;
+
+    void ProcessFreeScrollOverDrag(const OffsetF velocity) override;
+
+    bool TryFreeScroll(double offset, Axis axis) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -440,6 +447,11 @@ private:
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host);
     std::string GetScrollSnapPagination() const;
     void OnColorModeChange(uint32_t colorMode) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+    void ReportOnItemScrollEvent(const std::string& event);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
+    void ScrollHandle(float distance, int32_t reportEventId);
 
     double currentOffset_ = 0.0;
     double lastOffset_ = 0.0;
@@ -490,7 +502,7 @@ public:
     }
 
     Offset GetFreeScrollOffset() const final;
-    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false) final;
     bool FreeScrollPage(bool reverse, bool smooth) final;
     bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity) final;
     void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;

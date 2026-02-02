@@ -124,7 +124,20 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS, UNDO };
+enum class OperationType {
+    DEFAULT = 0,
+    DRAG,
+    IME,
+    FINISH_PREVIEW,
+    PASTE,
+    ACCESSIBILITY,
+    AI_WRITE,
+    STYLUS,
+    SAFE_PASTE,
+    AUTO_FILL,
+    UNDO
+};
+
 const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP = {
     { OperationType::DEFAULT, TextChangeReason::INPUT },
     { OperationType::DRAG, TextChangeReason::DRAG },
@@ -134,6 +147,8 @@ const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP =
     { OperationType::ACCESSIBILITY, TextChangeReason::ACCESSIBILITY },
     { OperationType::AI_WRITE, TextChangeReason::AI_WRITE },
     { OperationType::STYLUS, TextChangeReason::STYLUS },
+    { OperationType::SAFE_PASTE, TextChangeReason::INPUT },
+    { OperationType::AUTO_FILL, TextChangeReason::AUTO_FILL },
 };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
@@ -365,6 +380,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    void ContentChangeByDetaching(PipelineContext* pipeline) override {}
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
     bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
@@ -404,6 +420,11 @@ public:
         isTextPreviewSupported_ = isTextPreviewSupported;
     }
 
+    bool IsSupportPreviewText()
+    {
+        return isTextPreviewSupported_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
 
@@ -425,16 +446,19 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorEventHub>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
     }
@@ -448,7 +472,7 @@ public:
         }
         SysScale sysScale{ ctx->GetDipScale(), ctx->GetLogicScale(), ctx->GetFontScale(), ctx->GetFontWeightScale() };
         if (sysScale != lastSysScale_) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
                 lastSysScale_.ToString().c_str(), sysScale.ToString().c_str());
             lastSysScale_ = sysScale;
             paragraphCache_.Clear();
@@ -541,12 +565,22 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
+    bool IsEnableAutoSpacing()
+    {
+        return isEnableAutoSpacing_;
+    }
+
     void SetCompressLeadingPunctuation(bool enabled)
     {
         CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
         isCompressLeadingPunctuation_ = enabled;
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+    }
+
+    bool IsCompressLeadingPunctuation()
+    {
+        return isCompressLeadingPunctuation_;
     }
 
     void OnAttachToMainTree() override;
@@ -636,6 +670,7 @@ public:
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
+    int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
@@ -918,7 +953,7 @@ public:
         return selectOverlay_->GetSecondHandleInfo();
     }
 
-    RectF GetCaretRect() const override;
+    RectF GetCaretRect(bool ignoreScale = true) const override;
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
@@ -929,9 +964,22 @@ public:
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
+    bool IsHandleMoving();
+    void SetPreKeyboardNode();
+
     void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+ 
+    RefPtr<UINode> GetCustomKeyboardNode()
+    {
+        return customKeyboardNode_;
+    }
+ 
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
+
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
-    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
@@ -1125,6 +1173,8 @@ public:
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
+    void SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor);
+
     Color GetSelectedBackgroundColor() const;
 
     void SetCustomKeyboardOption(bool supportAvoidance);
@@ -1230,6 +1280,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback()
+    {
+        return isEnableHapticFeedback_;
+    }
+
     bool InsertOrDeleteSpace(int32_t index) override;
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
@@ -1242,6 +1297,11 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
         needToRequestKeyboardOnFocus_ = needToRequest;
+    }
+
+    bool GetRequestKeyboardOnFocus()
+    {
+        return needToRequestKeyboardOnFocus_;
     }
 
     bool IsTextEditableForStylus() const override;
@@ -1338,6 +1398,11 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
     }
 
+    bool IsIncludeFontPadding()
+    {
+        return isIncludeFontPadding_;
+    }
+
     void SetFallbackLineSpacing(bool isFallbackLineSpacing)
     {
         CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
@@ -1347,6 +1412,11 @@ public:
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
+    bool IsFallbackLineSpacing()
+    {
+        return isFallbackLineSpacing_;
     }
 
     void SetKeyboardAppearance(KeyboardAppearance value)
@@ -1432,7 +1502,7 @@ public:
     void SetContentPattern(const RefPtr<RichEditorContentPattern>& contentPattern);
     RefPtr<FrameNode> GetContentHost() const override;
 
-    float GetCaretWidth();
+    float GetCaretWidth() const;
     void UpdateCaretStyleByTypingStyle(bool isReset);
     void MarkAISpanStyleChanged() override;
     void HandleOnAskCelia() override;
@@ -1453,10 +1523,12 @@ public:
 
     bool IsShortCutBlocked() override { return IsDragging(); }
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
+    Color GetScrollBarColor() const;
     void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
@@ -1465,7 +1537,7 @@ public:
     void ProcessAutoFillOnPaste();
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
-    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
+    bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1489,12 +1561,12 @@ private:
     friend class RichEditorLayoutAlgorithm;
     friend class RichEditorPaintMethod;
     friend class RichEditorScrollController;
+    bool ParseCommand(const std::string& command);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
-    Color GetScrollBarColor() const;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     RefPtr<RichEditorScrollController> scrollController_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
@@ -1537,6 +1609,8 @@ private:
     void ShowCaretWithoutTwinkling();
     void StopTwinkling();
     void UpdateFontFeatureTextStyle(
+        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
+    void UpdateStrokeColor(
         RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateDecoration(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
@@ -1602,6 +1676,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
+    std::string GetCursorInfoInJson() const;
     Color GetSelectedDragPreviewStyleColor() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
@@ -1679,7 +1754,8 @@ private:
         int32_t offsetInSpan, int32_t endInSpan, std::u16string content, std::optional<TextStyle> textStyle,
         std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
-    void SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo);
+    void SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
+        const std::optional<std::u16string>& urlAddress);
     void SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo, std::optional<struct UpdateParagraphStyle> paraStyle);
 
     RichEditorAbstractSpanResult GetResultByImageSpanOptions(const ImageSpanOptions& options, int32_t spanIndex);

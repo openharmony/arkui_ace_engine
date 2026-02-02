@@ -246,6 +246,8 @@ public:
     virtual bool IsSameDisplayWithParentWindow(bool useInitializedId = false) = 0;
     virtual OHOS::Ace::MenuWindowState GetAttachState() {return MenuWindowState::DEFAULT;};
     virtual OHOS::Ace::MenuWindowState GetDetachState() {return MenuWindowState::DEFAULT;};
+    virtual bool GetDestroyInHide() = 0;
+    virtual void SetDestroyInHide(bool destroyInHide) = 0;
 
     virtual void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<NG::UINode>(int32_t)>&& buildNodeFunc,

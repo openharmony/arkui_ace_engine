@@ -538,9 +538,12 @@ void SetFillColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 value, ArkUI_
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageFill(frameNode, Color(value, static_cast<ColorSpace>(colorSpace)));
-    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> colorResObj;
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            colorResObj = AceType::Claim(color);
+        }
         ImageModelNG::CreateWithResourceObj(frameNode, ImageResourceType::FILL_COLOR, colorResObj);
     }
 }
@@ -1386,6 +1389,13 @@ int32_t GetAntiAlias(ArkUINodeHandle node)
     return ImageModelNG::GetAntiAlias(frameNode);
 }
 
+void SetImageFillSetByUser(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetImageFillSetByUser(frameNode, static_cast<bool>(value));
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -1516,6 +1526,7 @@ const ArkUIImageModifier* GetImageModifier()
         .setAntiAlias = SetAntiAlias,
         .resetAntiAlias = ResetAntiAlias,
         .getAntiAlias = GetAntiAlias,
+        .setImageFillSetByUser = SetImageFillSetByUser,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1621,6 +1632,7 @@ const CJUIImageModifier* GetCJUIImageModifier()
         .resetOnError = ResetOnError,
         .setImageOnFinish = SetImageOnFinish,
         .resetImageOnFinish = ResetImageOnFinish,
+        .setImageFillSetByUser = SetImageFillSetByUser,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

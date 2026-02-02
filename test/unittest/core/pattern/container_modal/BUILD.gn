@@ -14,26 +14,31 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("container_modal_test_ng") {
+  module_name = "ScrollingSet-ArcAlphabetIndexer"
   type = "new"
   sources = [ "container_modal_test_ng.cpp" ]
 }
 
 ace_unittest("container_modal_pattern_enhance_test_ng") {
+  module_name = "PickerSet-TextPicker/TextPickerDialog"
   type = "new"
   sources = [ "container_modal_pattern_enhance_test_ng.cpp" ]
 }
 
 ace_unittest("container_modal_toolbar_test_ng") {
+  module_name = "Layout-Row"
   type = "new"
   sources = [ "container_modal_toolbar_test_ng.cpp" ]
 }
 
 ace_unittest("container_modal_static_pattern_test") {
+  module_name = "FormAndSelection-Button"
   type = "new"
   sources = [ "container_modal_static_pattern_test.cpp" ]
 }
 
 ace_unittest("container_modal_static_view_test") {
+  module_name = "ScrollingSet-AlphabetIndexer"
   type = "new"
   sources = [ "container_modal_static_view_test.cpp" ]
 }

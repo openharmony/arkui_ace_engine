@@ -14,6 +14,7 @@
  */
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { CanvasLayoutDirection } from '../types/Declaration';
 @ComponentV2
 export declare struct DoodleBoardArea {
     private static DEFAULT_COUNT;
@@ -23,6 +24,8 @@ export declare struct DoodleBoardArea {
     @Param
     @Require
     readonly imageMatrixArr: number[][];
+    @Consumer('globalLayoutDirection')
+    curLayoutDirection: CanvasLayoutDirection;
     private invalidImageInfo;
     private getImageAspectRito;
     private getImageWidth;

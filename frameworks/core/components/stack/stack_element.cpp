@@ -15,12 +15,12 @@
 
 #include "core/components/stack/stack_element.h"
 
+#include "compatible/components/picker/picker_base_element.h"
 #include "core/components/bubble/render_bubble.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog_tween/render_dialog_tween.h"
 #include "core/components/drop_filter/drop_filter_element.h"
-#include "core/components/picker/picker_base_element.h"
 #include "core/components/select_popup/select_popup_element.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"

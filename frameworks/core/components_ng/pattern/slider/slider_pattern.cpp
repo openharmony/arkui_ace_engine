@@ -751,24 +751,17 @@ SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
     return SizeF(pointNodeWidth, pointNodeHeight);
 }
 
-void SliderPattern::CalcSliderValue()
+bool SliderPattern::CalcSliderValue()
 {
+    bool isExceptionValueRecovery = false;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, isExceptionValueRecovery);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
+    CHECK_NULL_RETURN(sliderPaintProperty, isExceptionValueRecovery);
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     value_ = sliderPaintProperty->GetValue().value_or(min);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    CancelExceptionValue(min, max, step);
-    valueRatio_ = (value_ - min) / (max - min);
-}
-
-void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
-{
-    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
     if (GreatOrEqual(min, max)) {
         min = SLIDER_MIN;
         max = SLIDER_MAX;
@@ -782,16 +775,23 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
         sliderPaintProperty->UpdateValue(value_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        context->AddAfterRenderTask([weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->FireChangeEvent(SliderChangeMode::End);
-        });
+        isExceptionValueRecovery = true;
     }
+    valueRatio_ = (value_ - min) / (max - min);
+    return isExceptionValueRecovery;
+}
+
+void SliderPattern::NotifyExceptionValueRecoveryEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterRenderTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireChangeEvent(SliderChangeMode::End);
+    });
 }
 
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
@@ -1093,7 +1093,10 @@ void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceTyp
             UpdateValueByLocalLocation(location);
         }
     } else if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP) {
+        allowDragEvents_ = true;
         lastTouchLocation_ = location;
+    } else if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_ONLY) {
+        allowDragEvents_ = AtPanArea(location, sourceType);
     }
     if (showTips_) {
         bubbleFlag_ = true;
@@ -1116,15 +1119,16 @@ void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
 {
     if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP &&
         lastTouchLocation_.has_value() && NeedFireClickEvent(lastTouchLocation_.value(), location)) {
-        allowDragEvents_ = true;
         if (!AtPanArea(location, sourceType)) {
             UpdateValueByLocalLocation(location);
+            UpdateBubble();
         }
         UpdateToValidValue();
         FireChangeEvent(SliderChangeMode::Click);
     } else {
         UpdateToValidValue();
     }
+    allowDragEvents_ = true;
     if (bubbleFlag_ && !isFocusActive_) {
         bubbleFlag_ = false;
     }
@@ -1162,8 +1166,6 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 {
     eventSourceDevice_ = info.GetSourceDevice();
     eventLocalLocation_ = info.GetLocalLocation();
-    allowDragEvents_ = (sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY ||
-                        AtPanArea(eventLocalLocation_, eventSourceDevice_));
     if (info.GetInputEventType() != InputEventType::AXIS) {
         minResponseStartValue_ = value_;
         isMinResponseExceedFlag_ = false;
@@ -2447,7 +2449,9 @@ void SliderPattern::UpdateValue(float value)
     }
     auto host = GetHost();
     FREE_NODE_CHECK(host, UpdateValue, host);
-    CalcSliderValue();
+    if (CalcSliderValue()) {
+        NotifyExceptionValueRecoveryEvent();
+    }
     FireBuilder();
 }
 

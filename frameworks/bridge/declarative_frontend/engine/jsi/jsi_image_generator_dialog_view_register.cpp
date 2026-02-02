@@ -14,11 +14,47 @@
  */
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h"
 
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 
 namespace OHOS::Ace::Framework {
+int32_t ParseInstanceId(const panda::Local<panda::ObjectRef>& obj)
+{
+    const auto uiContext = JSRef<JSObject>::Make(obj);
+    auto jsInstanceId = uiContext->GetProperty("instanceId_");
+    if (!jsInstanceId->IsNumber()) {
+        return -1;
+    }
+    return jsInstanceId->ToNumber<int32_t>();
+}
+
+panda::Local<panda::JSValueRef> JsOnXIconClicked(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    auto instanceId = ParseInstanceId(obj);
+    if (instanceId == -1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_RETURN(pipeline, panda::JSValueRef::Undefined(vm));
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, panda::JSValueRef::Undefined(vm));
+    auto isCloseSuccess = overlayManager->CloseImageGeneratorSheet();
+    TAG_LOGI(AceLogTag::ACE_SIDEBAR, "image generator close %{public}s", isCloseSuccess ? "success" : "failed");
+    return panda::JSValueRef::Undefined(vm);
+}
+
 void AddImageGeneratorDialogNode(const panda::Local<panda::ObjectRef>& obj)
 {
     const auto object = JSRef<JSObject>::Make(obj);

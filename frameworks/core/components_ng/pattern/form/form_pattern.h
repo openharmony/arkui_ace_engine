@@ -179,7 +179,7 @@ public:
 
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
-    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
 
     void OnAccessibilityChildTreeDeregister();
 
@@ -211,6 +211,9 @@ public:
 
     // FormLayoutWrapper functions
     void ProcessCheckForm() override;
+
+    void OnAttachContext([[maybe_unused]] PipelineContext *context) override;
+    void OnDetachContext([[maybe_unused]] PipelineContext *context) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -378,6 +381,7 @@ private:
     std::atomic_bool accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
     float formViewScale_ = 1.0f;
     int32_t formColorMode_ = -1; // -1: MODE_AUTO
+    bool isDetachContext_ = false;
     enum {
         VALUE_TYPE_INT = 5,
         VALUE_TYPE_DOUBLE = 8,

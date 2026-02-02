@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_mgr.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -264,8 +265,7 @@ HWTEST_F(XComponentTestTwoNg, BeforeSyncGeometryPropertiesTest, TestSize.Level1)
     frameNode->geometryNode_ = geometryNode;
     pattern->hasXComponentInit_ = false;
     pattern->isEnableAnalyzer_ = true;
-    auto imageAnalyzerManager =
-        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
     bool extSurfaceEnabled = SystemProperties::extSurfaceEnabled_;
     SystemProperties::extSurfaceEnabled_ = true;
     imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
@@ -481,8 +481,7 @@ HWTEST_F(XComponentTestTwoNg, StartImageAnalyzerTest, TestSize.Level1)
     std::optional<std::function<void(ImageAnalyzerState)>> callback;
     callback = processImage;
     pattern->isEnableAnalyzer_ = true;
-    auto imageAnalyzerManager =
-        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
     bool extSurfaceEnabled = SystemProperties::extSurfaceEnabled_;
     SystemProperties::extSurfaceEnabled_ = true;
     imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
@@ -593,20 +592,20 @@ HWTEST_F(XComponentTestTwoNg, EnableSecureTest, TestSize.Level1)
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
 
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(true)).WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(true))
+        .WillOnce(Return());
     pattern->EnableSecure(true);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(false)).WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(false))
+        .WillOnce(Return());
     pattern->EnableSecure(false);
 
     pattern->type_ = XCOMPONENT_TEXTURE_TYPE_VALUE;
 
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(true)).Times(0);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(true))
+        .Times(0);
     pattern->EnableSecure(true);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(false)).Times(0);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(false))
+        .Times(0);
     pattern->EnableSecure(false);
 }
 
@@ -942,8 +941,18 @@ HWTEST_F(XComponentTestTwoNg, SetXComponentSurfaceSizeTest, TestSize.Level1)
     ASSERT_TRUE(pattern);
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
         ConfigSurface(SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE))
+        .WillOnce(Return())
         .WillOnce(Return());
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    PipelineContext* context = frameNode->GetContext();
+    context->statisticEventReporter_ = reporter;
+    frameNode->onMainTree_ = true;
     XComponentModelNG::SetXComponentSurfaceSize(Referenced::RawPtr(frameNode), SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    frameNode->onMainTree_ = false;
+    XComponentModelNG::SetXComponentSurfaceSize(Referenced::RawPtr(frameNode), SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+    EXPECT_EQ(pattern->statisticEventTypes_.size(), 1);
 }
 
 /**

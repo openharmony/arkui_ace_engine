@@ -47,7 +47,7 @@ public:
     void SetData(const std::string& data);
 
     const TextStyle& GetTextStyle() const;
-    void SetTextStyle(const TextStyle& textStyle);
+    ACE_FORCE_EXPORT void SetTextStyle(const TextStyle& textStyle);
 
     const std::optional<TextAlign>& GetAlignment() const;
     void SetAlignment(const TextAlign& alignment);

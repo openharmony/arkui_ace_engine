@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <iterator>
 
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
@@ -133,7 +133,9 @@ void ContainerPickerLayoutAlgorithm::MeasureHeight(LayoutWrapper* layoutWrapper,
     if (layoutPolicy.has_value()) {
         if (layoutPolicy->IsHeightMatch() && parentMainSize.has_value()) {
             height = parentMainSize.value();
-        } else if (layoutPolicy->IsHeightFix() || layoutPolicy->IsHeightWrap()) {
+        } else if (layoutPolicy->IsHeightFix()) {
+            height = pickerDefaultHeight_;
+        } else if (layoutPolicy->IsHeightWrap()) {
             height = parentMainSize.has_value() ? std::min(pickerDefaultHeight_, parentMainSize.value())
                                                 : pickerDefaultHeight_;
         } else {
@@ -177,7 +179,7 @@ void ContainerPickerLayoutAlgorithm::MeasureWidth(LayoutWrapper* layoutWrapper, 
             width = parentCrossSize.has_value() ? std::min(childMaxWidth, parentCrossSize.value()) : childMaxWidth;
             crossMatchChild_ = true;
         } else if (layoutPolicy->IsWidthFix()) {
-            width = std::min(childMaxWidth, contentConstraint.maxSize.Width());
+            width = childMaxWidth;
             crossMatchChild_ = true;
         } else if (layoutPolicy->IsWidthMatch() && parentCrossSize.has_value()) {
             width = parentCrossSize.value();

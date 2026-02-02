@@ -163,6 +163,36 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_String_PlaybackSpeed, d
         2.0
     },
     {
+        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_50_X",
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_50_X),
+        0.5
+    },
+    {
+        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_50_X",
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_50_X),
+        1.5
+    },
+    {
+        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_3_00_X",
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_3_00_X),
+        3.0
+    },
+    {
+        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_25_X",
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_25_X),
+        0.25
+    },
+    {
+        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_125_X",
+        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
+            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_125_X),
+        0.125
+    },
+    {
         "3.5",
         Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_String>("3.5"),
         3.5

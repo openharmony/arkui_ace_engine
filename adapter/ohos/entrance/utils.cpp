@@ -21,6 +21,7 @@
 
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
+#include "base/json/json_util.h"
 
 namespace OHOS::Ace {
 

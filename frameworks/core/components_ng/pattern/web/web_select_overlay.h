@@ -61,8 +61,8 @@ struct TouchHandleState {
 struct MenuAvoidStrategyMember {
     LayoutWrapper* layoutWrapper = nullptr;
     std::shared_ptr<SelectOverlayInfo> info;
-    bool fixWrongNewAvoid = false;
     bool hasKeyboard = false;
+    bool needReset = false;
     RectF upPaint;
     RectF downPaint;
     double topArea = 0.0;
@@ -75,6 +75,8 @@ struct MenuAvoidStrategyMember {
     double avoidFromSingleHandle = 0.0;
     double avoidPositionX = 0.0;
     double avoidPositionY = 0.0;
+    double menuAboveUphandle = 0.0;
+    double menuBelowDownhandle = 0.0;
     double defaultAvoidY = 0.0;
     double menuHeight = 0.0;
     double menuWidth = 0.0;
@@ -116,6 +118,7 @@ public:
     void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     RectF ComputeSelectAreaRect(RectF& selectArea);
+    RectF GetViewPortFromHandle();
     void SetMenuOptions(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
@@ -135,6 +138,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
         bool& isNewAvoid);
+    RectF ComputeClippedSelectionBounds(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params);
     void QuickMenuIsNeedNewAvoid(
         SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
@@ -189,6 +193,7 @@ public:
     // override SelectOverlayCallback end
     void DetectSelectedText(const std::string& text);
     void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
+    void UpdateTextSelectionHolderId();
     void UpdateSingleHandleVisible(bool isVisible);
     bool IsSingleHandle();
     void SetTouchHandleExistState(bool touchHandleExist);
@@ -205,10 +210,11 @@ public:
     void SetDefaultDownPaint(MenuAvoidStrategyMember& member);
     void SingleHandlePosition(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
-    bool QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember &member);
+    bool MenuPositionCanReset(MenuAvoidStrategyMember &member);
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     void UpdateSelectAreaInfo();
     void UpdateSelectArea();
+    void OnOrientationChanged();
 private:
     void UpdateSelectMenuOptions();
     void UpdateIsSelectAll();

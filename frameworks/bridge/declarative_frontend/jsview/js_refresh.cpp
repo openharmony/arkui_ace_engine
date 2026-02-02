@@ -23,7 +23,7 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/refresh/refresh_model.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -47,7 +47,10 @@ RefreshModel* RefreshModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::RefreshModelNG());
             } else {
-                instance_.reset(new Framework::RefreshModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("refresh");
+                static RefreshModel* instance =
+                    loader ? reinterpret_cast<RefreshModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }
@@ -295,7 +298,8 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange",
+            ComponentEventType::COMPONENT_EVENT_SCROLL);
     };
     RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
 }

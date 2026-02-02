@@ -25,7 +25,11 @@
 
 namespace OHOS::Ace {
 
+#ifdef NG_BUILD
+class RosenRenderContext : public RenderContext {
+#else
 class ACE_FORCE_EXPORT RosenRenderContext : public RenderContext {
+#endif
     DECLARE_ACE_TYPE(RosenRenderContext, RenderContext);
 
 public:
@@ -40,7 +44,7 @@ public:
     void InitContext(
         const std::shared_ptr<RSNode>& rsNode, const Rect& rect, const Offset& initialOffset = Offset::Zero());
     RSCanvas* GetCanvas();
-    const std::shared_ptr<RSNode>& GetRSNode();
+    ACE_FORCE_EXPORT const std::shared_ptr<RSNode>& GetRSNode();
 
     void StartRecording();
     void StopRecordingIfNeeded();

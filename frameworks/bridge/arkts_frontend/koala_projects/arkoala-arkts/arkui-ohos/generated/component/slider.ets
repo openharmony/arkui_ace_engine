@@ -622,7 +622,7 @@ export interface SliderStepItemAccessibility {
     text?: ResourceStr;
 }
 export interface SliderShowStepOptions {
-    stepsAccessibility?: Map<number, SliderStepItemAccessibility>;
+    stepsAccessibility?: Map<double, SliderStepItemAccessibility>;
 }
 export interface SliderAttribute extends CommonMethod {
     setSliderOptions(options?: SliderOptions): this {
@@ -1161,7 +1161,7 @@ export class SliderShowStepOptions_serializer {
             for (const pair of valueHolderForStepsAccessibilityTmpValue) {
                 const valueHolderForStepsAccessibilityTmpValueKeyVar = pair[0]
                 const valueHolderForStepsAccessibilityTmpValueValueVar = pair[1]
-                valueSerializer.writeNumber(valueHolderForStepsAccessibilityTmpValueKeyVar)
+                valueSerializer.writeFloat64(valueHolderForStepsAccessibilityTmpValueKeyVar)
                 SliderStepItemAccessibility_serializer.write(valueSerializer, valueHolderForStepsAccessibilityTmpValueValueVar)
             }
         } else {
@@ -1171,19 +1171,19 @@ export class SliderShowStepOptions_serializer {
     public static read(buffer: DeserializerBase): SliderShowStepOptions {
         let valueDeserializer : DeserializerBase = buffer
         const stepsAccessibilityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stepsAccessibilityTmpBuf : Map<number, SliderStepItemAccessibility> | undefined = undefined
+        let stepsAccessibilityTmpBuf : Map<double, SliderStepItemAccessibility> | undefined = undefined
         if ((stepsAccessibilityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const stepsAccessibilityTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
-            let stepsAccessibilityTmpBuf_ : Map<number, SliderStepItemAccessibility> = new Map<number, SliderStepItemAccessibility>()
+            let stepsAccessibilityTmpBuf_ : Map<double, SliderStepItemAccessibility> = new Map<double, SliderStepItemAccessibility>()
             // TODO: TS map resize
             for (let stepsAccessibilityTmpBuf_IVar = 0; stepsAccessibilityTmpBuf_IVar < stepsAccessibilityTmpBuf_SizeVar; stepsAccessibilityTmpBuf_IVar++) {
-                const stepsAccessibilityTmpBuf_KeyVar : number = (valueDeserializer.readNumber() as number)
+                const stepsAccessibilityTmpBuf_KeyVar : double = valueDeserializer.readFloat64()
                 const stepsAccessibilityTmpBuf_ValueVar : SliderStepItemAccessibility = SliderStepItemAccessibility_serializer.read(valueDeserializer)
                 stepsAccessibilityTmpBuf_.set(stepsAccessibilityTmpBuf_KeyVar, stepsAccessibilityTmpBuf_ValueVar)
             }
             stepsAccessibilityTmpBuf = stepsAccessibilityTmpBuf_
         }
-        const stepsAccessibilityTmpResult : Map<number, SliderStepItemAccessibility> | undefined = stepsAccessibilityTmpBuf
+        const stepsAccessibilityTmpResult : Map<double, SliderStepItemAccessibility> | undefined = stepsAccessibilityTmpBuf
         let value : SliderShowStepOptions = ({stepsAccessibility: stepsAccessibilityTmpResult} as SliderShowStepOptions)
         return value
     }
@@ -1286,7 +1286,7 @@ export class SliderOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForValueTmpValueForIdx0)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<double>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)
@@ -1651,10 +1651,10 @@ export class ColorMetricsStop_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForOffsetForIdx0  = valueHolderForOffset as string
             valueSerializer.writeString(valueHolderForOffsetForIdx0)
-        } else if (valueHolderForOffset instanceof number) {
+        } else if (valueHolderForOffset instanceof double) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForOffsetForIdx1  = valueHolderForOffset as number
-            valueSerializer.writeNumber(valueHolderForOffsetForIdx1)
+            const valueHolderForOffsetForIdx1  = valueHolderForOffset as double
+            valueSerializer.writeFloat64(valueHolderForOffsetForIdx1)
         } else if (valueHolderForOffset instanceof Resource) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForOffsetForIdx2  = valueHolderForOffset as Resource
@@ -1665,17 +1665,17 @@ export class ColorMetricsStop_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const colorTmpResult : ColorMetrics = ColorMetrics_serializer.read(valueDeserializer)
         const offsetTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let offsetTmpBuf : string | number | Resource | undefined
-        if (offsetTmpBufUnionSelector == (0).toInt()) {
+        let offsetTmpBuf : string | double | Resource | undefined
+        if (offsetTmpBufUnionSelector == (0).toByte()) {
             offsetTmpBuf = (valueDeserializer.readString() as string)
-        } else if (offsetTmpBufUnionSelector == (1).toInt()) {
-            offsetTmpBuf = (valueDeserializer.readNumber() as number)
-        } else if (offsetTmpBufUnionSelector == (2).toInt()) {
+        } else if (offsetTmpBufUnionSelector == (1).toByte()) {
+            offsetTmpBuf = valueDeserializer.readFloat64()
+        } else if (offsetTmpBufUnionSelector == (2).toByte()) {
             offsetTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for offsetTmpBuf has to be chosen through deserialisation.")
         }
-        const offsetTmpResult : Length = (offsetTmpBuf as string | number | Resource)
+        const offsetTmpResult : Length = (offsetTmpBuf as string | double | Resource)
         let value : ColorMetricsStop = ({color: colorTmpResult, offset: offsetTmpResult} as ColorMetricsStop)
         return value
     }

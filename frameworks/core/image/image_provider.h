@@ -78,7 +78,7 @@ public:
         const std::string src);
 
     // get out source image data asynchronously.
-    static void FetchImageObject(const ImageSourceInfo& imageInfo, const ImageObjSuccessCallback& successCallback,
+    ACE_FORCE_EXPORT static void FetchImageObject(const ImageSourceInfo& imageInfo, const ImageObjSuccessCallback& successCallback,
         const UploadSuccessCallback& uploadSuccessCallback, const FailedCallback& failedCallback,
         const WeakPtr<PipelineBase>& context, bool syncMode, bool useSkiaSvg, bool needAutoResize,
         const OnPostBackgroundTask& onBackgroundTaskPostCallback = nullptr);
@@ -95,7 +95,7 @@ public:
     static bool NeedExchangeWidthAndHeight(SkEncodedOrigin origin);
 
     // This is a synchronization interface for getting out source image.
-    static std::shared_ptr<RSImage> GetDrawingImage(
+    ACE_FORCE_EXPORT static std::shared_ptr<RSImage> GetDrawingImage(
         const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize = Size());
 
     static RefPtr<ImageObject> GeneratorAceImageObject(
@@ -111,7 +111,7 @@ public:
         const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase>& pipelineContext);
     static Rosen::Drawing::ColorType PixelFormatToDrawingColorType(const RefPtr<PixelMap>& pixmap);
     static Rosen::Drawing::AlphaType AlphaTypeToDrawingAlphaType(const RefPtr<PixelMap>& pixmap);
-    static RSBitmapFormat MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    ACE_FORCE_EXPORT static RSBitmapFormat MakeRSBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static std::shared_ptr<RSColorSpace> ColorSpaceToDrawingColorSpace(const RefPtr<PixelMap>& pixmap);
     static RSImageInfo MakeRSImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
 

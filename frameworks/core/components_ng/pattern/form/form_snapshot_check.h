@@ -38,7 +38,11 @@ public:
             TAG_LOGE(AceLogTag::ACE_FORM, "FormSnapshotCheck::OnSurfaceCapture formManagerBridge is nullptr");
             return;
         }
-        int32_t ratio = FormSnapshotUtil::GetNonTransparentRatio(pixelMap);
+        int32_t ratio = 0;
+        bool success = FormSnapshotUtil::GetNonTransparentRatio(pixelMap, ratio);
+        if (!success) {
+            return;
+        }
         formManagerBridge->SendNonTransparencyRatio(ratio);
     }
     void OnSurfaceCaptureHDR(

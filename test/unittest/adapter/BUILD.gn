@@ -18,5 +18,6 @@ group("adapter_unittest") {
   deps = [
     "ohos/capability:capability_unittest",
     "ohos/entrance:entrance_unittest",
+    "ohos/osal/system_properties:system_properties_unittest",
   ]
 }

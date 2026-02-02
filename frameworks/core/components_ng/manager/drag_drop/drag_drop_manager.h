@@ -37,6 +37,7 @@ class GridColumnInfo;
 namespace OHOS::Rosen {
 class RSSyncTransactionController;
 class RSSyncTransactionHandler;
+class RSTransaction;
 } // namespace OHOS::Rosen
 namespace OHOS::Ace::NG {
 class DragDropSpringLoadingDetector;
@@ -149,9 +150,9 @@ public:
         const std::string& udKey, int32_t count = 0);
     void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
         const OHOS::Ace::DragPointerEvent& pointerEvent);
-    std::function<void(const DragRet&)> GetStopDragCallBack(const RefPtr<FrameNode>& dragFrameNode,
-        const DragPointerEvent& pointerEvent, const RefPtr<OHOS::Ace::DragEvent>& event,
-        const std::string& extraParams);
+    std::function<void(const DragRet&, const DragBehavior&, const bool&)> GetStopDragCallBack(
+        const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     bool PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
@@ -693,6 +694,24 @@ public:
 
     void DispatchLastDragEventVoluntarily(bool isTrans);
 
+    void SetDragStartPoint(double globalX, double globalY)
+    {
+        dragStartPoint_ = { globalX, globalY };
+    }
+
+
+#ifdef ENABLE_ROSEN_BACKEND
+    void InitSyncTransaction();
+
+    void ResetSyncTransaction();
+
+    void OpenSyncTransaction();
+
+    void CloseSyncTransaction();
+
+    std::shared_ptr<Rosen::RSTransaction> GetRSTransaction();
+#endif
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -755,6 +774,8 @@ private:
     void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
         const RefPtr<NG::PipelineContext>& pipeline);
+    void ReportOnItemDropEvent(
+        DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
 
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
@@ -832,6 +853,7 @@ private:
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
+    Point dragStartPoint_ { 0, 0 };
     RefPtr<DragDropSpringLoadingDetector> dragDropSpringLoadingDetector_;
 
     std::map<int32_t, Point> fingerPointInfo_;
@@ -839,6 +861,10 @@ private:
     bool isPullThrow_ = false;
     int32_t BundlecurrentPullId_ = -1;
     DragBundleInfo dragBundleInfo_;
+#ifdef ENABLE_ROSEN_BACKEND
+    OHOS::Rosen::RSSyncTransactionController* transactionController_ = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler_ = nullptr;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

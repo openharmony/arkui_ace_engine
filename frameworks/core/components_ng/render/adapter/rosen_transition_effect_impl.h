@@ -65,6 +65,10 @@ protected:
     void OnDetach(RosenRenderContext* context) override;
     void OnAppear() override
     {
+        if (property_ == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "transitionEffect property_ is nullptr in OnAppear");
+            return;
+        }
         isActive_ = false;
         if (keyframes_.empty()) {
             property_->Set(identityValue_);
@@ -77,6 +81,10 @@ protected:
     }
     void OnDisappear(bool activeTransition) override
     {
+        if (property_ == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "transitionEffect property_ is nullptr in OnDisappear");
+            return;
+        }
         if (!activeTransition) {
             return;
         }

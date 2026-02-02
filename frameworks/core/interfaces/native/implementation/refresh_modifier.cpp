@@ -196,6 +196,17 @@ void SetPullDownRatioImpl(Ark_NativePointer node,
     Validator::ClampByRange(convValue, PULLDOWNRATIO_MIN, PULLDOWNRATIO_MAX);
     RefreshModelStatic::SetPullDownRatio(frameNode, convValue);
 }
+void SetMaxPullDownDistanceImpl(Ark_NativePointer node,
+                                const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    if (convValue.has_value()) {
+        convValue = std::max(convValue.value(), 0.0f);
+    }
+    RefreshModelStatic::SetMaxPullDownDistance(frameNode, convValue);
+}
 } // RefreshAttributeModifier
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
 {
@@ -209,6 +220,7 @@ const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
         RefreshAttributeModifier::setPullUpToCancelRefreshImpl,
         RefreshAttributeModifier::SetOnOffsetChangeImpl,
         RefreshAttributeModifier::SetPullDownRatioImpl,
+        RefreshAttributeModifier::SetMaxPullDownDistanceImpl,
     };
     return &ArkUIRefreshModifierImpl;
 }

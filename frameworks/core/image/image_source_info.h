@@ -55,6 +55,9 @@ public:
     explicit ImageSourceInfo(const RefPtr<PixelMap>& pixmap)
         : ImageSourceInfo("", Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID, pixmap)
     {}
+
+    ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t bufferSize);
+
     ImageSourceInfo() = default;
     ~ImageSourceInfo() = default;
 
@@ -62,7 +65,11 @@ public:
     static bool IsSVGSource(const std::string& imageSrc, SrcType srcType, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
-    static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
+    static bool IsFileMediaThumbnailUri(const std::string& uri);
+    static bool IsFileMediaAstcUri(const std::string& uri);
+    static bool IsFileMediaUri(const std::string& uri);
+    static bool IsDataAbilityThumbnailUri(const std::string& uri);
+    static bool IsDataAbilityMediaUri(const std::string& uri);
     static ImageSourceInfo CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host);
 
     // operators
@@ -101,6 +108,8 @@ public:
     const std::string& GetSrc() const;
     const std::optional<Color>& GetFillColor() const;
     const RefPtr<PixelMap>& GetPixmap() const;
+    const std::shared_ptr<uint8_t[]>& GetBuffer() const;
+    size_t GetBufferSize() const;
     std::string GetKey() const;
     // Generates a task key that includes the current running container ID.
     std::string GetTaskKey() const;
@@ -120,6 +129,9 @@ public:
     {
         return localColorMode_;
     }
+    
+    void UpdateLocalColorMode(ColorMode localColorMode);
+
     bool IsFromReset()
     {
         return isFromReset_;
@@ -170,6 +182,8 @@ private:
     Dimension sourceHeight_ = Dimension(-1);
     InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
     RefPtr<PixelMap> pixmap_;
+    std::shared_ptr<uint8_t[]> buffer_ = nullptr;
+    size_t bufferSize_ = 0;
     bool isSvg_ = false;
     bool needCache_ = true;
     bool isUriPureNumber_ = false;

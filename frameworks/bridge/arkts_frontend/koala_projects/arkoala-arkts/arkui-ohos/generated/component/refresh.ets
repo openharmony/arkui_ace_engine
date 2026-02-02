@@ -140,6 +140,18 @@ export class ArkRefreshPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RefreshAttribute_setPullDownRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setMaxPullDownDistanceAttribute(value: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeFloat64(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RefreshAttribute_setMaxPullDownDistance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum RefreshStatus {
     INACTIVE = 0,
@@ -184,6 +196,9 @@ export interface RefreshAttribute extends CommonMethod {
     pullDownRatio(value: double | undefined): this {
         throw new Error("Unimplemented method pullDownRatio")
     }
+    maxPullDownDistance(value: double | undefined): this {
+        throw new Error("Unimplemented method maxPullDownDistance")
+    }
     attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -196,6 +211,7 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     pullUpToCancelRefresh_value?: boolean | undefined
     onOffsetChange_value?: ((value0: double) => void) | undefined
     pullDownRatio_value?: double | undefined
+    maxPullDownDistance_value?: double | undefined
     attributeModifier_value?: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined
     setRefreshOptions(value: RefreshOptions): this {
         return this
@@ -219,6 +235,9 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
         return this
     }
     pullDownRatio(value: double | undefined): this {
+        return this
+    }
+    maxPullDownDistance(value: double | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -298,6 +317,14 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         }
         return this
     }
+    public maxPullDownDistance(value: double | undefined): this {
+        if (this.checkPriority("maxPullDownDistance")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setMaxPullDownDistanceAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
           hookRefreshAttributeModifier(this, value);
@@ -339,7 +366,7 @@ export class RefreshOptions_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForRefreshingForIdx0  = valueHolderForRefreshing as boolean
             valueSerializer.writeBoolean(valueHolderForRefreshingForIdx0)
-        } else if (valueHolderForRefreshing instanceof Bindable<boolean>) {
+        } else if (valueHolderForRefreshing instanceof Bindable) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForRefreshingForIdx1  = valueHolderForRefreshing as Bindable<boolean>
             Bindable_Boolean_serializer.write(valueSerializer, valueHolderForRefreshingForIdx1)

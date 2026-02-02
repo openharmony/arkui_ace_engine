@@ -15,13 +15,13 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
 
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_static.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 
 namespace OHOS::Ace::NG {
+const uint32_t DEFAULT_SWIPER_CURRENT_INDEX = 0;
 
 RefPtr<FrameNode> IndicatorModelStatic::CreateFrameNode(int32_t nodeId)
 {

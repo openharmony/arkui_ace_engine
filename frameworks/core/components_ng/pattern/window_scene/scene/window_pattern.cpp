@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 #include "session_manager/include/scene_session_manager.h"
 #include "start_window_option.h"
 #include "ui/rs_surface_node.h"
@@ -60,6 +63,14 @@ constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
 constexpr uint32_t STARTING_WINDOW_TIMEOUT_MS = 10000;
+constexpr uint32_t DMA_RECLAIM_TIMEOUT_MS = 500;
+constexpr const char* DMA_DEVICE_FILE = "/dev/dma_reclaim";
+
+struct DmaBufIoctlSwPara {
+    pid_t pid = 0;
+    unsigned long ino = 0;
+    unsigned int fd = 0;
+};
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -123,11 +134,11 @@ public:
         windowPattern->OnRemoveBlank();
     }
 
-    void OnAddSnapshot() override
+    void OnAddSnapshot(std::function<void()>&& callback) override
     {
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
-        windowPattern->OnAddSnapshot();
+        windowPattern->OnAddSnapshot(std::move(callback));
     }
 
     void OnRemoveSnapshot() override
@@ -163,6 +174,13 @@ public:
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnRestart();
+    }
+
+    void OnRemovePrelaunchStartingWindow() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRemovePrelaunchStartingWindow();
     }
 
 private:
@@ -233,7 +251,7 @@ void WindowPattern::OnAttachToFrameNode()
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
         if (!session_->GetShowRecent() && !session_->GetAppLockControl()) {
-            AddChild(host, appWindow_, appWindowName_, 0);
+            DelayAddAppWindowForDmaResume(session_->GetCallingPid());
         }
         CreateSnapshotWindow();
         AddChild(host, snapshotWindow_, snapshotWindowName_);
@@ -282,20 +300,21 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_RETURN(HasStartingPage(), false, false);
         if (session_->GetShowRecent() && CheckSnapshotWindow()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch disconnect CreateSnapshotWindow");
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
-            isPrelaunch_ = true;
+            isPrelaunch_.store(true, std::memory_order_release);
             return true;
         }
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateBlankWindow");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch disconnect CreateBlankWindow");
         CreateBlankWindow(startingWindow_);
         AddChild(host, startingWindow_, startingWindowName_);
-        isPrelaunch_ = true;
+        isPrelaunch_.store(true, std::memory_order_release);
         return true;
     }
 
     if (session_->GetShowRecent()) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateStartingWindow");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch showRecent CreateStartingWindow");
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
         return true;
@@ -310,7 +329,7 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
         CreateBlankWindow(startingWindow_);
         AddChild(host, startingWindow_, startingWindowName_);
         surfaceNode->SetBufferAvailableCallback(callback_);
-        isPrelaunch_ = true;
+        isPrelaunch_.store(true, std::memory_order_release);
         return true;
     }
     attachToFrameNodeFlag_ = true;
@@ -320,11 +339,7 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
 bool WindowPattern::AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
     const RefPtr<NG::FrameNode>& host)
 {
-    int32_t imageFit = 0;
-    if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit) == false) {
-        return false;
-    }
+    CHECK_EQUAL_RETURN(session_->IsPersistentImageFit(), false, false);
     CreateSnapshotWindow();
     AddChild(host, snapshotWindow_, snapshotWindowName_);
     surfaceNode->SetIsNotifyUIBufferAvailable(false);
@@ -569,15 +584,15 @@ void WindowPattern::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
     auto imagePattern = node->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
-    imagePattern->SetSyncLoad(syncStartingWindow_);
     ACE_SCOPED_TRACE("WindowPattern::SetImagePatternSyncLoad set sync [%d]", syncStartingWindow_);
+    imagePattern->SetSyncLoad(syncStartingWindow_);
 }
 
 void WindowPattern::HideStartingWindow()
 {
     session_->SetHidingStartingWindow(true);
     session_->SetLeashWindowAlpha(true);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "hide startWindow: %{public}d", session_->GetPersistentId());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow: %{public}d", session_->GetPersistentId());
 
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
@@ -592,8 +607,15 @@ void WindowPattern::HideStartingWindow()
         CHECK_NULL_VOID(self->startingWindow_);
         auto session = self->session_;
         CHECK_NULL_VOID(session);
+        auto abilityInfo = session->GetSessionInfoAbilityInfo();
+        bool debugMode = false;
+        if (abilityInfo) {
+            debugMode = abilityInfo->applicationInfo.debug;
+            TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow time out, debug mode: %{public}d", debugMode);
+        }
+        CHECK_EQUAL_VOID(debugMode, true);
         auto ret = session->Clear();
-        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "Terminate StartingWindow, ret: %{public}d", ret);
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow terminate session, ret: %{public}d", ret);
     });
     taskExecutor->PostDelayedTask(
         interruptStartingTask_, TaskExecutor::TaskType::UI, STARTING_WINDOW_TIMEOUT_MS, "ArkUICleanStartingWindow");
@@ -605,7 +627,6 @@ void WindowPattern::CreateStartingWindow()
         HideStartingWindow();
         startingWindow_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        SetImagePatternSyncLoad(startingWindow_);
         return;
     }
 
@@ -629,8 +650,7 @@ void WindowPattern::CreateStartingWindow()
         CHECK_NULL_VOID(startingWindowLayoutHelper_);
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
-            startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
-        SetImagePatternSyncLoad(startingWindow_);
+            startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_, syncStartingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -641,15 +661,23 @@ void WindowPattern::CreateStartingWindow()
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     ImageSourceInfo sourceInfo;
-    auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
-    if (preLoadPixelMap != nullptr) {
-        auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
+    std::shared_ptr<Media::PixelMap> preloadPixelMap = nullptr;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
+    session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
+    if (preloadPixelMap != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&preloadPixelMap);
         sourceInfo = ImageSourceInfo(pixelMap);
-        Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
+        session_->ResetPreloadStartingWindow();
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
-    } else {
+    } else if (preloadBufferInfo.first != nullptr && preloadBufferInfo.second > 0) {
+        sourceInfo = ImageSourceInfo(preloadBufferInfo.first, preloadBufferInfo.second);
+        session_->ResetPreloadStartingWindow();
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload buffer id:%{public}d", session_->GetPersistentId());
+    } else if (!session_->GetPreloadingStartingWindow()) {
         sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
             sessionInfo.moduleName_);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "not preloading starting window id:%{public}d",
+            session_->GetPersistentId());
     }
     auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
@@ -684,11 +712,8 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     }
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    int32_t persistentImageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), persistentImageFit);
-    auto imageFit = static_cast<ImageFit>(persistentImageFit);
-    if (isPersistentImageFit) {
+    auto imageFit = static_cast<ImageFit>(session_->GetPersistentImageFit());
+    if (session_->IsPersistentImageFit()) {
         // ImageFit type COVER_TOP_LEFT is not support for api interface
         imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
     } else {
@@ -722,10 +747,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
 
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    if (IsSnapshotSizeChanged() && isPersistentImageFit == false) {
+    if (IsSnapshotSizeChanged() && !session_->IsPersistentImageFit()) {
         isBlankForSnapshot_ = true;
         CreateBlankWindow(snapshotWindow_);
         return;
@@ -741,9 +763,15 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     auto pattern = snapshotWindow_->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
+    snapshotWindow_->UpdateInspectorId("Snapshot_" + session_->GetSessionInfo().bundleName_ +
+        "_" + std::to_string(host->GetId()));
 
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        pattern->SetSyncLoad(true);
+    } else if (auto preloadSnapshot = session_->GetPreloadSnapshot(); preloadSnapshot != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&preloadSnapshot);
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         pattern->SetSyncLoad(true);
     } else {
@@ -850,6 +878,57 @@ void WindowPattern::AddBackgroundColorDelayed()
     });
     taskExecutor->PostDelayedTask(
         addBackgroundColorTask_, TaskExecutor::TaskType::UI, ADD_BACKGROUND_COLOR_MS, __func__);
+}
+
+void WindowPattern::DelayAddAppWindowForDmaResume(int32_t pid)
+{
+    if (!dmaReclaimEnabled_ || session_->IsAnco()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        AddChild(host, appWindow_, appWindowName_, 0);
+        return;
+    }
+    appWindowDelayAdded_ = false;
+    auto addAppUITask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::AddAppUITask");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_EQUAL_VOID(self->appWindowDelayAdded_, true);
+        CHECK_NULL_VOID(self->appWindow_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        self->appWindowDelayAdded_ = true;
+    };
+    auto dmaResumeTask = [containerId = instanceId_, pid, addAppUITask]() {
+        ACE_SCOPED_TRACE("WindowScene::WaitForDmaResume[%d]", pid);
+        auto fd = open(DMA_DEVICE_FILE, O_RDWR | O_CLOEXEC | O_NONBLOCK);
+        if (fd > 0) {
+            DmaBufIoctlSwPara param{.pid = pid};
+            int32_t ret = ioctl(fd, _IOWR('d', 0x05, int), &param);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "swap in dma buf: %{public}d, ret: %{public}d", pid, ret);
+            close(fd);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "failed to open device: %{public}d", pid);
+        }
+        ContainerScope scope(containerId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent(
+            std::move(addAppUITask), "ArkUIWindowSceneAddAppWindowAfterDmaResume", TaskExecutor::TaskType::UI);
+    };
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(
+        std::move(dmaResumeTask), "ArkUIWindowSceneWaitForDmaResume", TaskExecutor::TaskType::BACKGROUND);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    delayAddAppWindowTask_.Cancel();
+    delayAddAppWindowTask_.Reset(addAppUITask);
+    taskExecutor->PostDelayedTask(delayAddAppWindowTask_, TaskExecutor::TaskType::UI,
+        DMA_RECLAIM_TIMEOUT_MS, "ArkUIWindowSceneDelayAddAppWindow");
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)

@@ -583,7 +583,7 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     DragDropManager::DragPreviewInfo dragPreviewInfo;
     auto imageNode = overlayManager->GetDragPixelMapContentNode();
     CHECK_NULL_RETURN(imageNode, false);
-    auto badgeNode = overlayManager->GetPixelMapBadgeNode();
+    auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }

@@ -15,16 +15,18 @@
 
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 
+#include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-void JSLinearGradient::JSBind(BindingTarget globalObj)
+void JSLinearGradientBinding::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLinearGradient>::Declare("LinearGradient");
-    JSClass<JSLinearGradient>::Bind(globalObj, JSLinearGradient::Constructor, JSLinearGradient::Destructor);
+    JSClass<JSLinearGradient>::Bind(
+        globalObj, JSLinearGradientBinding::Constructor, JSLinearGradientBinding::Destructor);
 }
 
-void JSLinearGradient::Constructor(const JSCallbackInfo& args)
+void JSLinearGradientBinding::Constructor(const JSCallbackInfo& args)
 {
     auto jsLinearGradientPtr = Referenced::MakeRefPtr<JSLinearGradient>();
     jsLinearGradientPtr->IncRefCount();
@@ -47,14 +49,16 @@ void JSLinearGradient::Constructor(const JSCallbackInfo& args)
             return;
         }
         auto itemObject = JSRef<JSObject>::Cast(item);
+        RefPtr<ResourceObject> colorResObj;
         JSRef<JSVal> jsColor = itemObject->GetProperty("color");
         Color color;
-        if (!JSViewAbstract::ParseJsColor(jsColor, color)) {
+        if (!JSViewAbstract::ParseJsColor(jsColor, color, colorResObj)) {
             return;
         }
+        RefPtr<ResourceObject> offsetResObj;
         JSRef<JSVal> jsOffset = itemObject->GetProperty("offset");
         CalcDimension offset;
-        if (!JSViewAbstract::ParseJsDimensionVp(jsOffset, offset)) {
+        if (!JSViewAbstract::ParseJsDimensionVp(jsOffset, offset, offsetResObj)) {
             return;
         }
 
@@ -66,10 +70,13 @@ void JSLinearGradient::Constructor(const JSCallbackInfo& args)
             offset = Dimension(1.0, DimensionUnit::VP);
         }
         jsLinearGradientPtr->gradient_.push_back(std::make_pair(color, offset));
+        if (SystemProperties::ConfigChangePerform()) {
+            jsLinearGradientPtr->gradientResObj_.push_back(std::make_pair(colorResObj, offsetResObj));
+        }
     }
 }
 
-void JSLinearGradient::Destructor(JSLinearGradient* jsLinearGradientPtr)
+void JSLinearGradientBinding::Destructor(JSLinearGradient* jsLinearGradientPtr)
 {
     if (jsLinearGradientPtr != nullptr) {
         jsLinearGradientPtr->DecRefCount();

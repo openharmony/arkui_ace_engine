@@ -279,8 +279,8 @@ private:
     void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnColorConfigurationUpdate() override;
-    void CalcSliderValue();
-    void CancelExceptionValue(float& min, float& max, float& step);
+    bool CalcSliderValue();
+    void NotifyExceptionValueRecoveryEvent();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     bool UpdateParameters();
     void CreateParagraphFunc();

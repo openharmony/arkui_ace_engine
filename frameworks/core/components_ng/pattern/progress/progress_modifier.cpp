@@ -200,9 +200,10 @@ void ProgressModifier::StartCapsuleSweepingAnimation(float value)
     float date = (value / maxValue_->Get()) * barLength + SWEEP_WIDTH.ConvertToPx();
     float sweepSpeed = barLength / TIME_2000; // It takes 2 seconds to sweep the whole bar length.
 
-    if (!isSweeping_ && sweepEffect_->Get() && isVisible_) {
+    bool shouldStartAnimation = sweepEffect_->Get() && isVisible_ && inVisibleArea_;
+    if (!isSweeping_ && shouldStartAnimation) {
         StartCapsuleSweepingAnimationImpl(date, sweepSpeed);
-    } else if (!sweepEffect_->Get() || !isVisible_) {
+    } else if (!shouldStartAnimation) {
         StopSweepingAnimation();
     } else {
         dateUpdated_ = !NearEqual(sweepingDateBackup_, date);
@@ -256,7 +257,19 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
 void ProgressModifier::SetRingProgressColor(const Gradient& color)
 {
     CHECK_NULL_VOID(ringProgressColors_);
-    ringProgressColors_->Set(GradientArithmetic(color));
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    auto context = host ? host->GetContextRefPtr() : nullptr;
+    auto propertyCallback = [weak = WeakClaim(this), color]() {
+        auto progressModifier = weak.Upgrade();
+        CHECK_NULL_VOID(progressModifier);
+        progressModifier->SetGradientColor(color);
+    };
+    AnimationUtils::Animate(option, propertyCallback, nullptr, nullptr, context);
 }
 
 void ProgressModifier::SetPaintShadow(bool paintShadow)
@@ -297,6 +310,29 @@ void ProgressModifier::SetVisible(bool isVisible)
     }
 }
 
+void ProgressModifier::SetInVisibleArea(bool value)
+{
+    CHECK_NULL_VOID(inVisibleArea_ != value);
+    inVisibleArea_ = value;
+    if (progressStatus_->Get() != static_cast<int32_t>(ProgressStatus::LOADING)) {
+        ProcessSweepingAnimation(ProgressType(progressType_->Get()), value_->Get());
+    } else {
+        if (value) {
+            StartRingLoadingAnimation();
+        } else if (isLoading_) {
+            StopRingLoadingHeadAnimation();
+            StopRingLoadingTailAnimation();
+        }
+    }
+}
+
+void ProgressModifier::StopAllLoopAnimation()
+{
+    StopRingLoadingHeadAnimation();
+    StopRingLoadingTailAnimation();
+    StopSweepingAnimation();
+}
+
 void ProgressModifier::SetSmoothEffect(bool value)
 {
     CHECK_NULL_VOID(smoothEffect_);
@@ -310,7 +346,8 @@ void ProgressModifier::SetSmoothEffect(bool value)
 
 void ProgressModifier::StartRingLoadingAnimation()
 {
-    if (!isLoading_ && isVisible_) {
+    bool shouldStartAnimation = !isLoading_ && isVisible_ && inVisibleArea_;
+    if (shouldStartAnimation) {
         isLoading_ = true;
         StartRingLoadingHeadAnimation();
         StartRingLoadingTailAnimation();
@@ -395,7 +432,8 @@ void ProgressModifier::StopRingLoadingTailAnimation()
 
 void ProgressModifier::ProcessRingSweepingAnimation(float value)
 {
-    if (NearZero(value) || NearEqual(value, maxValue_->Get())) {
+    bool shouldStopAnimation = NearZero(value) || NearEqual(value, maxValue_->Get()) || !inVisibleArea_;
+    if (shouldStopAnimation) {
         StopSweepingAnimation();
     } else {
         StartRingSweepingAnimation(value);
@@ -404,7 +442,8 @@ void ProgressModifier::ProcessRingSweepingAnimation(float value)
 
 void ProgressModifier::ProcessLinearSweepingAnimation(float value)
 {
-    if (NearZero(value) || NearEqual(value, maxValue_->Get())) {
+    bool shouldStopAnimation = NearZero(value) || NearEqual(value, maxValue_->Get()) || !inVisibleArea_;
+    if (shouldStopAnimation) {
         StopSweepingAnimation();
     } else {
         StartLinearSweepingAnimation(value);

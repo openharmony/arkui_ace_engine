@@ -19,6 +19,10 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(Framework::DeclarativeEngineLoader);
+}
+
 namespace OHOS::Ace::Framework {
 
 DeclarativeEngineLoader::DeclarativeEngineLoader() = default;

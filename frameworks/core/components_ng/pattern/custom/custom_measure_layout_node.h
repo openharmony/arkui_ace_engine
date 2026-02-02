@@ -83,6 +83,9 @@ public:
         return true;
     }
 
+    bool Render(int64_t deadline = 0);
+    bool RenderCustomChild(int64_t deadline) override;
+
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
     std::function<void(LayoutWrapper* layoutWrapper)> layoutFunc_;

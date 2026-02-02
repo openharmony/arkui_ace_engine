@@ -884,6 +884,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._blockColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._blockColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blockColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -895,6 +896,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._trackColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -906,6 +908,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -917,6 +920,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._showSteps_0_flag = AttributeUpdaterFlag.UPDATE
             this._showSteps_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showSteps_0_flag = AttributeUpdaterFlag.SKIP
@@ -928,6 +932,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._trackThickness_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackThickness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackThickness_0_flag = AttributeUpdaterFlag.SKIP
@@ -939,6 +944,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -950,6 +956,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._blockBorderColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._blockBorderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blockBorderColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -961,6 +968,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._blockBorderWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._blockBorderWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blockBorderWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -972,6 +980,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._stepColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._stepColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stepColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -983,6 +992,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._trackBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackBorderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackBorderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -994,6 +1004,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._selectedBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBorderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBorderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -1005,6 +1016,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._blockSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._blockSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blockSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1016,6 +1028,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._blockStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._blockStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._blockStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1027,6 +1040,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._stepSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1038,6 +1052,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._sliderInteractionMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._sliderInteractionMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sliderInteractionMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1049,6 +1064,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.UPDATE
             this._minResponsiveDistance_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minResponsiveDistance_0_flag = AttributeUpdaterFlag.SKIP
@@ -1060,6 +1076,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._slideRange_0_flag = AttributeUpdaterFlag.UPDATE
             this._slideRange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._slideRange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1071,6 +1088,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1082,6 +1100,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -1094,6 +1113,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
             this._showSteps_1_flag = AttributeUpdaterFlag.UPDATE
             this._showSteps_1_0value = value
             this._showSteps_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._showSteps_1_flag = AttributeUpdaterFlag.SKIP
@@ -1106,6 +1126,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
             this._prefix_0_flag = AttributeUpdaterFlag.UPDATE
             this._prefix_0_0value = content
             this._prefix_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._prefix_0_flag = AttributeUpdaterFlag.SKIP
@@ -1118,6 +1139,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
             this._suffix_0_flag = AttributeUpdaterFlag.UPDATE
             this._suffix_0_0value = content
             this._suffix_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._suffix_0_flag = AttributeUpdaterFlag.SKIP
@@ -1130,6 +1152,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
             this._showTips_0_flag = AttributeUpdaterFlag.UPDATE
             this._showTips_0_0value = value
             this._showTips_0_1value = content
+            this._state.fireChange()
         } else
         {
             this._showTips_0_flag = AttributeUpdaterFlag.SKIP
@@ -1152,6 +1175,7 @@ export class SliderModifier extends CommonMethodModifier implements SliderAttrib
         {
             this._trackColorMetrics_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackColorMetrics_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackColorMetrics_0_flag = AttributeUpdaterFlag.SKIP

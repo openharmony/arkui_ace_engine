@@ -671,6 +671,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier001, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetVisible(true);
+    progressModifier->SetInVisibleArea(true);
     progressModifier->SetProgressType(PROGRESS_TYPE_RING);
     progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
@@ -1384,6 +1385,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier001, TestSize.Level1)
     SizeF ContentSize2(200.0f, 100.0f);
     progressModifier->SetContentSize(ContentSize2);
     progressModifier->SetVisible(true);
+    progressModifier->SetInVisibleArea(true);
     progressModifier->isSweeping_ = false;
     progressModifier->SetProgressType(PROGRESS_TYPE_LINEAR);
     progressModifier->SetValue(value);
@@ -1480,6 +1482,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier002, TestSize.Level1)
     SizeF ContentSize(100.0f, 200.0f);
     progressModifier->SetContentSize(ContentSize);
     progressModifier->SetVisible(true);
+    progressModifier->SetInVisibleArea(true);
     progressModifier->isSweeping_ = false;
     progressModifier->SetProgressType(PROGRESS_TYPE_LINEAR);
     progressModifier->SetValue(value);
@@ -1504,6 +1507,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier003, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetInVisibleArea(true);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetLinearSweepEffect(true);
@@ -1679,6 +1683,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier007, TestSize.Level1)
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
     auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    modifier->SetInVisibleArea(true);
     modifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1698,6 +1703,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier007, TestSize.Level1)
     EXPECT_EQ(modifier->dateUpdated_, false);
 
     modifier->SetVisible(false);
+    modifier->SetInVisibleArea(false);
     modifier->SetSweepEffect(true);
     modifier->SetProgressStatus(ProgressStatus::LOADING);
     modifier->StartCapsuleSweepingAnimationImpl(1.f, 1.f);
@@ -1709,6 +1715,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier007, TestSize.Level1)
     EXPECT_EQ(modifier->progressStatus_->Get(), static_cast<int32_t>(ProgressStatus::LOADING));
 
     modifier->SetVisible(true);
+    modifier->SetInVisibleArea(true);
     modifier->SetProgressType(PROGRESS_TYPE_SCALE);
     modifier->StartContinuousSweepingAnimation(0.f, 1.f, 1.f);
     EXPECT_EQ(modifier->isVisible_, true);
@@ -1727,6 +1734,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier008, TestSize.Level1)
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
     auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    modifier->SetInVisibleArea(true);
     modifier->SetProgressType(PROGRESS_TYPE_RING);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1783,6 +1791,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier009, TestSize.Level1)
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
     auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    modifier->SetInVisibleArea(true);
     modifier->SetProgressType(PROGRESS_TYPE_LINEAR);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1815,6 +1824,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier009, TestSize.Level1)
     EXPECT_FLOAT_EQ(modifier->value_->Get(), 100.f);
 
     modifier->SetVisible(false);
+    modifier->SetInVisibleArea(false);
     modifier->StartLinearSweepingAnimation(100.f);
     EXPECT_EQ(modifier->isVisible_, false);
 }
@@ -2234,6 +2244,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressFrameRateRangeTest001, TestSize.Level1)
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
     auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    modifier->SetInVisibleArea(true);
     modifier->SetProgressType(PROGRESS_TYPE_RING);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);

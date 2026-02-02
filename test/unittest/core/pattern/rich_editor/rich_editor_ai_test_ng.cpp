@@ -97,8 +97,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level2)
     richEditorPattern->textSelector_.Update(0, 5);
     auto mockContainer = MockContainer::Current();
     mockContainer->SetIsSceneBoardWindow(true);
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -119,8 +118,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level2)
     richEditorController->AddTextSpan(options);
     richEditorPattern->textSelector_.Update(0, 5);
     MockContainer::TearDown();
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -146,8 +144,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -174,8 +171,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite004, TestSize.Level2)
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -204,8 +200,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite005, TestSize.Level2)
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -235,8 +230,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level2)
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
     theme->aiWriteIsSupport_ = "true";
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -277,12 +271,18 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite001, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, HandleAIWrite002, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
 
+    /**
+     * @tc.steps: step2. add span
+     */
     TextSpanOptions options;
     options.value = INIT_VALUE_3;
     richEditorController->AddTextSpan(options);
@@ -355,12 +355,18 @@ HWTEST_F(RichEditorAITestOneNg, HandleAIWrite003, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
 
+    /**
+     * @tc.steps: step2. add span
+     */
     TextSpanOptions options;
     options.value = INIT_VALUE_3;
     richEditorController->AddTextSpan(options);
@@ -377,6 +383,36 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo001, TestSize.Level2)
     ASSERT_NE(spanString, nullptr);
     auto textContent = spanString->GetString();
     EXPECT_EQ(textContent.empty(), false);
+}
+
+/**
+ * @tc.name: GetAIWriteInfo002
+ * @tc.desc: test GetAIWriteInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add span
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(options);
+    richEditorPattern->textSelector_.Update(5, 5);
+    richEditorPattern->textForDisplay_ = u"testtesttest";
+    AIWriteInfo info;
+    richEditorPattern->GetAIWriteInfo(info);
+    EXPECT_EQ(info.selectStart, 5);
+    EXPECT_EQ(info.selectEnd, 5);
 }
 
 /**
@@ -617,11 +653,17 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle001, TestSize.Level2)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step1. construct spans
+     */
     auto& spans = richEditorPattern->spans_;
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->aiSpanResultCount = 0;
     spans.push_back(spanItem);
 
+    /**
+     * @tc.steps: step2. set config
+     */
     TextDetectConfig textDetectConfig;
 
     textDetectConfig.entityColor = TEXT_COLOR_VALUE;
@@ -631,6 +673,9 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle001, TestSize.Level2)
     richEditorPattern->SetTextDetectConfig(textDetectConfig);
     EXPECT_FALSE(spanItem->needReLayout);
 
+    /**
+     * @tc.steps: step3. change config
+     */
     spanItem->aiSpanResultCount = 1;
     textDetectConfig.entityDecorationColor = Color::BLUE;
     richEditorPattern->SetTextDetectConfig(textDetectConfig);
@@ -746,5 +791,65 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteAdapter001, TestSize.Level2)
     ASSERT_NE(richEditorPattern, nullptr);
     auto aiWriteAdapter = richEditorPattern->GetAIWriteAdapter();
     EXPECT_NE(aiWriteAdapter, nullptr);
+}
+
+/**
+ * @tc.name: HandleAIWriteResult001
+ * @tc.desc: test HandleAIWriteResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, HandleAIWriteResult001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+
+    TextSpanOptions initOptions;
+    initOptions.value = INIT_VALUE_1;
+    controller->AddTextSpan(initOptions);
+
+    int32_t start = 0;
+    int32_t end = 0;
+
+    std::vector<uint8_t> buffer;
+    auto replaceSpan = AceType::MakeRefPtr<SpanString>(u"xyz");
+    replaceSpan->EncodeTlv(buffer);
+
+    pattern->HandleAIWriteResult(start, end, buffer);
+    auto styled = pattern->ToStyledString(0, pattern->GetTextContentLength());
+    ASSERT_NE(styled, nullptr);
+    EXPECT_EQ(styled->GetString(), "xyzhello1");
+}
+
+/**
+ * @tc.name: HandleAIWriteResult002
+ * @tc.desc: test HandleAIWriteResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, HandleAIWriteResult002, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+
+    TextSpanOptions initOptions;
+    initOptions.value = INIT_VALUE_1;
+    controller->AddTextSpan(initOptions);
+
+    int32_t start = 0;
+    int32_t end = 3;
+
+    std::vector<uint8_t> buffer;
+    auto replaceSpan = AceType::MakeRefPtr<SpanString>(u"abc");
+    replaceSpan->EncodeTlv(buffer);
+
+    pattern->HandleAIWriteResult(start, end, buffer);
+    auto styled = pattern->ToStyledString(0, pattern->GetTextContentLength());
+    ASSERT_NE(styled, nullptr);
+    EXPECT_EQ(styled->GetString(), "abclo1");
 }
 }

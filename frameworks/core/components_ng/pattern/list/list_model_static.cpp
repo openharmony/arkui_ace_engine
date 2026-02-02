@@ -166,9 +166,17 @@ RefPtr<ScrollProxy> ListModelStatic::GetOrCreateScrollBarProxy(FrameNode* frameN
     return scrollBarProxy;
 }
 
+void ListModelStatic::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy> proxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
+}
+
 void ListModelStatic::SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex)
 {
-    if (initialIndex.has_value()) {
+    if (initialIndex.has_value() && initialIndex.value() >= 0) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, frameNode);
@@ -188,6 +196,7 @@ void ListModelStatic::SetCachedCount(FrameNode* frameNode, const std::optional<i
 void ListModelStatic::SetCachedCount(
         FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
 {
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, frameNode);
     if (count.has_value()) {
         int32_t value = count.value() < 0 ? 1 : count.value();
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, value, frameNode);
@@ -199,6 +208,43 @@ void ListModelStatic::SetCachedCount(
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, frameNode);
     }
+}
+
+void ListModelStatic::SetCacheRange(FrameNode* frameNode, NG::CacheRange cacheRange, bool show)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, cacheRange, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show, frameNode);
+}
+
+void ListModelStatic::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ItemFillPolicy, fillType, frameNode);
+}
+
+void ListModelStatic::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void ListModelStatic::SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFocusWrapMode(focusWrapMode);
+}
+
+void ListModelStatic::SetSyncLoad(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled, frameNode);
+}
+
+void ListModelStatic::SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSnapSpeed(speed);
 }
 
 void ListModelStatic::SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,

@@ -30,7 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/search/search_theme.h"
@@ -53,8 +53,9 @@ SearchModel* SearchModel::GetInstance()
         static NG::SearchModelNG instance;
         return &instance;
     } else {
-        static Framework::SearchModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
+        static SearchModel* instance = loader ? reinterpret_cast<SearchModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }
@@ -365,7 +366,7 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     Color fontColor = theme->GetSearchButtonTextColor();
     if (info.Length() < 2 || !info[1]->IsObject()) { // 2 : args num
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
-        SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor, true);
         return;
     }
     
@@ -391,7 +392,7 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     UnregisterResource("searchButtonFontColor");
     if (fontColorProp->IsUndefined() || fontColorProp->IsNull() ||
         !ParseJsColor(fontColorProp, fontColor, colorObject)) {
-        SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor, true);
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
     }
@@ -1122,7 +1123,8 @@ void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {stringValue, dataObject};
         func->Execute(param);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     };
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1243,7 +1245,8 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1777,9 +1780,14 @@ void JSSearch::SetStrokeColor(const JSCallbackInfo& info)
         return;
     }
     Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("strokeColor");
+    if (!ParseJsColor(info[0], strokeColor, resObj)) {
         SearchModel::GetInstance()->ResetStrokeColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<Color>("strokeColor", resObj, strokeColor);
     }
     SearchModel::GetInstance()->SetStrokeColor(strokeColor);
 }

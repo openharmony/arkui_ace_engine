@@ -23,7 +23,6 @@
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
@@ -31,8 +30,35 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+#ifndef NG_BUILD
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
+#endif
 
 namespace OHOS::Ace {
+#ifndef NG_BUILD
+namespace {
+const ArkUIInnerTabsModifier* GetTabsInnerModifier()
+{
+    static const ArkUIInnerTabsModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tabs");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabsModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
+
+void TrySetInitialIndex(const RefPtr<AceType>& tabController, int32_t index)
+{
+    CHECK_NULL_VOID(tabController);
+    CHECK_EQUAL_VOID(Container::IsCurrentUseNewPipeline(), true);
+    auto modifier = GetTabsInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setInitialIndex(tabController, index);
+}
+} // namespace
+#endif
 
 std::unique_ptr<TabsModel> TabsModel::instance_ = nullptr;
 std::mutex TabsModel::mutex_;
@@ -48,7 +74,9 @@ TabsModel* TabsModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::TabsModelNG());
             } else {
-                instance_.reset(new Framework::TabsModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tabs");
+                static TabsModel* instance = loader ? reinterpret_cast<TabsModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }
@@ -167,7 +195,8 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick",
+            ComponentEventType::COMPONENT_EVENT_SWIPER);
     };
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
@@ -249,7 +278,8 @@ void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("Tabs.onAnimationEnd");
         func->Execute(index, info);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd",
+            ComponentEventType::COMPONENT_EVENT_SWIPER);
     };
     TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }
@@ -319,7 +349,7 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
 void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barPosition = BarPosition::START;
-    RefPtr<TabController> tabController;
+    RefPtr<AceType> tabController;
     RefPtr<NG::TabsControllerNG> tabsController = AceType::MakeRefPtr<NG::TabsControllerNG>();
     int32_t index = -1;
     JSRef<JSVal> changeEventVal;
@@ -350,7 +380,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 tabController = JSTabsController::CreateController();
             }
 #ifndef NG_BUILD
-            tabController->SetInitialIndex(index);
+            TrySetInitialIndex(tabController, index);
 #endif
             changeEventVal = obj->GetProperty("$index");
         } else if (indexVal->IsObject()) {
@@ -363,8 +393,15 @@ void JSTabs::Create(const JSCallbackInfo& info)
             changeEventVal = indexObj->GetProperty("changeEvent");
         }
     }
-
-    TabsModel::GetInstance()->Create(barPosition, index, tabController, tabsController);
+#ifdef NG_BUILD
+    TabsModel::GetInstance()->Create(barPosition, index, tabsController);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        TabsModel::GetInstance()->Create(barPosition, index, tabsController);
+    } else {
+        TabsModel::GetInstance()->Create(barPosition, tabController);
+    }
+#endif
     ParseTabsIndexObject(info, changeEventVal);
     SetBarModifier(info, jsValue);
 }
@@ -962,6 +999,30 @@ void JSTabs::SetCachedMaxCount(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetCachedMaxCount(cachedMaxCount, cacheMode);
 }
 
+void JSTabs::SetNestedScroll(const JSCallbackInfo& info)
+{
+    // default value
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        TabsModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    int32_t value = -1;
+    JSViewAbstract::ParseJsInt32(info[0], value);
+    auto mode = static_cast<NestedScrollMode>(value);
+    if (mode < NestedScrollMode::SELF_ONLY || mode > NestedScrollMode::SELF_FIRST) {
+        TabsModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    nestedOpt.forward = mode;
+    nestedOpt.backward = mode;
+    TabsModel::GetInstance()->SetNestedScroll(nestedOpt);
+    info.ReturnSelf();
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -1011,6 +1072,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
     JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
+    JSClass<JSTabs>::StaticMethod("nestedScroll", &JSTabs::SetNestedScroll);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

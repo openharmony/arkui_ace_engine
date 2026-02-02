@@ -25,6 +25,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/frame_node_modifier_multi_thread.h"
@@ -215,14 +216,14 @@ ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkU
 }
 
 ArkUI_Int32 ConvertPositionToWindow(
-    ArkUINodeHandle node, ArkUI_Float32 position[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp)
+    ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     auto offset = frameNode->ConvertPositionToWindow(
-        { useVp ? PipelineBase::Vp2PxWithCurrentDensity(position[0]) : position[0],
-            useVp ? PipelineBase::Vp2PxWithCurrentDensity(position[1]) : position[1] },
+        { useVp ? PipelineBase::Vp2PxWithCurrentDensity((*position)[0]) : (*position)[0],
+            useVp ? PipelineBase::Vp2PxWithCurrentDensity((*position)[1]) : (*position)[1] },
         false);
     (*windowPosition)[0] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetX()) : offset.GetX();
     (*windowPosition)[1] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) : offset.GetY();
@@ -230,14 +231,14 @@ ArkUI_Int32 ConvertPositionToWindow(
 }
 
 ArkUI_Int32 ConvertPositionFromWindow(
-    ArkUINodeHandle node, ArkUI_Float32 windowPosition[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp)
+    ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     auto offset = frameNode->ConvertPositionToWindow(
-        { useVp ? PipelineBase::Vp2PxWithCurrentDensity(windowPosition[0]) : windowPosition[0],
-            useVp ? PipelineBase::Vp2PxWithCurrentDensity(windowPosition[1]) : windowPosition[1] },
+        { useVp ? PipelineBase::Vp2PxWithCurrentDensity((*windowPosition)[0]) : (*windowPosition)[0],
+            useVp ? PipelineBase::Vp2PxWithCurrentDensity((*windowPosition)[1]) : (*windowPosition)[1] },
         true);
     (*position)[0] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetX()) : offset.GetX();
     (*position)[1] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) : offset.GetY();
@@ -1154,6 +1155,14 @@ void ResetFocusDependence(ArkUINodeHandle node)
     focusHub->SetFocusDependence(FocusDependence::CHILD);
 }
 
+ArkUI_AccessibilityProvider* GetAccessibilityProvider(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CustomPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetNativeAccessibilityProvider();
+}
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -1247,6 +1256,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .isOnRenderTree = IsOnRenderTree,
         .convertPositionToWindow = ConvertPositionToWindow,
         .convertPositionFromWindow = ConvertPositionFromWindow,
+        .getAccessibilityProvider = GetAccessibilityProvider,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

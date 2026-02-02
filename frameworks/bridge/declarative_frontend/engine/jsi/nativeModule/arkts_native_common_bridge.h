@@ -20,9 +20,12 @@
 #include "core/components_ng/pattern/gesture/gesture_model.h"
 #include "core/event/focus_axis_event.h"
 
+namespace OHOS::Ace {
+struct ChangeValueInfo;
+}
 namespace OHOS::Ace::NG {
 using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
-class CommonBridge {
+class ACE_FORCE_EXPORT CommonBridge {
 public:
     static ArkUINativeModuleValue SetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -292,6 +295,8 @@ public:
     static ArkUINativeModuleValue ResetHoverEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetClickEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetClickEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableClickSoundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableClickSoundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetKeyBoardShortCutAll(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -351,7 +356,7 @@ public:
         uint32_t argNumber, ArkUIGesture* gesture);
     static void ParseLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo, int& isLocalizedBorderWidth,
         int& isLocalizedBorderColor, int& isLocalizedBorderRadius);
-    static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
+    static ACE_FORCE_EXPORT LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
     static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
         std::vector<ArkUI_Float32>& values, bool needLocalized = false);
     static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
@@ -432,6 +437,7 @@ public:
     static ArkUINativeModuleValue AttachGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveGestureByTag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ClearGestures(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetIsRecycleInvisibleImageMemory(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowWidthBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -476,13 +482,16 @@ public:
     static ArkUINativeModuleValue SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RegisterFrameNodeDestructorCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static Local<panda::ObjectRef> CreateAxisEventInfo(EcmaVM* vm, AxisInfo& info);
+    static Local<panda::ObjectRef> CreateAxisEventInfo(
+        EcmaVM* vm, std::shared_ptr<AxisInfo> infoPtr, const WeakPtr<FrameNode>& node);
     static ArkUINativeModuleValue SetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnPreDrag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnPreDrag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnVisibleAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnVisibleAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnTouchIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnTouchIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnChildTouchTest(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -512,6 +521,8 @@ public:
     static ArkUINativeModuleValue ResetExcludeFromRenderGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetUseUnionEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetUseUnionEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

@@ -468,8 +468,6 @@ export class ArkTextTimerComponent extends ArkCommonMethodComponent implements T
 export function TextTimerImpl(
     @memo
     style: ((attributes: TextTimerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextTimerComponent>((): ArkTextTimerComponent => {
         return new ArkTextTimerComponent()
@@ -478,7 +476,6 @@ export function TextTimerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

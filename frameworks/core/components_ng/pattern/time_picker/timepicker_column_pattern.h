@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_COLUMN_PATTERN_H
 
 #include <utility>
+#include "ui/base/macros.h"
 
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_base_component.h"
-#include "core/components/picker/picker_date_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
@@ -35,7 +34,7 @@
 
 namespace OHOS::Ace::NG {
 
-class TimePickerColumnPattern : public PickerColumnPattern {
+class ACE_FORCE_EXPORT TimePickerColumnPattern : public PickerColumnPattern {
     DECLARE_ACE_TYPE(TimePickerColumnPattern, PickerColumnPattern);
 
 public:

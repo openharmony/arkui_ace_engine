@@ -64,7 +64,8 @@ export class ShapeClipTransfer {
             throw Error('Not a ShapeClip object, convert fail.');
         }
         let nodeModule = ESValue.load('@ohos.arkui.node');
-        let shapeClipModule = nodeModule.getProperty('ShapeClip');
+        let defaultModule = nodeModule.getProperty('default');
+        let shapeClipModule = defaultModule.getProperty('ShapeClip');
         let ret = shapeClipModule.instantiate();
         if (staticValue.rect !== null) {
             let staticRectValue = staticValue.rect as Rect;

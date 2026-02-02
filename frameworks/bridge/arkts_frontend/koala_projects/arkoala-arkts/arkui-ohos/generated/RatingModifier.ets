@@ -215,6 +215,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._stars_0_flag = AttributeUpdaterFlag.UPDATE
             this._stars_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stars_0_flag = AttributeUpdaterFlag.SKIP
@@ -226,6 +227,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._stepSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stepSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -237,6 +239,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._starStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._starStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._starStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -248,6 +251,7 @@ export class RatingModifier extends CommonMethodModifier implements RatingAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP

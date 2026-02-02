@@ -14,6 +14,7 @@
  */
 
 #include "irregular_matrices.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
@@ -382,11 +383,80 @@ HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
     info.targetIndex_ = 2;
     algorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
-    EXPECT_EQ(info.lineHeightMap_.size(), 10);
+    EXPECT_EQ(info.lineHeightMap_.size(), 11);
     EXPECT_EQ(info.endMainLineIndex_, 10);
     EXPECT_EQ(info.endIndex_, 8);
     EXPECT_EQ(info.startIndex_, 5);
     EXPECT_EQ(info.startMainLineIndex_, 7);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::MeasureToTarget001
+ * @tc.desc: Test MeasureToTarget with target index when line 0 dose not exist in lineHeightMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, MeasureToTarget001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo5());
+    model.SetColumnsGap(Dimension { 5.0f });
+    model.SetRowsGap(Dimension { 1.0f });
+    CreateFixedItems(11);
+    CreateDone();
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->info_;
+    info.childrenCount_ = 11;
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+
+    info.targetIndex_ = 10;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(info.lineHeightMap_.size(), 12);
+ 
+    info.lineHeightMap_.erase(info.lineHeightMap_.find(1), info.lineHeightMap_.find(7));
+    info.startIndex_ = 5;
+    info.startMainLineIndex_ = 7;
+    info.endIndex_ = 10;
+    info.endMainLineIndex_ = 11;
+
+    info.targetIndex_ = 2;
+    algorithm->MeasureToTarget();
+    EXPECT_EQ(info.lineHeightMap_.size(), 12);
+
+    // Remove all lines including line 0 to test the code path
+    info.lineHeightMap_.clear();
+    info.targetIndex_ = 2;
+    algorithm->MeasureToTarget();
+    EXPECT_EQ(info.lineHeightMap_.size(), 9);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::ScrollToIndexWithClearedLineHeightMapStart001
+ * @tc.desc: Test ScrollToIndex when lineHeightMap_ is cleared with ScrollAlign::START
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, ScrollToIndexWithClearedLineHeightMapStart001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo12());
+    model.SetRowsGap(Dimension { 5.0f });
+    model.SetEdgeEffect(EdgeEffect::NONE, true);
+    CreateFixedHeightItems(1, 305.0f);
+    CreateFixedHeightItems(1, 150.0f);
+    CreateFixedHeightItems(1, 925.0f);
+    CreateFixedHeightItems(4, 150.0f);
+    CreateDone();
+
+    // Clear lineHeightMap_ to test the layout without line height information
+    auto& info = pattern_->info_;
+    info.startIndex_ = 3;
+    info.startMainLineIndex_ = 2;
+    info.lineHeightMap_.clear();
+    // Scroll to index 2 with start alignment
+    ScrollToIndex(2, true, ScrollAlign::START);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -155.0f);
 }
 
 /**
@@ -915,5 +985,70 @@ HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
         UpdateCurrentOffset(100.0f);
     }
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: ReloadWhenOverScrollFromEnd
+ * @tc.desc: Test jumping to bottom edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, ReloadWhenOverScrollFromEnd, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(10);
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(2, 150.0f);
+    CreateDone();
+
+    // mock the scroll up
+    GestureEvent info;
+    info.SetMainVelocity(-200.f);
+    info.SetMainDelta(-100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    std::map<int32_t, std::map<int32_t, int32_t>>  matrix = {
+        { 0, { { 0, 0 }, { 1, 0 } } },
+        { 1, { { 0, 0 }, { 1, 0 } } },
+        { 2, { { 0, 1 }, { 1, 2 } } },
+    };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+    // start animation
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    frameNode_->childrenUpdatedFrom_ = 0;
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    layoutProperty_->OnLayoutOptionsUpdate(option);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
 }
 } // namespace OHOS::Ace::NG

@@ -60,6 +60,7 @@ template("ace_osal_ohos_source_set") {
       "ai_write_adapter.cpp",
       "anr_thread.cpp",
       "app_bar_helper_impl.cpp",
+      "click_sound_effect_manager.cpp",
       "cpu_boost.cpp",
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
@@ -85,6 +86,7 @@ template("ace_osal_ohos_source_set") {
       "modal_ui_extension_impl.cpp",
       "perf_interfaces.cpp",
       "ressched_report.cpp",
+      "screen_lock_manager_ohos.cpp",
       "socperf_client_impl.cpp",
       "statistic_event_adapter.cpp",
       "stylus_detector_callback.cpp",
@@ -149,10 +151,17 @@ template("ace_osal_ohos_source_set") {
         defines += [ "FFRT_CPUBOOST_EN" ]
       }
 
+      if (defined(global_parts_info) &&
+          defined(global_parts_info.theme_screenlock_mgr)) {
+          external_deps += [ "screenlock_mgr:screenlock_client" ]
+          defines += [ "ENABLE_SCREEN_LOCK_MANAGER" ]
+      }
+
       external_deps += [
         "ability_base:view_data",
         "ability_base:want",
         "ability_runtime:abilitykit_native",
+        "ability_runtime:napi_common",
         "graphic_2d:libframe_analyzer",
         "image_framework:image",
         "input:libmmi-client",

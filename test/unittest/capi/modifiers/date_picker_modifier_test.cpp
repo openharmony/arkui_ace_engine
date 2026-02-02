@@ -17,9 +17,10 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
@@ -1879,5 +1880,22 @@ HWTEST_F(DatePickerModifierTest, DISABLED_setOnChangeEventSelectedTest, TestSize
         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
     };
 #endif
+}
+
+/*
+ * @tc.name: setColumnOrderTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setColumnOrderTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AceApplicationInfo::GetInstance().SetLocale("ug", "", "", "");
+    pattern->UpdateDateOrder();
+    auto dateOrder = pattern->GetDateOrder();
+    EXPECT_EQ(dateOrder, "y-d-M");
 }
 } // namespace OHOS::Ace::NG

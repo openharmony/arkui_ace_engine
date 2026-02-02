@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_MANAGER_H
 #include "test/mock/core/animation/mock_implicit_animation.h"
 
+#include <set>
 #include "core/components_ng/base/modifier.h"
 #include "frameworks/base/utils/singleton.h"
 namespace OHOS::Ace::NG {
@@ -29,15 +30,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(MockAnimationManager);
 
 public:
-    static void Enable(bool value)
-    {
-        GetInstance().enabled_ = value;
-    }
-    static bool Enabled()
-    {
-        return GetInstance().enabled_;
-    }
-
+    static void Enable(bool value);
+    static bool Enabled();
     /**
      * @brief Controls the animation manager version to maintain backward compatibility in tests when applying bug fixes.
      *
@@ -46,15 +40,8 @@ public:
         V0 = 0,
         V1 = 1, // introduces bugfixes to animation callback triggers
     };
-    static Version Version()
-    {
-        return GetInstance().runningVersion_;
-    }
-    static void SetVersion(enum Version value)
-    {
-        GetInstance().runningVersion_ = value;
-    }
-
+    static Version GetVersion();
+    static void SetVersion(enum Version value);
     void OpenAnimation()
     {
         inScope_ = true;

@@ -47,9 +47,15 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 }
 
+namespace OHOS::Ace {
+struct UiMaterialParam;
+}
+
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
+class FocusPattern;
+struct ScopeFocusAlgorithm;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -328,6 +334,11 @@ public:
         return true;
     }
 
+    virtual bool ForceRequestParentMeasure() const
+    {
+        return false;
+    }
+
     virtual void NotifyForNextTouchEvent() {}
 
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -430,6 +441,9 @@ public:
     virtual void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
     {}
+    virtual void AddExtraInfoWithParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
+    {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) {}
@@ -477,15 +491,9 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
-    virtual FocusPattern GetFocusPattern() const
-    {
-        return { FocusType::DISABLE, false, FocusStyleType::NONE };
-    }
+    virtual FocusPattern GetFocusPattern() const;
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
-    {
-        return ScopeFocusAlgorithm();
-    }
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm();
 
     virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     {
@@ -766,11 +774,23 @@ public:
     };
     virtual void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
-    virtual void ReportSelectedText() {};
+    virtual void ReportSelectedText(bool isRegister = false) {};
     virtual int32_t OnInjectionEvent(const std::string& command)
     {
         return RET_SUCCESS;
     };
+
+    bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd,
+        std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+    {
+        json = JsonUtil::ParseJsonString(command);
+        CHECK_NULL_RETURN(json && !json->IsNull(), false);
+        cmd = json->GetString("cmd");
+        CHECK_NULL_RETURN(!cmd.empty(), false);
+        params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), false);
+        return true;
+    }
 
     virtual bool BorderUnoccupied() const
     {
@@ -869,10 +889,14 @@ public:
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
     virtual void OnContentChangeUnregister() {}
     virtual void ContentChangeByDetaching(PipelineContext*) {}
-    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged()
+    virtual std::list<RefPtr<FrameNode>> GetKeyFrameNodeWhenContentChanged()
     {
-        return nullptr;
+        return std::list<RefPtr<FrameNode>>();
     }
+    virtual void OnDetachFromMainRenderTree() {}
+    virtual void OnAttachToMainRenderTree() {}
+    virtual void OnOffscreenProcessResource() {}
+    virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

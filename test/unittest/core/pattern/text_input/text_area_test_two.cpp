@@ -911,4 +911,47 @@ HWTEST_F(TextAreaTestTwo, ToJsonValue112, TestSize.Level1)
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectedDragPreviewStyle"), "#FFFFFFFF");
 }
+
+/**
+ * @tc.name: CloseHandleAndSelect002
+ * @tc.desc: Test CloseHandleAndSelect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, CloseHandleAndSelect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetIsOnlyBetweenLines(true); });
+
+    /**
+     * @tc.steps: step2. run CloseHandleAndSelect().
+     */
+    auto showSelect = true;
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->CloseHandleAndSelect();
+    showSelect = pattern_->showSelect_;
+    EXPECT_EQ(showSelect, false);
+}
+
+/**
+ * @tc.name: TextPatternGetWindowIdFromPipeline002
+ * @tc.desc: Test TextPattern GetWindowIdFromPipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, TextPatternGetWindowIdFromPipeline002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto windowId = pattern->GetWindowIdFromPipeline();
+    EXPECT_EQ(windowId, 0);
+}
 } // namespace OHOS::Ace::NG

@@ -37,6 +37,7 @@ void PreviewUIExtensionAdapter::Create(const NG::UIExtensionConfig& config)
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<PreviewUIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<PreviewUIExtensionPattern>();
@@ -54,6 +55,7 @@ RefPtr<FrameNode> PreviewUIExtensionAdapter::CreatePreviewUIExtensionNode(const 
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<PreviewUIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<PreviewUIExtensionPattern>();

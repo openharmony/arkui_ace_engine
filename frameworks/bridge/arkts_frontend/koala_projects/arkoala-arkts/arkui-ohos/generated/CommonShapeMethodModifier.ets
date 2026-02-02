@@ -415,6 +415,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stroke_0_flag = AttributeUpdaterFlag.SKIP
@@ -426,6 +427,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._fill_0_flag = AttributeUpdaterFlag.UPDATE
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fill_0_flag = AttributeUpdaterFlag.SKIP
@@ -437,6 +439,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -448,6 +451,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
@@ -459,6 +463,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
@@ -470,6 +475,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -481,6 +487,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -492,6 +499,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -503,6 +511,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -514,6 +523,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
@@ -525,6 +535,7 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP

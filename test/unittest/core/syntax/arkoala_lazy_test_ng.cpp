@@ -392,6 +392,41 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest014)
 }
 
 /**
+ * @tc.name: RebuildCache001
+ * @tc.desc: Test Rebuild Cache for LazyForEach and Repeat node.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, RebuildCache001)
+{
+    int32_t total_4 = 4;
+    int32_t total_8 = 8;
+    int32_t cache = 4;
+    /**
+     * @tc.steps: step1. Test Rebuild Cache for LazyForEach node
+     */
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    CreateChildren(lazyNode, TOTAL_COUNT);
+    lazyNode->DoSetActiveChildRange(1, total_4, cache, cache, false);
+    lazyNode->GetChildren();
+    EXPECT_EQ(lazyNode->children_.size(), total_4);
+    lazyNode->DoSetActiveChildRange(1, total_8, cache, cache, false);
+    lazyNode->GetChildren();
+    EXPECT_EQ(lazyNode->children_.size(), total_8);
+
+    /**
+     * @tc.steps: step2. Test Rebuild Cache for Repeat node
+     */
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    CreateChildren(repeatNode, TOTAL_COUNT);
+    repeatNode->DoSetActiveChildRange(1, total_4, 0, 0, false);
+    repeatNode->GetChildren();
+    EXPECT_EQ(repeatNode->children_.size(), total_4);
+    repeatNode->DoSetActiveChildRange(1, total_8, cache, cache, false);
+    repeatNode->GetChildren();
+    EXPECT_EQ(repeatNode->children_.size(), total_4);
+}
+
+/**
  * @tc.name: ArkoalaLazyNodeTest015
  * @tc.desc: Test ArkoalaLazyNode PostIdleTask.
  * @tc.type: FUNC
@@ -810,5 +845,68 @@ TEST_F(ArkoalaLazyNodeTest, IsInCacheRange003)
     EXPECT_FALSE(isInRange);
     isInRange = lazyNode->IsInCacheRange(10, activeRangeParam);
     EXPECT_FALSE(isInRange);
+}
+
+/**
+ * @tc.name: IsInCacheRange004
+ * @tc.desc: Test ArkoalaLazyNode IsInCacheRange with isLoop = true.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInCacheRange004)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    int32_t total = 3;
+    lazyNode->totalCount_ = total;
+    lazyNode->isLoop_ = true;
+    int32_t cachedCount = 1;
+    bool isInRange;
+    ActiveRangeParam activeRangeParam;
+
+    /**
+     * @tc.steps: step1. Test loop container full coverage case
+     * @tc.expected: (0,1,1,1,true) -> [0,2]
+     */
+    activeRangeParam = {0, 1, cachedCount, cachedCount};
+    for (int32_t i = 0; i < lazyNode->totalCount_; ++i) {
+        isInRange = lazyNode->IsInCacheRange(i, activeRangeParam);
+        EXPECT_TRUE(isInRange);
+    }
+}
+
+/**
+ * @tc.name: NeedBuildAll001
+ * @tc.desc: Test ArkoalaLazyNode needBuildAll_ flag and BuildAll
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, NeedBuildAll001)
+{
+    /**
+     * @tc.steps: step1. Test needBuildAll_ flag
+     * @tc.expected: needBuildAll_ flag should be set and get correctly
+     */
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    EXPECT_TRUE(lazyNode->needBuildAll_);
+    lazyNode->SetNeedBuildAll(false);
+    EXPECT_FALSE(lazyNode->needBuildAll_);
+
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    EXPECT_TRUE(repeatNode->needBuildAll_);
+    repeatNode->SetNeedBuildAll(false);
+    EXPECT_FALSE(repeatNode->needBuildAll_);
+
+    /**
+     * @tc.steps: step2. Test ArkoalaLazyNode BuildAllChildren
+     * @tc.expected: all children should be built
+     */
+    int32_t totalCount = 50;
+    lazyNode->SetNeedBuildAll(true);
+    lazyNode->SetTotalCount(totalCount);
+    lazyNode->BuildAllChildren();
+    EXPECT_EQ(lazyNode->GetChildren().size(), totalCount);
+
+    repeatNode->SetNeedBuildAll(true);
+    repeatNode->SetTotalCount(totalCount);
+    repeatNode->BuildAllChildren();
+    EXPECT_EQ(repeatNode->GetChildren().size(), totalCount);
 }
 } // namespace OHOS::Ace::NG

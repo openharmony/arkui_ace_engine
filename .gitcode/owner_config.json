@@ -129,6 +129,7 @@
             "camlostshi",
             "WendongPang",
             "fenglinbailu",
+            "lihao71",
             "skrobagleb",
             "spirinandrey",
             "huaweimaxuchu",
@@ -366,7 +367,7 @@
             "info": "[状态管理 chenbenzhi]"
         },
         "seaside_wu1": {
-            "info": "[公共能力/预览 wuhaibin]"
+            "info": "[公共能力 wuhaibin]"
         },
         "shiyu_huang_plus": {
             "info": "[前端公共 huangshiyu]"
@@ -459,13 +460,16 @@
             "info": "[布局类组件 linhu]"
         },
         "zju_ljz": {
-            "info": "[栅格、分栏布局相关 lijiazhi]"
+            "info": "[栅格、分栏布局相关/预览 lijiazhi]"
         },
         "camlostshi": {
             "info": "[弹性、线性布局及安全区相关 shibofan]"
         },
         "song-song-song": {
             "info": "[自定义布局相关 songqifan]"
+        },
+        "lihao71": {
+            "info": "[预览 lihao]"
         },
         "libing23232323": {
             "info": "[web-交互安全 libing]"

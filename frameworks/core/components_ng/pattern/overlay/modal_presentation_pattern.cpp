@@ -126,7 +126,7 @@ void ModalPresentationPattern::OnAppear()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(GetHost());
+    mgr->OnDialogChangeEnd(GetHost(), true);
 }
 
 void ModalPresentationPattern::OnDisappear()
@@ -139,6 +139,6 @@ void ModalPresentationPattern::OnDisappear()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(GetHost());
+    mgr->OnDialogChangeEnd(GetHost(), false);
 }
 } // namespace OHOS::Ace::NG

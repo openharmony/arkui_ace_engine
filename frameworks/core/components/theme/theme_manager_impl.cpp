@@ -20,9 +20,8 @@
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
-#include "core/components/camera/camera_theme.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/clock/clock_theme.h"
+#include "compatible/components/clock/clock_theme.h"
 #include "core/components/close_icon/close_icon_theme.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
@@ -39,8 +38,8 @@
 #include "core/components/list/arc_list_theme.h"
 #include "core/components/marquee/marquee_theme.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
-#include "core/components/picker/picker_theme.h"
-#include "core/components/piece/piece_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "frameworks/compatible/components/piece/piece_theme.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/qrcode/qrcode_theme.h"
@@ -60,6 +59,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/card_theme.h"
+#include "core/components/theme/corner_mark_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -67,7 +67,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
-#include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
@@ -100,6 +100,7 @@
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -150,7 +151,6 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { ToolBarTheme::TypeId(), &ThemeBuildFunc<ToolBarTheme::Builder> },
     { CardTheme::TypeId(), &ThemeBuildFunc<CardTheme::Builder> },
     { QrcodeTheme::TypeId(), &ThemeBuildFunc<QrcodeTheme::Builder> },
-    { CameraTheme::TypeId(), &ThemeBuildFunc<CameraTheme::Builder> },
     { HyperlinkTheme::TypeId(), &ThemeBuildFunc<HyperlinkTheme::Builder> },
     { ImageTheme::TypeId(), &ThemeBuildFunc<ImageTheme::Builder> },
     { CounterTheme::TypeId(), &ThemeBuildFunc<CounterTheme::Builder> },
@@ -180,6 +180,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
     { NG::RefreshThemeNG::TypeId(), &ThemeBuildFunc<NG::RefreshThemeNG::Builder> },
     { NG::ContainerPickerTheme::TypeId(), &ThemeBuildFunc<NG::ContainerPickerTheme::Builder> },
+    { NG::CornerMarkTheme::TypeId(), &ThemeBuildFunc<NG::CornerMarkTheme::Builder> },
 };
 
 template<class T>
@@ -243,6 +244,7 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         return GetThemeMultiThread(type);
     }
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     return GetThemeNormal(type);
 }
 
@@ -318,6 +320,7 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, TokenThemeScopeId theme
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         return GetThemeMultiThread(type, themeScopeId);
     }
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     return GetThemeNormal(type, themeScopeId);
 }
 
@@ -448,6 +451,7 @@ void ThemeManagerImpl::LoadResourceThemes()
         LoadResourceThemesMultiThread();
         return;
     }
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     LoadResourceThemesInner();
 }
 

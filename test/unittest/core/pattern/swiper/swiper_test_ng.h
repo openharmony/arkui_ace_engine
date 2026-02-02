@@ -22,7 +22,6 @@
 #define protected public
 #include "test/mock/core/common/mock_container.h"
 
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"

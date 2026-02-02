@@ -21,9 +21,9 @@
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 #include "ui_content_errors.h"
 
-#include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
+#include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
 bool UiContentStub::IsSACalling() const
@@ -193,6 +193,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             HighlightSpecifiedContentInner(data, reply, option);
             break;
         }
+        case GET_MULTI_IMAGES_BY_ID: {
+            GetMultiImagesByIdInner(data, reply, option);
+            break;
+        }
         case REGISTER_CONTENT_CHANGE: {
             RegisterContentChangeCallbackInner(data, reply, option);
             break;
@@ -207,6 +211,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case REQUEST_STATE_MGMT_INFO: {
             GetStateMgmtInfoInner(data, reply, option);
+            break;
+        }
+        case GET_WEBINFO_BY_REQUEST: {
+            GetWebInfoByRequestInner(data, reply, option);
             break;
         }
         default: {
@@ -273,7 +281,8 @@ int32_t UiContentStub::RegisterTextChangeEventCallbackInner(
 int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    reply.WriteInt32(RegisterComponentChangeEventCallback(nullptr));
+    uint32_t mask = data.ReadUint32();
+    reply.WriteInt32(RegisterComponentChangeEventCallback(nullptr, mask));
     return NO_ERROR;
 }
 
@@ -466,6 +475,29 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
     return NO_ERROR;
 }
 
+int32_t UiContentStub::GetMultiImagesByIdInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("getArkUIImages", processId);
+    UiSessionManager::GetInstance()->SaveProcessId("getArkWebImages", processId);
+    std::vector<int32_t> arkUIIds;
+    data.ReadInt32Vector(&arkUIIds);
+    std::map<int32_t, std::vector<int32_t>> arkWebs;
+    size_t mapSize = data.ReadUint64();
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    if (mapSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
+        return PARAM_INVALID;
+    }
+    for (size_t i = 0; i < mapSize; ++i) {
+        int32_t webId = data.ReadInt32();
+        std::vector<int32_t> webImageIds;
+        data.ReadInt32Vector(&webImageIds);
+        arkWebs.emplace(webId, std::move(webImageIds));
+    }
+    reply.WriteInt32(GetImagesById(arkUIIds, nullptr, arkWebs, nullptr));
+    return NO_ERROR;
+}
+
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
@@ -552,6 +584,16 @@ int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel&
     std::string propertyName = data.ReadString();
     std::string jsonPath = data.ReadString();
     reply.WriteInt32(GetStateMgmtInfo(componentName, propertyName, jsonPath, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetWebInfoByRequestInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("GetWebInfoByRequest", processId);
+    int32_t webId = data.ReadInt32();
+    std::string request = data.ReadString();
+    reply.WriteInt32(GetWebInfoByRequest(webId, request, nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

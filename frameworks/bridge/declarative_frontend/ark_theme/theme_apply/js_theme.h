@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H
 
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "ui/view/theme/token_theme.h"
@@ -89,12 +88,12 @@ struct ResourceValue {
     Color colorValue;
 };
 
-class JSThemeColors {
+class ACE_FORCE_EXPORT JSThemeColors {
 public:
     JSThemeColors() = default;
     virtual ~JSThemeColors() = default;
 
-    void SetColors(const JSRef<JSArray>& colors);
+    void SetColors(const std::vector<ResourceValue>& colors);
 
     Color Brand() const
     {
@@ -355,12 +354,12 @@ private:
     }
 };
 
-class JSThemeScope {
+class ACE_FORCE_EXPORT JSThemeScope {
 public:
     static std::map<int32_t, JSTheme> jsThemes;
     // keeps the current theme in static optional object
-    inline static std::optional<JSTheme> jsCurrentTheme = std::nullopt;
-    inline static bool isCurrentThemeDefault = true;
+    static std::optional<JSTheme> jsCurrentTheme;
+    static bool isCurrentThemeDefault;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H

@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_impl.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
+#include "node/node_model.h"
 #include "native_type.h"
 
 #ifdef __cplusplus
@@ -510,6 +511,33 @@ int32_t OH_ArkUI_FindAccessibilityActionArgumentByKey(
     CHECK_NULL_RETURN(key, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     *value = const_cast<char*>(arguments->FindValueByKey(key));
     return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
+}
+
+int32_t OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(
+    ArkUI_NodeHandle* node, ArkUI_AccessibilityProvider** provider)
+{
+    if ((node == nullptr) || (provider == nullptr)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_NodeHandle nativeNode = *node;
+    *provider = nullptr;
+
+    if (!OHOS::Ace::NodeModel::IsValidArkUINode(nativeNode)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (nativeNode->type != ARKUI_NODE_CUSTOM) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto arkuiProvider = impl->getNodeModifiers()->getFrameNodeModifier()->getAccessibilityProvider(
+        nativeNode->uiNodeHandle);
+    if (arkuiProvider == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *provider = arkuiProvider;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 #ifdef __cplusplus

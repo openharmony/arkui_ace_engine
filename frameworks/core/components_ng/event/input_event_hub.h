@@ -27,6 +27,12 @@ namespace OHOS::Ace::NG {
 
 class EventHub;
 
+using TouchpadInteractionCallback = std::function<void()>;
+struct TouchpadInteractionListener {
+    WeakPtr<FrameNode> frameNode;
+    TouchpadInteractionCallback callback;
+};
+
 // The gesture event hub is mainly used to handle common gesture events.
 class ACE_EXPORT InputEventHub : public virtual AceType {
     DECLARE_ACE_TYPE(InputEventHub, AceType);
@@ -143,7 +149,7 @@ public:
         }
         hoverMoveEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverMoveEventFunc));
     }
-    
+
     void AddOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
     {
         if (!hoverEventActuator_) {
@@ -301,6 +307,8 @@ public:
             coastingAxisEventActuator_->ClearUserCallback();
         }
     }
+
+    void AddTouchpadInteractionListenerInner(TouchpadInteractionCallback&& listener);
 
 private:
     WeakPtr<EventHub> eventHub_;

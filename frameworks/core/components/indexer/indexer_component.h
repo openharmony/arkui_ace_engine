@@ -19,8 +19,8 @@
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "compatible/components/list/list_component.h"
 #include "core/components/indexer/indexer_item_component.h"
-#include "core/components/list/list_component.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/pipeline/base/constants.h"
 
@@ -73,7 +73,7 @@ inline constexpr uint32_t INDEXER_CIRCLE_ARC_COLOR = 0xFF212121;
 inline constexpr uint32_t INDEXER_CIRCLE_ACTIVE_BG_COLOR = 0xFF007DFF;
 inline constexpr uint32_t INDEXER_ACTIVE_BG_COLOR = 0x1F0A59F7;
 
-class IndexerComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT IndexerComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(IndexerComponent, ComponentGroup);
 
 public:

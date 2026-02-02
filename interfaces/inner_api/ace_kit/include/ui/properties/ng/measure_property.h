@@ -107,6 +107,14 @@ struct PaddingPropertyT {
             bottom = value.bottom;
             needUpdate = true;
         }
+        if (value.left.has_value() && left != value.left) {
+            left = value.left;
+            needUpdate = true;
+        }
+        if (value.right.has_value() && right != value.right) {
+            right = value.right;
+            needUpdate = true;
+        }
         checkNeedReset(value);
         return needUpdate;
     }

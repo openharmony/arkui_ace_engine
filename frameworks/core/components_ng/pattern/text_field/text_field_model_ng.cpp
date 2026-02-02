@@ -18,6 +18,7 @@
 #include <cstddef>
 
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/multi_thread.h"
@@ -43,6 +44,7 @@ void TextFieldModelNG::CreateNode(
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     stack->Push(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -113,6 +115,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateTextInputNode(
     int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -129,6 +132,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateTextAreaNode(
     int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
@@ -1219,6 +1223,13 @@ void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow v
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value, frameNode);
 }
 
+TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
+{
+    TextOverflow value = TextOverflow::DEFAULT;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextOverflow, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value, frameNode);
@@ -2301,6 +2312,7 @@ std::string TextFieldModelNG::GetInputFilter(FrameNode* frameNode)
 RefPtr<TextFieldControllerBase> TextFieldModelNG::GetOrCreateController(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (!pattern->GetTextFieldController()) {
@@ -2671,6 +2683,13 @@ void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
 }
 
+EllipsisMode TextFieldModelNG::GetEllipsisMode(FrameNode* frameNode)
+{
+    EllipsisMode value = EllipsisMode::TAIL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, EllipsisMode, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
@@ -2854,6 +2873,11 @@ void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    if (pattern->IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Skipping delete operation: preview text inputting");
+        return;
+    }
+
     pattern->HandleOnDelete(true);
 }
 

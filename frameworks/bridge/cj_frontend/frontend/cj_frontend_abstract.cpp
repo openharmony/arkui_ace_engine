@@ -514,4 +514,15 @@ void CJFrontendAbstract::ReplacePageWithCallback(const std::string& url, const s
     pageRouterManager_->ReplacePageWithCallback({ url, mode, "", callback }, params);
 }
 
+void CJFrontendAbstract::CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs)
+{
+    auto runtimeDelegate = Framework::CJRuntimeDelegate::GetInstance();
+    CHECK_NULL_VOID(runtimeDelegate);
+    const auto& cjFuncsV3 = runtimeDelegate->GetCJFuncsV3();
+    CHECK_NULL_VOID(cjFuncsV3.atCOHOSAceFrameworkCJCleanUpIdleTask);
+    // Convert nanoseconds to milliseconds
+    int64_t maxTimeInMs = maxTimeInNs / 1000000;
+    cjFuncsV3.atCOHOSAceFrameworkCJCleanUpIdleTask(maxTimeInMs);
+}
+
 } // namespace OHOS::Ace

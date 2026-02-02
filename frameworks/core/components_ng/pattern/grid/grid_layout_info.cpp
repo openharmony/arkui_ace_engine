@@ -1064,8 +1064,12 @@ void GridLayoutInfo::UpdateDefaultCachedCount()
 
 int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex) const
 {
-    if (gridMatrix_.count(mainIndex) > 0 && gridMatrix_.at(mainIndex).count(crossIndex) > 0) {
-        return gridMatrix_.at(mainIndex).at(crossIndex);
+    auto mainIter = gridMatrix_.find(mainIndex);
+    if (mainIter != gridMatrix_.end()) {
+        auto crossIter = mainIter->second.find(crossIndex);
+        if (crossIter != mainIter->second.end()) {
+            return crossIter->second;
+        }
     }
     return -1;
 }

@@ -17,6 +17,7 @@
 
 #include "foundation/arkui/ace_engine/test/mock/core/render/mock_paragraph.h"
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "text_base.h"
 #include "ui/base/ace_type.h"
@@ -147,6 +148,11 @@ HWTEST_F(TextThirteenTestNg, DumpSimplifyInfo_001, TestSize.Level1)
     textNode->SetLayoutProperty(layoutProperty);
     auto pattern = textNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
 
     /**
      * @tc.steps: step2. Create a json.
@@ -232,12 +238,27 @@ HWTEST_F(TextThirteenTestNg, DumpSimplifyInfo_003, TestSize.Level1)
     pManager->SetParagraphs(paragraphs);
     pattern->pManager_ = pManager;
 
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"hello";
+    span1->position = 6;
+    span1->placeholderIndex = -1;
+    span1->spanItemType = SpanItemType::NORMAL;
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span
+    span2->content = u"  ";
+    span2->position = 7;
+    span2->placeholderIndex = -1;
+    span2->spanItemType = SpanItemType::SYMBOL;
+
+    pattern->spans_.push_back(span1);
+    pattern->spans_.push_back(span2);
+
     /**
      * @tc.steps: step3. Calling the DumpSimplifyInfo function
      * @tc.expected: The "content" to "hello".
      */
     pattern->DumpSimplifyInfo(json);
-    EXPECT_EQ(json->GetString("content"), "hello");
+    EXPECT_EQ(json->GetString("content"), "hello  ");
 }
 
 /**

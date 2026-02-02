@@ -1343,4 +1343,53 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureLimitFingerTest002, TestSize.Level1)
     EXPECT_EQ(swipeRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 }
 
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test SwipeRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    swipeRecognizerPtr->prevAngle_ = 45;
+    swipeRecognizerPtr->resultSpeed_ = 1.5;
+
+    std::string result = swipeRecognizerPtr->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("PAG:45"));
+    EXPECT_THAT(result, HasSubstr("RESPD:1.5"));
+    EXPECT_THAT(result, HasSubstr("DE:[]"));
+    EXPECT_THAT(result, HasSubstr("MT:[]"));
+}
+
+/**
+ * @tc.name: GetGestureInfoString002
+ * @tc.desc: Test SwipeRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeRecognizerTestNg, GetGestureInfoString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and set Recognizer、TargetComponent.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    TouchEvent event;
+    event.id = 1;
+    event.originalId = 2;
+    swipeRecognizerPtr->downEvents_[0] = event;
+    swipeRecognizerPtr->matchedTouch_.insert(1);
+
+    std::string result = swipeRecognizerPtr->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("RESPD:0"));
+    EXPECT_THAT(result, HasSubstr("DE:[,0->(1,2)]"));
+    EXPECT_THAT(result, HasSubstr("MT:[,1]"));
+}
 } // namespace OHOS::Ace::NG

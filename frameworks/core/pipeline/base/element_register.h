@@ -47,7 +47,7 @@ public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
     ACE_FORCE_EXPORT static ElementRegister* GetInstance();
-    RefPtr<Element> GetElementById(ElementIdType elementId);
+    ACE_FORCE_EXPORT RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
     void IterateElements(const std::function<bool(ElementIdType, const RefPtr<AceType>&)>& visitor) const;
 
@@ -95,7 +95,7 @@ public:
      */
     ACE_FORCE_EXPORT bool RemoveItemSilently(ElementIdType elementId);
 
-    void MoveRemovedItems(RemovedElementsType& removedItems);
+    ACE_FORCE_EXPORT void MoveRemovedItems(RemovedElementsType& removedItems);
 
     /**
      * does a complete reset
@@ -126,7 +126,8 @@ public:
 
     ElementIdType GetLatestElementId() const;
 
-    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
+    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(
+        const std::string& key, bool willGetAll = false, int32_t instanceId = -1);
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node, int32_t nodeId);
 

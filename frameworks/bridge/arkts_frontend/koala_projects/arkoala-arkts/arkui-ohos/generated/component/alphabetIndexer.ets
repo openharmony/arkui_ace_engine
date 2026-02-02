@@ -403,7 +403,7 @@ export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<int32>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -1003,9 +1003,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
 @memo
 export function AlphabetIndexerImpl(
     @memo
-    style: ((attributes: AlphabetIndexerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
+    style: ((attributes: AlphabetIndexerAttribute) => void) | undefined
 ): void {
     const receiver = remember<ArkAlphabetIndexerComponent>((): ArkAlphabetIndexerComponent => {
         return new ArkAlphabetIndexerComponent()
@@ -1014,7 +1012,6 @@ export function AlphabetIndexerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -1032,7 +1029,7 @@ export class AlphabetIndexerOptions_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForSelectedForIdx0  = valueHolderForSelected as int32
             valueSerializer.writeInt32(valueHolderForSelectedForIdx0)
-        } else if (valueHolderForSelected instanceof Bindable<int32>) {
+        } else if (valueHolderForSelected instanceof Bindable) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForSelectedForIdx1  = valueHolderForSelected as Bindable<int32>
             Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedForIdx1)

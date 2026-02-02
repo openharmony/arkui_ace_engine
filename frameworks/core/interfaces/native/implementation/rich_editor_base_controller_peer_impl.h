@@ -94,11 +94,18 @@ public:
         }
     }
 
+    void SetTypingParagraphStyle(std::optional<UpdateParagraphStyle> typingParagraphStyle)
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->SetTypingParagraphStyle(typingParagraphStyle);
+        }
+    }
+    
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options, bool isForward) override
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->SetSelection(selectionStart, selectionEnd, options, isForward);
+            controller->SetSelection(selectionStart, selectionEnd, options);
         }
     }
 

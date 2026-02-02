@@ -862,6 +862,33 @@ int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult resu
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_NotifySuggestedDropOperation(int32_t requestIdentify, ArkUI_DropOperation operation)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || ((operation != ARKUI_DROP_OPERATION_COPY) && (operation != ARKUI_DROP_OPERATION_MOVE))) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto ret =
+        impl->getDragAdapterAPI()->notifySuggestedDropOperation(requestIdentify, static_cast<ArkUI_Int32>(operation));
+    if (ret == -1) {
+        return ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NotifyDisableDefaultDropAnimation(int32_t requestIdentify, bool disable)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto ret = impl->getDragAdapterAPI()->notifyDisableDropAnimation(requestIdentify, disable);
+    if (ret == -1) {
+        return ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();

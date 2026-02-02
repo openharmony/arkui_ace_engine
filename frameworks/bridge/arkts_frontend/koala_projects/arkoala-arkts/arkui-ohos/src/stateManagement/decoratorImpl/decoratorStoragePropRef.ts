@@ -53,7 +53,7 @@ export class StoragePropRefDecoratedVariable<T>
         super(decoratorName, owningView, varName, watchFunc);
         this.propName = propName;
         this.backingStorageValue_ = storagePropRef;
-        this.backingStorageValue_.onChange(this.onStorageObjChanged);
+        this.backingStorageValue_.onChange(this.onStorageObjChanged<T>);
         let initValue = this.backingStorageValue_.get();
         if (isDynamicObject(initValue)) {
             this.backing_ = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
@@ -139,5 +139,11 @@ export class StoragePropRefDecoratedVariable<T>
             const handler = StateMgmtTool.tryGetHandler(value as Object);
             (handler as IWatchSubscriberRegister).addWatchSubscriber(this.storageWatchFunc_!.id());
         }
+    }
+    public aboutToBeDeletedInternal(): void {
+        this.backingStorageValue_.onChange(undefined);
+        this.unregisterWatchFromObservedObjectChanges(this.backing_.get(false));
+        this.removePrivateWatchSubscription();
+        super.aboutToBeDeletedInternal();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_MODEL_NG_H
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 
 namespace OHOS::Ace::NG {
@@ -48,6 +47,7 @@ public:
     void HasUserDefinedOpacity() override;
     void UpdateUserSetSelectColor() override;
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static void SetOnEnterSelectedArea(FrameNode* frameNode, TimeChangeEvent&& onEnterSelectedArea);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
     static void SetStartTime(FrameNode* frameNode, const PickerTime& value);
@@ -92,7 +92,7 @@ private:
     static void ParseNormalTextStyleResObj(FrameNode* frameNode, const PickerTextStyle& textStyleOpt);
 };
 
-class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {
+class ACE_FORCE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {
 public:
     void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,

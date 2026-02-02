@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 
 #include "iremote_broker.h"
-
+#include <map>
 #include "ui/base/macros.h"
 #include "param_config.h"
+#include "ui_content_proxy_error_code.h"
 
 namespace OHOS {
 namespace Media {
@@ -28,6 +29,8 @@ class ImageSource;
 } // namespace Media
 } // namespace OHOS
 namespace OHOS::Ace {
+using GetWebInfoByRequestCallback =
+    std::function<void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>;
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
     using EventCallback = std::function<void(std::string)>;
@@ -76,6 +79,8 @@ public:
         UNREGISTER_CONTENT_CHANGE,
         GET_HIT_TEST_NODE_INFO_FOR_TOUCH,
         REQUEST_STATE_MGMT_INFO,
+        GET_MULTI_IMAGES_BY_ID,
+        GET_WEBINFO_BY_REQUEST,
     };
 
     /**
@@ -129,7 +134,8 @@ public:
      * @description: define register a callback on component event occur to execute interface
      * @return: result number
      */
-    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) = 0;
+    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback,
+        uint32_t mask = ComponentEventType::COMPONENT_EVENT_ALL) = 0;
 
     /**
      * @description: define register a callback on web unfocus event occur to execute interface
@@ -312,6 +318,18 @@ public:
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>&
             finishCallback) = 0;
 
+    /*
+     * @description:get ArkUI components' pixelMap and ArkWeb pixelMap
+     * @return: result number
+     */
+    virtual int32_t GetImagesById(
+        const std::vector<int32_t>& arkUIIds,
+        const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+            MultiImageQueryErrorCode)>& arkUIfinishCallback,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs,
+        const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
+            std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback) = 0;
+
     /* Not Used Ipc Interface*/
     /**
      * AI to judge if connect
@@ -344,6 +362,11 @@ public:
      */
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) = 0;
+
+    virtual int32_t GetWebInfoByRequest(
+        int32_t webId,
+        const std::string& request,
+        const GetWebInfoByRequestCallback& finishCallback) = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -372,6 +395,9 @@ public:
         SEND_CONTENT_CHANGE,
         REPORT_HIT_TEST_NODE_INFOS,
         REPORT_STATE_MGMT_INFO,
+        SEND_ARKUI_IMAGES_BY_ID,
+        SEND_ARKWEB_IMAGES_BY_ID,
+        SEND_WEB_INFO_BY_REQUEST,
     };
 
     /**
@@ -455,6 +481,19 @@ public:
     virtual void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) = 0;
 
     /**
+     * @description: define arkui component pixelMap for sa service
+     */
+    virtual void SendArkUIImagesById(int32_t windowId,
+        const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+        MultiImageQueryErrorCode arkUIErrorCode) = 0;
+
+    /**
+     * @description: define arkweb component pixelMap for sa service
+     */
+    virtual void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+            std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) = 0;
+
+    /**
      * @description: define ui send page name for sa service
      */
     virtual void SendCurrentPageName(const std::string& data) = 0;
@@ -473,6 +512,12 @@ public:
      * @description: define send the state management info to the proxy interface
      */
     virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) = 0;
+
+    virtual void SendWebInfoRequestResult(
+        uint32_t windowId,
+        int32_t webId,
+        const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

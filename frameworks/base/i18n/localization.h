@@ -137,7 +137,7 @@ public:
         return isInit_;
     }
 
-    bool LocalizeNumber(std::string &inputOutputNum, const int32_t precision = -1);
+    bool LocalizeNumber(const std::string &inputNum, std::string &outputNum, const int32_t precision = -1);
 
     std::string GetLanguage();
     std::string GetLanguageTag();

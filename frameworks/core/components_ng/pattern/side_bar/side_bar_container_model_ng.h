@@ -66,7 +66,9 @@ public:
     void SetMinContentWidth(const Dimension& minContentWidth) override;
     void SetMinContentWidth(const RefPtr<ResourceObject>& resObj) override;
     void ResetControlButton() override;
+    static void SetOnChangeEventModifier(std::function<void(const bool)>&& onChangeEvent);
     static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
+    static void SetSideBarWidthStatic(const Dimension& sideBarWidth, bool isDoubleBind = false);
     static void SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth);
     static void SetControlButtonWidth(FrameNode* frameNode, const Dimension& width);
     static void SetControlButtonHeight(FrameNode* frameNode, const Dimension& height);
@@ -108,6 +110,13 @@ public:
     static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);
+    static void SetOnSideBarWidthChangeEventStatic(OnSideBarWidthChangeEvent&& event);
+    static void ParseAndSetWidthStatic(WidthType widthType, Dimension& width, bool isDoubleBind = false);
+    static void ParseAndSetWidthStatic(WidthType widthType, const RefPtr<ResourceObject>& resObj);
+    static void CreateStatic();
+    static void SetSideBarContainerTypeStatic(SideBarContainerType type);
+    static void ResetControlButtonStatic();
+
 private:
     void MarkNeedInitRealSideBarWidth() override;
     void SetSideBarWidth(const RefPtr<ResourceObject>& sideBarWidth);

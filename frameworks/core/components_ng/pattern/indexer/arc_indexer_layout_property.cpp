@@ -66,7 +66,7 @@ std::unique_ptr<JsonValue> ArcIndexerLayoutProperty::ToJsonObjectValue(const Tex
     fontJsonObject->Put("size", textStyle.GetFontSize().ToString().c_str());
     fontJsonObject->Put(
         "style", textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
-    fontJsonObject->Put("weight", V2::ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
+    fontJsonObject->Put("weight", ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
     auto fontFamilyVector = textStyle.GetFontFamilies();
     std::string fontFamily;
     for (uint32_t i = 0; i < fontFamilyVector.size(); i++) {

@@ -28,6 +28,7 @@
 #undef protected
 #undef private
 
+#include "test/mock/base/mock_mouse_style.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "ui/properties/ui_material.h"
@@ -581,6 +582,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop001, TestSize.Level1)
     EXPECT_NE(host, nullptr);
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(nullptr);
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
     EXPECT_GE(aceData->GetSize(), 1);
 #endif
@@ -612,6 +616,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop002, TestSize.Level1)
     EXPECT_NE(host, nullptr);
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMockRe>();
     gestureHub->SetData(aceData);
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
     EXPECT_LT(aceData->GetSize(), 1);
 #endif
@@ -659,6 +666,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop003, TestSize.Level1)
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
     EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
 }
@@ -704,6 +714,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop004, TestSize.Level1)
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
     EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
 }
@@ -754,6 +767,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop005, TestSize.Level1)
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
     EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
 }
@@ -804,6 +820,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop006, TestSize.Level1)
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
     EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
 }
@@ -849,6 +868,9 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop007, TestSize.Level1)
             [](const RefPtr<UnifiedData>& aceData, std::string&, std::string&) { EXPECT_NE(aceData, nullptr); }));
     EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceData), _))
         .WillOnce(Return(false));
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    EXPECT_CALL(*mockMouseStyle, SetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(true));
     webPattern->HandleOnDragDrop(gestureHub);
 #endif
 }

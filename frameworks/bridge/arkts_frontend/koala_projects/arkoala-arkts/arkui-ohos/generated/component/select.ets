@@ -31,6 +31,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TextModifier_serializer } from "./../TextModifier"
 import { LengthMetrics_serializer } from "./../Graphics"
+import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Color, OptionWidthMode } from "./enums"
@@ -38,6 +39,7 @@ import { ControlSize } from "./button"
 import { DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { TextModifier } from "arkui.TextModifier"
 import { LengthMetrics } from "arkui.Graphics"
+import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -348,11 +350,11 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Bindable<int32>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Bindable<Resource>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
@@ -380,11 +382,11 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueTmpValue instanceof Bindable<string>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<string>
                 Bindable_String_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Bindable<Resource>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
@@ -887,6 +889,18 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setMinKeyboardAvoidDistance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setMenuSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            uiMaterial_Material_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setMenuSystemMaterial(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setMenuAlignAttribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (alignType !== undefined) {
@@ -1028,6 +1042,9 @@ export interface SelectAttribute extends CommonMethod {
     minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
         throw new Error("Unimplemented method minKeyboardAvoidDistance")
     }
+    menuSystemMaterial(value: uiMaterial.Material | undefined): this {
+        throw new Error("Unimplemented method menuSystemMaterial")
+    }
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         throw new Error("Unimplemented method menuAlign")
     }
@@ -1069,6 +1086,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     backgroundColor_value?: ResourceColor | undefined
     keyboardAvoidMode_value?: MenuKeyboardAvoidMode | undefined
     minKeyboardAvoidDistance_value?: LengthMetrics | undefined
+    menuSystemMaterial_value?: uiMaterial.Material | undefined
     setSelectOptions(options: Array<SelectOption>): this {
         return this
     }
@@ -1166,6 +1184,9 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         return this
     }
     minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
+        return this
+    }
+    menuSystemMaterial(value: uiMaterial.Material | undefined): this {
         return this
     }
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
@@ -1440,6 +1461,14 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         if (this.checkPriority("minKeyboardAvoidDistance")) {
             const value_casted = value as (LengthMetrics | undefined)
             this.getPeer()?.setMinKeyboardAvoidDistanceAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public menuSystemMaterial(value: uiMaterial.Material | undefined): this {
+        if (this.checkPriority("menuSystemMaterial")) {
+            const value_casted = value as (uiMaterial.Material | undefined)
+            this.getPeer()?.setMenuSystemMaterialAttribute(value_casted)
             return this
         }
         return this

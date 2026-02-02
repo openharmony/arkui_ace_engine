@@ -633,9 +633,312 @@ HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest005, TestSize.Level1)
      * @tc.expected: step3. clickRecognizer state set ready.
      */
     clickRecognizerPtr->touchPoints_[0] = {};
+    clickRecognizerPtr->touchPoints_[0].originalId = 0;
     clickRecognizerPtr->touchPoints_[1] = {};
+    clickRecognizerPtr->touchPoints_[1].originalId = 1;
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     parallelRecognizer->CleanRecognizerState();
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest006
+ * @tc.desc: Test ParallelRecognizer function: OnAccepted
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call AddSucceedBlockRecognizer function and test OnAccepted.
+     * @tc.expected: step2. result equals.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    parallelRecognizer->AddSucceedBlockRecognizer(clickRecognizerPtr);
+    parallelRecognizer->AddSucceedBlockRecognizer(clickRecognizerPtr2);
+    parallelRecognizer->AddSucceedBlockRecognizer(nullptr);
+    parallelRecognizer->OnAccepted();
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest007
+ * @tc.desc: Test ParallelRecognizer function: OnReject
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizerPtr->SetBridgeMode(true);
+    clickRecognizerPtr2->refereeState_ = RefereeState::FAIL;
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr, clickRecognizerPtr2, nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call OnRejected function and test result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer->OnRejected();
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizerPtr2->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest008
+ * @tc.desc: Test ParallelRecognizer function: OnBlocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr, nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    clickRecognizerPtr->disposal_ = GestureDisposal::ACCEPT;
+    parallelRecognizer->disposal_ = GestureDisposal::ACCEPT;
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->currentBatchRecognizer_ = clickRecognizerPtr;
+
+    /**
+     * @tc.steps: step2. call OnBlocked function and test result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer->OnBlocked();
+    EXPECT_FALSE(parallelRecognizer->succeedBlockRecognizers_.empty());
+    EXPECT_NE(parallelRecognizer->currentBatchRecognizer_, clickRecognizerPtr);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::SUCCEED_BLOCKED);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED_BLOCKED);
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest009
+ * @tc.desc: Test ParallelRecognizer function: CleanRecognizerState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr, clickRecognizerPtr2, nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. prepare testCase info.
+     */
+    std::vector<RefereeState> refereeStateList = {
+        RefereeState::SUCCEED, RefereeState::FAIL, RefereeState::DETECTING, RefereeState::PENDING,
+        RefereeState::SUCCEED, RefereeState::FAIL, RefereeState::DETECTING, RefereeState::PENDING,
+    };
+    std::vector<int32_t> currentFingerList = { 0, 0, 0, 0, 1, 1, 1, 1 };
+    std::vector<RefereeState> resultRefereeStateList = {
+        RefereeState::READY, RefereeState::READY, RefereeState::READY, RefereeState::PENDING,
+        RefereeState::SUCCEED, RefereeState::FAIL, RefereeState::DETECTING, RefereeState::PENDING,
+    };
+
+    /**
+     * @tc.steps: step3. call CleanRecognizerState function and test result.
+     * @tc.expected: step3. result equals.
+     */
+    for (int32_t i = 0; i < 8; i++) {
+        parallelRecognizer->refereeState_ = refereeStateList[i];
+        parallelRecognizer->currentFingers_ = currentFingerList[i];
+        parallelRecognizer->CleanRecognizerState();
+        EXPECT_EQ(parallelRecognizer->refereeState_, resultRefereeStateList[i]);
+    }
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest010
+ * @tc.desc: Test ParallelRecognizer function: ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr, nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->currentBatchRecognizer_ = clickRecognizerPtr;
+
+    /**
+     * @tc.steps: step2. call ForceCleanRecognizer function and test result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer->AddSucceedBlockRecognizer(clickRecognizerPtr);
+    parallelRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest011
+ * @tc.desc: Test ParallelRecognizer function: CleanRecognizerStateVoluntarily
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr, nullptr };
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    exclusiveRecognizerPtr->SetIsNeedResetRecognizer(true);
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizerGroups = {
+        exclusiveRecognizerPtr, clickRecognizerPtr2, nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizerEx = AceType::MakeRefPtr<ParallelRecognizer>(recognizerGroups);
+
+    /**
+     * @tc.steps: step2. call CleanRecognizerStateVoluntarily function and test result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizerEx->CleanRecognizerStateVoluntarily();
+    EXPECT_EQ(exclusiveRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_FALSE(exclusiveRecognizerPtr->IsNeedResetRecognizerState());
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest012
+ * @tc.desc: Test ParallelRecognizer OnAccepted with succeedBlockRecognizers_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer with SUCCEED_BLOCKED recognizers
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. Add to succeedBlockRecognizers_ and call OnAccepted
+     * @tc.expected: step2. AboutToAccept is called, succeedBlockRecognizers_ cleared
+     */
+    parallelRecognizer->AddSucceedBlockRecognizer(clickRecognizerPtr);
+    parallelRecognizer->OnAccepted();
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest013
+ * @tc.desc: Test ParallelRecognizer OnRejected early return when refereeState_ is SUCCEED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer in SUCCEED state
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+
+    /**
+     * @tc.steps: step2. call OnRejected - should return early without changing state
+     * @tc.expected: step2. state remains SUCCEED
+     */
+    parallelRecognizer->OnRejected();
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest014
+ * @tc.desc: Test BatchAdjudicate with ACCEPT disposal and SUCCEED_BLOCKED refereeState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer with SUCCEED_BLOCKED state
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+
+    /**
+     * @tc.steps: step2. Call BatchAdjudicate with ACCEPT disposal
+     * @tc.expected: step2. recognizer added to succeedBlockRecognizers_
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::SUCCEED_BLOCKED);
+    EXPECT_EQ(parallelRecognizer->succeedBlockRecognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest015
+ * @tc.desc: Test BatchAdjudicate with ACCEPT disposal and READY refereeState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer with READY state
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    parallelRecognizer->refereeState_ = RefereeState::READY;
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+
+    /**
+     * @tc.steps: step2. Call BatchAdjudicate with ACCEPT disposal
+     * @tc.expected: step2. GroupAdjudicate is called
+     */
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+}
+
+/**
+ * @tc.name: ParallelRecognizerTest016
+ * @tc.desc: Test CleanRecognizerStateVoluntarily with non-RecognizerGroup child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer with non-RecognizerGroup children
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. Call CleanRecognizerStateVoluntarily
+     * @tc.expected: step2. Should handle non-RecognizerGroup children
+     */
+    parallelRecognizer->CleanRecognizerStateVoluntarily();
+    EXPECT_NE(clickRecognizerPtr, nullptr);
 }
 } // namespace OHOS::Ace::NG

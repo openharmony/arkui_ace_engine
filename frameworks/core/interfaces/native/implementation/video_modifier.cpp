@@ -15,9 +15,11 @@
 
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_static.h"
+#include "core/interfaces/native/implementation/content_transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -34,6 +36,7 @@ struct VideoOptions {
     ImageSourceInfo previewSourceInfo;
     RefPtr<VideoControllerV2> videoController;
     bool showFirstFrame;
+    ContentTransitionType contentTransitionType;
 };
 } // OHOS::Ace::NG
 
@@ -47,6 +50,11 @@ void AssignCast(std::optional<float>& dst, const Ark_PlaybackSpeed& src)
         case ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X: dst = 1.75f; break;
         case ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X: dst = 2.0f; break;
         case ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X: dst = 1.0f; break;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_50_X: dst = 0.5f; break;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_50_X: dst = 1.5f; break;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_3_00_X: dst = 3.0f; break;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_25_X: dst = 0.25f; break;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_125_X: dst = 0.125f; break;
         default: LOGE("Unexpected enum value in Ark_PlaybackSpeed: %{public}d", src);
     }
 }
@@ -84,9 +92,17 @@ VideoOptions Convert(const Ark_VideoOptions& src)
     // posterOptions
     options.showFirstFrame = false;
     auto optPosterOptions = src.posterOptions;
-    if (optPosterOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED &&
-        optPosterOptions.value.showFirstFrame.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        options.showFirstFrame = Converter::Convert<bool>(optPosterOptions.value.showFirstFrame.value);
+    if (optPosterOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        if (optPosterOptions.value.showFirstFrame.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            options.showFirstFrame = Converter::Convert<bool>(optPosterOptions.value.showFirstFrame.value);
+        }
+        auto optValue = Converter::GetOptPtr(&optPosterOptions.value.contentTransitionEffect);
+        if (optValue.has_value()) {
+            auto* peer = optValue.value();
+            if (peer) {
+                options.contentTransitionType = peer->type_;
+            }
+        }
     }
     return options;
 }
@@ -115,10 +131,10 @@ void SetVideoOptionsImpl(Ark_NativePointer node,
     VideoModelStatic::SetProgressRate(frameNode, options.currentProgressRate);
     VideoModelStatic::SetPosterSourceInfo(frameNode, options.previewSourceInfo);
     VideoModelStatic::SetShowFirstFrame(frameNode, options.showFirstFrame);
+    VideoModelStatic::SetContentTransition(frameNode, options.contentTransitionType);
     if (options.videoController) {
         VideoModelStatic::SetVideoController(frameNode, options.videoController);
     }
-    LOGE("ARKOALA VideoInterface::SetVideoOptionsImpl -> imageAIOptions is not supported.");
 }
 } // VideoInterfaceModifier
 namespace VideoAttributeModifier {

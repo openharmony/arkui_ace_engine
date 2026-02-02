@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_H
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace {
 enum class MenuColorType {

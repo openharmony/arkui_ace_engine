@@ -22,7 +22,7 @@
 #include "ui/base/geometry/ng/offset_t.h"
 
 #include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";
@@ -1798,5 +1798,644 @@ HWTEST_F(ListModelTestNg, ScrollToItemInGroup002, TestSize.Level1)
     model.ScrollToItemInGroup(listNode, 2, 3, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern->scrollAlign_, ScrollAlign::END);
     CreateDone();
+}
+
+
+/**
+ * @tc.name: ListModelNGSetLaneMinLengthInvalid001
+ * @tc.desc: Test ListModelNG SetLaneMinLength with invalid dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetLaneMinLengthInvalid001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Set invalid dimension (IsValid() returns false)
+    model.SetLaneMinLength(Dimension());
+    CreateDone();
+
+    // Property should be reset
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: ListModelNGSetLaneMaxLengthInvalid001
+ * @tc.desc: Test ListModelNG SetLaneMaxLength with invalid dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetLaneMaxLengthInvalid001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Set invalid dimension (IsValid() returns false)
+    model.SetLaneMaxLength(Dimension());
+    CreateDone();
+
+    // Property should be reset
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: ListModelNGSetLaneMinLengthFrameNodeInvalid001
+ * @tc.desc: Test ListModelNG SetLaneMinLength(FrameNode*) with invalid dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetLaneMinLengthFrameNodeInvalid001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Set invalid dimension
+    model.SetLaneMinLength(listNode, Dimension());
+    CreateDone();
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: ListModelNGSetLaneMaxLengthFrameNodeInvalid001
+ * @tc.desc: Test ListModelNG SetLaneMaxLength(FrameNode*) with invalid dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetLaneMaxLengthFrameNodeInvalid001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Set invalid dimension
+    model.SetLaneMaxLength(listNode, Dimension());
+    CreateDone();
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: ListModelNGGetScrollEnabledNotSet001
+ * @tc.desc: Test ListModelNG GetScrollEnabled when scrollEnabled not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetScrollEnabledNotSet001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // GetScrollEnabled returns default value when not set
+    auto result = model.GetScrollEnabled(listNode);
+    EXPECT_TRUE(result); // Default is true
+}
+
+/**
+ * @tc.name: ListModelNGSetScrollSnapAlignChange001
+ * @tc.desc: Test ListModelNG SetScrollSnapAlign with value change
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetScrollSnapAlignChange001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Set initial value
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+
+    // Change to different value - should trigger ResetLastSnapTargetIndex
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    CreateDone();
+
+    // Verify the value was changed
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetScrollSnapAlign().value(), ScrollSnapAlign::CENTER);
+}
+
+/**
+ * @tc.name: ListModelNGSetScrollSnapAlignSame001
+ * @tc.desc: Test ListModelNG SetScrollSnapAlign with same value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetScrollSnapAlignSame001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Set initial value
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+
+    // Set same value - should NOT trigger ResetLastSnapTargetIndex
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateDone();
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: ListModelNGSetListFrictionNegative001
+ * @tc.desc: Test ListModelNG SetListFriction with negative value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetListFrictionNegative001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set negative friction - should set to FRISSION constant
+    model.SetListFriction(listNode, -1.0);
+    CreateDone();
+
+    auto result = model.GetListFriction(listNode);
+    EXPECT_GT(result, 0.0); // Should be FRISSION constant value
+}
+
+/**
+ * @tc.name: ListModelNGSetListFrictionZero001
+ * @tc.desc: Test ListModelNG SetListFriction with zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetListFrictionZero001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set zero friction - should set to FRISSION constant
+    model.SetListFriction(listNode, 0.0);
+    CreateDone();
+
+    auto result = model.GetListFriction(listNode);
+    EXPECT_GT(result, 0.0); // Should be FRISSION constant value
+}
+
+/**
+ * @tc.name: ListModelNGGetListMaintainVisibleContentPositionNull001
+ * @tc.desc: Test ListModelNG GetListMaintainVisibleContentPosition with nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetListMaintainVisibleContentPositionNull001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Don't set maintainVisibleContentPosition - should return false
+    auto result = model.GetListMaintainVisibleContentPosition(listNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ListModelNGGetListMaintainVisibleContentPositionSet001
+ * @tc.desc: Test ListModelNG GetListMaintainVisibleContentPosition after Set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetListMaintainVisibleContentPositionSet001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set maintainVisibleContentPosition to true
+    model.SetListMaintainVisibleContentPosition(listNode, true);
+
+    auto result = model.GetListMaintainVisibleContentPosition(listNode);
+    EXPECT_TRUE(result);
+    CreateDone();
+}
+
+/**
+ * @tc.name: ListModelNGSetListScrollBarInvalidState001
+ * @tc.desc: Test ListModelNG SetListScrollBar with invalid state (too large)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetListScrollBarInvalidState001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    listNode->paintProperty_ = scrollablePaintProperty;
+
+    // Set barState to value >= DISPLAY_MODE.size()
+    int32_t invalidState = 100;
+    model.SetListScrollBar(listNode, invalidState);
+    CreateDone();
+
+    auto result = model.GetListScrollBar(listNode);
+    // Should use default display mode
+    EXPECT_NE(result, invalidState);
+}
+
+/**
+ * @tc.name: ListModelNGSetListScrollBarNegativeState001
+ * @tc.desc: Test ListModelNG SetListScrollBar with negative state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetListScrollBarNegativeState001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    listNode->paintProperty_ = scrollablePaintProperty;
+
+    // Set barState to negative value
+    model.SetListScrollBar(listNode, -1);
+    CreateDone();
+
+    auto result = model.GetListScrollBar(listNode);
+    // Should use default display mode
+    EXPECT_NE(result, -1);
+}
+
+/**
+ * @tc.name: ListModelNGSetScrollByZeroOffset001
+ * @tc.desc: Test ListModelNG SetScrollBy with zero offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetScrollByZeroOffset001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set axis to VERTICAL
+    pattern->SetAxis(Axis::VERTICAL);
+
+    // Call SetScrollBy with zero offset - should return early
+    model.SetScrollBy(listNode, 0.0, 0.0);
+    CreateDone();
+
+    // Should not crash and offset should remain unchanged
+}
+
+/**
+ * @tc.name: ListModelNGSetScrollByHorizontal001
+ * @tc.desc: Test ListModelNG SetScrollBy with horizontal axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGSetScrollByHorizontal001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set axis to HORIZONTAL
+    pattern->SetAxis(Axis::HORIZONTAL);
+
+    // Call SetScrollBy - should use X offset
+    model.SetScrollBy(listNode, 10.0, 5.0);
+    CreateDone();
+
+    // Should use X offset when axis is horizontal
+}
+
+/**
+ * @tc.name: ListModelNGScrollToItemInGroupNoneAlign001
+ * @tc.desc: Test ListModelNG ScrollToItemInGroup with ScrollAlign::NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGScrollToItemInGroupNoneAlign001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Set initial align to END
+    pattern->scrollAlign_ = ScrollAlign::END;
+
+    // Call with ScrollAlign::NONE - should be changed to START
+    model.ScrollToItemInGroup(listNode, 1, 2, false, ScrollAlign::NONE);
+    CreateDone();
+
+    // Align should be START (NONE was changed to START)
+    EXPECT_EQ(pattern->scrollAlign_, ScrollAlign::START);
+}
+
+/**
+ * @tc.name: ListModelNGGetListNestedScrollDefault001
+ * @tc.desc: Test ListModelNG GetListNestedScroll with no value set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetListNestedScrollDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Get without setting - should return default options
+    auto result = model.GetListNestedScroll(listNode);
+    EXPECT_EQ(result.forward, NestedScrollMode::SELF_ONLY);
+    EXPECT_EQ(result.backward, NestedScrollMode::SELF_ONLY);
+}
+
+/**
+ * @tc.name: ListModelNGCreateWithResourceObjLaneConstrainNull001
+ * @tc.desc: Test ListModelNG CreateWithResourceObjLaneConstrain with null params
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGCreateWithResourceObjLaneConstrainNull001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    // Call with both null params - should not crash
+    model.CreateWithResourceObjLaneConstrain(listNode, nullptr, nullptr);
+    CreateDone();
+
+    // Should not crash
+}
+
+/**
+ * @tc.name: ListModelNGCreateWithResourceObjLaneConstrainPartial001
+ * @tc.desc: Test ListModelNG CreateWithResourceObjLaneConstrain with only minLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGCreateWithResourceObjLaneConstrainPartial001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(0, 0, params, "", "", Container::CurrentIdSafely());
+
+    // Call with only minLength - should not crash
+    model.CreateWithResourceObjLaneConstrain(listNode, resObj, nullptr);
+    CreateDone();
+
+    // Should not crash
+}
+
+/**
+ * @tc.name: ListModelNGGetLanesDefault001
+ * @tc.desc: Test ListModelNG GetLanes with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetLanesDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 1 (default)
+    auto result = model.GetLanes(listNode);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: ListModelNGGetLaneMinLengthDefault001
+ * @tc.desc: Test ListModelNG GetLaneMinLength with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetLaneMinLengthDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0
+    auto result = model.GetLaneMinLength(listNode);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ListModelNGGetLaneMaxLengthDefault001
+ * @tc.desc: Test ListModelNG GetLaneMaxLength with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetLaneMaxLengthDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0
+    auto result = model.GetLaneMaxLength(listNode);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ListModelNGGetLaneGutterDefault001
+ * @tc.desc: Test ListModelNG GetLaneGutter with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetLaneGutterDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0
+    auto result = model.GetLaneGutter(listNode);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ListModelNGGetListItemAlignDefault001
+ * @tc.desc: Test ListModelNG GetListItemAlign with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetListItemAlignDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0 (START)
+    auto result = model.GetListItemAlign(listNode);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: ListModelNGGetListSpaceDefault001
+ * @tc.desc: Test ListModelNG GetListSpace with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetListSpaceDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0
+    auto result = model.GetListSpace(listNode);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ListModelNGGetScrollSnapAlignDefault001
+ * @tc.desc: Test ListModelNG GetScrollSnapAlign with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetScrollSnapAlignDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0 (NONE)
+    auto result = model.GetScrollSnapAlign(listNode);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: ListModelNGGetContentStartOffsetDefault001
+ * @tc.desc: Test ListModelNG GetContentStartOffset with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetContentStartOffsetDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0
+    auto result = model.GetContentStartOffset(listNode);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ListModelNGGetContentEndOffsetDefault001
+ * @tc.desc: Test ListModelNG GetContentEndOffset with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetContentEndOffsetDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    // Get without setting - should return 0
+    auto result = model.GetContentEndOffset(listNode);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ListModelNGGetCachedCountDefault001
+ * @tc.desc: Test ListModelNG GetCachedCount with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetCachedCountDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+
+    // Get with null frameNode - should return default value (1)
+    auto result = model.GetCachedCount(nullptr);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: ListModelNGGetShowCachedDefault001
+ * @tc.desc: Test ListModelNG GetShowCached with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, ListModelNGGetShowCachedDefault001, TestSize.Level1)
+{
+    ListModelNG model;
+
+    // Get with null frameNode - should return default value (false)
+    auto result = model.GetShowCached(nullptr);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

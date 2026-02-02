@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 
+#include "compatible/components/svg/parse/svg_dom.h"
 #include "modules/svg/include/SkSVGDOM.h"
 
 #include "base/image/pixel_map.h"
-#include "core/components/svg/parse/svg_dom.h"
 #include "core/image/animated_image_player.h"
 #include "core/image/image_source_info.h"
 #ifdef USE_NEW_SKIA

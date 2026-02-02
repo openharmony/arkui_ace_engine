@@ -21,7 +21,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
+#include "base/log/ace_scoring_log.h"
+
 namespace OHOS::Ace::NG {
+const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 namespace {
 constexpr int32_t TYPE_CYCLE = 0;
 
@@ -44,9 +47,9 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DATA_PANEL_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", DATA_PANEL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
+        DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Values, values);
@@ -56,6 +59,7 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
     if (dataPanelType != TYPE_CYCLE) {
         SetDefaultBorderRadius();
     }
+
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
@@ -72,6 +76,7 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     std::string key = "dataPanel.ValueColors";
@@ -97,7 +102,12 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
 void DataPanelModelNG::SetTrackBackground(const Color& trackBackgroundColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor);
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true);
+}
+
+void DataPanelModelNG::ResetTrackBackground()
+{
+    ACE_RESET_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
 }
 
 void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
@@ -106,10 +116,17 @@ void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true);
 }
 
+void DataPanelModelNG::ResetStrokeWidth()
+{
+    ACE_RESET_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
+}
+
 void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
@@ -136,7 +153,12 @@ void DataPanelModelNG::SetCloseEffect(FrameNode* frameNode, bool isClose)
 void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true, frameNode);
+}
+
+void DataPanelModelNG::ResetTrackBackground(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false, frameNode);
 }
 
 void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
@@ -145,9 +167,16 @@ void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& str
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true, frameNode);
 }
 
+void DataPanelModelNG::ResetStrokeWidth(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false, frameNode);
+}
+
 void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [shadowOption, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -166,6 +195,7 @@ void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShad
 void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [valueColors, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -272,6 +302,64 @@ void DataPanelModelNG::SetValueColorsSetByUser(bool value)
 {
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, value);
+    }
+}
+
+void DataPanelModelNG::CreateDataPanelModelNG(const std::vector<double>& values, double max, int32_t dataPanelType)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", DATA_PANEL_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
+    stack->Push(frameNode);
+
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Values, values);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Max, max);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, dataPanelType);
+
+    if (dataPanelType != TYPE_CYCLE) {
+        SetDefaultBorderRadius();
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, false);
+    }
+}
+
+void DataPanelModelNG::SetTrackBackgroundSetByUser(bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value);
+    }
+}
+
+void DataPanelModelNG::SetStrokeWidthSetByUser(bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, value);
+    }
+}
+
+void DataPanelModelNG::SetValueColorsSetByUser(FrameNode* frameNode, bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, value, frameNode);
+    }
+}
+
+void DataPanelModelNG::SetTrackBackgroundSetByUser(FrameNode* frameNode, bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value, frameNode);
+    }
+}
+
+void DataPanelModelNG::SetStrokeWidthSetByUser(FrameNode* frameNode, bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, value, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

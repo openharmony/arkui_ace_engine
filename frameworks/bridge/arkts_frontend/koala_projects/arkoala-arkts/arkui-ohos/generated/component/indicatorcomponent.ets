@@ -342,9 +342,7 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
 @memo
 export function IndicatorComponentImpl(
     @memo
-    style: ((attributes: IndicatorComponentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
+    style: ((attributes: IndicatorComponentAttribute) => void) | undefined
 ): void {
     const receiver = remember<ArkIndicatorComponentComponent>((): ArkIndicatorComponentComponent => {
         return new ArkIndicatorComponentComponent()
@@ -353,7 +351,6 @@ export function IndicatorComponentImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

@@ -45,18 +45,18 @@ export enum ColoringStrategy {
     PRIMARY = 'primary'
 }
 export enum ImageFit {
-    CONTAIN = 0,
-    Contain = 0,
-    COVER = 1,
-    Cover = 1,
-    AUTO = 2,
-    Auto = 2,
-    FILL = 3,
-    Fill = 3,
-    SCALE_DOWN = 4,
-    ScaleDown = 4,
+    FILL = 0,
+    Fill = 0,
+    CONTAIN = 1,
+    Contain = 1,
+    COVER = 2,
+    Cover = 2,
+    AUTO = 3,
+    Auto = 3,
     NONE = 5,
     None = 5,
+    SCALE_DOWN = 6,
+    ScaleDown = 6,
     TOP_START = 7,
     TOP = 8,
     TOP_END = 9,
@@ -577,7 +577,8 @@ export enum ImageSpanAlignment {
     BASELINE = 4,
     BOTTOM = 3,
     CENTER = 2,
-    TOP = 1
+    TOP = 1,
+    FOLLOW_PARAGRAPH = 5
 }
 export enum ObscuredReasons {
     PLACEHOLDER = 0
@@ -655,7 +656,9 @@ export enum IlluminatedType {
 export enum EllipsisMode {
     START = 0,
     CENTER = 1,
-    END = 2
+    END = 2,
+    MULTILINE_START = 3,
+    MULTILINE_CENTER = 4
 }
 export type Nullable<T = void> = T | undefined;
 export enum OptionWidthMode {
@@ -761,6 +764,9 @@ export enum DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1
 }
+export enum EventQueryType {
+ 	ON_CLICK = 0
+}
 export enum TipsAnchorType {
     TARGET = 0,
     CURSOR = 1
@@ -771,8 +777,21 @@ export enum AnimationPropertyType {
     SCALE = 2,
     OPACITY = 3
 }
+export enum ColorSpace {
+    SRGB = 0,
+    DISPLAY_P3 = 1
+}
 export enum AxisType {
     VERTICAL_AXIS = 0,
     HORIZONTAL_AXIS = 1,
     PINCH_AXIS = 2
+}
+export enum FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW = 1
+}
+export enum PresetFillType {
+    BREAKPOINT_DEFAULT = 0,
+    BREAKPOINT_SM1MD2LG3 = 1,
+    BREAKPOINT_SM2MD3LG5 = 2
 }

@@ -170,9 +170,9 @@ OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
         }
     }
     if (itemEnd_) {
-        auto endPos = currentOffset_ + maxHeight_;
-        if (GreatNotEqual(lastMainSize_, currentOffset_ + maxHeight_)) {
-            endPos = currentOffset_ + lastMainSize_;
+        auto endPos = currentOffset_ + maxHeight_ + contentEndOffset_;
+        if (GreatNotEqual(lastMainSize_ - contentStartOffset_, currentOffset_ + maxHeight_ + contentEndOffset_)) {
+            endPos = currentOffset_ + lastMainSize_ - contentStartOffset_ - contentEndOffset_;
         }
         auto newEndPos = endPos + delta;
         if (endPos < lastMainSize_ && newEndPos < lastMainSize_) {
@@ -355,7 +355,7 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset, bool firstLayout) const
     if (!offsetEnd_) {
         return false;
     }
-    float minOffset = lastMainSize_ - maxHeight_;
+    float minOffset = lastMainSize_ - maxHeight_ - contentEndOffset_;
     auto scrollDownToReachEnd =
         (GreatNotEqual(prevOffset, minOffset) || firstLayout) && LessOrEqual(currentOffset_, minOffset);
     auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
@@ -601,7 +601,7 @@ bool WaterFlowLayoutInfo::OutOfBounds() const
 {
     bool outOfStart = itemStart_ && GreatNotEqual(currentOffset_, contentStartOffset_);
     bool outOfEnd = offsetEnd_ &&
-                    LessNotEqual(currentOffset_ + maxHeight_ + contentEndOffset_ + contentStartOffset_, lastMainSize_);
+                    LessNotEqual(currentOffset_ + maxHeight_ + contentEndOffset_, lastMainSize_);
     // not outOfEnd when content size < mainSize but currentOffset_ == 0
     if (LessNotEqual(maxHeight_ + contentEndOffset_ + contentStartOffset_, lastMainSize_)) {
         outOfEnd &= Negative(currentOffset_ - contentStartOffset_);
@@ -616,7 +616,13 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
         res = currentOffset_ - contentStartOffset_ + delta;
     }
     if (offsetEnd_) {
-        res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);
+		// Fix over-scroll when content doesn't fill the viewport.
+		// Use totalOffset delta to avoid excessive friction at low scroll speed.
+        if (GetMaxMainHeight() < mainSize) {
+            res = currentOffset_ - contentStartOffset_ + delta;
+        } else {
+            res = mainSize - (GetMaxMainHeight() + contentEndOffset_ + currentOffset_ - delta);
+        }
     }
     return res;
 }

@@ -30,10 +30,12 @@ import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
-import { UIContextUtil } from '../../../base/UIContextUtil';
-import { UIContextImpl } from '../../../base/UIContextImpl';
-import { StateMgmtConsole } from '../stateMgmtDFX';
+import { UIContextUtil } from '@uicontext/UIContextUtil';
+import { StateMgmtConsole } from '#StateMgmtConsole';
 import { int32 } from '@koalaui/common';
+
+export * from './observeInterfaceProxy';
+
 export class StateMgmtTool {
     static isIObservedObject(value: NullableObject): boolean {
         return value instanceof IObservedObject;
@@ -81,8 +83,8 @@ export class StateMgmtTool {
         return value instanceof InterfaceProxyHandler;
     }
     static tryGetHandler(value: Object): NullableObject {
-        const objType = Type.of(value);
-        return objType instanceof ClassType && (objType as ClassType).getName().startsWith('$Proxy')
+        const objType = Class.of(value);
+        return objType.getName().startsWith('$Proxy')
             ? ((value as reflect.Proxy).getHandler() as NullableObject) // a very slow call so need to judge proxy first
             : undefined;
     }
@@ -99,19 +101,9 @@ export class StateMgmtTool {
         return reflect.Proxy.create(linker, ifaces, new InterfaceProxyHandler(value, allowDeep, isAPI)) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
-        return Reflect.isLiteralInitializedInterface(value);
+        return reflect.isLiteralInitializedInterface(value);
     }
     static getGlobalStateManager(): StateManager {
         return GlobalStateManager.instance;
-    }
-    static tryGetCurrentGlobalStateManager(): StateManager {
-        let context: UIContextImpl | undefined = undefined;
-        try {
-            context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        } catch (e) {
-            // for scenario where UIContext is not ready.
-            StateMgmtConsole.log('Get current UIContext fail, will directly use GlobalStateManager');
-        }
-        return context && context.stateMgr ? context.stateMgr! : GlobalStateManager.instance;
     }
 }

@@ -16,6 +16,10 @@
 class UIUtilsImpl {
     private static instance_: UIUtilsImpl = undefined;
 
+    public canBeObserved<T extends Object>(source: T): ObservedResult {
+      return ObservedUtil.canBeObserved(source);
+    }
+
     public getTarget<T extends Object>(source: T): T {
       if (!source || typeof source !== 'object') {
         return source;

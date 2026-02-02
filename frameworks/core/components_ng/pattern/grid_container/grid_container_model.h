@@ -30,6 +30,10 @@ public:
 
     virtual void Create(const RefPtr<GridContainerInfo>& containerInfo) = 0;
     virtual void Pop() {}
+    virtual RefPtr<GridContainerInfo> GetGridContainer()
+    {
+        return nullptr;
+    }
 };
 } // namespace OHOS::Ace
 #endif

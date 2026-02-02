@@ -79,6 +79,12 @@ public:
     void SetRingProgressLeftPadding(const Dimension& ringProgressLeftPadding);
 
     Color CalculateHoverPressColor(const Color& color);
+    void StopAllLoopAnimation();
+    void SetInVisibleArea(bool value);
+    void SetGradientColor(const NG::Gradient& gradient)
+    {
+        ringProgressColors_->Set(GradientArithmetic(gradient));
+    }
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -198,6 +204,7 @@ private:
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
     bool dateUpdated_ = false;
+    bool inVisibleArea_ = false;
     Dimension ringProgressLeftPadding_ = 0.0_vp;
     WeakPtr<FrameNode> host_;
     WeakPtr<Pattern> pattern_;

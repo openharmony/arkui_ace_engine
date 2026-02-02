@@ -25,7 +25,7 @@ using ErrorImpl = std::function<void(bool)>;
 using ResetImpl = std::function<void()>;
 using SetChallengeResultImpl = std::function<void(PatternLockChallengeResult)>;
 
-class PatternLockController : public virtual AceType {
+class ACE_FORCE_EXPORT PatternLockController : public virtual AceType {
     DECLARE_ACE_TYPE(PatternLockController, AceType);
 
 public:

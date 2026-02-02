@@ -28,7 +28,7 @@ import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, CommonConfigurat
 import { ResourceColor, Length } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, hookDataPanelAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, hookDataPanelTrackShadow, hookDataPanelAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -189,18 +189,6 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DataPanelAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTrackShadowAttribute(value: DataPanelShadowOptions | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            DataPanelShadowOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._DataPanelAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export enum DataPanelType {
     LINE = 0,
@@ -335,7 +323,7 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
     public trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
             const value_casted = value as (DataPanelShadowOptions | null | undefined)
-            this.getPeer()?.setTrackShadowAttribute(value_casted)
+            hookDataPanelTrackShadow(this, value)
             return this
         }
         return this
@@ -365,8 +353,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
 export function DataPanelImpl(
     @memo
     style: ((attributes: DataPanelAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkDataPanelComponent>((): ArkDataPanelComponent => {
         return new ArkDataPanelComponent()
@@ -375,7 +361,6 @@ export function DataPanelImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -654,10 +639,10 @@ export class ColorStop_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -678,10 +663,10 @@ export class ColorStop_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOffsetTmpValueForIdx0  = valueHolderForOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForOffsetTmpValueForIdx0)
-            } else if (valueHolderForOffsetTmpValue instanceof number) {
+            } else if (valueHolderForOffsetTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetTmpValueForIdx1)
+                const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetTmpValueForIdx1)
             } else if (valueHolderForOffsetTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForOffsetTmpValueForIdx2  = valueHolderForOffsetTmpValue as Resource

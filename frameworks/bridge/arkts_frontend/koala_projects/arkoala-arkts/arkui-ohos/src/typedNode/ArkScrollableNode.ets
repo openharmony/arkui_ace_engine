@@ -27,7 +27,11 @@ import {
   EdgeEffectOptions,
   FadingEdgeOptions,
   AttributeModifier,
-  CommonMethod
+  CommonMethod,
+  ScrollBarMargin,
+  VoidCallback,
+  OnWillStopDraggingCallback,
+  OnDidStopDraggingCallback
 } from '../framework';
 import { RectShape } from '@ohos.arkui.shape'
 import { Resource } from 'global.resource'
@@ -41,8 +45,8 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
         this.markDirty()
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
-        const value_casted = value as (Color | int32 | string | undefined)
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
+        const value_casted = value as (Color | int32 | string | Resource | undefined)
         this.getPeer()?.setScrollBarColorAttribute(value_casted)
         this.markDirty()
         return this
@@ -50,6 +54,12 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
     scrollBarWidth(value: double | string | undefined): this {
         const value_casted = value as (double | string | undefined)
         this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        const value_casted = value as (ScrollBarMargin | undefined)
+        this.getPeer()?.setScrollBarMarginAttribute(value_casted)
         this.markDirty()
         return this
     }
@@ -68,6 +78,48 @@ export class ArkScrollableNode extends ArkBaseNode implements ScrollableCommonMe
     friction(value: double | Resource | undefined): this {
         const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setFrictionAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
+        this.getPeer()?.setContentStartOffsetAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
+        this.getPeer()?.setContentEndOffsetAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnWillStartDraggingAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        const value_casted = value as (OnWillStopDraggingCallback | undefined)
+        this.getPeer()?.setOnWillStopDraggingAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        const value_casted = value as (OnDidStopDraggingCallback | undefined)
+        this.getPeer()?.setOnDidStopDraggingAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnWillStartFlingAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnDidStopFlingAttribute(value_casted)
         this.markDirty()
         return this
     }

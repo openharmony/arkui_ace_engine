@@ -74,6 +74,19 @@ public:
     }
 };
 
+class MarkNodeTreeFreeScope {
+public:
+    MarkNodeTreeFreeScope()
+    {
+        GetFullImpl()->getMultiThreadManagerAPI()->setNeedMarkNodeTreeFree(true);
+    }
+
+    ~MarkNodeTreeFreeScope()
+    {
+        GetFullImpl()->getMultiThreadManagerAPI()->setNeedMarkNodeTreeFree(false);
+    }
+};
+
 std::mutex g_nodeSetMutex_;
 std::set<ArkUI_NodeHandle> g_nodeSetSafely;
 
@@ -83,13 +96,14 @@ ArkUI_NodeHandle CreateNodeSafely(ArkUI_NodeType type)
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
-        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
+        ARKUI_CHECK_BOX_GROUP, ARKUI_RICH_EDITOR, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
         ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
-        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN };
+        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN, ARKUI_EMBEDDED_COMPONENT,
+        ARKUI_UNDEFINED, ARKUI_PICKER };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
-    if (nodeType >= sizeof(nodes) / sizeof(ArkUINodeType)) {
+    if (nodeType >= sizeof(nodes) / sizeof(ArkUINodeType) || nodes[nodeType] == ARKUI_UNDEFINED) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
         return nullptr;
     }
@@ -155,6 +169,7 @@ int32_t RemoveChildSafely(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
     ThreadSafeNodeScope threadSafeNodeScope;
+    MarkNodeTreeFreeScope markNodeTreeFreeScope;
     return RemoveChild(parentNode, childNode);
 }
 
@@ -305,7 +320,7 @@ void MarkDirtySafely(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
         if (nodePtr) {
-            impl->getMultiThreadManagerAPI()->executeAfterAttachTasks(nodePtr->uiNodeHandle);
+            impl->getMultiThreadManagerAPI()->markNodeTreeNotFree(nodePtr->uiNodeHandle);
         }
         MarkDirty(nodePtr, dirtyFlag);
     }
@@ -397,6 +412,7 @@ int32_t RemoveNodeCustomEventReceiverSafely(ArkUI_NodeHandle nodePtr,
 
 int32_t SetMeasuredSizeSafely(ArkUI_NodeHandle node, int32_t width, int32_t height)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
         return SetMeasuredSize(node, width, height);
@@ -406,6 +422,7 @@ int32_t SetMeasuredSizeSafely(ArkUI_NodeHandle node, int32_t width, int32_t heig
 
 int32_t SetLayoutPositionSafely(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
         return SetLayoutPosition(node, positionX, positionY);
@@ -415,7 +432,8 @@ int32_t SetLayoutPositionSafely(ArkUI_NodeHandle node, int32_t positionX, int32_
 
 ArkUI_IntSize GetMeasuredSizeSafely(ArkUI_NodeHandle node)
 {
-    ArkUI_IntSize size;
+    ArkUI_IntSize size = {0, 0};
+    CHECK_NULL_RETURN(node, size);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
         return GetMeasuredSize(node);
@@ -426,6 +444,7 @@ ArkUI_IntSize GetMeasuredSizeSafely(ArkUI_NodeHandle node)
 ArkUI_IntOffset GetLayoutPositionSafely(ArkUI_NodeHandle node)
 {
     ArkUI_IntOffset offset;
+    CHECK_NULL_RETURN(node, offset);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
         return GetLayoutPosition(node);
@@ -435,8 +454,10 @@ ArkUI_IntOffset GetLayoutPositionSafely(ArkUI_NodeHandle node)
 
 int32_t MeasureNodeSafely(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
+        impl->getMultiThreadManagerAPI()->markNodeTreeNotFree(node->uiNodeHandle);
         return MeasureNode(node, constraint);
     }
     return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
@@ -444,8 +465,10 @@ int32_t MeasureNodeSafely(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constra
 
 int32_t LayoutNodeSafely(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
+        impl->getMultiThreadManagerAPI()->markNodeTreeNotFree(node->uiNodeHandle);
         return LayoutNode(node, positionX, positionY);
     }
     return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
@@ -536,6 +559,7 @@ int32_t RemoveAllChildrenSafely(ArkUI_NodeHandle parentNode)
         return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
     ThreadSafeNodeScope threadSafeNodeScope;
+    MarkNodeTreeFreeScope markNodeTreeFreeScope;
     return RemoveAllChildren(parentNode);
 }
 

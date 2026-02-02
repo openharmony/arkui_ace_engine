@@ -16,62 +16,76 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_marquee_ffi.h"
 
 #include "cj_lambda.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::MarqueeModelNG* GetMarqueeModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("marquee");
+    if (module == nullptr) {
+        LOGF("Can't find marquee dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::MarqueeModelNG*>(module->GetModel());
+}
+}
 extern "C" {
 void FfiOHOSAceFrameworkMarqueeCreate(bool start, const char* src, double step, int32_t loop, bool fromStart)
 {
-    MarqueeModel::GetInstance()->Create();
-    MarqueeModel::GetInstance()->SetValue(src);
-    MarqueeModel::GetInstance()->SetPlayerStatus(start);
-    MarqueeModel::GetInstance()->SetScrollAmount(step);
-    MarqueeModel::GetInstance()->SetLoop(loop);
+    GetMarqueeModel()->Create();
+    GetMarqueeModel()->SetValue(src);
+    GetMarqueeModel()->SetPlayerStatus(start);
+    GetMarqueeModel()->SetScrollAmount(step);
+    GetMarqueeModel()->SetLoop(loop);
     if (fromStart) {
-        MarqueeModel::GetInstance()->SetDirection(MarqueeDirection::LEFT);
+        GetMarqueeModel()->SetDirection(MarqueeDirection::LEFT);
     } else {
-        MarqueeModel::GetInstance()->SetDirection(MarqueeDirection::RIGHT);
+        GetMarqueeModel()->SetDirection(MarqueeDirection::RIGHT);
     }
 }
 
 void FfiOHOSAceFrameworkMarqueeSetAllowScale(bool value)
 {
-    MarqueeModel::GetInstance()->SetAllowScale(value);
+    GetMarqueeModel()->SetAllowScale(value);
 }
 
 void FfiOHOSAceFrameworkMarqueeSetFontColor(uint32_t color)
 {
-    MarqueeModel::GetInstance()->SetTextColor(Color(color));
+    GetMarqueeModel()->SetTextColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkMarqueeSetFontSize(double value, int32_t unit)
 {
     Dimension fontSize(value, static_cast<DimensionUnit>(unit));
-    MarqueeModel::GetInstance()->SetFontSize(fontSize);
+    GetMarqueeModel()->SetFontSize(fontSize);
 }
 
 void FfiOHOSAceFrameworkMarqueeSetFontWeight(const char* fontWeight)
 {
-    MarqueeModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    GetMarqueeModel()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void FfiOHOSAceFrameworkMarqueeSetFontFamily(const char* fontFamily)
 {
     std::vector<std::string> fontFamilies;
     fontFamilies = ConvertStrToFontFamilies(fontFamily);
-    MarqueeModel::GetInstance()->SetFontFamily(fontFamilies);
+    GetMarqueeModel()->SetFontFamily(fontFamilies);
 }
 
 void FfiOHOSAceFrameworkMarqueeSetMarqueeUpdateStrategy(int32_t value)
 {
     if (value == 0) {
-        MarqueeModel::GetInstance()->SetMarqueeUpdateStrategy(MarqueeUpdateStrategy::DEFAULT);
+        GetMarqueeModel()->SetMarqueeUpdateStrategy(MarqueeUpdateStrategy::DEFAULT);
     }
     if (value == 1) {
-        MarqueeModel::GetInstance()->SetMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+        GetMarqueeModel()->SetMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
     }
 }
 
@@ -80,7 +94,7 @@ void FfiOHOSAceFrameworkMarqueeOnStart(void (*callback)())
     auto onStart = [lambda = CJLambda::Create(callback)]() {
         lambda();
     };
-    MarqueeModel::GetInstance()->SetOnStart(std::move(onStart));
+    GetMarqueeModel()->SetOnStart(std::move(onStart));
 }
 
 void FfiOHOSAceFrameworkMarqueeOnBounce(void (*callback)())
@@ -88,7 +102,7 @@ void FfiOHOSAceFrameworkMarqueeOnBounce(void (*callback)())
     auto onBounce = [lambda = CJLambda::Create(callback)]() {
         lambda();
     };
-    MarqueeModel::GetInstance()->SetOnBounce(std::move(onBounce));
+    GetMarqueeModel()->SetOnBounce(std::move(onBounce));
 }
 
 void FfiOHOSAceFrameworkMarqueeOnFinish(void (*callback)())
@@ -96,6 +110,6 @@ void FfiOHOSAceFrameworkMarqueeOnFinish(void (*callback)())
     auto onFinish = [lambda = CJLambda::Create(callback)]() {
         lambda();
     };
-    MarqueeModel::GetInstance()->SetOnFinish(std::move(onFinish));
+    GetMarqueeModel()->SetOnFinish(std::move(onFinish));
 }
 }

@@ -14,7 +14,7 @@
  */
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
-import { CanvasMode, ImageGenerateState } from "../types/Declaration";
+import { CanvasLayoutDirection, CanvasMode, ImageGenerateState } from "../types/Declaration";
 import image from "@ohos.multimedia.image";
 export declare class styleItem {
     name: ResourceStr;
@@ -36,6 +36,12 @@ export declare struct CanvasHome {
     readonly styles?: Array<imageGeneration.ImageStyle>;
     @Param
     readonly userPrompt: string;
+    @Consumer('globalCanvasMode')
+    curCanvasMode: CanvasMode;
+    @Consumer('globalSheetType')
+    curSheetType: SheetType;
+    @Consumer('globalLayoutDirection')
+    curLayoutDirection: CanvasLayoutDirection;
     @Builder
     homeTitleBuilder(): void;
     build(): void;

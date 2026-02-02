@@ -421,6 +421,41 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestDefaultValues, TestSiz
 * @tc.desc:
 * @tc.type: FUNC
 */
+HWTEST_F(CommonMethodModifierTest19, SetAccessibilityGroupWithConfigImplTest001, TestSize.Level1)
+{
+    Ark_AccessibilityOptions options;
+
+    NG::AccessibilityGroupOptions groupOptions;
+    options.stateControllerRoleType = {
+        .tag = INTEROP_TAG_UNDEFINED,
+        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
+    };
+    options.actionControllerRoleType = {
+        .tag = INTEROP_TAG_UNDEFINED,
+        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
+    };
+
+    groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(options);
+    ASSERT_EQ(groupOptions.stateControllerByType, AccessibilityRoleType::ROLE_NONE);
+    ASSERT_EQ(groupOptions.actionControllerByType, AccessibilityRoleType::ROLE_NONE);
+
+    options.stateControllerRoleType = {
+        .tag = INTEROP_TAG_INT32,
+        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
+    };
+    options.actionControllerRoleType = {
+        .tag = INTEROP_TAG_INT32,
+        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
+    };
+    groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(options);
+    ASSERT_EQ(groupOptions.stateControllerByType, AccessibilityRoleType::BUTTON);
+}
+
+/*
+* @tc.name: AccessibilityRoleTestValidValues
+* @tc.desc:
+* @tc.type: FUNC
+*/
 HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
@@ -616,7 +651,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu1Test, TestSize.Level1)
     auto unionCustomNodeBuilderValue =
         Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomBuilder, CustomNodeBuilder>(builder);
 
-    auto show = Converter::ArkValue<Opt_Boolean>(false);
+    auto show = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
     modifier_->setBindMenu1(node_, &show, &unionCustomNodeBuilderValue, &optOptions);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }

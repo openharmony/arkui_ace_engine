@@ -145,6 +145,8 @@ let EllipsisMode;
   EllipsisMode[EllipsisMode.START = 0] = 'start';
   EllipsisMode[EllipsisMode.CENTER = 1] = 'center';
   EllipsisMode[EllipsisMode.END = 2] = 'end';
+  EllipsisMode[EllipsisMode.MULTILINE_START = 3] = 'multiline-start';
+  EllipsisMode[EllipsisMode.MULTILINE_CENTER = 4] = 'multiline-center';
 })(EllipsisMode || (EllipsisMode = {}));
 
 let LineBreakStrategy;
@@ -2914,10 +2916,49 @@ class NavPathStack {
     return undefined;
   }
   replacePath(info, optionParam) {
-    if (!this.checkPathValid(info)) {
+    if (info === undefined || info === null) {
       return;
     }
-    this.doReplaceInner(info, optionParam);
+    let launchMode = LaunchMode.STANDARD;
+    let animated = true;
+    if (typeof optionParam === 'boolean') {
+      animated = optionParam;
+    } else if (optionParam !== undefined && optionParam !== null) {
+      if (typeof optionParam.animated === 'boolean') {
+        animated = optionParam.animated;
+      }
+      if (optionParam.launchMode !== undefined && optionParam.launchMode !== null) {
+        launchMode = optionParam.launchMode;
+      }
+    }
+    let index = -1;
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].index = -1;
+        if (index !== this.pathArray.length - 1) {
+          let targetInfo = this.pathArray.splice(index, 1);
+          if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+            this.pathArray.pop();
+          } else {
+            this.pathArray.splice(index);
+          }
+          this.pathArray.push(targetInfo[0]);
+        }
+      }
+    }
+    if (index === -1) {
+      if (this.pathArray.length !== 0) {
+        this.pathArray.pop();
+      }
+      this.pathArray.push(info);
+      this.pathArray[this.pathArray.length - 1].index = -1;
+    }
+    this.isReplace = 1;
+    this.animated = animated;
+    this.nativeStack?.onStateChanged();
   }
   replaceDestination(info, navigationOptions) {
     if (!this.checkPathValid(info)) {
@@ -4277,6 +4318,12 @@ let SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode.SELF_FIRST = 1] = 'SELF_FIRST';
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
+let TabsNestedScrollMode;
+(function (TabsNestedScrollMode) {
+  TabsNestedScrollMode[TabsNestedScrollMode.SELF_ONLY = 0] = 'SELF_ONLY';
+  TabsNestedScrollMode[TabsNestedScrollMode.SELF_FIRST = 1] = 'SELF_FIRST';
+})(TabsNestedScrollMode || (TabsNestedScrollMode = {}));
+
 let PageFlipMode;
 (function (PageFlipMode) {
   PageFlipMode[PageFlipMode.CONTINUOUS = 0] = 'CONTINUOUS';
@@ -4938,16 +4985,6 @@ let WebBypassVsyncCondition;
   WebBypassVsyncCondition[WebBypassVsyncCondition.SCROLLBY_FROM_ZERO_OFFSET = 1] = 'SCROLLBY_FROM_ZERO_OFFSET';
 })(WebBypassVsyncCondition || (WebBypassVsyncCondition = {}));
 
-let CommonState;
-(function (CommonState) {
-  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
-  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
-  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
-  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
-  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
-  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
-})(CommonState || (CommonState = {}));
-
 let EventQueryType;
 (function (EventQueryType) {
   EventQueryType[EventQueryType.ON_CLICK = 0] = 'ON_CLICK';
@@ -5051,6 +5088,14 @@ let ScrollSnapAnimationSpeed;
   ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.SLOW = 1] = 'SLOW';
 })(ScrollSnapAnimationSpeed || (ScrollSnapAnimationSpeed = {}));
 
+let NavigationPolicy;
+(function (NavigationPolicy) {
+  NavigationPolicy[NavigationPolicy.NEW_POPUP = 0] = 'NEW_POPUP';
+  NavigationPolicy[NavigationPolicy.NEW_WINDOW = 1] = 'NEW_WINDOW';
+  NavigationPolicy[NavigationPolicy.NEW_BACKGROUND_TAB = 2] = 'NEW_BACKGROUND_TAB';
+  NavigationPolicy[NavigationPolicy.NEW_FOREGROUND_TAB = 3] = 'NEW_FOREGROUND_TAB';
+})(NavigationPolicy || (NavigationPolicy = {}));
+
 let NativeEmbedParamStatus;
 (function (NativeEmbedParamStatus) {
   NativeEmbedParamStatus.ADD = 0;
@@ -5118,3 +5163,40 @@ let ThreatType;
   ThreatType[ThreatType.THREAT_NONE = 4] = 'THREAT_NONE';
   ThreatType[ThreatType.THREAT_UNPROCESSED = 5] = 'THREAT_UNPROCESSED';
 })(ThreatType || (ThreatType = {}));
+
+let ConsoleMessageSource
+(function (ConsoleMessageSource) {
+  ConsoleMessageSource[ConsoleMessageSource.XML = 0] = 'XML';
+  ConsoleMessageSource[ConsoleMessageSource.JAVASCRIPT = 1] = 'JAVASCRIPT';
+  ConsoleMessageSource[ConsoleMessageSource.NETWORK = 2] = 'NETWORK';
+  ConsoleMessageSource[ConsoleMessageSource.CONSOLE_API = 3] = 'CONSOLE_API';
+  ConsoleMessageSource[ConsoleMessageSource.STORAGE = 4] = 'STORAGE';
+  ConsoleMessageSource[ConsoleMessageSource.RENDERING = 5] = 'RENDERING';
+  ConsoleMessageSource[ConsoleMessageSource.SECURITY = 6] = 'SECURITY';
+  ConsoleMessageSource[ConsoleMessageSource.OTHER = 7] = 'OTHER';
+  ConsoleMessageSource[ConsoleMessageSource.DEPRECATION = 8] = 'DEPRECATION';
+  ConsoleMessageSource[ConsoleMessageSource.WORKER = 9] = 'WORKER';
+  ConsoleMessageSource[ConsoleMessageSource.VIOLATION = 10] = 'VIOLATION';
+  ConsoleMessageSource[ConsoleMessageSource.INTERVENTION = 11] = 'INTERVENTION';
+  ConsoleMessageSource[ConsoleMessageSource.RECOMMENDATION = 12] = 'RECOMMENDATION';
+})(ConsoleMessageSource || (ConsoleMessageSource = {}));
+
+let DialogDisplayMode;
+(function (DialogDisplayMode) {
+  DialogDisplayMode[DialogDisplayMode.SCREEN_BASED = 0] = 'SCREEN_BASED';
+  DialogDisplayMode[DialogDisplayMode.WINDOW_BASED = 1] = 'WINDOW_BASED';
+})(DialogDisplayMode || (DialogDisplayMode = {}));
+
+let CameraCaptureState;
+(function (CameraCaptureState) {
+  CameraCaptureState[CameraCaptureState.NONE = 0] = 'NONE';
+  CameraCaptureState[CameraCaptureState.PAUSED = 1] = 'PAUSED';
+  CameraCaptureState[CameraCaptureState.ACTIVE = 2] = 'ACTIVE';
+})(CameraCaptureState || (CameraCaptureState = {}));
+
+let MicrophoneCaptureState;
+(function (MicrophoneCaptureState) {
+  MicrophoneCaptureState[MicrophoneCaptureState.NONE = 0] = 'NONE';
+  MicrophoneCaptureState[MicrophoneCaptureState.PAUSED = 1] = 'PAUSED';
+  MicrophoneCaptureState[MicrophoneCaptureState.ACTIVE = 2] = 'ACTIVE';
+})(MicrophoneCaptureState || (MicrophoneCaptureState = {}));

@@ -20,10 +20,12 @@
 #include "common/common_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
+#include "detached_free_root_node/detached_free_root_node.h"
 #include "syntax/lazy_for_each_module.h"
 #include "syntax/syntax_module.h"
 #include "syntax/for_each_module.h"
-#include "list/list_children_main_size_module.h"
+#include "list/list_module.h"
+#include "list/list_item_group_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "water_flow/water_flow_module.h"
@@ -342,6 +344,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowName)
         },
         ani_native_function {
+            "_Common_setIsRecycleInvisibleImageMemory",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetIsRecycleInvisibleImageMemory)
+        },
+        ani_native_function {
             "_Common_getWindowId",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::getWindowId)
@@ -372,9 +379,34 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
         },
         ani_native_function {
+            "_GetCallingScopeUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetCallingScopeUIContext)
+        },
+        ani_native_function {
+            "_GetLastFocusedUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetLastFocusedUIContext)
+        },
+        ani_native_function {
+            "_GetLastForegroundUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetLastForegroundUIContext)
+        },
+        ani_native_function {
+            "_GetAllUIContexts",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetAllUIContexts)
+        },
+        ani_native_function {
             "_ResolveUIContext",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ResolveUIContext)
+       },
+       ani_native_function {
+            "_DetachedFreeRoot_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructDetachedFreeRoot)
        }
     };
 

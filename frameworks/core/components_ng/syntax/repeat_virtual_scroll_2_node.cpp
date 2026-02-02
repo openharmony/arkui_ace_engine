@@ -46,6 +46,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode
         node->UpdateTotalCount(totalCount);
         return node;
     }
+    ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<RepeatVirtualScroll2Node>(
         nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange,
         onMoveFromTo, onPurge, onUpdateDirty);

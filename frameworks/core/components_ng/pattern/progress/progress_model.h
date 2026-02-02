@@ -58,6 +58,7 @@ public:
     virtual void SetColor(const Color& value) = 0;
     virtual void ResetColor() = 0;
     virtual void SetBackgroundColor(const Color& value) = 0;
+    virtual void SetBackgroundColorByUser(bool value) = 0;
     virtual void ResetBackgroundColor() = 0;
     virtual void SetStrokeWidth(const Dimension& value) = 0;
     virtual void SetScaleCount(int32_t value) = 0;
@@ -85,6 +86,7 @@ public:
     virtual void ResetStrokeRadius() {}
     virtual void SetBorderRadius(const Dimension& value) {}
     virtual void ResetBorderRadius() {}
+    virtual void SetGradientColorResObj(const NG::Gradient& value) = 0;
     virtual void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetCapsuleStyleFontColor(bool value) = 0;
     virtual void SetCapsuleStyle(bool value) = 0;

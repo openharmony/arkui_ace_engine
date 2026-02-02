@@ -1282,6 +1282,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
     };
     auto props = list->GetLayoutProperty<ListLayoutProperty>();
     props->UpdateDivider(divider);
+    props->UpdateDividerColorSetByUser(true);
     props->UpdateListDirection(Axis::VERTICAL);
     return list;
 }
@@ -1514,6 +1515,7 @@ void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, con
     CHECK_NULL_VOID(textProps);
     textProps->UpdateTextColor(textStyle.GetTextColor());
     textNode->MarkModifyDone();
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void DialogPattern::UpdateAlignmentAndOffset()
@@ -2101,7 +2103,8 @@ bool DialogPattern::NeedUpdateHostWindowRect()
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     auto forceUpdate = NeedUpdateHostWindowRect();
-    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE;
+    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE ||
+                           type == WindowSizeChangeReason::SCENE_WITH_ANIMATION;
 
     TAG_LOGI(AceLogTag::ACE_DIALOG,
         "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d forceUpdate: %{public}d", type,
@@ -2475,6 +2478,20 @@ void DialogPattern::OnDetachFromMainTreeImpl()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->RemoveDialogFromMapForcefully(host);
+
+    if (dialogProperties_.isShowInSubWindow) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        auto maskNodeId = parentOverlayManager->GetMaskNodeIdWithDialogId(host->GetId());
+        if (maskNodeId == -1) {
+            maskNodeId = maskNodeId_;
+        }
+        RefPtr<FrameNode> maskNode = parentOverlayManager->GetDialog(maskNodeId);
+        CHECK_NULL_VOID(maskNode);
+        parentOverlayManager->CloseDialog(maskNode);
+    }
 }
 
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)

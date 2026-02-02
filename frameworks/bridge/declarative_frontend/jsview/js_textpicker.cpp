@@ -26,10 +26,9 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/textpicker_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/picker/picker_base_component.h"
-#include "core/components/picker/picker_theme.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
@@ -66,7 +65,12 @@ TextPickerModel* TextPickerModel::GetInstance()
         if (Container::IsCurrentUseNewPipeline()) {
             textPickerInstance_.reset(new NG::TextPickerModelNG());
         } else {
-            textPickerInstance_.reset(new Framework::TextPickerModelImpl());
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textPicker");
+            if (!loader) {
+                LOGF("Can't find textPicker loader");
+                return;
+            }
+            textPickerInstance_.reset(reinterpret_cast<TextPickerModel*>(loader->CreateModel()));
         }
 #endif
     });
@@ -83,7 +87,12 @@ TextPickerDialogModel* TextPickerDialogModel::GetInstance()
         if (Container::IsCurrentUseNewPipeline()) {
             textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
         } else {
-            textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textPickerDialog");
+            if (!loader) {
+                LOGF("Can't find textpickerdialog loader");
+                return;
+            }
+            textPickerDialogInstance_.reset(reinterpret_cast<TextPickerDialogModel*>(loader->CreateModel()));
         }
 #endif
     });
@@ -2161,94 +2170,5 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
         dialogCancelEvent["cancelId"] = cancelId;
     }
     return dialogCancelEvent;
-}
-
-void JSTextPickerDialog::AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info)
-{
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto onAccept = paramObject->GetProperty("onAccept");
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        auto acceptId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                                        const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "value", "index" };
-            ACE_SCORING_EVENT("TextPickerDialog.onAccept");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        });
-        picker->SetDialogAcceptEvent(acceptId);
-    }
-    auto onCancel = paramObject->GetProperty("onCancel");
-    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId =
-            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("TextPickerDialog.onCancel");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute();
-            });
-        picker->SetDialogCancelEvent(cancelId);
-    }
-    auto onChange = paramObject->GetProperty("onChange");
-    if (!onChange->IsUndefined() && onChange->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        auto changeId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                                        const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "value", "index" };
-            ACE_SCORING_EVENT("TextPickerDialog.onChange");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        });
-        picker->SetDialogChangeEvent(changeId);
-    }
-}
-
-void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj)
-{
-    auto getSelected = paramObj->GetProperty("selected");
-    auto defaultHeight = paramObj->GetProperty("defaultPickerItemHeight");
-    auto canLoop = paramObj->GetProperty("canLoop");
-    JSRef<JSArray> getRange = paramObj->GetProperty("range");
-    std::vector<std::string> getRangeVector;
-    if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
-        return;
-    }
-
-    std::string value = "";
-    uint32_t selectedValue = 0;
-    auto getValue = paramObj->GetProperty("value");
-    if (!JSViewAbstract::ParseJsInteger(getSelected, selectedValue) && JSViewAbstract::ParseJsString(getValue, value)) {
-        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
-        if (valueIterator != getRangeVector.end()) {
-            selectedValue = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
-        }
-    }
-
-    if (selectedValue >= getRangeVector.size()) {
-        selectedValue = 0;
-    }
-
-    CalcDimension height;
-    if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
-        if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
-            return;
-        }
-    }
-
-    component->SetIsDialog(true);
-    component->SetIsCreateDialogComponent(true);
-    if (!defaultHeight->IsEmpty()) {
-        component->SetColumnHeight(height);
-        component->SetDefaultHeight(true);
-    }
-    component->SetSelected(selectedValue);
-    component->SetRange(getRangeVector);
 }
 } // namespace OHOS::Ace::Framework

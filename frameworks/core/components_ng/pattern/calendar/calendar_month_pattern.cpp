@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/calendar/calendar_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,6 +47,8 @@ constexpr int32_t WEEK_ROW_INDEX = 1;
 
 RefPtr<NodePaintMethod> CalendarMonthPattern::CreateNodePaintMethod()
 {
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         InitCurrentVirtualNode();
     }
@@ -134,7 +137,7 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
 #ifndef ARKUI_WEARABLE
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange()) {
 #else
     if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
 #endif
@@ -150,7 +153,7 @@ bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
     CHECK_NULL_RETURN(pipeline, false);
     auto fontSizeScale = pipeline->GetFontScale();
 #ifndef ARKUI_WEARABLE
-    if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange())
+    if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange())
         && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
 #else
     if (fontSizeScale < theme->GetCalendarPickerLargeScale()
@@ -288,6 +291,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
 void CalendarMonthPattern::InitVirtualButtonClickEvent(RefPtr<FrameNode> frameNode, int32_t index)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this), index](GestureEvent& info) {
@@ -307,6 +311,7 @@ void CalendarMonthPattern::InitClickEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto obtainedMonth = obtainedMonth_;

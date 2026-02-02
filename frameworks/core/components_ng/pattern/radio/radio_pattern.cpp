@@ -542,6 +542,7 @@ void RadioPattern::CheckPageNode()
     if (pageNode->GetId() != prePageId) {
         auto eventHub = host->GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(eventHub);
+        UpdateGroupManager();
         auto groupManager = GetGroupManager();
         CHECK_NULL_VOID(groupManager);
         auto group = eventHub->GetGroup();
@@ -1118,6 +1119,13 @@ RefPtr<FrameNode> RadioPattern::BuildContentModifierNode()
     return (makeFunc_.value())(radioConfiguration);
 }
 
+void RadioPattern::UpdateGroupManager()
+{
+    auto manager = GroupManager::GetGroupManager();
+    CHECK_NULL_VOID(manager.Upgrade());
+    groupManager_ = manager;
+}
+
 RefPtr<GroupManager> RadioPattern::GetGroupManager()
 {
     auto manager = groupManager_.Upgrade();
@@ -1229,7 +1237,8 @@ bool RadioPattern::ReportOnChangeEvent(int32_t nodeId, bool isChecked, bool forc
     CHECK_NULL_RETURN(value, false);
     value->Put("Radio", "onChange");
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
 }
 

@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <string>
 
-#include "ui/focus/focus_constants.h"
 #include "ui/properties/flex.h"
 
 #include "base/utils/linear_map.h"
@@ -599,6 +598,7 @@ enum class SrcType {
     RESOURCE_ID, // default resource which src is internal resource id
     PIXMAP,
     ASTC,
+    STREAM,
 };
 
 enum class WrapAlignment {

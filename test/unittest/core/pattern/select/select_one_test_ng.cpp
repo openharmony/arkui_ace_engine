@@ -134,6 +134,7 @@ void SelectOneTestNg::SetUpTestCase()
 
 void SelectOneTestNg::TearDownTestCase()
 {
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
 }
 
@@ -1453,5 +1454,37 @@ HWTEST_F(SelectOneTestNg, OnModifyDone014, TestSize.Level1)
     val = menuPattern->IsSelectMenu();
     EXPECT_EQ(val, true);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnModifyDone015
+ * @tc.desc: Test SelectPattern OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOneTestNg, OnModifyDone015, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->menuItemNeedFocus_ = true;
+    selectPattern->OnModifyDone();
+    BorderColorProperty borderColor;
+    borderColor.SetColor(selectTheme->GetMenuNormalBorderColor());
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(selectTheme->GetMenuNormalBorderWidth());
+    EXPECT_EQ(renderContext->GetBorderColor(), borderColor);
+    EXPECT_EQ(renderContext->GetBorderWidth(), borderWidth);
 }
 } // namespace OHOS::Ace::NG

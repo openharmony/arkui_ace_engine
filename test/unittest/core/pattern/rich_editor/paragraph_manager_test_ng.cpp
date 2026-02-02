@@ -66,12 +66,18 @@ void RichEditorParagraphManagetTestNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects001, TestSize.Level0)
 {
+    /**
+ 	* @tc.steps: step1. get richEditor controller
+ 	*/
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ParagraphManager::ParagraphInfo info;
     info.start = 3;
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    /**
+ 	* @tc.steps: step2. get paragraphs rects
+ 	*/
     std::vector<std::pair<std::vector<RectF>, TextDirection>> result =
         richEditorPattern->paragraphs_.GetParagraphsRects(1, 2);
     EXPECT_EQ(result.size(), 0);
@@ -1347,6 +1353,28 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphPositionAtCoordinate001, Test
     EXPECT_EQ(finalResult.position_, 0);
     finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(0.0, 900.0));
     EXPECT_EQ(finalResult.position_, 2);
+}
+
+/**
+ * @tc.name: CalLineIndex001
+ * @tc.desc: Test the paragraph manager CalLineIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalLineIndex001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+
+    richEditorPattern->paragraphs_.CalLineIndex();
+    EXPECT_TRUE(richEditorPattern->paragraphs_.hasLineIndex);
 }
 
 /**

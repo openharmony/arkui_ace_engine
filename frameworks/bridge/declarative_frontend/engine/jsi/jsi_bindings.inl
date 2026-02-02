@@ -57,10 +57,23 @@ template<typename C>
 void JsiClass<C>::Declare(const char* name)
 {
     className_ = name;
+    for (auto& [name, val] : staticFunctions_) {
+        val.FreeGlobalHandleAddr();
+    }
     staticFunctions_.clear();
+    for (auto& [name, val] : customFunctions_) {
+        val.FreeGlobalHandleAddr();
+    }
     customFunctions_.clear();
+    for (auto& [name, val] : customGetFunctions_) {
+        val.FreeGlobalHandleAddr();
+    }
     customGetFunctions_.clear();
+    for (auto& [name, val] : customSetFunctions_) {
+        val.FreeGlobalHandleAddr();
+    }
     customSetFunctions_.clear();
+    classFunction_.FreeGlobalHandleAddr();
     classFunction_.Empty();
 }
 

@@ -19,6 +19,7 @@
 #include "ui/common/layout/constants.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -46,6 +47,8 @@ constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
+constexpr uint32_t REPORTER_PRECISION = 3;
+constexpr uint32_t NODE_TYPE = 0;
 constexpr float OBSCURED_ALPHA = 0.2f;
 } // namespace
 
@@ -510,9 +513,71 @@ float TextContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInf
     return contentRect.GetX() + contentRect.Width() - leadingMarginWidth;
 }
 
+void TextContentModifier::RemoveWhitespaceCharacters(std::u16string& reportParagraph)
+{
+    reportParagraph.erase(
+        std::remove_if(reportParagraph.begin(), reportParagraph.end(),
+            [](char16_t c) { return c == u' ' || c == u'\t' || c == u'\n' || c == u'\r' || c == u'\v' || c == u'\f'; }),
+        reportParagraph.end());
+}
+
+void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager,
+    const RefPtr<TextPattern>& textPattern, const std::u16string& paragraphContent)
+{
+    CHECK_NULL_VOID(pManager);
+    CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto lineCount = pManager->GetLineCount();
+    auto paragraphs = pManager->GetParagraphs();
+    auto paragraphsSize = paragraphs.size();
+    std::u16string reportParagraph = paragraphContent;
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
+    if (host->GetHostTag() == V2::TEXT_ETS_TAG && recordingCanvas != nullptr &&
+        recordingCanvas->GetDrawCmdList() != nullptr && recordingCanvas->GetDrawCmdList()->IsEmpty()) {
+        RemoveWhitespaceCharacters(reportParagraph);
+        if (reportParagraph.length() != 0) {
+            std::stringstream errorInfo;
+            errorInfo << std::fixed << std::setprecision(REPORTER_PRECISION);
+            errorInfo << "LongestLineWithIndent:" << pManager->GetLongestLineWithIndent()
+                      << " MaxIntrinsicWidth:" << pManager->GetMaxIntrinsicWidth()
+                      << " MaxWidth:" << pManager->GetMaxWidth() << " height:" << pManager->GetHeight()
+                      << " lineCount:" << lineCount << " size:" << paragraphsSize;
+            EventReport::SendComponentExceptionNG(
+                ComponentExcepTypeNG::TEXT_DRAW_CMD_LIST_ERR, NODE_TYPE, host->GetId(), errorInfo.str());
+        }
+    }
+}
+
+bool TextContentModifier::HandleDrawCallback(
+    const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
+{
+    CHECK_NULL_RETURN(pManager, false);
+    CHECK_NULL_RETURN(textPattern, false);
+    auto drawCallback = textPattern->GetExternalDrawCallback();
+    CHECK_NULL_RETURN(drawCallback, false);
+    auto paragraphs = pManager->GetParagraphs();
+    if (paragraphs.size() == 1) {
+        auto paintOffsetY = paintOffset_.GetY();
+        SetTextContentAlingOffsetY(paintOffsetY);
+        auto contentRect = textPattern->GetTextContentRect();
+        float paintOffsetX = AdjustParagraphX(paragraphs.front(), contentRect);
+        auto host = textPattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return drawCallback(
+            paintOffsetX, paintOffsetY, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    }
+    return false;
+}
+
 void TextContentModifier::DrawText(
     RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
+    if (HandleDrawCallback(pManager, textPattern)) {
+        return;
+    }
     auto paintOffsetY = paintOffset_.GetY();
     SetTextContentAlingOffsetY(paintOffsetY);
     auto paragraphs = pManager->GetParagraphs();
@@ -527,6 +592,7 @@ void TextContentModifier::DrawText(
         paintOffsetY += paragraph->GetHeight();
         paragraphContent += paragraph->GetParagraphText();
     }
+    ReportFaultEvent(canvas, pManager, textPattern, paragraphContent);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(paragraphContent.length() == 1 && host->GetHostTag() == V2::TEXT_ETS_TAG);
@@ -581,8 +647,10 @@ void TextContentModifier::ContentChangeReport()
     if (!mgr->IsTextAABBCollecting() || host->GetTag() == "SymbolGlyph") {
         return;
     }
-    auto textRect = host->GetTransformRectRelativeToWindow();
-    mgr->OnTextChangeEnd(textRect);
+    auto textRect = host->GetTransformRectRelativeToWindowOnlyVisible();
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    mgr->OnTextChangeEnd(textRect, rootNode->GetRectWithRender());
 }
 
 void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,
@@ -1267,20 +1335,16 @@ TextDirection TextContentModifier::GetTextRaceDirection() const
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
-    // 获取文本方向属性，默认为 INHERIT
+    // default INHERIT
     auto textDirection = layoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
     auto layoutDirection = layoutProperty->GetLayoutDirection();
     
-    // textDirection 优先级高于 layoutDirection
     if (textDirection != TextDirection::INHERIT) {
         if (textDirection == TextDirection::AUTO) {
-            // textDirection 为 AUTO 时，返回文本自身字符方向
             return GetTextRaceDirectionByContent();
         }
-        // 直接返回明确的文本方向（LTR 或 RTL）
         return textDirection;
     }
-    // textDirection 为 INHERIT 时，继承原有的 layoutDirection 逻辑
     if (layoutDirection == TextDirection::AUTO) {
         return GetTextRaceDirectionByContent();
     }
@@ -1412,6 +1476,13 @@ void TextContentModifier::ContentChange()
 
 void TextContentModifier::AddDefaultShadow()
 {
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    if (textPattern) {
+        auto frameNode = textPattern->GetHost();
+        if (frameNode) {
+            ACE_UINODE_TRACE(frameNode);
+        }
+    }
     Shadow emptyShadow;
     auto blurRadius = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetBlurRadius());
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
@@ -1514,9 +1585,15 @@ void TextContentModifier::ResumeTextRace(bool bounce)
     if (!AllowTextRace()) {
         return;
     }
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    if (textPattern) {
+        auto frameNode = textPattern->GetHost();
+        if (frameNode) {
+            ACE_UINODE_TRACE(frameNode);
+        }
+    }
     if (!bounce) {
         marqueeCount_ = 0;
-        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }

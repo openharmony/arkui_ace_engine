@@ -19,6 +19,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
+
+SINGLETON_INSTANCE_IMPL(ColorInverter);
+
 ColorInverter::ColorInverter() = default;
 ColorInverter::~ColorInverter() = default;
 

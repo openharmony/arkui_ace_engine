@@ -80,7 +80,101 @@ public:
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        paintRect_ = geometryNode->GetFrameRect();
+        OnePixelRounding(flag);
+        UpdatePaintRect(RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize()));
+    }
+
+    void OnePixelRounding(uint16_t flag)
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto geometryNode = frameNode->GetGeometryNode();
+        float relativeLeft = geometryNode->GetFrameOffset().GetX();
+        float relativeTop = geometryNode->GetFrameOffset().GetY();
+        float nodeWidth = geometryNode->GetFrameSize().Width();
+        float nodeHeight = geometryNode->GetFrameSize().Height();
+        float roundToPixelErrorX = 0.0f;
+        float roundToPixelErrorY = 0.0f;
+        float absoluteRight = relativeLeft + nodeWidth;
+        float absoluteBottom = relativeTop + nodeHeight;
+        bool ceilLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+        bool floorLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        bool noRoundLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+        bool ceilTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+        bool floorTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        bool noRoundTop = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+        bool ceilRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+        bool floorRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        bool noRoundRight = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+        bool ceilBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+        bool floorBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        bool noRoundBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+
+        float nodeLeftI = OnePixelValueRounding(relativeLeft, !noRoundLeft, ceilLeft, floorLeft);
+        float nodeTopI = OnePixelValueRounding(relativeTop, !noRoundTop, ceilTop, floorTop);
+        roundToPixelErrorX += nodeLeftI - relativeLeft;
+        roundToPixelErrorY += nodeTopI - relativeTop;
+        geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+
+        float nodeWidthI = OnePixelValueRounding(absoluteRight, !noRoundRight, ceilRight, floorRight) - nodeLeftI;
+        float nodeWidthTemp = OnePixelValueRounding(nodeWidth, !noRoundRight, ceilRight, floorRight);
+        roundToPixelErrorX += nodeWidthI - nodeWidth;
+        if (roundToPixelErrorX > 0.5f) {
+            nodeWidthI -= 1.0f;
+            roundToPixelErrorX -= 1.0f;
+        }
+        bool enableForceFloorX =
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE && (floorLeft || floorRight);
+        if (roundToPixelErrorX < -0.5f && !enableForceFloorX) {
+            nodeWidthI += 1.0f;
+            roundToPixelErrorX += 1.0f;
+        }
+        if (nodeWidthI < nodeWidthTemp) {
+            roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+            nodeWidthI = nodeWidthTemp;
+        }
+
+        float nodeHeightI = OnePixelValueRounding(absoluteBottom, !noRoundBottom, ceilBottom, floorBottom) - nodeTopI;
+        float nodeHeightTemp = OnePixelValueRounding(nodeHeight, !noRoundBottom, ceilBottom, floorBottom);
+        roundToPixelErrorY += nodeHeightI - nodeHeight;
+        if (roundToPixelErrorY > 0.5f) {
+            nodeHeightI -= 1.0f;
+            roundToPixelErrorY -= 1.0f;
+        }
+        bool enableForceFloorY =
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE && (floorTop || floorBottom);
+        if (roundToPixelErrorY < -0.5f && !enableForceFloorY) {
+            nodeHeightI += 1.0f;
+            roundToPixelErrorY += 1.0f;
+        }
+        if (nodeHeightI < nodeHeightTemp) {
+            roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+            nodeHeightI = nodeHeightTemp;
+        }
+        geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    }
+
+    float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
+    {
+        float fractials = fmod(value, 1.0f);
+        if (fractials == 0.0f) {
+            return value;
+        }
+        if (fractials < 0.0f) {
+            ++fractials;
+        }
+        if (forceCeil) {
+            return (value - fractials + 1.0f);
+        } else if (forceFloor) {
+            return (value - fractials);
+        } else if (isRound) {
+            if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.5f)) {
+                return (value - fractials + 1.0f);
+            } else {
+                return (value - fractials);
+            }
+        }
+        return value;
     }
 
     RectF GetPaintRectWithTransform() override
@@ -117,6 +211,17 @@ public:
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
+        sysOptions_ = sysOptions;
+    }
+
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurRadius = radius;
+        // see ./components_ng/render/adapter/rosen_render_context.cpp
+        // RosenRenderContext::UpdateBackBlur
+        backdropBlurOption = blurOption;
+        sysOptions_ = sysOptions;
     }
 
     void UpdateBackgroundEffect(
@@ -139,6 +244,13 @@ public:
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;
+    }
+
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propBlurRadius = radius;
+        foregroundBlurOption = blurOption;
     }
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -176,6 +288,11 @@ public:
         animationsCount_ = count;
     }
 
+    const std::optional<SysOptions>& GetSysOptions() const
+    {
+        return sysOptions_;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -186,8 +303,11 @@ public:
     std::function<void()> transitionOutCallback_;
     Color actualForegroundColor_;
 
+    BlurOption backdropBlurOption;
+    BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_;
+    std::optional<SysOptions> sysOptions_;
 private:
     size_t animationsCount_ = 0;
 };

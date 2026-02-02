@@ -39,6 +39,16 @@ int32_t GetNavigationUniqueId(const RefPtr<NavDestinationPattern>& pattern)
 }
 } // namespace
 
+std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>> UIObserverHandler::beforePanStartCallbackMap_;
+std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>> UIObserverHandler::beforePanEndCallbackMap_;
+std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>> UIObserverHandler::afterPanStartCallbackMap_;
+std::unordered_map<int32_t, std::map<int32_t, PanListenerCallback>> UIObserverHandler::afterPanEndCallbackMap_;
+
+std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::willClickCallbackMap_;
+std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::didClickCallbackMap_;
+std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::willTapCallbackMap_;
+std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::didTapCallbackMap_;
+
 UIObserverHandler& UIObserverHandler::GetInstance()
 {
     static UIObserverHandler instance;
@@ -215,7 +225,6 @@ void UIObserverHandler::NotifyWillClick(
     const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(willClickHandleFunc_);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
@@ -227,6 +236,9 @@ void UIObserverHandler::NotifyWillClick(
         willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
     }
 
+    TriggerWillClick(gestureEventInfo, frameNode);
+    TriggerWillTap(gestureEventInfo, frameNode);
+
     if (willClickHandleFuncForAni_) {
         willClickHandleFuncForAni_();
     }
@@ -236,7 +248,6 @@ void UIObserverHandler::NotifyDidClick(
     const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(didClickHandleFunc_);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
@@ -248,6 +259,9 @@ void UIObserverHandler::NotifyDidClick(
     if (didClickHandleFunc_) {
         didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
     }
+
+    TriggerDidClick(gestureEventInfo, frameNode);
+    TriggerDidTap(gestureEventInfo, frameNode);
 
     if (didClickHandleFuncForAni_) {
         didClickHandleFuncForAni_();
@@ -270,26 +284,18 @@ void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureE
     if (panGestureInfo.callbackState == CurrentCallbackState::START) {
         if (panGestureInfo.gestureState == PanGestureState::BEFORE) {
             // beforePanStart
-            if (beforePanStartHandleFuncForAni_) {
-                beforePanStartHandleFuncForAni_();
-            }
+            TriggerBeforePanStart(gestureEventInfo, current, frameNode);
         } else if (panGestureInfo.gestureState == PanGestureState::AFTER) {
             // afterPanStart
-            if (afterPanStartHandleFuncForAni_) {
-                afterPanStartHandleFuncForAni_();
-            }
+            TriggerAfterPanStart(gestureEventInfo, current, frameNode);
         }
     } else if (panGestureInfo.callbackState == CurrentCallbackState::END) {
         if (panGestureInfo.gestureState == PanGestureState::BEFORE) {
             // beforePanEnd
-            if (beforePanEndHandleFuncForAni_) {
-                beforePanEndHandleFuncForAni_();
-            }
+            TriggerBeforePanEnd(gestureEventInfo, current, frameNode);
         } else if (panGestureInfo.gestureState == PanGestureState::AFTER) {
             // afterPanEnd
-            if (afterPanEndHandleFuncForAni_) {
-                afterPanEndHandleFuncForAni_();
-            }
+            TriggerAfterPanEnd(gestureEventInfo, current, frameNode);
         }
     }
 }
@@ -332,18 +338,27 @@ void UIObserverHandler::NotifyRouterPageSizeChange(
     const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size)
 {
     CHECK_NULL_VOID(pageInfo);
-    CHECK_NULL_VOID(routerPageSizeChangeHandleFunc_);
+    if (!routerPageSizeChangeHandleFunc_ && !routerPageSizeChangeHandleFuncForAni_) {
+        return;
+    }
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
     RouterPageInfoNG routerPageInfo(index, name, path, state, pageId, size);
-    routerPageSizeChangeHandleFunc_(routerPageInfo);
+    if (routerPageSizeChangeHandleFunc_) {
+        routerPageSizeChangeHandleFunc_(routerPageInfo);
+    }
+    if (routerPageSizeChangeHandleFuncForAni_) {
+        routerPageSizeChangeHandleFuncForAni_(routerPageInfo);
+    }
 }
 
-void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+void UIObserverHandler::NotifyNavDestinationSizeChange(
+    const WeakPtr<AceType>& weakPattern, NavDestinationState state, const std::optional<SizeF>& size)
 {
-    if (navDestinationSizeChangeHandleFunc_ == nullptr && navDestinationSizeChangeByUniqueIdHandleFunc_ == nullptr) {
+    if (!navDestinationSizeChangeHandleFunc_ && !navDestinationSizeChangeByUniqueIdHandleFunc_ &&
+        !navDestinationSizeChangeHandleFuncForAni_ && !navDestinationSizeChangeByUniqueIdHandleFuncForAni_) {
         return;
     }
     auto ref = weakPattern.Upgrade();
@@ -362,12 +377,18 @@ void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& w
     scope = pathInfo->Scope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
-        GetNavigationUniqueId(pattern), pattern->GetCurrentNavDestinationSize());
+        GetNavigationUniqueId(pattern), size);
     if (navDestinationSizeChangeHandleFunc_) {
         navDestinationSizeChangeHandleFunc_(info);
     }
     if (navDestinationSizeChangeByUniqueIdHandleFunc_) {
         navDestinationSizeChangeByUniqueIdHandleFunc_(info);
+    }
+    if (navDestinationSizeChangeHandleFuncForAni_) {
+        navDestinationSizeChangeHandleFuncForAni_(info);
+    }
+    if (navDestinationSizeChangeByUniqueIdHandleFuncForAni_) {
+        navDestinationSizeChangeByUniqueIdHandleFuncForAni_(info);
     }
 }
 
@@ -628,8 +649,12 @@ bool UIObserverHandler::IsSwiperContentObserverEmpty()
 void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
     int32_t instanceId, const WindowSizeBreakpoint& breakpoint)
 {
-    CHECK_NULL_VOID(winSizeLayoutBreakpointHandleFunc_);
-    winSizeLayoutBreakpointHandleFunc_(instanceId, breakpoint);
+    if (winSizeLayoutBreakpointHandleFunc_) {
+        winSizeLayoutBreakpointHandleFunc_(instanceId, breakpoint);
+    }
+    if (winSizeLayoutBreakpointHandleFuncAni_) {
+        winSizeLayoutBreakpointHandleFuncAni_(instanceId, breakpoint);
+    }
 }
 
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
@@ -670,6 +695,11 @@ void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 void UIObserverHandler::SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func)
 {
     winSizeLayoutBreakpointHandleFunc_ = std::move(func);
+}
+
+void UIObserverHandler::SetWinSizeLayoutBreakpointChangeFuncAni(WinSizeLayoutBreakpointHandleFuncAni func)
+{
+    winSizeLayoutBreakpointHandleFuncAni_ = std::move(func);
 }
 
 void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)
@@ -793,6 +823,22 @@ void UIObserverHandler::SetNavDestinationSizeChangeByUniqueIdHandleFunc(
     navDestinationSizeChangeByUniqueIdHandleFunc_ = func;
 }
 
+void UIObserverHandler::SetRouterPageSizeChangeHandleFuncForAni(RouterPageSizeChangeHandleFuncForAni&& func)
+{
+    routerPageSizeChangeHandleFuncForAni_ = std::move(func);
+}
+
+void UIObserverHandler::SetNavDestinationSizeChangeHandleFuncForAni(NavDestinationSizeChangeHandleFuncForAni&& func)
+{
+    navDestinationSizeChangeHandleFuncForAni_ = std::move(func);
+}
+
+void UIObserverHandler::SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
+    NavDestinationSizeChangeByUniqueIdHandleFuncForAni&& func)
+{
+    navDestinationSizeChangeByUniqueIdHandleFuncForAni_ = std::move(func);
+}
+
 napi_value UIObserverHandler::GetUIContextValue()
 {
     auto container = Container::Current();
@@ -800,5 +846,336 @@ napi_value UIObserverHandler::GetUIContextValue()
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, nullptr);
     return frontend->GetContextValue();
+}
+
+void UIObserverHandler::AddBeforePanStartListenerCallback(
+    int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = beforePanStartCallbackMap_.find(instanceId);
+    if (iter == beforePanStartCallbackMap_.end()) {
+        std::map<int32_t, PanListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        beforePanStartCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+
+void UIObserverHandler::AddBeforePanEndListenerCallback(
+    int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = beforePanEndCallbackMap_.find(instanceId);
+    if (iter == beforePanEndCallbackMap_.end()) {
+        std::map<int32_t, PanListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        beforePanEndCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+
+void UIObserverHandler::AddAfterPanStartListenerCallback(
+    int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = afterPanStartCallbackMap_.find(instanceId);
+    if (iter == afterPanStartCallbackMap_.end()) {
+        std::map<int32_t, PanListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        afterPanStartCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+
+void UIObserverHandler::AddAfterPanEndListenerCallback(
+    int32_t instanceId, int32_t resourceId, PanListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = afterPanEndCallbackMap_.find(instanceId);
+    if (iter == afterPanEndCallbackMap_.end()) {
+        std::map<int32_t, PanListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        afterPanEndCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+
+void UIObserverHandler::RemoveBeforePanStartListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!beforePanStartCallbackMap_.empty());
+    if (isRemoveAll) {
+        beforePanStartCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = beforePanStartCallbackMap_.find(instanceId);
+    if (iter != beforePanStartCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+
+void UIObserverHandler::RemoveBeforePanEndListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!beforePanEndCallbackMap_.empty());
+    if (isRemoveAll) {
+        beforePanEndCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = beforePanEndCallbackMap_.find(instanceId);
+    if (iter != beforePanEndCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+
+void UIObserverHandler::RemoveAfterPanStartListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!afterPanStartCallbackMap_.empty());
+    if (isRemoveAll) {
+        afterPanStartCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = afterPanStartCallbackMap_.find(instanceId);
+    if (iter != afterPanStartCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+
+void UIObserverHandler::RemoveAfterPanEndListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!afterPanEndCallbackMap_.empty());
+    if (isRemoveAll) {
+        afterPanEndCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = afterPanEndCallbackMap_.find(instanceId);
+    if (iter != afterPanEndCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+
+void UIObserverHandler::TriggerBeforePanStart(
+    const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!beforePanStartCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = beforePanStartCallbackMap_.find(currentId);
+    if (iter != beforePanStartCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(gestureEventInfo, current, frameNode);
+            }
+        }
+    }
+}
+
+void UIObserverHandler::TriggerBeforePanEnd(
+    const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!beforePanEndCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = beforePanEndCallbackMap_.find(currentId);
+    if (iter != beforePanEndCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(gestureEventInfo, current, frameNode);
+            }
+        }
+    }
+}
+
+void UIObserverHandler::TriggerAfterPanStart(
+    const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!afterPanStartCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = afterPanStartCallbackMap_.find(currentId);
+    if (iter != afterPanStartCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(gestureEventInfo, current, frameNode);
+            }
+        }
+    }
+}
+
+void UIObserverHandler::TriggerAfterPanEnd(
+    const GestureEvent& gestureEventInfo, const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!afterPanEndCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = afterPanEndCallbackMap_.find(currentId);
+    if (iter != afterPanEndCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(gestureEventInfo, current, frameNode);
+            }
+        }
+    }
+}
+
+void UIObserverHandler::AddWillClickListenerCallback(
+    int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = willClickCallbackMap_.find(instanceId);
+    if (iter == willClickCallbackMap_.end()) {
+        std::map<int32_t, GestureListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        willClickCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+void UIObserverHandler::AddDidClickListenerCallback(
+    int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = didClickCallbackMap_.find(instanceId);
+    if (iter == didClickCallbackMap_.end()) {
+        std::map<int32_t, GestureListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        didClickCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+void UIObserverHandler::AddWillTapListenerCallback(
+    int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = willTapCallbackMap_.find(instanceId);
+    if (iter == willTapCallbackMap_.end()) {
+        std::map<int32_t, GestureListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        willTapCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+void UIObserverHandler::AddDidTapListenerCallback(
+    int32_t instanceId, int32_t resourceId, GestureListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto iter = didTapCallbackMap_.find(instanceId);
+    if (iter == didTapCallbackMap_.end()) {
+        std::map<int32_t, GestureListenerCallback> callbackMap;
+        callbackMap[resourceId] = std::move(callback);
+        didTapCallbackMap_[instanceId] = callbackMap;
+    } else {
+        iter->second[resourceId] = std::move(callback);
+    }
+}
+
+void UIObserverHandler::RemoveWillClickListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!willClickCallbackMap_.empty());
+    if (isRemoveAll) {
+        willClickCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = willClickCallbackMap_.find(instanceId);
+    if (iter != willClickCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+void UIObserverHandler::RemoveDidClickListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!didClickCallbackMap_.empty());
+    if (isRemoveAll) {
+        didClickCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = didClickCallbackMap_.find(instanceId);
+    if (iter != didClickCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+void UIObserverHandler::RemoveWillTapListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!willTapCallbackMap_.empty());
+    if (isRemoveAll) {
+        willTapCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = willTapCallbackMap_.find(instanceId);
+    if (iter != willTapCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+void UIObserverHandler::RemoveDidTapListenerCallback(int32_t instanceId, int32_t resourceId, bool isRemoveAll)
+{
+    CHECK_NULL_VOID(!didTapCallbackMap_.empty());
+    if (isRemoveAll) {
+        didTapCallbackMap_.erase(instanceId);
+        return;
+    }
+    auto iter = didTapCallbackMap_.find(instanceId);
+    if (iter != didTapCallbackMap_.end()) {
+        iter->second.erase(resourceId);
+    }
+}
+
+void UIObserverHandler::TriggerWillClick(const GestureEvent& clickInfo, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!willClickCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = willClickCallbackMap_.find(currentId);
+    if (iter != willClickCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(clickInfo, frameNode);
+            }
+        }
+    }
+}
+void UIObserverHandler::TriggerDidClick(const GestureEvent& clickInfo, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!didClickCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = didClickCallbackMap_.find(currentId);
+    if (iter != didClickCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(clickInfo, frameNode);
+            }
+        }
+    }
+}
+void UIObserverHandler::TriggerWillTap(const GestureEvent& gestureEvent, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!willTapCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = willTapCallbackMap_.find(currentId);
+    if (iter != willTapCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(gestureEvent, frameNode);
+            }
+        }
+    }
+}
+void UIObserverHandler::TriggerDidTap(const GestureEvent& gestureEvent, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(!didTapCallbackMap_.empty());
+    auto currentId = Container::CurrentId();
+    auto iter = didTapCallbackMap_.find(currentId);
+    if (iter != didTapCallbackMap_.end()) {
+        auto callbackMap = iter->second;
+        for (auto& pair : callbackMap) {
+            if (pair.second) {
+                pair.second(gestureEvent, frameNode);
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

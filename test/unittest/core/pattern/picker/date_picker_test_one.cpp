@@ -942,7 +942,7 @@ HWTEST_F(DatePickerTestOne, UpdateCheckboxPaintProperty, TestSize.Level1)
     checkboxData.unselectedColor = Color::BLUE;
     checkboxData.strokeColor = Color::BLUE;
     DatePickerDialogView::UpdateCheckboxPaintProperty(
-        checkboxPaintProps, true, checkboxData);
+        AceType::RawPtr(checkbox), true, checkboxData);
     EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxSelectedColor());
     EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxUnSelectedColor());
     EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxCheckMarkColor());

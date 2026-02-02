@@ -763,6 +763,106 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragScrollBar013
+ * @tc.desc: Test overDrag by scrollbar trigger scroll event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar013, TestSize.Level1)
+{
+    bool isStart = false;
+    bool isStop = false;
+    OnScrollStartEvent startEvent = [&isStart]() { isStart = true; };
+    OnScrollStopEvent stopEvent = [&isStop]() { isStop = true; };
+    ScrollModelNG model = CreateScroll();
+    model.SetOnScrollStart(std::move(startEvent));
+    model.SetOnScrollStop(std::move(stopEvent));
+    CreateContent();
+    CreateScrollDone();
+    
+    float dragDelta = 100;
+    DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, -dragDelta);
+    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(isStart);
+    EXPECT_TRUE(isStop);
+}
+
+/**
+ * @tc.name: HandleDragScrollBar014
+ * @tc.desc: Test sliding the scrollBar downwards so that it does not reach the bottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar014, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    auto mockScrollSpringEffect = AceType::MakeRefPtr<MockScrollSpringEffect>();
+    pattern_->scrollEffect_ = mockScrollSpringEffect;
+    EXPECT_CALL(*mockScrollSpringEffect, ProcessScrollOver(_)).Times(0);
+
+    float dragDelta = 100;
+    uint64_t TIME_1 = 1000 * 1000 * 1;
+    uint64_t TIME_2 = 1000 * 1000 * 2 + 1;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar_->HandleDragStart(info);
+
+    info.SetMainDelta(dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    float expectOffset = -dragDelta / VERTICAL_RATIO;
+    EXPECT_TRUE(Position(expectOffset));
+
+    MockPipelineContext::GetCurrentContext()->SetVsyncTime(TIME_1);
+    info.SetMainVelocity(100.f);
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    scrollBar_->HandleDragEnd(info);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockPipelineContext::GetCurrentContext()->SetVsyncTime(TIME_2);
+
+    scrollBar_->frictionMotion_->NotifyListener(100.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+}
+
+/**
+ * @tc.name: HandleDragScrollBar015
+ * @tc.desc: Test overDrag by scrollbar with mouse trigger scroll event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar015, TestSize.Level1)
+{
+    bool isStart = false;
+    bool isStop = false;
+    OnScrollStartEvent startEvent = [&isStart]() { isStart = true; };
+    OnScrollStopEvent stopEvent = [&isStop]() { isStop = true; };
+    ScrollModelNG model = CreateScroll();
+    model.SetOnScrollStart(std::move(startEvent));
+    model.SetOnScrollStop(std::move(stopEvent));
+    CreateContent();
+    CreateScrollDone();
+
+    float dragDelta = 100;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    scrollBar_->HandleDragStart(info);
+
+    info.SetMainDelta(-dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(Position(0));
+    scrollBar_->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isStart);
+    EXPECT_TRUE(isStop);
+}
+
+/**
  * @tc.name: HandleDragEndScrollBar001
  * @tc.desc: Test handleDragEnd in Horizontal and RTL layout
  * @tc.type: FUNC

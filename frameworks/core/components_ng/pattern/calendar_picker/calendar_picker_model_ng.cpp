@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,16 @@ void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CALENDAR_PICKER_ETS_TAG, nodeId);
+    auto pickerNode = CalendarPickerModelNG::CreateNode(nodeId, settingData);
+    stack->Push(pickerNode);
+}
+
+void CalendarPickerModelNG::CreateCalendarPicker(const CalendarSettingData& settingData)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CALENDAR_PICKER_ETS_TAG, nodeId);
     auto pickerNode = CalendarPickerModelNG::CreateNode(nodeId, settingData);
     stack->Push(pickerNode);
@@ -51,6 +61,7 @@ void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 
 RefPtr<FrameNode> CalendarPickerModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     NG::CalendarSettingData settingData;
     return CalendarPickerModelNG::CreateNode(nodeId, settingData);
 }
@@ -249,6 +260,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const Calend
 {
     auto pickerNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
+    ACE_UINODE_TRACE(pickerNode);
     auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, pickerNode);
     auto pipelineContext = pickerNode->GetContext();
@@ -555,6 +567,17 @@ void CalendarPickerModelNG::ClearHeight(FrameNode* frameNode)
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     ViewAbstract::SetHeight(frameNode, CalcLength(theme->GetEntryHeight()));
+}
+
+void CalendarPickerModelNG::ClearJSHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    frameNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
 }
 
 void CalendarPickerModelNG::ClearBorderColor(FrameNode* frameNode)
@@ -909,6 +932,7 @@ void CalendarPickerModelNG::ParseNormalTextStyleResObj(FrameNode* frameNode, con
         }
         pickerPattern->UpdateTextStyle(textStyle);
     };
+    
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pickerPattern->AddResObj("CalendarPickerNormalTextStyle", resObj, std::move(updateFunc));
 }

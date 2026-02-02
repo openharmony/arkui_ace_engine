@@ -118,7 +118,7 @@ export function Chip(options, parent = null) {
             undefined,
             elmtId,
             () => {},
-            { page: 'library/src/main/ets/components/chip_v16.ets', line: 224, col: 3 }
+            { page: 'library/src/main/ets/components/MainPage.ets', line: 278, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -1598,13 +1598,25 @@ export class ChipComponent extends ViewPU {
     }
     return chipSize;
   }
+  copyPadding(src) {
+    return {
+      top: src.top,
+      bottom: src.bottom,
+      start: src.start,
+      end: src.end,
+    };
+  }
   getChipPadding() {
     let chipTheme = this.theme.chipNode;
     let res;
     if (this.isSmallChipSize()) {
-      res = this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
+      res = this.isChipActivated()
+        ? this.copyPadding(chipTheme.localizedActivatedSmallPadding)
+        : this.copyPadding(chipTheme.localizedSmallPadding);
     } else {
-      res = this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
+      res = this.isChipActivated()
+        ? this.copyPadding(chipTheme.localizedActivatedNormalPadding)
+        : this.copyPadding(chipTheme.localizedNormalPadding);
     }
     if (this.chipPadding?.top && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.top)) {
       res.top = this.chipPadding.top;

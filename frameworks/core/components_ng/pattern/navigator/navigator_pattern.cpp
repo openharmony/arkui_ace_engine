@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 void NavigatorPattern::OnModifyDone()
@@ -42,4 +43,8 @@ void NavigatorPattern::OnModifyDone()
     gesture->AddClickEvent(clickListener_);
 }
 
+FocusPattern NavigatorPattern::GetFocusPattern() const
+{
+    return { FocusType::SCOPE, true };
+}
 } // namespace OHOS::Ace::NG

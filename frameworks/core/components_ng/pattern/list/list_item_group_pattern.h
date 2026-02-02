@@ -86,6 +86,11 @@ public:
         return false;
     }
 
+    bool ForceRequestParentMeasure() const override
+    {
+        return true;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -311,6 +316,11 @@ public:
         lanes_ = num;
     }
 
+    void SetAxisChanged(bool value)
+    {
+        isAxisChanged_ = value;
+    }
+
     V2::ListItemGroupStyle GetListItemGroupStyle()
     {
         return listItemGroupStyle_;
@@ -511,6 +521,7 @@ private:
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     std::map<int32_t, uint32_t> noDividerItems_;
     bool layouted_ = false;
+    bool isAxisChanged_ = false;
 
     bool reCache_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;

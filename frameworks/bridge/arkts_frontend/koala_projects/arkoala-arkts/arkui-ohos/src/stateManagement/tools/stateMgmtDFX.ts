@@ -39,10 +39,24 @@ class ViewInfo {
     isV2?: boolean;
 }
 
+class MapItem {
+    key?: string;
+    value?: string[];
+}
+
+class PropertyDependenciesInfo {
+    mode?: string;
+    propertyDependencies?: string[];
+    trackPropertiesDependencies?: MapItem[];
+}
+
 class DecoratorInfo {
     decorator?: string;
     propertyName?: string;
     value?: Any;
+    syncPeers?: DecoratorInfo[];
+    id?: int;
+    dependentElementIds?: PropertyDependenciesInfo;
 }
 
 export class DumpInfo {
@@ -74,13 +88,29 @@ export class StateMgmtDFX {
                     return varName.startsWith('__backing');
                 })
                 .forEach((varName) => {
-                    const value = (reflect.Value.of(view) as ClassValue).getFieldByName(varName).getData();
-                    if (value && value instanceof DecoratedV1VariableBase) {
-                        dumpInfo.observedPropertiesInfo.push({
-                            decorator: value.decorator,
-                            propertyName: value.varName,
-                            value: value.get(),
-                        });
+                    let field: reflect.InstanceField | undefined = undefined;
+                    for (let cls: Class | undefined = Class.of(view as Object); cls != undefined; cls = cls!.getSuper()) {
+                        field = cls!.getInstanceField(varName);
+                        if (field != undefined) {
+                            break;
+                        }
+                    }
+                    if (field != undefined) {
+                        const value = field!.getValue(view as Object);
+                        if (value && value instanceof DecoratedV1VariableBase) {
+                            dumpInfo.observedPropertiesInfo.push({
+                                decorator: value.decorator,
+                                propertyName: value.varName,
+                                value: value.get(),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
+                            });
+                        }
                     }
                 });
         }
@@ -97,25 +127,55 @@ export class StateMgmtDFX {
                     );
                 })
                 .forEach((varName) => {
-                    const value = (reflect.Value.of(view) as ClassValue).getFieldByName(varName).getData();
-                    if (value && value instanceof DecoratedV2VariableBase) {
-                        dumpInfo.observedPropertiesInfo.push({
-                            decorator: value.decorator,
-                            propertyName: value.varName,
-                            value: value.get(),
-                        });
-                    } else if (value && value instanceof ComputedDecoratedVariable) {
-                        dumpInfo.observedPropertiesInfo.push({
-                            decorator: value.decorator,
-                            propertyName: value.varName,
-                            value: value.get(),
-                        });
-                    } else if (value && value instanceof MonitorFunctionDecorator) {
-                        const propertyName = varName.replace('__monitor_', '');
-                        dumpInfo.observedPropertiesInfo.push({
-                            decorator: value.decorator,
-                            propertyName: propertyName,
-                        });
+                    let field: reflect.InstanceField | undefined = undefined;
+                    for (let cls: Class | undefined = Class.of(view as Object); cls != undefined; cls = cls!.getSuper()) {
+                        field = cls!.getInstanceField(varName);
+                        if (field != undefined) {
+                            break;
+                        }
+                    }
+                    if (field != undefined) {
+                        const value = field!.getValue(view as Object);
+                        if (value && value instanceof DecoratedV2VariableBase) {
+                            dumpInfo.observedPropertiesInfo.push({
+                                decorator: value.decorator,
+                                propertyName: value.varName,
+                                value: value.get(),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
+                            });
+                        } else if (value && value instanceof ComputedDecoratedVariable) {
+                            dumpInfo.observedPropertiesInfo.push({
+                                decorator: value.decorator,
+                                propertyName: value.varName,
+                                value: value.get(),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
+                            });
+                        } else if (value && value instanceof MonitorFunctionDecorator) {
+                            const propertyName = varName.replace('__monitor_', '');
+                            dumpInfo.observedPropertiesInfo.push({
+                                decorator: value.decorator,
+                                propertyName: propertyName,
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
+                            });
+                        }
                     }
                 });
         }

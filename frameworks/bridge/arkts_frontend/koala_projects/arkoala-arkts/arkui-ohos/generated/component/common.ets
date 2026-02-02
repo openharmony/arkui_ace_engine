@@ -20,13 +20,13 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, TipsAnchorType } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
-import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
+import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
 import { TextRange_serializer, TextRange } from "./textCommon"
@@ -38,7 +38,9 @@ import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
+import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, StyledStringInternal } from "./styledString"
+import { ArkThemeScopeManager } from "#arktheme"
+import { dragController_DragSpringLoadingConfiguration_serializer } from "./../framework/ohos.arkui.dragController"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -47,8 +49,9 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
+import { dragController } from "@ohos.arkui.dragController"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -80,7 +83,8 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
-import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
+import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer, unifiedDataChannel_DataLoadParams_serializer } from "./../framework/ohos.data.unifiedDataChannel"
+import { OnScrollFrameBeginCallback } from "./scroll"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
@@ -671,7 +675,12 @@ export interface DragEvent {
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
     getDisplayId(): int32
+    getDragSource(): string
+    isRemote(): boolean
+    setDataLoadParams(dataLoadParams: unifiedDataChannel.DataLoadParams): void
     enableInternalDropAnimation(configuration: string): void
+    getGlobalDisplayX(): double
+    getGlobalDisplayY(): double
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
     peer?: Finalizable | undefined = undefined
@@ -772,10 +781,25 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getDisplayId(): int32 {
         return this.getDisplayId_serialize()
     }
-    public enableInternalDropAnimation(configuration: string): void {
-        const configuration_casted = configuration as (string)
-        this.enableInternalDropAnimation_serialize(configuration_casted)
+    public getDragSource(): string {
+        return this.getDragSource_serialize()
+    }
+    public isRemote(): boolean {
+        return this.isRemote_serialize()
+    }
+    public setDataLoadParams(dataLoadParams: unifiedDataChannel.DataLoadParams): void {
+        hookDragEventSetDataLoadParams(this, dataLoadParams)
         return
+    }
+    public enableInternalDropAnimation(configuration: string): void {
+        hookEnableInternalDropAnimation(this, configuration)
+        return
+    }
+    public getGlobalDisplayX(): double {
+        return this.getGlobalDisplayX_serialize()
+    }
+    public getGlobalDisplayY(): double {
+        return this.getGlobalDisplayY_serialize()
     }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
@@ -866,8 +890,30 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayId(this.peer!.ptr)
         return retval
     }
+    getDragSource_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDragSource(this.peer!.ptr)
+        return retval
+    }
+    isRemote_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_isRemote(this.peer!.ptr)
+        return retval
+    }
+    setDataLoadParams_serialize(dataLoadParams: unifiedDataChannel.DataLoadParams): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        unifiedDataChannel_DataLoadParams_serializer.write(thisSerializer, dataLoadParams)
+        ArkUIGeneratedNativeModule._DragEvent_setDataLoadParams(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
+    }
+    getGlobalDisplayX_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getGlobalDisplayX(this.peer!.ptr)
+        return retval
+    }
+    getGlobalDisplayY_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getGlobalDisplayY(this.peer!.ptr)
+        return retval
     }
     private getDragBehavior_serialize(): DragBehavior {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDragBehavior(this.peer!.ptr)
@@ -937,10 +983,13 @@ export interface KeyEvent {
     deviceId: int32
     metaKey: int32
     timestamp: int64
-    stopPropagation: (() => void)
     intentionCode: IntentionCode
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     unicode?: int64 | undefined
+    stopPropagation(): void
+    isNumLockOn?: boolean | undefined
+    isCapsLockOn?: boolean | undefined
+    isScrollLockOn?: boolean | undefined
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -989,12 +1038,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
     get intentionCode(): IntentionCode {
         return this.getIntentionCode()
     }
@@ -1020,6 +1063,27 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const unicode_NonNull  = (unicode as int64)
         this.setUnicode(unicode_NonNull)
     }
+    get isNumLockOn(): boolean | undefined {
+        return this.getIsNumLockOn()
+    }
+    set isNumLockOn(isNumLockOn: boolean | undefined) {
+        const isNumLockOn_NonNull  = (isNumLockOn as boolean)
+        this.setIsNumLockOn(isNumLockOn_NonNull)
+    }
+    get isCapsLockOn(): boolean | undefined {
+        return this.getIsCapsLockOn()
+    }
+    set isCapsLockOn(isCapsLockOn: boolean | undefined) {
+        const isCapsLockOn_NonNull  = (isCapsLockOn as boolean)
+        this.setIsCapsLockOn(isCapsLockOn_NonNull)
+    }
+    get isScrollLockOn(): boolean | undefined {
+        return this.getIsScrollLockOn()
+    }
+    set isScrollLockOn(isScrollLockOn: boolean | undefined) {
+        const isScrollLockOn_NonNull  = (isScrollLockOn as boolean)
+        this.setIsScrollLockOn(isScrollLockOn_NonNull)
+    }
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, KeyEventInternal.getFinalizer())
     }
@@ -1035,6 +1099,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     public static fromPtr(ptr: KPointer): KeyEventInternal {
         return new KeyEventInternal(ptr)
+    }
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     private getType(): KeyType {
         return this.getType_serialize()
@@ -1092,14 +1160,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getIntentionCode(): IntentionCode {
         return this.getIntentionCode_serialize()
     }
@@ -1122,6 +1182,33 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setUnicode(unicode: int64 | undefined): void {
         const unicode_casted = unicode as (int64 | undefined)
         this.setUnicode_serialize(unicode_casted)
+        return
+    }
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._KeyEvent_stopPropagation(this.peer!.ptr)
+    }
+    private getIsNumLockOn(): boolean | undefined {
+        return this.getIsNumLockOn_serialize()
+    }
+    private setIsNumLockOn(isNumLockOn: boolean | undefined): void {
+        const isNumLockOn_casted = isNumLockOn as (boolean | undefined)
+        this.setIsNumLockOn_serialize(isNumLockOn_casted)
+        return
+    }
+    private getIsCapsLockOn(): boolean | undefined {
+        return this.getIsCapsLockOn_serialize()
+    }
+    private setIsCapsLockOn(isCapsLockOn: boolean | undefined): void {
+        const isCapsLockOn_casted = isCapsLockOn as (boolean | undefined)
+        this.setIsCapsLockOn_serialize(isCapsLockOn_casted)
+        return
+    }
+    private getIsScrollLockOn(): boolean | undefined {
+        return this.getIsScrollLockOn_serialize()
+    }
+    private setIsScrollLockOn(isScrollLockOn: boolean | undefined): void {
+        const isScrollLockOn_casted = isScrollLockOn as (boolean | undefined)
+        this.setIsScrollLockOn_serialize(isScrollLockOn_casted)
         return
     }
     private getType_serialize(): KeyType {
@@ -1172,37 +1259,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer: (() => void) | undefined = undefined
-        
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
-            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
-            
-            buffer = (): void => {
-                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
-                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
-                buffer_BufArgsSerializer.release();
-                return;
-            }
-        }
-        
-        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._KeyEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private getIntentionCode_serialize(): IntentionCode {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
@@ -1278,11 +1334,80 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private getIsNumLockOn_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIsNumLockOn(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setIsNumLockOn_serialize(isNumLockOn: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isNumLockOn !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isNumLockOnTmpValue  = isNumLockOn!
+            thisSerializer.writeBoolean(isNumLockOnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._KeyEvent_setIsNumLockOn(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getIsCapsLockOn_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIsCapsLockOn(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setIsCapsLockOn_serialize(isCapsLockOn: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isCapsLockOn !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isCapsLockOnTmpValue  = isCapsLockOn!
+            thisSerializer.writeBoolean(isCapsLockOnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._KeyEvent_setIsCapsLockOn(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getIsScrollLockOn_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIsScrollLockOn(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setIsScrollLockOn_serialize(isScrollLockOn: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isScrollLockOn !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isScrollLockOnTmpValue  = isScrollLockOn!
+            thisSerializer.writeBoolean(isScrollLockOnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._KeyEvent_setIsScrollLockOn(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface Layoutable {
     measureResult: MeasureResult
-    uniqueId?: number | undefined
-    layout(position: Position): void
+    uniqueId?: int32 | undefined
+    layout(position: Position | undefined): void
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
     getBorderWidth(): DirectionalEdgesT<number> | undefined
@@ -1298,11 +1423,11 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     set measureResult(measureResult: MeasureResult) {
         this.setMeasureResult(measureResult)
     }
-    get uniqueId(): number | undefined {
+    get uniqueId(): int32 | undefined {
         return this.getUniqueId()
     }
-    set uniqueId(uniqueId: number | undefined) {
-        const uniqueId_NonNull  = (uniqueId as number)
+    set uniqueId(uniqueId: int32 | undefined) {
+        const uniqueId_NonNull  = (uniqueId as int32)
         this.setUniqueId(uniqueId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1321,8 +1446,8 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     public static fromPtr(ptr: KPointer): LayoutableInternal {
         return new LayoutableInternal(ptr)
     }
-    public layout(position: Position): void {
-        const position_casted = position as (Position)
+    public layout(position: Position | undefined): void {
+        const position_casted = position as (Position | undefined)
         this.layout_serialize(position_casted)
         return
     }
@@ -1343,17 +1468,23 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         this.setMeasureResult_serialize(measureResult_casted)
         return
     }
-    private getUniqueId(): number | undefined {
+    private getUniqueId(): int32 | undefined {
         return this.getUniqueId_serialize()
     }
-    private setUniqueId(uniqueId: number | undefined): void {
-        const uniqueId_casted = uniqueId as (number | undefined)
+    private setUniqueId(uniqueId: int32 | undefined): void {
+        const uniqueId_casted = uniqueId as (int32 | undefined)
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
-    layout_serialize(position: Position): void {
+    layout_serialize(position: Position | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        Position_serializer.write(thisSerializer, position)
+        if (position !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const positionTmpValue  = position!
+            Position_serializer.write(thisSerializer, positionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         ArkUIGeneratedNativeModule._Layoutable_layout(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1387,23 +1518,23 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         ArkUIGeneratedNativeModule._Layoutable_setMeasureResult(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getUniqueId_serialize(): number | undefined {
+    private getUniqueId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._Layoutable_getUniqueId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = (retvalDeserializer.readInt32() as int32)
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setUniqueId_serialize(uniqueId: number | undefined): void {
+    private setUniqueId_serialize(uniqueId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (uniqueId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const uniqueIdTmpValue  = uniqueId!
-            thisSerializer.writeNumber(uniqueIdTmpValue)
+            thisSerializer.writeInt32(uniqueIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1463,8 +1594,8 @@ export class LayoutPolicy implements MaterializedBase {
     }
 }
 export interface Measurable {
-    uniqueId?: number | undefined
-    measure(constraint: ConstraintSizeOptions): MeasureResult | undefined
+    uniqueId?: int32 | undefined
+    measure(constraint: ConstraintSizeOptions | undefined): MeasureResult | undefined
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
     getBorderWidth(): DirectionalEdgesT<number> | undefined
@@ -1474,11 +1605,11 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get uniqueId(): number | undefined {
+    get uniqueId(): int32 | undefined {
         return this.getUniqueId()
     }
-    set uniqueId(uniqueId: number | undefined) {
-        const uniqueId_NonNull  = (uniqueId as number)
+    set uniqueId(uniqueId: int32 | undefined) {
+        const uniqueId_NonNull  = (uniqueId as int32)
         this.setUniqueId(uniqueId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1497,8 +1628,8 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public static fromPtr(ptr: KPointer): MeasurableInternal {
         return new MeasurableInternal(ptr)
     }
-    public measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
-        const constraint_casted = constraint as (ConstraintSizeOptions)
+    public measure(constraint: ConstraintSizeOptions | undefined): MeasureResult | undefined {
+        const constraint_casted = constraint as (ConstraintSizeOptions | undefined)
         return this.measure_serialize(constraint_casted)
     }
     public getMargin(): DirectionalEdgesT<number> | undefined {
@@ -1510,21 +1641,32 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getBorderWidth(): DirectionalEdgesT<number> | undefined {
         return this.getBorderWidth_serialize()
     }
-    private getUniqueId(): number | undefined {
+    private getUniqueId(): int32 | undefined {
         return this.getUniqueId_serialize()
     }
-    private setUniqueId(uniqueId: number | undefined): void {
-        const uniqueId_casted = uniqueId as (number | undefined)
+    private setUniqueId(uniqueId: int32 | undefined): void {
+        const uniqueId_casted = uniqueId as (int32 | undefined)
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
-    measure_serialize(constraint: ConstraintSizeOptions): MeasureResult {
+    measure_serialize(constraint: ConstraintSizeOptions | undefined): MeasureResult | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
+        if (constraint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const constraintTmpValue  = constraint!
+            ConstraintSizeOptions_serializer.write(thisSerializer, constraintTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : MeasureResult = MeasureResult_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : MeasureResult | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = MeasureResult_serializer.read(retvalDeserializer)
+        }
+        const returnResult : MeasureResult | undefined = buffer
         return returnResult
     }
     getMargin_serialize(): DirectionalEdgesT<number> | undefined {
@@ -1545,23 +1687,23 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    private getUniqueId_serialize(): number | undefined {
+    private getUniqueId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getUniqueId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = (retvalDeserializer.readInt32() as int32)
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setUniqueId_serialize(uniqueId: number | undefined): void {
+    private setUniqueId_serialize(uniqueId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (uniqueId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const uniqueIdTmpValue  = uniqueId!
-            thisSerializer.writeNumber(uniqueIdTmpValue)
+            thisSerializer.writeInt32(uniqueIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1789,6 +1931,11 @@ export class TextContentControllerBase implements MaterializedBase {
         this.deleteBackward_serialize()
         return
     }
+    public setStyledPlaceholder(styledString: StyledString): void {
+        const styledString_casted = styledString as (StyledString)
+        this.setStyledPlaceholder_serialize(styledString_casted)
+        return
+    }
     getCaretOffset_serialize(): CaretOffset | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -1890,6 +2037,9 @@ export class TextContentControllerBase implements MaterializedBase {
     }
     deleteBackward_serialize(): void {
         ArkUIGeneratedNativeModule._TextContentControllerBase_deleteBackward(this.peer!.ptr)
+    }
+    setStyledPlaceholder_serialize(styledString: StyledString): void {
+        ArkUIGeneratedNativeModule._TextContentControllerBase_setStyledPlaceholder(this.peer!.ptr, toPeerPtr(styledString))
     }
 }
 export class TransitionEffectInternal {
@@ -2857,6 +3007,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setCompositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setMaterialFilterAttribute(value: uiEffect.Filter | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            uiEffect_Filter_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setMaterialFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOpacityAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3677,6 +3839,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setUseUnionEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRenderGroupAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3687,6 +3861,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setRenderGroup(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setExcludeFromRenderGroupAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setExcludeFromRenderGroup(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFreezeAttribute(value: boolean | undefined): void {
@@ -4087,6 +4273,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setClickEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableClickSoundEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setEnableClickSoundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
@@ -4793,6 +4991,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnTouchTestDoneAttribute(value: TouchTestDoneCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnTouchTestDone(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -4803,6 +5013,39 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSystemMaterial(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityStateDescriptionAttribute(value: string | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityStateDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityActionOptionsAttribute(value: AccessibilityActionOptions | undefined): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            AccessibilityActionOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
@@ -4859,12 +5102,36 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setIgnoreLayoutSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
+    setBackgroundAttribute(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (builder !== undefined) {
+        if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const builderTmpValue  = builder!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+            const contentTmpValue  = content!
+            if (contentTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0  = contentTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
+            } else if (contentTmpValue instanceof ResourceColor) {
+                thisSerializer.writeInt8((1).toByte())
+                const contentTmpValueForIdx1  = contentTmpValue as ResourceColor
+                if (contentTmpValueForIdx1 instanceof Color) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const contentTmpValueForIdx1ForIdx0  = contentTmpValueForIdx1 as Color
+                    thisSerializer.writeInt32(contentTmpValueForIdx1ForIdx0.getOrdinal())
+                } else if (contentTmpValueForIdx1 instanceof int32) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const contentTmpValueForIdx1ForIdx1  = contentTmpValueForIdx1 as int32
+                    thisSerializer.writeInt32(contentTmpValueForIdx1ForIdx1)
+                } else if (contentTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const contentTmpValueForIdx1ForIdx2  = contentTmpValueForIdx1 as string
+                    thisSerializer.writeString(contentTmpValueForIdx1ForIdx2)
+                } else if (contentTmpValueForIdx1 instanceof Resource) {
+                    thisSerializer.writeInt8((3).toByte())
+                    const contentTmpValueForIdx1ForIdx3  = contentTmpValueForIdx1 as Resource
+                    Resource_serializer.write(thisSerializer, contentTmpValueForIdx1ForIdx3)
+                }
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5323,6 +5590,25 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnDrop1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnDragSpringLoadingAttribute(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined && callback_ !== null) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (configuration !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const configurationTmpValue  = configuration!
+            dragController_DragSpringLoadingConfiguration_serializer.write(thisSerializer, configurationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnDragSpringLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDragPreview1Attribute(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (preview !== undefined) {
@@ -5404,16 +5690,22 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBlendMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): void {
+    setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (effect instanceof BlendMode) {
-            thisSerializer.writeInt8((0).toByte())
-            const effectForIdx0  = effect as BlendMode
-            thisSerializer.writeInt32(effectForIdx0.valueOf())
-        } else if (effect instanceof uiEffect.Blender) {
-            thisSerializer.writeInt8((1).toByte())
-            const effectForIdx1  = effect as uiEffect.Blender
-            uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectForIdx1)
+        if (effect !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const effectTmpValue  = effect!
+            if (effectTmpValue instanceof BlendMode) {
+                thisSerializer.writeInt8((0).toByte())
+                const effectTmpValueForIdx0  = effectTmpValue as BlendMode
+                thisSerializer.writeInt32(effectTmpValueForIdx0.valueOf())
+            } else if (effectTmpValue instanceof uiEffect.Blender) {
+                thisSerializer.writeInt8((1).toByte())
+                const effectTmpValueForIdx1  = effectTmpValue as uiEffect.Blender
+                uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (type !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5537,12 +5829,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindMenu1Attribute(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
+    setBindMenu1Attribute(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShow !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShowTmpValue  = isShow!
-            thisSerializer.writeBoolean(isShowTmpValue)
+            if (isShowTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShowTmpValueForIdx0  = isShowTmpValue as boolean
+                thisSerializer.writeBoolean(isShowTmpValueForIdx0)
+            } else if (isShowTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5601,7 +5901,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenu1Attribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenuWithResponseAttribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5617,15 +5917,23 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenu2Attribute(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenu1Attribute(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShown !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShownTmpValue  = isShown!
-            thisSerializer.writeBoolean(isShownTmpValue)
+            if (isShownTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShownTmpValueForIdx0  = isShownTmpValue as boolean
+                thisSerializer.writeBoolean(isShownTmpValueForIdx0)
+            } else if (isShownTmpValue instanceof Bindable) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShownTmpValueForIdx1  = isShownTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShownTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5643,7 +5951,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContentCover0Attribute(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): void {
@@ -5655,7 +5963,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
@@ -5689,7 +5997,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
@@ -5723,7 +6031,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
@@ -6136,7 +6444,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6153,6 +6461,10 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -6178,6 +6490,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarMarginAttribute(value: ScrollBarMargin | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ScrollBarMargin_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNestedScrollAttribute(value: NestedScrollOptions | undefined): void {
@@ -6222,6 +6546,106 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setFriction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentStartOffsetAttribute(value: double | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setContentStartOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentEndOffsetAttribute(value: double | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setContentEndOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillStartDraggingAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnWillStartDragging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillStopDraggingAttribute(value: OnWillStopDraggingCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnWillStopDragging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidStopDraggingAttribute(value: OnDidStopDraggingCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnDidStopDragging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillStartFlingAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnWillStartFling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidStopFlingAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnDidStopFling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnReachStartAttribute(value: (() => void) | undefined): void {
@@ -6370,6 +6794,8 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
 export interface InputCounterOptions {
     thresholdPercentage?: double;
     highlightBorder?: boolean;
+    counterTextColor?: ColorMetrics;
+    counterTextOverflowColor?: ColorMetrics;
 }
 export interface TextDecorationOptions {
     type: TextDecorationType | undefined;
@@ -6600,6 +7026,7 @@ export interface SweepGradientOptions {
     end?: double | string;
     rotation?: double | string;
     colors: Array<[ ResourceColor, double ]>;
+    metricsColors?: Array<[ ColorMetrics, double ]>;
     repeating?: boolean;
 }
 export interface RadialGradientOptions {
@@ -6727,12 +7154,12 @@ export enum SourceType {
     JOYSTICK = 5
 }
 export enum SourceTool {
-    UNKNOWN = 0,
     Unknown = 0,
-    FINGER = 1,
+    UNKNOWN = 0,
     Finger = 1,
-    PEN = 2,
+    FINGER = 1,
     Pen = 2,
+    PEN = 2,
     MOUSE = 7,
     TOUCHPAD = 9,
     JOYSTICK = 10
@@ -6791,7 +7218,7 @@ export interface BackgroundBlurStyleOptions extends BlurStyleOptions {
 export interface ForegroundBlurStyleOptions extends BlurStyleOptions {
 }
 export interface BlurOptions {
-    grayscale: [ double, double ];
+    grayscale: [ double, double ] | undefined;
 }
 export interface SystemAdaptiveOptions {
     disableSystemAdaptation?: boolean;
@@ -6803,7 +7230,7 @@ export interface BlurStyleOptions {
     blurOptions?: BlurOptions;
 }
 export interface BackgroundEffectOptions {
-    radius: double;
+    radius: double | undefined;
     saturation?: double;
     brightness?: double;
     color?: ResourceColor;
@@ -6813,7 +7240,7 @@ export interface BackgroundEffectOptions {
     inactiveColor?: ResourceColor;
 }
 export interface ForegroundEffectOptions {
-    radius: double;
+    radius: double | undefined;
 }
 export interface PickerTextStyle {
     color?: ResourceColor;
@@ -6837,7 +7264,7 @@ export enum ShadowType {
     BLUR = 1
 }
 export interface ShadowOptions {
-    radius: double | Resource;
+    radius: double | Resource | undefined;
     type?: ShadowType;
     color?: Color | string | Resource | ColoringStrategy;
     offsetX?: double | Resource;
@@ -6908,6 +7335,8 @@ export interface TouchObject {
     pressure?: double;
     width?: double;
     height?: double;
+    globalDisplayX?: double;
+    globalDisplayY?: double;
 }
 export interface HistoricalPoint {
     touchObject: TouchObject;
@@ -6916,9 +7345,10 @@ export interface HistoricalPoint {
     timestamp: int64;
 }
 export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
-export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
+export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>, touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult;
 export type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 export type TransitionFinishCallback = (transitionIn: boolean) => void;
+export type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
 export type PixelMap = image.PixelMap;
 export enum DragBehavior {
     COPY = 0,
@@ -6928,6 +7358,9 @@ export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
 export type DataSyncOptions = unifiedDataChannel.GetDataParams;
+export type DataLoadParams = unifiedDataChannel.DataLoadParams;
+export type SpringLoadingContext = dragController.SpringLoadingContext;
+export type DragSpringLoadingConfiguration = dragController.DragSpringLoadingConfiguration;
 export enum DragResult {
     UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
@@ -7115,6 +7548,7 @@ export interface SheetOptions extends BindOptions {
     showInSubWindow?: boolean;
     placement?: Placement;
     placementOnTarget?: boolean;
+    systemMaterial?: uiMaterial.Material;
 }
 export interface StateStyles {
     normal?: CustomStyles;
@@ -7317,6 +7751,7 @@ export interface ContextMenuOptions {
     anchorPosition?: Position;
     keyboardAvoidMode?: MenuKeyboardAvoidMode;
     minKeyboardAvoidDistance?: LengthMetrics;
+    systemMaterial?: uiMaterial.Material;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -7416,6 +7851,7 @@ export interface BackgroundImageOptions {
 }
 export interface BackgroundOptions {
     align?: Alignment;
+    ignoresLayoutSafeAreaEdges?: Array<LayoutSafeAreaEdge>;
 }
 export interface ResponseRegion {
     tool?: ResponseRegionSupportedTool;
@@ -7428,660 +7864,2692 @@ export interface ResponseRegion {
 export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 // instructive change end
 export interface CommonMethod {
+    __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return undefined;
+    }
+    __is_CustomComponent__Internal(): boolean {
+        return false;
+    }
     width(value: Length | LayoutPolicy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.width(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'width' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method width")
     }
     height(value: Length | LayoutPolicy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.height(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'height' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method height")
     }
     drawModifier(value: DrawModifier | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.drawModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'drawModifier' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method drawModifier")
     }
     responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.responseRegion(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'responseRegion' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method responseRegion")
     }
     mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.mouseResponseRegion(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'mouseResponseRegion' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method mouseResponseRegion")
     }
     responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.responseRegionList(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'responseRegionList' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method responseRegionList")
     }
     size(value: SizeOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.size(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'size' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method size")
     }
     constraintSize(value: ConstraintSizeOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.constraintSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'constraintSize' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method constraintSize")
     }
     hitTestBehavior(value: HitTestMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.hitTestBehavior(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'hitTestBehavior' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method hitTestBehavior")
     }
     onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onChildTouchTest(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onChildTouchTest' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onChildTouchTest")
     }
     layoutWeight(value: number | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.layoutWeight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'layoutWeight' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method layoutWeight")
     }
     chainWeight(value: ChainWeightOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.chainWeight(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'chainWeight' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method chainWeight")
     }
     padding(value: Padding | Length | LocalizedPadding | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.padding(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'padding' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method padding")
     }
     safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.safeAreaPadding(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'safeAreaPadding' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method safeAreaPadding")
     }
     margin(value: Padding | Length | LocalizedPadding | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.margin(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'margin' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method margin")
     }
     backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundColor' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundColor")
     }
     pixelRound(value: PixelRoundPolicy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.pixelRound(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'pixelRound' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method pixelRound")
     }
+    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundImage(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundImage' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method backgroundImage")
+    }
     backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundImageSize(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundImageSize' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundImageSize")
     }
     backgroundImagePosition(value: Position | Alignment | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundImagePosition(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundImagePosition' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundImagePosition")
     }
     backgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundEffect")
     }
     backgroundImageResizable(value: ResizableOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundImageResizable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundImageResizable' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundImageResizable")
     }
     foregroundEffect(value: ForegroundEffectOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.foregroundEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'foregroundEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method foregroundEffect")
     }
     visualEffect(value: uiEffect.VisualEffect | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.visualEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'visualEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method visualEffect")
     }
     backgroundFilter(value: uiEffect.Filter | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundFilter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundFilter' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundFilter")
     }
     foregroundFilter(value: uiEffect.Filter | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.foregroundFilter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'foregroundFilter' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method foregroundFilter")
     }
     compositingFilter(value: uiEffect.Filter | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.compositingFilter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'compositingFilter' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method compositingFilter")
     }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.materialFilter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'materialFilter' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method materialFilter")
+    }
     opacity(value: double | Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.opacity(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'opacity' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method opacity")
     }
     border(value: BorderOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.border(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'border' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method border")
     }
     borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.borderStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'borderStyle' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method borderStyle")
     }
     borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.borderWidth(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'borderWidth' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method borderWidth")
     }
     borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.borderColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'borderColor' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method borderColor")
     }
     borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.borderRadius(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'borderRadius' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method borderRadius")
     }
     borderImage(value: BorderImageOption | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.borderImage(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'borderImage' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method borderImage")
     }
     outline(value: OutlineOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.outline(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'outline' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method outline")
     }
     outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.outlineStyle(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'outlineStyle' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method outlineStyle")
     }
     outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.outlineWidth(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'outlineWidth' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method outlineWidth")
     }
     outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.outlineColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'outlineColor' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method outlineColor")
     }
     outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.outlineRadius(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'outlineRadius' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method outlineRadius")
     }
     foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.foregroundColor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'foregroundColor' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method foregroundColor")
     }
     onClick(value: ((event: ClickEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onClick(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onClick' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onClick")
     }
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onHover(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onHover' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onHover")
     }
     onHoverMove(value: ((value0: HoverEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onHoverMove(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onHoverMove' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onHoverMove")
     }
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAccessibilityHover(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAccessibilityHover' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAccessibilityHover")
     }
     onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAccessibilityHoverTransparent(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAccessibilityHoverTransparent' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAccessibilityHoverTransparent")
     }
     hoverEffect(value: HoverEffect | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.hoverEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'hoverEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method hoverEffect")
     }
     onMouse(value: ((event: MouseEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onMouse(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onMouse' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onMouse")
     }
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onTouch(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onTouch' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onTouch")
     }
     onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onKeyEvent(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onKeyEvent' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onKeyEvent")
     }
     onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDigitalCrown(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDigitalCrown' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDigitalCrown")
     }
     onKeyPreIme(value: ((value0: KeyEvent) => boolean) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onKeyPreIme(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onKeyPreIme' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onKeyPreIme")
     }
     onKeyEventDispatch(value: ((value0: KeyEvent) => boolean) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onKeyEventDispatch(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onKeyEventDispatch' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onKeyEventDispatch")
     }
     onFocusAxisEvent(value: ((value0: FocusAxisEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onFocusAxisEvent(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onFocusAxisEvent' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onFocusAxisEvent")
     }
     onAxisEvent(value: ((value0: AxisEvent) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAxisEvent(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAxisEvent' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAxisEvent")
     }
     focusable(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.focusable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'focusable' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method focusable")
     }
     nextFocus(value: FocusMovement | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.nextFocus(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'nextFocus' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method nextFocus")
     }
     tabStop(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.tabStop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'tabStop' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method tabStop")
     }
     onFocus(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onFocus(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onFocus' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onFocus")
     }
     onBlur(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onBlur(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onBlur' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onBlur")
     }
     tabIndex(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.tabIndex(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'tabIndex' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method tabIndex")
     }
     defaultFocus(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.defaultFocus(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'defaultFocus' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method defaultFocus")
     }
     groupDefaultFocus(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.groupDefaultFocus(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'groupDefaultFocus' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method groupDefaultFocus")
     }
     focusOnTouch(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.focusOnTouch(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'focusOnTouch' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method focusOnTouch")
     }
     focusBox(value: FocusBoxStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.focusBox(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'focusBox' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method focusBox")
     }
-
-    // instructive change start
     animationStart(value: AnimateParam | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.animationStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'animationStart' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method animationStart")
     }
     animationStop(value: AnimateParam | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.animationStop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'animationStop' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method animationStop")
     }
     __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.__createOrSetAnimatableProperty(functionName, value, callback));
+            return;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method '__createOrSetAnimatableProperty' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method __createOrSetAnimatableProperty")
     }
-    // instructive change end
-
     transition(value: TransitionEffect | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.transition(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'transition' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method transition")
     }
     motionBlur(value: MotionBlurOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.motionBlur(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'motionBlur' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method motionBlur")
     }
     brightness(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.brightness(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'brightness' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method brightness")
     }
     contrast(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.contrast(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'contrast' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method contrast")
     }
     grayscale(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.grayscale(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'grayscale' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method grayscale")
     }
     colorBlend(value: Color | string | Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.colorBlend(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'colorBlend' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method colorBlend")
     }
     saturate(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.saturate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'saturate' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method saturate")
     }
     sepia(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.sepia(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'sepia' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method sepia")
     }
     invert(value: double | InvertOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.invert(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'invert' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method invert")
     }
     hueRotate(value: double | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.hueRotate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'hueRotate' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method hueRotate")
     }
     useShadowBatching(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.useShadowBatching(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'useShadowBatching' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method useShadowBatching")
     }
     useEffect(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.useEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'useEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method useEffect")
     }
+    useUnionEffect(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.useUnionEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'useUnionEffect' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method useUnionEffect")
+    }
     renderGroup(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.renderGroup(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'renderGroup' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method renderGroup")
     }
+    excludeFromRenderGroup(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.excludeFromRenderGroup(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'excludeFromRenderGroup' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method excludeFromRenderGroup")
+    }
     freeze(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.freeze(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'freeze' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method freeze")
     }
     translate(value: TranslateOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.translate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'translate' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method translate")
     }
     scale(value: ScaleOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.scale(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'scale' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method scale")
     }
     rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.rotate(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'rotate' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method rotate")
     }
     transform(value: matrix4.Matrix4Transit | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.transform(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'transform' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method transform")
     }
     transform3D(value: matrix4.Matrix4Transit | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.transform3D(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'transform3D' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method transform3D")
     }
     onAppear(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAppear(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAppear' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAppear")
     }
     onDisAppear(value: (() => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDisAppear(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDisAppear' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDisAppear")
     }
     onAttach(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAttach(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAttach' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAttach")
     }
     onDetach(value: VoidCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDetach(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDetach' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDetach")
     }
     onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAreaChange")
     }
     visibility(value: Visibility | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.visibility(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'visibility' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method visibility")
     }
     flexGrow(value: number | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.flexGrow(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'flexGrow' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method flexGrow")
     }
     flexShrink(value: number | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.flexShrink(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'flexShrink' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method flexShrink")
     }
     flexBasis(value: number | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.flexBasis(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'flexBasis' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method flexBasis")
     }
     alignSelf(value: ItemAlign | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.alignSelf(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'alignSelf' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method alignSelf")
     }
     layoutGravity(value: LocalizedAlignment | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.layoutGravity(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'layoutGravity' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method layoutGravity")
     }
     displayPriority(value: number | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.displayPriority(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'displayPriority' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method displayPriority")
     }
     zIndex(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.zIndex(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'zIndex' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method zIndex")
     }
     direction(value: Direction | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.direction(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'direction' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method direction")
     }
     align(value: Alignment | LocalizedAlignment | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.align(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'align' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method align")
     }
     position(value: Position | Edges | LocalizedEdges | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.position(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'position' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method position")
     }
     markAnchor(value: Position | LocalizedPosition | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.markAnchor(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'markAnchor' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method markAnchor")
     }
     offset(value: Position | Edges | LocalizedEdges | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.offset(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'offset' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method offset")
     }
     enabled(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.enabled(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'enabled' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method enabled")
     }
     alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.alignRules(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'alignRules' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method alignRules")
     }
     aspectRatio(value: number | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.aspectRatio(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'aspectRatio' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method aspectRatio")
     }
     clickEffect(value: ClickEffect | null | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.clickEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'clickEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method clickEffect")
     }
+    enableClickSoundEffect(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.enableClickSoundEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'enableClickSoundEffect' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method enableClickSoundEffect")
+    }
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDragStart(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDragStart' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDragStart")
     }
     onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDragEnter(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDragEnter' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDragEnter")
     }
     onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDragMove(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDragMove' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDragMove")
     }
     onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDragLeave(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDragLeave' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDragLeave")
     }
     onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDrop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDrop' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDrop")
     }
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDragEnd(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDragEnd' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDragEnd")
     }
     allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | null | Array<string> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.allowDrop(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'allowDrop' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method allowDrop")
     }
     draggable(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.draggable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'draggable' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method draggable")
     }
     dragPreview(value: CustomBuilder | DragItemInfo | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.dragPreview(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'dragPreview' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method dragPreview")
     }
     onPreDrag(value: ((value0: PreDragStatus) => void) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onPreDrag(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onPreDrag' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onPreDrag")
     }
     linearGradient(value: LinearGradientOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.linearGradient(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'linearGradient' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method linearGradient")
     }
     sweepGradient(value: SweepGradientOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.sweepGradient(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'sweepGradient' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method sweepGradient")
     }
     radialGradient(value: RadialGradientOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.radialGradient(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'radialGradient' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method radialGradient")
     }
     motionPath(value: MotionPathOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.motionPath(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'motionPath' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method motionPath")
     }
     shadow(value: ShadowOptions | ShadowStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.shadow(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'shadow' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method shadow")
     }
     clip(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.clip(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'clip' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method clip")
     }
     clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.clipShape(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'clipShape' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method clipShape")
     }
     mask(value: ProgressMask | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.mask(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'mask' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method mask")
     }
     maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.maskShape(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'maskShape' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method maskShape")
     }
     key(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.key(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'key' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method key")
     }
     id(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.id(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'id' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method id")
     }
     geometryTransition(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.geometryTransition(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'geometryTransition' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method geometryTransition")
     }
     stateStyles(value: StateStyles | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.stateStyles(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'stateStyles' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method stateStyles")
     }
     restoreId(value: int32 | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.restoreId(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'restoreId' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method restoreId")
     }
     sphericalEffect(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.sphericalEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'sphericalEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method sphericalEffect")
     }
     lightUpEffect(value: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.lightUpEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'lightUpEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method lightUpEffect")
     }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.pixelStretchEffect(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'pixelStretchEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method pixelStretchEffect")
     }
     accessibilityGroupWithValue(value: boolean | undefined): this {
-        throw new Error("Unimplemented method accessibilityGroup")
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityGroupWithValue(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityGroupWithValue' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method accessibilityGroupWithValue")
     }
     accessibilityTextOfStringType(value: string | undefined): this {
-        throw new Error("Unimplemented method accessibilityText")
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityTextOfStringType(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityTextOfStringType' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method accessibilityTextOfStringType")
     }
     accessibilityNextFocusId(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityNextFocusId(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityNextFocusId' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityNextFocusId")
     }
     accessibilityDefaultFocus(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityDefaultFocus(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityDefaultFocus' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityDefaultFocus")
     }
     accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityUseSamePage(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityUseSamePage' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityUseSamePage")
     }
     accessibilityScrollTriggerable(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityScrollTriggerable(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityScrollTriggerable' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityScrollTriggerable")
     }
     accessibilityTextOfResourceType(value: Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityTextOfResourceType(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityTextOfResourceType' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityText")
     }
     accessibilityRole(value: AccessibilityRoleType | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityRole(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityRole' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityRole")
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAccessibilityFocus(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAccessibilityFocus' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAccessibilityFocus")
     }
     onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAccessibilityActionIntercept(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAccessibilityActionIntercept' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onAccessibilityActionIntercept")
     }
     accessibilityTextHint(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityTextHint(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityTextHint' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityTextHint")
     }
     accessibilityDescriptionOfStringType(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityDescriptionOfStringType(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityDescriptionOfStringType' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityDescription")
     }
     accessibilityDescriptionOfResourceType(value: Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityDescriptionOfResourceType(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityDescriptionOfResourceType' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityDescription")
     }
     accessibilityLevel(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityLevel(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityLevel' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityLevel")
     }
     accessibilityVirtualNode(value: CustomBuilder | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityVirtualNode(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityVirtualNode' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityVirtualNode")
     }
     accessibilityChecked(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityChecked(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityChecked' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityChecked")
     }
     accessibilitySelected(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilitySelected(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilitySelected' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilitySelected")
     }
     obscured(value: Array<ObscuredReasons> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.obscured(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'obscured' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method obscured")
     }
     reuseId(value: string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.reuseId(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'reuseId' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method reuseId")
     }
     reuse(value: ReuseOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.reuse(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'reuse' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method reuse")
     }
     renderFit(value: RenderFit | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.renderFit(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'renderFit' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method renderFit")
     }
     gestureModifier(value: GestureModifier | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.gestureModifier(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'gestureModifier' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method gestureModifier")
     }
     backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundBrightness(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundBrightness' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundBrightness")
     }
     onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onGestureJudgeBegin(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onGestureJudgeBegin' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onGestureJudgeBegin")
     }
     onGestureRecognizerJudgeBegin(value: GestureRecognizerJudgeBeginCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onGestureRecognizerJudgeBegin(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onGestureRecognizerJudgeBegin' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
     shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.shouldBuiltInRecognizerParallelWith(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'shouldBuiltInRecognizerParallelWith' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method shouldBuiltInRecognizerParallelWith")
     }
     monopolizeEvents(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.monopolizeEvents(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'monopolizeEvents' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method monopolizeEvents")
     }
     onTouchIntercept(value: ((value0: TouchEvent) => HitTestMode) | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onTouchIntercept(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onTouchIntercept' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onTouchIntercept")
     }
     onSizeChange(value: SizeChangeCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onSizeChange(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onSizeChange' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onSizeChange")
     }
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityFocusDrawLevel(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityFocusDrawLevel' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityFocusDrawLevel")
     }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onTouchTestDone(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onTouchTestDone' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method onTouchTestDone")
+    }
     systemMaterial(value: uiMaterial.Material | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.systemMaterial(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'systemMaterial' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method systemMaterial")
     }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityStateDescription(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityStateDescription' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method accessibilityStateDescription")
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityActionOptions(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityActionOptions' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method accessibilityActionOptions")
+    }
     customProperty(name: string, value: CustomProperty): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.customProperty(name, value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'customProperty' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method customProperty")
     }
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.expandSafeArea(types, edges));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'expandSafeArea' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method expandSafeArea")
     }
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.ignoreLayoutSafeArea(types, edges));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'ignoreLayoutSafeArea' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method ignoreLayoutSafeArea")
     }
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.background(builder, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'background' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method background")
     }
-    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
-        throw new Error("Unimplemented method backgroundImage")
-    }
     backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundImage(src, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundImage' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundImage")
     }
     backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundImage(src, repeat));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundImage' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundImage")
     }
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundBlurStyle(style, options, sysOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundBlurStyle' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundBlurStyle")
     }
     backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backgroundEffect(options, sysOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backgroundEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backgroundEffect")
     }
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.foregroundBlurStyle(style, options, sysOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'foregroundBlurStyle' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method foregroundBlurStyle")
     }
     borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.borderRadius(value, type));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'borderRadius' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method borderRadius")
     }
     onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onClick(event, distanceThreshold));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onClick' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onClick")
     }
     focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.focusScopeId(id, isGroup, arrowStepOut));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'focusScopeId' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method focusScopeId")
     }
     focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.focusScopePriority(scopeId, priority));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'focusScopePriority' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method focusScopePriority")
     }
     transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.transition(effect, onFinish));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'transition' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method transition")
     }
     gesture(gesture: GestureType, mask?: GestureMask): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.gesture(gesture, mask));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'gesture' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method gesture")
     }
     priorityGesture(gesture: GestureType, mask?: GestureMask): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.priorityGesture(gesture, mask));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'priorityGesture' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method priorityGesture")
     }
     parallelGesture(gesture: GestureType, mask?: GestureMask): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.parallelGesture(gesture, mask));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'parallelGesture' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method parallelGesture")
     }
     blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.blur(blurRadius, options, sysOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'blur' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method blur")
     }
     linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.linearGradientBlur(value, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'linearGradientBlur' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method linearGradientBlur")
     }
     systemBarEffect(): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.systemBarEffect());
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'systemBarEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method systemBarEffect")
     }
     useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.useEffect(useEffect, effectType));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'useEffect' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method useEffect")
     }
     backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.backdropBlur(radius, options, sysOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'backdropBlur' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method backdropBlur")
     }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.sharedTransition(id, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'sharedTransition' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method sharedTransition")
     }
     chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.chainMode(direction, style));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'chainMode' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method chainMode")
     }
     onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDrop(eventCallback, dropOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDrop' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onDrop")
     }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onDragSpringLoading(callback_, configuration));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onDragSpringLoading' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method onDragSpringLoading")
+    }
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.dragPreview(preview, config));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'dragPreview' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method dragPreview")
     }
     dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.dragPreviewOptions(value, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'dragPreviewOptions' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method dragPreviewOptions")
     }
     overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.overlay(value, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'overlay' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method overlay")
     }
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.blendMode(value, type));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'blendMode' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method blendMode")
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.advancedBlendMode(effect, type));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'advancedBlendMode' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method advancedBlendMode")
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.geometryTransition(id, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'geometryTransition' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method geometryTransition")
     }
     bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindTips(message, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindTips' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindTips")
     }
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindPopup(show, popup));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindPopup' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindPopup")
     }
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindMenu(content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindMenu' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindMenu")
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindMenu(isShow, content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindMenu' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindMenu")
     }
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenu(content, responseType, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindContextMenu' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindContextMenu")
     }
-    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
-        throw new Error("Unimplemented method bindContextMenu")
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenuWithResponse(content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindContextMenuWithResponse' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method bindContextMenuWithResponse")
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContextMenu(isShown, content, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindContextMenu' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindContextMenu")
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContentCover(isShow, builder, type));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindContentCover' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindContentCover")
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindContentCover(isShow, builder, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindContentCover' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindContentCover")
     }
     bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.bindSheet(isShow, builder, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'bindSheet' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method bindSheet")
     }
     onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onVisibleAreaChange(ratios, event));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onVisibleAreaChange' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onVisibleAreaChange")
     }
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onVisibleAreaApproximateChange(options, event));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onVisibleAreaApproximateChange' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onVisibleAreaApproximateChange")
     }
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.keyboardShortcut(value, keys, action));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'keyboardShortcut' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method keyboardShortcut")
     }
     accessibilityGroupWithConfig(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
-        throw new Error("Unimplemented method accessibilityGroup")
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityGroupWithConfig(isGroup, config));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityGroupWithConfig' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method accessibilityGroupWithConfig")
     }
     onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onGestureRecognizerJudgeBegin(callback_, exposeInnerGesture));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onGestureRecognizerJudgeBegin' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityGroup(isGroup, accessibilityOptions));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityGroup' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityGroup")
     }
     accessibilityText(value: Resource | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityText(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityText' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityText")
     }
     accessibilityDescription(value: Resource | string | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.accessibilityDescription(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'accessibilityDescription' can only be set when creating a custom component")
+            }
+        }
         throw new Error("Unimplemented method accessibilityDescription")
     }
-    // instructive change begin
     applyAttributesFinish(): void {}
-    // instructive change end
 }
+
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | LayoutPolicy | undefined
     height_value?: Length | LayoutPolicy | undefined
@@ -8109,6 +10577,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     backgroundFilter_value?: uiEffect.Filter | undefined
     foregroundFilter_value?: uiEffect.Filter | undefined
     compositingFilter_value?: uiEffect.Filter | undefined
+    materialFilter_value?: uiEffect.Filter | undefined
     opacity_value?: double | Resource | undefined
     border_value?: BorderOptions | undefined
     borderStyle_value?: BorderStyle | EdgeStyles | undefined
@@ -8159,7 +10628,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     hueRotate_value?: double | string | undefined
     useShadowBatching_value?: boolean | undefined
     useEffect_value?: boolean | undefined
+    useUnionEffect_value?: boolean | undefined
     renderGroup_value?: boolean | undefined
+    excludeFromRenderGroup_value?: boolean | undefined
     freeze_value?: boolean | undefined
     translate_value?: TranslateOptions | undefined
     scale_value?: ScaleOptions | undefined
@@ -8188,6 +10659,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     aspectRatio_value?: number | undefined
     clickEffect_value?: ClickEffect | null | undefined
+    enableClickSoundEffect_value?: boolean | undefined
     onDragStart_value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
     onDragEnter_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragMove_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
@@ -8243,7 +10715,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouchIntercept_value?: ((value0: TouchEvent) => HitTestMode) | undefined
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
+    onTouchTestDone_value?: TouchTestDoneCallback | undefined
     systemMaterial_value?: uiMaterial.Material | undefined
+    accessibilityStateDescription_value?: string | Resource | undefined
+    accessibilityActionOptions_value?: AccessibilityActionOptions | undefined
     width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
@@ -8317,6 +10792,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     compositingFilter(value: uiEffect.Filter | undefined): this {
+        return this
+    }
+    materialFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
     opacity(value: double | Resource | undefined): this {
@@ -8478,7 +10956,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     useEffect(value: boolean | undefined): this {
         return this
     }
+    useUnionEffect(value: boolean | undefined): this {
+        return this
+    }
     renderGroup(value: boolean | undefined): this {
+        return this
+    }
+    excludeFromRenderGroup(value: boolean | undefined): this {
         return this
     }
     freeze(value: boolean | undefined): this {
@@ -8563,6 +11047,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     clickEffect(value: ClickEffect | null | undefined): this {
+        return this
+    }
+    enableClickSoundEffect(value: boolean | undefined): this {
         return this
     }
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
@@ -8736,7 +11223,16 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        return this
+    }
     systemMaterial(value: uiMaterial.Material | undefined): this {
+        return this
+    }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        return this
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
         return this
     }
     customProperty(name: string, value: CustomProperty): this {
@@ -8748,7 +11244,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
     }
-    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
         return this
     }
     backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
@@ -8817,6 +11313,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         return this
     }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        return this
+    }
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         return this
     }
@@ -8829,7 +11328,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         return this
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         return this
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
@@ -8844,16 +11343,16 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         return this
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -8991,16 +11490,16 @@ export interface PixelRoundPolicy {
     bottom?: PixelRoundCalcPolicy;
 }
 export interface LinearGradientBlurOptions {
-    fractionStops: Array<FractionStop>;
-    direction: GradientDirection;
+    fractionStops: Array<FractionStop> | undefined;
+    direction: GradientDirection | undefined;
 }
 export interface MotionBlurAnchor {
-    x: double;
-    y: double;
+    x: double | undefined;
+    y: double | undefined;
 }
 export interface MotionBlurOptions {
-    radius: double;
-    anchor: MotionBlurAnchor;
+    radius: double | undefined;
+    anchor: MotionBlurAnchor | undefined;
 }
 export interface GeometryInfo extends SizeResult {
     borderWidth: EdgeWidths;
@@ -9046,11 +11545,14 @@ export interface ScrollableCommonMethod extends CommonMethod {
     scrollBar(value: BarState | undefined): this {
         throw new Error("Unimplemented method scrollBar")
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         throw new Error("Unimplemented method scrollBarColor")
     }
     scrollBarWidth(value: double | string | undefined): this {
         throw new Error("Unimplemented method scrollBarWidth")
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        throw new Error("Unimplemented method scrollBarMargin")
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
         throw new Error("Unimplemented method nestedScroll")
@@ -9060,6 +11562,27 @@ export interface ScrollableCommonMethod extends CommonMethod {
     }
     friction(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method friction")
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        throw new Error("Unimplemented method contentStartOffset")
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        throw new Error("Unimplemented method contentEndOffset")
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onWillStartDragging")
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        throw new Error("Unimplemented method onWillStopDragging")
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        throw new Error("Unimplemented method onDidStopDragging")
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onWillStartFling")
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onDidStopFling")
     }
     onReachStart(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onReachStart")
@@ -9099,10 +11622,13 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     scrollBar(value: BarState | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         return this
     }
     scrollBarWidth(value: double | string | undefined): this {
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -9112,6 +11638,27 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
         return this
     }
     friction(value: double | Resource | undefined): this {
+        return this
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        return this
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
         return this
     }
     onReachStart(value: (() => void) | undefined): this {
@@ -9150,6 +11697,8 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
 }
 export type OnWillScrollCallback = (scrollOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
 export type OnScrollCallback = (scrollOffset: double, scrollState: ScrollState) => void;
+export type OnWillStopDraggingCallback = (velocity: double) => void;
+export type OnDidStopDraggingCallback = (willFling: boolean) => void;
 export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: int32) => CustomBuilder | undefined;
 export type OnMoveHandler = (from: int32, to: int32) => void;
 export interface ItemDragEventHandler {
@@ -9168,6 +11717,7 @@ export enum EffectEdge {
 }
 export interface EditModeOptions {
     enableGatherSelectedItemsAnimation?: boolean;
+    onGetPreviewBadge?: (() => boolean | int32);
 }
 export interface BackgroundBrightnessOptions {
     rate: double;
@@ -9238,6 +11788,7 @@ export interface Bindable<T = void> {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<Resource>> | Bindable<Array<string>>;
+export type InputEventType = TouchEvent | MouseEvent | AxisEvent;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         if (!this.peer) {
@@ -9447,6 +11998,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("compositingFilter")) {
             const value_casted = value as (uiEffect.Filter | undefined)
             this.getPeer()?.setCompositingFilterAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public materialFilter(value: uiEffect.Filter | undefined): this {
+        if (this.checkPriority("materialFilter")) {
+            const value_casted = value as (uiEffect.Filter | undefined)
+            this.getPeer()?.setMaterialFilterAttribute(value_casted)
             return this
         }
         return this
@@ -9879,10 +12438,26 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public useUnionEffect(value: boolean | undefined): this {
+        if (this.checkPriority("useUnionEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setUseUnionEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public renderGroup(value: boolean | undefined): this {
         if (this.checkPriority("renderGroup")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setRenderGroupAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public excludeFromRenderGroup(value: boolean | undefined): this {
+        if (this.checkPriority("excludeFromRenderGroup")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setExcludeFromRenderGroupAttribute(value_casted)
             return this
         }
         return this
@@ -10108,6 +12683,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("clickEffect")) {
             const value_casted = value as (ClickEffect | null | undefined)
             this.getPeer()?.setClickEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableClickSoundEffect(value: boolean | undefined): this {
+        if (this.checkPriority("enableClickSoundEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableClickSoundEffectAttribute(value_casted)
             return this
         }
         return this
@@ -10592,10 +13175,34 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        if (this.checkPriority("onTouchTestDone")) {
+            const value_casted = value as (TouchTestDoneCallback | undefined)
+            this.getPeer()?.setOnTouchTestDoneAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public systemMaterial(value: uiMaterial.Material | undefined): this {
         if (this.checkPriority("systemMaterial")) {
             const value_casted = value as (uiMaterial.Material | undefined)
             this.getPeer()?.setSystemMaterialAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityStateDescription(value: string | Resource | undefined): this {
+        if (this.checkPriority("accessibilityStateDescription")) {
+            const value_casted = value as (string | Resource | undefined)
+            this.getPeer()?.setAccessibilityStateDescriptionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        if (this.checkPriority("accessibilityActionOptions")) {
+            const value_casted = value as (AccessibilityActionOptions | undefined)
+            this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
             return this
         }
         return this
@@ -10624,11 +13231,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    public background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
-            const builder_casted = builder as (CustomBuilder | undefined)
+            const content_casted = content as (CustomBuilder | ResourceColor | undefined)
             const options_casted = options as (BackgroundOptions | undefined)
-            this.getPeer()?.setBackgroundAttribute(builder_casted, options_casted)
+            this.getPeer()?.setBackgroundAttribute(content_casted, options_casted)
             return this
         }
         return this
@@ -10824,6 +13431,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        if (this.checkPriority("onDragSpringLoading")) {
+            const callback__casted = callback_ as (((value0: dragController.SpringLoadingContext) => void) | null | undefined)
+            const configuration_casted = configuration as (dragController.DragSpringLoadingConfiguration | undefined)
+            this.getPeer()?.setOnDragSpringLoadingAttribute(callback__casted, configuration_casted)
+            return this
+        }
+        return this
+    }
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         if (this.checkPriority("dragPreview")) {
             const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
@@ -10858,9 +13474,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    public advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("advancedBlendMode")) {
-            const effect_casted = effect as (BlendMode | uiEffect.Blender)
+            const effect_casted = effect as (BlendMode | uiEffect.Blender | undefined)
             const type_casted = type as (BlendApplyType | undefined)
             this.getPeer()?.setAdvancedBlendModeAttribute(effect_casted, type_casted)
             return this
@@ -10903,9 +13519,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         if (this.checkPriority("bindMenu")) {
-            const isShow_casted = isShow as (boolean | undefined)
+            const isShow_casted = isShow as (boolean | Bindable<boolean> | undefined)
             const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
             const options_casted = options as (MenuOptions | undefined)
             this.getPeer()?.setBindMenu1Attribute(isShow_casted, content_casted, options_casted)
@@ -10923,21 +13539,21 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
-        if (this.checkPriority("bindContextMenu")) {
+    public bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        if (this.checkPriority("bindContextMenuWithResponse")) {
             const content_casted = content as (CustomBuilderT<ResponseType> | undefined)
             const options_casted = options as (ContextMenuOptions | undefined)
-            this.getPeer()?.setBindContextMenu1Attribute(content_casted, options_casted)
+            this.getPeer()?.setBindContextMenuWithResponseAttribute(content_casted, options_casted)
             return this
         }
         return this
     }
-    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         if (this.checkPriority("bindContextMenu")) {
-            const isShown_casted = isShown as (boolean | undefined)
+            const isShown_casted = isShown as (boolean | Bindable<boolean> | undefined)
             const content_casted = content as (CustomBuilder | undefined)
             const options_casted = options as (ContextMenuOptions | undefined)
-            this.getPeer()?.setBindContextMenu2Attribute(isShown_casted, content_casted, options_casted)
+            this.getPeer()?.setBindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
             return this
         }
         return this
@@ -11165,9 +13781,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public scrollBarColor(value: Color | int32 | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | int32 | string | undefined)
+            const value_casted = value as (Color | int32 | string | Resource | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
@@ -11177,6 +13793,14 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         if (this.checkPriority("scrollBarWidth")) {
             const value_casted = value as (double | string | undefined)
             this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        if (this.checkPriority("scrollBarMargin")) {
+            const value_casted = value as (ScrollBarMargin | undefined)
+            this.getPeer()?.setScrollBarMarginAttribute(value_casted)
             return this
         }
         return this
@@ -11201,6 +13825,62 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         if (this.checkPriority("friction")) {
             const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setFrictionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentStartOffset(value: double | Resource | undefined): this {
+        if (this.checkPriority("contentStartOffset")) {
+            const value_casted = value as (double | Resource | undefined)
+            this.getPeer()?.setContentStartOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentEndOffset(value: double | Resource | undefined): this {
+        if (this.checkPriority("contentEndOffset")) {
+            const value_casted = value as (double | Resource | undefined)
+            this.getPeer()?.setContentEndOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillStartDragging(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onWillStartDragging")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnWillStartDraggingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        if (this.checkPriority("onWillStopDragging")) {
+            const value_casted = value as (OnWillStopDraggingCallback | undefined)
+            this.getPeer()?.setOnWillStopDraggingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        if (this.checkPriority("onDidStopDragging")) {
+            const value_casted = value as (OnDidStopDraggingCallback | undefined)
+            this.getPeer()?.setOnDidStopDraggingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillStartFling(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onWillStartFling")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnWillStartFlingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidStopFling(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onDidStopFling")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnDidStopFlingAttribute(value_casted)
             return this
         }
         return this
@@ -11337,19 +14017,6 @@ export class ContentTransitionEffect_serializer {
         return ContentTransitionEffectInternal.fromPtr(ptr)
     }
 }
-export class ForegroundEffectOptions_serializer {
-    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
-    }
-    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = valueDeserializer.readFloat64()
-        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
-        return value
-    }
-}
 export class InvertOptions_serializer {
     public static write(buffer: SerializerBase, value: InvertOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -11381,22 +14048,6 @@ export class LayoutPolicy_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutPolicyInternal.fromPtr(ptr)
-    }
-}
-export class MotionBlurAnchor_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForX  = value.x
-        valueSerializer.writeFloat64(valueHolderForX)
-        const valueHolderForY  = value.y
-        valueSerializer.writeFloat64(valueHolderForY)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurAnchor {
-        let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : double = valueDeserializer.readFloat64()
-        const yTmpResult : double = valueDeserializer.readFloat64()
-        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
-        return value
     }
 }
 export class NestedScrollOptions_serializer {
@@ -11566,6 +14217,17 @@ export class UICommonEvent_serializer {
         return UICommonEventInternal.fromPtr(ptr)
     }
 }
+export class UIScrollableCommonEvent_serializer {
+    public static write(buffer: SerializerBase, value: UIScrollableCommonEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): UIScrollableCommonEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UIScrollableCommonEventInternal.fromPtr(ptr)
+    }
+}
 export class VerticalAlignParam_serializer {
     public static write(buffer: SerializerBase, value: VerticalAlignParam): void {
         let valueSerializer : SerializerBase = buffer
@@ -11663,6 +14325,18 @@ export class BackgroundOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForIgnoresLayoutSafeAreaEdges  = value.ignoresLayoutSafeAreaEdges
+        if (valueHolderForIgnoresLayoutSafeAreaEdges !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue  = valueHolderForIgnoresLayoutSafeAreaEdges!
+            valueSerializer.writeInt32((valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue.length).toInt())
+            for (let valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI = 0; valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI < valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue.length; valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI++) {
+                const valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueTmpElement : LayoutSafeAreaEdge = valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue[valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI]
+                valueSerializer.writeInt32(valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueTmpElement.valueOf())
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): BackgroundOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -11672,7 +14346,18 @@ export class BackgroundOptions_serializer {
             alignTmpBuf = Alignment.fromValue(valueDeserializer.readInt32())
         }
         const alignTmpResult : Alignment | undefined = alignTmpBuf
-        let value : BackgroundOptions = ({align: alignTmpResult} as BackgroundOptions)
+        const ignoresLayoutSafeAreaEdgesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let ignoresLayoutSafeAreaEdgesTmpBuf : Array<LayoutSafeAreaEdge> | undefined = undefined
+        if ((ignoresLayoutSafeAreaEdgesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const ignoresLayoutSafeAreaEdgesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let ignoresLayoutSafeAreaEdgesTmpBuf_ : Array<LayoutSafeAreaEdge> = new Array<LayoutSafeAreaEdge>(ignoresLayoutSafeAreaEdgesTmpBuf_Length)
+            for (let ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI = 0; ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI < ignoresLayoutSafeAreaEdgesTmpBuf_Length; ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI++) {
+                ignoresLayoutSafeAreaEdgesTmpBuf_[ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI] = LayoutSafeAreaEdge.fromValue(valueDeserializer.readInt32())
+            }
+            ignoresLayoutSafeAreaEdgesTmpBuf = ignoresLayoutSafeAreaEdgesTmpBuf_
+        }
+        const ignoresLayoutSafeAreaEdgesTmpResult : Array<LayoutSafeAreaEdge> | undefined = ignoresLayoutSafeAreaEdgesTmpBuf
+        let value : BackgroundOptions = ({align: alignTmpResult, ignoresLayoutSafeAreaEdges: ignoresLayoutSafeAreaEdgesTmpResult} as BackgroundOptions)
         return value
     }
 }
@@ -11955,16 +14640,27 @@ export class BlurOptions_serializer {
     public static write(buffer: SerializerBase, value: BlurOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForGrayscale  = value.grayscale
-        const valueHolderForGrayscale_0  = valueHolderForGrayscale[0]
-        valueSerializer.writeFloat64(valueHolderForGrayscale_0)
-        const valueHolderForGrayscale_1  = valueHolderForGrayscale[1]
-        valueSerializer.writeFloat64(valueHolderForGrayscale_1)
+        if (valueHolderForGrayscale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGrayscaleTmpValue  = valueHolderForGrayscale!
+            const valueHolderForGrayscaleTmpValue_0  = valueHolderForGrayscaleTmpValue[0]
+            valueSerializer.writeFloat64(valueHolderForGrayscaleTmpValue_0)
+            const valueHolderForGrayscaleTmpValue_1  = valueHolderForGrayscaleTmpValue[1]
+            valueSerializer.writeFloat64(valueHolderForGrayscaleTmpValue_1)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): BlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const grayscaleTmpBufValue0 : double = valueDeserializer.readFloat64()
-        const grayscaleTmpBufValue1 : double = valueDeserializer.readFloat64()
-        const grayscaleTmpResult : [ double, double ] = ([grayscaleTmpBufValue0, grayscaleTmpBufValue1] as [ double, double ])
+        const grayscaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let grayscaleTmpBuf : [ double, double ] | undefined = undefined
+        if ((grayscaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const grayscaleTmpBuf_Value0 : double = valueDeserializer.readFloat64()
+            const grayscaleTmpBuf_Value1 : double = valueDeserializer.readFloat64()
+            grayscaleTmpBuf = ([grayscaleTmpBuf_Value0, grayscaleTmpBuf_Value1] as [ double, double ])
+        }
+        const grayscaleTmpResult : [ double, double ] | undefined = grayscaleTmpBuf
         let value : BlurOptions = ({grayscale: grayscaleTmpResult} as BlurOptions)
         return value
     }
@@ -12381,6 +15077,14 @@ export class EditModeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForOnGetPreviewBadge  = value.onGetPreviewBadge
+        if (valueHolderForOnGetPreviewBadge !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnGetPreviewBadgeTmpValue  = valueHolderForOnGetPreviewBadge!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnGetPreviewBadgeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditModeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -12390,7 +15094,29 @@ export class EditModeOptions_serializer {
             enableGatherSelectedItemsAnimationTmpBuf = valueDeserializer.readBoolean()
         }
         const enableGatherSelectedItemsAnimationTmpResult : boolean | undefined = enableGatherSelectedItemsAnimationTmpBuf
-        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult} as EditModeOptions)
+        const onGetPreviewBadgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetPreviewBadgeTmpBuf : (() => boolean | int32) | undefined = undefined
+        if ((onGetPreviewBadgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetPreviewBadgeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetPreviewBadgeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetPreviewBadgeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetPreviewBadgeTmpBuf = ():boolean | int32 => {
+                const onGetPreviewBadgeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writeInt32(onGetPreviewBadgeTmpBuf_BufResource.resourceId);
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCall);
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCallSync);
+                let onGetPreviewBadgeTmpBuf_BufContinuationValue : boolean | int32 | undefined;
+                const onGetPreviewBadgeTmpBuf_BufContinuationCallback : ((value: boolean | int32) => void) = (value: boolean | int32):void => {
+                onGetPreviewBadgeTmpBuf_BufContinuationValue = value;
+            }
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetPreviewBadgeTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 250356603, onGetPreviewBadgeTmpBuf_BufArgsSerializer.asBuffer(), onGetPreviewBadgeTmpBuf_BufArgsSerializer.length());
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.release();
+                return (onGetPreviewBadgeTmpBuf_BufContinuationValue as boolean | int32);
+            }
+        }
+        const onGetPreviewBadgeTmpResult : (() => boolean | int32) | undefined = onGetPreviewBadgeTmpBuf
+        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult} as EditModeOptions)
         return value
     }
 }
@@ -12507,6 +15233,30 @@ export class FocusMovement_serializer {
         return value
     }
 }
+export class ForegroundEffectOptions_serializer {
+    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            valueSerializer.writeFloat64(valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = valueDeserializer.readFloat64()
+        }
+        const radiusTmpResult : double | undefined = radiusTmpBuf
+        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
+        return value
+    }
+}
 export class GeometryTransitionOptions_serializer {
     public static write(buffer: SerializerBase, value: GeometryTransitionOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -12580,6 +15330,22 @@ export class InputCounterOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForCounterTextColor  = value.counterTextColor
+        if (valueHolderForCounterTextColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCounterTextColorTmpValue  = valueHolderForCounterTextColor!
+            ColorMetrics_serializer.write(valueSerializer, valueHolderForCounterTextColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCounterTextOverflowColor  = value.counterTextOverflowColor
+        if (valueHolderForCounterTextOverflowColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCounterTextOverflowColorTmpValue  = valueHolderForCounterTextOverflowColor!
+            ColorMetrics_serializer.write(valueSerializer, valueHolderForCounterTextOverflowColorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): InputCounterOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -12595,7 +15361,19 @@ export class InputCounterOptions_serializer {
             highlightBorderTmpBuf = valueDeserializer.readBoolean()
         }
         const highlightBorderTmpResult : boolean | undefined = highlightBorderTmpBuf
-        let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentageTmpResult, highlightBorder: highlightBorderTmpResult} as InputCounterOptions)
+        const counterTextColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let counterTextColorTmpBuf : ColorMetrics | undefined = undefined
+        if ((counterTextColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            counterTextColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+        }
+        const counterTextColorTmpResult : ColorMetrics | undefined = counterTextColorTmpBuf
+        const counterTextOverflowColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let counterTextOverflowColorTmpBuf : ColorMetrics | undefined = undefined
+        if ((counterTextOverflowColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            counterTextOverflowColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
+        }
+        const counterTextOverflowColorTmpResult : ColorMetrics | undefined = counterTextOverflowColorTmpBuf
+        let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentageTmpResult, highlightBorder: highlightBorderTmpResult, counterTextColor: counterTextColorTmpResult, counterTextOverflowColor: counterTextOverflowColorTmpResult} as InputCounterOptions)
         return value
     }
 }
@@ -12809,28 +15587,50 @@ export class LinearGradientBlurOptions_serializer {
     public static write(buffer: SerializerBase, value: LinearGradientBlurOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForFractionStops  = value.fractionStops
-        valueSerializer.writeInt32((valueHolderForFractionStops.length).toInt())
-        for (let valueHolderForFractionStopsCounterI = 0; valueHolderForFractionStopsCounterI < valueHolderForFractionStops.length; valueHolderForFractionStopsCounterI++) {
-            const valueHolderForFractionStopsTmpElement : FractionStop = valueHolderForFractionStops[valueHolderForFractionStopsCounterI]
-            const valueHolderForFractionStopsTmpElement_0  = valueHolderForFractionStopsTmpElement[0]
-            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_0)
-            const valueHolderForFractionStopsTmpElement_1  = valueHolderForFractionStopsTmpElement[1]
-            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_1)
+        if (valueHolderForFractionStops !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFractionStopsTmpValue  = valueHolderForFractionStops!
+            valueSerializer.writeInt32((valueHolderForFractionStopsTmpValue.length).toInt())
+            for (let valueHolderForFractionStopsTmpValueCounterI = 0; valueHolderForFractionStopsTmpValueCounterI < valueHolderForFractionStopsTmpValue.length; valueHolderForFractionStopsTmpValueCounterI++) {
+                const valueHolderForFractionStopsTmpValueTmpElement : FractionStop = valueHolderForFractionStopsTmpValue[valueHolderForFractionStopsTmpValueCounterI]
+                const valueHolderForFractionStopsTmpValueTmpElement_0  = valueHolderForFractionStopsTmpValueTmpElement[0]
+                valueSerializer.writeFloat64(valueHolderForFractionStopsTmpValueTmpElement_0)
+                const valueHolderForFractionStopsTmpValueTmpElement_1  = valueHolderForFractionStopsTmpValueTmpElement[1]
+                valueSerializer.writeFloat64(valueHolderForFractionStopsTmpValueTmpElement_1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForDirection  = value.direction
-        valueSerializer.writeInt32(valueHolderForDirection.valueOf())
+        if (valueHolderForDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as GradientDirection)
+            valueSerializer.writeInt32(valueHolderForDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): LinearGradientBlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const fractionStopsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let fractionStopsTmpBuf : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufLength)
-        for (let fractionStopsTmpBufBufCounterI = 0; fractionStopsTmpBufBufCounterI < fractionStopsTmpBufLength; fractionStopsTmpBufBufCounterI++) {
-            const fractionStopsTmpBufTempBufValue0 : double = valueDeserializer.readFloat64()
-            const fractionStopsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
-            fractionStopsTmpBuf[fractionStopsTmpBufBufCounterI] = ([fractionStopsTmpBufTempBufValue0, fractionStopsTmpBufTempBufValue1] as FractionStop)
+        const fractionStopsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fractionStopsTmpBuf : Array<FractionStop> | undefined = undefined
+        if ((fractionStopsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fractionStopsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let fractionStopsTmpBuf_ : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBuf_Length)
+            for (let fractionStopsTmpBuf_BufCounterI = 0; fractionStopsTmpBuf_BufCounterI < fractionStopsTmpBuf_Length; fractionStopsTmpBuf_BufCounterI++) {
+                const fractionStopsTmpBuf_TempBufValue0 : double = valueDeserializer.readFloat64()
+                const fractionStopsTmpBuf_TempBufValue1 : double = valueDeserializer.readFloat64()
+                fractionStopsTmpBuf_[fractionStopsTmpBuf_BufCounterI] = ([fractionStopsTmpBuf_TempBufValue0, fractionStopsTmpBuf_TempBufValue1] as FractionStop)
+            }
+            fractionStopsTmpBuf = fractionStopsTmpBuf_
         }
-        const fractionStopsTmpResult : Array<FractionStop> = fractionStopsTmpBuf
-        const directionTmpResult : GradientDirection = GradientDirection.fromValue(valueDeserializer.readInt32())
+        const fractionStopsTmpResult : Array<FractionStop> | undefined = fractionStopsTmpBuf
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let directionTmpBuf : GradientDirection | undefined = undefined
+        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            directionTmpBuf = GradientDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const directionTmpResult : GradientDirection | undefined = directionTmpBuf
         let value : LinearGradientBlurOptions = ({fractionStops: fractionStopsTmpResult, direction: directionTmpResult} as LinearGradientBlurOptions)
         return value
     }
@@ -12993,6 +15793,44 @@ export class Measurable_serializer {
         return MeasurableInternal.fromPtr(ptr)
     }
 }
+export class MotionBlurAnchor_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        if (valueHolderForX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForXTmpValue  = valueHolderForX!
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForY  = value.y
+        if (valueHolderForY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForYTmpValue  = valueHolderForY!
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MotionBlurAnchor {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let xTmpBuf : double | undefined = undefined
+        if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            xTmpBuf = valueDeserializer.readFloat64()
+        }
+        const xTmpResult : double | undefined = xTmpBuf
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let yTmpBuf : double | undefined = undefined
+        if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            yTmpBuf = valueDeserializer.readFloat64()
+        }
+        const yTmpResult : double | undefined = yTmpBuf
+        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
+        return value
+    }
+}
 export class MeasureResult_serializer {
     public static write(buffer: SerializerBase, value: MeasureResult): void {
         let valueSerializer : SerializerBase = buffer
@@ -13006,22 +15844,6 @@ export class MeasureResult_serializer {
         const widthTmpResult : number = (valueDeserializer.readNumber() as number)
         const heightTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : MeasureResult = ({width: widthTmpResult, height: heightTmpResult} as MeasureResult)
-        return value
-    }
-}
-export class MotionBlurOptions_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
-        const valueHolderForAnchor  = value.anchor
-        MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchor)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = (valueDeserializer.readNumber() as double)
-        const anchorTmpResult : MotionBlurAnchor = MotionBlurAnchor_serializer.read(valueDeserializer)
-        let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
         return value
     }
 }
@@ -13207,10 +16029,10 @@ export class PopupBorderLinearGradient_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForColorsTmpElement_0TmpValueForIdx0  = valueHolderForColorsTmpElement_0TmpValue as Color
                     valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx0.getOrdinal())
-                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof number) {
+                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as number
-                    valueSerializer.writeNumber(valueHolderForColorsTmpElement_0TmpValueForIdx1)
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as int32
+                    valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx1)
                 } else if (valueHolderForColorsTmpElement_0TmpValue instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForColorsTmpElement_0TmpValueForIdx2  = valueHolderForColorsTmpElement_0TmpValue as string
@@ -13246,7 +16068,7 @@ export class PopupBorderLinearGradient_serializer {
                 if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (0).toChar()) {
                     colorsTmpBufTempBufValue0TempBuf_ = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (1).toChar()) {
-                    colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32()
+                    colorsTmpBufTempBufValue0TempBuf_ = valueDeserializer.readInt32()
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (2).toChar()) {
                     colorsTmpBufTempBufValue0TempBuf_ = (valueDeserializer.readString() as string)
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (3).toChar()) {
@@ -13965,6 +16787,22 @@ export class TouchObject_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForGlobalDisplayX  = value.globalDisplayX
+        if (valueHolderForGlobalDisplayX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayXTmpValue  = valueHolderForGlobalDisplayX!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGlobalDisplayY  = value.globalDisplayY
+        if (valueHolderForGlobalDisplayY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayYTmpValue  = valueHolderForGlobalDisplayY!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TouchObject {
         let valueDeserializer : DeserializerBase = buffer
@@ -14006,7 +16844,19 @@ export class TouchObject_serializer {
             heightTmpBuf = valueDeserializer.readFloat64()
         }
         const heightTmpResult : double | undefined = heightTmpBuf
-        let value : TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult} as TouchObject)
+        const globalDisplayXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayXTmpBuf : double | undefined = undefined
+        if ((globalDisplayXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayXTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayXTmpResult : double | undefined = globalDisplayXTmpBuf
+        const globalDisplayYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayYTmpBuf : double | undefined = undefined
+        if ((globalDisplayYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayYTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayYTmpResult : double | undefined = globalDisplayYTmpBuf
+        let value : TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult} as TouchObject)
         return value
     }
 }
@@ -14581,7 +17431,13 @@ export class BackgroundEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundEffectOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            valueSerializer.writeFloat64(valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSaturation  = value.saturation
         if (valueHolderForSaturation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -14673,7 +17529,12 @@ export class BackgroundEffectOptions_serializer {
     }
     public static read(buffer: DeserializerBase): BackgroundEffectOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = valueDeserializer.readFloat64()
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = valueDeserializer.readFloat64()
+        }
+        const radiusTmpResult : double | undefined = radiusTmpBuf
         const saturationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let saturationTmpBuf : double | undefined = undefined
         if ((saturationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15819,6 +18680,44 @@ export class MenuMaskType_serializer {
         return value
     }
 }
+export class MotionBlurOptions_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            valueSerializer.writeFloat64(valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAnchor  = value.anchor
+        if (valueHolderForAnchor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAnchorTmpValue  = valueHolderForAnchor!
+            MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MotionBlurOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = valueDeserializer.readFloat64()
+        }
+        const radiusTmpResult : double | undefined = radiusTmpBuf
+        const anchorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let anchorTmpBuf : MotionBlurAnchor | undefined = undefined
+        if ((anchorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            anchorTmpBuf = MotionBlurAnchor_serializer.read(valueDeserializer)
+        }
+        const anchorTmpResult : MotionBlurAnchor | undefined = anchorTmpBuf
+        let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
+        return value
+    }
+}
 export class OverlayOptions_serializer {
     public static write(buffer: SerializerBase, value: OverlayOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -16057,14 +18956,20 @@ export class ShadowOptions_serializer {
     public static write(buffer: SerializerBase, value: ShadowOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        if (valueHolderForRadius instanceof double) {
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            if (valueHolderForRadiusTmpValue instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForRadiusForIdx0  = valueHolderForRadius as double
-            valueSerializer.writeFloat64(valueHolderForRadiusForIdx0)
-        } else if (valueHolderForRadius instanceof Resource) {
+            const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx0)
+            } else if (valueHolderForRadiusTmpValue instanceof Resource) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForRadiusForIdx1  = valueHolderForRadius as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForRadiusForIdx1)
+            const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForType  = value.type
         if (valueHolderForType !== undefined) {
@@ -16141,16 +19046,21 @@ export class ShadowOptions_serializer {
     }
     public static read(buffer: DeserializerBase): ShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let radiusTmpBuf : double | Resource | undefined
-        if (radiusTmpBufUnionSelector == (0).toChar()) {
-            radiusTmpBuf = valueDeserializer.readFloat64()
-        } else if (radiusTmpBufUnionSelector == (1).toChar()) {
-            radiusTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for radiusTmpBuf has to be chosen through deserialisation.")
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | Resource | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let radiusTmpBuf_ : double | Resource | undefined
+            if (radiusTmpBuf_UnionSelector == (0).toByte()) {
+                radiusTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (radiusTmpBuf_UnionSelector == (1).toByte()) {
+                radiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
+            }
+            radiusTmpBuf = (radiusTmpBuf_ as double | Resource)
         }
-        const radiusTmpResult : double | Resource = (radiusTmpBuf as double | Resource)
+        const radiusTmpResult : double | Resource | undefined = radiusTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : ShadowType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -17352,6 +20262,21 @@ export class SweepGradientOptions_serializer {
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
             valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
+        const valueHolderForMetricsColors  = value.metricsColors
+        if (valueHolderForMetricsColors !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMetricsColorsTmpValue  = valueHolderForMetricsColors!
+            valueSerializer.writeInt32((valueHolderForMetricsColorsTmpValue.length).toInt())
+            for (let valueHolderForMetricsColorsTmpValueCounterI = 0; valueHolderForMetricsColorsTmpValueCounterI < valueHolderForMetricsColorsTmpValue.length; valueHolderForMetricsColorsTmpValueCounterI++) {
+                const valueHolderForMetricsColorsTmpValueTmpElement : [ ColorMetrics, double ] = valueHolderForMetricsColorsTmpValue[valueHolderForMetricsColorsTmpValueCounterI]
+                const valueHolderForMetricsColorsTmpValueTmpElement_0  = valueHolderForMetricsColorsTmpValueTmpElement[0]
+                ColorMetrics_serializer.write(valueSerializer, valueHolderForMetricsColorsTmpValueTmpElement_0)
+                const valueHolderForMetricsColorsTmpValueTmpElement_1  = valueHolderForMetricsColorsTmpValueTmpElement[1]
+                valueSerializer.writeFloat64(valueHolderForMetricsColorsTmpValueTmpElement_1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -17454,13 +20379,26 @@ export class SweepGradientOptions_serializer {
             colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
         const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
+        const metricsColorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let metricsColorsTmpBuf : Array<[ ColorMetrics, double ]> | undefined = undefined
+        if ((metricsColorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const metricsColorsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let metricsColorsTmpBuf_ : Array<[ ColorMetrics, double ]> = new Array<[ ColorMetrics, double ]>(metricsColorsTmpBuf_Length)
+            for (let metricsColorsTmpBuf_BufCounterI = 0; metricsColorsTmpBuf_BufCounterI < metricsColorsTmpBuf_Length; metricsColorsTmpBuf_BufCounterI++) {
+                const metricsColorsTmpBuf_TempBufValue0 : ColorMetrics = ColorMetrics_serializer.read(valueDeserializer)
+                const metricsColorsTmpBuf_TempBufValue1 : double = valueDeserializer.readFloat64()
+                metricsColorsTmpBuf_[metricsColorsTmpBuf_BufCounterI] = ([metricsColorsTmpBuf_TempBufValue0, metricsColorsTmpBuf_TempBufValue1] as [ ColorMetrics, double ])
+            }
+            metricsColorsTmpBuf = metricsColorsTmpBuf_
+        }
+        const metricsColorsTmpResult : Array<[ ColorMetrics, double ]> | undefined = metricsColorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             repeatingTmpBuf = valueDeserializer.readBoolean()
         }
         const repeatingTmpResult : boolean | undefined = repeatingTmpBuf
-        let value : SweepGradientOptions = ({center: centerTmpResult, start: startTmpResult, end: endTmpResult, rotation: rotationTmpResult, colors: colorsTmpResult, repeating: repeatingTmpResult} as SweepGradientOptions)
+        let value : SweepGradientOptions = ({center: centerTmpResult, start: startTmpResult, end: endTmpResult, rotation: rotationTmpResult, colors: colorsTmpResult, metricsColors: metricsColorsTmpResult, repeating: repeatingTmpResult} as SweepGradientOptions)
         return value
     }
 }
@@ -18304,6 +21242,14 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial  = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue  = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ContextMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -18732,7 +21678,13 @@ export class ContextMenuOptions_serializer {
             minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
-        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult} as ContextMenuOptions)
+        const systemMaterialTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let systemMaterialTmpBuf : uiMaterial.Material | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult : uiMaterial.Material | undefined = systemMaterialTmpBuf
+        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -19917,6 +22869,14 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial  = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue  = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -20369,6 +23329,12 @@ export class MenuOptions_serializer {
             minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
+        const systemMaterialTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let systemMaterialTmpBuf : uiMaterial.Material | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult : uiMaterial.Material | undefined = systemMaterialTmpBuf
         const titleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let titleTmpBuf : ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -20390,7 +23356,7 @@ export class MenuOptions_serializer {
             showInSubWindowTmpBuf = valueDeserializer.readBoolean()
         }
         const showInSubWindowTmpResult : boolean | undefined = showInSubWindowTmpBuf
-        let value : MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
+        let value : MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
         return value
     }
 }
@@ -22210,6 +25176,14 @@ export class SheetOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial  = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue  = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SheetOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -22920,7 +25894,13 @@ export class SheetOptions_serializer {
             placementOnTargetTmpBuf = valueDeserializer.readBoolean()
         }
         const placementOnTargetTmpResult : boolean | undefined = placementOnTargetTmpBuf
-        let value : SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult} as SheetOptions)
+        const systemMaterialTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let systemMaterialTmpBuf : uiMaterial.Material | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult : uiMaterial.Material | undefined = systemMaterialTmpBuf
+        let value : SheetOptions = ({backgroundColor: backgroundColorTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, height: heightTmpResult, dragBar: dragBarTmpResult, enableFloatingDragBar: enableFloatingDragBarTmpResult, modalTransition: modalTransitionTmpResult, maskColor: maskColorTmpResult, detents: detentsTmpResult, blurStyle: blurStyleTmpResult, showClose: showCloseTmpResult, preferType: preferTypeTmpResult, title: titleTmpResult, shouldDismiss: shouldDismissTmpResult, onWillDismiss: onWillDismissTmpResult, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismissTmpResult, enableOutsideInteractive: enableOutsideInteractiveTmpResult, width: widthTmpResult, borderWidth: borderWidthTmpResult, borderColor: borderColorTmpResult, borderStyle: borderStyleTmpResult, shadow: shadowTmpResult, onHeightDidChange: onHeightDidChangeTmpResult, mode: modeTmpResult, scrollSizeMode: scrollSizeModeTmpResult, onDetentsDidChange: onDetentsDidChangeTmpResult, onWidthDidChange: onWidthDidChangeTmpResult, onTypeDidChange: onTypeDidChangeTmpResult, uiContext: uiContextTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, offset: offsetTmpResult, effectEdge: effectEdgeTmpResult, radius: radiusTmpResult, detentSelection: detentSelectionTmpResult, showInSubWindow: showInSubWindowTmpResult, placement: placementTmpResult, placementOnTarget: placementOnTargetTmpResult, systemMaterial: systemMaterialTmpResult} as SheetOptions)
         return value
     }
 }
@@ -23708,6 +26688,8 @@ export interface AccessibilityHoverEvent extends BaseEvent {
     displayY: double
     windowX: double
     windowY: double
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
     get type(): AccessibilityHoverType {
@@ -23751,6 +26733,20 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     }
     set windowY(windowY: double) {
         this.setWindowY(windowY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -23824,6 +26820,22 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         this.setWindowY_serialize(windowY_casted)
         return
     }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
     private getType_serialize(): AccessibilityHoverType {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getType(this.peer!.ptr)
         return AccessibilityHoverType.fromValue(retval)
@@ -23873,6 +26885,52 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface AxisEvent extends BaseEvent {
     action: AxisAction
@@ -23883,6 +26941,8 @@ export interface AxisEvent extends BaseEvent {
     x: double
     y: double
     scrollStep?: int32 | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
     propagation(): void
     getHorizontalAxisValue(): double
     getVerticalAxisValue(): double
@@ -23937,6 +26997,20 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     set scrollStep(scrollStep: int32 | undefined) {
         const scrollStep_NonNull  = (scrollStep as int32)
         this.setScrollStep(scrollStep_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     public propagation(): void {
         this.propagation_serialize()
@@ -24032,6 +27106,22 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
     getHorizontalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
@@ -24119,6 +27209,52 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     propagation_serialize(): void {
         ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AxisEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AxisEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface ClickEvent extends BaseEvent {
     displayX: double
@@ -24128,6 +27264,8 @@ export interface ClickEvent extends BaseEvent {
     x: double
     y: double
     hand?: InteractionHand | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
     preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
@@ -24173,6 +27311,20 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     set hand(hand: InteractionHand | undefined) {
         const hand_NonNull  = (hand as InteractionHand)
         this.setHand(hand_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     public preventDefault(): void {
         // instructive change start
@@ -24251,6 +27403,22 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand_serialize(hand_casted)
         return
     }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
     private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
         return retval
@@ -24314,6 +27482,52 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ClickEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ClickEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     preventDefault_serialize(): void {
@@ -24396,6 +27610,8 @@ export interface HoverEvent extends BaseEvent {
     windowY?: double | undefined
     displayX?: double | undefined
     displayY?: double | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
     stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
@@ -24440,6 +27656,20 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     set displayY(displayY: double | undefined) {
         const displayY_NonNull  = (displayY as double)
         this.setDisplayY(displayY_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     public stopPropagation(): void {
         this.stopPropagation_serialize()
@@ -24507,6 +27737,22 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     private setDisplayY(displayY: double | undefined): void {
         const displayY_casted = displayY as (double | undefined)
         this.setDisplayY_serialize(displayY_casted)
+        return
+    }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
         return
     }
     private getX_serialize(): double | undefined {
@@ -24647,6 +27893,52 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._HoverEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._HoverEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     stopPropagation_serialize(): void {
         ArkUIGeneratedNativeModule._HoverEvent_stopPropagation(this.peer!.ptr)
     }
@@ -24660,10 +27952,12 @@ export interface MouseEvent extends BaseEvent {
     windowY: double
     x: double
     y: double
-    stopPropagation: (() => void)
     rawDeltaX?: double | undefined
     rawDeltaY?: double | undefined
     pressedButtons?: Array<MouseButton> | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
+    stopPropagation(): void
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     get button(): MouseButton {
@@ -24714,12 +28008,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     set y(y: double) {
         this.setY(y)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
     get rawDeltaX(): double | undefined {
         return this.getRawDeltaX()
     }
@@ -24741,6 +28029,20 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         const pressedButtons_NonNull  = (pressedButtons as Array<MouseButton>)
         this.setPressedButtons(pressedButtons_NonNull)
     }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
+    }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
     }
@@ -24756,6 +28058,10 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     public static fromPtr(ptr: KPointer): MouseEventInternal {
         return new MouseEventInternal(ptr)
+    }
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     private getButton(): MouseButton {
         return this.getButton_serialize()
@@ -24821,14 +28127,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setY_serialize(y_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getRawDeltaX(): double | undefined {
         return this.getRawDeltaX_serialize()
     }
@@ -24852,6 +28150,25 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         const pressedButtons_casted = pressedButtons as (Array<MouseButton> | undefined)
         this.setPressedButtons_serialize(pressedButtons_casted)
         return
+    }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._MouseEvent_stopPropagation(this.peer!.ptr)
     }
     private getButton_serialize(): MouseButton {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getButton(this.peer!.ptr)
@@ -24908,37 +28225,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer: (() => void) | undefined = undefined
-        
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
-            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
-            
-            buffer = (): void => {
-                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
-                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
-                buffer_BufArgsSerializer.release();
-                return;
-            }
-        }
-        
-        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private getRawDeltaX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)
@@ -25016,6 +28302,52 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MouseEvent_setPressedButtons(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MouseEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MouseEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -25168,6 +28500,113 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     preventDefault_serialize(): void {
         ArkUIGeneratedNativeModule._TouchEvent_preventDefault(this.peer!.ptr)
+    }
+}
+export interface UIScrollableCommonEvent extends UICommonEvent {
+    setOnReachStart(callback_: (() => void) | undefined): void
+    setOnReachEnd(callback_: (() => void) | undefined): void
+    setOnScrollStart(callback_: (() => void) | undefined): void
+    setOnScrollStop(callback_: (() => void) | undefined): void
+    setOnScrollFrameBegin(callback_: OnScrollFrameBeginCallback | undefined): void
+}
+export class UIScrollableCommonEventInternal extends UICommonEventInternal implements MaterializedBase,UIScrollableCommonEvent {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    static construct(ptr: KPointer): UIScrollableCommonEventInternal {
+        const retval  = ArkUIGeneratedNativeModule._UIScrollableCommonEvent_construct(ptr)
+        return new UIScrollableCommonEventInternal(retval)
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._UIScrollableCommonEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): UIScrollableCommonEventInternal {
+        return new UIScrollableCommonEventInternal(ptr)
+    }
+    public setOnReachStart(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnReachStart_serialize(callback__casted)
+        return
+    }
+    public setOnReachEnd(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnReachEnd_serialize(callback__casted)
+        return
+    }
+    public setOnScrollStart(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnScrollStart_serialize(callback__casted)
+        return
+    }
+    public setOnScrollStop(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnScrollStop_serialize(callback__casted)
+        return
+    }
+    public setOnScrollFrameBegin(callback_: OnScrollFrameBeginCallback | undefined): void {
+        const callback__casted = callback_ as (OnScrollFrameBeginCallback | undefined)
+        this.setOnScrollFrameBegin_serialize(callback__casted)
+        return
+    }
+    setOnReachStart_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnReachStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnReachEnd_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnReachEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollStart_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnScrollStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollStop_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnScrollStop(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollFrameBegin_serialize(callback_: OnScrollFrameBeginCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnScrollFrameBegin(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export namespace cursorControl {

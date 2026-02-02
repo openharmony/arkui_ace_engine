@@ -29,6 +29,10 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     [[maybe_unused]] ani_long pointer);
 ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dataSyncOptions);
+void DragEventSetDataLoadParams([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object data);
+void DragEventEnableInternalDropAnimation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_string configuration);
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object pixelMap);
 void DragEventSetExtraInfo([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -59,6 +63,8 @@ void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOp
 // extractors
 ani_long ExtractorFromUnifiedDataToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_object data);
 ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+ani_long ExtractorFromDataLoadParamsToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_long dataLoadParams);
+ani_object ExtractorFromPtrToDataLoadParams(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
 std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool& isSuccess);
 } // namespace OHOS::Ace::Ani
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_DRAG_AND_DROP_NATIVE_DRAG_DROP_GLOBAL

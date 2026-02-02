@@ -716,6 +716,21 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
     pattern->SetCancelButtonNode(nullptr);
     pattern->OnColorConfigurationUpdate();
     EXPECT_EQ(pattern->cancelButtonNode_.Upgrade(), nullptr);
+
+    pattern->CreateCancelIcon();
+    pattern->CreateSearchIcon("");
+    CalcDimension iconSize;
+    std::string iconSrc = "resource://16777247.png";
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    IconOptions iconOptions = IconOptions(iconSize, iconSrc, bundleName, moduleName);
+    pattern->SetSearchImageIcon(iconOptions);
+    pattern->SetCancelImageIcon(iconOptions);
+    pattern->OnColorConfigurationUpdate();
+    auto searchNode = pattern->GetSearchNode();
+    ASSERT_NE(searchNode, nullptr);
+    EXPECT_TRUE(searchNode->HasCancelIconNodeCreated());
+    EXPECT_TRUE(searchNode->HasSearchIconNodeCreated());
 }
 
 /**
@@ -1092,6 +1107,12 @@ HWTEST_F(SearchTestNg, SetSearchButtonFontSize001, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetFontSize(), 14.0_vp);
     searchModelInstance.SetSearchButtonFontColor(Color::RED);
     EXPECT_EQ(buttonLayoutProperty->GetFontColor(), Color::RED);
+
+    // test SetSearchButtonFontColor isTheme true
+    searchModelInstance.SetSearchButtonFontColor(Color::BLUE, true);
+
+    // test SetSearchButtonFontColor isTheme false
+    searchModelInstance.SetSearchButtonFontColor(Color::GREEN, false);
 }
 
 /**

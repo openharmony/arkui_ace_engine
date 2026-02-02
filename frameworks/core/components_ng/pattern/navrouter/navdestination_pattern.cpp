@@ -889,7 +889,7 @@ bool NavDestinationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     if (!currentDestSize.has_value() || currentDestSize.value() != curSize) {
         navDestinationContext_->SetCurrentSize(curSize);
         if (layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE) {
-            NotifyNavDestinationSizeChange();
+            NotifyNavDestinationSizeChange(curSize, ++lastSizeChangeNotifyId_);
         } else {
             needNotifySizeChangeWhenVisible_ = true;
         }
@@ -897,17 +897,20 @@ bool NavDestinationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     return false;
 }
 
-void NavDestinationPattern::NotifyNavDestinationSizeChange()
+void NavDestinationPattern::NotifyNavDestinationSizeChange(const std::optional<SizeF>& size, int64_t notifyId)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    auto task = [weakPattern = WeakClaim(this)]() {
+    auto task = [weakPattern = WeakClaim(this), size, notifyId]() {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (notifyId < pattern->lastSizeChangeNotifyId_) {
+            return;
+        }
         auto eventHub = pattern->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto state = eventHub->GetState();
-        UIObserverHandler::GetInstance().NotifyNavDestinationSizeChange(WeakPtr(pattern), state);
+        UIObserverHandler::GetInstance().NotifyNavDestinationSizeChange(WeakPtr(pattern), state, size);
     };
     context->AddAfterLayoutTask(std::move(task));
 }
@@ -920,7 +923,9 @@ void NavDestinationPattern::OnVisibleChange(bool isVisible)
     }
     needNotifySizeChangeWhenVisible_ = false;
     // InVisible -> Visible
-    NotifyNavDestinationSizeChange();
+    CHECK_NULL_VOID(navDestinationContext_);
+    auto curSize = navDestinationContext_->GetCurrentSize();
+    NotifyNavDestinationSizeChange(curSize, ++lastSizeChangeNotifyId_);
 }
 
 void NavDestinationPattern::CheckIfOrientationChanged()

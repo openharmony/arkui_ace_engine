@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/image/image_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,6 +64,77 @@ void SetTabBarCustomBuilder(FrameNode* frameNode, const CustomNodeBuilder& arkBu
 }
 } // namespace
 
+ImageType ConvertToImageType(DrawableType type)
+{
+    switch (type) {
+        case DrawableType::BASE:
+            return ImageType::DRAWABLE;
+        case DrawableType::LAYERED:
+            return ImageType::LAYERED_DRAWABLE;
+        case DrawableType::ANIMATED:
+            return ImageType::ANIMATED_DRAWABLE;
+        case DrawableType::PIXELMAP:
+            return ImageType::PIXELMAP_DRAWABLE;
+        default:
+            return ImageType::BASE;
+    }
+}
+
+bool ParseImageInfoConfig(const Ark_DrawableTabBarIndicator& src, ImageInfoConfig& config)
+{
+    if (src.drawable.tag == INTEROP_TAG_UNDEFINED) {
+        return false;
+    }
+    auto desc = Converter::Convert<DrawableDescriptor*>(src.drawable.value);
+    auto drawableType = desc->GetDrawableType();
+    config.type = ConvertToImageType(drawableType);
+    if (config.type == ImageType::ANIMATED_DRAWABLE) {
+        config.drawable = Referenced::Claim<DrawableDescriptor>(desc);
+        return true;
+    } else if (config.type == ImageType::PIXELMAP_DRAWABLE || config.type == ImageType::DRAWABLE ||
+               config.type == ImageType::LAYERED_DRAWABLE) {
+        config.pixelMap = desc->GetPixelMap();
+        return true;
+    }
+    return false;
+}
+
+void ParseIndicatorStyle(const Ark_DrawableTabBarIndicator& src, IndicatorStyle& indicatorStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    if (tabTheme) {
+        indicatorStyle.color = tabTheme->GetActiveIndicatorColor();
+        indicatorStyle.height = tabTheme->GetActiveIndicatorWidth();
+        indicatorStyle.marginTop = tabTheme->GetSubTabIndicatorGap();
+    }
+    std::optional<Dimension> height = Converter::OptConvert<Dimension>(src.height);
+    Validator::ValidateNonNegative(height);
+    Validator::ValidateNonPercent(height);
+    if (height) {
+        indicatorStyle.height = height.value();
+    }
+    std::optional<Dimension> width = Converter::OptConvert<Dimension>(src.width);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
+    if (width) {
+        indicatorStyle.width = width.value();
+    }
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        indicatorStyle.borderRadius = borderRadius.value();
+    }
+    std::optional<Dimension> marginTop = Converter::OptConvert<Dimension>(src.marginTop);
+    Validator::ValidateNonNegative(marginTop);
+    Validator::ValidateNonPercent(marginTop);
+    if (marginTop) {
+        indicatorStyle.marginTop = marginTop.value();
+    }
+}
+
 namespace Validator {
 void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
 {
@@ -71,16 +143,34 @@ void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
     }
     Validator::ValidateNonNegative(opt->left);
     Validator::ValidateNonPercent(opt->left);
+    if (opt->left && !opt->left.value().IsValid()) {
+        opt->left.reset();
+    }
     Validator::ValidateNonNegative(opt->top);
     Validator::ValidateNonPercent(opt->top);
+    if (opt->top && !opt->top.value().IsValid()) {
+        opt->top.reset();
+    }
     Validator::ValidateNonNegative(opt->right);
     Validator::ValidateNonPercent(opt->right);
+    if (opt->right && !opt->right.value().IsValid()) {
+        opt->right.reset();
+    }
     Validator::ValidateNonNegative(opt->bottom);
     Validator::ValidateNonPercent(opt->bottom);
+    if (opt->bottom && !opt->bottom.value().IsValid()) {
+        opt->bottom.reset();
+    }
     Validator::ValidateNonNegative(opt->start);
     Validator::ValidateNonPercent(opt->start);
+    if (opt->start && !opt->start.value().IsValid()) {
+        opt->start.reset();
+    }
     Validator::ValidateNonNegative(opt->end);
     Validator::ValidateNonPercent(opt->end);
+    if (opt->end && !opt->end.value().IsValid()) {
+        opt->end.reset();
+    }
 }
 } // namespace Validator
 
@@ -94,20 +184,44 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         [&content](const Ark_Resource& arkContent) {
             content = Converter::OptConvert<std::string>(arkContent);
         },
-        [](const Ark_ComponentContent& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContent) is not supported yet.");
+        [](const Ark_ComponentContentBase& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContentBase) is not supported yet.");
         },
         []() {}
     );
-
-    // indicator
-    TabContentModelStatic::SetIndicator(frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator));
+    bool isDrawableIndicator = false;
+    if (style._indicator.value.selector == 0) {
+        // indicator
+        TabContentModelStatic::SetIndicator(
+            frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator.value.value0));
+    } else {
+        ImageInfoConfig config;
+        IndicatorStyle indicatorStyle;
+        isDrawableIndicator = ParseImageInfoConfig(style._indicator.value.value1, config);
+        ParseIndicatorStyle(style._indicator.value.value1, indicatorStyle);
+        if (isDrawableIndicator) {
+            TabContentModelStatic::SetDrawableIndicatorConfig(frameNode, config);
+        }
+        TabContentModelStatic::SetIndicatorColorByUser(frameNode, false);
+        TabContentModelStatic::SetIndicator(frameNode, indicatorStyle);
+    }
+    TabContentModelStatic::SetDrawableIndicatorFlag(frameNode, isDrawableIndicator);
     // selectedMode
     TabContentModelStatic::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
     // board
     TabContentModelStatic::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
     // labelStyle
-    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
+    auto optLabelStyle = Converter::OptConvert<LabelStyle>(style._labelStyle);
+    if (optLabelStyle) {
+        auto labelFont = Converter::OptConvertFromFont(style._labelStyle.value.font, true);
+        optLabelStyle->fontSize = labelFont.fontSize;
+        optLabelStyle->fontStyle = labelFont.fontStyle;
+        optLabelStyle->fontWeight = labelFont.fontWeight;
+        if (labelFont.fontFamilies.size() > 0) {
+            optLabelStyle->fontFamily = labelFont.fontFamilies;
+        }
+    }
+    TabContentModelStatic::SetLabelStyle(frameNode, optLabelStyle, true);
     // padding
     std::optional<PaddingProperty> optPadding;
     bool useLocalizedPadding = false;
@@ -122,7 +236,7 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         []() {}
     );
     Validator::ValidatePaddingProperty(optPadding);
-    TabContentModelStatic::SetPadding(frameNode, optPadding);
+    TabContentModelStatic::SetPadding(frameNode, optPadding, true);
     TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // id
     auto id = Converter::OptConvert<std::string>(style._id);
@@ -166,14 +280,24 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         []() {}
     );
     Validator::ValidatePaddingProperty(optPadding);
-    TabContentModelStatic::SetPadding(frameNode, optPadding);
+    TabContentModelStatic::SetPadding(frameNode, optPadding, false);
     TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // verticalAlign
     TabContentModelStatic::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
     // symmetricExtensible
     TabContentModelStatic::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
     // labelStyle
-    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
+    auto optLabelStyle = Converter::OptConvert<LabelStyle>(style._labelStyle);
+    if (optLabelStyle) {
+        auto labelFont = Converter::OptConvertFromFont(style._labelStyle.value.font, false);
+        optLabelStyle->fontSize = labelFont.fontSize;
+        optLabelStyle->fontStyle = labelFont.fontStyle;
+        optLabelStyle->fontWeight = labelFont.fontWeight;
+        if (labelFont.fontFamilies.size() > 0) {
+            optLabelStyle->fontFamily = labelFont.fontFamilies;
+        }
+    }
+    TabContentModelStatic::SetLabelStyle(frameNode, optLabelStyle, false);
     // iconStyle
     TabContentModelStatic::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
     // id
@@ -297,23 +421,14 @@ void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
     dst->maxLines = maxLines;
     dst->heightAdaptivePolicy =
         Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
-    auto minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
+    auto minFontSize = Converter::OptConvertFromF64ResourceStr(src.minFontSize, DimensionUnit::FP);
     Validator::ValidateNonNegative(minFontSize);
     Validator::ValidateNonPercent(minFontSize);
     dst->minFontSize = minFontSize;
-    auto maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
+    auto maxFontSize = Converter::OptConvertFromF64ResourceStr(src.maxFontSize, DimensionUnit::FP);
     Validator::ValidateNonNegative(maxFontSize);
     Validator::ValidateNonPercent(maxFontSize);
     dst->maxFontSize = maxFontSize;
-    auto labelFont = Converter::OptConvert<Font>(src.font);
-    if (labelFont) {
-        dst->fontSize = labelFont->fontSize;
-        dst->fontStyle = labelFont->fontStyle;
-        dst->fontWeight = labelFont->fontWeight;
-        if (labelFont->fontFamilies.size() > 0) {
-            dst->fontFamily = labelFont->fontFamilies;
-        }
-    }
     dst->unselectedColor = Converter::OptConvert<Color>(src.unselectedColor);
     dst->selectedColor = Converter::OptConvert<Color>(src.selectedColor);
 }
@@ -338,14 +453,14 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void SetTabBarImpl(Ark_NativePointer node,
-                   const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
+                   const Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Converter::VisitUnion(
         *value,
-        [](const Ark_ComponentContent& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
+        [](const Ark_ComponentContentBase& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContentBase is not supported yet.");
         },
         [frameNode](const Ark_SubTabBarStyle& style) { g_setSubTabBarStyle(frameNode, style); },
         [frameNode](const Ark_BottomTabBarStyle& style) { g_setBottomTabBarStyle(frameNode, style); },

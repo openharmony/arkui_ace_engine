@@ -943,8 +943,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
     /**
      * @tc.steps: step1. all == false;
      */
-    std::list<RefPtr<UINode>> removingNodes{};
-    auto step1 = lazyForEachBuilder->PreBuild(removingNodes, 10, layoutConstraint, true);
+    auto step1 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_TRUE(step1);
 
     /**
@@ -953,34 +952,34 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
     layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
     lazyForEachBuilder->startIndex_ = 3;
-    auto step2 = lazyForEachBuilder->PreBuild(removingNodes, 10, layoutConstraint, true);
+    auto step2 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_TRUE(step2);
 
     /**
      * @tc.steps: step3. startIndex_ != -1 && endIndex_ != -1;
      */
     lazyForEachBuilder->endIndex_ = 1;
-    auto step3 = lazyForEachBuilder->PreBuild(removingNodes, 10, layoutConstraint, true);
+    auto step3 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_TRUE(step3);
 
     /**
      * @tc.steps: step4. !canRunLongPredictTask;
      */
-    auto step4 = lazyForEachBuilder->PreBuild(removingNodes, 10, layoutConstraint, false);
+    auto step4 = lazyForEachBuilder->PreBuild(10, layoutConstraint, false);
     EXPECT_FALSE(step4);
 
     /**
      * @tc.steps: step5. Set cacheCount_ is 7 and check PreBuild fuction;
      */
     lazyForEachBuilder->SetCacheCount(7);
-    auto step5 = lazyForEachBuilder->PreBuild(removingNodes, 10, layoutConstraint, true);
+    auto step5 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_FALSE(step5);
 
     /**
      * @tc.steps: step6. Set cacheCount_ is 7 and check PreBuild fuction;
      */
     lazyForEachBuilder->preBuildingIndex_ = 0;
-    auto step6 = lazyForEachBuilder->PreBuild(removingNodes, 10, layoutConstraint, true);
+    auto step6 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_FALSE(step6);
 }
 
@@ -1500,68 +1499,15 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReorganizeOffscreenNode001, TestSize.Level1)
     lazyForEachBuilder->expiringItem_["2"] = LazyForEachCacheChild(2, node2);
     lazyForEachBuilder->expiringItem_["3"] = LazyForEachCacheChild(3, node3);
     lazyForEachBuilder->expiringItem_["4"] = LazyForEachCacheChild(4, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
     lazyForEachBuilder->ProcessOffscreenNode(node1, false);
-    auto count1 = Inspector::GetOffscreenNodesSize();
+    auto count1 = offscreenNodesMgr->GetOffscreenNodesSize();
     lazyForEachBuilder->ReorganizeOffscreenNode();
-    auto count2 = Inspector::GetOffscreenNodesSize();
+    auto count2 = offscreenNodesMgr->GetOffscreenNodesSize();
     EXPECT_EQ(count2 - count1, 1);
 }
 
-/**
- * @tc.name: LazyForEachBuilder39
- * @tc.desc: Test the RemovingExpiringItem function.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder39, TestSize.Level1)
-{
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    auto uiNode_1 = AceType::MakeRefPtr<NG::CustomNode>(666, "node_1");
-    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
-    uiNode_1->children_ = { childNode };
-    std::list<RefPtr<UINode>> removingNodes;
-    int64_t deadline = GetSysTimestamp() + 1;
-    std::unordered_map<std::string, LazyForEachCacheChild> cache{{"1", {1, uiNode_1}}};
-    lazyForEachBuilder->RemovingExpiringItem(removingNodes, deadline, cache);
-    EXPECT_EQ(removingNodes.size(), 0);
-}
-
-/**
- * @tc.name: LazyForEachBuilder40
- * @tc.desc: Test the RemovingExpiringItem function. 
- * There is no time for release all nodes, release at least one node.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder40, TestSize.Level1)
-{
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    auto uiNode_1 = AceType::MakeRefPtr<NG::CustomNode>(666, "node_1");
-    auto uiNode_2 = AceType::MakeRefPtr<NG::CustomNode>(777, "node_2");
-    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
-    uiNode_1->children_ = { childNode };
-    std::list<RefPtr<UINode>> removingNodes;
-    int64_t deadline = GetSysTimestamp() + 1;
-    std::unordered_map<std::string, LazyForEachCacheChild> cache{{"1", {1, uiNode_1}}, {"2", {2, uiNode_2}}};
-    lazyForEachBuilder->RemovingExpiringItem(removingNodes, deadline, cache);
-    EXPECT_EQ(removingNodes.size(), 1);
-}
-
-/**
- * @tc.name: LazyForEachBuilder40
- * @tc.desc: Test the RemovingExpiringItem function. 
- * Release all nodes.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder41, TestSize.Level1)
-{
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    auto uiNode_1 = AceType::MakeRefPtr<NG::CustomNode>(666, "node_1");
-    auto uiNode_2 = AceType::MakeRefPtr<NG::CustomNode>(777, "node_2");
-    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
-    uiNode_1->children_ = { childNode };
-    std::list<RefPtr<UINode>> removingNodes;
-    int64_t deadline = GetSysTimestamp() + 1000;
-    std::unordered_map<std::string, LazyForEachCacheChild> cache{{"1", {1, uiNode_1}}, {"2", {2, uiNode_2}}};
-    lazyForEachBuilder->RemovingExpiringItem(removingNodes, deadline, cache);
-    EXPECT_EQ(removingNodes.size(), 0);
-}
 } // namespace OHOS::Ace::NG

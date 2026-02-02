@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -1891,5 +1892,187 @@ HWTEST_F(ListPatternTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
     EXPECT_EQ(padding.bottom, 10);
     EXPECT_EQ(padding.left, std::nullopt);
     EXPECT_EQ(padding.right, std::nullopt);
+}
+
+/**
+ * @tc.name: GetStartIndexExcludeStartOffset001
+ * @tc.desc: Test ListPattern GetStartIndexExcludeStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetStartIndexExcludeStartOffset001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t returnIndex = listPattern->GetStartIndexExcludeStartOffset();
+    EXPECT_EQ(listPattern->GetStartIndex(), returnIndex);
+}
+
+/**
+ * @tc.name: GetStartIndexExcludeStartOffset002
+ * @tc.desc: Test ListPattern GetStartIndexExcludeStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetStartIndexExcludeStartOffset002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->contentStartOffset_ = 10.0f;
+    listPattern->itemPosition_[0] = { 2, 20.0f, 40.0f, true };
+    int32_t returnIndex = listPattern->GetStartIndexExcludeStartOffset();
+    EXPECT_EQ(returnIndex, 0);
+}
+
+/**
+ * @tc.name: GetEndIndexExcludeEndOffset001
+ * @tc.desc: Test ListPattern GetEndIndexExcludeEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetEndIndexExcludeEndOffset001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t returnIndex = listPattern->GetEndIndexExcludeEndOffset();
+    EXPECT_EQ(listPattern->GetEndIndex(), returnIndex);
+}
+
+/**
+ * @tc.name: GetEndIndexExcludeEndOffset002
+ * @tc.desc: Test ListPattern GetEndIndexExcludeEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetEndIndexExcludeEndOffset002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->contentMainSize_ = 100.0f;
+    listPattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true };
+    int32_t returnIndex = listPattern->GetEndIndexExcludeEndOffset();
+    EXPECT_EQ(returnIndex, 0);
+}
+
+/**
+ * @tc.name: IsFreeScrollTest001
+ * @tc.desc: Test IsFreeScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsFreeScrollTest001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    model.SetListDirection(Axis::FREE);
+    auto scrollBarProxy = listPattern->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+
+    EXPECT_FALSE(scrollBarProxy->IsFreeScroll());
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test ListPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollForward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollBackward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 400);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 40);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":1.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(1);
+    CreateDone();
+    EXPECT_FALSE(pattern_->IsScrollable());
+
+    std::string command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+}
+
+/**
+ * @tc.name: ReportComponentChangeEventTest001
+ * @tc.desc: ReportComponentChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ReportComponentChangeEventTest001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered()).WillRepeatedly(Return(true));
+
+    pattern_->ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, 123);
+    pattern_->ReportScroll(true, ScrollError::SCROLL_NO_ERROR, 123);
+    pattern_->ReportOnItemListEvent("onReachStart");
+    pattern_->ReportOnItemListScrollEvent("onScrollIndex", 0, 0);
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
 }
 } // namespace OHOS::Ace::NG

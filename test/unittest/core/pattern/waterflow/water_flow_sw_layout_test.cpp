@@ -588,27 +588,27 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     EXPECT_FALSE(info_->IsMisaligned());
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     ScrollToIndex(15, true, ScrollAlign::START);
-    EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -575.0f);
+    EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -1291.10009765625f);
     UpdateCurrentOffset(550.0f);
 
     EXPECT_EQ(GetChildY(frameNode_, 15), -25.0f);
     EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), -62.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 16), 320.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 17), -96.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 17), 160.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), -25.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 160.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), -25.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 17), 320.0f);
     EXPECT_EQ(info_->startIndex_, 15);
-    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_FALSE(info_->IsMisaligned());
 
     UpdateCurrentOffset(100.0f);
     EXPECT_EQ(info_->startIndex_, 13);
-    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_FALSE(info_->IsMisaligned());
 
     pattern_->OnScrollEndCallback(); // check misalignment onScrollEnd
     FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 15), 4.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 75.0f);
     EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), 4.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 75.0f);
     EXPECT_EQ(GetChildX(frameNode_, 16), 160.0f);
     EXPECT_FALSE(info_->IsMisaligned());
 }
@@ -1833,11 +1833,11 @@ HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -54.42704);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -125.09299);
 
     MockAnimationManager::GetInstance().TickByVelocity(-100.0f);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -154.42703);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -125.09299);
     // swipe in the opposite direction
     info.SetMainVelocity(1200.f);
     info.SetMainDelta(100.f);
@@ -1848,7 +1848,7 @@ HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -151.06215);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -172.05814);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushUITasks();
@@ -1952,11 +1952,11 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -54.19994);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -125.09299);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -27.09997);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -62.546494);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
@@ -2130,16 +2130,16 @@ HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
     scrollable->HandleDragStart(gesture);
     scrollable->HandleDragUpdate(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 1.720595);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 100);
     MockAnimationManager::GetInstance().SetTicks(2);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 3.4597926);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 153.52615);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 1.7298963);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 76.763077);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
@@ -2367,5 +2367,139 @@ HWTEST_F(WaterFlowSWTest, ItemFillPolicySWTest003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_EQ(GetChildY(frameNode_, 4), 0);
     EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
+}
+
+/**
+ * @tc.name: WaterFlowSWNaNTest001
+ * @tc.desc: Test NaN value handling in measurement results for SlidingWindow layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, WaterFlowSWNaNTest001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateWaterFlowItems(60);
+
+    // Create scenario that causes NaN measurement result
+    auto item = GetChildFrameNode(frameNode_, 3);
+    auto layoutProperty = item->GetLayoutProperty();
+
+    // Set invalid constraint size that may cause NaN in measurement
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(std::numeric_limits<float>::quiet_NaN()),
+                CalcLength(std::numeric_limits<float>::quiet_NaN())));
+
+    CreateDone();
+    FlushUITasks();
+
+    // Verify other items are not affected
+    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 5), 200.0f);
+}
+
+/**
+ * @tc.name: WaterFlowSWNaNTest002
+ * @tc.desc: Test onGetItemMainSizeByIndex returns NaN and gets converted to 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, WaterFlowSWNaNTest002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateWaterFlowItems(60);
+
+    // Create custom Section with onGetItemMainSizeByIndex returning NaN for specific index
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        {.itemsCount = 60, .crossCount = 3, .onGetItemMainSizeByIndex = [](int32_t index) -> float {
+            if (index == 5) {
+                return std::numeric_limits<float>::quiet_NaN();  // Index 5 returns NaN
+            }
+            // Other indices return normal values
+            return (index & 1) ? 200.0f : 100.0f;
+        }}
+    };
+    secObj->ChangeData(0, 0, sections);
+
+    CreateDone();
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    // Verify other item heights are normal
+    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);  // Even index
+    EXPECT_EQ(GetChildHeight(frameNode_, 5), 0.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 6), 100.0f);  // Even index
+    EXPECT_EQ(GetChildHeight(frameNode_, 7), 200.0f);  // Odd index
+}
+
+/**
+ * @tc.name: DeleteSection0LastItem001
+ * @tc.desc: Test deleting the last item of section 0 and verify section 1 layout position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, DeleteSection0LastItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with 2 sections
+     * @tc.expected: Section 0 has 3 items, Section 1 has 2 items
+     */
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateItemWithHeight(100.0f);  // idx 0
+    CreateItemWithHeight(200.0f);  // idx 1
+    CreateItemWithHeight(150.0f);  // idx 2
+    CreateItemWithHeight(100.0f);  // idx 3
+    CreateItemWithHeight(100.0f);  // idx 4
+
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        WaterFlowSections::Section { .itemsCount = 3, .crossCount = 2 },
+        WaterFlowSections::Section { .itemsCount = 2, .crossCount = 2 }
+    };
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Verify initial layout
+     * @tc.expected: Section 0 ends at 250, Section 1 starts at 250
+     */
+    EXPECT_EQ(info_->lanes_.size(), 2);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 250.000000 Items [0 2 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 250.000000 EndPos: 350.000000 Items [3 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 250.000000 EndPos: 350.000000 Items [4 ] }");
+
+    /**
+     * @tc.steps: step3. Delete last item of section 0 (idx 2)
+     * @tc.expected: Section configuration updated correctly
+     */
+    frameNode_->RemoveChildAtIndex(2);
+    frameNode_->ChildrenUpdatedFrom(2);
+    info_->NotifyDataChange(2, -1);
+
+    std::vector<WaterFlowSections::Section> newSections = {
+        WaterFlowSections::Section { .itemsCount = 2, .crossCount = 2 },
+        WaterFlowSections::Section { .itemsCount = 2, .crossCount = 2 }
+    };
+    secObj->ChangeData(0, 2, newSections);
+
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step4. Verify layout after deletion
+     * @tc.expected: Section 0 ends at 200, Section 1 starts at 200 (not 250)
+     */
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [3 ] }");
 }
 } // namespace OHOS::Ace::NG

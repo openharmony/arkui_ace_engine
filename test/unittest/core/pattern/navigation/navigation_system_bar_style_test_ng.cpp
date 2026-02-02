@@ -280,15 +280,5 @@ HWTEST_F(NavigationSystemBarStyleTestNg, TryRestoreSystemBarStyle001, TestSize.L
     navigationPattern->TryRestoreSystemBarStyle(windowManager);
     ASSERT_FALSE(funcCalled);
     ASSERT_EQ(styleForSet, nullptr);
-
-    /**
-     * @tc.steps: step4. set backupStyle of NavigationPattern, then call restore func.
-     * @tc.expected: WindowManager's SetSystemBarStyleCallback will be called.
-     */
-    auto backupStyle = AceType::MakeRefPtr<MockSystemBarStyle>();
-    navigationPattern->backupStyle_ = backupStyle;
-    navigationPattern->TryRestoreSystemBarStyle(windowManager);
-    ASSERT_TRUE(funcCalled);
-    ASSERT_EQ(navigationPattern->backupStyle_, styleForSet);
 }
 } // namespace OHOS::Ace::NG

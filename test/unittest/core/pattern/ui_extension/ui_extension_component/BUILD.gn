@@ -16,14 +16,11 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("ui_extension_component_test_group") {
   testonly = true
-  deps = [
-    ":ui_extension_accessibility_child_tree_callback_test",
-    ":ui_extension_component_testtwo_ng",
-    ":ui_extension_pattern_test_ng",
-  ]
+  deps = []
 }
 
 ace_unittest("ui_extension_accessibility_child_tree_callback_test") {
+  module_name = "UIEngine-ThemeFramework"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
@@ -101,6 +98,7 @@ ace_unittest("ui_extension_accessibility_child_tree_callback_test") {
 }
 
 ace_unittest("ui_extension_pattern_test_ng") {
+  module_name = "EmbeddedDisPlayCrossProcess-UIExtensionComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
@@ -178,6 +176,7 @@ ace_unittest("ui_extension_pattern_test_ng") {
 }
 
 ace_unittest("ui_extension_component_testtwo_ng") {
+  module_name = "EmbeddedDisPlayCrossProcess-PreviewUIExtensionComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",

@@ -514,6 +514,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._state_0_flag = AttributeUpdaterFlag.UPDATE
             this._state_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._state_0_flag = AttributeUpdaterFlag.SKIP
@@ -525,6 +526,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._duration_0_flag = AttributeUpdaterFlag.UPDATE
             this._duration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._duration_0_flag = AttributeUpdaterFlag.SKIP
@@ -536,6 +538,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._curve_0_flag = AttributeUpdaterFlag.UPDATE
             this._curve_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._curve_0_flag = AttributeUpdaterFlag.SKIP
@@ -547,6 +550,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._delay_0_flag = AttributeUpdaterFlag.UPDATE
             this._delay_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._delay_0_flag = AttributeUpdaterFlag.SKIP
@@ -558,6 +562,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._fillMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -569,6 +574,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._iterations_0_flag = AttributeUpdaterFlag.UPDATE
             this._iterations_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iterations_0_flag = AttributeUpdaterFlag.SKIP
@@ -580,6 +586,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._playMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._playMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._playMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -591,6 +598,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._motion_0_flag = AttributeUpdaterFlag.UPDATE
             this._motion_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._motion_0_flag = AttributeUpdaterFlag.SKIP
@@ -602,6 +610,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -613,6 +622,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._onPause_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPause_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPause_0_flag = AttributeUpdaterFlag.SKIP
@@ -624,6 +634,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._onRepeat_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRepeat_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRepeat_0_flag = AttributeUpdaterFlag.SKIP
@@ -635,6 +646,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._onCancel_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCancel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCancel_0_flag = AttributeUpdaterFlag.SKIP
@@ -646,6 +658,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -657,6 +670,7 @@ export class AnimatorModifier extends CommonMethodModifier implements AnimatorAt
         {
             this._onFrame_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFrame_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFrame_0_flag = AttributeUpdaterFlag.SKIP

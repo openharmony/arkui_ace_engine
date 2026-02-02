@@ -43,6 +43,7 @@ public:
     Ark_Boolean TriggerIsAtEnd(Ark_VMContext vmContext);
     Ark_RectResult TriggerGetItemRect(Ark_VMContext vmContext, const Ark_Int32 index);
     Ark_Int32 TriggerGetItemIndex(Ark_VMContext vmContext, const Ark_Float64 x, const Ark_Float64 y);
+    Ark_SizeResult TriggerContentSize(Ark_VMContext vmContext);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {

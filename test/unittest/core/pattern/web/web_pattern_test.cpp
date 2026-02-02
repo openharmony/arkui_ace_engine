@@ -847,4 +847,35 @@ HWTEST_F(WebPatternTest, CleanupWebPatternResource, TestSize.Level1)
     MockPipelineContext::TearDown();
 }
 
+/**
+ * @tc.name: NotifyOverlayRotation
+ * @tc.desc: Test NotifyOverlayRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, NotifyOverlayRotation, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(webPattern);
+    ASSERT_NE(webPattern->webSelectOverlay_, nullptr);
+    webPattern->webSelectOverlay_->selectTemporarilyHidden_ = true;
+    webPattern->webSelectOverlay_->webSelectInfo_.menuInfo.menuIsShow = true;
+    webPattern->NotifyOverlayRotation();
+    EXPECT_EQ(webPattern->webSelectOverlay_->webSelectInfo_.menuInfo.menuIsShow, true);
+    webPattern->webSelectOverlay_->webSelectInfo_.menuInfo.menuIsShow = false;
+    webPattern->NotifyOverlayRotation();
+    EXPECT_EQ(webPattern->webSelectOverlay_->webSelectInfo_.menuInfo.menuIsShow, false);
+}
+
 } // namespace OHOS::Ace::NG

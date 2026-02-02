@@ -29,7 +29,7 @@ public:
 
     RefPtr<NGGestureRecognizer> PackInnerRecognizer(
     const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent) override;
+    int32_t originalId, const RefPtr<TargetComponent>& targetComponent) override;
 };
 }
 

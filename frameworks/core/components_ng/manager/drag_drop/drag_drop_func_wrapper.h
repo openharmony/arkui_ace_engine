@@ -44,6 +44,8 @@ public:
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
     static int32_t RequestDragEndPending();
     static int32_t NotifyDragResult(int32_t requestId, int32_t result);
+    static int32_t NotifySuggestedDropOperation(int32_t requestId, int32_t operation);
+    static int32_t NotifyDisableDropAnimation(int32_t requestId, bool disable);
     static int32_t NotifyDragEndPendingDone(int32_t requestId);
     static void DecideWhetherToStopDragging(const DragPointerEvent& pointerEvent,
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
@@ -86,8 +88,7 @@ public:
     static void HandleOnDragEvent(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static bool IsTextCategoryComponent(const std::string& frameTag);
     static RefPtr<DragDropManager> GetDragDropManagerForDragAnimation(const RefPtr<PipelineBase>& context,
-        const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow,
-        bool isExpandDisplay, int32_t instanceId);
+        const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow);
     static void SetMenuSubWindowTouchable(bool touchable);
     static void HandleBackPressHideMenu();
 

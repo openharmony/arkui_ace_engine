@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
 namespace OHOS::Ace::Framework {
 class JSScrollable {
@@ -30,6 +31,7 @@ public:
     static std::string ParseBarWidth(const JSCallbackInfo& info);
     static void JsClip(const JSCallbackInfo& info);
     static std::optional<PresetFillType> ParsePresetFillType(const JSRef<JSVal>& jsValue);
+    static void ParseEditModeOptions(const JSCallbackInfo& info, NG::EditModeOptions& options);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_H

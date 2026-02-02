@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/xcomponent/xcomponent_controller_impl.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -111,6 +112,15 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
     }
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }
+
+void SendStatisticEvent(StatisticEventType type)
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto StatisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(StatisticEventReporter);
+    StatisticEventReporter->SendEvent(type);
+}
 } // namespace
 void JSXComponentController::JSBind(BindingTarget globalObj)
 {
@@ -187,7 +197,7 @@ void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
         LOGW("Failed to parse param 'surfaceWidth' or 'surfaceHeight'");
         return;
     }
-
+    SendStatisticEvent(StatisticEventType::XCOMPONENT_SET_SURFACE_SIZE);
     CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
 }

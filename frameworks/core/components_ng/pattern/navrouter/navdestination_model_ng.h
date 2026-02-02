@@ -78,10 +78,10 @@ public:
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true,
         const RefPtr<ResourceObject>& backgroundColorResObj = nullptr);
-    static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
-        bool noPixMap, RefPtr<PixelMap>& pixMap);
-    static void SetBackButtonIcon(FrameNode* frameNode, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const RefPtr<ResourceObject>& backButtonIconResObj);
+    static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
+        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap);
+    static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
+        bool noPixMap, RefPtr<PixelMap>& pixMap, const RefPtr<ResourceObject>& backButtonIconResObj);
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
 

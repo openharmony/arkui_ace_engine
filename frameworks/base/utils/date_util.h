@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,11 @@
 #include <cstdint>
 #include <ctime>
 
+#include "base/utils/macros.h"
+
 namespace OHOS::Ace {
 
-struct Date {
+struct ACE_FORCE_EXPORT Date {
     Date() = default;
     Date(uint32_t year, uint32_t month, uint32_t day) : year(year), month(month), day(day) {}
     ~Date() = default;

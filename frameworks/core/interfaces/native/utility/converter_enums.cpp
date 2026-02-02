@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,16 +27,20 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/particle/particle_model.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "ui/base/macros.h"
 #include "ui/view/components/tabs/tabs_data.h"
 
 #include "ace_engine_types.h"
@@ -58,7 +62,7 @@ void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQu
     }
 }
 template<>
-void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
 {
     switch (src) {
         case ARK_ALIGNMENT_TOP_START: dst = Alignment::TOP_LEFT; break;
@@ -122,7 +126,7 @@ void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissRea
 }
 
 template<>
-void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
     switch (src) {
         case ARK_BLUR_STYLE_THIN: dst = BlurStyle::THIN; break;
@@ -213,7 +217,7 @@ void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& 
 }
 
 template<>
-void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
 {
     switch (src) {
         case ARK_COLOR_WHITE: dst = Color(0xffffffff); break; // White
@@ -233,7 +237,7 @@ void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
 }
 
 template<>
-void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src)
 {
     switch (src) {
         case ARK_CROWN_SENSITIVITY_LOW: dst = CrownSensitivity::LOW; break;
@@ -244,7 +248,17 @@ void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity
 }
 
 template<>
-void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
+void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
+{
+    switch (src) {
+        case ARK_FOCUS_WRAP_MODE_DEFAULT: dst = FocusWrapMode::DEFAULT; break;
+        case ARK_FOCUS_WRAP_MODE_WRAP_WITH_ARROW: dst = FocusWrapMode::WRAP_WITH_ARROW; break;
+        default: LOGE("Unexpected enum value in Ark_FocusWrapMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
 {
     switch (src) {
         case ARK_FONT_WEIGHT_LIGHTER: dst = FontWeight::LIGHTER; break;
@@ -368,11 +382,23 @@ template<>
 void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
 {
     switch (src) {
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP: dst = VerticalAlign::TOP; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER: dst = VerticalAlign::CENTER; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM: dst = VerticalAlign::BOTTOM; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE: dst = VerticalAlign::BASELINE; break;
-        default: LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP:
+            dst = VerticalAlign::TOP;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER:
+            dst = VerticalAlign::CENTER;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM:
+            dst = VerticalAlign::BOTTOM;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE:
+            dst = VerticalAlign::BASELINE;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH:
+            dst = VerticalAlign::FOLLOW_PARAGRAPH;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
     }
 }
 
@@ -406,6 +432,17 @@ void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src)
         case ARK_LINE_JOIN_STYLE_ROUND: dst = LineJoinStyle::ROUND; break;
         case ARK_LINE_JOIN_STYLE_BEVEL: dst = LineJoinStyle::BEVEL; break;
         default: LOGE("Unexpected enum value in Ark_LineJoinStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<PresetFillType>& dst, const Ark_PresetFillType& src)
+{
+    switch (src) {
+        case ARK_PRESET_FILL_TYPE_BREAKPOINT_DEFAULT: dst = PresetFillType::BREAKPOINT_DEFAULT; break;
+        case ARK_PRESET_FILL_TYPE_BREAKPOINT_SM1MD2LG3: dst = PresetFillType::BREAKPOINT_SM1MD2LG3; break;
+        case ARK_PRESET_FILL_TYPE_BREAKPOINT_SM2MD3LG5: dst = PresetFillType::BREAKPOINT_SM2MD3LG5; break;
+        default: LOGE("Unexpected enum value in Ark_PresetFillType: %{public}d", src);
     }
 }
 
@@ -477,6 +514,16 @@ void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src)
         case ARK_SHEET_TYPE_SIDE: dst = SheetType::SHEET_SIDE; break;
         case ARK_SHEET_TYPE_CONTENT_COVER: dst = SheetType::SHEET_CONTENT_COVER; break;
         default: LOGE("Unexpected enum value in Ark_SheetType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ScrollSnapAnimationSpeed>& dst, const Ark_ScrollSnapAnimationSpeed& src)
+{
+    switch (src) {
+        case ARK_SCROLL_SNAP_ANIMATION_SPEED_NORMAL: dst = ScrollSnapAnimationSpeed::NORMAL; break;
+        case ARK_SCROLL_SNAP_ANIMATION_SPEED_SLOW: dst = ScrollSnapAnimationSpeed::SLOW; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollSnapAnimationSpeed: %{public}d", src);
     }
 }
 
@@ -553,7 +600,7 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 }
 
 template<>
-void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src)
 {
     switch (src) {
         case ARK_FLEX_DIRECTION_ROW: dst = FlexDirection::ROW; break;
@@ -565,7 +612,7 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src)
 }
 
 template<>
-void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
 {
     switch (src) {
         case ARK_AXIS_VERTICAL: dst = Axis::VERTICAL; break;
@@ -679,12 +726,25 @@ void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 }
 
 template<>
+void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src)
+{
+    switch (src) {
+        case ARK_EFFECT_LAYER_NONE: dst = EffectLayer::NONE; break;
+        case ARK_EFFECT_LAYER_CHARGE_MOTION: dst = EffectLayer::CHARGE; break;
+        case ARK_EFFECT_LAYER_CHARGE_TEXT: dst = EffectLayer::TEXT; break;
+        default: LOGE("Unexpected enum value in Ark_EffectLayer: %{public}d", src); break;
+    }
+}
+
+template<>
 void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 {
     switch (src) {
         case ARK_ELLIPSIS_MODE_START: dst = EllipsisMode::HEAD; break;
         case ARK_ELLIPSIS_MODE_CENTER: dst = EllipsisMode::MIDDLE; break;
         case ARK_ELLIPSIS_MODE_END: dst = EllipsisMode::TAIL; break;
+        case ARK_ELLIPSIS_MODE_MULTILINE_START: dst = EllipsisMode::MULTILINE_HEAD; break;
+        case ARK_ELLIPSIS_MODE_MULTILINE_CENTER: dst = EllipsisMode::MULTILINE_MIDDLE; break;
         default: LOGE("Unexpected enum value in Ark_EllipsisMode: %{public}d", src);
     }
 }
@@ -700,6 +760,18 @@ void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
         case ARK_TEXT_ALIGN_LEFT: dst = TextAlign::LEFT; break;
         case ARK_TEXT_ALIGN_RIGHT: dst = TextAlign::RIGHT; break;
         default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAlign& src)
+{
+    switch (src) {
+        case ARK_TEXT_VERTICAL_ALIGN_BASELINE: dst = TextVerticalAlign::BASELINE; break;
+        case ARK_TEXT_VERTICAL_ALIGN_BOTTOM: dst = TextVerticalAlign::BOTTOM; break;
+        case ARK_TEXT_VERTICAL_ALIGN_CENTER: dst = TextVerticalAlign::CENTER; break;
+        case ARK_TEXT_VERTICAL_ALIGN_TOP: dst = TextVerticalAlign::TOP; break;
+        default: LOGE("Unexpected enum value in Ark_TextVerticalAlign: %{public}d", src);
     }
 }
 
@@ -746,6 +818,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src)
         case ARK_INPUT_TYPE_NEW_PASSWORD: dst = TextInputType::NEW_PASSWORD; break;
         case ARK_INPUT_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
         case ARK_INPUT_TYPE_URL: dst = TextInputType::URL; break;
+        case ARK_INPUT_TYPE_ONE_TIME_CODE: dst = TextInputType::JS_ONE_TIME_CODE; break;
         default: LOGE("Unexpected enum value in Ark_InputType: %{public}d", src);
     }
 }
@@ -1009,6 +1082,16 @@ void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGr
 }
 
 template<>
+void AssignCast(std::optional<ListItemSwipeActionDirection>& dst, const Ark_ListItemSwipeActionDirection& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_SWIPE_ACTION_DIRECTION_START: dst = ListItemSwipeActionDirection::START; break;
+        case ARK_LIST_ITEM_SWIPE_ACTION_DIRECTION_END: dst = ListItemSwipeActionDirection::END; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemSwipeActionDirection: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src)
 {
     switch (src) {
@@ -1112,6 +1195,16 @@ void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpan
 }
 
 template<>
+void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src)
+{
+    switch (src) {
+        case ARK_UNDO_STYLE_CLEAR_STYLE: dst = UndoStyle::CLEAR_STYLE; break;
+        case ARK_UNDO_STYLE_KEEP_STYLE: dst = UndoStyle::KEEP_STYLE; break;
+        default: LOGE("Unexpected enum value in Ark_UndoStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src)
 {
     switch (src) {
@@ -1135,7 +1228,7 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 {
     switch (src) {
         case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
@@ -1145,7 +1238,7 @@ void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
 {
     switch (src) {
         case ARK_SLIDER_STYLE_OUT_SET: dst = SliderModel::SliderMode::OUTSET; break;
@@ -1199,7 +1292,7 @@ void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
 {
     switch (src) {
         case ARK_SLIDER_INTERACTION_SLIDE_AND_CLICK: dst = SliderModel::SliderInteraction::SLIDE_AND_CLICK;
@@ -1225,7 +1318,7 @@ void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
 {
     switch (src) {
         case ARK_SLIDER_BLOCK_TYPE_DEFAULT: dst = SliderModel::BlockStyleType::DEFAULT;
@@ -1302,6 +1395,7 @@ void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardA
         case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL: dst = WebKeyboardAvoidMode::RESIZE_VISUAL; break;
         case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT: dst = WebKeyboardAvoidMode::RESIZE_CONTENT; break;
         case ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT: dst = WebKeyboardAvoidMode::OVERLAYS_CONTENT; break;
+        case ARK_WEB_KEYBOARD_AVOID_MODE_RETURN_TO_UICONTEXT: dst = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT; break;
         default: LOGE("Unexpected enum value in Ark_WebKeyboardAvoidMode: %{public}d", src);
     }
 }
@@ -1547,7 +1641,9 @@ template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollS
 }
 
 template<>
-void AssignCast(std::optional<Converter::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
+ACE_FORCE_EXPORT void AssignCast(
+    std::optional<Converter::RenderingStrategy>& dst,
+    const Ark_SymbolRenderingStrategy& src)
 {
     switch (src) {
         case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = Converter::RenderingStrategy::SINGLE; break;
@@ -1570,7 +1666,7 @@ void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
 }
 
 template<>
-void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src)
 {
     switch (src) {
         case ARK_SYMBOL_EFFECT_STRATEGY_NONE: dst = OHOS::Ace::SymbolEffectType::NONE; break;
@@ -1618,6 +1714,7 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
         case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
         case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
         case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
+        case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
         default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
     }
 }
@@ -1632,6 +1729,16 @@ void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
         case ARK_MESSAGE_LEVEL_LOG: dst = MessageLevel::LOG; break;
         case ARK_MESSAGE_LEVEL_WARN: dst = MessageLevel::WARN; break;
         default: LOGE("Unexpected enum value in Ark_MessageLevel: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ColorSpace>& dst, const Ark_ColorSpace& src)
+{
+    switch (src) {
+        case ARK_COLOR_SPACE_SRGB: dst = ColorSpace::SRGB; break;
+        case ARK_COLOR_SPACE_DISPLAY_P3: dst = ColorSpace::DISPLAY_P3; break;
+        default: LOGE("Unexpected enum value in Ark_ColorSpace: %{public}d", src); break;
     }
 }
 
@@ -1664,6 +1771,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& 
         case ARK_RICH_EDITOR_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
         case ARK_RICH_EDITOR_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
         case ARK_RICH_EDITOR_SPAN_TYPE_BUILDER: dst = TextSpanType::BUILDER; break;
+        case ARK_RICH_EDITOR_SPAN_TYPE_DEFAULT: dst = TextSpanType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_RichEditorSpanType: %{public}d", src);
     }
 }
@@ -1685,6 +1793,7 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorRespon
         case ARK_RICH_EDITOR_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
         case ARK_RICH_EDITOR_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
         case ARK_RICH_EDITOR_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        case ARK_RICH_EDITOR_RESPONSE_TYPE_DEFAULT: dst = TextResponseType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_RichEditorResponseType: %{public}d", src);
     }
 }
@@ -1840,7 +1949,7 @@ void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src)
 }
 
 template<>
-void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src)
 {
     switch (src) {
         case ARK_DIALOG_ALIGNMENT_TOP: dst = DialogAlignment::TOP; break;
@@ -1909,7 +2018,7 @@ void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src
 }
 
 template<>
-void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
 {
     switch (src) {
         case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE: dst = TimePickerFormat::HOUR_MINUTE; break;
@@ -1919,7 +2028,7 @@ void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat
 }
 
 template<>
-void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src)
 {
     switch (src) {
         case ARK_HOVER_MODE_AREA_TYPE_TOP_SCREEN: dst = HoverModeAreaType::TOP_SCREEN; break;
@@ -1958,6 +2067,8 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
         case ARK_HIT_TEST_MODE_BLOCK: dst = HitTestMode::HTMBLOCK; break;
         case ARK_HIT_TEST_MODE_TRANSPARENT: dst = HitTestMode::HTMTRANSPARENT; break;
         case ARK_HIT_TEST_MODE_NONE: dst = HitTestMode::HTMNONE; break;
+        case ARK_HIT_TEST_MODE_BLOCK_HIERARCHY: dst = HitTestMode::HTMBLOCK_HIERARCHY; break;
+        case ARK_HIT_TEST_MODE_BLOCK_DESCENDANTS: dst = HitTestMode::HTMBLOCK_DESCENDANTS; break;
         default: {
             LOGE("Unexpected enum value in Ark_HitTestMode: %{public}d", src);
         }
@@ -1998,6 +2109,106 @@ void AssignCast(std::optional<OHOS::Ace::ScopeType>& dst, const Ark_EffectScope&
         default: {
             LOGE("Unexpected enum value in Ark_EffectScope: %{public}d", src);
         }
+    }
+}
+template<>
+void AssignCast(std::optional<SymbolEffectType>& dst, const Ark_ReplaceEffectType& src)
+{
+    switch (src) {
+        case ARK_REPLACE_EFFECT_TYPE_SEQUENTIAL: dst = SymbolEffectType::REPLACE; break;
+        case ARK_REPLACE_EFFECT_TYPE_CROSS_FADE: dst = SymbolEffectType::QUICK_REPLACE; break;
+        case ARK_REPLACE_EFFECT_TYPE_SLASH_OVERLAY: dst = SymbolEffectType::DISABLE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ReplaceEffectType: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextContentAlign>& dst, const Ark_TextContentAlign& src)
+{
+    switch (src) {
+        case Ark_TextContentAlign::ARK_TEXT_CONTENT_ALIGN_TOP:
+            dst = TextContentAlign::TOP; break;
+        case Ark_TextContentAlign::ARK_TEXT_CONTENT_ALIGN_CENTER:
+            dst = TextContentAlign::CENTER; break;
+        case Ark_TextContentAlign::ARK_TEXT_CONTENT_ALIGN_BOTTOM:
+            dst = TextContentAlign::BOTTOM; break;
+        default:
+            LOGE("Unexpected enum value in Ark_TextContentAlign: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<OverflowMode>& dst, const Ark_MaxLinesMode& src)
+{
+    switch (src) {
+        case Ark_MaxLinesMode::ARK_MAX_LINES_MODE_CLIP:
+            dst = OverflowMode::CLIP; break;
+        case Ark_MaxLinesMode::ARK_MAX_LINES_MODE_SCROLL:
+            dst = OverflowMode::SCROLL; break;
+        default:
+            LOGE("Unexpected enum value in Ark_MaxLinesMode: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextFlipDirection>& dst, const Ark_FlipDirection& src)
+{
+    switch (src) {
+        case Ark_FlipDirection::ARK_FLIP_DIRECTION_DOWN:
+            dst = TextFlipDirection::DOWN; break;
+        case Ark_FlipDirection::ARK_FLIP_DIRECTION_UP:
+            dst = TextFlipDirection::UP; break;
+        default:
+            LOGE("Unexpected enum value in Ark_FlipDirection: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<KeyboardGradientMode>& dst, const Ark_KeyboardGradientMode& src)
+{
+    switch (src) {
+        case Ark_KeyboardGradientMode::ARK_KEYBOARD_GRADIENT_MODE_NONE:
+            dst = KeyboardGradientMode::NONE; break;
+        case Ark_KeyboardGradientMode::ARK_KEYBOARD_GRADIENT_MODE_LINEAR_GRADIENT:
+            dst = KeyboardGradientMode::LINEAR_GRADIENT; break;
+        default:
+            LOGE("Unexpected enum value in Ark_KeyboardGradientMode: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<SuperscriptStyle>& dst, const Ark_SuperscriptStyle& src)
+{
+    switch (src) {
+        case Ark_SuperscriptStyle::ARK_SUPERSCRIPT_STYLE_NORMAL:
+            dst = SuperscriptStyle::NORMAL; break;
+        case Ark_SuperscriptStyle::ARK_SUPERSCRIPT_STYLE_SUPERSCRIPT:
+            dst = SuperscriptStyle::SUPERSCRIPT; break;
+        case Ark_SuperscriptStyle::ARK_SUPERSCRIPT_STYLE_SUBSCRIPT:
+            dst = SuperscriptStyle::SUBSCRIPT; break;
+        default:
+            LOGE("Unexpected enum value in Ark_SuperscriptStyle: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<KeyboardFluidLightMode>& dst, const Ark_KeyboardFluidLightMode& src)
+{
+    switch (src) {
+        case Ark_KeyboardFluidLightMode::ARK_KEYBOARD_FLUID_LIGHT_MODE_NONE:
+            dst = KeyboardFluidLightMode::NONE; break;
+        case Ark_KeyboardFluidLightMode::ARK_KEYBOARD_FLUID_LIGHT_MODE_BACKGROUND_FLUID_LIGHT:
+            dst = KeyboardFluidLightMode::BACKGROUND_FLUID_LIGHT; break;
+        default:
+            LOGE("Unexpected enum value in Ark_SuperscriptStyle: %{public}d", src);
+            break;
     }
 }
 template<>
@@ -2330,7 +2541,7 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src)
 }
 
 template<>
-void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
 {
     switch (src) {
         case ARK_CHECK_BOX_SHAPE_CIRCLE: dst = CheckBoxStyle::CIRCULAR_STYLE; break;

@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("geometry_test") {
-  module_output = "basic"
+  module_name = "Animation-Animatable"
   type = "new"
   sources = [
     "animatable_dimension_test.cpp",
@@ -32,7 +32,7 @@ ace_unittest("geometry_test") {
 }
 
 ace_unittest("util_test") {
-  module_output = "basic"
+  module_name = "CommonEvent-Input"
   type = "new"
   sources = [
     "base_utils_test.cpp",

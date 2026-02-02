@@ -133,7 +133,9 @@ ColorMode Container::CurrentColorMode()
 
 std::string Container::CurrentBundleName()
 {
-    return "";
+    auto container = MockContainer::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
 }
 
 void MockContainer::SetMockColorMode(ColorMode mode)
@@ -258,5 +260,11 @@ Window* Container::GetWindow() const
 {
     auto context = GetPipelineContext();
     return context ? context->GetWindow() : nullptr;
+}
+
+bool Container::IsCurrentUseNewPipeline()
+{
+    auto container = Current();
+    return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
 }
 } // namespace OHOS::Ace

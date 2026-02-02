@@ -28,6 +28,7 @@ const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
 std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
+std::shared_ptr<NWeb::NWebAgentManager> g_nwebAgentManager = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
@@ -292,32 +293,38 @@ std::string FileSelectorParamOhos::GetDefaultFileName()
 {
     return "";
 }
+
 std::vector<std::string> FileSelectorParamOhos::GetAcceptType()
 {
     return {};
 }
+
 bool FileSelectorParamOhos::IsCapture()
 {
     return false;
 }
+
 std::string FileSelectorParamOhos::GetDefaultPath()
 {
     return "";
 }
+
 std::vector<std::string> FileSelectorParamOhos::GetDescriptions()
 {
     return {};
 }
+
 bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
 {
     return false;
 }
+
 AcceptFileTypeLists FileSelectorParamOhos::GetAccepts()
 {
     AcceptFileTypeLists result;
-
     return result;
 }
+
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result) {}
 void WebPermissionRequestOhos::Deny() const {}
 std::string WebPermissionRequestOhos::GetOrigin() const
@@ -733,6 +740,7 @@ void WebDelegate::SetSurfaceDensity(const double& density) {}
 void WebDelegate::OnOnlineRenderToForeground() {}
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should) {}
 void WebDelegate::NotifyMemoryLevel(int32_t level) {}
+void WebDelegate::SetIsOfflineWebComponent() {}
 void WebDelegate::SetAudioMuted(bool muted) {}
 void WebDelegate::Zoom(float factor) {}
 bool WebDelegate::ZoomIn()
@@ -969,6 +977,7 @@ void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, con
 void WebDelegate::WebHandleTouchpadFlingEvent(
     const double& x, const double& y, const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
 {}
+void WebDelegate::WebHandleCancelFlingEvent() {}
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY) {}
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY,
     const std::vector<int32_t>& pressedCodes, const int32_t source)
@@ -1355,6 +1364,12 @@ std::string WebDelegate::GetWebInfoType()
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId) {}
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) {}
+
+std::shared_ptr<OHOS::NWeb::NWebAgentManager> WebDelegate::GetNWebAgentManager()
+{
+    return g_nwebAgentManager;
+}
+
 std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& content)
 {
     return "";
@@ -1446,6 +1461,8 @@ bool WebDelegate::IsBlanklessFrameValid() const
            blanklessFrameWidth_ == resizeWidth && blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
 }
 
+void WebDelegate::CallBlanklessCallback(int32_t state, const std::string& reason) {}
+
 void WebDelegate::UpdateEnableImageAnalyzer(bool enable) {}
 
 void WebDelegate::RemoveSnapshotFrameNodeIfNeeded() {}
@@ -1473,7 +1490,7 @@ bool WebDelegate::IsPcMode()
 {
     return g_setReturnStatus == STATUS_TRUE;
 }
-void WebDelegate::OnTextSelectionChange(const std::string& selectionTex, bool isFromOverlay) {}
+void WebDelegate::OnTextSelectionChange(const std::string& selectionText) {}
 std::string WebDelegate::GetLastSelectionText() const { return ""; }
 void WebDelegate::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) {}
@@ -1483,4 +1500,5 @@ void WebDelegate::OnRequestAutofill(int32_t menuType) {}
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
+void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
 } // namespace OHOS::Ace

@@ -20,6 +20,13 @@
 
 typedef struct napi_value__* napi_value;
 typedef struct napi_env__* napi_env;
+typedef class __ani_object* ani_object;
+
+#ifdef __cplusplus
+typedef struct __ani_env ani_env;
+#else
+typedef const struct __ani_interaction_api* ani_env;
+#endif
 
 namespace OHOS::Ace {
 #ifndef ACE_EXPORT
@@ -55,12 +62,26 @@ public:
         napi_env env, napi_value napiValue);
 
     /**
+    * @brief Get xcomponentController from aniValue converted by jsXComponentController
+    *
+    */
+    static std::shared_ptr<XComponentController> GetXComponentControllerFromAniValue(
+        ani_env* env, ani_object aniValue);
+
+    /**
      * @brief set typedNode.XComponent's SurfaceCallbackMode
      *
      */
     static XComponentControllerErrorCode SetSurfaceCallbackMode(
         napi_env env, napi_value node, SurfaceCallbackMode mode);
-    
+
+    /**
+     * @brief set typeNode.XComponent's SurfaceCallbackMode
+     *
+     */
+    static XComponentControllerErrorCode SetSurfaceCallbackModeFromAniValue(
+        ani_env* env, ani_object node, SurfaceCallbackMode mode);
+
     /**
      * @brief set surface renderFit by surfaceId
      * @param surfaceId index of the surface

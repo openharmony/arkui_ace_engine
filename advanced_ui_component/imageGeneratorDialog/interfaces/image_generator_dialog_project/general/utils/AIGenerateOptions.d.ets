@@ -29,13 +29,13 @@ export declare class AIGenerateOptions {
     version: string;
     private static instance;
     static getInstance(): AIGenerateOptions;
-    setImages(f18: Array<imageGeneration.ImageItem>): void;
-    updateRelativeLayout(d18: boolean): void;
-    updateUserPrompt(c18: string): void;
-    updateShapePath(b18: Array<common2D.Point>): void;
-    updateStyle(a18: string): void;
-    updateResolution(z17: image.Size): void;
-    updateRatio(y17: string): void;
-    updateType(x17: number): void;
-    updateVersion(w17: string): void;
+    setImages(images: Array<imageGeneration.ImageItem>): void;
+    updateRelativeLayout(layout: boolean): void;
+    updateUserPrompt(prompt: string): void;
+    updateShapePath(shapePath: Array<common2D.Point>): void;
+    updateStyle(style: string): void;
+    updateResolution(resolution: image.Size): void;
+    updateRatio(ratio: string): void;
+    updateType(type: number): void;
+    updateVersion(version: string): void;
 }

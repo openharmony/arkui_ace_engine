@@ -30,9 +30,9 @@ class ACE_EXPORT BorderEdge final {
 public:
     BorderEdge() = default;
     ~BorderEdge() = default;
-    BorderEdge(const Color& color, const Dimension& width, BorderStyle style);
+    ACE_FORCE_EXPORT BorderEdge(const Color& color, const Dimension& width, BorderStyle style);
 
-    bool HasValue() const;
+    ACE_FORCE_EXPORT bool HasValue() const;
 
     const AnimatableColor& GetColor() const
     {

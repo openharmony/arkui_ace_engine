@@ -695,6 +695,14 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     }
 }
 
+void SliderModelNG::SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
 {
     Color value;

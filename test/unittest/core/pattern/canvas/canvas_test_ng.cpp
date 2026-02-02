@@ -741,10 +741,15 @@ HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level1)
 HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
 {
     g_canvasTestProperty.immediateRender = true;
-    g_canvasTestProperty.unit = CanvasUnit::DEFAULT;
+    g_canvasTestProperty.unit = CanvasUnit::PX;
     bool onReadyHasTriggered = false;
-    g_canvasTestProperty.onReady = [&onReadyHasTriggered](bool needDrawingContext, CanvasUnit unit) {
-        onReadyHasTriggered = needDrawingContext;
+    bool isNeedDrawingContext = false;
+    CanvasUnit canvasUnit = CanvasUnit::DEFAULT;
+    g_canvasTestProperty.onReady = [&onReadyHasTriggered, &isNeedDrawingContext, &canvasUnit](
+                                       bool needDrawingContext, CanvasUnit unit) {
+        onReadyHasTriggered = true;
+        isNeedDrawingContext = needDrawingContext;
+        canvasUnit = unit;
     };
 
     /**
@@ -763,5 +768,44 @@ HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
      */
     pattern->FireReadyEvent();
     EXPECT_TRUE(onReadyHasTriggered);
+    EXPECT_TRUE(isNeedDrawingContext);
+    EXPECT_EQ(canvasUnit, CanvasUnit::PX);
+}
+
+/**
+ * @tc.name: CanvasPatternCacheTest
+ * @tc.desc: CanvasPatternCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternCacheTest, TestSize.Level1)
+{
+    g_canvasTestProperty.immediateRender = false;
+    g_canvasTestProperty.unit = CanvasUnit::DEFAULT;
+    bool onReadyHasTriggered = false;
+    bool isNeedDrawingContext = false;
+    g_canvasTestProperty.onReady = [&onReadyHasTriggered, &isNeedDrawingContext](
+                                       bool needDrawingContext, CanvasUnit unit) {
+        onReadyHasTriggered = true;
+        isNeedDrawingContext = needDrawingContext;
+    };
+
+    /**
+     * @tc.steps: step1. Create Canvas with no cache.
+     * @tc.expected: Create successfully.
+     */
+    auto frameNode = CreateCanvasNode(g_canvasTestProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_FALSE(pattern->immediateRender_.value());
+    EXPECT_FALSE(pattern->hasRegisteredVisibleAreaChange_);
+
+    /**
+     * @tc.steps: step2. trigger onReady.
+     * @tc.expected: OnReady trigger successfully.
+     */
+    pattern->FireReadyEvent();
+    EXPECT_TRUE(onReadyHasTriggered);
+    EXPECT_FALSE(isNeedDrawingContext);
 }
 } // namespace OHOS::Ace::NG

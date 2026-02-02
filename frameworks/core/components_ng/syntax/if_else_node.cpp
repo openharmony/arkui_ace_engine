@@ -26,6 +26,7 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
     if (node) {
         return node;
     }
+    ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<IfElseNode>(nodeId);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;

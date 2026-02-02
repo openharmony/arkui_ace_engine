@@ -127,8 +127,7 @@ std::vector<std::string> AniExports::getModules() {
 const std::vector<std::tuple<std::string, std::string, void*, int>>& AniExports::getMethods(const std::string& module) {
     auto it = implementations.find(module);
     if (it == implementations.end()) {
-        LOGE("Module %s is not registered", module.c_str());
-        abort();
+        InteropLogFatal("Module %{public}s is not registered", module.c_str());
     }
     return it->second;
 }

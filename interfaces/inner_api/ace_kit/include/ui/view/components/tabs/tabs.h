@@ -57,13 +57,16 @@ public:
     static RefPtr<Tabs> Create(RefPtr<FrameNode>& node);
 
     void SetTabBarWidth(const Dimension& tabBarWidth);
+    Dimension GetTabBarWidth() const;
     void SetTabBarHeight(const Dimension& tabBarHeight);
+    Dimension GetTabBarHeight() const;
     void SetDivider(const TabsItemDivider& divider);
     void SetEffectNodeOption(const TabsEffectNodeOption& option);
     void SetTabBarMode(const TabBarMode& barMode);
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option);
     void SetTabBarTranslate(const NG::TranslateOptions& options);
     void SetTabBarOpacity(float opacity);
+    void SwipeTo(const int32_t index);
     void SetOnTabBarItemsChange(OnTabBarItemsChangeEvent&& event);
     void UpdateDividerOpacity(const double opacity);
 
@@ -82,6 +85,8 @@ public:
     void SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent);
     void SetOnGestureSwipe(OnGestureSwipeEvent onGestureSwipe);
     void SetOnAnimationStart(OnAnimationStartEvent onAnimationStart);
+    void SetTabBarFolded(bool isTabBarFolded);
+    RefPtr<FrameNode> GetTabBarActiveItem();
 };
 
 } // namespace OHOS::Ace::Kit

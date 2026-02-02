@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
-HeightBreakpoint, WidthBreakpoint } from "@ohos.arkui.component"
+HeightBreakpoint, WidthBreakpoint, Axis } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
 import type { Callback } from '@ohos.base';
 import hilog from '@ohos.hilog'
- 
+import { Size } from '@ohos.arkui.node'
+
  export default namespace uiObserver {
     loadLibrary("observer_ani");
     export native function createUIObserver(id: number): UIObserver;
@@ -41,13 +42,27 @@ import hilog from '@ohos.hilog'
         options: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationInfo>
     ): void;
-    export native function onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
-    export native function offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+
+    export native function onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+    export native function offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+    export native function onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+    export native function offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
     export native function onNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
+        callback: Callback<NavDestinationSwitchInfo>
+    ): void;
+    export native function offNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
+        callback?: Callback<NavDestinationSwitchInfo>
+    ): void;
+    export native function onNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
         observerOptions: NavDestinationSwitchObserverOptions,
         callback: Callback<NavDestinationSwitchInfo>
     ): void;
     export native function offNavDestinationSwitch(
+        context: UIAbilityContext | UIContext,
         observerOptions: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationSwitchInfo>
     ): void;
@@ -56,6 +71,9 @@ import hilog from '@ohos.hilog'
     export native function offTabChange(callback?: Callback<ObserverOptions>): void;
     export native function onTabChange(options: ObserverOptions, callback: Callback<ObserverOptions>): void;
     export native function offTabChange(options: ObserverOptions, callback?: Callback<ObserverOptions>): void;
+
+    export native function onWindowSizeLayoutBreakpointChange(callback: Callback<WindowSizeLayoutBreakpointInfo>): void;
+    export native function offWindowSizeLayoutBreakpointChange(callback?: Callback<WindowSizeLayoutBreakpointInfo>): void;
 
     export class DensityInfo {
         density: number;
@@ -112,6 +130,9 @@ import hilog from '@ohos.hilog'
         public native onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
         public native offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
 
+        public native onWindowSizeLayoutBreakpointChange(callback: Callback<WindowSizeLayoutBreakpointInfo>): void;
+ 	    public native offWindowSizeLayoutBreakpointChange(callback?: Callback<WindowSizeLayoutBreakpointInfo>): void;
+
         public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
         public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
         public native onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
@@ -123,11 +144,21 @@ import hilog from '@ohos.hilog'
         public native offWillDraw(callback?: Callback<void>): void;
         public native onDidLayout(callback: Callback<void>): void;
         public native offDidLayout(callback?: Callback<void>): void;
+
+        public native onRouterPageSizeChange(callback: Callback<RouterPageInfo>): void;
+        public native offRouterPageSizeChange(callback?: Callback<RouterPageInfo>): void;
+        public native onNavDestinationSizeChange(callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationSizeChange(callback?: Callback<NavDestinationInfo>): void;
+        public native onNavDestinationSizeChangeByUniqueId(
+            navigationUniqueId: int, callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationSizeChangeByUniqueId(
+            navigationUniqueId: int, callback?: Callback<NavDestinationInfo>): void;
     }
 
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
     }
     export class WindowSizeLayoutBreakpointInfo {
         widthBreakpoint: WidthBreakpoint;
@@ -137,6 +168,7 @@ import hilog from '@ohos.hilog'
     export class NavigationInfoImpl implements NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavigationInfoImpl();
@@ -150,6 +182,11 @@ import hilog from '@ohos.hilog'
             let navPathStack = dynamicValue.getProperty("pathStack");
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
                 // pathStack needs analysis to static NavPathStack
+            }
+            let uniqueId =dynamicValue.getProperty('uniqueId');
+            if (uniqueId.typeOf() !== 'undefined' && uniqueId.typeOf() !== 'null' && uniqueId.isNumber()) {
+                let id = uniqueId.toNumber();
+                staticValue.uniqueId = Double.toInt(id);
             }
             return staticValue;
         }
@@ -165,6 +202,9 @@ import hilog from '@ohos.hilog'
             }
             dynamicValue.setProperty('navigationId', ESValue.wrap(staticValue.navigationId));
             dynamicValue.setProperty('pathStack', ESValue.wrap(staticValue.pathStack));
+            if (staticValue.uniqueId != undefined && staticValue.uniqueId != null) {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
             return dynamicValue as Any;
         }
     }
@@ -183,6 +223,15 @@ import hilog from '@ohos.hilog'
         ON_BACKPRESS = 100
     }
 
+    export class SizeInner implements Size {
+        width: number;
+        height: number;
+        constructor(width: number, height: number) {
+            this.width = width;
+            this.height = height;
+        }
+    }
+
     export interface NavDestinationInfo {
         navigationId: ResourceStr;
         name: ResourceStr;
@@ -192,6 +241,7 @@ import hilog from '@ohos.hilog'
         navDestinationId: string;
         uniqueId?: int;
         mode?: NavDestinationMode;
+        size?: Size;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -203,6 +253,7 @@ import hilog from '@ohos.hilog'
         navDestinationId: string;
         uniqueId?: int;
         mode?: NavDestinationMode;
+        size?: Size;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;
@@ -340,6 +391,7 @@ import hilog from '@ohos.hilog'
         path: string;
         state: RouterPageState;
         pageId: string;
+        size?: Size;
 
         static castToRouterPageState(value: number): RouterPageState {
             if (value === 0) {
@@ -427,26 +479,19 @@ import hilog from '@ohos.hilog'
       SCROLL_STOP = 1
     }
 
-    export enum Axis {
-        VERTICAL = 0,
-        Vertical = 0,
-        HORIZONTAL = 1,
-        Horizontal = 1
-    }
-
     export interface ScrollEventInfo {
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         scrollEvent: ScrollEventType;
-        offset: number;
+        offset: double;
         axis: Axis;
     }
 
     export class ScrollEventInfoImpl implements ScrollEventInfo{
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         scrollEvent: ScrollEventType;
-        offset: number;
+        offset: double;
         axis: Axis;
 
         static castToScrollEventType(value: number): ScrollEventType {
@@ -484,7 +529,7 @@ import hilog from '@ohos.hilog'
             if (!uniqueId.isNumber()) {
                 throw Error("uniqueId in ScrollEventInfo type Error");
             }
-            staticValue.uniqueId = uniqueId.toNumber();
+            staticValue.uniqueId = Double.toInt(uniqueId.toNumber());
 
             let scrollEvent = dynamicValue.getProperty("scrollEvent");
             if (!scrollEvent.isNumber()) {

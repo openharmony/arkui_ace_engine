@@ -565,6 +565,8 @@ public:
     float cornerRadius_ = 0.f;
     float offsetX_ = 0.f;
     float offsetY_ = 0.f;
+    float zoomOffsetX_ = 0.f;
+    float zoomOffsetY_ = 0.f;
 
     float shadowOffsetX_ = 0.f;
     float shadowOffsetY_ = 0.f;
@@ -584,7 +586,8 @@ public:
         return NearEqual(factor_, other.factor_) && NearEqual(width_, other.width_) &&
                NearEqual(height_, other.height_) && NearEqual(borderWidth_, other.borderWidth_) &&
                NearEqual(cornerRadius_, other.cornerRadius_) && NearEqual(offsetX_, other.offsetX_) &&
-               NearEqual(offsetY_, other.offsetY_) && NearEqual(shadowOffsetX_, other.shadowOffsetX_) &&
+               NearEqual(offsetY_, other.offsetY_) && NearEqual(zoomOffsetX_, other.zoomOffsetX_) &&
+               NearEqual(zoomOffsetY_, other.zoomOffsetY_) && NearEqual(shadowOffsetX_, other.shadowOffsetX_) &&
                NearEqual(shadowOffsetY_, other.shadowOffsetY_) && NearEqual(shadowSize_, other.shadowSize_) &&
                NearEqual(shadowStrength_, other.shadowStrength_) &&
                NearEqual(gradientMaskColor1_, other.gradientMaskColor1_) &&

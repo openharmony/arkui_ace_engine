@@ -20,8 +20,8 @@ export declare struct GenerateProgress {
     readonly currentGenerateState: ImageGenerateState | undefined;
     @Event
     changeCurrentState: (state: ImageGenerateState) => void;
-    @Param
-    readonly imageNumber: number;
+    @Local
+    imageNumber: number;
     @Local
     progressValue: number;
     @Local
@@ -39,6 +39,7 @@ export declare struct GenerateProgress {
     @Monitor('currentGenerateState')
     currentGenerateStateChangeMonitor(monitor: IMonitor): void;
     getEstimatedTime(imageNumber: number): number;
+    getUpdateProgressValue(currentValue: number, estimatedTime: number, currentCnt: number): number;
     aboutToAppear(): void;
     aboutToDisappear(): void;
     createApplicationListener(): void;
@@ -47,6 +48,7 @@ export declare struct GenerateProgress {
     clearTimer(): void;
     onSuccess(): void;
     onTimeOut(): void;
+    cancelImageGenerateTask(): void;
     build(): void;
 }
 @ComponentV2

@@ -20,7 +20,7 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
-export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implements IParamDecoratedVariable<T> {
+export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IParamDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Param', owningView, varName);
@@ -46,5 +46,13 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase implement
         StateUpdateLoop.add(() => {
             this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
         });
+    }
+
+    resetOnReuse(newValue: T): void {
+        const value = this.backing_.get(false);
+        if (value === newValue) {
+            return;
+        }
+        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
     }
 }

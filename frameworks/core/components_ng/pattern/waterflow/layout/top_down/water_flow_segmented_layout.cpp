@@ -51,7 +51,7 @@ bool WaterFlowSegmentLayoutBase::IsSectionValid(const RefPtr<WaterFlowLayoutInfo
         std::string subErrorType = "Id = " + std::to_string(host->GetAccessibilityId()) +
                                     ", Sections number = " + std::to_string(childrenCnt) +
                                     ", LazyForEach/Repeat number =" + std::to_string(info->segmentTails_.back() + 1);
-        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::CHILDREN_COUNT_DISMATDH,
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::CHILDREN_COUNT_DISMATCH,
             subErrorType);
         info->SetReportedHostId(hostId);
         return false;
@@ -163,7 +163,13 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 namespace {
 inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
 {
-    return GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis);
+    float height = GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis);
+    if (std::isnan(height)) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Item's height is NaN,reset to 0.0f");
+        return 0.0f;
+    }
+
+    return height;
 }
 /**
  * @brief Prepares a jump to the current StartItem.

@@ -1478,4 +1478,99 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg0410, TestSize.Level1)
 
     EXPECT_NE(val, false);
 }
+
+/**
+ * @tc.name: MenuPatternTest_OnModifyDone_UpdateBorderRadius
+ * @tc.desc: Test OnModifyDone() when borderRadius has no percent unit (should trigger UpdateBorderRadius)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest_OnModifyDone_UpdateBorderRadius, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+
+    // Create menu wrapper and menu nodes
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    // Test case: BorderRadius with VP unit (no percent) - should trigger UpdateBorderRadius
+    BorderRadiusProperty borderRadiusVP;
+    borderRadiusVP.SetRadius(Dimension(10.0_vp));  // VP unit, no percent
+    menuLayoutProperty->UpdateBorderRadius(borderRadiusVP);
+
+    // Reset outerBorderRadius to ensure clean state before OnModifyDone
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetOuterBorder();
+
+    // Call OnModifyDone to trigger the UpdateBorderRadius logic
+    menuPattern->OnModifyDone();
+
+    // Verify that UpdateBorderRadius was triggered and outerBorderRadius was set
+    auto outerRadius = renderContext->GetOuterBorderRadius();
+    EXPECT_TRUE(outerRadius.has_value()) << "OuterBorderRadius should be set when borderRadius has no percent unit";
+
+    if (outerRadius.has_value()) {
+        // Verify the value was set correctly
+        auto& radiusValue = outerRadius.value();
+        bool hasPercent = radiusValue.HasPercentUnit();
+        EXPECT_FALSE(hasPercent) << "OuterBorderRadius should not have percent unit";
+    }
+}
+
+/**
+ * @tc.name: MenuPatternTest_OnModifyDone_PercentBorderRadius
+ * @tc.desc: Test OnModifyDone() when borderRadius has percent unit (should NOT trigger UpdateBorderRadius)
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest_OnModifyDone_PercentBorderRadius, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
+    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+
+    // Create menu wrapper and menu nodes
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    // Test case: BorderRadius with PERCENT unit - should NOT trigger UpdateBorderRadius
+    BorderRadiusProperty borderRadiusPercent;
+    borderRadiusPercent.SetRadius(Dimension(50.0f, DimensionUnit::PERCENT));  // Percent unit
+    menuLayoutProperty->UpdateBorderRadius(borderRadiusPercent);
+
+    // Reset outerBorderRadius to ensure clean state before OnModifyDone
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetOuterBorder();
+
+    // Call OnModifyDone
+    menuPattern->OnModifyDone();
+
+    // Verify that UpdateBorderRadius was NOT triggered due to percent unit check
+    // When borderRadius has percent unit, OnModifyDone should skip UpdateBorderRadius due to percent unit check
+    auto outerRadius = renderContext->GetOuterBorderRadius();
+    EXPECT_FALSE(outerRadius.has_value()) << "OuterBorderRadius should not be set when borderRadius has percent unit";
+}
+
 } // namespace OHOS::Ace::NG

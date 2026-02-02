@@ -19,7 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
-#include "core/components/text_field/text_field_controller.h"
+#include "compatible/components/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
@@ -152,6 +152,16 @@ public:
         return buttonSize_;
     }
 
+    void SetIsSearchButtonUsingThemeColor(bool isSearchButtonUsingThemeColor)
+    {
+        isSearchButtonUsingThemeColor_ = isSearchButtonUsingThemeColor;
+    }
+
+    bool IsSearchButtonUsingThemeColor() const
+    {
+        return isSearchButtonUsingThemeColor_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
     void OnIconColorConfigrationUpdate(const RefPtr<SearchTheme>& searchTheme);
@@ -200,6 +210,7 @@ public:
     void UpdatePlaceholderFontSizeResource(const Dimension& value);
     void UpdateDecorationColorResource(const Color& value);
     void UpdateDividerColorResource(const Color& value);
+    void UpdateStrokeColorResource(const Color& value);
     void UpdateMinFontSizeResource(const Dimension& value);
     void UpdateMaxFontSizeResource(const Dimension& value);
     void UpdateLetterSpacingResource(const Dimension& value);
@@ -211,6 +222,7 @@ public:
     void UpdateInputFilterResource(const std::string& value);
     void UpdateFontSizeResource(const Dimension& value);
     void UpdateBorderResource() override;
+    int32_t OnInjectionEvent(const std::string& command) override;
     void ProcessTextFieldDefaultStyleAndBehaviors();
     void ProcessDividerDefaultStyleAndBehaviors();
 
@@ -292,6 +304,7 @@ private:
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
     void UpdateImageIconNode(int32_t index);
+    void ImageIconColorConfigurationUpdate(int32_t index);
     void UpdateSymbolIconNode(int32_t index);
     void UpdateSymbolIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
 
@@ -359,6 +372,7 @@ private:
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
     bool isNotifyChildAction_ = false;
+    bool isSearchButtonUsingThemeColor_ = false;
     Color searchNormalColor_;
     Color transparentColor_ = Color::TRANSPARENT;
 

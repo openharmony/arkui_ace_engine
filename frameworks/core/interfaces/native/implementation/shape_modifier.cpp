@@ -96,12 +96,12 @@ void SetFillImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value).value_or(Color::BLACK));
 }
 void SetStrokeDashOffsetImpl(Ark_NativePointer node,
-                             const Opt_Union_F64_String* value)
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto strokeDashOffset = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidatePositive(strokeDashOffset);
+    Validator::ValidateNonNegative(strokeDashOffset);
     Validator::ValidateNonPercent(strokeDashOffset);
     ShapeModelStatic::SetStrokeDashOffset(frameNode, strokeDashOffset);
 }
@@ -110,7 +110,7 @@ void SetStrokeDashArrayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::vector<std::optional<Dimension>>>(*value);
+    auto convValue = Converter::OptConvertPtr<std::vector<std::optional<Dimension>>>(value);
     if (!convValue) {
         ShapeModelNG::SetStrokeDashArray(frameNode, {});
         return;
@@ -144,7 +144,7 @@ void SetStrokeLineJoinImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void SetStrokeMiterLimitImpl(Ark_NativePointer node,
-                             const Opt_Union_F64_String* value)
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +173,7 @@ void SetFillOpacityImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFillOpacity(frameNode, strokeOpacity);
 }
 void SetStrokeWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_F64_String* value)
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

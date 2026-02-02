@@ -160,6 +160,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
         return spanNode;
     }
     spanNode = MakeRefPtr<SpanNode>(nodeId);
+    ACE_UINODE_TRACE(spanNode);
     ElementRegister::GetInstance()->AddUINode(spanNode);
     return spanNode;
 }
@@ -167,6 +168,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 RefPtr<SpanNode> SpanNode::CreateSpanNode(int32_t nodeId)
 {
     auto spanNode = MakeRefPtr<SpanNode>(nodeId);
+    ACE_UINODE_TRACE(spanNode);
     ElementRegister::GetInstance()->AddUINode(spanNode);
     return spanNode;
 }
@@ -178,6 +180,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t n
         return spanNode;
     }
     spanNode = MakeRefPtr<SpanNode>(tag, nodeId);
+    ACE_UINODE_TRACE(spanNode);
     ElementRegister::GetInstance()->AddUINode(spanNode);
     return spanNode;
 }
@@ -448,6 +451,7 @@ using Handler = std::function<void(int32_t, RefPtr<PropertyValueBase>)>;
 template<typename T>
 void ContainerSpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj)
 {
+    ACE_UINODE_TRACE(nodeId_);
     auto value = AceType::MakeRefPtr<PropertyValueBase>();
     if constexpr (std::is_same_v<T, std::string>) {
         value->SetValueType(ValueType::STRING);
@@ -539,6 +543,7 @@ void SpanNode::NotifyColorModeChange(uint32_t colorMode)
 void SpanItem::AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
     std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
 {
+    ACE_UINODE_TRACE(nodeId_);
     if (resourceMgr_ == nullptr) {
         resourceMgr_ = MakeRefPtr<PatternResourceManager>();
     }
@@ -649,6 +654,7 @@ void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
 template<typename T>
 void SpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj)
 {
+    ACE_UINODE_TRACE(nodeId_);
     auto value = AceType::MakeRefPtr<PropertyValueBase>();
     if constexpr (std::is_same_v<T, std::string>) {
         value->SetValueType(ValueType::STRING);
@@ -1173,6 +1179,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 
 RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
+    ACE_UINODE_TRACE(nodeId_);
     auto sameSpan = MakeRefPtr<SpanItem>();
     GetFontStyleSpanItem(sameSpan);
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
@@ -1344,6 +1351,14 @@ void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode, EllipsisMode);
     WRITE_TLV_INHERIT(textLineStyle, TextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN, TextVerticalAlign,
         ParagraphVerticalAlign);
+
+    if (textLineStyle->HasTextDirection()) {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION);
+        TLVUtil::WriteTextDirection(buff, textLineStyle->propTextDirection.value());
+    } else {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION);
+        TLVUtil::WriteTextDirection(buff, TextDirection::INHERIT);
+    }
 }
 
 RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
@@ -1404,6 +1419,8 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateEllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN,
                 TextVerticalAlign);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextDirection, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION,
+                TextDirection);
 
             case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
                 if (!sameSpan->backgroundStyle.has_value()) {
@@ -1444,6 +1461,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         sameSpan->textLineStyle->ResetTextVerticalAlign();
+    }
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        sameSpan->textLineStyle->ResetTextDirection();
     }
     return sameSpan;
 }
@@ -1926,5 +1946,6 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
     json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
+    json->Put("TextDirection", StringUtils::ToString(textStyle->GetTextDirection()).c_str());
 }
 } // namespace OHOS::Ace::NG

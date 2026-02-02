@@ -27,7 +27,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_font_manager.h"
 
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"

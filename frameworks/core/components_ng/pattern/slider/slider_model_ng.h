@@ -35,7 +35,7 @@ public:
 };
 using SliderMakeCallback =
     std::function<RefPtr<FrameNode>(const SliderConfiguration& sliderConfiguration)>;
-class ACE_EXPORT SliderModelNG : public SliderModel {
+class ACE_FORCE_EXPORT SliderModelNG : public SliderModel {
 public:
     void Create(float value, float step, float min, float max) override;
     void SetSliderMode(const SliderMode& value) override;
@@ -190,6 +190,7 @@ public:
 #ifdef SUPPORT_DIGITAL_CROWN
     static CrownSensitivity GetDigitalCrownSensitivity(FrameNode* frameNode);
 #endif
+    static void SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent);
 
 private:
     void SetSliderValue(float value);

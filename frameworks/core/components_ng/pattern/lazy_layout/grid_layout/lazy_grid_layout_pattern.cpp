@@ -27,6 +27,17 @@ RefPtr<LayoutAlgorithm> LazyGridLayoutPattern::CreateLayoutAlgorithm()
     return layoutAlgorithm;
 }
 
+FocusPattern LazyGridLayoutPattern::GetFocusPattern() const
+{
+    return { FocusType::SCOPE, true };
+}
+
+ScopeFocusAlgorithm LazyGridLayoutPattern::GetScopeFocusAlgorithm()
+{
+    return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true,
+        ScopeType::OTHERS);
+}
+
 bool LazyGridLayoutPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {

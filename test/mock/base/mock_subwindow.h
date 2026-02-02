@@ -118,6 +118,8 @@ public:
     MOCK_METHOD0(ResizeDialogSubwindow, void());
     MOCK_METHOD0(GetDisplayId, uint64_t());
     MOCK_METHOD1(IsSameDisplayWithParentWindow, bool(bool useInitializedId));
+    MOCK_METHOD0(GetDestroyInHide, bool());
+    MOCK_METHOD1(SetDestroyInHide, void(bool));
     MOCK_METHOD1(ShowSelectOverlay, bool(const RefPtr<NG::FrameNode>& overlayNode));
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<NG::UINode>(int32_t)>&& buildNodeFunc,

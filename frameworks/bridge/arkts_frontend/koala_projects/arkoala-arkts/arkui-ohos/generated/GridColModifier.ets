@@ -149,6 +149,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         {
             this._span_0_flag = AttributeUpdaterFlag.UPDATE
             this._span_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._span_0_flag = AttributeUpdaterFlag.SKIP
@@ -160,6 +161,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         {
             this._gridColOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._gridColOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._gridColOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -171,6 +173,7 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         {
             this._order_0_flag = AttributeUpdaterFlag.UPDATE
             this._order_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._order_0_flag = AttributeUpdaterFlag.SKIP

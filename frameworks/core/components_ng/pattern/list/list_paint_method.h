@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 struct DividerInfo {

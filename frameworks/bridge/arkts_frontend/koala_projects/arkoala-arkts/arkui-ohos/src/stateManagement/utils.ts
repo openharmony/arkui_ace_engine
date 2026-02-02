@@ -14,7 +14,7 @@
  */
 
 import { uiUtils } from './base/uiUtilsImpl';
-import { IMonitor, IMonitorDecoratedVariable, IMonitorPathInfo } from './decorator';
+import { IMonitor, IMonitorDecoratedVariable, IMonitorPathInfo, IVariableOwner } from './decorator';
 import { MonitorFunctionDecorator } from './decoratorImpl/decoratorMonitor';
 import { ExtendableComponent } from '../component/extendableComponent';
 import { BusinessError } from '@ohos.base';
@@ -80,19 +80,19 @@ export class UIUtils {
     }
 
     private static generatePathLambda(callbacks: (() => Any)[], paths?: string[]): IMonitorPathInfo[] {
-        return callbacks.map((callback: () => Any, index: number): IMonitorPathInfo => {
+        return callbacks.map((callback: () => Any, index: int): IMonitorPathInfo => {
             const currentPath: string = !paths || index >= paths.length
                 ? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`
-                : paths[Double.toInt(index)];
+                : paths[index];
 
             return UIUtils.createPathInfo(callback, currentPath);
         });
     }
 }
 
-interface MonitorOptions {
+export interface MonitorOptions {
     isSynchronous?: boolean;
-    owner?: ExtendableComponent;
+    owner?: IVariableOwner;
     path?: string | string[];
 }
 

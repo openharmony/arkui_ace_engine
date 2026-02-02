@@ -28,11 +28,7 @@
 namespace OHOS {
 namespace Ace {
 using EventHandler = OHOS::AppExecFwk::EventHandler;
-struct StatisticEvent {
-    std::string eventName;
-    std::vector<int32_t> eventCounts;
-    std::vector<std::string> bundleNames;
-};
+class StatisticEvent;
 
 class StatisticEventManager final {
     DECLARE_DELAYED_SINGLETON(StatisticEventManager)
@@ -43,22 +39,13 @@ public:
     void Init(std::shared_ptr<EventHandler>& handler);
 private:
     void InitTimedMap();
-    void InitReporter();
     void StartTimedEvent();
-    void ReportStatisticEvent(StatisticEvent& event);
-    void ReportCommonStatistiEvent(StatisticEvent& event);
-    void ReportDefaultTimedStatisticEvents();
-    void ReportCustomTimedStatisticEvents(int32_t interval);
-    void AggregateEvent(StatisticEvent& event,
-        const AppInfoParcel& newAppInfo, const StatisticEventInfoParcel& newEventInfo);
+    bool NeedReportEvent(const StatisticEvent& statisticEvent, int32_t interval) const;
 
     int32_t defaultReportInterval_ = 1;
     std::shared_ptr<EventHandler> handler_;
     std::set<int32_t> timedSet_;
     std::map<std::string, StatisticEvent> eventMap_;
-    std::map<std::string, int32_t> customEventReportInterval_;
-    using ReporterFunc = void (StatisticEventManager::*)(StatisticEvent& event);
-    std::map<std::string, ReporterFunc> customEventReportFunc_;
 };
 }  // namespace Ace
 }  // namespace OHOS

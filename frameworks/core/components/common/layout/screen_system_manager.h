@@ -56,7 +56,7 @@ inline bool IsValid(ScreenSizeType val)
 
 class ScreenSystemManager final {
 public:
-    static ScreenSystemManager& GetInstance();
+    ACE_FORCE_EXPORT static ScreenSystemManager& GetInstance();
 
     void SetWindowInfo(double screenWidth, double density, double dipScale)
     {
@@ -77,7 +77,7 @@ public:
 
     void OnSurfaceChanged(double width);
 
-    double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const;
+    ACE_FORCE_EXPORT double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const;
 
     double GetDipScale() const
     {
@@ -109,15 +109,9 @@ private:
 private:
     ScreenSystemManager() = default;
     ~ScreenSystemManager() = default;
-    static std::mutex lock;
+    ACE_FORCE_EXPORT static std::mutex lock;
     ACE_DISALLOW_COPY_AND_MOVE(ScreenSystemManager);
 };
-
-inline ScreenSystemManager& ScreenSystemManager::GetInstance()
-{
-    static ScreenSystemManager instance;
-    return instance;
-}
 
 template<typename T>
 class ArrayByScreenType final {

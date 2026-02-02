@@ -14,6 +14,7 @@
  */
 
 #include "core/components/navigation_bar/navigation_bar_element.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

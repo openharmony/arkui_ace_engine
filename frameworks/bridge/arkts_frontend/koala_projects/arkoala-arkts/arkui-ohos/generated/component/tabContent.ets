@@ -24,13 +24,13 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { VoidCallback, ResourceColor, Length, ResourceStr, Font, Padding, Dimension, LocalizedPadding, Font_serializer, Padding_serializer, LocalizedPadding_serializer } from "./units"
@@ -38,8 +38,10 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextOverflow, TextHeightAdaptivePolicy, VerticalAlign } from "./enums"
+import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { TabContentModifier } from "./../TabContentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
 export class TabBarSymbolInternal {
     public static fromPtr(ptr: KPointer): TabBarSymbol {
         return new TabBarSymbol(ptr)
@@ -140,15 +142,15 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._TabContentInterface_setTabContentOptions(this.peer.ptr)
     }
-    setTabBarAttribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
+    setTabBarAttribute(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof ComponentContent) {
+            if (valueTmpValue instanceof ComponentContentBase) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as ComponentContent
-                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as ComponentContentBase
+                ComponentContentBase_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof SubTabBarStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as SubTabBarStyle
@@ -221,6 +223,13 @@ export interface SubTabBarIndicatorStyle {
     borderRadius?: Length;
     marginTop?: Length;
 }
+export interface DrawableTabBarIndicator {
+    drawable?: DrawableDescriptor;
+    width?: Length;
+    height?: Length;
+    borderRadius?: Length;
+    marginTop?: Length;
+}
 export interface BoardStyle {
     borderRadius?: Length;
 }
@@ -246,7 +255,7 @@ export interface TabContentAttribute extends CommonMethod {
     setTabContentOptions(): this {
         throw new Error("Unimplemented method setTabContentOptions")
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         throw new Error("Unimplemented method tabBar")
     }
     onWillShow(value: VoidCallback | undefined): this {
@@ -260,14 +269,14 @@ export interface TabContentAttribute extends CommonMethod {
     }
 }
 export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
-    tabBar_value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
+    tabBar_value?: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
     onWillShow_value?: VoidCallback | undefined
     onWillHide_value?: VoidCallback | undefined
     attributeModifier_value?: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined
     setTabContentOptions(): this {
         return this
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         return this
     }
     onWillShow(value: VoidCallback | undefined): this {
@@ -296,9 +305,9 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    public tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         if (this.checkPriority("tabBar")) {
-            const value_casted = value as (ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
+            const value_casted = value as (ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
             this.getPeer()?.setTabBarAttribute(value_casted)
             return this
         }
@@ -335,21 +344,21 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     }
 }
 export class SubTabBarStyle {
-    _content?: ResourceStr | ResourceStr | ComponentContent | undefined
-    _indicator?: SubTabBarIndicatorStyle | undefined
+    _content?: ResourceStr | ResourceStr | ComponentContentBase | undefined
+    _indicator?: SubTabBarIndicatorStyle | DrawableTabBarIndicator | undefined
     _selectedMode?: SelectedMode | undefined
     _board?: BoardStyle | undefined
     _labelStyle?: TabBarLabelStyle | undefined
     _padding?: Padding | Dimension | LocalizedPadding | undefined
     _id?: string | undefined
-    constructor(content: ResourceStr | ResourceStr | ComponentContent) {
+    constructor(content: ResourceStr | ResourceStr | ComponentContentBase) {
         this._content = content
     }
-    static of(content: ResourceStr | ComponentContent): SubTabBarStyle {
+    static of(content: ResourceStr | ComponentContentBase): SubTabBarStyle {
         return new SubTabBarStyle(content)
     }
-    indicator(style: SubTabBarIndicatorStyle): this {
-        this._indicator = style
+    indicator(value: SubTabBarIndicatorStyle | DrawableTabBarIndicator): this {
+        this._indicator = value
         return this
     }
     selectedMode(value: SelectedMode): this {
@@ -646,6 +655,178 @@ export class BoardStyle_serializer {
         }
         const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
         let value : BoardStyle = ({borderRadius: borderRadiusTmpResult} as BoardStyle)
+        return value
+    }
+}
+export class DrawableTabBarIndicator_serializer {
+    public static write(buffer: SerializerBase, value: DrawableTabBarIndicator): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForDrawable  = value.drawable
+        if (valueHolderForDrawable !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDrawableTmpValue  = valueHolderForDrawable!
+            DrawableDescriptor_serializer.write(valueSerializer, valueHolderForDrawableTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForBorderRadius  = value.borderRadius
+        if (valueHolderForBorderRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
+            if (valueHolderForBorderRadiusTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
+                valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForBorderRadiusTmpValueForIdx1)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMarginTop  = value.marginTop
+        if (valueHolderForMarginTop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarginTopTmpValue  = valueHolderForMarginTop!
+            if (valueHolderForMarginTopTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForMarginTopTmpValueForIdx0  = valueHolderForMarginTopTmpValue as string
+                valueSerializer.writeString(valueHolderForMarginTopTmpValueForIdx0)
+            } else if (valueHolderForMarginTopTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForMarginTopTmpValueForIdx1  = valueHolderForMarginTopTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForMarginTopTmpValueForIdx1)
+            } else if (valueHolderForMarginTopTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForMarginTopTmpValueForIdx2  = valueHolderForMarginTopTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForMarginTopTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): DrawableTabBarIndicator {
+        let valueDeserializer : DeserializerBase = buffer
+        const drawableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let drawableTmpBuf : DrawableDescriptor | undefined = undefined
+        if ((drawableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            drawableTmpBuf = (DrawableDescriptor_serializer.read(valueDeserializer) as DrawableDescriptor)
+        }
+        const drawableTmpResult : DrawableDescriptor | undefined = drawableTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : Length | undefined = undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : string | double | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toByte()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toByte()) {
+                widthTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (widthTmpBuf_UnionSelector == (2).toByte()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
+        }
+        const widthTmpResult : Length | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : Length | undefined = undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : string | double | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toByte()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (heightTmpBuf_UnionSelector == (1).toByte()) {
+                heightTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (heightTmpBuf_UnionSelector == (2).toByte()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+            }
+            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
+        }
+        const heightTmpResult : Length | undefined = heightTmpBuf
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderRadiusTmpBuf : Length | undefined = undefined
+        if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderRadiusTmpBuf_ : string | double | Resource | undefined
+            if (borderRadiusTmpBuf_UnionSelector == (0).toByte()) {
+                borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (borderRadiusTmpBuf_UnionSelector == (1).toByte()) {
+                borderRadiusTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (borderRadiusTmpBuf_UnionSelector == (2).toByte()) {
+                borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
+            }
+            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | double | Resource)
+        }
+        const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
+        const marginTopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marginTopTmpBuf : Length | undefined = undefined
+        if ((marginTopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const marginTopTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let marginTopTmpBuf_ : string | double | Resource | undefined
+            if (marginTopTmpBuf_UnionSelector == (0).toByte()) {
+                marginTopTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (marginTopTmpBuf_UnionSelector == (1).toByte()) {
+                marginTopTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (marginTopTmpBuf_UnionSelector == (2).toByte()) {
+                marginTopTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for marginTopTmpBuf_ has to be chosen through deserialisation.")
+            }
+            marginTopTmpBuf = (marginTopTmpBuf_ as string | double | Resource)
+        }
+        const marginTopTmpResult : Length | undefined = marginTopTmpBuf
+        let value : DrawableTabBarIndicator = ({drawable: drawableTmpResult, width: widthTmpResult, height: heightTmpResult, borderRadius: borderRadiusTmpResult, marginTop: marginTopTmpResult} as DrawableTabBarIndicator)
         return value
     }
 }
@@ -1241,10 +1422,10 @@ export class SubTabBarStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_contentTmpValueForIdx1  = valueHolderFor_contentTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx1)
-            } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
+            } else if (valueHolderFor_contentTmpValue instanceof ComponentContentBase) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
-                ComponentContent_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
+                const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContentBase
+                ComponentContentBase_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1253,7 +1434,15 @@ export class SubTabBarStyle_serializer {
         if (valueHolderFor_indicator !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderFor_indicatorTmpValue  = valueHolderFor_indicator!
-            SubTabBarIndicatorStyle_serializer.write(valueSerializer, valueHolderFor_indicatorTmpValue)
+            if (valueHolderFor_indicatorTmpValue instanceof SubTabBarIndicatorStyle) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderFor_indicatorTmpValueForIdx0  = valueHolderFor_indicatorTmpValue as SubTabBarIndicatorStyle
+                SubTabBarIndicatorStyle_serializer.write(valueSerializer, valueHolderFor_indicatorTmpValueForIdx0)
+            } else if (valueHolderFor_indicatorTmpValue instanceof DrawableTabBarIndicator) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderFor_indicatorTmpValueForIdx1  = valueHolderFor_indicatorTmpValue as DrawableTabBarIndicator
+                DrawableTabBarIndicator_serializer.write(valueSerializer, valueHolderFor_indicatorTmpValueForIdx1)
+            }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

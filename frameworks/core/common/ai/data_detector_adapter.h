@@ -124,6 +124,7 @@ public:
         return taskId == taskId_;
     }
     bool IsAskCeliaSupported();
+    void ReportStatisticEvent(const RefPtr<NG::PipelineContext>& pipeline, TextDataDetectType type);
 
 private:
     friend class NG::TextPattern;

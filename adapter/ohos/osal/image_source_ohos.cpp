@@ -46,6 +46,29 @@ void InitDecodeOptions(
         options.desiredSize = { size.first, size.second };
     }
 }
+
+ImageRotateOrientation GetImageSourceRotateOrientation(std::string origin)
+{
+    if (origin == "Top-right") {
+        return ImageRotateOrientation::UP_MIRRORED;
+    } else if (origin == "Bottom-right") {
+        return ImageRotateOrientation::DOWN;
+    } else if (origin == "Bottom-left") {
+        return ImageRotateOrientation::DOWN_MIRRORED;
+    } else if (origin == "Left-top") {
+        return ImageRotateOrientation::LEFT_MIRRORED;
+    } else if (origin == "Right-top") {
+        return ImageRotateOrientation::RIGHT;
+    } else if (origin == "Right-bottom") {
+        return ImageRotateOrientation::RIGHT_MIRRORED;
+    } else if (origin == "Left-bottom") {
+        return ImageRotateOrientation::LEFT;
+    } else if (origin == "Top-left") {
+        return ImageRotateOrientation::UP;
+    } else {
+        return ImageRotateOrientation::UP;
+    }
+}
 } // namespace
 
 RefPtr<ImageSource> ImageSource::Create(int32_t fd)
@@ -112,7 +135,7 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
     std::string value;
     uint32_t res = imageSource_->GetImagePropertyString(0, key, value);
     if (res != Media::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get ImageSource property %{public}s failed, errorCode = %{public}u",
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Get ImageSource property %{public}s failed, errorCode = %{public}u",
             key.c_str(), res);
     }
     return value;
@@ -220,5 +243,11 @@ std::string ImageSourceOhos::GetEncodedFormat()
 bool ImageSourceOhos::IsHeifWithoutAlpha()
 {
     return imageSource_->IsHeifWithoutAlpha();
+}
+
+ImageRotateOrientation ImageSourceOhos::GetImageOrientation()
+{
+    auto origin = GetProperty("Orientation");
+    return GetImageSourceRotateOrientation(origin);
 }
 } // namespace OHOS::Ace

@@ -333,6 +333,7 @@ ArkUINativeModuleValue TextTimerBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     TextTimerModelNG::SetBuilderFunc(frameNode,
         [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
             TextTimerConfiguration config) -> RefPtr<FrameNode> {
+            LocalScope pandaScope(vm);
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
@@ -348,7 +349,6 @@ ArkUINativeModuleValue TextTimerBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             textTimer->SetNativePointerFieldCount(vm, 1);
             textTimer->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[2] = { context, textTimer };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

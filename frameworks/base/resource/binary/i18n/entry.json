@@ -2832,14 +2832,17 @@
     },
     "lo-LA":{
         "common":{
-            "ok":"​ຕົກລົງ",
-            "cancel":"ຍົກ​ເລີກ"
+            "cancel":"ຍົກເລີກ",
+            "ok":"ຕົກລົງ",
+            "more":"ເພີ່ມເຕີມ",
+            "prev":"ຜ່ານມາ",
+            "next":"ຕໍ່ໄປ"
         },
         "textoverlay":{
-            "paste":"ວາງ​ໃສ່",
-            "select_all":"​​ເລືອກ​ທັງ​ໝົດ",
+            "select_all":"ເລືອກທັງ​ໝົດ",
+            "copy":"ອັດສຳເນົາ",
             "cut":"ຕັດ​",
-            "copy":"​ອັດ​ສຳ​ເນົາ",
+            "paste":"ວາງໃສ່",
             "search":"ຊອກຫາ",
             "share":"ແຊຣ໌",
             "translate":"ແປ​ພາ​ສາ"
@@ -2847,15 +2850,28 @@
         "refresh":{
             "last_updated":"ອັບເດດຫຼ້າສຸດ: %s"
         },
-        "switch":{
-            "on":"ເປີດ",
-            "off":"ປິດ"
-        },
         "stepper":{
             "skip":"ຂ້າມໄປ",
             "next":"ຕໍ່ໄປ",
             "start":"ເລີ່ມຕົ້ນ",
             "back":"ກັບ​ຄືນ"
+        },
+        "navigation":{
+            "back":"ກັບ​ຄືນ"
+        },
+        "sheet":{
+            "close":"ປິດ"
+        },
+        "switch":{
+            "off":"ປິດ",
+            "on":"ເປີດ"
+        },
+        "datepicker":{
+            "lunarSwitch":"ສະ​ແດງປະ​ຕິ​ທິນ​ດວງ​ຈັນ"
+        },
+        "window":{
+            "leftSide":"ສະ​ແດງ​ຢູ່​ຂ້າງ​ຊ້າຍ",
+            "rightSide":"ສະ​ແດງ​ຢູ່​ຂ້າງ​ຂວາ"
         }
     },
     "zz-ZX":{
@@ -2935,50 +2951,6 @@
         },
         "datepicker":{
             "lunarSwitch":"Prikaži lunarni kalendar"
-        }
-    },
-    "null":{
-        "common":{
-            "cancel":"ຍົກເລີກ",
-            "ok":"ຕົກລົງ",
-            "more":"ເພີ່ມເຕີມ",
-            "prev":"ຜ່ານມາ",
-            "next":"ຕໍ່ໄປ"
-        },
-        "textoverlay":{
-            "select_all":"ເລືອກທັງ​ໝົດ",
-            "copy":"ອັດສຳເນົາ",
-            "cut":"ຕັດ​",
-            "paste":"ວາງໃສ່",
-            "search":"ຊອກຫາ",
-            "share":"ແຊຣ໌",
-            "translate":"ແປ​ພາ​ສາ"
-        },
-        "refresh":{
-            "last_updated":"ອັບເດດຫຼ້າສຸດ: %s"
-        },
-        "stepper":{
-            "skip":"ຂ້າມໄປ",
-            "next":"ຕໍ່ໄປ",
-            "start":"ເລີ່ມຕົ້ນ",
-            "back":"ກັບ​ຄືນ"
-        },
-        "navigation":{
-            "back":"ກັບ​ຄືນ"
-        },
-        "sheet":{
-            "close":"ປິດ"
-        },
-        "switch":{
-            "off":"ປິດ",
-            "on":"ເປີດ"
-        },
-        "datepicker":{
-            "lunarSwitch":"ສະ​ແດງປະ​ຕິ​ທິນ​ດວງ​ຈັນ"
-        },
-        "window":{
-            "leftSide":"ສະ​ແດງ​ຢູ່​ຂ້າງ​ຊ້າຍ",
-            "rightSide":"ສະ​ແດງ​ຢູ່​ຂ້າງ​ຂວາ"
         }
     }
 }

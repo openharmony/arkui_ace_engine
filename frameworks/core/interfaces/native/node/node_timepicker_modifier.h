@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,15 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H
 
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier();
 const CJUITimepickerModifier* GetCJUITimepickerModifier();
+const NG::TimePickerUtil::TimepickerCustomModifier* GetTimepickerCustomModifier();
 void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam);
-}
+} // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H

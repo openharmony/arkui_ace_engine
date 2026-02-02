@@ -46,7 +46,16 @@ using MediaQueryCallback = std::function<void(const std::string& callbackId, con
 using LayoutInspectorCallback = std::function<void(const std::string& componedId)>;
 using DrawInspectorCallback = std::function<void(const std::string& componedId)>;
 using DrawChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
+using LayoutChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
 using IsDrawChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
+using IsLayoutChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
+ 
+using LayoutInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using DrawInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using DrawChildrenInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using LayoutChildrenInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using IsDrawChildrenCallbackFuncExistUniqueIdCallback = std::function<bool(int32_t uniqueId)>;
+using IsLayoutChildrenCallbackFuncExistUniqueIdCallback = std::function<bool(int32_t uniqueId)>;
 using DestroyPageCallback = std::function<void(int32_t pageId)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
 using UpdateApplicationStateCallback = std::function<void(const std::string& packageName, Frontend::State state)>;
@@ -67,6 +76,7 @@ using OnRemoteTerminatedCallBack = std::function<void(void)>;
 using OnSaveDataCallBack = std::function<void(std::string& data)>;
 using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
 using CallNativeHandlerCallback = std::function<void(const std::string& event, const std::string& params)>;
+using OnDigitalCrownCallback = std::function<bool(const std::string& callbackId, const std::string& args)>;
 
 struct PageInfo {
     int32_t pageId = -1;
@@ -105,6 +115,7 @@ struct FrontendDelegateImplBuilder {
     OnInactiveCallBack onInactiveCallBack;
     OnMemoryLevelCallBack onMemoryLevelCallBack;
     CallNativeHandlerCallback callNativeHandler;
+    OnDigitalCrownCallback onCrownEventCallback;
     void* ability;
 };
 
@@ -321,6 +332,10 @@ public:
 
     void CancelAnimationFrame(const std::string& callbackId) override;
 
+    void SetMonitorForCrownEvents(const std::string& callbackId) override;
+
+    void ClearMonitorForCrownEvents() override;
+
     SingleTaskExecutor GetAnimationJsTask() override;
 
     SingleTaskExecutor GetUiTask() override;
@@ -460,6 +475,7 @@ private:
 
     RefPtr<TaskExecutor> taskExecutor_;
     CallNativeHandlerCallback callNativeHandler_;
+    OnDigitalCrownCallback onCrownEventCallback_;
 
     PipelineContextHolder pipelineContextHolder_;
 

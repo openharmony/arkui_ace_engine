@@ -21,8 +21,9 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> PatternLockModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+        PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
     CHECK_NULL_RETURN(frameNode, frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     pattern->SetPatternLockController(AceType::MakeRefPtr<V2::PatternLockController>());
     return frameNode;

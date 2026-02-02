@@ -186,6 +186,7 @@ public:
         INCREMENTAL_CANVAS,
         HARDWARE_SURFACE,
         COMPOSITE_COMPONENT,
+        UNION,
 #ifdef RENDER_EXTRACT_SUPPORTED
         HARDWARE_TEXTURE,
 #endif
@@ -206,9 +207,10 @@ public:
         bool isSkipCheckInMultiInstance = false;
     };
 
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, FrameNode* host = nullptr) {}
 
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode,
+        FrameNode* host = nullptr) {}
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -557,6 +559,7 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) {}
     virtual void OnExcludeFromRenderGroupUpdate(bool exclude) {}
     virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
@@ -734,6 +737,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
 
+    // useUnionEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnionEffect, bool);
+
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
 
@@ -861,6 +867,11 @@ public:
 
     virtual void UpdateOverlayText() {}
 
+    void SetIsFree(bool isFree)
+    {
+        isFree_ = isFree;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -870,6 +881,7 @@ protected:
     bool isNeedRebuildRSTree_ = true;
     bool handleChildBounds_ = false;
     bool isNeedAnimate_ = true;
+    bool isFree_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -957,6 +969,7 @@ protected:
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
+    virtual void OnUseUnionEffectUpdate(bool useUnion) {}
     virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
@@ -965,6 +978,7 @@ protected:
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;
+    void ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     friend class ViewAbstract;
     friend class ViewAbstractModelStatic;
     std::function<void(bool)> requestFrame_;

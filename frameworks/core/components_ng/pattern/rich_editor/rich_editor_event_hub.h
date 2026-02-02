@@ -142,6 +142,10 @@ public:
     ImageFit GetObjectFit() const;
     void SetUrlAddress(const std::u16string& urlAddress);
     const std::u16string& GetUrlAddress() const;
+    void SetStrokeWidth(double strokeWidth);
+    double GetStrokeWidth() const;
+    void SetStrokeColor(const std::string& strokeColor);
+    const std::string& GetStrokeColor() const;
     void SetBorderRadius(const std::string& borderRadius)
     {
         borderRadius_ = borderRadius;
@@ -183,6 +187,8 @@ private:
     std::u16string previewText_;
     std::u16string urlAddress_;
     std::string fontColor_;
+    std::string strokeColor_;
+    double strokeWidth_ = 0.0;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
     OHOS::Ace::FontStyle fontStyle_;

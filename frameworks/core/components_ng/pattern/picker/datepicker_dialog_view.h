@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/picker/picker_base_component.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
@@ -29,9 +29,8 @@
 
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
-class CheckBoxPaintProperty;
 class DatePickerPattern;
-class ACE_EXPORT DatePickerDialogView {
+class DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -68,6 +67,8 @@ public:
     static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
         const PickerTextProperties& properties, bool useMilitaryTime);
     static RefPtr<FrameNode> CreateLunarSwitchTextNode();
+    static const Dimension ConvertFontScaleValue(
+        const Dimension& fontSizeValue, const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
 
     static bool switchFlag_;
 
@@ -75,8 +76,8 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    static void UpdateCheckboxPaintProperty(const RefPtr<CheckBoxPaintProperty>& checkboxPaintProps,
-    bool isLunar, const CheckboxSettingData& checkboxSettingData);
+    static void UpdateCheckboxPaintProperty(
+        FrameNode* frameNode, bool isLunar, const CheckboxSettingData& checkboxSettingData);
     static void CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn, const RefPtr<FrameNode>& dateNode,
         std::function<void(const bool)>&& changeEvent, bool isLunar, const CheckboxSettingData& checkboxSettingData);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
@@ -134,7 +135,7 @@ private:
     static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
         const RefPtr<FrameNode>& buttonNode, bool isConfirm);
     static RefPtr<FrameNode> CreateNextPrevButtonNode(
-        std::function<void()> & switchEvent,
+        std::function<void()>& switchEvent,
         const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo> &buttonInfos,
         const RefPtr<FrameNode>& contentRow);
     static void BuildDialogAcceptAndCancelButtonForAging(
@@ -166,8 +167,6 @@ private:
         const RefPtr<FrameNode>& dialogNode);
     static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
         const Dimension& fontSizeLimit, bool isUserSetFont = false);
-    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
-        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
     static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();

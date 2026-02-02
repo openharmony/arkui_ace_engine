@@ -422,7 +422,7 @@ void ListItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     if (IsInHotZone(index, frameRect) && parent->GetDragPreviewOption().enableEdgeAutoScroll) {
-        pattern->HandleMoveEventInComp(point);
+        pattern->HandleMoveEventInComp(point, true);
         if (!scrolling_) {
             pattern->SetHotZoneScrollCallback([weak = WeakClaim(this)]() {
                 auto manager = weak.Upgrade();
@@ -672,11 +672,13 @@ void ListItemDragManager::HandleOnItemDragCancel()
         scrolling_ = false;
     }
     HandleDragEndAnimation();
-    int32_t to = GetIndex();
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
-    forEach->FireOnMove(fromIndex_, to);
-    forEach->FireOnDrop(to);
+    if (dragState_ == ListItemDragState::DRAGGING) {
+        int32_t to = GetIndex();
+        auto forEach = forEachNode_.Upgrade();
+        CHECK_NULL_VOID(forEach);
+        forEach->FireOnMove(fromIndex_, to);
+        forEach->FireOnDrop(to);
+    }
     dragState_ = ListItemDragState::IDLE;
     if (isDragAnimationStopped_) {
         SetIsNeedDividerAnimation(true);

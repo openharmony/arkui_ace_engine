@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #endif
 #include <mutex>
+#include <sstream>
 
 #ifdef ACE_INSTANCE_LOG
 #include "core/common/container_scope.h"
@@ -179,5 +180,46 @@ bool LogBacktrace(size_t maxFrameNums)
     LOGI("Backtrace: skipFrameNum=%{public}zu maxFrameNums=%{public}zu\n%{public}s",
         skipFrameNum, maxFrameNums, pfnGetTrace(skipFrameNum, maxFrameNums));
     return true;
+}
+
+static uintptr_t SetCrashObj(const char* msg)
+{
+    static uintptr_t (*pfnSetCrashObj)(uint8_t, uintptr_t);
+#ifdef _GNU_SOURCE
+    if (!pfnSetCrashObj) {
+        pfnSetCrashObj = (decltype(pfnSetCrashObj))dlsym(RTLD_DEFAULT, "DFX_SetCrashObj");
+    }
+#endif
+    if (!pfnSetCrashObj) {
+        return 0;
+    }
+    return pfnSetCrashObj(0, reinterpret_cast<uintptr_t>(msg));
+}
+
+static void ResetCrashObj(uintptr_t crashObj)
+{
+    static void (*pfnResetCrashObj)(uintptr_t);
+#ifdef _GNU_SOURCE
+    if (!pfnResetCrashObj) {
+        pfnResetCrashObj = (decltype(pfnResetCrashObj))dlsym(RTLD_DEFAULT, "DFX_ResetCrashObj");
+    }
+#endif
+    if (!pfnResetCrashObj) {
+        return;
+    }
+    pfnResetCrashObj(crashObj);
+}
+
+CallbackLogger::CallbackLogger(const std::string& funcName, uintptr_t callback)
+{
+    std::ostringstream oss;
+    oss << "[" << funcName << "] crash occured on callback: " << std::showbase << std::hex << callback;
+    msg_ = oss.str();
+    lastObjAddr_ = SetCrashObj(msg_.c_str());
+}
+
+CallbackLogger::~CallbackLogger()
+{
+    ResetCrashObj(lastObjAddr_);
 }
 } // namespace OHOS::Ace

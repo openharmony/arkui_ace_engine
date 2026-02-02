@@ -99,58 +99,58 @@ const std::string EXPECTED_TRUE("true");
 const std::string EXPECTED_FALSE("false");
 
 namespace Fixtures {
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberInitialValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberInitialValuesSlider = {
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "100", Converter::ArkValue<Ark_Float64>(100.), "100.000000" },
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberValueValidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "2.2", Converter::ArkValue<Ark_Number>(2.2), "2.200000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberValueValidValuesSlider = {
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "2.2", Converter::ArkValue<Ark_Float64>(2.2), "2.200000" },
+    { "99", Converter::ArkValue<Ark_Float64>(99.), "99.000000" },
+    { "100", Converter::ArkValue<Ark_Float64>(100.), "100.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberValueInvalidValuesSlider = {
-    { "-100", Converter::ArkValue<Ark_Number>(-100), ATTRIBUTE_MIN_DEFAULT_VALUE },
-    { "200", Converter::ArkValue<Ark_Number>(200), ATTRIBUTE_MAX_DEFAULT_VALUE },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberValueInvalidValuesSlider = {
+    { "-100", Converter::ArkValue<Ark_Float64>(-100.), ATTRIBUTE_MIN_DEFAULT_VALUE },
+    { "200", Converter::ArkValue<Ark_Float64>(200.), ATTRIBUTE_MAX_DEFAULT_VALUE },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMinValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "2.2", Converter::ArkValue<Ark_Number>(2.2), "2.200000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "-100", Converter::ArkValue<Ark_Number>(-100), "-100.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberMinValidValuesSlider = {
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
+    { "2.2", Converter::ArkValue<Ark_Float64>(2.2), "2.200000" },
+    { "99", Converter::ArkValue<Ark_Float64>(99.), "99.000000" },
+    { "-100", Converter::ArkValue<Ark_Float64>(-100.), "-100.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMinInvalidValuesSlider = {
-    { "100", Converter::ArkValue<Ark_Number>(100), ATTRIBUTE_MIN_DEFAULT_VALUE },
-    { "200", Converter::ArkValue<Ark_Number>(200), ATTRIBUTE_MIN_DEFAULT_VALUE },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberMinInvalidValuesSlider = {
+    { "100", Converter::ArkValue<Ark_Float64>(100.), ATTRIBUTE_MIN_DEFAULT_VALUE },
+    { "200", Converter::ArkValue<Ark_Float64>(200.), ATTRIBUTE_MIN_DEFAULT_VALUE },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMaxValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "2.2", Converter::ArkValue<Ark_Number>(2.2), "2.200000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "200", Converter::ArkValue<Ark_Number>(200), "200.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberMaxValidValuesSlider = {
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
+    { "2.2", Converter::ArkValue<Ark_Float64>(2.2), "2.200000" },
+    { "99", Converter::ArkValue<Ark_Float64>(99.), "99.000000" },
+    { "200", Converter::ArkValue<Ark_Float64>(200.), "200.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberMaxInvalidValuesSlider = {
-    { "-100", Converter::ArkValue<Ark_Number>(-100), ATTRIBUTE_MIN_DEFAULT_VALUE },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberMaxInvalidValuesSlider = {
+    { "-100", Converter::ArkValue<Ark_Float64>(-100.), ATTRIBUTE_MIN_DEFAULT_VALUE },
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberStepValidValuesSlider = {
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "0.5", Converter::ArkValue<Ark_Number>(0.5), "0.500000" },
-    { "10", Converter::ArkValue<Ark_Number>(10), "10.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberStepValidValuesSlider = {
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
+    { "0.5", Converter::ArkValue<Ark_Float64>(0.5), "0.500000" },
+    { "10", Converter::ArkValue<Ark_Float64>(10.), "10.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberStepInvalidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), ATTRIBUTE_STEP_DEFAULT_VALUE },
-    { "-1", Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_STEP_DEFAULT_VALUE },
-    { "200", Converter::ArkValue<Ark_Number>(200), ATTRIBUTE_STEP_DEFAULT_VALUE },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberStepInvalidValuesSlider = {
+    { "0", Converter::ArkValue<Ark_Float64>(0.), ATTRIBUTE_STEP_DEFAULT_VALUE },
+    { "-1", Converter::ArkValue<Ark_Float64>(-1.), ATTRIBUTE_STEP_DEFAULT_VALUE },
+    { "200", Converter::ArkValue<Ark_Float64>(200.), ATTRIBUTE_STEP_DEFAULT_VALUE },
 };
 
 std::vector<std::tuple<std::string, Ark_SliderStyle,
@@ -203,34 +203,34 @@ std::vector<std::tuple<std::string, Ark_SliderBlockType,
     { "ARK_SLIDER_BLOCK_TYPE_SHAPE", ARK_SLIDER_BLOCK_TYPE_SHAPE, "BlockStyleType.SHAPE" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberResponsiveDistanceValidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberResponsiveDistanceValidValuesSlider = {
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
+    { "99", Converter::ArkValue<Ark_Float64>(99.), "99.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeFromValidValuesSlider = {
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberRangeFromValidValuesSlider = {
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
+    { "99", Converter::ArkValue<Ark_Float64>(99.), "99.000000" },
+    { "100", Converter::ArkValue<Ark_Float64>(100.), "100.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeFromInvalidValuesSlider = {
-    { "-1", Converter::ArkValue<Ark_Number>(-1), "-1.000000" },
-    { "200", Converter::ArkValue<Ark_Number>(200), "200.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberRangeFromInvalidValuesSlider = {
+    { "-1", Converter::ArkValue<Ark_Float64>(-1.), "-1.000000" },
+    { "200", Converter::ArkValue<Ark_Float64>(200.), "200.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeToValidValuesSlider = {
-    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
-    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
-    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
-    { "99", Converter::ArkValue<Ark_Number>(99), "99.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberRangeToValidValuesSlider = {
+    { "100", Converter::ArkValue<Ark_Float64>(100.), "100.000000" },
+    { "0", Converter::ArkValue<Ark_Float64>(0.), "0.000000" },
+    { "1", Converter::ArkValue<Ark_Float64>(1.), "1.000000" },
+    { "99", Converter::ArkValue<Ark_Float64>(99.), "99.000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberRangeToInvalidValuesSlider = {
-    { "-1", Converter::ArkValue<Ark_Number>(-1), "-1.000000" },
-    { "200", Converter::ArkValue<Ark_Number>(200), "200.000000" },
+std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureNumberRangeToInvalidValuesSlider = {
+    { "-1", Converter::ArkValue<Ark_Float64>(-1.), "-1.000000" },
+    { "200", Converter::ArkValue<Ark_Float64>(200.), "200.000000" },
 };
 
 } // Fixtures

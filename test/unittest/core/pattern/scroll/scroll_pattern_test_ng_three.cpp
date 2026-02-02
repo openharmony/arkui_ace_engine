@@ -797,4 +797,84 @@ HWTEST_F(ScrollPatternThreeTestNg, SnapWithContentOffsetUpdate, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, 0);
     EXPECT_EQ(pattern_->GetTotalOffset(), -CONTENT_END_OFFSET);
 }
+
+/**
+ * @tc.name: GetScrollSnap001
+ * @tc.desc: Test Snap with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, GetScrollSnap001, TestSize.Level1)
+{
+    Dimension intervalSize(50.0);
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, true);
+
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    ScrollSnapOptions snapOptions = model.GetScrollSnap(frameNode.GetRawPtr());
+
+    EXPECT_TRUE(pattern_->IsSnapToInterval());
+    EXPECT_EQ(snapOptions.snapAlign, 1);
+    EXPECT_EQ(snapOptions.enableSnapToStart, 1);
+    EXPECT_EQ(snapOptions.enableSnapToEnd, 1);
+    EXPECT_EQ(snapOptions.paginationParams[0].ToString(), intervalSize.ToString());
+}
+
+/**
+* @tc.name: GetScrollSnap002
+* @tc.desc: Test Snap with contentOffset
+* @tc.type: FUNC
+*/
+HWTEST_F(ScrollPatternThreeTestNg, GetScrollSnap002, TestSize.Level1)
+{
+    Dimension intervalSize(0);
+    std::vector<Dimension> snapPaginations = { Dimension(100.0), Dimension(200.0) };
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, true);
+
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+
+    auto frameNode = pattern_->GetHost();
+    ASSERT_NE(frameNode, nullptr);
+    ScrollSnapOptions snapOptions = model.GetScrollSnap(frameNode.GetRawPtr());
+
+    EXPECT_FALSE(pattern_->IsSnapToInterval());
+    EXPECT_EQ(snapOptions.snapAlign, 1);
+    EXPECT_EQ(snapOptions.enableSnapToStart, 1);
+    EXPECT_EQ(snapOptions.enableSnapToEnd, 1);
+    EXPECT_EQ(snapOptions.paginationParams[0].ToString(), snapPaginations[0].ToString());
+    EXPECT_EQ(snapOptions.paginationParams[1].ToString(), snapPaginations[1].ToString());
+}
+
+/**
+ * @tc.name: CalcPredictSnapOffsetWithContentOffset
+ * @tc.desc: Test Snap with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetWithContentOffset, TestSize.Level1)
+{
+    Dimension intervalSize(100.0);
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, true);
+
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+    auto offset = pattern_->CalcPredictSnapOffset(0, 0, 0, SnapDirection::NONE);
+    EXPECT_EQ(offset, 0);
+}
 } // namespace OHOS::Ace::NG

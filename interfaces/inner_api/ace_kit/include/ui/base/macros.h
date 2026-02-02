@@ -65,4 +65,8 @@
 #define ACE_LIKELY(x) __builtin_expect(!!(x), 1)
 #define ACE_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
+#define ACE_CONCAT_IMPL(a, b) a##b
+#define ACE_CONCAT(a, b) ACE_CONCAT_IMPL(a, b)
+#define ACE_UNIQUE_VAR ACE_CONCAT(_, __COUNTER__)
+
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MACROS_H

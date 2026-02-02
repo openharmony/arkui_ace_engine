@@ -116,6 +116,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         {
             this._guideLine_0_flag = AttributeUpdaterFlag.UPDATE
             this._guideLine_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._guideLine_0_flag = AttributeUpdaterFlag.SKIP
@@ -127,6 +128,7 @@ export class RelativeContainerModifier extends CommonMethodModifier implements R
         {
             this._barrier_0_flag = AttributeUpdaterFlag.UPDATE
             this._barrier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barrier_0_flag = AttributeUpdaterFlag.SKIP

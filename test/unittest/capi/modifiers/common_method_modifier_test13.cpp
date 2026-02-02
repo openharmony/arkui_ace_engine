@@ -466,9 +466,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     // valid value
-    auto arkRadius = Converter::ArkValue<Ark_Float64>(1.0f);
-    Ark_Union_F64_Resource arkUnionRadius;
-    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionRadius) = arkRadius;
+    auto arkUnionRadius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0f);
 
     Ark_ShadowOptions arkShadowOptions = { .radius = arkUnionRadius };
 
@@ -499,8 +497,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
     EXPECT_EQ(checkValue, "1.000000");
 
     // negative value
-    arkRadius = Converter::ArkValue<Ark_Float64>(-1.0f);
-    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionRadius) = arkRadius;
+    arkUnionRadius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0f);
 
     arkShadowOptions = { .radius = arkUnionRadius };
     TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
@@ -533,8 +530,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    Ark_Union_F64_Resource arkUnionRadius;
-    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionRadius) = TEST_FLOAT_RESOURCE;
+    auto arkUnionRadius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE);
 
     Ark_ShadowOptions arkShadowOptions = {
         .radius = arkUnionRadius

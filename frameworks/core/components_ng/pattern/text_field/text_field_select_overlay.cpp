@@ -36,6 +36,22 @@ namespace {
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
 constexpr uint32_t REQUEST_AFTER_LAYOUT = 1 << 2;
+
+void RunAsyncTask(const RefPtr<TextFieldSelectOverlay>& overlay, const std::string& name, bool isUITask,
+    const TaskExecutor::Task& task)
+{
+    CHECK_NULL_VOID(overlay);
+    CHECK_NULL_VOID(task);
+    auto pattern = overlay->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(task, isUITask ? TaskExecutor::TaskType::UI : TaskExecutor::TaskType::PLATFORM, name);
+}
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -57,6 +73,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableHandleLevel(true);
     SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
+    needRefreshPasteButton_ = false;
     return true;
 }
 
@@ -110,6 +127,7 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 
 void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    needRefreshPasteButton_ = false;
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
@@ -307,7 +325,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     if (IsUsingMouse()) {
         menuInfo.menuIsShow = !isHideSelectionMenu || manager->IsOpen();
     } else {
-        menuInfo.menuIsShow = (hasText || IsShowPaste() || menuInfo.showCameraInput) &&
+        menuInfo.menuIsShow = (hasText || IsShowPaste() || menuInfo.showCameraInput || pattern->IsShowAutoFill()) &&
             !isHideSelectionMenu && IsShowMenu();
     }
     menuInfo.menuDisable = isHideSelectionMenu;
@@ -339,7 +357,17 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     CHECK_NULL_VOID(textFieldPattern);
     auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    overlayInfo.handlerColor = paintProperty->GetCursorColor();
+    if (paintProperty->GetCursorColor().has_value()) {
+        overlayInfo.handlerColor = paintProperty->GetCursorColor();
+    } else {
+        auto pipeline = textFieldPattern->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        overlayInfo.handlerColor = textFieldTheme->GetCursorColor();
+    }
     OnUpdateOnCreateMenuCallback(overlayInfo);
     auto layoutProperty =
         DynamicCast<TextFieldLayoutProperty>(textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>());
@@ -847,6 +875,7 @@ void TextFieldSelectOverlay::UpdateAISelectMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+    manager->FocusFirstFocusableChildInMenu();
 }
 
 void TextFieldSelectOverlay::OnHandleMarkInfoChange(
@@ -861,5 +890,38 @@ void TextFieldSelectOverlay::OnHandleMarkInfoChange(
         info->menuInfo.showAIWrite = textFieldPattern->IsShowAIWrite();
         manager->NotifyUpdateToolBar(true);
     }
+    if ((flag & DIRTY_PASTE_MENU) == DIRTY_PASTE_MENU) {
+        info->menuInfo.showPaste = IsShowPaste();
+        manager->NotifyUpdateToolBar(true);
+    }
+}
+
+void TextFieldSelectOverlay::RefreshPasteButton()
+{
+    CheckHasPasteData([weak = WeakClaim(this)](bool hasData, bool isAutoFill) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->SetShowPaste(hasData);
+        auto manager = overlay->GetManager<SelectContentOverlayManager>();
+        CHECK_NULL_VOID(manager);
+        manager->MarkInfoChange(DIRTY_PASTE_MENU);
+        manager->ShowOptionMenu();
+    });
+}
+
+bool TextFieldSelectOverlay::OnHandleBeforeMenuVisibiltyChanged(bool isVisible)
+{
+    if (isVisible && needRefreshPasteButton_) {
+        needRefreshPasteButton_ = false;
+        RunAsyncTask(Claim(this), "SyncClipboardDataTask", false, [weak = WeakClaim(this)]() {
+            RunAsyncTask(weak.Upgrade(), "RefreshPasteTask", true, [weak]() {
+                auto overlay = weak.Upgrade();
+                CHECK_NULL_VOID(overlay);
+                overlay->RefreshPasteButton();
+            });
+        });
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

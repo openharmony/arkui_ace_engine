@@ -26,6 +26,7 @@
 
 
 namespace OHOS::Ace::NG {
+constexpr const char* GAUGE_ETS_TAG = "Gauge";
 constexpr int32_t ANIMATION_DURATION = 1200;        // The circle animation duration is 1200ms
 constexpr int32_t ANIMATION_DELAY = 0;              // The circle animation delay is 0ms
 constexpr int32_t ANIMATION_TIMES = 1;              // The circle animation repeat times is 1

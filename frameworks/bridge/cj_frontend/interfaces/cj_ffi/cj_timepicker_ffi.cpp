@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,14 @@
 
 #include "cj_lambda.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -31,7 +34,19 @@ namespace {
 constexpr char TIMEPICKER_OPTIONS_NUMERIC_VAL[] = "numeric";
 constexpr char TIMEPICKER_OPTIONS_TWO_DIGIT_VAL[] = "2-digit";
 
-FFiTimePickerResult TimePickerChangeEventToFfi(const DatePickerChangeEvent& eventInfo)
+NG::TimePickerModelNG* GetTimePickerModel()
+{
+    // Dynamically load the independently compiled so library
+    // from frameworks/core/components_ng/pattern/time_picker directory
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TimePicker");
+    if (module == nullptr) {
+        LOGF("Can't find TimePicker dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::TimePickerModelNG*>(module->GetModel());
+}
+
+FFiTimePickerResult TimePickerChangeEventToFfi(const OHOS::Ace::NG::DatePickerChangeEvent& eventInfo)
 {
     FFiTimePickerResult result;
     auto infoStr = eventInfo.GetSelectedStr();
@@ -319,11 +334,11 @@ void IsUserDefinedFontFamily(const std::string& pos)
     } else if (pos == "selectedTextStyle") {
         DatePickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
     } else if (pos == "disappearTextStyleTime") {
-        TimePickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+        GetTimePickerModel()->HasUserDefinedDisappearFontFamily(true);
     } else if (pos == "textStyleTime") {
-        TimePickerModel::GetInstance()->HasUserDefinedNormalFontFamily(true);
+        GetTimePickerModel()->HasUserDefinedNormalFontFamily(true);
     } else if (pos == "selectedTextStyleTime") {
-        TimePickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+        GetTimePickerModel()->HasUserDefinedSelectedFontFamily(true);
     }
 }
 
@@ -470,19 +485,19 @@ void FfiOHOSAceFrameworkTimePickerSetDefaultAttributes(void)
     textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    GetTimePickerModel()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
     textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    GetTimePickerModel()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
     textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    GetTimePickerModel()->SetNormalTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTimePickerCreate(FfiTime selected, int32_t format)
@@ -494,14 +509,14 @@ void FfiOHOSAceFrameworkTimePickerCreate(FfiTime selected, int32_t format)
 
     bool showSecond = (format == static_cast<int32_t>(TimePickerFormat::HOUR_MINUTE_SECOND));
 
-    TimePickerModel::GetInstance()->CreateTimePicker(theme, showSecond);
-    TimePickerModel::GetInstance()->SetSelectedTime(selectedTime);
+    GetTimePickerModel()->CreateTimePicker(theme, showSecond);
+    GetTimePickerModel()->SetSelectedTime(selectedTime);
     FfiOHOSAceFrameworkTimePickerSetDefaultAttributes();
 }
 
 void FfiOHOSAceFrameworkTimePickerSetUseMilitaryTime(bool value)
 {
-    TimePickerModel::GetInstance()->SetHour24(value);
+    GetTimePickerModel()->SetHour24(value);
 }
 
 void FfiOHOSAceFrameworkTimePickerSetDisappearTextStyle(NativePickerTextStyle value)
@@ -521,7 +536,7 @@ void FfiOHOSAceFrameworkTimePickerSetDisappearTextStyle(NativePickerTextStyle va
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(value.style);
 
-    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    GetTimePickerModel()->SetDisappearTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTimePickerSetTextStyle(NativePickerTextStyle value)
@@ -541,7 +556,7 @@ void FfiOHOSAceFrameworkTimePickerSetTextStyle(NativePickerTextStyle value)
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(value.style);
 
-    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    GetTimePickerModel()->SetNormalTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTimePickerSetSelectedTextStyle(NativePickerTextStyle value)
@@ -561,17 +576,17 @@ void FfiOHOSAceFrameworkTimePickerSetSelectedTextStyle(NativePickerTextStyle val
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(value.style);
 
-    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    GetTimePickerModel()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTimePickerSetLoop(bool value)
 {
-    TimePickerModel::GetInstance()->SetWheelModeEnabled(value);
+    GetTimePickerModel()->SetWheelModeEnabled(value);
 }
 
 void FfiOHOSAceFrameworkTimePickerSetEnableHapticFeedback(bool enable)
 {
-    TimePickerModel::GetInstance()->SetIsEnableHapticFeedback(enable);
+    GetTimePickerModel()->SetIsEnableHapticFeedback(enable);
 }
 
 void FfiOHOSAceFrameworkTimePickerDateTimeOptions(const char* hourType, const char* minuteType, const char* secondType)
@@ -593,13 +608,13 @@ void FfiOHOSAceFrameworkTimePickerDateTimeOptions(const char* hourType, const ch
     ZeroPrefixType minutePrefixType = convertToZeroPrefixType(minuteType);
     ZeroPrefixType secondPrefixType = convertToZeroPrefixType(secondType);
 
-    TimePickerModel::GetInstance()->SetDateTimeOptions(hourPrefixType, minutePrefixType, secondPrefixType);
+    GetTimePickerModel()->SetDateTimeOptions(hourPrefixType, minutePrefixType, secondPrefixType);
 }
 
 void FfiOHOSAceFrameworkTimePickerSetOnChange(void (*callback)(int64_t hour, int64_t minute, int64_t second))
 {
     auto onChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
-        auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OHOS::Ace::NG::DatePickerChangeEvent>(index);
         const auto infoResult = TimePickerChangeEventToFfi(*eventInfo);
         lambda(infoResult.hour, infoResult.minute, infoResult.second);
     };
@@ -609,7 +624,7 @@ void FfiOHOSAceFrameworkTimePickerSetOnChange(void (*callback)(int64_t hour, int
     auto getMainFrameNode = getInstance->GetMainFrameNode();
     CHECK_NULL_VOID(getMainFrameNode);
 
-    TimePickerModel::GetInstance()->SetOnChange(std::move(onChange));
+    GetTimePickerModel()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkTimePickerDialogShow(NativeTimePickerDialogOptions options)

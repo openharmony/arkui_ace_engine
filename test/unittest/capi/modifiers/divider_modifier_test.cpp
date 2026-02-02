@@ -140,7 +140,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest003, TestSize.Level1)
     ASSERT_NE(modifier_->setLineCap, nullptr);
 
     auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, LINE_CUP_BUTT);
+    EXPECT_EQ(checkVal1, LINE_CUP_SQUARE);
 
     auto optValue = Converter::ArkValue<Opt_LineCapStyle>(ARK_LINE_CAP_STYLE_SQUARE);
     modifier_->setLineCap(node_, &optValue);

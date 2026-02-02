@@ -982,4 +982,37 @@ HWTEST_F(TabBarTwoTestNg, SetCachedMaxCount003, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     CreateTabsDone(model);
 }
+
+/**
+ * @tc.name: SetNestedScroll001
+ * @tc.desc: test SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTwoTestNg, SetNestedScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1 Create tabs model
+     */
+    TabsModelNG model = CreateTabs();
+
+    /**
+     * @tc.steps: step2 Set nestedScroll
+     */
+    NestedScrollOptions scrollOption;
+    scrollOption.forward = NestedScrollMode::SELF_FIRST;
+    scrollOption.backward = NestedScrollMode::SELF_FIRST;
+    model.SetNestedScroll(scrollOption);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto value = swiperPattern->nestedScroll_;
+    EXPECT_EQ(value, scrollOption);
+
+    ASSERT_NE(frameNode_, nullptr);
+    CreateTabsDone(model);
+}
 } // namespace OHOS::Ace::NG

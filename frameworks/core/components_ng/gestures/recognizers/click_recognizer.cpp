@@ -17,6 +17,7 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/common/click_effect/click_sound_effect_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 
@@ -226,6 +227,7 @@ void ClickRecognizer::OnAccepted()
         remoteMessage_(info);
     }
     UpdateFingerListInfo();
+    PlayClickSoundEffect(localOffset);
     SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
 
     int64_t overTime = GetSysTimestamp();
@@ -241,6 +243,27 @@ void ClickRecognizer::OnAccepted()
     }
     if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
         ResetStateVoluntarily();
+    }
+}
+
+void ClickRecognizer::PlayClickSoundEffect(Offset clickPoint)
+{
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetEnableClickSoundEffect()) {
+        if (!ClickSoundEffectManager::GetInstance().LoadProductPolicy()) {
+            return;
+        }
+        auto container = Container::GetContainer(Container::CurrentId());
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [clickPoint]() {
+                ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(
+                    static_cast<int32_t>(clickPoint.GetX()), static_cast<int32_t>(clickPoint.GetY()));
+            },
+            TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
     }
 }
 
@@ -271,12 +294,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
-        auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
-            SEC_PLD(%{public}s) ".",
-            refereeState_, node ? node->GetTag().c_str() : "null",
-            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Click not READY, info:%{public}s", GetGestureInfoString().c_str());
         return;
     }
     InitGlobalValue(event.sourceType);
@@ -337,7 +355,8 @@ bool ClickRecognizer::IsFormRenderClickRejected(const TouchEvent& event)
 
 void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept %{public}s", node ? node->GetTag().c_str() : "");
     time_ = event.time;
     if (!useCatchMode_) {
         OnAccepted();
@@ -585,10 +604,22 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         HandleGestureAccept(info, type, GestureListenerType::TAP);
+        ACE_BENCH_MARK_TRACE("TapGesture_end");
+        HandleReportClick(info);
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+}
+
+void ClickRecognizer::HandleReportClick(const GestureEvent& info)
+{
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(pipeline->GetClickOptimizer());
+    pipeline->GetClickOptimizer()->ReportClick(frameNode, info);
 }
 
 void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -614,10 +645,6 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
         tapReport.SetFingerList(info.GetFingerList());
         Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    CHECK_NULL_VOID(pipeline->GetClickOptimizer());
-    pipeline->GetClickOptimizer()->ReportClick(GetAttachedNode(), info);
 }
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
@@ -812,5 +839,19 @@ void ClickRecognizer::SetDistanceThreshold(Dimension distanceThreshold)
     if (appTheme && distanceThreshold_.ConvertToPx() == std::numeric_limits<double>::infinity()) {
         distanceThreshold_ = appTheme->GetClickDistanceThreshold();
     }
+}
+
+std::string ClickRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",TPC:");
+    gestureInfoStr.append(std::to_string(tappedCount_));
+    gestureInfoStr.append(",ETF:");
+    gestureInfoStr.append(std::to_string(equalsToFingers_));
+    gestureInfoStr.append(",UCM:");
+    gestureInfoStr.append(std::to_string(useCatchMode_));
+    gestureInfoStr.append(",CTPN:");
+    gestureInfoStr.append(std::to_string(currentTouchPointsNum_));
+    return gestureInfoStr;
 }
 } // namespace OHOS::Ace::NG

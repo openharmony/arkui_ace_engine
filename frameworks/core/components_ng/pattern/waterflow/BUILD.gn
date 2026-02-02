@@ -1,0 +1,70 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import(
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+
+build_component_ng("waterflow_pattern_ng") {
+  is_component_model = true
+  sources = [
+    "layout/sliding_window/water_flow_layout_info_sw.cpp",
+    "layout/sliding_window/water_flow_layout_sw.cpp",
+    "layout/top_down/water_flow_layout_algorithm.cpp",
+    "layout/top_down/water_flow_layout_info.cpp",
+    "layout/top_down/water_flow_segmented_layout.cpp",
+    "layout/water_flow_layout_algorithm_base.cpp",
+    "layout/water_flow_layout_info_base.cpp",
+    "layout/water_flow_layout_utils.cpp",
+    "water_flow_accessibility_property.cpp",
+    "water_flow_content_modifier.cpp",
+    "water_flow_item_model_ng.cpp",
+    "water_flow_item_node.cpp",
+    "water_flow_layout_property.cpp",
+    "water_flow_model_ng.cpp",
+    "water_flow_model_ng_multi_thread.cpp",
+    "water_flow_model_static.cpp",
+    "water_flow_paint_method.cpp",
+    "water_flow_pattern.cpp",
+    "water_flow_sections.cpp",
+  ]
+
+  ark_sources = [
+    "bridge/flowitem/arkts_native_water_flow_item_bridge.cpp",
+    "bridge/flowitem/water_flow_item_dynamic_modifier.cpp",
+    "bridge/flowitem/water_flow_item_dynamic_module.cpp",
+    "bridge/waterflow/arkts_native_water_flow_bridge.cpp",
+    "bridge/waterflow/water_flow_dynamic_modifier.cpp",
+    "bridge/waterflow/water_flow_dynamic_module.cpp",
+  ]
+
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [
+        "bridge/flowitem/water_flow_item_static_modifier.cpp",
+        "bridge/waterflow/ui_water_flow_event_static_accessor.cpp",
+        "bridge/waterflow/water_flow_static_ani_modifier.cpp",
+        "bridge/waterflow/water_flow_static_modifier.cpp",
+        "bridge/waterflow/water_flow_static_sections_accessor.cpp",
+      ]
+    }
+    ark_sources += [
+      "bridge/flowitem/water_flow_item_model_impl.cpp",
+      "bridge/waterflow/water_flow_model_impl.cpp",
+    ]
+  }
+  if (!build_ohos_sdk && !is_arkui_x) {
+    deps = [
+      "$ace_root/interfaces/inner_api/ui_session:ui_session",
+    ]
+  }
+}

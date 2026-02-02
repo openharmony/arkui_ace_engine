@@ -54,7 +54,7 @@ export {
     memoryStats,
     launchJob,
 } from '@koalaui/compat';
-export { clamp, lerp, modulo, parseNumber, isFiniteNumber, getDistancePx } from './math';
+export { clamp, lerp, modulo, parseNumber, getDistancePx } from './math';
 export { hashCodeFromString } from './stringUtils';
 export * from './Finalization';
 export { SHA1Hash, createSha1 } from './sha1';

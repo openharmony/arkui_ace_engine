@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ constexpr float SWIPER_CURVE_MASS = 1.0f;
 constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
 constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 
-class SwiperPattern : public NestableScrollContainer {
+class ACE_FORCE_EXPORT SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 
@@ -70,7 +70,7 @@ public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
     using PanEventFunction = std::function<void(const GestureEvent& info)>;
 
-    SwiperPattern();
+    ACE_FORCE_EXPORT SwiperPattern();
     ~SwiperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -123,6 +123,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     virtual std::string GetArcDotIndicatorStyle() const { return ""; }
     // ArcSwiper will implement this interface in order to set transitionAnimation disable
@@ -227,7 +228,7 @@ public:
     void CheckMarkDirtyNodeForRenderIndicator(
         float additionalOffset = 0.0f, std::optional<int32_t> nextIndex = std::nullopt);
 
-    int32_t TotalCount() const;
+    ACE_FORCE_EXPORT int32_t TotalCount() const;
 
     Axis GetDirection() const;
 
@@ -535,6 +536,8 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json,
+        ParamConfig config = ParamConfig()) override;
     void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
     void BuildAxisInfo(std::unique_ptr<JsonValue>& json);
     void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
@@ -683,7 +686,7 @@ public:
     }
     void UpdateNodeRate();
 
-    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged() override;
+    std::list<RefPtr<FrameNode>> GetKeyFrameNodeWhenContentChanged() override;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
     virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}
@@ -872,6 +875,18 @@ public:
     {
         return isPureSwiper_;
     }
+
+    bool StartFakeDrag();
+
+    bool FakeDragBy(float offset);
+
+    bool StopFakeDrag();
+
+    bool IsFakeDragging()
+    {
+        return isFakeDragging_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -922,7 +937,7 @@ protected:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
 
-    void HandleTouchDown(const TouchLocationInfo& locationInfo);
+    void HandleTouchDown(const TouchLocationInfo& locationInfo, bool isFakeDragging = false);
     void HandleTouchUp();
 
     bool ChildPreMeasureHelperEnabled() override
@@ -1350,8 +1365,13 @@ private:
     void UpdateDefaultColor();
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
+    friend class SwiperUISessionAdapter;
     void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
+    void LoadCompleteManagerStopCollect(bool needSwiperChangeEnd = true);
+
+    bool FakeDragCheckAtStart(float& offset);
+    bool FakeDragCheckAtEnd(float& offset);
+    void CheckOffsetAfterLyout(float offset);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1509,6 +1529,7 @@ private:
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;
+    std::optional<int32_t> customAnimationPrevIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
@@ -1547,6 +1568,11 @@ private:
 
     std::list<int32_t> itemsLatestSwitched_;
     std::set<int32_t> itemsNeedClean_;
+
+    bool isFakeDragging_ = false;
+    VelocityTracker velocityTracker_;
+    Offset offsetXY_;
+    std::optional<float> lastDragByOffset_;
 };
 } // namespace OHOS::Ace::NG
 

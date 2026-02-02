@@ -20,7 +20,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
-#include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 namespace OHOS::Ace::NG {
@@ -122,9 +121,9 @@ ArkUINativeModuleValue ContainerPickerBridge::ResetContainerPickerCanLoop(ArkUIR
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool* isHasValue,
-    ArkUIPickerIndicatorStyle& pickerIndicatorStyle, RefPtr<ResourceObject>* radiusResObjs,
-    ArkUI_Float32* value, ArkUI_Int32* unit)
+void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo,
+    ArkUI_Bool (*isHasValue)[4], ArkUIPickerIndicatorStyle& pickerIndicatorStyle,
+    RefPtr<ResourceObject> (*radiusResObjs)[4], ArkUI_Float32 (*value)[4], ArkUI_Int32 (*unit)[4])
 {
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(unit);
@@ -135,18 +134,18 @@ void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* 
     for (int i = 0; i < VALUE_MAX_SIZE; i++) {
         if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_7), calcDimension, tmpResObj) &&
             !calcDimension.IsNegative()) {
-            isHasValue[i] = true;
-            value[i] = calcDimension.Value();
-            unit[i] = static_cast<int>(calcDimension.Unit());
-            radiusResObjs[i] = tmpResObj;
+            (*isHasValue)[i] = true;
+            (*value)[i] = calcDimension.Value();
+            (*unit)[i] = static_cast<int>(calcDimension.Unit());
+            (*radiusResObjs)[i] = tmpResObj;
             pickerIndicatorStyle.isDefaultBorderRadius = false;
         }
         if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_7), calcDimension, tmpResObj) &&
             !calcDimension.IsNegative()) {
-            isHasValue[i] = true;
-            value[i] = calcDimension.Value();
-            unit[i] = static_cast<int>(calcDimension.Unit());
-            radiusResObjs[i] = tmpResObj;
+            (*isHasValue)[i] = true;
+            (*value)[i] = calcDimension.Value();
+            (*unit)[i] = static_cast<int>(calcDimension.Unit());
+            (*radiusResObjs)[i] = tmpResObj;
             pickerIndicatorStyle.isDefaultBorderRadius = false;
         }
     }
@@ -161,8 +160,8 @@ void ParseSelectionIndicatorStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* 
         std::swap(radiusResObjs[TOPLEFT], radiusResObjs[BOTTOMLEFT]);
         std::swap(radiusResObjs[TOPRIGHT], radiusResObjs[BOTTOMRIGHT]);
     }
-    pickerIndicatorStyle.values = value;
-    pickerIndicatorStyle.units = unit;
+    pickerIndicatorStyle.values = *value;
+    pickerIndicatorStyle.units = *unit;
     pickerIndicatorStyle.length = VALUE_MAX_SIZE;
 }
 
@@ -304,8 +303,8 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
         static_cast<int>(defaultBgRadius.Unit()),
         static_cast<int>(defaultBgRadius.Unit())
      };
-    ParseSelectionIndicatorStyleRadius(vm, runtimeCallInfo, isHasValue, pickerIndicatorStyle, radiusResObjs,
-        value, unit);
+    ParseSelectionIndicatorStyleRadius(vm, runtimeCallInfo, &isHasValue, pickerIndicatorStyle, &radiusResObjs,
+        &value, &unit);
     pickerIndicatorStyle.topLeftRawPtr = AceType::RawPtr(radiusResObjs[TOPLEFT]);
     pickerIndicatorStyle.topRightRawPtr = AceType::RawPtr(radiusResObjs[TOPRIGHT]);
     pickerIndicatorStyle.bottomLeftRawPtr = AceType::RawPtr(radiusResObjs[BOTTOMLEFT]);

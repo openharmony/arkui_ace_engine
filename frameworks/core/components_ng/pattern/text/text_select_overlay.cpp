@@ -633,6 +633,7 @@ void TextSelectOverlay::TriggerScrollableParentToScroll(
     auto scrollableFrameRect = scrollableHost->GetPaintRectWithTransform();
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hostRect = host->GetPaintRectWithTransform();
     auto hostSize = hostRect.Height();
     auto scrollableParentSize = scrollableFrameRect.Height();
@@ -769,5 +770,6 @@ void TextSelectOverlay::UpdateAISelectMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+    manager->FocusFirstFocusableChildInMenu();
 }
 } // namespace OHOS::Ace::NG

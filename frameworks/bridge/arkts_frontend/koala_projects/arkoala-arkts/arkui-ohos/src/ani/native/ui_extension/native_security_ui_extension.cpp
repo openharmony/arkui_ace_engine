@@ -274,7 +274,7 @@ ani_ref CreateSecurityUIExtensionProxyObject(ani_env* env, const RefPtr<NG::Secu
     pattern->SetAsyncCallbacks(
         { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_FALSE); } });
     pattern->SetSyncCallbacks(
-        { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_FALSE); } });
+        { [jsProxyObj](const RefPtr<NG::SecurityUIExtensionProxy>&) { jsProxyObj->JsCallback(ANI_TRUE); } });
     return proxyObjectRef;
 }
 
@@ -356,6 +356,7 @@ ani_long NativeSecurityUiExtension::Construct(
     [[maybe_unused]] ani_int id, [[maybe_unused]] ani_int flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    ACE_UINODE_TRACE(id);
     LOGI("[NativeSecurityUiExtension] Construct.");
     auto frameNode =
         NG::SecurityUIExtensionStatic::CreateSecurityUIExtensionComponent(id,
@@ -381,6 +382,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionOption(
             "frameNode is null when SetSecurityUiextensionOption");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     std::string optionClassName =
         "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUIExtensionOptions";
@@ -455,6 +457,7 @@ ani_status NativeSecurityUiExtension::SetSecurityUiextensionWant(
             "frameNode is null when SetSecurityUiextensionWant");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     std::string wantClassName =
         "@ohos.app.ability.Want.Want";
@@ -493,6 +496,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
             "frameNode is null when SetSecurityOnError");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     ani_ref onErrorRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onErrorGlobalRef;
@@ -500,8 +504,9 @@ ani_status NativeSecurityUiExtension::SetSecurityOnError(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onErrorAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onErrorGlobalRef);
-    auto onErrorCallback = [onErrorAniReadyCallbackInfo] (
+    auto onErrorCallback = [onErrorAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
         int32_t code, const std::string& name, const std::string& message) {
+        ACE_UINODE_TRACE(node);
         if (onErrorAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
                 "onErrorAniReadyCallbackInfo is nullptr");
@@ -555,6 +560,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
             "frameNode is null when SetSecurityOnRecive");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     ani_ref onReciveRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onReciveGlobalRef;
@@ -562,7 +568,9 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRecive(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onReciveAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReciveGlobalRef);
-    auto onReciveCallback = [onReciveAniReadyCallbackInfo] (const AAFwk::WantParams& params) {
+    auto onReciveCallback = [onReciveAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
+        const AAFwk::WantParams& params) {
+        ACE_UINODE_TRACE(node);
         if (onReciveAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
                 "onReciveAniReadyCallbackInfo is nullptr");
@@ -614,6 +622,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
             "frameNode is null when SetSecurityOnTerminate");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
     ani_ref onTerminateRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onTerminateGlobalRef;
     env->GlobalReference_Create(onTerminateRef, &onTerminateGlobalRef);
@@ -621,7 +630,9 @@ ani_status NativeSecurityUiExtension::SetSecurityOnTerminate(
     env->GetVM(&vm);
     auto onTerminateAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onTerminateGlobalRef);
     auto onTerminateCallback =
-        [env, onTerminateAniReadyCallbackInfo] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        [env, onTerminateAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
+            int32_t code, const RefPtr<WantWrap>& wantWrap) {
+            ACE_UINODE_TRACE(node);
             if (onTerminateAniReadyCallbackInfo == nullptr) {
                 TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
                     "onTerminateAniReadyCallbackInfo is nullptr");
@@ -677,6 +688,7 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRemoteReady(
             "frameNode is null when SetSecurityOnRemoteReady");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     ani_ref onRemoteReadyRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onRemoteReadyGlobalRef = nullptr;
@@ -685,7 +697,9 @@ ani_status NativeSecurityUiExtension::SetSecurityOnRemoteReady(
     env->GetVM(&vm);
     auto onRemoteReadyAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onRemoteReadyGlobalRef);
     auto onRemoteReadyCallback =
-        [onRemoteReadyAniReadyCallbackInfo] (const RefPtr<NG::SecurityUIExtensionProxy>& proxy) {
+        [onRemoteReadyAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
+        const RefPtr<NG::SecurityUIExtensionProxy>& proxy) {
+        ACE_UINODE_TRACE(node);
         if (proxy == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_SECURITYUIEXTENSION,
                 "proxy is nullptr in onRemoteReadyCallback");

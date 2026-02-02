@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, int32toFloat64, int64to32, isFiniteNumber, uint32 } from '@koalaui/common'
+import { float64, int32toFloat64, int64to32, uint32 } from '@koalaui/common'
 
 export class EasingSupport {
     private x: Float64Array
@@ -63,10 +63,10 @@ export class EasingSupport {
     }
 
     static newCubicBezier(p1x: float64, p1y: float64, p2x: float64, p2y: float64, size: uint32 = 1024): EasingSupport {
-        if (!isFiniteNumber(p1x) || !isFiniteNumber(p1y) || p1x < 0 || 1 < p1x) {
+        if (!isFinite(p1x) || !isFinite(p1y) || p1x < 0 || 1 < p1x) {
             throw new Error(`illegal point: (${p1x},${p1y}), where 0 <= x <= 1`)
         }
-        if (!isFiniteNumber(p2x) || !isFiniteNumber(p2y) || p2x < 0 || 1 < p2x) {
+        if (!isFinite(p2x) || !isFinite(p2y) || p2x < 0 || 1 < p2x) {
             throw new Error(`illegal point: (${p2x},${p2y}), where 0 <= x <= 1`)
         }
         return new EasingSupport(size, (value: float64) => cubicBezierValue(value, p1x, p2x), (value: float64) => cubicBezierValue(value, p1y, p2y))

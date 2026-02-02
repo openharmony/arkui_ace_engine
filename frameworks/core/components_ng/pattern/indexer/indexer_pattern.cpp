@@ -50,7 +50,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -220,7 +220,7 @@ void IndexerPattern::BuildArrayValueItems()
         layoutProperty->UpdateIsPopup(false);
         for (int32_t index = 0; index < indexerSize; index++) {
             auto indexerChildNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+                TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(indexerChildNode);
             InitChildInputEvent(indexerChildNode, index);
             host->AddChild(indexerChildNode);
@@ -991,25 +991,25 @@ void IndexerPattern::ShowBubble()
 
 RefPtr<FrameNode> IndexerPattern::CreatePopupNode()
 {
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto columnNode = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
 
     if (!autoCollapse_) {
         auto letterNode = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_RETURN(letterNode, nullptr);
         auto letterStackNode = FrameNode::CreateFrameNode(
-            V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+            STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
         CHECK_NULL_RETURN(letterStackNode, nullptr);
         letterStackNode->AddChild(letterNode);
         columnNode->AddChild(letterStackNode);
     }
     auto listNode = FrameNode::CreateFrameNode(
-        V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+        LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
     CHECK_NULL_RETURN(listNode, nullptr);
     auto listStackNode = FrameNode::CreateFrameNode(
-        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+        STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
     CHECK_NULL_RETURN(listStackNode, nullptr);
     listStackNode->AddChild(listNode);
     columnNode->AddChild(listStackNode);
@@ -1350,7 +1350,7 @@ void IndexerPattern::CreateBubbleListView()
 {
     CHECK_NULL_VOID(popupNode_);
     auto listNode = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                        ? FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                        ? FrameNode::CreateFrameNode(LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                             AceType::MakeRefPtr<ListPattern>())
                         : DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
@@ -1364,10 +1364,10 @@ void IndexerPattern::CreateBubbleListView()
 
     if (autoCollapse_) {
         auto letterNode = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(letterNode);
         auto listItemNode =
-            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            FrameNode::CreateFrameNode(LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
         listItemNode->AddChild(letterNode);
         listNode->AddChild(listItemNode);
@@ -1375,10 +1375,10 @@ void IndexerPattern::CreateBubbleListView()
 
     for (uint32_t i = 0; i < currentListData_.size(); i++) {
         auto listItemNode =
-            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            FrameNode::CreateFrameNode(LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
         auto textNode = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         listItemNode->AddChild(textNode);
         AddListItemClickListener(listItemNode, i);
         listNode->AddChild(listItemNode);
@@ -1691,7 +1691,8 @@ void IndexerPattern::OnListItemClick(int32_t index)
     ReportPoupSelectEvent();
     if (onPopupSelected) {
         onPopupSelected(index);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -2042,7 +2043,8 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
                 TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
                 onSelected(actualIndex); // fire onSelected with an item's index from original array
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected",
+                ComponentEventType::COMPONENT_EVENT_SELECT);
             TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER,
                 "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected", GetHost()->GetId());
         }
@@ -2269,7 +2271,8 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 void IndexerPattern::ReportSelectEvent()
 {
     if (initialized_ && selectChanged_) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
         TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected",
             GetHost()->GetId());
     }
@@ -2277,7 +2280,8 @@ void IndexerPattern::ReportSelectEvent()
 
 void IndexerPattern::ReportPoupSelectEvent()
 {
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect",
+        ComponentEventType::COMPONENT_EVENT_SELECT);
     TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
         GetHost()->GetId());
 }

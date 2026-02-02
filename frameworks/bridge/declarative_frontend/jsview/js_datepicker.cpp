@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,11 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/picker_model_impl.h"
-#include "bridge/declarative_frontend/jsview/models/timepicker_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components/picker/picker_date_component.h"
-#include "core/components/picker/picker_theme.h"
-#include "core/components/picker/picker_time_component.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
@@ -38,6 +36,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 
@@ -52,7 +51,6 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
     HoverModeAreaType::BOTTOM_SCREEN };
 const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
 const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
-const char TIMEPICKER_OPTIONS_SECOND[] = "second";
 const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
 const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
 } // namespace
@@ -75,7 +73,12 @@ DatePickerModel* DatePickerModel::GetInstance()
         if (Container::IsCurrentUseNewPipeline()) {
             datePickerInstance_.reset(new NG::DatePickerModelNG());
         } else {
-            datePickerInstance_.reset(new Framework::DatePickerModelImpl());
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("datePicker");
+            if (!loader) {
+                LOGF("Can't find datePicker loader");
+                return;
+            }
+            datePickerInstance_.reset(reinterpret_cast<DatePickerModel*>(loader->CreateModel()));
         }
 #endif
     });
@@ -92,7 +95,12 @@ DatePickerDialogModel* DatePickerDialogModel::GetInstance()
         if (Container::IsCurrentUseNewPipeline()) {
             datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
         } else {
-            datePickerDialogInstance_.reset(new Framework::DatePickerDialogModelImpl());
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("datePickerDialog");
+            if (!loader) {
+                LOGF("Can't find datePickerDialog loader");
+                return;
+            }
+            datePickerDialogInstance_.reset(reinterpret_cast<DatePickerDialogModel*>(loader->CreateModel()));
         }
 #endif
     });
@@ -102,14 +110,29 @@ DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 
 TimePickerModel* TimePickerModel::GetInstance()
 {
-    std::call_once(onceFlag_, []() {
+    // Dynamically load the independently compiled so library
+    // from frameworks/core/components_ng/pattern/time_picker directory
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TimePicker");
+    if (module == nullptr) {
+        LOGF("Can't find TimePicker dynamic module");
+        abort();
+    }
+    auto* model = reinterpret_cast<const NG::TimePickerModelNG*>(module->GetModel());
+    CHECK_NULL_RETURN(model, nullptr);
+    std::call_once(onceFlag_, [model]() {
 #ifdef NG_BUILD
-        timePickerInstance_.reset(new NG::TimePickerModelNG());
+        timePickerInstance_.reset(const_cast<NG::TimePickerModelNG*>(model));
 #else
         if (Container::IsCurrentUseNewPipeline()) {
-            timePickerInstance_.reset(new NG::TimePickerModelNG());
+            timePickerInstance_.reset(const_cast<NG::TimePickerModelNG*>(model));
         } else {
-            timePickerInstance_.reset(new Framework::TimePickerModelImpl());
+            // Load the timePicker loader from frameworks/compatible/components/picker directory
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("timePicker");
+            if (!loader) {
+                LOGF("Can't find timePicker loader");
+                return;
+            }
+            timePickerInstance_.reset(reinterpret_cast<TimePickerModel*>(loader->CreateModel()));
         }
 #endif
     });
@@ -119,14 +142,29 @@ TimePickerModel* TimePickerModel::GetInstance()
 
 TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 {
-    std::call_once(onceFlag_, []() {
+    // Dynamically load the independently compiled so library
+    // from frameworks/core/components_ng/pattern/time_picker directory
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TimePickerDialog");
+    if (module == nullptr) {
+        LOGF("Can't find TimePickerDialog dynamic module");
+        abort();
+    }
+    auto* model = reinterpret_cast<const NG::TimePickerDialogModelNG*>(module->GetModel());
+    CHECK_NULL_RETURN(model, nullptr);
+    std::call_once(onceFlag_, [model]() {
 #ifdef NG_BUILD
-        timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+        timePickerDialogInstance_.reset(const_cast<NG::TimePickerDialogModelNG*>(model));
 #else
         if (Container::IsCurrentUseNewPipeline()) {
-            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+            timePickerDialogInstance_.reset(const_cast<NG::TimePickerDialogModelNG*>(model));
         } else {
-            timePickerDialogInstance_.reset(new Framework::TimePickerDialogModelImpl());
+            // Load the timePicker loader from frameworks/compatible/components/picker directory
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("timePickerDialog");
+            if (!loader) {
+                LOGF("Can't find timePickerDialog loader");
+                return;
+            }
+            timePickerDialogInstance_.reset(reinterpret_cast<TimePickerDialogModel*>(loader->CreateModel()));
         }
 #endif
     });
@@ -137,7 +175,7 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
+JSRef<JSVal> DatePickerChangeEventToJSValue(const NG::DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
@@ -156,7 +194,7 @@ JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventIn
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
+JSRef<JSVal> DatePickerDateChangeEventToJSValue(const NG::DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
@@ -548,7 +586,7 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
         return;
     }
 
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NG::DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -556,7 +594,7 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("datePicker.onChange");
         PipelineContext::SetCallBackNode(node);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<NG::DatePickerChangeEvent>(info);
         func->Execute(*eventInfo);
     };
     DatePickerModel::GetInstance()->SetOnChange(std::move(onChange));
@@ -567,7 +605,7 @@ void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NG::DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerDateChangeEventToJSValue);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -575,50 +613,10 @@ void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("datePicker.onDateChange");
         PipelineContext::SetCallBackNode(node);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<NG::DatePickerChangeEvent>(info);
         func->Execute(*eventInfo);
     };
     DatePickerModel::GetInstance()->SetOnDateChange(std::move(onDateChange));
-}
-
-void JSTimePicker::OnChange(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        const BaseEventInfo* index) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("datePicker.onChange");
-        PipelineContext::SetCallBackNode(node);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
-        func->Execute(*eventInfo);
-    };
-    TimePickerModel::GetInstance()->SetOnChange(std::move(onChange));
-}
-
-void JSTimePicker::OnEnterSelectedArea(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onEnterSelectedArea = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        const BaseEventInfo* index) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("datePicker.onEnterSelectedArea");
-        PipelineContext::SetCallBackNode(node);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
-        func->Execute(*eventInfo);
-    };
-    TimePickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
@@ -703,7 +701,7 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
                            node = targetNode, isDatePicker](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<NG::DatePickerChangeEvent>(info);
         CHECK_NULL_VOID(eventInfo);
         auto selectedStr = eventInfo->GetSelectedStr();
         auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
@@ -1341,54 +1339,6 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
-void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)
-{
-    auto datePicker = AceType::MakeRefPtr<PickerDateComponent>();
-    auto startDate = paramObj->GetProperty("start");
-    auto endDate = paramObj->GetProperty("end");
-    auto selectedDate = paramObj->GetProperty("selected");
-    auto lunar = paramObj->GetProperty("lunar");
-    bool isLunar = lunar->ToBoolean();
-    auto parseStartDate = ParseDate(startDate);
-    auto parseEndDate = ParseDate(endDate);
-    auto parseSelectedDate = ParseDate(selectedDate);
-    auto startDays = parseStartDate.ToDays();
-    auto endDays = parseEndDate.ToDays();
-    if (startDays > endDays) {
-        parseStartDate.SetYear(0);
-        parseEndDate.SetYear(0);
-    }
-    if (startDate->IsObject()) {
-        datePicker->SetStartDate(parseStartDate);
-    }
-    if (endDate->IsObject()) {
-        datePicker->SetEndDate(parseEndDate);
-    }
-    if (selectedDate->IsObject()) {
-        datePicker->SetSelectedDate(parseSelectedDate);
-    }
-    datePicker->SetIsDialog(true);
-    datePicker->SetIsCreateDialogComponent(true);
-    datePicker->SetShowLunar(isLunar);
-
-    component = datePicker;
-}
-
-void JSDatePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)
-{
-    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
-    auto selectedTime = paramObj->GetProperty("selected");
-    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
-    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    if (selectedTime->IsObject()) {
-        timePicker->SetSelectedTime(ParseTime(selectedTime));
-    }
-    timePicker->SetIsDialog(true);
-    timePicker->SetIsCreateDialogComponent(true);
-    timePicker->SetHour24(isUseMilitaryTime);
-    component = timePicker;
-}
-
 PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
 {
     auto pickerDate = PickerDate();
@@ -1468,673 +1418,5 @@ void JSDatePickerDialog::ParseDateTimeOptions(const JSRef<JSObject>& paramObj, D
             dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
         }
     }
-}
-
-void JSTimePicker::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSTimePicker>::Declare("TimePicker");
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSTimePicker>::StaticMethod("create", &JSTimePicker::Create, opt);
-    JSClass<JSTimePicker>::StaticMethod("onChange", &JSTimePicker::OnChange);
-    JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSTimePicker::PickerBackgroundColor);
-    JSClass<JSTimePicker>::StaticMethod("loop", &JSTimePicker::Loop);
-    JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
-    JSClass<JSTimePicker>::StaticMethod("enableHapticFeedback", &JSTimePicker::EnableHapticFeedback);
-    JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSTimePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSTimePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSTimePicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
-    JSClass<JSTimePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSTimePicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
-    JSClass<JSTimePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
-    JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
-    JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
-    JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
-    JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
-    JSClass<JSTimePicker>::StaticMethod("enableCascade", &JSTimePicker::EnableCascade);
-    JSClass<JSTimePicker>::StaticMethod("onEnterSelectedArea", &JSTimePicker::OnEnterSelectedArea);
-    JSClass<JSTimePicker>::StaticMethod("digitalCrownSensitivity", &JSTimePicker::SetDigitalCrownSensitivity);
-    JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
-}
-
-void JSTimePicker::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
-{
-    int32_t value = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
-    if (info[0]->IsNumber()) {
-        value = info[0]->ToNumber<int32_t>();
-    }
-    TimePickerModel::GetInstance()->SetDigitalCrownSensitivity(value);
-}
-
-void JSTimePicker::Create(const JSCallbackInfo& info)
-{
-    JSRef<JSObject> paramObject = JSRef<JSObject>::New();
-    if (info.Length() >= 1 && info[0]->IsObject()) {
-        paramObject = JSRef<JSObject>::Cast(info[0]);
-    }
-    CreateTimePicker(info, paramObject);
-}
-
-void JSTimePicker::JsOpacity(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsOpacity(info);
-    TimePickerModel::GetInstance()->HasUserDefinedOpacity();
-}
-
-void JSTimePicker::Loop(const JSCallbackInfo& info)
-{
-    bool isLoop = true;
-    if (info[0]->IsBoolean()) {
-        isLoop = info[0]->ToBoolean();
-    }
-    TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
-}
-
-void JSTimePicker::EnableHapticFeedback(const JSCallbackInfo& info)
-{
-    bool isEnableHapticFeedback = true;
-    if (info[0]->IsBoolean()) {
-        isEnableHapticFeedback = info[0]->ToBoolean();
-    }
-    TimePickerModel::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
-}
-
-void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
-{
-    TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
-}
-
-void JSTimePicker::EnableCascade(const JSCallbackInfo& info)
-{
-    bool isEnableCascade = false;
-    if (info[0]->IsBoolean()) {
-        isEnableCascade = info[0]->ToBoolean();
-    }
-    TimePickerModel::GetInstance()->SetEnableCascade(isEnableCascade);
-}
-
-void JSTimePicker::DateTimeOptions(const JSCallbackInfo& info)
-{
-    JSRef<JSObject> paramObject;
-    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
-    ZeroPrefixType minuteType = ZeroPrefixType::AUTO;
-    ZeroPrefixType secondType = ZeroPrefixType::AUTO;
-    if (info.Length() >= 1 && info[0]->IsObject()) {
-        paramObject = JSRef<JSObject>::Cast(info[0]);
-        auto hourValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_HOUR);
-        if (hourValue->IsString()) {
-            std::string hour = hourValue->ToString();
-            if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
-                hourType = ZeroPrefixType::SHOW;
-            } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
-                hourType = ZeroPrefixType::HIDE;
-            }
-        }
-        auto minuteValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_MINUTE);
-        if (minuteValue->IsString()) {
-            minuteType = ZeroPrefixType::SHOW;
-            std::string minute = minuteValue->ToString();
-            if (minute == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
-                minuteType = ZeroPrefixType::HIDE;
-            }
-        }
-        auto secondValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_SECOND);
-        if (secondValue->IsString()) {
-            secondType = ZeroPrefixType::SHOW;
-            std::string second = secondValue->ToString();
-            if (second == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
-                secondType = ZeroPrefixType::HIDE;
-            }
-        }
-    }
-    TimePickerModel::GetInstance()->SetDateTimeOptions(hourType, minuteType, secondType);
-}
-
-void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsBackgroundColor(info);
-
-    if (info.Length() < 1) {
-        return;
-    }
-    Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
-    }
-    TimePickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
-}
-
-void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
-{
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
-    }
-    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
-}
-
-void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
-{
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
-    }
-    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
-}
-
-void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
-{
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
-    }
-    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
-    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
-        TimePickerModel::GetInstance()->UpdateUserSetSelectColor();
-    }
-}
-
-void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
-{
-    auto startTime = paramObj->GetProperty("start");
-    auto endTime = paramObj->GetProperty("end");
-    auto selectedTime = paramObj->GetProperty("selected");
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
-    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
-    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
-        parseStartTime = theme->GetDefaultStartTime();
-        parseEndTime = theme->GetDefaultEndTime();
-    }
-    auto formatValue = paramObj->GetProperty("format");
-    bool showSecond = false;
-    if (formatValue->IsNumber()) {
-        auto displayedFormat = static_cast<TimePickerFormat>(formatValue->ToNumber<int32_t>());
-        if (displayedFormat == TimePickerFormat::HOUR_MINUTE_SECOND) {
-            showSecond = true;
-        }
-    }
-    TimePickerModel::GetInstance()->CreateTimePicker(theme, showSecond);
-    TimePickerModel::GetInstance()->SetStartTime(parseStartTime);
-    TimePickerModel::GetInstance()->SetEndTime(parseEndTime);
-    if (selectedTime->IsObject()) {
-        JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
-        JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
-        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
-            ParseSelectedDateTimeObject(info, selectedTimeObj, false);
-            auto parseSelectedTime = ParseTime(selectedTimeObj->GetProperty("value"));
-            TimePickerModel::GetInstance()->SetSelectedTime(parseSelectedTime);
-        } else {
-            TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
-        }
-    }
-    SetDefaultAttributes();
-}
-
-void JSTimePicker::SetDefaultAttributes()
-{
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    NG::PickerTextStyle textStyle;
-    auto selectedStyle = theme->GetOptionStyle(true, false);
-    textStyle.fontSize = selectedStyle.GetFontSize();
-    textStyle.fontWeight = selectedStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
-
-    auto disappearStyle = theme->GetDisappearOptionStyle();
-    textStyle.fontSize = disappearStyle.GetFontSize();
-    textStyle.fontWeight = disappearStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
-
-    auto normalStyle = theme->GetOptionStyle(false, false);
-    textStyle.fontSize = normalStyle.GetFontSize();
-    textStyle.fontWeight = normalStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
-}
-
-PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
-{
-    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime::Current();
-    if (!timeVal->IsObject()) {
-        return pickerTime;
-    }
-    auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto yearFuncJsVal = timeObj->GetProperty("getFullYear");
-    if (yearFuncJsVal->IsFunction()) {
-        auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
-        JSRef<JSVal> year = yearFunc->Call(timeObj);
-        if (year->IsNumber() && LessOrEqual(year->ToNumber<int32_t>(), 0)) {
-            return pickerTime;
-        }
-    }
-
-    auto hourFuncJsVal = timeObj->GetProperty("getHours");
-    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
-    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
-    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
-        return pickerTime;
-    }
-    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
-    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
-    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
-    JSRef<JSVal> hour = hourFunc->Call(timeObj);
-    JSRef<JSVal> minute = minuteFunc->Call(timeObj);
-    JSRef<JSVal> second = secondFunc->Call(timeObj);
-
-    if (hour->IsNumber() && minute->IsNumber() && second->IsNumber()) {
-        pickerTime.SetHour(hour->ToNumber<int32_t>());
-        pickerTime.SetMinute(minute->ToNumber<int32_t>());
-        pickerTime.SetSecond(second->ToNumber<int32_t>());
-    }
-    return pickerTime;
-}
-
-void JSTimePickerDialog::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSTimePickerDialog>::Declare("TimePickerDialog");
-    JSClass<JSTimePickerDialog>::StaticMethod("show", &JSTimePickerDialog::Show);
-
-    JSClass<JSTimePickerDialog>::Bind<>(globalObj);
-}
-
-void TimePickerDialogAppearEvent(const JSCallbackInfo& info, TimePickerDialogEvent& timePickerDialogEvent)
-{
-    std::function<void()> didAppearEvent;
-    std::function<void()> willAppearEvent;
-    if (info.Length() == 0 || !info[0]->IsObject()) {
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onDidAppear = paramObject->GetProperty("onDidAppear");
-    if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
-        didAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onDidAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-    }
-    auto onWillAppear = paramObject->GetProperty("onWillAppear");
-    if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
-        willAppearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onWillAppear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-    }
-    timePickerDialogEvent.onDidAppear = std::move(didAppearEvent);
-    timePickerDialogEvent.onWillAppear = std::move(willAppearEvent);
-}
-
-void TimePickerDialogDisappearEvent(const JSCallbackInfo& info, TimePickerDialogEvent& timePickerDialogEvent)
-{
-    std::function<void()> didDisappearEvent;
-    std::function<void()> willDisappearEvent;
-    if (info.Length() == 0 || !info[0]->IsObject()) {
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
-    if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
-        didDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onDidDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-    }
-    auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
-    if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
-        willDisappearEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onWillDisappear");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-    }
-    timePickerDialogEvent.onDidDisappear = std::move(didDisappearEvent);
-    timePickerDialogEvent.onWillDisappear = std::move(willDisappearEvent);
-}
-
-void JSTimePickerDialog::Show(const JSCallbackInfo& info)
-{
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);
-    std::function<void()> cancelEvent;
-    std::function<void(const std::string&)> acceptEvent;
-    std::function<void(const std::string&)> changeEvent;
-    std::function<void(const std::string&)> enterEvent;
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChange = paramObject->GetProperty("onChange");
-    if (!onChange->IsUndefined() && onChange->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        changeEvent = [execCtx = info.GetExecutionContext(), type = DatePickerType::TIME, func = std::move(jsFunc),
-                          node = targetNode](const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys;
-            keys = { "year", "month", "day", "hour", "minute", "second" };
-            ACE_SCORING_EVENT("DatePickerDialog.onChange");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        };
-    }
-    auto onEnterSelectedArea = paramObject->GetProperty("onEnterSelectedArea");
-    if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onEnterSelectedArea));
-        enterEvent = [execCtx = info.GetExecutionContext(), type = DatePickerType::TIME, func = std::move(jsFunc),
-                          node = targetNode](const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys;
-            keys = { "year", "month", "day", "hour", "minute", "second" };
-            ACE_SCORING_EVENT("DatePickerDialog.onEnterSelectedArea");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        };
-    }
-    auto onAccept = paramObject->GetProperty("onAccept");
-    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                          const std::string& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
-            ACE_SCORING_EVENT("DatePickerDialog.onAccept");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute(keys, info);
-        };
-    }
-    auto onCancel = paramObject->GetProperty("onCancel");
-    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("DatePickerDialog.onCancel");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-    }
-    auto startTime = paramObject->GetProperty("start");
-    auto endTime = paramObject->GetProperty("end");
-    auto selectedTime = paramObject->GetProperty("selected");
-    auto useMilitaryTime = paramObject->GetProperty("useMilitaryTime");
-    auto enableCascade = paramObject->GetProperty("enableCascade");
-    NG::TimePickerSettingData settingData;
-    PickerDialogInfo pickerDialog;
-    settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    settingData.isEnableCascade = enableCascade->ToBoolean();
-    pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    pickerDialog.isEnableCascade = enableCascade->ToBoolean();
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
-    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
-    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
-    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
-        parseStartTime = theme->GetDefaultStartTime();
-        parseEndTime = theme->GetDefaultEndTime();
-    }
-    pickerDialog.parseStartTime = parseStartTime;
-    pickerDialog.parseEndTime = parseEndTime;
-
-    if (selectedTime->IsObject()) {
-        PickerDate dialogTitleDate = ParseDate(selectedTime);
-        if (dialogTitleDate.GetYear() != 0) {
-            settingData.dialogTitleDate = dialogTitleDate;
-            pickerDialog.isSelectedTime = true;
-            pickerDialog.pickerTime = ParseTime(selectedTime);
-        }
-    }
-    JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
-    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
-    if (dateTimeOptionsValue->IsObject()) {
-        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
-        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
-    }
-
-    // Parse alignment
-    auto alignmentValue = paramObject->GetProperty("alignment");
-    if (alignmentValue->IsNumber()) {
-        auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
-            pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
-        }
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-                alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-                alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-                pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
-            }
-        }
-    }
-
-    // Parse offset
-    auto offsetValue = paramObject->GetProperty("offset");
-    if (offsetValue->IsObject()) {
-        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-        CalcDimension dx;
-        auto dxValue = offsetObj->GetProperty("dx");
-        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
-        CalcDimension dy;
-        auto dyValue = offsetObj->GetProperty("dy");
-        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
-        pickerDialog.offset = DimensionOffset(dx, dy);
-    }
-
-    // Parse maskRect.
-    auto maskRectValue = paramObject->GetProperty("maskRect");
-    DimensionRect maskRect;
-    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
-        pickerDialog.maskRect = maskRect;
-    }
-
-    auto backgroundColorValue = paramObject->GetProperty("backgroundColor");
-    Color backgroundColor;
-    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
-        pickerDialog.backgroundColor = backgroundColor;
-    }
-
-    auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
-    if (backgroundBlurStyle->IsNumber()) {
-        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            pickerDialog.backgroundBlurStyle = blurStyle;
-        }
-    }
-
-    ParseDatePickerHoverMode(pickerDialog, paramObject);
-    ParseDatePickerBlurStyleOption(pickerDialog, paramObject);
-    ParseDatePickerEffectOption(pickerDialog, paramObject);
-
-    auto buttonInfos = ParseButtonStyles(paramObject);
-
-    auto shadowValue = paramObject->GetProperty("shadow");
-    Shadow shadow;
-    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
-        pickerDialog.shadow = shadow;
-    }
-    auto formatValue = paramObject->GetProperty("format");
-    bool showSecond = false;
-    if (formatValue->IsNumber()) {
-        auto displayedFormat = static_cast<TimePickerFormat>(formatValue->ToNumber<int32_t>());
-        if (displayedFormat == TimePickerFormat::HOUR_MINUTE_SECOND) {
-            showSecond = true;
-        }
-    }
-    settingData.showSecond = showSecond;
-    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
-    bool isEnableHapticFeedback = true;
-    if (enableHapticFeedbackValue->IsBoolean()) {
-        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
-    }
-    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
-    TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
-    TimePickerDialogAppearEvent(info, timePickerDialogEvent);
-    TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
-    TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), std::move(enterEvent), timePickerDialogEvent, buttonInfos);
-}
-
-void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
-    const std::map<std::string, NG::DialogEvent>& dialogEvent,
-    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
-{
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-
-    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-
-    auto executor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
-
-    auto theme = JSAlertDialog::GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(theme);
-
-    auto selectedTime = paramObj->GetProperty("selected");
-    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
-    auto enableCascade = paramObj->GetProperty("enableCascade");
-    NG::TimePickerSettingData settingData;
-    settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    settingData.isEnableCascade = enableCascade->ToBoolean();
-
-    DialogProperties properties;
-    properties.alignment = theme->GetAlignment();
-    if (properties.alignment == DialogAlignment::BOTTOM &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    }
-
-    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
-    bool isEnableHapticFeedback = true;
-    if (enableHapticFeedbackValue->IsBoolean()) {
-        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
-    }
-    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
-
-    properties.customStyle = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    }
-
-    std::map<std::string, PickerTime> timePickerProperty;
-    if (selectedTime->IsObject()) {
-        settingData.dialogTitleDate = ParseDate(selectedTime);
-        timePickerProperty["selected"] = ParseTime(selectedTime);
-    }
-    JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
-
-    auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
-    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-    executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
-}
-
-void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)
-{
-    auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
-    auto selectedTime = paramObj->GetProperty("selected");
-    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
-    auto enableCascade = paramObj->GetProperty("enableCascade");
-    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    bool isEnableCascade = enableCascade->ToBoolean();
-    if (selectedTime->IsObject()) {
-        timePicker->SetSelectedTime(ParseTime(selectedTime));
-    }
-    timePicker->SetIsDialog(true);
-    timePicker->SetIsCreateDialogComponent(true);
-    timePicker->SetHour24(isUseMilitaryTime);
-    timePicker->SetEnableCascade(isEnableCascade);
-    component = timePicker;
-}
-
-PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
-{
-    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime();
-    if (!timeVal->IsObject()) {
-        return pickerTime;
-    }
-    auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto yearFuncJsVal = timeObj->GetProperty("getFullYear");
-    if (yearFuncJsVal->IsFunction()) {
-        auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
-        JSRef<JSVal> year = yearFunc->Call(timeObj);
-        if (year->IsNumber() && LessOrEqual(year->ToNumber<int32_t>(), 0)) {
-            return pickerTime;
-        }
-    }
-    auto hourFuncJsVal = timeObj->GetProperty("getHours");
-    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
-    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
-    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
-        return pickerTime;
-    }
-    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
-    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
-    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
-    JSRef<JSVal> hour = hourFunc->Call(timeObj);
-    JSRef<JSVal> minute = minuteFunc->Call(timeObj);
-    JSRef<JSVal> second = secondFunc->Call(timeObj);
-
-    if (hour->IsNumber() && minute->IsNumber() && second->IsNumber()) {
-        pickerTime.SetHour(hour->ToNumber<int32_t>());
-        pickerTime.SetMinute(minute->ToNumber<int32_t>());
-        pickerTime.SetSecond(second->ToNumber<int32_t>());
-    }
-    return pickerTime;
-}
-
-PickerDate JSTimePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
-{
-    auto pickerDate = PickerDate();
-    if (!dateVal->IsObject()) {
-        return pickerDate;
-    }
-    auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
-    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
-    auto dateFuncJsVal = dateObj->GetProperty("getDate");
-    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
-        return pickerDate;
-    }
-    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
-    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
-    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
-    JSRef<JSVal> year = yearFunc->Call(dateObj);
-    JSRef<JSVal> month = monthFunc->Call(dateObj);
-    JSRef<JSVal> date = dateFunc->Call(dateObj);
-
-    if (year->IsNumber() && month->IsNumber() && date->IsNumber()) {
-        pickerDate.SetYear(year->ToNumber<int32_t>());
-        pickerDate.SetMonth(month->ToNumber<int32_t>() + 1); // 0-11 means 1 to 12 months
-        pickerDate.SetDay(date->ToNumber<int32_t>());
-    }
-    return pickerDate;
 }
 } // namespace OHOS::Ace::Framework

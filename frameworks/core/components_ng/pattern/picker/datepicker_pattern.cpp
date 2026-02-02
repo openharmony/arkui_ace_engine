@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,15 @@
 #include <utility>
 #include <vector>
 
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
+
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "core/components/picker/picker_base_component.h"
+#include "compatible/components/picker/picker_base_component.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -33,6 +37,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -117,11 +122,11 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
 {
     auto height = pickerTheme->GetDividerSpacing();
     auto buttonSpace = pickerTheme->GetSelectorItemSpace();
-    auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
-    CHECK_NULL_RETURN(columnNode, false);
-    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
     CHECK_NULL_RETURN(datePickerColumnNode, false);
+    auto columnNode = DynamicCast<FrameNode>(datePickerColumnNode->GetLastChild());
+    CHECK_NULL_RETURN(columnNode, false);
+    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_RETURN(buttonNode, false);
     auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -1221,7 +1226,8 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
     value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
+        ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
 
@@ -1383,9 +1389,14 @@ std::string DatePickerPattern::GetSelectedObject(bool isColumnChange, int status
             CHECK_NULL_RETURN(pickerRow, date.ToString(true, status));
             auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
             CHECK_NULL_RETURN(timeNode, date.ToString(true, status));
-            auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
-            CHECK_NULL_RETURN(timePickerPattern, date.ToString(true, status));
-            pickTime = timePickerPattern->GetCurrentTime();
+            auto* modifier = NG::NodeModifier::GetTimepickerCustomModifier();
+            CHECK_NULL_RETURN(modifier, date.ToString(true, status));
+            auto pickTimeOpt = modifier->getTimepickerCurrentTime(timeNode);
+            if (pickTimeOpt.has_value()) {
+                pickTime = pickTimeOpt.value();
+            } else {
+                return date.ToString(true, status);
+            }
         } else {
             auto pickerStack = host->GetParent();
             CHECK_NULL_RETURN(pickerStack, date.ToString(true, status));
@@ -1393,9 +1404,14 @@ std::string DatePickerPattern::GetSelectedObject(bool isColumnChange, int status
             CHECK_NULL_RETURN(pickerRow, date.ToString(true, status));
             auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
             CHECK_NULL_RETURN(timeNode, date.ToString(true, status));
-            auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
-            CHECK_NULL_RETURN(timePickerPattern, date.ToString(true, status));
-            pickTime = timePickerPattern->GetCurrentTime();
+            auto* modifier = NodeModifier::GetTimepickerCustomModifier();
+            CHECK_NULL_RETURN(modifier, date.ToString(true, status));
+            auto pickTimeOpt = modifier->getTimepickerCurrentTime(timeNode);
+            if (pickTimeOpt.has_value()) {
+                pickTime = pickTimeOpt.value();
+            } else {
+                return date.ToString(true, status);
+            }
         }
     }
     dateTimeString += std::string(",\"hour\":") + std::to_string(pickTime.GetHour()) +

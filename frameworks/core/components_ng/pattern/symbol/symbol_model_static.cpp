@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float MAX_FONT_SCALE = 2.0;
+constexpr float MAX_FONT_SCALE = 1.0f;
 } // namespace
 
 void SymbolModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
@@ -72,22 +72,21 @@ void SymbolModelStatic::SetSymbolEffect(FrameNode* frameNode, const std::optiona
 
 void SymbolModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    float minFontScale = 0.0f;
-    if (optValue.has_value()) {
-        minFontScale = std::clamp(optValue.value(), 0.0f, 1.0f);
-    }
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, minFontScale, frameNode);
+    if (optValue.has_value()) {
+        float minFontScale = 0.0f;
+        minFontScale = std::clamp(optValue.value(), 0.0f, 1.0f);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, minFontScale, frameNode);
+    }
 }
 
 void SymbolModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    float maxFontScale = MAX_FONT_SCALE;
-    if (optValue.has_value()) {
-        maxFontScale = std::max(optValue.value(), 1.0f);
-    }
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, maxFontScale, frameNode);
+    if (optValue.has_value()) {
+        float maxFontScale = std::max(optValue.value(), MAX_FONT_SCALE);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, maxFontScale, frameNode);
+    }
 }
 
 void SymbolModelStatic::SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue)
@@ -115,4 +114,14 @@ void SymbolModelStatic::InitialSymbol(FrameNode* frameNode, const std::uint32_t&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
 }
 
+void SymbolModelStatic::SetSymbolShadow(FrameNode* frameNode, const std::optional<SymbolShadow>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue.has_value()) {
+        SymbolModelNG::SetSymbolShadow(frameNode, optValue.value());
+    } else {
+        SymbolShadow symbolShadow;
+        SymbolModelNG::SetSymbolShadow(frameNode, symbolShadow);
+    }
+}
 } // namespace OHOS::Ace::NG

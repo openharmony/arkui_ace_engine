@@ -18,15 +18,27 @@
 #include "base/log/dump_log.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/ifelse/if_else_component.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
-#include "core/components_v2/list/list_item_component.h"
-#include "core/components_v2/tabs/tabs_helper.h"
+#include "compatible/components/list_v2/list_item_component.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #include "frameworks/core//components_part_upd/foreach/foreach_component.h"
 #include "frameworks/core//components_part_upd/foreach/foreach_element.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
+const ArkUITabContentModifier* GetTabContentInnerModifier()
+{
+    static const ArkUITabContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-content");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUITabContentModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 
 const std::string PREFIX_STEP = "  ";
 class RenderElementProxy : public ElementProxy {
@@ -150,16 +162,12 @@ public:
             return nullptr;
         }
 
-        auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_);
-        if (tabContentItemComponent) {
-            tabContentItemComponent->SetElementId(realElmtId_);
-        } else {
+        auto* modifier = GetTabContentInnerModifier();
+        if (!modifier || !modifier->setRealElementId(component_, realElmtId_)) {
             component_->SetElementId(realElmtId_);
         }
         auto element = host->OnUpdateElement(element_, component_);
-        if (tabContentItemComponent) {
-            tabContentItemComponent->SetElementId(GetElementId());
-        } else {
+        if (!modifier || !modifier->setRealElementId(component_, GetElementId())) {
             component_->SetElementId(GetElementId());
         }
         return element;
@@ -275,43 +283,45 @@ public:
 
     ~TabContentItemElementProxy() override
     {
-        auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_);
-        if (tabContentItemComponent) {
-            TabsHelper::RemoveTabBarItemById(tabContentItemComponent->GetBarElementId());
-
+        if (auto modifier = GetTabContentInnerModifier()) {
+            auto tabContentItemComponent = modifier->getTabContentItemComponent(component_);
+            if (!tabContentItemComponent) {
+                return;
+            }
+            modifier->removeTabBarItemById(tabContentItemComponent);
             if (!host_.Upgrade()) {
                 LOGE("Host_ is nullptr");
                 return;
             }
-            auto element = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
+            auto element = modifier->getTabContentProxyElement(host_.Upgrade());
             if (!element) {
                 LOGE("DTOR host is NOT TabContentProxyElement is nullptr");
                 return;
             }
-            TabsHelper::DecTabContentRenderCount(AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade()));
+            modifier->decTabContentRenderCount(host_.Upgrade());
         }
     }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
+        auto modifier = GetTabContentInnerModifier();
         if (GetElementId() == ElementRegister::UndefinedElementId) {
             // first render case, add the ElementRegistry
             ACE_DCHECK(element_ == nullptr);
 
-            auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component);
-            if (tabContentItemComponent) {
-                SetElementId(tabContentItemComponent->GetElementId());
+            if (modifier) {
+                int32_t id;
+                if (modifier->tryGetTabContentItemElementId(component, id)) {
+                    SetElementId(id);
+                }
             }
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
 
         // Add Tab Bar Item
-        auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
-        if (tabContentProxyElement && !element_) {
-            auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component);
-            TabsHelper::AddTabBarElement(tabContentProxyElement, tabContentItemComponent);
-            TabsHelper::IncTabContentRenderCount(tabContentProxyElement);
+        if (modifier) {
+            modifier->addTabBarItem(host_, element_, component);
         }
 
         RenderElementProxy::Update(component, startIndex);
@@ -324,13 +334,8 @@ public:
             (component_ != nullptr) && (GetElementId() != ElementRegister::UndefinedElementId) && "Is re-render");
 
         // Update TabBar element
-        auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
-        if (tabContentProxyElement) {
-            auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(
-                inwardWrappingComponent);
-            auto oldComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_);
-            tabContentItemComponent->SetBarElementId(oldComponent->GetBarElementId());
-            TabsHelper::UpdateTabBarElement(tabContentProxyElement, element_, inwardWrappingComponent);
+        if (auto modifier = GetTabContentInnerModifier()) {
+            modifier->updateTabBarElement(host_, element_, component_, inwardWrappingComponent);
         }
 
         RenderElementProxy::LocalizedUpdate(inwardWrappingComponent, newTabContentItemComponent);
@@ -339,8 +344,9 @@ public:
     void UpdateIndex(size_t startIndex) override
     {
         startIndex_ = startIndex;
-        TabsHelper::SetTabBarElementIndex(element_,
-            TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_), startIndex);
+        if (auto modifier = GetTabContentInnerModifier()) {
+            modifier->setTabBarElementIndex(element_, component_, startIndex);
+        }
         RenderElementProxy::UpdateIndex(startIndex);
     }
 };
@@ -415,7 +421,9 @@ public:
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
 
-            auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
+            auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+            CHECK_NULL_VOID(listItemModifier);
+            auto listItemComponent = listItemModifier->getV2ListItemComponent(component_);
             if (listItemComponent->GetIsLazyCreating()) {
                 deepRenderignState_ = DeepRenderingState::shallowTree;
                 // continue later when GetElementByIndex is called
@@ -434,7 +442,9 @@ public:
 
     void GetDeepRenderComponent() override
     {
-        auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
+        auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+        CHECK_NULL_VOID(listItemModifier);
+        auto listItemComponent = listItemModifier->getV2ListItemComponent(component_);
         auto newComponent = listItemComponent->ExecDeepRender();
 
         ACE_DCHECK(newComponent != nullptr);
@@ -460,8 +470,10 @@ public:
 
         // release deeprender Component tree,
         // repalce component_ with a dummy
-        auto listItem = AceType::DynamicCast<V2::ListItemComponent>(component_);
-        auto placeholder = AceType::MakeRefPtr<V2::ListItemComponent>();
+        auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+        CHECK_NULL_VOID(listItemModifier);
+        auto listItem = listItemModifier->getV2ListItemComponent(component_);
+        auto placeholder = listItemModifier->makeV2ListItemComponent();
         listItem->MoveDeepRenderFunc(placeholder);
         placeholder->SetElementId(listItem->GetElementId());
         component_ = std::move(placeholder);
@@ -1537,9 +1549,10 @@ RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host,
     }
 
     if (Container::IsCurrentUsePartialUpdate()) {
-        auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component);
-        if (tabContentItemComponent) {
-            return AceType::MakeRefPtr<TabContentItemElementProxy>(host);
+        if (auto modifier = GetTabContentInnerModifier()) {
+            if (modifier->isTabContentItemComponent(component)) {
+                return AceType::MakeRefPtr<TabContentItemElementProxy>(host);
+            }
         }
     }
 

@@ -34,11 +34,15 @@ namespace {
 // error code
 constexpr int32_t CREATOR_IMAGES_OVERSIZE = 1;
 constexpr int32_t CREATOR_CONTENT_OVERSIZE = 2;
+constexpr int32_t CREATOR_INVALID_INSTANCE_ID = 3;
+constexpr int32_t CREATOR_PARAMETERS_ERROR = 4;
 constexpr int32_t CREATOR_INTERNAL_ERROR = 99;
 // error message
 constexpr char FIRST_ARG_TYPE_INCORRECT[] = "type of first param is incorrect!";
+constexpr char SECOND_ARG_TYPE_INCORRECT[] = "type of second param is incorrect!";
 constexpr char IMAGES_INPUT_OVER_SIZE[] = "images input are oversize(larger than 4)!";
-constexpr char CONTENT_INPUT_OVER_SIZE[] = "content input is oversize(larger than 600 character)!";
+constexpr char CONTENT_INPUT_OVER_SIZE[] = "content input is oversize(larger than 280 character)!";
+constexpr char INVALID_INSTANCE_ID_MSG[] = "uiContext input is invalid!";
 constexpr char INTERNAL_ERROR_MSG[] = "internal error, create canvas failed!";
 constexpr char IMAGE_GENERATOR_DIALOG_CREATOR_FUNC[] = "__imageGeneratorDialogCreator";
 
@@ -73,7 +77,7 @@ napi_value CreatePromise(napi_env env, int32_t errCode, const std::string& errMs
 }
 }
 
-static int32_t CallImageGeneratorCreator(napi_env env, napi_value options)
+static int32_t CallImageGeneratorCreator(napi_env env, napi_value options, napi_value instanceId)
 {
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env, &scope);
@@ -84,17 +88,20 @@ static int32_t CallImageGeneratorCreator(napi_env env, napi_value options)
     napi_get_global(env, &globalValue);
     napi_value imageGeneratorCreator;
     napi_get_named_property(env, globalValue, IMAGE_GENERATOR_DIALOG_CREATOR_FUNC, &imageGeneratorCreator);
-    napi_value funcArgv[1] = { options };
+    napi_value funcArgv[2] = { options, instanceId };
     napi_value returnValue;
-    if (napi_call_function(env, globalValue, imageGeneratorCreator, 1, funcArgv, &returnValue) != napi_ok) {
+    if (napi_call_function(env, globalValue, imageGeneratorCreator, 2, funcArgv, &returnValue) != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_SIDEBAR, "CallLoadImageGeneratorDialog failed");
+        napi_close_handle_scope(env, scope);
         return CREATOR_INTERNAL_ERROR;
     }
     int32_t errorCode = CREATOR_INTERNAL_ERROR;
     if (napi_get_value_int32(env, returnValue, &errorCode) != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_SIDEBAR, "parse error code failed when create image generator");
+        napi_close_handle_scope(env, scope);
         return CREATOR_INTERNAL_ERROR;
     }
+    napi_close_handle_scope(env, scope);
     return errorCode;
 }
 
@@ -117,30 +124,77 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     }
     // parse uiContext finish
     napi_value options = argc == 2 ? argv[1] : nullptr;
-    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(-1)) {
+    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(instanceId)) {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
-    int32_t errorCode = CallImageGeneratorCreator(env, options);
+    int32_t errorCode = CallImageGeneratorCreator(env, options, napiInstanceId);
     if (errorCode == CREATOR_IMAGES_OVERSIZE) {
         return CreatePromise(env, ERROR_CODE_PARAM_INVALID, IMAGES_INPUT_OVER_SIZE);
     }
     if (errorCode == CREATOR_CONTENT_OVERSIZE) {
         return CreatePromise(env, ERROR_CODE_PARAM_INVALID, CONTENT_INPUT_OVER_SIZE);
     }
+    if (errorCode == CREATOR_INVALID_INSTANCE_ID) {
+        return CreatePromise(env, CREATOR_INVALID_INSTANCE_ID, INVALID_INSTANCE_ID_MSG);
+    }
     if (errorCode == CREATOR_INTERNAL_ERROR) {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
+    if (errorCode == CREATOR_PARAMETERS_ERROR) {
+        return CreatePromise(env, ERROR_CODE_PARAM_INVALID, SECOND_ARG_TYPE_INCORRECT);
+    }
+    // ---------- INVALID CASE ABOVE ----------
     if (Framework::ImageGeneratorDialogView::Create(instanceId)) {
         return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
-    } else {
-        return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
+    return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
+}
+
+static napi_value JSScaleGeneratorDialog(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+    NAPI_ASSERT(env, (argc == 3), "Invalid argc");
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[0], &valueType);
+    if (valueType != napi_object) {
+        return nullptr;
+    }
+    napi_value napiInstanceId = nullptr;
+    napi_get_named_property(env, argv[0], "instanceId_", &napiInstanceId);
+    int32_t instanceId = -1;
+    if (napi_get_value_int32(env, napiInstanceId, &instanceId) != napi_ok) {
+        return nullptr;
+    }
+    napi_typeof(env, argv[1], &valueType);
+    if (valueType != napi_number) {
+        return nullptr;
+    }
+    int32_t uniqueId = -1;
+    if (napi_get_value_int32(env, argv[1], &uniqueId) != napi_ok) {
+        return nullptr;
+    }
+    napi_typeof(env, argv[2], &valueType);
+    if (valueType != napi_boolean) {
+        return nullptr;
+    }
+    bool isMinimize = true;
+    if (napi_get_value_bool(env, argv[2], &isMinimize) != napi_ok) {
+        return nullptr;
+    }
+    if (isMinimize) {
+        Framework::ImageGeneratorDialogView::MinimizeDialog(instanceId, uniqueId);
+    } else {
+        Framework::ImageGeneratorDialogView::RecoverDialog(instanceId, uniqueId);
+    }
+    return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
 }
 
 static napi_value Export(napi_env env, napi_value exports)
 {
-    napi_property_descriptor properties[] = { DECLARE_NAPI_FUNCTION(
-        "showGeneratorDialog", JSShowGeneratorDialog) };
+    napi_property_descriptor properties[] = {
+        DECLARE_NAPI_FUNCTION("showGeneratorDialog", JSShowGeneratorDialog),
+        DECLARE_NAPI_FUNCTION("scaleGeneratorDialog", JSScaleGeneratorDialog)
+    };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     return exports;

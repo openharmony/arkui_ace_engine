@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CONTAINER_BASE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CONTAINER_BASE_H
 
+#include "ui/base/macros.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -23,7 +24,7 @@ namespace OHOS::Ace::Framework {
 
 class JSContainerBase : public JSViewAbstract, public JSInteractableView {
 public:
-    static void Pop();
+    static ACE_FORCE_EXPORT void Pop();
     static void JSBind(BindingTarget globalObj);
 };
 

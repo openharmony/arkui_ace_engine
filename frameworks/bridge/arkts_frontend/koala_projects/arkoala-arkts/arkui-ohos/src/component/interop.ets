@@ -20,13 +20,13 @@ import { int32 } from '@koalaui/common';
 import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { ExtendableComponent } from './extendableComponent';
-import { 
-    StateDecoratedVariable, 
-    ProvideDecoratedVariable, 
+import {
+    StateDecoratedVariable,
+    ProvideDecoratedVariable,
     PropDecoratedVariable,
     PropRefDecoratedVariable,
-    LinkDecoratedVariable, 
-    ConsumeDecoratedVariable, 
+    LinkDecoratedVariable,
+    ConsumeDecoratedVariable,
     InteropWatchFunc,
     uiUtils,
     IObservedObject,
@@ -51,7 +51,6 @@ import { ThemeColorMode } from "arkui/component/common"
 import { ArkThemeNativeHelper } from "arkui/theme/ArkThemeNativeHelper"
 import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager"
 
-import { StateManagerImpl } from '@koalaui/runtime';
 import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
 import { NavPathInfo, NavPathStackInternal, NavigationOptions, NavigationInterception } from "../component/navigation";
 
@@ -104,11 +103,11 @@ export function compatibleComponent(
         if (staticComponent === undefined) {
             staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
         }
-        let current = (GlobalStateManager.instance as StateManagerImpl).current;
-        (GlobalStateManager.instance as StateManagerImpl).current = undefined;
+        let current = GlobalStateManager.instance.currentScope;
+        GlobalStateManager.instance.currentScope = undefined;
         const viewInterop = staticComponent ? createInteropView(staticComponent) : ESValue.instantiateEmptyObject();
         const result = init(viewInterop);
-        (GlobalStateManager.instance as StateManagerImpl).current = current;
+        GlobalStateManager.instance.currentScope = current;
         const dynamicComponent = result.component;
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
@@ -128,20 +127,15 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     content?: () => void
 ): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        BaseCustomComponent._invokeImpl(undefined, factory, options, undefined, content);
+        BaseCustomComponent._invokeImpl<T, T_Options>(undefined, factory, options, undefined, content);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-    let manager = uiContext.stateMgr;
-    if (manager === undefined) {
-        manager = GlobalStateManager.instance;
-    }
+    const manager = GlobalStateManager.instance;
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
-    
+
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
-        const frozen = manager.frozen;
-        manager.frozen = true;
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -150,7 +144,6 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
-        manager.frozen = frozen;
     });
 
     const inc = node.value;
@@ -166,7 +159,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         () => {
             ArkThemeScopeManager.getInstance().executeReload(node);
             (staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);
-            }, 
+            },
             peerNode.getPeerPtr() as number,
         ];
 }
@@ -325,13 +318,13 @@ export function isDynamicObject<T>(value: T): boolean {
 export function getRawObject<T>(value: T): T {
     const global = ESValue.getGlobal();
     const getRawObjectForInterop = global.getProperty('getRawObjectForInterop');
-    return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
+    return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
 export function getObservedObject<T>(value: T): T {
     const global = ESValue.getGlobal();
     const createObservedObject = global.getProperty('createObservedObject');
-    return createObservedObject.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
+    return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
 export function registerCreateWatchFuncCallback(): void {
@@ -355,10 +348,12 @@ export function registerCreateStaticObservedCallback(): void {
     registerCallback.invoke(makeObservedcallback);
 }
 
+abstract class DummyBaseCustom extends BaseCustomComponent<undefined> {}
+
 export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
-    registerCallback.invoke(compatibleStaticComponent);
+    registerCallback.invoke(compatibleStaticComponent<DummyBaseCustom, undefined>);
 }
 
 export function registerMakeBuilderParameterStaticProxy(): void {
@@ -398,8 +393,8 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
 
         let component: ESValue;
         let createCompatibleNode: ESValue;
-        let current = (GlobalStateManager.instance as StateManagerImpl).current;
-        (GlobalStateManager.instance as StateManagerImpl).current = undefined;
+        let current = GlobalStateManager.instance.currentScope;
+        GlobalStateManager.instance.currentScope = undefined;
         switch (args.length) {
             case 0:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFuncVoid');
@@ -415,17 +410,17 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                 break;
             case 3:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc3');
-                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
                     args[1], args[2]);
                 break;
             case 4:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc4');
-                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
                     args[1], args[2], args[3]);
                 break;
             case 5:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc5');
-                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
                     args[1], args[2], args[3], args[4]);
                 break;
             case 6:
@@ -458,7 +453,7 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         }
         const viewPUCreate = global.getProperty('viewPUCreate');
         viewPUCreate.invoke(component);
-        (GlobalStateManager.instance as StateManagerImpl).current = current;
+        GlobalStateManager.instance.currentScope = current;
         return {
             component: component,
             name: 'compatibleWrappedBuilder',
@@ -496,21 +491,15 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                 }
             }
         } else {
-            const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
-            const keys = Object.keys(target);
-            if (rawValue instanceof IObservedObject) {
-                const PREFIX = '__backing_';
-                keys.forEach((key)=>{
-                    if(key.startsWith(PREFIX)){
-                        const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
-                        stateParam.setProperty(key.slice(PREFIX.length), value);
-                        invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key.slice(PREFIX.length)));
-                    }
-                })
+            if (!Object.keys(rawValue as Object).includes('handler')) {
+                return;
             } else {
-                keys.forEach((key)=>{
+                const handler = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('handler').getData() as Object;
+                const target = (reflect.Value.of(handler) as ClassValue).getFieldByName('_target').getData() as Object;
+                const keys = Object.keys(target);
+                keys.forEach((key) => {
                     const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
-                    stateParam.setProperty(key, value);
+                    stateParam.setProperty(ESValue.wrap(key), ESValue.wrap(value));
                     invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key));
                 })
             }
@@ -531,20 +520,14 @@ export function transferCompatibleBuilder<T extends Function>(
         };
 
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        let manager = uiContext.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
-            const frozen = manager.frozen;
-            manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             memoEntry<void>(context, 0, func);
             OBSERVE.renderingComponent = r;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen;
         });
 
         const ptr = node.value.peer.ptr;
@@ -566,29 +549,22 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
         if (isDynamicObject(args)) {
             state = updateDynamicObjectForInterop(args);
         } else {
-            const objType = Type.of(args);
-            let handler = objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
-            ? (proxy.Proxy.tryGetHandler(args) as InteropBuilderLiteralProxyHandler<T>) // a very slow call so need to judge proxy first
-            : undefined;
-            if (handler) {
-                state = handler!.state;
+            if (args instanceof reflect.Proxy) {
+                const handler = args.getHandler();
+                if (handler instanceof InteropBuilderLiteralProxyHandler) {
+                    state = handler!.state;
+                }
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        let manager = uiContext.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
-            const frozen = manager.frozen;
-            manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             memoEntry1<T, void>(context, 0, builder, args);
             OBSERVE.renderingComponent = r;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen;
         });
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
@@ -603,9 +579,13 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
  * Creates a proxy for static object literal in the ArkTS 1.1 context
  * to intercept property getter operations.
  */
-function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: T, sourceGetter: Any): T {
-    const result = proxy.Proxy.create(value, new InteropBuilderLiteralProxyHandler<T>(sourceGetter));
-    return result;
+function makeBuilderParameterStaticProxy(name: string, value: Object, sourceGetter: Any): Object {
+    const cls = Class.of(value);
+    const ifaces = cls.getInterfaces();
+    if (ifaces.length == 0) {
+        return value;
+    }
+    return reflect.Proxy.create(cls.getLinker(), ifaces, new InteropBuilderLiteralProxyHandler(value, sourceGetter));
 }
 
 /**
@@ -613,7 +593,7 @@ function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: 
  * through hook functions, thereby enabling it to refresh the 1.2 UI.
  */
 function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefined {
-    let state: MutableState<int32> = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    let state: MutableState<int32> = GlobalStateManager.instance.mutableState<int32>(0, true);
     const startHookFunc = ESValue.getGlobal().getProperty('startStaticHook');
     const result = startHookFunc.invoke(ESValue.wrap(args), ESValue.wrap(()=>{ state.value })).unwrap();
     if (result === undefined) {
@@ -622,21 +602,36 @@ function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefin
     return state;
 }
 
-class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
+class InteropBuilderLiteralProxyHandler implements reflect.InvocationHandler {
+    private static readonly GETTER_PREFIX = "%%get-"
+
     source: ESValue;
+    target: Object;
     state: MutableState<int32>;
-    constructor(source: Any) {
+
+    constructor(target: Object, source: Any) {
         this.source = ESValue.wrap(source)
-        this.state = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        this.target = target
+        this.state = GlobalStateManager.instance.mutableState<int32>(0, true);
     }
 
-    override get(target: T, name: string): Any {
-        const propertyGetter: ESValue = this.source.getPropertySafe(name);
-        if (propertyGetter === ESValue.Undefined) {
-            return super.get(target, name);
+    override get(proxy: reflect.Proxy, method: reflect.InstanceMethod): Any {
+        const getterPrefixLength = InteropBuilderLiteralProxyHandler.GETTER_PREFIX.length
+        const propName = method.getName().substring(getterPrefixLength)
+        const propGetter: ESValue = this.source.getPropertySafe(propName);
+        if (propGetter.isUndefined()) {
+            return method.invoke(this.target);
         }
         this.state.value;
-        return propertyGetter.invoke().unwrap();
+        return propGetter.isFunction() ? propGetter.invoke().unwrap() : propGetter.unwrap()
+    }
+
+    override set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {
+        method.invoke(this.target, [value])
+    }
+
+    override invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): void {
+        method.invoke(this.target, args)
     }
 }
 
@@ -655,7 +650,7 @@ function parseInfoFromJsonElement(infoElement: jsonx.JsonElement): NavPathInfo |
     let paramObj: Object | undefined = infoElement.tryGetElement('param');
     let isEntry: boolean | undefined = infoElement.tryGetBoolean('isEntry');
     return new NavPathInfo(name, paramObj, undefined, isEntry);
-} 
+}
 
 function parseNumberArrayFromJson(jsonArray: string): Array<int32> {
     let array = new Array<int32>();
@@ -1018,7 +1013,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
     return (
         /** @memo */
         (...args: FixedArray<Any>) => {
-            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length]; 
+            let argsESValue: FixedArray<ESValueOrUndefined> = new FixedArray<ESValueOrUndefined>(args.length);
             for (let i = 0; i < args.length; i++) {
                 if (args[i] instanceof ESValue) {
                     argsESValue[i] = args[i] as ESValue;
@@ -1034,7 +1029,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
 export function registerCreateCompatibleStaticState(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCreateCompatibleStaticState');
-    registerCallback.invoke(createCompatibleStaticState);
+    registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
 
 function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedVariable<T> {
@@ -1079,12 +1074,12 @@ export function enableCompatibleObservedV2ForStatic<T>(
 ): T {
     let method = ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStatic');
     let createStaticState = () => {
-        return StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        return GlobalStateManager.instance.mutableState<int32>(0, true);
     }
     let recordStaticState = (value: MutableState<int32>) => {
         value.value
     }
-    let updateStaticState = (value: MutableState<int32>) => {   
+    let updateStaticState = (value: MutableState<int32>) => {
         value.value++
         ESValue.getGlobal().getProperty('runPendingJobs').invoke();
     }

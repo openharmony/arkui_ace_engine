@@ -1399,6 +1399,30 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData002, TestSize.Level1)
 }
 
 /**
+@tc.name: SetObserverParentForLayoutChildren001
+@tc.desc: Test SetObserverParentForLayoutChildren
+@tc.type: FUNC
+*/
+HWTEST_F(UINodeTestNg, SetObserverParentForLayoutChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto rootNode = FrameNode::CreateFrameNode("rootNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), false);
+
+    rootNode->SetObserverParentForLayoutChildren(parentNode);
+    EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), true);
+    /**
+     * @tc.steps: step2. Test free node GetObserverParentForLayoutChildren
+     */
+    EXPECT_EQ(rootNode->GetObserverParentForLayoutChildren(), parentNode);
+    rootNode->ClearObserverParentForLayoutChildren();
+    EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), false);
+}
+
+/**
  * @tc.name: TestPostAfterAttachMainTreeTask001
  * @tc.desc: Test PostAfterAttachMainTreeTask
  * @tc.type: FUNC
@@ -1428,5 +1452,150 @@ HWTEST_F(UINodeTestNg, TestPostAfterAttachMainTreeTask001, TestSize.Level1)
     testNode->SetIsFree(false);
     testNode->PostAfterAttachMainTreeTask([]() { return; });
     EXPECT_EQ(testNode->afterAttachMainTreeTasks_.size(), 0);
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId001
+ * @tc.desc: Test basic Add/Remove FrameNodeByInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    const std::string& existingId = "testNode";
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode(existingId, 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Test Add/Remove FrameNodeByInspectorId
+     */
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(existingId, testNode, testNode->GetId());
+    auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(existingId);
+    EXPECT_NE(retrievedNode, nullptr);
+    EXPECT_EQ(retrievedNode->GetId(), testNode->GetId());
+
+    /**
+     * @tc.steps: step3. Test RemoveFrameNodeByInspectorId
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(existingId, testNode->GetId());
+    auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(existingId);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId002
+ * @tc.desc: Test adding multiple nodes with same inspector ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create multiple nodes with same inspector ID
+     */
+    const std::string& inspectorId = "multiNodeTest";
+    const RefPtr<FrameNode> node1 =
+        FrameNode::CreateFrameNode(inspectorId, 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 =
+        FrameNode::CreateFrameNode(inspectorId, 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node3 =
+        FrameNode::CreateFrameNode(inspectorId, 3, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Add all nodes with same inspector ID
+     */
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node1, node1->GetId());
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node2, node2->GetId());
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node3, node3->GetId());
+
+    /**
+     * @tc.steps: step3. Verify all nodes can be retrieved
+     */
+    auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId);
+    EXPECT_NE(retrievedNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Clean up
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node1->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node2->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node3->GetId());
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId003
+ * @tc.desc: Test removing specific node from multiple nodes with same inspector ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create multiple nodes with same inspector ID
+     */
+    const std::string& inspectorId = "removeTest";
+    const RefPtr<FrameNode> node1 =
+        FrameNode::CreateFrameNode(inspectorId, 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 =
+        FrameNode::CreateFrameNode(inspectorId, 2, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Add both nodes
+     */
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node1, node1->GetId());
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node2, node2->GetId());
+
+    /**
+     * @tc.steps: step3. Remove first node, second should still exist
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node1->GetId());
+    auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId);
+    EXPECT_NE(retrievedNode, nullptr);
+    EXPECT_EQ(retrievedNode->GetId(), node2->GetId());
+
+    /**
+     * @tc.steps: step4. Clean up
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node2->GetId());
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId004
+ * @tc.desc: Test nodes with different inspector IDs
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create nodes with different inspector IDs
+     */
+    const std::string& inspectorId1 = "testId1";
+    const std::string& inspectorId2 = "testId2";
+    const RefPtr<FrameNode> node1 =
+        FrameNode::CreateFrameNode(inspectorId1, 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 =
+        FrameNode::CreateFrameNode(inspectorId2, 2, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Add nodes with different inspector IDs
+     */
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId1, node1, node1->GetId());
+    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId2, node2, node2->GetId());
+
+    /**
+     * @tc.steps: step3. Verify nodes can be retrieved by their respective inspector IDs
+     */
+    auto retrievedNode1 = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId1);
+    auto retrievedNode2 = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId2);
+    EXPECT_NE(retrievedNode1, nullptr);
+    EXPECT_NE(retrievedNode2, nullptr);
+    EXPECT_EQ(retrievedNode1->GetId(), node1->GetId());
+    EXPECT_EQ(retrievedNode2->GetId(), node2->GetId());
+
+    /**
+     * @tc.steps: step4. Clean up
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId1, node1->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId2, node2->GetId());
 }
 } // namespace OHOS::Ace::NG

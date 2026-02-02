@@ -29,7 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -521,6 +521,7 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext = false);
+    void OpenImageGenerator(BindSheetCreateParam&& param, int32_t instanceId);
     void CloseSheet(const SheetKey& sheetKey);
     void InitSheetMask(
         const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle);
@@ -578,7 +579,7 @@ public:
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
     void MountToParentWithOrder(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node,
-        std::optional<double> levelOrder = std::nullopt);
+        std::optional<double> levelOrder = std::nullopt, bool isCustKBContFeat = false);
     void OnMainWindowSizeChange(int32_t instanceId, WindowSizeChangeReason reason);
 
     void CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
@@ -594,7 +595,7 @@ public:
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
-    bool ChangeBindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
+    void ChangeBindKeyboardWithNode(int32_t targetId);
     void CloseKeyboard(int32_t targetId);
     void UpdateCustomKeyboardPosition();
 
@@ -720,6 +721,7 @@ public:
     bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
+    void UpdatePopupCustomNode();
 
     bool IsMenuShow() const
     {
@@ -786,6 +788,12 @@ public:
         return menuLifeCycleCallbackMap_[targetId];
     }
     bool CheckTargetIdIsValid(int32_t targetId);
+
+    void UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId);
+    bool CloseImageGeneratorSheet();
+    void UpdateImageGeneratorSheetScale(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
+        int32_t targetId, std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -937,8 +945,7 @@ private:
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
     void RemoveMenuNotInSubWindow(
         const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
-    bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId,
-        SheetKey& sheetKey);
+    bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId, SheetKey& sheetKey);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
@@ -991,7 +998,6 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
-    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -1074,8 +1080,10 @@ private:
     std::optional<OverlayManagerInfo> overlayInfo_;
     WeakPtr<FrameNode> customKeyboardNode_;
     int32_t oldTargetId_ = -1;
+    bool isKeyBoardContinue_ = false;
     std::unordered_set<int32_t> onDisappearFilterIds_;
     std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
+    std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

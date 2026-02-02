@@ -620,6 +620,7 @@ int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
 bool ListModelNG::GetShowCached(FrameNode* frameNode)
 {
     bool show = false;
+    CHECK_NULL_RETURN(frameNode, show);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, ShowCachedItems, show, frameNode, false);
     return show;
 }
@@ -1178,9 +1179,9 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
     pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
-RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
+RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize(FrameNode* node)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = node ? node : ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

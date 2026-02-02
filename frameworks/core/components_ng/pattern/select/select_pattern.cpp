@@ -32,6 +32,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -143,6 +145,34 @@ void SelectPattern::OnAttachToMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
+void SelectPattern::UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = menu->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>(menu->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    if (!theme->GetMenuItemNeedFocus()) {
+        return;
+    }
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuLayoutProperty);
+        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(menuBorderWidth);
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+}
+
 void SelectPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -157,6 +187,7 @@ void SelectPattern::OnModifyDone()
     }
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
+    UpdateMenuBorderStyle(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);
@@ -168,7 +199,10 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(selectPaintProperty);
-    if (selectPaintProperty->HasBackgroundColor()) {
+    auto material = renderContext->GetSystemMaterial();
+    if (selectPaintProperty->HasBackgroundColor() ||
+        (material && material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+            material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX))) {
         return;
     }
     auto context = host->GetContextRefPtr();
@@ -246,7 +280,8 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(selectLayoutProps);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false)) {
+    if ((theme->GetExpandDisplay() || SystemProperties::IsPCMode()) &&
+        selectLayoutProps->GetShowInSubWindowValue(false)) {
         ShowSelectMenuInSubWindow();
         return;
     }
@@ -272,10 +307,14 @@ void SelectPattern::ConfigMenuParam()
     CHECK_NULL_VOID(selectLayoutProps);
     auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    auto menuparam = wrapperPattern->GetMenuParam();
-    menuparam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
-    menuparam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
-    wrapperPattern->SetMenuParam(menuparam);
+    auto menuParam = wrapperPattern->GetMenuParam();
+    menuParam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
+    menuParam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
+    menuParam.systemMaterial = GetMenuSystemMaterial();
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+    wrapperPattern->SetMenuParam(menuParam);
 }
 
 void SelectPattern::ShowSelectMenuInSubWindow()
@@ -2049,16 +2088,12 @@ void SelectPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     } else {
         renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
-        if (!SystemProperties::ConfigChangePerform()) {
-            SetOptionBgColor(selectTheme->GetBackgroundColor());
-        }
     }
 
     UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
-        optionsPattern->SetFontColor(selectTheme->GetFontColor());
         auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
         if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
@@ -2378,7 +2413,8 @@ bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
     CHECK_NULL_RETURN(result, false);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire onSelect event:%{public}s, nodeId:%{public}d",
         result->ToString().c_str(), nodeId);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result));
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result),
+        ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
 }
 

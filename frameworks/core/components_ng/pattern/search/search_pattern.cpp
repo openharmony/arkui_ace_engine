@@ -297,6 +297,7 @@ void SearchPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     InitMargin(layoutProperty);
@@ -829,7 +830,8 @@ void SearchPattern::OnClickButtonAndImage()
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit",
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     TAG_LOGI(AceLogTag::ACE_SEARCH, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
 }
 
@@ -1435,6 +1437,40 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     AnimationUtils::Animate(
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); }, nullptr,
         nullptr, Claim(context));
+}
+
+int32_t SearchPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
+        host->GetId());
+    std::string cmd;
+    std::unique_ptr<JsonValue> json = nullptr;
+    std::unique_ptr<JsonValue> params = nullptr;
+    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
+        return RET_FAILED;
+    }
+    if (cmd != "setSearchText") {
+        TAG_LOGE(AceLogTag::ACE_SEARCH, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
+        return RET_FAILED;
+    }
+    // Get TextField child
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldChild, RET_FAILED);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, RET_FAILED);
+    std::string text = params->GetString("value");
+    InputCommandInfo inputCommandInfo;
+    inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length()) };
+    inputCommandInfo.insertOffset = 0;
+    inputCommandInfo.insertValue = UtfUtils::Str8ToStr16(text);
+    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+    textFieldPattern->AddInputCommand(inputCommandInfo);
+    if (isSearchButtonEnabled_) {
+        OnClickButtonAndImage();
+    }
+    return RET_SUCCESS;
 }
 
 void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext,
@@ -2102,6 +2138,8 @@ void SearchPattern::OnColorConfigurationUpdate()
         UpdateImageIconNode(SEARCH_IMAGE_INDEX);
         UpdateImageIconNode(CANCEL_IMAGE_INDEX);
     }
+    ImageIconColorConfigurationUpdate(SEARCH_IMAGE_INDEX);
+    ImageIconColorConfigurationUpdate(CANCEL_IMAGE_INDEX);
     UpdateDividerColorMode();
     if (SystemProperties::ConfigChangePerform()) {
         auto searchTheme = GetTheme();
@@ -2212,10 +2250,11 @@ void SearchPattern::UpdateTextFieldColor()
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        if (!buttonLayoutProperty->HasFontColor()) {
-            textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        if (IsSearchButtonUsingThemeColor()) {
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2466,6 +2505,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     imageClickListener_ = nullptr;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2519,6 +2559,7 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     imageClickListener_ = nullptr;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
@@ -2764,6 +2805,21 @@ void SearchPattern::UpdateImageIconNode(int32_t index)
         UpdateImageIconProperties(iconFrameNode, index);
         iconFrameNode->MarkModifyDone();
         iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void SearchPattern::ImageIconColorConfigurationUpdate(int32_t index)
+{
+    if (!IsSymbolIcon(index)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(iconFrameNode);
+        auto pattern = iconFrameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(pattern);
+        CHECK_NULL_VOID(imagePattern);
+        pattern->OnColorConfigurationUpdate();
     }
 }
 
@@ -3276,6 +3332,16 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                 }
             }
         },
+
+        {"strokeColor",
+            [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateStrokeColorResource(*realValue);
+                }
+            }
+        },
     };
 
     auto it = handlers.find(key);
@@ -3468,6 +3534,16 @@ void SearchPattern::UpdateDividerColorResource(const Color& value)
 
     dividerRenderProperty->UpdateDividerColor(value);
     dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdateStrokeColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
+    searchLayoutProperty->UpdateStrokeColor(value);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchPattern::UpdateMinFontSizeResource(const Dimension& value)

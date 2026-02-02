@@ -136,7 +136,7 @@ public:
     void AddFormRenderDiedCallback(FormRenderDiedCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
-    void OnActionEvent(const std::string& action);
+    void OnActionEvent(const std::string& action, bool isManuallyClick);
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         SerializedGesture& serializedGesture);
     void AddRenderDelegate();
@@ -150,7 +150,7 @@ public:
     void SetColorMode(int32_t colorMode);
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs);
-    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
     void OnAccessibilityChildTreeDeregister();
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     bool CheckFormBundleForbidden(const std::string& bundleName);
@@ -262,7 +262,7 @@ private:
     bool isMultiInstanceEnable_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     void OnRouterActionEvent(const std::string& action);
-    void OnCallActionEvent(const std::string& action);
+    void OnCallActionEvent(const std::string& action, bool isManuallyClick);
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
     std::mutex wantCacheMutex_;

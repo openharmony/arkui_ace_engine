@@ -359,6 +359,22 @@ private:
     std::map<int32_t, std::list<WeakPtr<FrameNode>>> controller_;
 };
 
+class AccessibilityEventBlockerInAction {
+public:
+    // 构造函数
+    AccessibilityEventBlockerInAction() = default;
+    ~AccessibilityEventBlockerInAction() = default;
+    void AddBlockedEvent(int64_t actionId, AccessibilityEventType event);
+    void SetBlockedEvents(int64_t actionId,
+        const std::vector<AccessibilityEventType>& events);
+    bool ShouldBlock(int64_t actionId, AccessibilityEventType eventType) const;
+    void Reset();
+
+private:
+    int64_t currentActionId_ = -1;
+    std::unordered_set<uint32_t> blockedEvents_;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_UTILS_ACCESSIBILITY_MANAGER_UTILS_H

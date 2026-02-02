@@ -21,7 +21,7 @@
 #include "frameworks/base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT CommonViewModelNG : public OHOS::Ace::CommonViewModel {
+class ACE_FORCE_EXPORT CommonViewModelNG : public OHOS::Ace::CommonViewModel {
 public:
     void Create(bool isLayoutNode) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

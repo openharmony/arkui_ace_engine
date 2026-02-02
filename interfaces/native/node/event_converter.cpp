@@ -231,13 +231,13 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
         case NODE_ON_PRE_DRAG:
             return ON_PRE_DRAG;
         case NODE_ON_KEY_EVENT:
-            return ON_KEY_EVENT;
+            return ArkUIEventSubKind::ON_KEY_EVENT;
         case NODE_ON_KEY_PRE_IME:
             return ON_KEY_PREIME;
         case NODE_DISPATCH_KEY_EVENT:
             return ON_KEY_DISPATCH;
         case NODE_ON_CLICK_EVENT:
-            return ON_CLICK_EVENT;
+            return ArkUIEventSubKind::ON_CLICK_EVENT;
         case NODE_ON_HOVER_EVENT:
             return ON_HOVER_EVENT;
         case NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT:
@@ -424,10 +424,28 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_COASTING_AXIS_EVENT;
         case NODE_ON_CHILD_TOUCH_TEST:
             return ON_CHILD_TOUCH_TEST;
+        case NODE_ON_CUSTOM_OVERFLOW_SCROLL:
+            return ON_CUSTOM_OVERFLOW_SCROLL;
+        case NODE_ON_STACK_OVERFLOW_SCROLL:
+            return ON_STACK_OVERFLOW_SCROLL;
         case NODE_PICKER_EVENT_ON_CHANGE :
             return ON_CONTAINER_PICKER_CHANGE;
         case NODE_PICKER_EVENT_ON_SCROLL_STOP :
             return ON_CONTAINER_PICKER_SCROLL_STOP;
+        case NODE_RICH_EDITOR_ON_SELECTION_CHANGE:
+            return ON_RICH_EDITOR_ON_SELECTION_CHANGE;
+        case NODE_RICH_EDITOR_ON_READY:
+            return ON_RICH_EDITOR_ON_READY;
+        case NODE_RICH_EDITOR_ON_PASTE:
+            return ON_RICH_EDITOR_ON_PASTE;
+        case NODE_RICH_EDITOR_ON_EDITING_CHANGE:
+            return ON_RICH_EDITOR_ON_EDITING_CHANGE;
+        case NODE_RICH_EDITOR_ON_SUBMIT:
+            return ON_RICH_EDITOR_ON_SUBMIT;
+        case NODE_RICH_EDITOR_ON_CUT:
+            return ON_RICH_EDITOR_ON_CUT;
+        case NODE_RICH_EDITOR_ON_COPY:
+            return ON_RICH_EDITOR_ON_COPY;
         default:
             return -1;
     }
@@ -510,7 +528,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_DRAG_END;
         case ON_PRE_DRAG:
             return NODE_ON_PRE_DRAG;
-        case ON_KEY_EVENT:
+        case ArkUIEventSubKind::ON_KEY_EVENT:
             return NODE_ON_KEY_EVENT;
         case ON_KEY_PREIME:
             return NODE_ON_KEY_PRE_IME;
@@ -518,7 +536,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT;
         case ON_KEY_DISPATCH:
             return NODE_DISPATCH_KEY_EVENT;
-        case ON_CLICK_EVENT:
+        case ArkUIEventSubKind::ON_CLICK_EVENT:
             return NODE_ON_CLICK_EVENT;
         case ON_HOVER_EVENT:
             return NODE_ON_HOVER_EVENT;
@@ -722,10 +740,28 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_COASTING_AXIS_EVENT;
         case ON_CHILD_TOUCH_TEST:
             return NODE_ON_CHILD_TOUCH_TEST;
+        case ON_CUSTOM_OVERFLOW_SCROLL:
+            return NODE_ON_CUSTOM_OVERFLOW_SCROLL;
+        case ON_STACK_OVERFLOW_SCROLL:
+            return NODE_ON_STACK_OVERFLOW_SCROLL;
         case ON_CONTAINER_PICKER_CHANGE:
             return NODE_PICKER_EVENT_ON_CHANGE;
         case ON_CONTAINER_PICKER_SCROLL_STOP :
             return NODE_PICKER_EVENT_ON_SCROLL_STOP;
+        case ON_RICH_EDITOR_ON_SELECTION_CHANGE:
+            return NODE_RICH_EDITOR_ON_SELECTION_CHANGE;
+        case ON_RICH_EDITOR_ON_READY:
+            return NODE_RICH_EDITOR_ON_READY;
+        case ON_RICH_EDITOR_ON_PASTE:
+            return NODE_RICH_EDITOR_ON_PASTE;
+        case ON_RICH_EDITOR_ON_EDITING_CHANGE:
+            return NODE_RICH_EDITOR_ON_EDITING_CHANGE;
+        case  ON_RICH_EDITOR_ON_SUBMIT:
+            return NODE_RICH_EDITOR_ON_SUBMIT;
+        case ON_RICH_EDITOR_ON_CUT:
+            return NODE_RICH_EDITOR_ON_CUT;
+        case ON_RICH_EDITOR_ON_COPY:
+            return NODE_RICH_EDITOR_ON_COPY;
         default:
             return -1;
     }
@@ -841,6 +877,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case CHILD_TOUCH_TEST_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchTestInfo.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case PREVENTABLE_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->preventableEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -1115,6 +1157,19 @@ ArkUI_TextChangeEvent* OH_ArkUI_NodeEvent_GetTextChangeEvent(ArkUI_NodeEvent* ev
     }
     return const_cast<ArkUI_TextChangeEvent*>(
         reinterpret_cast<const ArkUI_TextChangeEvent*>(&(originNodeEvent->textChangeEvent)));
+}
+
+ArkUI_PreventableEvent* OH_ArkUI_NodeEvent_GetPreventableEvent(ArkUI_NodeEvent* event)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        return nullptr;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return const_cast<ArkUI_PreventableEvent*>(
+        reinterpret_cast<const ArkUI_PreventableEvent*>(&(originNodeEvent->preventableEvent)));
 }
 
 void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)

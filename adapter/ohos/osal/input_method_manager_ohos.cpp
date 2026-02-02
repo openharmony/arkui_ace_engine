@@ -245,7 +245,9 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    CloseCustomKeyboard();
+    if (currentFocusNode->GetTag() != V2::WEB_ETS_TAG) {
+        CloseCustomKeyboard();
+    }
     if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
         return;
     }
@@ -309,7 +311,16 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
     auto pipeline = currentFocusNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto systemWindowId = pipeline->GetFocusWindowId();
-    inputMethod->RequestHideInput(systemWindowId);
+#ifdef WINDOW_SCENE_SUPPORTED
+    NG::WindowSceneHelper::ConvertSystemWindowId(currentFocusNode, systemWindowId);
+#endif
+    auto container = Container::Current();
+    if (!container) {
+        inputMethod->RequestHideInput(systemWindowId);
+    } else {
+        auto displayId = container->GetCurrentDisplayId();
+        inputMethod->RequestHideInput(systemWindowId, false, displayId);
+    }
     inputMethod->Close();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard Successfully.");
 #endif

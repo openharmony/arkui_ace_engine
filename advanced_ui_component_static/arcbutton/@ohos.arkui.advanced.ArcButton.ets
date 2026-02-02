@@ -29,7 +29,6 @@ import {
   FontWeight,
   ICurve,
   LocalizedMargin,
-  PathShape,
   Progress,
   ProgressType,
   Resource,
@@ -45,6 +44,7 @@ import {
   SizeOptions,
   $r
 } from '@ohos.arkui.component';
+import { PathShape } from '@ohos.arkui.shape';
 import { ObservedV2, Monitor, IMonitor, Require, Trace, Param, Local } from '@ohos.arkui.stateManagement';
 
 export enum ArcButtonPosition {
@@ -185,6 +185,7 @@ class Constants {
   public static readonly EMPHASIZE_DARK_PRESSED_BTN_COLOR = '#C53C3E';
   public static readonly EMPHASIZE_DARK_DISABLE_BTN_COLOR = '#4C0f10';
   public static readonly EMPHASIZE_DARK_DISABLE_TEXT_COLOR = '#99FFFFFF';
+  public static readonly PRESS_MERGE_COLOR = '#1AFFFFFF';
   public static readonly DEFAULT_TRANSPARENCY = 0.4;
 }
 
@@ -210,30 +211,15 @@ interface ArcButtonThemeInterface {
   CHAMFER_CIRCLE_RADIUS: number,
 }
 
-export class ArcButtonProgressConfig {
-  /**
-   * 指定当前Progress进度值
-   */
-  value?: double;
-  /**
-   * 指定Progress总进度值
-   */
-  total?: double;
-  /**
-   * Progress进度条颜色
-   */
-  color?: ResourceColor;
-}
-
 @ObservedV2
-export class ArcButtonProgress {
-  @Trace public value?: number;
-  @Trace public total?: number;
+export class ArcButtonProgressConfig {
+  @Trace public value: double;
+  @Trace public total?: double;
   @Trace public color?: ResourceColor;
-  constructor(options: ArcButtonProgressConfig) {
-    this.value = options?.value;
-    this.total = options?.total;
-    this.color = options?.color;
+  constructor(value: double, total?: double, color?:ResourceColor) {
+    this.value = value ?? 0;
+    this.total = total ?? 100;
+    this.color = color ?? Constants.EMPHASIZED_DISABLE_BTN_COLOR;
   }
 }
 
@@ -247,7 +233,7 @@ export class ArcButtonOptions {
   @Trace public backgroundColor: ColorMetrics;
   @Trace public shadowColor: ColorMetrics;
   @Trace public shadowEnabled: boolean;
-  @Trace public fontSize: LengthMetrics;
+  @Trace public fontSize?: LengthMetrics;
   @Trace public fontColor: ColorMetrics;
   @Trace public pressedFontColor: ColorMetrics;
   @Trace public fontStyle: FontStyle;
@@ -255,7 +241,7 @@ export class ArcButtonOptions {
   @Trace public fontMargin: LocalizedMargin;
   @Trace public onTouch?: Callback<TouchEvent>;
   @Trace public onClick?: Callback<ClickEvent>;
-  @Trace public progressConfig?: ArcButtonProgress;
+  @Trace public progressConfig?: ArcButtonProgressConfig;
 
   constructor(options: CommonArcButtonOptions) {
     this.position = options.position ?? ArcButtonPosition.BOTTOM_EDGE;
@@ -266,7 +252,7 @@ export class ArcButtonOptions {
     this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
     this.shadowColor = options.shadowColor ?? ColorMetrics.resourceColor('#000000');
     this.shadowEnabled = options.shadowEnabled ?? false;
-    this.fontSize = options.fontSize ?? LengthMetrics.fp(Constants.MAX_FONT_SIZE);
+    this.fontSize = options.fontSize ?? undefined;
     this.fontColor = options.fontColor ?? ColorMetrics.resourceColor(Color.White);
     this.pressedFontColor = options.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
     this.fontStyle = options.fontStyle ?? FontStyle.Normal;
@@ -284,7 +270,7 @@ export class ArcButtonOptions {
     if (options?.progressConfig) {
       this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(
         Constants.EMPHASIZED_DISABLE_BTN_COLOR);
-      this.progressConfig = new ArcButtonProgress(options?.progressConfig as ArcButtonProgressConfig)
+      this.progressConfig = options?.progressConfig as ArcButtonProgressConfig;
     } else {
       this.progressConfig = undefined;
     }
@@ -304,7 +290,7 @@ export struct ArcButton {
   @Local private fontColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
   @Local private isExceed: boolean = false;
   @Local private pathString: string = '';
-  @Local private fontSize: string = '';
+  @Local private fontSize: string | undefined = undefined;
   @Local private progressValue: number = 0;
   @Local private progressTotal: number = 100;
   @Local private progressColor: ColorMetrics = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
@@ -328,21 +314,25 @@ export struct ArcButton {
   @Monitor(['options.label', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor',
     'options.fontColor'])
   optionsChange(monitor: IMonitor) {
-    this.fontSize = this.cover(this.options.fontSize ?? LengthMetrics.fp(Constants.MAX_FONT_SIZE))
+    if (this.options.fontSize) {
+      this.fontSize = this.cover(this.options.fontSize as LengthMetrics);
+    } else {
+      this.fontSize = undefined;
+    }
     this.judgeTextWidth()
     this.changeStatus()
   }
 
   @Monitor(['options.progressConfig', 'options.progressConfig.color', 'options.progressConfig.total',
     'options.progressConfig.value'])
-  progressOptionsChange(monitor: IMonitor){
+  progressOptionsChange(monitor: IMonitor) {
     this.progressOptionsUpdate()
   }
 
-  progressOptionsUpdate(){
+  progressOptionsUpdate() {
     if (this.options?.progressConfig) {
       if (this.options?.progressConfig?.value) {
-        this.progressValue = this.options?.progressConfig?.value as number;
+        this.progressValue = this.options?.progressConfig?.value as double;
       } else {
         this.progressValue = 0;
       }
@@ -354,7 +344,7 @@ export struct ArcButton {
         this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
       }
       if (this.options?.progressConfig?.total) {
-        this.progressTotal = this.options?.progressConfig?.total as number;
+        this.progressTotal = this.options?.progressConfig?.total as double;
       } else {
         this.progressTotal = 100;
       }
@@ -366,7 +356,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.EMPHASIZED_LIGHT:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
@@ -375,7 +366,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.NORMAL_LIGHT:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_TEXT_COLOR);
@@ -384,7 +376,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.NORMAL_DARK:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_TEXT_COLOR);
@@ -393,7 +386,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.EMPHASIZED_DARK:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_PRESSED_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZE_DARK_TEXT_COLOR);
@@ -402,13 +396,17 @@ export struct ArcButton {
       default:
         this.btnNormalColor = this.options.backgroundColor;
         this.textNormalColor = this.options.fontColor;
-        this.btnPressColor = this.options.backgroundColor;
+        this.btnPressColor = this.options.backgroundColor.blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.textPressColor = this.options.pressedFontColor;
         break;
     }
     if (this.options.status === ArcButtonStatus.DISABLED) {
       this.btnColor = this.btnDisableColor;
       this.fontColor = this.textDisableColor;
+    } else if (this.options.status === ArcButtonStatus.PRESSED) {
+      this.btnColor = this.btnPressColor;
+      this.fontColor = this.textPressColor;
     } else {
       this.btnColor = this.btnNormalColor;
       this.fontColor = this.textNormalColor;
@@ -423,7 +421,7 @@ export struct ArcButton {
     this.btnColor = this.options.backgroundColor;
     this.fontColor = this.options.fontColor;
     this.curves = Curves.interpolatingSpring(10, 1, 350, 35);
-    this.scaleValue = 0.95;
+    this.scaleValue = 1;
     this.progressOptionsUpdate();
     this.changeStatus();
   }
@@ -605,12 +603,12 @@ export struct ArcButton {
           .rotate({ x: 1, angle: !this.isUp ? 0 : 180 })
           .clipShape(new PathShape().commands(this.pathString))
           .backgroundColor(
-            ColorMetrics.rgba(this.progressColor.red,this.progressColor.green,this.progressColor.blue, 0.25))
+            ColorMetrics.rgba(this.progressColor.red, this.progressColor.green, this.progressColor.blue, 0.25))
           .color(this.progressColor.color)
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
           .shadow(this.getShadow())
       } else {
-        Button({ type: ButtonType.Normal, stateEffect: true })
+        Button({ type: ButtonType.Normal, stateEffect: false })
           .width('100%')
           .height('100%')
           .rotate({ angle: !this.isUp ? 0 : 180 })
@@ -648,16 +646,23 @@ export struct ArcButton {
     if (this.options.onTouch) {
       this.options.onTouch?.(event);
     }
-    if (event.type === TouchType.Down || event.type === TouchType.Move) {
+    if (this.options.status === ArcButtonStatus.PRESSED) {
       this.scaleX = this.scaleValue;
       this.scaleY = this.scaleValue;
       this.btnColor = this.btnPressColor;
       this.fontColor = this.textPressColor;
-    } else if (event.type === TouchType.Up) {
-      this.scaleX = 1;
-      this.scaleY = 1;
-      this.btnColor = this.btnNormalColor;
-      this.fontColor = this.textNormalColor;
+    } else {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
+        this.scaleX = this.scaleValue;
+        this.scaleY = this.scaleValue;
+        this.btnColor = this.btnPressColor;
+        this.fontColor = this.textPressColor;
+      } else if (event.type === TouchType.Up) {
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.btnColor = this.btnNormalColor;
+        this.fontColor = this.textNormalColor;
+      }
     }
   }
 }
@@ -770,8 +775,8 @@ class DataProcessUtil {
 
   /**
    * 查找两圆的交点
-   * @param C1 第一个圆
-   * @param c2 第二个圆
+   * @param firstCircus 第一个圆
+   * @param secondCircus 第二个圆
    * @returns 两圆相交的点的数组
    */
   findCircleIntersections(firstCircus: ArcButtonCircle, secondCircus: ArcButtonCircle): ArcButtonPoint[] {

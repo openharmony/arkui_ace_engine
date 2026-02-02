@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("navrouter_test_ng") {
+  module_name = "NavigationSet-NavigationAndNavDestination"
   type = "new"
   sources = [
     "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",
@@ -24,6 +25,7 @@ ace_unittest("navrouter_test_ng") {
 }
 
 ace_unittest("navdestination_test_ng") {
+  module_name = "CommonProperties-InteractionProperties"
   type = "new"
   sources = [
     "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",

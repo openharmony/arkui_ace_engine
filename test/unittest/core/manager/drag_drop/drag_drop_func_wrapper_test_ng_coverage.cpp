@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/base/mock_subwindow.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/common/mock_udmf.h"
@@ -1906,6 +1907,34 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus002, T
 }
 
 /**
+ * @tc.name: GetDragDropManagerForDragAnimation001
+ * @tc.desc: Test GetDragDropManagerForDragAnimation context equals nodeContext
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetDragDropManagerForDragAnimation001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+        pipelineContext, pipelineContext, nullptr);
+    ASSERT_EQ(dragDropManager, manager);
+    
+    auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
+    subwindow->SetReceiveDragEventEnabled(true);
+    manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+        pipelineContext, pipelineContext, subwindow);
+    ASSERT_EQ(dragDropManager, manager);
+
+    subwindow->SetReceiveDragEventEnabled(false);
+    manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+        pipelineContext, pipelineContext, subwindow);
+    ASSERT_EQ(dragDropManager, manager);
+}
+
+/**
  * @tc.name: UpdateDragDropInitiatingStatus_MovingStatus
  * @tc.desc: Verify that MOVING status updates currentDragNode_
  * @tc.type: FUNC
@@ -1916,5 +1945,54 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus003, T
     ASSERT_NE(frameNode, nullptr);
     DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
     EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
+}
+
+/**
+ * @tc.name: Test NotifySuggestedDropOperation
+ * @tc.desc: Test NotifySuggestedDropOperation func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifySuggestedDropOperation, TestSize.Level1)
+{
+    int32_t requestId = 1;
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    int32_t ret =
+        DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, static_cast<int32_t>(DragBehavior::COPY));
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().suggestedDropOperation_, DragBehavior::UNKNOWN);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    ret = DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, static_cast<int32_t>(DragBehavior::COPY));
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().suggestedDropOperation_, DragBehavior::UNKNOWN);
+    DragDropGlobalController::GetInstance().requestId_ = requestId;
+    ret = DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, static_cast<int32_t>(DragBehavior::COPY));
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().suggestedDropOperation_, DragBehavior::COPY);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+}
+
+/**
+ * @tc.name: Test NotifyDisableDropAnimation
+ * @tc.desc: Test NotifyDisableDropAnimation func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDisableDropAnimation, TestSize.Level1)
+{
+    int32_t requestId = 1;
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    int32_t ret = DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, true);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, false);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    ret = DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, true);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, false);
+    DragDropGlobalController::GetInstance().requestId_ = requestId;
+    ret = DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, true);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, true);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
 }
 } // namespace OHOS::Ace::NG

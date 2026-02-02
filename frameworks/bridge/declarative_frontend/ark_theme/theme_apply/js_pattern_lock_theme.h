@@ -18,6 +18,10 @@
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 class JSPatternLockTheme {
@@ -30,10 +34,12 @@ public:
             return;
         }
 
-        PatternLockModel::GetInstance()->SetRegularColor(themeColors->CompBackgroundNeutral());
-        PatternLockModel::GetInstance()->SetActiveColor(themeColors->CompBackgroundNeutral());
-        PatternLockModel::GetInstance()->SetSelectedColor(themeColors->CompBackgroundNeutral());
-        PatternLockModel::GetInstance()->SetPathColor(themeColors->CompDivider());
+        auto* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        NG::PatternLockModelNG::SetRegularColor(frameNode, themeColors->CompBackgroundNeutral());
+        NG::PatternLockModelNG::SetActiveColor(frameNode, themeColors->CompBackgroundNeutral());
+        NG::PatternLockModelNG::SetSelectedColor(frameNode, themeColors->CompBackgroundNeutral());
+        NG::PatternLockModelNG::SetPathColor(frameNode, themeColors->CompDivider());
     }
 };
 } // namespace OHOS::Ace::Framework

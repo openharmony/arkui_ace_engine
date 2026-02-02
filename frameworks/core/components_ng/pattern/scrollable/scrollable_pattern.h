@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,9 @@
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/scrollable_event.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -75,13 +77,20 @@ enum class ScrollToDirection {
     FORWARD,
     BACKWARD
 };
+enum class ScrollError {
+    SCROLL_NO_ERROR,
+    SCROLL_TOP_ERROR,
+    SCROLL_BOTTOM_ERROR,
+    SCROLL_NOT_SCROLLABLE_ERROR,
+    SCROLL_ERROR_OTHER
+};
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
     Axis axis = Axis::VERTICAL;
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
-class ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
+class ACE_FORCE_EXPORT ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
@@ -168,9 +177,22 @@ public:
     {
         return false;
     }
+
+    virtual bool TryFreeScroll(double offset, Axis axis)
+    {
+        return false;
+    }
+
+    virtual bool FreeOverScrollWithDelta(Axis axis, double delta)
+    {
+        return false;
+    }
+
     virtual bool CanOverScrollWithDelta(double delta, bool isNestScroller = false);
 
     virtual void OnTouchDown(const TouchEventInfo& info);
+
+    virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
 
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
@@ -243,6 +265,7 @@ public:
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
     virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
+    virtual void AdjustOffset(float& delta, int32_t source) {}
 
     float GetScrollableDistance() const
     {
@@ -410,7 +433,7 @@ public:
     {
         return {};
     }
-    virtual bool FreeScrollBy(const OffsetF& delta)
+    virtual bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false)
     {
         return false;
     }
@@ -776,7 +799,7 @@ public:
 
     PositionMode GetPositionMode();
 
-    void HandleMoveEventInComp(const PointF& point);
+    void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
@@ -937,6 +960,10 @@ public:
 
     void SetCanOverScroll(bool val);
 
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
+
+    void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
@@ -946,6 +973,7 @@ protected:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
@@ -1043,6 +1071,9 @@ protected:
         return isBackToTopRunning_;
     }
 
+    std::string ParseCommand(const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio);
+    void ReportScroll(bool isJump, ScrollError error, int32_t reportEventId);
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
@@ -1069,6 +1100,7 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void RegisterTouchpadInteractionCallback();
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
@@ -1185,7 +1217,7 @@ private:
     void SetOnHiddenChangeForParent();
     virtual void ResetForExtScroll() {};
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
-    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
+    void ReportOnItemStopEvent();
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -1266,7 +1298,7 @@ private:
     RefPtr<VelocityMotion> fixedVelocityMotion_;
     std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager(FrameNode* frameNode);
-    float IsInHotZone(const PointF& point);
+    float IsInHotZone(const PointF& point, bool needExpandHotZone = false);
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);

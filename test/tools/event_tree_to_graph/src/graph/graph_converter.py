@@ -21,8 +21,8 @@
 import os
 import shutil
 
-from typing import List
-from graphviz import Digraph
+from typing import List, TYPE_CHECKING
+# Defer graphviz import to allow dependency checking
 from src.beans.event_node import EventNode
 from src.beans.event_procedures import EventProcedures
 from src.beans.event_scope import EventScope
@@ -31,9 +31,19 @@ from src.beans.frame_node import FrameNode
 from src.keywords import get_dict_value
 from src.utils.log_wrapper import log_message
 
+# Type hints only import (not executed at runtime)
+if TYPE_CHECKING:
+    from graphviz import Digraph
+
 output_folder = 'output'
 # finger scope edge colors
 edge_colors = ['black', 'blue', 'brown', 'purple', 'yellow', 'pink', 'gray']
+
+
+def _get_graphviz_digraph():
+    """Lazy import of graphviz.Digraph to allow dependency checking."""
+    from graphviz import Digraph
+    return Digraph
 
 
 def reset_output_dir():
@@ -51,7 +61,7 @@ def draw_title_and_touch_points(tree: EventTree, tree_name, dot):
         current_index += 1
     touch_points_info.rstrip('\n')
     if current_index != 0:
-        sub_graph = Digraph(comment='touch points')
+        sub_graph = _get_graphviz_digraph()(comment='touch points')
         sub_graph.node(tree_name, touch_points_info, shape='box')
         dot.subgraph(sub_graph)
 
@@ -101,18 +111,75 @@ def build_event_node_tree(scope: EventScope):
 def draw_event_scop_tree_recursively(node_tree: List[EventParentChildrenPair],
                                      parent_node_name: str,
                                      finger,
-                                     graph: Digraph,
+                                     graph,  # type: 'Digraph'
                                      is_show_detail):
     for item in node_tree:
         node_name = item.get_address()
+
+        # Check if this gesture recognizer successfully accepted the event
+        is_accepted = check_if_gesture_accepted(item.item_self)
+
         node_label = item.item_self.get_summary_string()
         if is_show_detail:
             node_label = item.item_self.get_detailed_summary_string()
-        graph.node(node_name, node_label, tooltip=item.item_self.to_string())
+
+        tooltip = item.item_self.to_string()
+
+        # Apply special styling for accepted gestures
+        if is_accepted:
+            # Convert newlines to Graphviz line breaks (\l for left-aligned)
+            node_label_formatted = node_label.replace('\n', '\\l')
+
+            # Add visual indicators for accepted gestures
+            if is_show_detail:
+                node_label_formatted = f'{node_label_formatted}\\l\\l✓ Gesture Recognized (ACCEPT)\\l'
+            else:
+                node_label_formatted = f'{node_label_formatted}\\l✓ ACCEPT\\l'
+
+            tooltip = f'{tooltip}\n\n✓ Status: ACCEPT (Gesture Successfully Recognized)'
+
+            # Use fillcolor for background, color for border
+            graph.node(node_name, label=node_label_formatted, tooltip=tooltip,
+                      style='rounded,filled', fillcolor='lightgreen', color='green', penwidth='2.0')
+        else:
+            graph.node(node_name, label=node_label, tooltip=tooltip)
+
         if parent_node_name is not None:
-            graph.edge(parent_node_name, node_name, color=edge_colors[finger])
+            edge_color = 'green' if is_accepted else edge_colors[finger]
+            if is_accepted:
+                # Explicitly pass edge attributes for accepted gestures
+                graph.edge(parent_node_name, node_name, color='green',
+                          penwidth='2.0', style='bold')
+            else:
+                graph.edge(parent_node_name, node_name, color=edge_color)
+
         if len(item.children) > 0:
             draw_event_scop_tree_recursively(item.children, node_name, finger, graph, is_show_detail)
+
+
+def check_if_gesture_accepted(event_node: EventNode) -> bool:
+    """
+    Check if the gesture recognizer accepted the event by examining
+    the disposal field in all procedure steps.
+
+    Args:
+        event_node: EventNode instance containing state_history
+
+    Returns:
+        bool: True if any procedure has disposal: ACCEPT, False otherwise
+    """
+    if event_node.state_history is None:
+        return False
+
+    if event_node.state_history.event_procedures is None:
+        return False
+
+    # Check all procedure steps for ACCEPT disposal
+    for procedure in event_node.state_history.event_procedures:
+        if procedure.disposal == 'ACCEPT':
+            return True
+
+    return False
 
 
 def draw_event_procedures(tree: EventTree, tree_name, dot, is_show_detail):
@@ -120,11 +187,11 @@ def draw_event_procedures(tree: EventTree, tree_name, dot, is_show_detail):
     if event_procedures is None:
         return
     tag = f'{str(tree.tree_id)} event procedures'
-    sub_graph = Digraph(comment=tag)
+    sub_graph = _get_graphviz_digraph()(comment=tag)
     current_index = 0
     for scope in event_procedures.event_scopes:
         comment = f'event scope {str(scope.finger)}'
-        sub_scope_graph = Digraph(comment=comment)
+        sub_scope_graph = _get_graphviz_digraph()(comment=comment)
         node_tree = build_event_node_tree(scope)
         # treat finger as root node of subgraph
         scope_root_node_name = f'finger {str(scope.finger)}'
@@ -143,7 +210,7 @@ def generate_event_trees_graph(dump_result, is_show_detail):
     for tree in dump_result.event_trees:
         # create a graph
         comment = f'event dump {str(current_index)}'
-        dot = Digraph(comment=comment)
+        dot = _get_graphviz_digraph()(comment=comment)
         # draw touch points info
         tree_name = f'event tree {str(tree.tree_id)}'
         draw_title_and_touch_points(tree, tree_name, dot)
@@ -203,7 +270,7 @@ def generate_hittest_label_with_highlight(item: FrameNode):
 
 
 def draw_hittest_result_recursively(node_tree: List[FrameNodeParentChildrenPair], parent_node_name: str,
-                                    graph: Digraph):
+                                    graph):  # type: 'Digraph'
     for item in node_tree:
         node_name = 'frame node ' + str(item.get_node_id())
         node_label = generate_hittest_label_with_highlight(item.item_self)
@@ -224,7 +291,7 @@ def generate_hittest_graph(dump_result):
     # draw every event tree into file
     for tree in dump_result.event_trees:
         # create a graph
-        dot = Digraph(comment='hit test result ' + str(current_index))
+        dot = _get_graphviz_digraph()(comment='hit test result ' + str(current_index))
         tree_name = 'hit test result ' + str(tree.tree_id)
         # draw event procedures
         draw_hittest_result(tree, tree_name, dot)

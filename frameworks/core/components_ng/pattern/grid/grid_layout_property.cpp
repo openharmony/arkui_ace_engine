@@ -140,6 +140,12 @@ void GridLayoutProperty::UpdateIrregularFlag(const GridLayoutOptions& layoutOpti
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
+    if (layoutOptions.getStartIndexByIndex && layoutOptions.getStartIndexByOffset) {
+        pattern->SetUserDefined(true);
+        return;
+    } else {
+        pattern->SetUserDefined(false);
+    }
     pattern->SetIrregular(false);
     CHECK_NULL_VOID(layoutOptions.getSizeByIndex);
 

@@ -27,8 +27,9 @@ import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framewo
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
-    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo} from '@ohos/arkui/UIContext';
+    MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
+    CustomKeyboardContinueFeature } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -44,7 +45,7 @@ import { TimePickerDialogOptions } from "arkui/component/timePicker"
 import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from "arkui/component/textPicker"
 import { DatePickerDialogOptions } from "arkui/component/datePicker"
 import inspector from '@ohos/arkui/inspector';
-import { ComponentContent } from 'arkui/ComponentContent';
+import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
 import promptAction, { LevelOrder } from '@ohos/promptAction';
 import { ArkUIAniModule } from 'arkui.ani';
@@ -62,10 +63,11 @@ import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { UIContextAtomicServiceBar, UIContextGetInfo } from 'arkui/component/idlize';
-import { GlobalScope, SheetOptions } from '#generated';
+import { SheetOptions } from '#generated';
+import { GlobalScope } from './../framework/GlobalScope';
 import { default as mediaquery } from '@ohos.mediaquery';
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
-import { AsyncCallback } from '#generated';
+import { AsyncCallback } from '#external';
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { PeerNode, findPeerNode } from 'arkui/PeerNode';
 import { KBuffer } from '@koalaui/interop';
@@ -74,17 +76,20 @@ import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
-    DialogExtender, IUIContext } from '../framework';
+    DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
-import { IUIContext, SystemOps } from 'arkui/component/idlize';
+import { IUIContext, SystemOps, UIObserverGestureEventOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
+import { FreeRootNode } from '../CallbackTransformer';
 
 export class ContextRecord {
     uiContext?: UIContext
 }
+
+export { UIObserverGestureEventOps };
 
 export class FontImpl extends Font {
     instanceId_: int32;
@@ -221,9 +226,9 @@ class ContextMenuControllerImpl extends ContextMenuController {
     }
 
     public close(): void {
-        // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // ContextMenu.close();
-        // ArkUIAniModule._Common_Restore_InstanceId();
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ContextMenu.close();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
 
@@ -266,7 +271,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
 
     // @ts-ignore
     public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
-                             delay?: number, checkImageStatus?: boolean,
+                             delay?: int32, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
@@ -282,7 +287,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     }
 
     // @ts-ignore
-    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+    public createFromBuilder(builder: CustomBuilder, delay?: int32, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
@@ -304,21 +309,21 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+    public getWithUniqueId(uniqueId: int32, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let pixmap = componentSnapshot.getWithUniqueId(uniqueId, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
 
-    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSyncWithUniqueId(uniqueId: int32, options?: componentSnapshot.SnapshotOptions): PixelMap {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let pixmap = componentSnapshot.getSyncWithUniqueId(uniqueId, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: int32,
         checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let node = content.getFrameNode();
@@ -332,6 +337,14 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
+
+    public getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let pixmap = componentSnapshot.getWithRange(start, end, isStartRect, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
 }
 
 export class DragControllerImpl extends DragController {
@@ -342,10 +355,15 @@ export class DragControllerImpl extends DragController {
     }
 
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        if (typeof custom === "function") {
+        if (custom === undefined) {
+            let destroyCallback = (): void => {}
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, nullptr,
+                destroyCallback, dragInfo, callback);
+        } else if (typeof custom === "function") {
             const peerNode = createUiDetachedRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
             }, custom as CustomBuilder);
@@ -385,11 +403,16 @@ export class DragControllerImpl extends DragController {
     }
 
     // @ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let promise = new Promise<dragController.DragEventParam>((resolve, reject) => { });
-        if (typeof custom === "function") {
+        if (custom === undefined) {
+            let destroyCallback = (): void => {}
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, nullptr,
+                destroyCallback, dragInfo);
+        } else if (typeof custom === "function") {
             const peerNode = createUiDetachedRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
             }, custom as CustomBuilder);
@@ -429,34 +452,37 @@ export class DragControllerImpl extends DragController {
         return promise;
     }
 
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
 
         let rootNodeArray: Array<KPointer> = [];
         let peerNodeArray: Array<PeerNode> = [];
         let dragItemInfoArray: Array<DragItemInfo> = [];
-
-        for (let element of customArray) {
-            if (typeof element === "function") {
-                const builder = element as CustomBuilder;
-                const peerNode = createUiDetachedRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, builder);
-                const rootNode = peerNode.peer.ptr;
-                rootNodeArray.push(rootNode);
-                peerNodeArray.push(peerNode);
-            } else if (element instanceof DragItemInfo) {
-                const dragItemInfo = element as DragItemInfo;
-                if (dragItemInfo.pixelMap !== undefined) {
-                    dragItemInfoArray.push(dragItemInfo);
-                } else if (dragItemInfo.builder !== undefined) {
+        
+        if (customArray !== undefined) {
+            let arrayData = customArray as Array<CustomBuilder | DragItemInfo>
+            for (let element of arrayData) {
+                if (typeof element === "function") {
+                    const builder = element as CustomBuilder;
                     const peerNode = createUiDetachedRoot((): PeerNode => {
                         return ArkComponentRootPeer.create(undefined);
-                    }, dragItemInfo.builder as CustomBuilder);
+                    }, builder);
                     const rootNode = peerNode.peer.ptr;
                     rootNodeArray.push(rootNode);
                     peerNodeArray.push(peerNode);
+                } else if (element instanceof DragItemInfo) {
+                    const dragItemInfo = element as DragItemInfo;
+                    if (dragItemInfo.pixelMap !== undefined) {
+                        dragItemInfoArray.push(dragItemInfo);
+                    } else if (dragItemInfo.builder !== undefined) {
+                        const peerNode = createUiDetachedRoot((): PeerNode => {
+                            return ArkComponentRootPeer.create(undefined);
+                        }, dragItemInfo.builder as CustomBuilder);
+                        const rootNode = peerNode.peer.ptr;
+                        rootNodeArray.push(rootNode);
+                        peerNodeArray.push(peerNode);
+                    }
                 }
             }
         }
@@ -499,6 +525,12 @@ export class DragControllerImpl extends DragController {
         ArkUIAniModule._DragController_notifyDragStartReques(requestStatus);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    public enableDropDisallowedBadge(enabled: boolean): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._DragController_enableDropDisallowedBadge(enabled);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class RouterImpl extends Router {
@@ -512,11 +544,37 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = new Promise<void>((resolve, reject) => {
-            this.router_!.push(options)
-        })
+        let result = this.router_!.push(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.push(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public pushUrl(options: router.RouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.pushAsync(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.pushAsync(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public pushNamedRoute(options: router.NamedRouterOptions): Promise<void> {
@@ -544,7 +602,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.pushNamedRoute(options, callback);
+        this.router_!.pushNamedRouteAsync(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -553,7 +611,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.pushNamedRoute(options, callback, mode);
+        this.router_!.pushNamedRouteAsync(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -562,11 +620,37 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = new Promise<void>((resolve, reject) => {
-            this.router_!.replace(options);
-        });
+        let result = this.router_!.replace(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.replace(options, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public replaceUrl(options: router.RouterOptions, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.replaceAsync(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode, callback: routerAsyncCallback<void>): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.replaceAsync(options, callback, mode);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public replaceNamedRoute(options: router.NamedRouterOptions): Promise<void> {
@@ -594,7 +678,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.replaceNamedRoute(options, callback);
+        this.router_!.replaceNamedRouteAsync(options, callback);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -603,7 +687,7 @@ export class RouterImpl extends Router {
             throw Error("router set in uiContext is empty");
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // this.router_!.replaceNamedRoute(options, callback, mode);
+        this.router_!.replaceNamedRouteAsync(options, callback, mode);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -613,6 +697,15 @@ export class RouterImpl extends Router {
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         this.router_!.back(options)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public back(index: int, params?: Object): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.back(index, params);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -631,6 +724,16 @@ export class RouterImpl extends Router {
         }
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = this.router_!.getLength();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getStackSize(): int {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getStackSize();
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
     }
@@ -697,15 +800,6 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.router_!.registerNamedRouter(routerName, instance, param);
-        ArkUIAniModule._Common_Restore_InstanceId();
-    }
-
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
@@ -731,7 +825,7 @@ export class UIInspectorImpl extends UIInspector {
         super()
         this.instanceId_ = instanceId;
     }
-    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
+    public createComponentObserver(id: string | int): inspector.ComponentObserver {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let componentObserver = inspector.createComponentObserver(id);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1156,7 +1250,6 @@ export class CursorControllerImpl extends CursorController {
 
     public setCursor(value: PointerStyle): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // GlobalScope.cursorControl_setCursor(value)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -1164,28 +1257,36 @@ export class CursorControllerImpl extends CursorController {
 export interface DetachedRootEntry {
     compute(): void;
     dispose(): void;
+    forceCompleteRerender(): void;
 }
 
 export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
-    entry: ComputableState<T>;
+    private entry?: ComputableState<T>;
     constructor(entry: ComputableState<T>) {
         this.entry = entry
     }
 
     compute(): void {
-        this.entry.value;
+        this.entry?.value;
     }
 
     dispose(): void {
-        this.entry.dispose();
+        this.entry?.dispose();
+        this.entry = undefined;
+    }
+
+    forceCompleteRerender(): void {
+        this.entry?.forceCompleteRerender();
     }
 }
 
 export class DetachedRootEntryManager {
     uicontext_: UIContextImpl;
     detachedRoots_: Map<KPointer, DetachedRootEntry>;
+    private freezedRoots_: Map<KPointer, DetachedRootEntry>;
     constructor(uicontext: UIContextImpl) {
         this.detachedRoots_ = new Map<KPointer, DetachedRootEntry>();
+        this.freezedRoots_ = new Map<KPointer, DetachedRootEntry>();
         this.uicontext_ = uicontext;
     }
 
@@ -1202,17 +1303,11 @@ export class DetachedRootEntryManager {
         /** @memo */
         builder: () => void
     ): PeerNode {
-        let manager = this.uicontext_.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry<void>(context, 0, builder)
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen
         })
         this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntryImpl<PeerNode>(node))
         return node.value
@@ -1224,17 +1319,11 @@ export class DetachedRootEntryManager {
         builder: (arg: T) => void,
         arg: T
     ): PeerNode {
-        let manager = this.uicontext_.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry1<T, void>(context, 0, builder, arg)
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen
         })
         this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntryImpl<PeerNode>(node))
         return node.value
@@ -1245,17 +1334,15 @@ export class DetachedRootEntryManager {
         /** @memo */
         builder: () => void
     ): PeerNode | undefined {
-        let manager = this.uicontext_.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
-        const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
+        const manager = GlobalStateManager.instance;
+        const freeRoot = nodeFactory();
+        const node = manager.updatableNodeEx<IncrementalNode>(freeRoot, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
+            const lastFreezeNode = FreeRootNode.current;
+            FreeRootNode.current = freeRoot as FreeRootNode;
             memoEntry<void>(context, 0, builder)
+            FreeRootNode.current = lastFreezeNode;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen
         })
 
         const inc = node.value;
@@ -1264,26 +1351,50 @@ export class DetachedRootEntryManager {
             node.dispose()
             return undefined
         }
+        (freeRoot as FreeRootNode).setPtr(peerNode.peer.ptr);
+        this.detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
+        return peerNode;
+    }
 
-        this.detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node))
-        return peerNode
+    public freezeDetachedFreeRoot(ptr: KPointer): void {
+        if (!this.detachedRoots_.has(ptr)) {
+            return;
+        }
+        const node = this.detachedRoots_.get(ptr) as DetachedRootEntry;
+        this.freezedRoots_.set(ptr, node);
+        this.detachedRoots_.delete(ptr);
+    }
+
+    public unfreezeDetachedFreeRoot(ptr: KPointer): void {
+        if (!this.freezedRoots_.has(ptr)) {
+            return;
+        }
+        const node = this.freezedRoots_.get(ptr) as DetachedRootEntry;
+        this.detachedRoots_.set(ptr, node);
+        this.freezedRoots_.delete(ptr);
     }
 
     public destroyUiDetachedRoot(ptr: KPointer): boolean {
-        if (!this.detachedRoots_.has(ptr)) {
+        if (!this.detachedRoots_.has(ptr) && !this.freezedRoots_.has(ptr)) {
             return false;
         }
-
-        const root = this.detachedRoots_.get(ptr)!
-        this.detachedRoots_.delete(ptr)
-        root.dispose()
+        if (this.detachedRoots_.has(ptr)) {
+            const root = this.detachedRoots_.get(ptr)!;
+            this.detachedRoots_.delete(ptr);
+            root.dispose();
+        } else if (this.freezedRoots_.has(ptr)) {
+            const root = this.freezedRoots_.get(ptr)!;
+            this.freezedRoots_.delete(ptr);
+            root.dispose();
+        } else {
+            return false;
+        }
         return true;
     }
 }
 
 export class UIContextImpl extends UIContext {
     instanceId_: int32 = -1;
-    stateMgr: StateManager | undefined = undefined;
     observer_ :UIObserver |null = null;
     router_: Router;
     focusController_: FocusControllerImpl;
@@ -1338,16 +1449,6 @@ export class UIContextImpl extends UIContext {
         return this.detachedRootEntryManager_;
     }
     dispatchCallback(buffer: KSerializerBuffer, length: int32): void {
-        // if (length <= 0) {
-        //     return
-        // }
-
-        // if (this.position + length > this.bufferSize) {
-        //     throw Error("Callback buffer of UIContextImpl is full!")
-        // }
-
-        // InteropNativeModule._CopyBuffer(this.buffer.buffer + this.position, length, buffer)
-        // this.position += length
     }
 
     callCallbacks(): void {
@@ -1363,6 +1464,45 @@ export class UIContextImpl extends UIContext {
         this.position = 0;
     }
 
+    static getCallingScopeUIContext(): UIContext | undefined {
+        const instanceId = ArkUIAniModule._GetCallingScopeUIContext();
+        if (instanceId < 0) {
+            return undefined
+        }
+        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
+        return uiContext
+    }
+    static getLastFocusedUIContext(): UIContext | undefined {
+        const instanceId = ArkUIAniModule._GetLastFocusedUIContext();
+        if (instanceId < 0) {
+            return undefined
+        }
+        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
+        return uiContext
+    }
+    static getLastForegroundUIContext(): UIContext | undefined {
+        const instanceId = ArkUIAniModule._GetLastForegroundUIContext();
+        if (instanceId < 0) {
+            return undefined
+        }
+        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
+        return uiContext
+    }
+    static getAllUIContexts(): Array<UIContext> {
+        let allContainerIds = ArkUIAniModule._GetAllUIContexts();
+        let contextArray = new Array<UIContext>();
+        for (let item of allContainerIds) {
+            if (item >= 0) {
+                contextArray.push(UIContextUtil.getOrCreateUIContextById(item));
+            }
+        }
+        return contextArray;
+    }
+    static availableInstanceIds_: Set<int32> = new Set<int32>();
+
+    public isAvailable() : boolean {
+        return UIContextImpl.availableInstanceIds_.has(this.instanceId_);
+    }
     public getFont() : Font {
         return this.font_;
     }
@@ -1524,7 +1664,7 @@ export class UIContextImpl extends UIContext {
         }
     }
 
-    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+    public openBindSheet(bindSheetContent: ComponentContentBase, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
             ptr = bindSheetContent.getNodePtr() as KPointer;
@@ -1535,7 +1675,7 @@ export class UIContextImpl extends UIContext {
         return result;
     }
 
-    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+    public updateBindSheet(bindSheetContent: ComponentContentBase, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
             ptr = bindSheetContent.getNodePtr() as KPointer;
@@ -1546,7 +1686,7 @@ export class UIContextImpl extends UIContext {
         return result;
     }
 
-    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+    public closeBindSheet(bindSheetContent: ComponentContentBase): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
             ptr = bindSheetContent.getNodePtr() as KPointer;
@@ -1629,10 +1769,10 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+    public animateToImmediately(value: AnimateParam, event: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         AnimationExtender.AnimateToImmediatelyImpl(value, () => {
-            event(undefined);
+            event();
         }, true);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
@@ -1658,12 +1798,39 @@ export class UIContextImpl extends UIContext {
         }
         return ret;
     }
+
+    private handleBreakpointError(ret: int32, type: string) {
+        if (ret === -1) {
+            console.error("some error occurred while initializing the ANI environment, return default value: ${type}.");
+        }
+        if (ret === -2) {
+            console.error("failed to retrieve the current container, return default value: ${type}.");
+        }
+        if (ret === -3) {
+            console.error("failed to retrieve the current window, return default value: ${type}.");
+        }
+    }
+
     public getWindowWidthBreakpoint(): WidthBreakpoint {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
+        if (ret < 0) {
+            this.handleBreakpointError(ret, "WidthBreakpoint.WIDTH_XS");
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return WidthBreakpoint.WIDTH_XS;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
         return ret as WidthBreakpoint;
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
+        if (ret < 0) {
+            this.handleBreakpointError(ret, "HeightBreakpoint.HEIGHT_SM");
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return HeightBreakpoint.HEIGHT_SM;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
         return ret as HeightBreakpoint;
     }
     public vp2px(value: double): double {
@@ -1808,6 +1975,12 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
+    public setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
+        IUIContext.setCustomKeyboardContinueFeature(feature);
+        ArkUIAniModule._Common_Restore_InstanceId()
+    }
+
     public enableSwipeBack(enabled: boolean | undefined): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         UIContextGetInfo.enableSwipeBack(enabled);
@@ -1818,7 +1991,8 @@ export class UIContextImpl extends UIContext {
         if (this.checkThread(this.instanceId_)) {
             callback();
         } else {
-            this.stateMgr?.scheduleCallback(callback);
+            const manager = GlobalStateManager.instance;
+            manager.scheduleCallback(callback);
         }
     }
 
@@ -1840,6 +2014,10 @@ export class UIContextImpl extends UIContext {
 
     public setImageRawDataCacheSize(value: int): void {
         ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
+    }
+
+    public recycleInvisibleImageMemory(value: boolean): void {
+        ArkUIAniModule._Common_setIsRecycleInvisibleImageMemory(value ? 1 : 0, this.instanceId_);
     }
 
     public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {

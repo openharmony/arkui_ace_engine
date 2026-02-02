@@ -69,16 +69,14 @@ void OffscreenCanvasRenderingContext2DPeerImpl::RemoveOptions()
 }
 ImageBitmapPeer* OffscreenCanvasRenderingContext2DPeerImpl::TransferToImageBitmap()
 {
-    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
-    CHECK_NULL_RETURN(bitmap, nullptr);
     ContainerScope scope(instanceId_);
     auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id_));
     CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
     auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
     ImageBitmapPeer::LoadImageConstructor(bitmap, pixelMap);
 #ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
-    CHECK_NULL_RETURN(imageData, nullptr);
     bitmap->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
 #endif
     bitmap->SetUnit(GetUnit());

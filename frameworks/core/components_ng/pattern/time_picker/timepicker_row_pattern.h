@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_ROW_PATTERN_H
 
 #include <optional>
+#include "ui/base/macros.h"
 
 #include "base/i18n/date_time_sequence.h"
 #include "base/i18n/localization.h"
@@ -43,7 +44,7 @@ namespace {
 const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
 }
 
-class TimePickerRowPattern : public LinearLayoutPattern {
+class ACE_FORCE_EXPORT TimePickerRowPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TimePickerRowPattern, LinearLayoutPattern);
 
 public:
@@ -762,6 +763,8 @@ private:
     void InitSelect();
     void SetCallBack();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
+    void HandleAmPmReorder();
+    void UpdateDialogButtons();
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     bool OnThemeScopeUpdateMultiThread();
 

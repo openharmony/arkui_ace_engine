@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
@@ -50,6 +51,7 @@ bool CustomNode::Render(int64_t deadline)
         if (!CheckFireOnAppear()) {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
+            FireTriggerLifecycleFunc(LifeCycleEvent::ON_APPEAR);
             if (deadline > 0 && GetSysTimestamp() > deadline) {
                 std::swap(renderFunction, renderFunction_);
                 return false;
@@ -85,10 +87,7 @@ bool CustomNode::Render(int64_t deadline)
                 child->MountToParent(Claim(this));
             }
         }
-        {
-            ACE_SCOPED_TRACE("CustomNode::DidBuild");
-            FireDidBuild();
-        }
+        NodeDidBuild();
     }
     {
         FireRecycleRenderFunc();
@@ -102,6 +101,14 @@ bool CustomNode::Render(int64_t deadline)
     }
     needMarkParent_ = needMarkParentBak;
     return true;
+}
+
+void CustomNode::NodeDidBuild()
+{
+    ACE_SCOPED_TRACE("CustomNode::DidBuild");
+    FireTriggerLifecycleFunc(LifeCycleEvent::ON_BUILD);
+    FireDidBuild();
+    isDidBuild_ = true;
 }
 
 void CustomNode::FireCustomDisappear()
@@ -295,6 +302,16 @@ void CustomNode::DumpInfo()
 void CustomNode::FireRecycleRenderFunc()
 {
     if (HasRecycleRenderFunc()) {
+        if (SystemProperties::ConfigChangePerform()) {
+            // Get the current color mode and notify the node to change the color mode
+            auto context = GetContext();
+            if (context) {
+                auto colorMode = context->GetColorMode();
+                SetRerenderable(true);
+                SetMeasureAnyway(true);
+                NotifyColorModeChange(static_cast<uint32_t>(colorMode));
+            }
+        }
         std::string reuseId = GetReuseId().empty() ? "-1" : GetReuseId();
         std::string parentInfo = "-1";
         if (SystemProperties::GetDynamicDetectionTraceEnabled()) {

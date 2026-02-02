@@ -18,7 +18,6 @@
 
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/drawable/drawable_descriptor.h"
@@ -44,6 +43,7 @@ public:
     static void SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetSupportSvg2(FrameNode* frameNode, bool enable);
     static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
+    static void SetAntialiased(FrameNode* frameNode, const std::optional<bool>& antialiased);
     static void SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);

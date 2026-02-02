@@ -62,6 +62,10 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest001, TestSize.Level1)
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.expected: step2. result equals.
      */
+    rotationRecognizer->inputEventType_ = InputEventType::AXIS;
+    rotationRecognizer->OnAccepted();
+    EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::SUCCEED);
+    rotationRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
     rotationRecognizer->OnAccepted();
     EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::SUCCEED);
 
@@ -998,5 +1002,32 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerHandleAxisEventTest002, Tes
     recognizer->refereeState_ = RefereeState::SUCCEED;
     recognizer->HandleTouchUpEvent(event);
     EXPECT_EQ(recognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test RotationRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotation recognizer and axis event.
+     */
+    RefPtr<RotationRecognizer> recognizer =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    recognizer->initialAngle_ = 1.5;
+    recognizer->currentAngle_ = 2.5;
+    recognizer->resultAngle_ = 3.5;
+    recognizer->lastAngle_ = 4.5;
+    recognizer->cumulativeAngle_ = 5.5;
+
+    std::string result = recognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("INAG:1.5"));
+    EXPECT_THAT(result, HasSubstr("CUAG:2.5"));
+    EXPECT_THAT(result, HasSubstr("REAG:3.5"));
+    EXPECT_THAT(result, HasSubstr("LAG:4.5"));
+    EXPECT_THAT(result, HasSubstr("CULAG:5.5"));
 }
 } // namespace OHOS::Ace::NG

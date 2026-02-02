@@ -107,9 +107,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
+  protected __lifecycle__Internal: CustomComponentLifecycle;
+
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
   protected static prebuildingElmtId_: number = -1;
+
+  // it only exists when native id is different with the front id
+  private __nativeId__Internal__?: number;
 
   static readonly doRecycle: boolean = true;
   static readonly doReuse: boolean = false;
@@ -126,7 +131,18 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU/V2 object by given elmtId
-    this.id_ = elmtId === UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
+    if (elmtId === UINodeRegisterProxy.notRecordingDependencies) {
+      // Check if native side has already allocated an elmtId via StartGetAccessRecordingFor
+      // This ensures consistency between TS and native sides, especially for LoadNamedRouterSource
+      const assignedElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+      if (assignedElmtId !== UINodeRegisterProxy.notRecordingDependencies) {
+        this.__nativeId__Internal__ = assignedElmtId;
+      }
+      this.id_ = SubscriberManager.MakeId();
+    } else {
+      this.id_ = elmtId;
+    }
+    this.__lifecycle__Internal = new CustomComponentLifecycle(this);
 
     stateMgmtConsole.debug(`PUV2ViewBase constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
@@ -149,10 +165,35 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
+    if (this['__newLifecycleNeedWork__Internal']) {
+      return this.__lifecycle__Internal.handleEvent(eventId);
+    }
+    return false;
+  }
+
+  public __getLifecycle__Internal(): CustomComponentLifecycle {
+    return this.__lifecycle__Internal;
+  }
+
+  public get __nativeId__Internal(): number {
+    return this.__nativeId__Internal__ ? this.__nativeId__Internal__ : this.id_;
+  }
+
+  public __customComponentExecuteInit__Internal(): void {
+    let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
+    const componentInitFunctions = this[watchProp];
+    if (componentInitFunctions instanceof Array) {
+        componentInitFunctions.forEach((componentInitFunction) => {
+            componentInitFunction.call(this);
+        })
+    }
+  }
+
   public static create(view: PUV2ViewBase): void {
     return NativeViewPartialUpdate.create(view.nativeViewPartialUpdate);
   }
-  
+
   static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
     return NativeViewPartialUpdate.createRecycle(componentCall, isRecycling, reuseId, callback);
   }
@@ -394,7 +435,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected abstract debugInfoStateVars(): string;
 
-  public abstract getRecycleDump(): string;
+  public __getRecycleDump_internal(): string {
+    return '';
+  }
 
   public isViewActive(): boolean {
     return this.activeCount_ > 0;
@@ -639,7 +682,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
-          throw new Error(`${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
+          throw new BusinessError(103801, `${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
         }
       };
     }
@@ -851,7 +894,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           this.sendStateInfo('{}');
           break;
         case 'RecyclePool':
-          DumpLog.addDesc('RecyclePool: ' + this.getRecycleDump());
+          DumpLog.addDesc('RecyclePool: ' + this.__getRecycleDump_internal());
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
@@ -1025,18 +1068,37 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public abstract __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined;
 
-  protected __findPathValueInJson__Internal(jsonValue: Object, jsonPath: string): string | undefined {
+  protected __findPathValueInJson__Internal(jsonValue: any, jsonPath: string): string | undefined {
     const paths = jsonPath.split('/').filter(path => path.length > 0);
     let current = jsonValue;
     for (const path of paths) {
       if (current === null || current === undefined) {
         return undefined;
       }
+      if (Array.isArray(current)) {
+        if (!/^\d+$/.test(path)) {
+          return undefined;
+        }
+        const index = Number(path);
+        if (index < 0 || index >= current.length) {
+          return undefined;
+        }
+        current = current[index];
+        continue;
+      }
       if ((typeof current !== 'object') || !Object.prototype.hasOwnProperty.call(current, path)) {
         return undefined;
       }
       current = current[path];
     }
-    return typeof current === 'string' ? current : undefined;
+    if (typeof current === 'string') {
+      return current;
+    }
+    try {
+      return JSON.stringify(current);
+    } catch (error) {
+      stateMgmtConsole.error('getStateMgmtInfo get path JSON.stringify failed', error);
+      return undefined;
+    }
   }
 } // class PUV2ViewBase

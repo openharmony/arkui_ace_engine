@@ -132,6 +132,11 @@ public:
         irregular_ = value;
     }
 
+    void SetUserDefined(bool userDefined)
+    {
+        userDefined_ = userDefined;
+    }
+
     void ResetPositionFlags()
     {
         info_.ResetPositionFlags();
@@ -217,6 +222,7 @@ public:
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
     void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -318,6 +324,10 @@ private:
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
+    void ReportOnItemGridEvent(const std::string& event);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
+    void HandleGridScroll(float distance, int32_t reportEventId);
 
     inline bool UseIrregularLayout() const;
 
@@ -330,6 +340,7 @@ private:
     bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
+    bool userDefined_ = false; // true if onGetStartIndex
 
     RefPtr<GridContentModifier> gridContentModifier_;
 

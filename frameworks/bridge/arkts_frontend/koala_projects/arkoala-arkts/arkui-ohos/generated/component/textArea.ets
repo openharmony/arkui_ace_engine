@@ -20,9 +20,9 @@ import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, ResourceColor, Font, Length, ResourceStr, Dimension } from "./units"
-import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer, TextDirection, LineSpacingOptions_serializer, MaxLinesOptions_serializer, IMEClient, LineSpacingOptions, MaxLinesOptions, MaxLinesMode } from "./textCommon"
 import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Arkui_Component_Units_ResourceStr_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
-import { LengthMetrics_serializer } from "./../Graphics"
+import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from "./richEditor"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -31,8 +31,8 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode } from "./enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent, ContentType } from "./textInput"
-import { LengthMetrics } from "arkui.Graphics"
-import { AttributeModifier, hookTextAreaAttributeModifier, AttributeUpdater } from "#handwritten"
+import { LengthMetrics, ColorMetrics, LengthUnit } from "arkui.Graphics"
+import { AttributeModifier, hookTextAreaAttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -41,6 +41,8 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextAreaModifier } from "./../TextAreaModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContentBase } from "arkui.ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 export class ArkTextAreaPeer extends ArkCommonMethodPeer {
     attributeSet?: TextAreaModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -610,12 +612,19 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setHeightAdaptivePolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxLinesAttribute(value: int32 | undefined): void {
+    setMaxLinesAttribute(value: int32 | undefined, options?: MaxLinesOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             thisSerializer.writeInt32(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            MaxLinesOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -682,12 +691,19 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setLetterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineSpacingAttribute(value: LengthMetrics | undefined): void {
+    setLineSpacingAttribute(value: LengthMetrics | undefined, options?: LineSpacingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            LineSpacingOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -970,6 +986,118 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTextDirectionAttribute(value: TextDirection | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextDirection)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinLinesAttribute(value: int32 | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setMinLines(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableAutoSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setEnableAutoSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setStrokeWidthAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setStrokeColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setStrokeColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillAttachIMEAttribute(value: ((value0: IMEClient) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setOnWillAttachIME(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarColorAttribute(value: ColorMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableSelectedDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAreaAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((value: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1016,12 +1144,20 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setShowCounter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCustomKeyboardAttribute(value: CustomBuilder | undefined, options?: KeyboardOptions): void {
+    setCustomKeyboardAttribute(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+            if (valueTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof ComponentContentBase) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ComponentContentBase
+                ComponentContentBase_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1047,7 +1183,8 @@ export enum TextAreaType {
     PHONE_NUMBER = 3,
     EMAIL = 5,
     NUMBER_DECIMAL = 12,
-    URL = 13
+    URL = 13,
+    ONE_TIME_CODE = 14
 }
 export type TextAreaSubmitCallback = (enterKeyType: EnterKeyType, event?: SubmitEvent) => void;
 export interface TextAreaAttribute extends CommonMethod {
@@ -1153,7 +1290,7 @@ export interface TextAreaAttribute extends CommonMethod {
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         throw new Error("Unimplemented method heightAdaptivePolicy")
     }
-    maxLines(value: int32 | undefined): this {
+    maxLines(value: int32 | undefined, options?: MaxLinesOptions): this {
         throw new Error("Unimplemented method maxLines")
     }
     wordBreak(value: WordBreak | undefined): this {
@@ -1168,7 +1305,7 @@ export interface TextAreaAttribute extends CommonMethod {
     letterSpacing(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method letterSpacing")
     }
-    lineSpacing(value: LengthMetrics | undefined): this {
+    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
         throw new Error("Unimplemented method lineSpacing")
     }
     lineHeight(value: double | string | Resource | undefined): this {
@@ -1237,13 +1374,37 @@ export interface TextAreaAttribute extends CommonMethod {
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         throw new Error("Unimplemented method selectedDragPreviewStyle")
     }
+    textDirection(value: TextDirection | undefined): this {
+        throw new Error("Unimplemented method textDirection")
+    }
+    minLines(value: int32 | undefined): this {
+        throw new Error("Unimplemented method minLines")
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoSpacing")
+    }
+    strokeWidth(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    strokeColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method strokeColor")
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        throw new Error("Unimplemented method onWillAttachIME")
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method scrollBarColor")
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableSelectedDataDetector")
+    }
     inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
         throw new Error("Unimplemented method inputFilter")
     }
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         throw new Error("Unimplemented method showCounter")
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         throw new Error("Unimplemented method customKeyboard")
     }
     attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1308,11 +1469,19 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
+    minLines_value?: int32 | undefined
+    enableAutoSpacing_value?: boolean | undefined
+    strokeWidth_value?: LengthMetrics | undefined
+    strokeColor_value?: ResourceColor | undefined
+    onWillAttachIME_value?: ((value0: IMEClient) => void) | undefined
+    scrollBarColor_value?: ColorMetrics | undefined
+    enableSelectedDataDetector_value?: boolean | undefined
     compressLeadingPunctuation_value?: boolean | undefined
     includeFontPadding_value?: boolean | undefined
     fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined
     selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
+    textDirection_value?: TextDirection | undefined
     setTextAreaOptions(value?: TextAreaOptions): this {
         return this
     }
@@ -1415,7 +1584,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         return this
     }
-    maxLines(value: int32 | undefined): this {
+    maxLines(value: int32 | undefined, options?: MaxLinesOptions): this {
         return this
     }
     wordBreak(value: WordBreak | undefined): this {
@@ -1430,7 +1599,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     letterSpacing(value: double | string | Resource | undefined): this {
         return this
     }
-    lineSpacing(value: LengthMetrics | undefined): this {
+    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
         return this
     }
     lineHeight(value: double | string | Resource | undefined): this {
@@ -1499,13 +1668,37 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         return this
     }
+    textDirection(value: TextDirection | undefined): this {
+        return this
+    }
+    minLines(value: int32 | undefined): this {
+        return this
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        return this
+    }
+    strokeWidth(value: LengthMetrics | undefined): this {
+        return this
+    }
+    strokeColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        return this
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        return this
+    }
     inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
         return this
     }
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1793,10 +1986,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public maxLines(value: int32 | undefined): this {
+    public maxLines(value: int32 | undefined, options?: MaxLinesOptions): this {
         if (this.checkPriority("maxLines")) {
             const value_casted = value as (int32 | undefined)
-            this.getPeer()?.setMaxLinesAttribute(value_casted)
+            const options_casted = options as (MaxLinesOptions | undefined)
+            this.getPeer()?.setMaxLinesAttribute(value_casted, options_casted)
             return this
         }
         return this
@@ -1833,10 +2027,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public lineSpacing(value: LengthMetrics | undefined): this {
+    public lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
         if (this.checkPriority("lineSpacing")) {
             const value_casted = value as (LengthMetrics | undefined)
-            this.getPeer()?.setLineSpacingAttribute(value_casted)
+            const options_casted = options as (LineSpacingOptions | undefined)
+            this.getPeer()?.setLineSpacingAttribute(value_casted, options_casted)
             return this
         }
         return this
@@ -2017,6 +2212,70 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
+    public textDirection(value: TextDirection | undefined): this {
+        if (this.checkPriority("textDirection")) {
+            const value_casted = value as (TextDirection | undefined)
+            this.getPeer()?.setTextDirectionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minLines(value: int32 | undefined): this {
+        if (this.checkPriority("minLines")) {
+            const value_casted = value as (int32 | undefined)
+            this.getPeer()?.setMinLinesAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableAutoSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public strokeWidth(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("strokeWidth")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setStrokeWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public strokeColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("strokeColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.setStrokeColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        if (this.checkPriority("onWillAttachIME")) {
+            const value_casted = value as (((value0: IMEClient) => void) | undefined)
+            this.getPeer()?.setOnWillAttachIMEAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarColor(value: ColorMetrics | undefined): this {
+        if (this.checkPriority("scrollBarColor")) {
+            const value_casted = value as (ColorMetrics | undefined)
+            this.getPeer()?.setScrollBarColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableSelectedDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableSelectedDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -2035,9 +2294,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    public customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | ComponentContentBase | undefined)
             const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.setCustomKeyboardAttribute(value_casted, options_casted)
             return this
@@ -2063,8 +2322,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
 export function TextAreaImpl(
     @memo
     style: ((attributes: TextAreaAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextAreaComponent>((): ArkTextAreaComponent => {
         return new ArkTextAreaComponent()
@@ -2073,7 +2330,6 @@ export function TextAreaImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -2123,15 +2379,15 @@ export class TextAreaOptions_serializer {
                     const valueHolderForTextTmpValueForIdx0ForIdx1  = valueHolderForTextTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueHolderForTextTmpValue instanceof Bindable<ResourceStr>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
-            } else if (valueHolderForTextTmpValue instanceof Bindable<Resource>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTextTmpValueForIdx2  = valueHolderForTextTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx2)
-            } else if (valueHolderForTextTmpValue instanceof Bindable<string>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForTextTmpValueForIdx3  = valueHolderForTextTmpValue as Bindable<string>
                 Bindable_String_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx3)

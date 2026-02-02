@@ -77,10 +77,10 @@ std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
-LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
-bool SystemProperties::unZipHap_ = true;
+std::atomic<bool> SystemProperties::unZipHap_(true);
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugEnabled_ = false;
+bool SystemProperties::eventBenchMarkEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::layoutDetectEnabled_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
@@ -138,6 +138,7 @@ bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
 bool SystemProperties::isOpenYuvDecode_ = false;
+std::once_flag SystemProperties::getSysPropertiesFlag_;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -211,6 +212,10 @@ void SystemProperties::InitDeviceInfo(
     }
 }
 
+void SystemProperties::ReadSystemParametersCallOnce()
+{
+}
+
 void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
     if (orientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
@@ -278,6 +283,11 @@ int32_t SystemProperties::GetSvgMode()
 bool SystemProperties::GetIsUseMemoryMonitor()
 {
     return false;
+}
+
+int32_t SystemProperties::GetComponentLoadNumber()
+{
+    return 1;
 }
 
 bool SystemProperties::IsFormAnimationLimited()
@@ -413,6 +423,11 @@ bool SystemProperties::IsBigFoldProduct()
 std::string SystemProperties::GetDebugInspectorId()
 {
     return UNDEFINED_PARAM;
+}
+
+bool SystemProperties::GetEventBenchMarkEnabled()
+{
+    return false;
 }
 
 double SystemProperties::GetSrollableVelocityScale()

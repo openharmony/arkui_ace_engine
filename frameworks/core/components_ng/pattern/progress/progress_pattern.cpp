@@ -53,6 +53,22 @@ void ProgressPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void ProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    hasVisibleChangeRegistered_ = false;
+}
+
+void ProgressPattern::OnDetachFromMainTree()
+{
+    CHECK_NULL_VOID(progressModifier_);
+    progressModifier_->StopAllLoopAnimation();
+}
+
 void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -132,6 +148,34 @@ void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
         default:
             break;
     }
+}
+
+void ProgressPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    bool isScan = paintProperty->GetEnableScanEffect().value_or(false)
+        || paintProperty->GetEnableRingScanEffect().value_or(false)
+        || paintProperty->GetEnableLinearScanEffect().value_or(false);
+    ProgressStatus progressStatus = paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING);
+    CHECK_NULL_VOID(isScan || progressStatus == ProgressStatus::LOADING);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->progressModifier_);
+        pattern->progressModifier_->SetInVisibleArea(visible);
+    };
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+    hasVisibleChangeRegistered_ = true;
 }
 
 void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -503,6 +547,7 @@ void ProgressPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
@@ -529,6 +574,7 @@ void ProgressPattern::OnModifyDone()
         padding.SetEdges(CalcLength(theme->GetRingDefaultPadding()));
         progressLayoutProperty->UpdatePadding(padding);
     }
+    RegisterVisibleAreaChange();
     OnAccessibilityEvent();
     ReportProgressEvent();
 }
@@ -574,6 +620,11 @@ void ProgressPattern::OnLanguageConfigurationUpdate()
     progressModifier_->SetIsRightToLeft(isRtl);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     isRightToLeft_ = isRtl;
+}
+
+FocusPattern ProgressPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
 }
 
 void ProgressPattern::OnVisibleChange(bool isVisible)
@@ -870,7 +921,8 @@ void ProgressPattern::ReportProgressEvent()
     }
     auto maxValue = progressPaintProperty->GetMaxValue().value();
     if (LessOrEqual(maxValue, value) && LessNotEqual(reportLastValue_, maxValue)) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress",
+            ComponentEventType::COMPONENT_EVENT_PROGRESS);
     }
     reportLastValue_ = value;
 }
@@ -933,27 +985,7 @@ void ProgressPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto pops = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(pops);
-    const auto& type = pops->GetProgressType();
-    if (!pops->GetGradientColorSetByUserValue(false)) {
-        Color colorVal;
-        Color endColor;
-        Color beginColor;
-        NG::Gradient gradient;
-        endColor = theme->GetRingProgressEndSideColor();
-        beginColor = theme->GetRingProgressBeginSideColor();
-        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
-                                                                 : theme->GetTrackParseFailedSelectedColor();
-        NG::GradientColor endSideColor;
-        NG::GradientColor beginSideColor;
-        endSideColor.SetLinearColor(LinearColor(endColor));
-        endSideColor.SetDimension(Dimension(0.0f));
-        beginSideColor.SetLinearColor(LinearColor(beginColor));
-        beginSideColor.SetDimension(Dimension(1.0f));
-        gradient.AddColor(endSideColor);
-        gradient.AddColor(beginSideColor);
-        pops->UpdateGradientColor(gradient);
-        pops->UpdateColor(colorVal);
-    }
+    ProcessColorOnColorConfigurationUpdate();
     if (pops->GetCapsuleStyleSetByUserValue(false) && !pops->GetCapsuleStyleFontColorSetByUserValue(false)) {
         auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(textHost);
@@ -962,6 +994,55 @@ void ProgressPattern::OnColorConfigurationUpdate()
         textLayoutProperty->UpdateTextColor(theme->GetTextColor());
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         pops->UpdateTextColor(theme->GetTextColor());
+    }
+    const auto& type = pops->GetProgressType();
+    if (!pops->GetBackgroundColorSetByUserValue(false)) {
+        Color colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
+                         : (type == ProgressType::RING)  ? theme->GetRingProgressParseFailedBgColor()
+                                                         : theme->GetTrackParseFailedBgColor();
+        pops->UpdateBackgroundColor(colorVal);
+    }
+}
+
+void ProgressPattern::ProcessColorOnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    const auto& type = pops->GetProgressType();
+    if (!pops->GetGradientColorSetByUserValue(false)) {
+        Color colorVal;
+        Color beginColor;
+        Color endColor;
+        NG::Gradient gradient;
+        NG::GradientColor beginSideColor;
+        NG::GradientColor endSideColor;
+        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
+                                                   : theme->GetTrackParseFailedSelectedColor();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+            endColor = (type == ProgressType::RING || type == ProgressType::SCALE)
+                           ? theme->GetRingProgressEndSideColor()
+                           : colorVal;
+            beginColor = (type == ProgressType::RING || type == ProgressType::SCALE)
+                             ? theme->GetRingProgressBeginSideColor()
+                             : colorVal;
+        } else {
+            endColor = theme->GetRingProgressEndSideColor();
+            beginColor = theme->GetRingProgressBeginSideColor();
+        }
+        beginSideColor.SetLinearColor(LinearColor(beginColor));
+        beginSideColor.SetDimension(Dimension(1.0f));
+        endSideColor.SetLinearColor(LinearColor(endColor));
+        endSideColor.SetDimension(Dimension(0.0f));
+        gradient.AddColor(endSideColor);
+        gradient.AddColor(beginSideColor);
+        pops->UpdateGradientColor(gradient);
+        pops->UpdateColor(colorVal);
     }
 }
 } // namespace OHOS::Ace::NG

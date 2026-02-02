@@ -21,7 +21,7 @@ import {
     IDecoratedV1Variable,
     IVariableOwner,
 } from '../decorator';
-
+import { StorageProperty } from '../storage/storageBase';
 export class StorageLinkDecoratedVariable<T>
     extends LinkDecoratedVariable<T>
     implements
@@ -46,5 +46,9 @@ export class StorageLinkDecoratedVariable<T>
         super(owningComponent, varName, source, sourceGet, sourceSet, watchFunc);
         this.decorator = decoratroName;
         this.propertyNameInAppStorage_ = propertyNameInAppStorage;
+    }
+    public aboutToBeDeletedInternal(): void {
+        (this.getSource() as StorageProperty<T>).__unregister(this.getMyTriggerFromSourceWatchId());
+        super.aboutToBeDeletedInternal();
     }
 }

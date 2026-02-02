@@ -42,6 +42,7 @@ void TextModelNG::Create(const std::u16string& content)
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_ETS_TAG, nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
@@ -88,6 +89,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::u16str
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
     auto isFirstBuild = frameNode->IsFirstBuilding();
     if (layout) {
@@ -210,6 +212,7 @@ void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
@@ -574,6 +577,7 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
@@ -754,6 +758,7 @@ void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>&
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto index = 0;
@@ -955,8 +960,8 @@ void TextModelNG::SetClipEdge(bool clip)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ClipEdge, clip, frameNode);
     frameNode->GetRenderContext()->SetClipToFrame(clip);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
@@ -1516,6 +1521,7 @@ void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int
 void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextDetectConfig(textDetectConfig);
@@ -1801,6 +1807,7 @@ void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
@@ -1839,6 +1846,7 @@ void TextModelNG::ResetGradientShaderStyle()
 void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
@@ -1963,5 +1971,23 @@ void TextModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color&
 void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
+
+void TextModelNG::SetExternalDrawCallback(
+    FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    if (textPattern) {
+        textPattern->SetExternalDrawCallback(std::move(callback));
+    }
+}
+
+std::optional<void*> TextModelNG::GetInnerParagraph(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, std::nullopt);
+    return textPattern->GetDrawParagraph();
 }
 } // namespace OHOS::Ace::NG

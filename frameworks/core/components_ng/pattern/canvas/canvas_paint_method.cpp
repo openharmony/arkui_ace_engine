@@ -109,6 +109,7 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
     ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateRecordingCanvas[%f, %f]", GetId(), width, height);
+    ACE_UINODE_TRACE(GetId());
     rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
     CHECK_NULL_VOID(rsCanvas_);
@@ -118,6 +119,15 @@ void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
         ResetStates();
     }
     needMarkDirty_ = true;
+}
+
+void CanvasPaintMethod::ClearRecordingCanvas()
+{
+    auto rsRecordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
+    CHECK_NULL_VOID(rsRecordingCanvas);
+    auto drawCmdList = rsRecordingCanvas->GetDrawCmdList();
+    CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);
+    rsRecordingCanvas->Clear();
 }
 
 void CanvasPaintMethod::ResetRecordingCanvas()
@@ -502,6 +512,7 @@ void CanvasPaintMethod::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
 void CanvasPaintMethod::SetCanvasRenderContext(const RefPtr<CanvasRenderContext>& canvasRenderContext)
 {
     canvasRenderContext_ = canvasRenderContext;
+    CHECK_NULL_VOID(canvasRenderContext_);
     canvasRenderContext_->SetPaintMethod(this);
 }
 

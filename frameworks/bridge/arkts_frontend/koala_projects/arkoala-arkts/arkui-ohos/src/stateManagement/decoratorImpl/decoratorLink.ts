@@ -79,6 +79,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             if (this.sourceSet_ === undefined) {
                 throw new Error(`${this.getInfo()}: Can not set @Link value. @Link source is immutable error.`);
             }
+            this.checkValueIsNotFunction(newValue);
             const value = uiUtils.makeV1Observed(newValue);
             // @Watch
             // if new value is object, register so that property changes trigger

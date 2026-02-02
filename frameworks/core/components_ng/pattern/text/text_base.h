@@ -142,7 +142,7 @@ private:
     int32_t selectingFingerId_ = -1;
 };
 
-class TextBase : public SelectOverlayClient {
+class ACE_FORCE_EXPORT TextBase : public SelectOverlayClient {
     DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
 public:
@@ -175,10 +175,12 @@ public:
     }
 
     // The methods that need to be implemented for input class components
-    virtual RectF GetCaretRect() const
+    virtual RectF GetCaretRect(bool ignoreScale = true) const
     {
         return { 0, 0, 0, 0 };
     }
+
+    VectorF GetHostScale(RefPtr<FrameNode> host) const;
 
     virtual void ScrollToSafeArea() const {}
 

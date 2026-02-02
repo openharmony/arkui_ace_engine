@@ -30,6 +30,7 @@ COMMON_SRC = [
 ]
 
 ace_unittest("grid_test_regular") {
+  module_name = "ScrollingSet-GridAndGridItem"
   type = "new"
   sources = COMMON_SRC
   sources += [
@@ -51,6 +52,7 @@ ace_unittest("grid_test_regular") {
 }
 
 ace_unittest("grid_test_ng") {
+  module_name = "ScrollingSet-GridAndGridItem"
   type = "new"
   sources = COMMON_SRC
   defines = [ "TEST_IRREGULAR_GRID" ]
@@ -65,9 +67,23 @@ ace_unittest("grid_test_ng") {
 }
 
 ace_unittest("grid_static_test_ng") {
+  module_name = "ScrollingSet-GridAndGridItem"
+  type = "new"
+  sources = [
+    "grid_static_test_ng.cpp",
+    "grid_test_ng.cpp",
+  ]
+}
+
+ace_unittest("grid_test_custom") {
+  module_name = "ScrollingSet-GridAndGridItem"
   type = "new"
   sources = [
     "grid_test_ng.cpp",
-    "grid_static_test_ng.cpp",
+    "custom/custom_layout_options.cpp",
+    "custom/grid_custom_layout_test_ng.cpp",
+    "custom/grid_custom_algorithm_test_ng.cpp",
+    "custom/grid_custom_scroller_test_ng.cpp",
+    "custom/grid_custom_layout_algorithm_test.cpp",
   ]
 }

@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 
-#include "focus_event_handler.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
+#include "core/components_ng/event/focus_type.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
@@ -41,28 +42,6 @@ constexpr auto DEFAULT_FOCUS_IS_GROUP_DEFAULT = false;
 constexpr auto DEFAULT_FOCUS_DEFAULT_FOCUS = false;
 constexpr auto DEFAULT_FOCUS_ARROW_KEY_STEP_OUT = true;
 constexpr auto DEFAULT_FOCUS_TAB_INDEX = 0;
-enum class FocusNodeType : int32_t {
-    DEFAULT = 0,
-    GROUP_DEFAULT = 1,
-};
-enum class ScopeType : int32_t {
-    OTHERS = 0,
-    FLEX = 1,
-    PROJECT_AREA = 2,
-};
-enum class FocusStep : int32_t {
-    NONE = 0x0,
-    LEFT = 0x1,
-    UP = 0x2,
-    RIGHT = 0x11,
-    DOWN = 0x12,
-    LEFT_END = 0x3,
-    UP_END = 0x4,
-    RIGHT_END = 0X13,
-    DOWN_END = 0x14,
-    SHIFT_TAB = 0x5,
-    TAB = 0x15,
-};
 enum class RequestFocusResult : int32_t {
     DEFAULT = 0,
     NON_FOCUSABLE = 1,
@@ -94,16 +73,6 @@ enum class SwitchingUpdateReason : int32_t {
 };
 
 using GetNextFocusNodeFunc = std::function<bool(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
-
-enum class FocusStyleType : int32_t {
-    NONE = -1,
-    INNER_BORDER = 0,
-    OUTER_BORDER = 1,
-    CUSTOM_BORDER = 2,
-    CUSTOM_REGION = 3,
-    FORCE_BORDER = 4,
-    FORCE_NONE = 5,
-};
 
 enum class FocusDependence : int32_t {
     CHILD = 0,

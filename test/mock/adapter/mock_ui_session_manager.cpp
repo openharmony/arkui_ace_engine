@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "mock_uisession_manager.h"
+#include "mock_ui_session_manager.h"
 
 namespace OHOS::Ace {
 UiSessionManager* UiSessionManager::GetInstance()

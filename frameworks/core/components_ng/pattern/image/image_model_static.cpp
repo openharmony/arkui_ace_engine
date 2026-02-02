@@ -146,6 +146,7 @@ void ImageModelStatic::SetAlt(FrameNode* frameNode, const std::optional<ImageSou
 
 void ImageModelStatic::SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
 {
+    CHECK_NULL_VOID(frameNode);
     if (src) {
         if (ImageSourceInfo::ResolveURIType(src.value().GetSrc()) == SrcType::NETWORK) {
             ImageSourceInfo defaultSrcInfo("");
@@ -159,6 +160,7 @@ void ImageModelStatic::SetAltError(FrameNode* frameNode, const std::optional<Ima
 
 void ImageModelStatic::SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
 {
+    CHECK_NULL_VOID(frameNode);
     if (src) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, src.value(), frameNode);
     } else {
@@ -176,7 +178,18 @@ void ImageModelStatic::SetSupportSvg2(FrameNode* frameNode, bool enable)
 
 void ImageModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition, frameNode);
+}
+
+void ImageModelStatic::SetAntialiased(FrameNode* frameNode, const std::optional<bool>& antialiased)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (antialiased) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antialiased.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, frameNode);
+    }
 }
 
 void ImageModelStatic::SetImageInterpolation(
@@ -253,7 +266,7 @@ void ImageModelStatic::SetHdrBrightness(FrameNode* frameNode, const std::optiona
 void ImageModelStatic::ResetDraggable(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<ImageTheme>();
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

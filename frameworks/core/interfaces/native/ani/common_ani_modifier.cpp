@@ -330,14 +330,12 @@ ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRun
         &nativeContext, FrontendType::ARK_TS);
     CHECK_NULL_RETURN(container, -1);
     int32_t instanceId = container->GetInstanceId();
-    ContainerScope::Add(instanceId);
     return instanceId;
 }
 
 void DestroyWindowFreeContainer(ani_int id)
 {
     Platform::WindowFreeContainer::DestroyWindowFreeContainer();
-    ContainerScope::RemoveAndCheck(static_cast<int32_t>(id));
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
@@ -480,8 +478,6 @@ ani_double Vp2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     return value * density;
@@ -492,8 +488,6 @@ ani_double Px2vp(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -507,8 +501,6 @@ ani_double Fp2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -529,8 +521,6 @@ ani_double Px2fp(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -553,8 +543,6 @@ ani_double Lpx2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -584,8 +572,6 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     CHECK_NULL_RETURN(value, 0);
     auto container = Container::Current();
@@ -605,6 +591,16 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
         windowConfig.UpdateDesignWidthScale(width);
     }
     return value / windowConfig.designWidthScale;
+}
+
+void SetIsRecycleInvisibleImageMemory(ani_boolean isRecycle, ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsRecycleInvisibleImageMemory(isRecycle);
 }
 
 std::optional<std::string> GetWindowName(ani_int instanceId)
@@ -1043,6 +1039,28 @@ ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
     eventInfo->SetPreventDefault(true);
     return true;
 }
+void GetCallingScopeUIContext(int32_t& instanceId)
+{
+    instanceId = ContainerScope::CurrentId();
+}
+
+void GetLastFocusedUIContext(int32_t& instanceId)
+{
+    instanceId = ContainerScope::RecentActiveId();
+}
+
+void GetLastForegroundUIContext(int32_t& instanceId)
+{
+    instanceId = ContainerScope::RecentForegroundId();
+}
+
+void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
+{
+    const auto allIds = ContainerScope::GetAllUIContexts();
+    for (const auto& id : allIds) {
+        instanceIds.push_back(id);
+    }
+}
 
 void ResolveUIContext(std::vector<int32_t>& instnace)
 {
@@ -1088,6 +1106,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .setIsRecycleInvisibleImageMemory = OHOS::Ace::NG::SetIsRecycleInvisibleImageMemory,
         .getWindowId = OHOS::Ace::NG::GetWindowId,
         .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
         .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
@@ -1130,7 +1149,11 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getKeyEventPressedModifierKey = OHOS::Ace::NG::GetKeyEventPressedModifierKey,
         .setClickEventPreventDefault = OHOS::Ace::NG::SetClickEventPreventDefault,
         .setTouchEventPreventDefault = OHOS::Ace::NG::SetTouchEventPreventDefault,
-        .resolveUIContext = OHOS::Ace::NG::ResolveUIContext
+        .getCallingScopeUIContext = OHOS::Ace::NG::GetCallingScopeUIContext,
+        .getLastFocusedUIContext = OHOS::Ace::NG::GetLastFocusedUIContext,
+        .getLastForegroundUIContext = OHOS::Ace::NG::GetLastForegroundUIContext,
+        .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
+        .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
     };
     return &impl;
 }

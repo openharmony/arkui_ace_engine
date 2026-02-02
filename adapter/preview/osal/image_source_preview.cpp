@@ -15,8 +15,43 @@
 
 #include "image_source_preview.h"
 
-#include "frameworks/base/image/image_source.h"
+#include "include/codec/SkEncodedImageFormat.h"
+#include "include/core/SkStream.h"
+
+#include "base/image/image_defines.h"
+#include "base/image/image_source.h"
+
 namespace OHOS::Ace {
+namespace {
+ImageRotateOrientation GetImageRotateOrientation(SkEncodedOrigin origin)
+{
+    switch (origin) {
+        case SkEncodedOrigin::kTopRight_SkEncodedOrigin:
+            return ImageRotateOrientation::UP_MIRRORED;
+        case SkEncodedOrigin::kBottomRight_SkEncodedOrigin:
+            // Rotated 180
+            return ImageRotateOrientation::DOWN;
+        case SkEncodedOrigin::kBottomLeft_SkEncodedOrigin:
+            return ImageRotateOrientation::DOWN_MIRRORED;
+        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
+            // Reflected across x-axis, Rotated 90 CCW
+            return ImageRotateOrientation::LEFT_MIRRORED;
+        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
+            // Rotated 90 CW
+            return ImageRotateOrientation::RIGHT;
+        case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
+            // Reflected across x-axis, Rotated 90 CW
+            return ImageRotateOrientation::RIGHT_MIRRORED;
+        case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
+            // Rotated 90 CCW
+            return ImageRotateOrientation::LEFT;
+        case SkEncodedOrigin::kTopLeft_SkEncodedOrigin:
+            return ImageRotateOrientation::UP;
+        default:
+            return ImageRotateOrientation::UP;
+    }
+}
+}
 RefPtr<ImageSource> ImageSource::Create(int32_t /* fd */)
 {
     return nullptr;
@@ -29,7 +64,19 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
 
 RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
 {
-    return nullptr;
+    auto skData = SkData::MakeWithCopy(data, size);
+    if (!skData) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "skData is null");
+        errorCode = static_cast<uint32_t>(ImageInnerErrorCode::SK_DATA_CREATE_ERROR);
+        return nullptr;
+    }
+    auto codec = SkCodec::MakeFromData(skData);
+    if (!codec) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "codec is null");
+        errorCode =  static_cast<uint32_t>(ImageInnerErrorCode::SK_CODEC_CREATE_ERROR);
+        return nullptr;
+    }
+    return MakeRefPtr<ImageSourcePreview>(std::move(codec));
 }
 
 RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
@@ -76,12 +123,14 @@ RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap()
 
 ImageSource::Size ImageSourcePreview::GetImageSize()
 {
-    return {};
+    CHECK_NULL_RETURN(codec_, {});
+    return { codec_->dimensions().fWidth, codec_->dimensions().fHeight };
 }
 
 uint32_t ImageSourcePreview::GetFrameCount()
 {
-    return 0;
+    CHECK_NULL_RETURN(codec_, {});
+    return codec_->getFrameCount();
 }
 
 std::string ImageSourcePreview::GetEncodedFormat()
@@ -102,5 +151,12 @@ std::vector<int32_t> ImageSourcePreview::GetDelayTime()
 bool ImageSourcePreview::IsHeifWithoutAlpha()
 {
     return false;
+}
+
+ImageRotateOrientation ImageSourcePreview::GetImageOrientation()
+{
+    CHECK_NULL_RETURN(codec_, {});
+    auto origin = codec_->getOrigin();
+    return GetImageRotateOrientation(origin);
 }
 } // namespace OHOS::Ace

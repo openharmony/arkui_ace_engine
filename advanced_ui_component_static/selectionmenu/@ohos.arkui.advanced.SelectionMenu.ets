@@ -19,16 +19,16 @@ import {
   ShadowStyle, $r, Builder, BuilderParam, CustomBuilder, RichEditorSelection, RichEditorTextSpanResult, Column, ForEach,
   ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, Component, Length, Menu,
   RichEditorTextStyle, FontStyle, FontWeight, TextDecorationType, Flex, Visibility, Scroll, FlexWrap, MenuItemGroup,
-  OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError,
+  OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy,
   RichEditorTextStyleResult
 } from '@ohos.arkui.component';
-import { State, Observed, PropRef, StorageProp, Watch, StorageLink } from '@ohos.arkui.stateManagement';
+import { State, Observed, PropRef, Watch, StorageLink } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from '@ohos.arkui.UIContext';
 import pasteboard from '@ohos.pasteboard'
 import { BusinessError, RecordData } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 const WITHOUT_BUILDER = -2
 const MAX_FONT_STANDARD = 1.0
@@ -267,7 +267,7 @@ struct SelectionMenuComponent {
     sysBoard.clearData()
     sysBoard.setData(pasteData).then(() => {
       hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Succeeded in setting PasteData.');
-    }).catch((err: BusinessError) => {
+    }).catch((err: Error) => {
       hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
     } as (error: Error) => void)
   }
@@ -464,6 +464,11 @@ struct SelectionMenuComponent {
           .borderRadius(this.theme.iconBorderRadius)
           .width(this.measureButtonWidth())
           .height(this.theme.buttonSize)
+        }, (item: EditorMenuOptions, index: int) => {
+          if (item.symbolStyle) {
+            return index + '__symbolStyle'
+          }
+          return index + '__' + JSON.stringify(item)
         })
       }
     }
@@ -624,6 +629,8 @@ struct SelectionMenuComponent {
                     expandedMenuOptionItem.action!()
                   }
                 })
+            }, (item: ExpandedMenuOptions, index: int) => {
+              return index + '__expandedMenu'
             })
           }
         }

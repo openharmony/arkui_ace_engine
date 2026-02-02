@@ -19,7 +19,7 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace::NG {

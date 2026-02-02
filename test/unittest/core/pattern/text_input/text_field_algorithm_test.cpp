@@ -230,6 +230,9 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle002, TestSize.Level1)
  */
 HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create textfield and set property.
+     */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetStrokeWidth(Dimension(2.0f));
         model.SetStrokeColor(STORKE_COLOR_VALUE_1);
@@ -244,6 +247,9 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle003, TestSize.Level1)
 
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
 
+    /**
+     * @tc.steps: step2. Check if stroke color is STORKE_COLOR_VALUE_1
+     */
     EXPECT_EQ(layoutProperty_->GetStrokeWidth(), Dimension(2.0f));
     EXPECT_EQ(layoutProperty_->GetStrokeColor(), STORKE_COLOR_VALUE_1);
 }

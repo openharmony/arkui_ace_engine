@@ -408,10 +408,16 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteBackward003, TestSize.Level0)
  */
 HWTEST_F(RichEditorDeleteTestNg, DeleteForward001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. DeleteForward with PreviewTextInputting
+     */
     richEditorPattern->previewTextRecord_.previewContent = u"123";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;

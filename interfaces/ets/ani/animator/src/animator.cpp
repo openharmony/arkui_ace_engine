@@ -54,6 +54,33 @@ constexpr int32_t ANIMATION_DIRETION_NORMAL_NUM = 0;
 constexpr int32_t ANIMATION_DIRETION_REVERSE_NUM = 1;
 constexpr int32_t ANIMATION_DIRETION_ALTERNATE_NUM = 2;
 constexpr int32_t ANIMATION_DIRETION_ALTERNATE_REVERSE_NUM = 3;
+
+static ani_vm* GetAniVm(ani_env* env)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_vm* vm = nullptr;
+    ani_status status = env->GetVM(&vm);
+    if (status != ANI_OK || !vm) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] get vm from env failed.");
+        return nullptr;
+    }
+
+    return vm;
+}
+
+static ani_env* GetAniEnv(ani_vm* vm)
+{
+    CHECK_NULL_RETURN(vm, nullptr);
+    ani_env* env = nullptr;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK || !env) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] get env from vm failed.");
+        return nullptr;
+    }
+
+    return env;
+}
+
 static AnimationDirection StringToAnimationDirection(const std::string &direction)
 {
     if (direction.compare("alternate") == 0) {
@@ -486,12 +513,16 @@ static void SetOnfinish([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     if (!animator) {
         return;
     }
+    ani_vm* vm = GetAniVm(env);
+    CHECK_NULL_VOID(vm);
     ani_ref onfinishRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onfinishGlobalRef;
     env->GlobalReference_Create(onfinishRef, &onfinishGlobalRef);
     animatorResult->SetOnfinishRef(onfinishGlobalRef);
     animator->ClearStopListeners();
-    animator->AddStopListener([env, onfinishGlobalRef, id = animator->GetId()] {
+    animator->AddStopListener([vm, onfinishGlobalRef, id = animator->GetId()] {
+        ani_env* env = GetAniEnv(vm);
+        CHECK_NULL_VOID(env);
         auto fnObj = reinterpret_cast<ani_fn_object>(onfinishGlobalRef);
         ani_ref result;
         env->FunctionalObject_Call(fnObj, 0, NULL, &result);
@@ -575,22 +606,21 @@ static void SetOnframe([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_objec
     if (!animator) {
         return;
     }
+    ani_vm* vm = GetAniVm(env);
+    CHECK_NULL_VOID(vm);
     animator->ClearInterpolators();
     ani_ref onframeRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onframeGlobalRef;
     env->GlobalReference_Create(onframeRef, &onframeGlobalRef);
     animatorResult->SetOnframeRef(onframeGlobalRef);
-    auto onFrameCallback = [env,
-                               onframeGlobalRef,
-                               id = animator->GetId(),
-                               weakOption = std::weak_ptr<Napi::AnimatorOption>(animatorResult->GetAnimatorOption())](
-                               double value) {
+    auto onFrameCallback = [vm, onframeGlobalRef, id = animator->GetId(),
+        weakOption = std::weak_ptr<Napi::AnimatorOption>(animatorResult->GetAnimatorOption())](double value) {
+        ani_env* env = GetAniEnv(vm);
+        CHECK_NULL_VOID(env);
         auto fnObj = reinterpret_cast<ani_fn_object>(onframeGlobalRef);
         auto option = weakOption.lock();
         auto args = createDouble(env, value);
-        if (args == nullptr) {
-            return;
-        }
+        CHECK_NULL_VOID(args);
         ani_ref result;
         auto obj = reinterpret_cast<ani_ref>(args);
         std::vector<ani_ref> tmp = {reinterpret_cast<ani_ref>(obj)};
@@ -629,12 +659,16 @@ static void SetOncancel([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     if (!animator) {
         return;
     }
+    ani_vm* vm = GetAniVm(env);
+    CHECK_NULL_VOID(vm);
     ani_ref oncancelRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref oncancelGlobalRef;
     env->GlobalReference_Create(oncancelRef, &oncancelGlobalRef);
     animatorResult->SetOncancelRef(oncancelGlobalRef);
     animator->ClearIdleListeners();
-    animator->AddIdleListener([env, oncancelGlobalRef] {
+    animator->AddIdleListener([vm, oncancelGlobalRef] {
+        ani_env* env = GetAniEnv(vm);
+        CHECK_NULL_VOID(env);
         auto fnObj = reinterpret_cast<ani_fn_object>(oncancelGlobalRef);
         ani_ref result;
         env->FunctionalObject_Call(fnObj, 0, NULL, &result);
@@ -657,13 +691,17 @@ static void SetOnrepeat([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     if (!animator) {
         return;
     }
+    ani_vm* vm = GetAniVm(env);
+    CHECK_NULL_VOID(vm);
 
     ani_ref onrepeatRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onrepeatGlobalRef;
     env->GlobalReference_Create(onrepeatRef, &onrepeatGlobalRef);
     animatorResult->SetOnrepeatRef(onrepeatGlobalRef);
     animator->ClearRepeatListeners();
-    animator->AddRepeatListener([env, onrepeatGlobalRef] {
+    animator->AddRepeatListener([vm, onrepeatGlobalRef] {
+        ani_env* env = GetAniEnv(vm);
+        CHECK_NULL_VOID(env);
         auto fnObj = reinterpret_cast<ani_fn_object>(onrepeatGlobalRef);
         ani_ref result;
         env->FunctionalObject_Call(fnObj, 0, NULL, &result);
@@ -676,6 +714,10 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
     ani_object animatorObj = {};
     static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] aniEnv is null");
+        return animatorObj;
+    }
     if (ANI_OK != aniEnv->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
         return animatorObj;
@@ -687,10 +729,6 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
         return animatorObj;
     }
 
-    if (aniEnv == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] aniEnv is null");
-        return nullptr;
-    }
     void *unwrapResult = nullptr;
     bool success = arkts_esvalue_unwrap(aniEnv, input, &unwrapResult);
     if (!success) {
@@ -820,13 +858,17 @@ static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     if (!animator) {
         return;
     }
+    ani_vm* vm = GetAniVm(env);
+    CHECK_NULL_VOID(vm);
     ParseAnimatorOption(env, options, option);
     animator->ClearInterpolators();
     animator->ResetIsReverse();
     animatorResult->ApplyOption();
     ani_ref onframeRef = animatorResult->GetOnframeRef();
     if (onframeRef) {
-        auto onFrameCallback = [env, onframeRef, id = animator->GetId()](double value) {
+        auto onFrameCallback = [vm, onframeRef, id = animator->GetId()](double value) {
+            ani_env* env = GetAniEnv(vm);
+            CHECK_NULL_VOID(env);
             auto fnObj = reinterpret_cast<ani_fn_object>(onframeRef);
             auto args = createDouble(env, value);
             if (args == nullptr) {

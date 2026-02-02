@@ -25,7 +25,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/swiper/swiper_controller.h"
-#include "core/components/tab_bar/tab_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -120,8 +119,8 @@ public:
     static TabsModel* GetInstance();
     virtual ~TabsModel() = default;
 
-    virtual void Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& tabController,
-        const RefPtr<SwiperController>& swiperController) = 0;
+    virtual void Create(BarPosition barPosition, int32_t index, const RefPtr<SwiperController>& swiperController) {};
+    virtual void Create(BarPosition barPosition, const RefPtr<AceType>& tabController) {};
     virtual void Pop() = 0;
     virtual void SetIndex(int32_t index) = 0;
     virtual void SetTabBarPosition(BarPosition tabBarPosition) = 0;
@@ -166,6 +165,7 @@ public:
     virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
     virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
     virtual void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) {}
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

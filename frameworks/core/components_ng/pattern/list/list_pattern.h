@@ -53,7 +53,7 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public SelectableContainerPattern {
+class ACE_FORCE_EXPORT ListPattern : public SelectableContainerPattern {
     DECLARE_ACE_TYPE(ListPattern, SelectableContainerPattern);
 
 public:
@@ -61,7 +61,7 @@ public:
     {
         SetEdgeEffect(EdgeEffect::SPRING, false);
     }
-    ~ListPattern() override = default;
+    ~ListPattern() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -352,6 +352,7 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void GetEventDumpInfo() override;
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {
@@ -658,6 +659,11 @@ private:
     void ResetForExtScroll() override;
     bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
     void CheckValidPredictItem();
+    void ReportOnItemListEvent(const std::string& event);
+    void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
+    void HandleListScroll(float distance, int32_t reportEventId);
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;

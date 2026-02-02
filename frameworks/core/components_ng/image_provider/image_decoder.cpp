@@ -37,6 +37,8 @@ namespace {
 constexpr char IMAGE_JPEG_MIME[] = "image/jpeg";
 constexpr char IMAGE_HEIC_MIME[] = "image/heic";
 constexpr char IMAGE_HEIF_MIME[] = "image/heif";
+constexpr char XMAGE_MODE[] = "HwMnoteXmageMode";
+constexpr char DEFAULT_XMAGE_MODE[] = "default_exif_value";
 } // namespace
 
 WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size)
@@ -196,6 +198,10 @@ void ImageDecoder::HandleDecodeFormat(
     const RefPtr<ImageObject>& obj, const RefPtr<ImageSource>& imageSource, PixelMapConfig& config)
 {
     if (!obj->GetIsYUVDecode()) {
+        return;
+    }
+    auto xmageMode = imageSource->GetProperty(XMAGE_MODE);
+    if (xmageMode != DEFAULT_XMAGE_MODE) {
         return;
     }
     auto mimeType = imageSource->GetEncodedFormat();

@@ -13,51 +13,26 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace RowSplitModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = LinearSplitModelNGStatic::CreateFrameNode(id, NG::SplitType::ROW_SPLIT);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // RowSplitModifier
-namespace RowSplitInterfaceModifier {
-void SetRowSplitOptionsImpl(Ark_NativePointer node)
-{
-    // keep it empty because RowSplit doesn`t have any options
-}
-} // RowSplitInterfaceModifier
-namespace RowSplitAttributeModifier {
-void SetResizeableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, false);
-        return;
-    }
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, *convValue);
-}
-} // RowSplitAttributeModifier
+#ifdef ACE_UNITTEST
+const GENERATED_ArkUIRowSplitModifier* GetRowSplitStaticModifier();
+#endif
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
 {
-    static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
-        RowSplitModifier::ConstructImpl,
-        RowSplitInterfaceModifier::SetRowSplitOptionsImpl,
-        RowSplitAttributeModifier::SetResizeableImpl,
-    };
-    return &ArkUIRowSplitModifierImpl;
+#ifdef ACE_UNITTEST
+ 	return GetRowSplitStaticModifier();
+#else
+    static const GENERATED_ArkUIRowSplitModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RowSplit");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIRowSplitModifier*>(module->GetStaticModifier());
+    }
+    return cachedModifier;
+#endif
 }
-
 }

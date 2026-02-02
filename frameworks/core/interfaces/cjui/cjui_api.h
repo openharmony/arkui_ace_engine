@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -287,6 +287,8 @@ struct CJUICommonModifier {
     ArkUI_Int32 (*getHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
     void (*resetClickEffect)(ArkUINodeHandle node);
+    void (*setEnableClickSoundEffect)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableClickSoundEffect)(ArkUINodeHandle node);
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
@@ -883,6 +885,7 @@ struct CJUIImageModifier {
     void (*resetOnError)(ArkUINodeHandle node);
     void (*setImageOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetImageOnFinish)(ArkUINodeHandle node);
+    void (*setImageFillSetByUser)(ArkUINodeHandle node, ArkUI_Bool value);
 };
 
 struct CJUIColumnModifier {
@@ -1751,7 +1754,7 @@ struct CJUITextAreaModifier {
     void (*setTextAreaEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextAreaEnableAutoFill)(ArkUINodeHandle node);
     void (*setTextAreaBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, void* colorRawPtr);
     void (*resetTextAreaBorder)(ArkUINodeHandle node);
     void (*setTextAreaBorderWidth)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -2422,7 +2425,8 @@ struct CJUIWaterFlowModifier {
     ArkUI_Float32 (*getWaterFlowFriction)(ArkUINodeHandle node);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
-    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
+    void (*setScrollToIndex)(
+        ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, ArkUI_Float32 options);
     void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
     void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
 };
@@ -2533,7 +2537,7 @@ struct CJUIGaugeModifier {
     void (*resetGaugeEndAngle)(ArkUINodeHandle node);
     void (*setGaugeStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setGaugeStrokeWidthPtr)(
-        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* strokeWidthRawPtr);
+        ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* strokeWidthRawPtr);
     void (*resetGaugeStrokeWidth)(ArkUINodeHandle node);
     void (*setShadowOptions)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY,
         ArkUI_Bool isShadowVisible);
@@ -2753,8 +2757,46 @@ struct CJUICalendarPickerModifier {
     void (*setCalendarPickerBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
     void (*resetCalendarPickerBorderRadius)(ArkUINodeHandle node);
     void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
+    ArkUINodeHandle (*jsShowCalendarPicker)(
+        void* dialogProperties, void* settingData, void* buttonInfos, void* dialogEvent, void* dialogCancelEvent);
+    void (*jsCreate)(void* param);
+    ArkUINodeHandle (*jsCreateById)(ArkUI_Int32 id);
+    void (*jsCalendarPickerRemoveResObj)(ArkUINodeHandle node, const ArkUI_CharPtr key);
+    void (*jsRemoveResObj)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*jSResetResObj)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*parseJSEdgeAlignResObjArray)(ArkUINodeHandle node, void* edgeAlignResObj);
+    void (*setJSBorderColor)(ArkUINodeHandle node, const uint32_t value);
+    void (*setJSBorderColorProperty)(ArkUINodeHandle node, void *colorProperty);
+    void (*setJSBorderColorResObj)(ArkUINodeHandle node, void *colorResPtr);
+    void (*setJSBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
+    void (*setJSBorderRadiusArray)(ArkUINodeHandle node, const ArkUIBorderRadiusOption *values, ArkUI_Int32 length);
+    void (*setJSBorderRadiusProperty)(ArkUINodeHandle node, void *radiusProperty);
+    void (*setJSBorderRadiusResObj)(ArkUINodeHandle node, void *radiusResPtrs);
+    void (*setJsBorderStyle)(ArkUINodeHandle node,  const ArkUI_Int32 style);
+    void (*setJSBorderStyleArray)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
+    void (*setJSBorderWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setJSBorderWidthArray)(ArkUINodeHandle node, const ArkUIBorderWidthOption *values, ArkUI_Int32 length);
+    void (*setJSBorderWidthIsLocalized)(
+        ArkUINodeHandle node, const ArkUIBorderWidthOption* values, ArkUI_Int32 length, bool isLocalized);
+    void (*setJSBorderWidthProperty)(ArkUINodeHandle node, void *widthPropertyPtr);
+    void (*setJSBorderWidthResObj)(ArkUINodeHandle node, void *widthResObj);
+    void (*setJsEdgeAlign)(ArkUINodeHandle node, void* offset, int32_t alignType);
+    void (*setJSHeight)(
+        ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit, const std::string calcValue);
+    void (*setJSHeightResObj)(ArkUINodeHandle node, void *heightResPtr);
+    void (*setJSPaddingProperty)(ArkUINodeHandle node, void* padding);
+    void (*setJSTextStyle)(ArkUINodeHandle node, void* textStyleResPtr);
+    void (*updateOnlyLayoutPolicyProperty)(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy,  bool isWidth);
+    void (*setJSRenderStrategy)(ArkUINodeHandle node, ArkUI_Int32 renderStrategy);
+    void (*clearJSWidthOrHeight)(ArkUINodeHandle node, bool isWidth);
+    void (*clearJSHeight)(ArkUINodeHandle node);
 };
 
+struct CJUICalendarPickerDialogModifier {
+    void (*jsRemoveResObj)(ArkUI_CharPtr key);
+    void (*show)(const CalendarPickerDialogOption* option);
+    ArkUI_Bool (*checkOrientationChange)();
+};
 struct CJUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setRatingStepSize)(ArkUINodeHandle node, ArkUI_Float32 value);
@@ -2796,7 +2838,8 @@ struct CJUISearchModifier {
         ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value, ArkUIImageIconRes* imageIconRes);
     void (*resetSearchSearchIcon)(ArkUINodeHandle node);
     void (*setSearchSearchButton)(
-        ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value, ArkUIImageIconRes* imageIconRes);
+        ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value, ArkUIImageIconRes* imageIconRes,
+        bool isThemeColor);
     void (*resetSearchSearchButton)(ArkUINodeHandle node);
     void (*setSearchFontColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr);
     void (*resetSearchFontColor)(ArkUINodeHandle node);
@@ -3019,7 +3062,7 @@ struct CJUITextTimerControllerModifier {
 
 struct CJUIMarqueeModifier {
     void (*setMarqueeFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr);
-    void (*resetMarqueeFontSize)(ArkUINodeHandle node);
+    void (*resetMarqueeFontSize)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setMarqueeFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resourceRawPtr);
     void (*resetMarqueeFontColor)(ArkUINodeHandle node);
     void (*setMarqueeAllowScale)(ArkUINodeHandle node, ArkUI_Bool allowScale);
@@ -3027,7 +3070,7 @@ struct CJUIMarqueeModifier {
     void (*setMarqueeFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
     void (*resetMarqueeFontWeight)(ArkUINodeHandle node);
     void (*setMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily);
-    void (*resetMarqueeFontFamily)(ArkUINodeHandle node);
+    void (*resetMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setMarqueeUpdateStrategy)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMarqueeUpdateStrategy)(ArkUINodeHandle node);
     void (*setMarqueeOnStart)(ArkUINodeHandle node, void* callback);
@@ -3327,22 +3370,33 @@ struct CJUIColumnSplitModifier {
 struct CJUIRichEditorModifier {
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
+    ArkUI_Int32 (*getRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
-    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getRichEditorCaretColor)(ArkUINodeHandle node);
     void (*setOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetOnReady)(ArkUINodeHandle node);
     void (*setOnDeleteComplete)(ArkUINodeHandle node, void* callback);
     void (*resetOnDeleteComplete)(ArkUINodeHandle node);
     void (*setOnEditingChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnEditingChange)(ArkUINodeHandle node);
-    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    ArkUI_Uint32 (*getRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRichEditorEnterKeyType)(ArkUINodeHandle node);
     void (*setRichEditorBarState)(ArkUINodeHandle node, ArkUI_Uint32 barStateValue);
     void (*resetRichEditorBarState)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRichEditorBarState)(ArkUINodeHandle node);
+    void (*setRichEditorSingleLine)(ArkUINodeHandle node, ArkUI_Bool singleLine);
+    void (*resetRichEditorSingleLine)(ArkUINodeHandle node);
+    ArkUI_Bool (*getRichEditorSingleLine)(ArkUINodeHandle node);
 };
 
 struct CJUIRichEditorControllerModifier {
@@ -3376,7 +3430,7 @@ struct CJUIQRCodeModifier {
     void (*resetQRColor)(ArkUINodeHandle node);
     void (*setQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setQRBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetQRBackgroundColor)(ArkUINodeHandle node);
+    void (*resetQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*setContentOpacityPtr)(ArkUINodeHandle node, ArkUI_Float32 opacity, void* opacityRawPtr);
     void (*resetContentOpacity)(ArkUINodeHandle node);
@@ -3761,6 +3815,7 @@ struct CJUINodeModifiers {
     const CJUIImageAnimatorModifier* (*getImageAnimatorModifier)();
     const CJUISideBarContainerModifier* (*getSideBarContainerModifier)();
     const CJUICalendarPickerModifier* (*getCalendarPickerModifier)();
+    const CJUICalendarPickerDialogModifier* (*getCalendarPickerDialogModifier)();
     const CJUITextInputModifier* (*getTextInputModifier)();
     const CJUITabsModifier* (*getTabsModifier)();
     const CJUIStepperItemModifier* (*getStepperItemModifier)();

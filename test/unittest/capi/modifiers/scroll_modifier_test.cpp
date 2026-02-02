@@ -263,8 +263,7 @@ HWTEST_F(ScrollModifierTest, OnScrollBar_SetBadDisplayMode, testing::ext::TestSi
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSize.Level1)
 {
     std::string testColor = "#11123456";
-    Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_String>(testColor);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -279,24 +278,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize.Level1)
 {
     int32_t testColor = 0xff008000;
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
-    modifier_->setScrollBarColor(node_, &colorUnion);
-
-    auto after = GetStringAttribute(node_, "scrollBarColor");
-    auto afterNumeric = Color::FromString(after).GetValue();
-    ASSERT_EQ(testColor, afterNumeric);
-}
-
-/**
- * @tc.name: ScrollBarColor_SetColorFloat
- * @tc.desc: Test OnScrollBarColorImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSize.Level1)
-{
-    float testColor = 286405718.0;
-    auto testNumber = Converter::ArkValue<Ark_Int32>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_Int32>(testNumber);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -316,16 +298,9 @@ HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarColor_SetBadColorString, testing:
 
     // empty color string
     std::string testColor = "";
-    Ark_String str = Converter::ArkValue<Ark_String>(testColor);
-    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
+    auto colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_String>(testColor);
     modifier_->setScrollBarColor(node_, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
-    EXPECT_EQ(before, after);
-    // nullptr to data
-    str = {.length = 12334, .chars = nullptr};
-    colorUnion = Converter::ArkUnion<Opt_Union_Color_I32_String, Ark_String>(str);
-    modifier_->setScrollBarColor(node_, &colorUnion);
-    after = GetStringAttribute(node_, jsonKey);
     EXPECT_EQ(before, after);
     // nullptr value
     modifier_->setScrollBarColor(node_, nullptr);
@@ -443,7 +418,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
     auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::FLOAT};
-    auto friction = CreateResourceUnion<Opt_Union_I32_Resource>(RES_NAME);
+    auto friction = CreateResourceUnion<Opt_Union_F64_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);

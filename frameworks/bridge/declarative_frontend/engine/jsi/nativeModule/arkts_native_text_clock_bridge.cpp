@@ -407,6 +407,7 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     TextClockModelNG::SetBuilderFunc(frameNode,
         [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
             TextClockConfiguration config) -> RefPtr<FrameNode> {
+            LocalScope pandaScope(vm);
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
@@ -419,7 +420,6 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             obj->SetNativePointerFieldCount(vm, 1);
             obj->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, textClock };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

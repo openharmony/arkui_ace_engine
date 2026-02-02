@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> PluginModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PLUGIN_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = PluginNode::GetOrCreatePluginNode(
         V2::PLUGIN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PluginPattern>(); });
     return frameNode;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,16 +22,22 @@ import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPolylinePeer, PolylineAttribute } from "./component/polyline"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ShapePoint } from "./component/line"
 export class PolylineModifier extends CommonMethodModifier implements PolylineAttribute,AttributeModifier<PolylineAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,246 +47,238 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
     applyFocusedAttribute(instance: PolylineAttribute): void { }
     applyDisabledAttribute(instance: PolylineAttribute): void { }
     applySelectedAttribute(instance: PolylineAttribute): void { }
-    _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
-    _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stroke_0_0value?: ResourceColor | undefined
-    _fill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fill_0_0value?: ResourceColor | undefined
-    _strokeDashOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashOffset_0_0value?: number | string | undefined
-    _strokeLineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeLineCap_0_0value?: LineCapStyle | undefined
-    _strokeLineJoin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeLineJoin_0_0value?: LineJoinStyle | undefined
-    _strokeMiterLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeMiterLimit_0_0value?: number | string | undefined
-    _strokeOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeOpacity_0_0value?: number | string | Resource | undefined
-    _fillOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fillOpacity_0_0value?: number | string | Resource | undefined
-    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeWidth_0_0value?: Length | undefined
-    _antiAlias_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _antiAlias_0_0value?: boolean | undefined
-    _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkPolylinePeer;
-        if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkPolylinePeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0)
         {
-            switch (this._points_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setPointsAttribute((this._points_0_0value as Array<ShapePoint> | undefined));
-                    this._points_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._points_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._points_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setPointsAttribute((undefined as Array<ShapePoint> | undefined));
                 }
             }
         }
-        if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[1] != 0)
         {
-            switch (this._stroke_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setStrokeAttribute((this._stroke_0_0value as ResourceColor | undefined));
-                    this._stroke_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._stroke_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._stroke_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setStrokeAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._fill_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[2] != 0)
         {
-            switch (this._fill_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setFillAttribute((this._fill_0_0value as ResourceColor | undefined));
-                    this._fill_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fill_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._fill_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setFillAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._strokeDashOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[3] != 0)
         {
-            switch (this._strokeDashOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setStrokeDashOffsetAttribute((this._strokeDashOffset_0_0value as number | string | undefined));
-                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setStrokeDashOffsetAttribute((undefined as number | string | undefined));
                 }
             }
         }
-        if (this._strokeLineCap_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[4] != 0)
         {
-            switch (this._strokeLineCap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setStrokeLineCapAttribute((this._strokeLineCap_0_0value as LineCapStyle | undefined));
-                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setStrokeLineCapAttribute((undefined as LineCapStyle | undefined));
                 }
             }
         }
-        if (this._strokeLineJoin_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[5] != 0)
         {
-            switch (this._strokeLineJoin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setStrokeLineJoinAttribute((this._strokeLineJoin_0_0value as LineJoinStyle | undefined));
-                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setStrokeLineJoinAttribute((undefined as LineJoinStyle | undefined));
                 }
             }
         }
-        if (this._strokeMiterLimit_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[6] != 0)
         {
-            switch (this._strokeMiterLimit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setStrokeMiterLimitAttribute((this._strokeMiterLimit_0_0value as number | string | undefined));
-                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setStrokeMiterLimitAttribute((undefined as number | string | undefined));
                 }
             }
         }
-        if (this._strokeOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[7] != 0)
         {
-            switch (this._strokeOpacity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[7]) {
+                case 1: {
                     peer.setStrokeOpacityAttribute((this._strokeOpacity_0_0value as number | string | Resource | undefined));
-                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[7] = 0;
                     peer.setStrokeOpacityAttribute((undefined as number | string | Resource | undefined));
                 }
             }
         }
-        if (this._fillOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[8] != 0)
         {
-            switch (this._fillOpacity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[8]) {
+                case 1: {
                     peer.setFillOpacityAttribute((this._fillOpacity_0_0value as number | string | Resource | undefined));
-                    this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._fillOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[8] = 0;
                     peer.setFillOpacityAttribute((undefined as number | string | Resource | undefined));
                 }
             }
         }
-        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[9] != 0)
         {
-            switch (this._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as Length | undefined));
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setStrokeWidthAttribute((undefined as Length | undefined));
                 }
             }
         }
-        if (this._antiAlias_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[10] != 0)
         {
-            switch (this._antiAlias_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setAntiAliasAttribute((this._antiAlias_0_0value as boolean | undefined));
-                    this._antiAlias_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._antiAlias_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._antiAlias_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setAntiAliasAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._strokeDashArray_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[11] != 0)
         {
-            switch (this._strokeDashArray_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+            switch (flagArray[11]) {
+                case 1: {
                     peer.setStrokeDashArrayAttribute((this._strokeDashArray_0_0value as Array<Length> | undefined));
-                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[11] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[11] = 2;
                     break;
                 }
                 default: {
-                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[11] = 0;
                     peer.setStrokeDashArrayAttribute((undefined as Array<Length> | undefined));
                 }
             }
@@ -289,11 +287,15 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
     mergeModifier(modifier: PolylineModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: PolylineModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0)
         {
-            switch (modifier._points_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.points(modifier._points_0_0value);
                     break;
                 }
@@ -302,11 +304,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[1] != 0)
         {
-            switch (modifier._stroke_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.stroke(modifier._stroke_0_0value);
                     break;
                 }
@@ -315,11 +317,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._fill_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[2] != 0)
         {
-            switch (modifier._fill_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.fill(modifier._fill_0_0value);
                     break;
                 }
@@ -328,11 +330,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeDashOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[3] != 0)
         {
-            switch (modifier._strokeDashOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.strokeDashOffset(modifier._strokeDashOffset_0_0value);
                     break;
                 }
@@ -341,11 +343,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeLineCap_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[4] != 0)
         {
-            switch (modifier._strokeLineCap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.strokeLineCap(modifier._strokeLineCap_0_0value);
                     break;
                 }
@@ -354,11 +356,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeLineJoin_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[5] != 0)
         {
-            switch (modifier._strokeLineJoin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.strokeLineJoin(modifier._strokeLineJoin_0_0value);
                     break;
                 }
@@ -367,11 +369,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeMiterLimit_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[6] != 0)
         {
-            switch (modifier._strokeMiterLimit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.strokeMiterLimit(modifier._strokeMiterLimit_0_0value);
                     break;
                 }
@@ -380,11 +382,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[7] != 0)
         {
-            switch (modifier._strokeOpacity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.strokeOpacity(modifier._strokeOpacity_0_0value);
                     break;
                 }
@@ -393,11 +395,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._fillOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[8] != 0)
         {
-            switch (modifier._fillOpacity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.fillOpacity(modifier._fillOpacity_0_0value);
                     break;
                 }
@@ -406,11 +408,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[9] != 0)
         {
-            switch (modifier._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.strokeWidth(modifier._strokeWidth_0_0value);
                     break;
                 }
@@ -419,11 +421,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._antiAlias_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[10] != 0)
         {
-            switch (modifier._antiAlias_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
                     this.antiAlias(modifier._antiAlias_0_0value);
                     break;
                 }
@@ -432,11 +434,11 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
                 }
             }
         }
-        if (modifier._strokeDashArray_0_flag != AttributeUpdaterFlag.INITIAL)
+        if (flagArray[11] != 0)
         {
-            switch (modifier._strokeDashArray_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
                     this.strokeDashArray(modifier._strokeDashArray_0_0value);
                     break;
                 }
@@ -447,134 +449,146 @@ export class PolylineModifier extends CommonMethodModifier implements PolylineAt
         }
     }
     points(value: Array<ShapePoint> | undefined): this {
-        if (((this._points_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[0]) == (0)) || (true))
         {
-            this._points_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[0] = 1
             this._points_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._points_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[0] = 3
         }
         return this
     }
     stroke(value: ResourceColor | undefined): this {
-        if (((this._stroke_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[1]) == (0)) || (true))
         {
-            this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[1] = 1
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._stroke_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[1] = 3
         }
         return this
     }
     fill(value: ResourceColor | undefined): this {
-        if (((this._fill_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[2]) == (0)) || (true))
         {
-            this._fill_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[2] = 1
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._fill_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[2] = 3
         }
         return this
     }
     strokeDashOffset(value: number | string | undefined): this {
-        if (((this._strokeDashOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeDashOffset_0_0value) !== (value)))
+        if (((this._flagArray[3]) == (0)) || ((this._strokeDashOffset_0_0value) !== (value)))
         {
-            this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[3] = 1
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[3] = 3
         }
         return this
     }
     strokeLineCap(value: LineCapStyle | undefined): this {
-        if (((this._strokeLineCap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[4]) == (0)) || (true))
         {
-            this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[4] = 1
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[4] = 3
         }
         return this
     }
     strokeLineJoin(value: LineJoinStyle | undefined): this {
-        if (((this._strokeLineJoin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[5]) == (0)) || (true))
         {
-            this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[5] = 1
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[5] = 3
         }
         return this
     }
     strokeMiterLimit(value: number | string | undefined): this {
-        if (((this._strokeMiterLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeMiterLimit_0_0value) !== (value)))
+        if (((this._flagArray[6]) == (0)) || ((this._strokeMiterLimit_0_0value) !== (value)))
         {
-            this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[6] = 1
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[6] = 3
         }
         return this
     }
     strokeOpacity(value: number | string | Resource | undefined): this {
-        if (((this._strokeOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[7]) == (0)) || (true))
         {
-            this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[7] = 1
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[7] = 3
         }
         return this
     }
     fillOpacity(value: number | string | Resource | undefined): this {
-        if (((this._fillOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[8]) == (0)) || (true))
         {
-            this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[8] = 1
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[8] = 3
         }
         return this
     }
     strokeWidth(value: Length | undefined): this {
-        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[9]) == (0)) || (true))
         {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[9] = 1
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[9] = 3
         }
         return this
     }
     antiAlias(value: boolean | undefined): this {
-        if (((this._antiAlias_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._antiAlias_0_0value) !== (value)))
+        if (((this._flagArray[10]) == (0)) || ((this._antiAlias_0_0value) !== (value)))
         {
-            this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[10] = 1
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[10] = 3
         }
         return this
     }
     strokeDashArray(value: Array<Length> | undefined): this {
-        if (((this._strokeDashArray_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        if (((this._flagArray[11]) == (0)) || (true))
         {
-            this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
+            this._flagArray[11] = 1
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
-            this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP
+            this._flagArray[11] = 3
         }
         return this
     }

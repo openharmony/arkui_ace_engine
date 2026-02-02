@@ -19,6 +19,13 @@
 
 namespace OHOS::Ace::NG {
 
+EventHub::EventHub() = default;
+
+EventHub::~EventHub()
+{
+    keyboardShortcut_.clear();
+}
+
 void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
 {
     host_ = host;
@@ -64,6 +71,7 @@ RefPtr<FrameNode> EventHub::GetFrameNode() const
 
 void EventHub::AddSupportedState(UIState state)
 {
+    ACE_UINODE_TRACE(host_);
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
@@ -72,6 +80,7 @@ void EventHub::AddSupportedState(UIState state)
 
 void EventHub::SetSupportedStates(UIState state)
 {
+    ACE_UINODE_TRACE(host_);
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
@@ -714,6 +723,11 @@ const RefPtr<GestureEventHub>& EventHub::GetOrCreateGestureEventHub()
     return gestureEventHub_;
 }
 
+RefPtr<GestureEventHub> EventHub::CreateGestureEventHub()
+{
+    return MakeRefPtr<GestureEventHub>(WeakClaim(this));
+}
+
 const RefPtr<GestureEventHub>& EventHub::GetGestureEventHub() const
 {
     return gestureEventHub_;
@@ -1056,13 +1070,6 @@ bool EventHub::IsDeveloperEnabled() const
 
 void EventHub::SetEnabled(bool enabled)
 {
-    auto host = GetFrameNode();
-    if (enabled_ != enabled && host) {
-        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty) {
-            accessibilityProperty->NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
-        }
-    }
     enabled_ = enabled;
     developerEnabled_ = enabled;
 }

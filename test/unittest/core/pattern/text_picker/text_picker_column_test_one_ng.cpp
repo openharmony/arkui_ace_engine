@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"

@@ -26,6 +26,7 @@
 #include "sys/types.h"
 #include "unistd.h"
 
+#include "base/log/event_report.h"
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
 #include "base/thread/background_task_executor.h"
@@ -76,6 +77,17 @@ inline void DataWrapperReleaseProc(const void*, void* context)
     delete wrapper;
 }
 #endif
+
+struct StreamWrapper {
+    std::shared_ptr<uint8_t[]> data;
+    size_t size;
+};
+
+inline void StreamWrapperReleaseProc(const void*, void* context)
+{
+    StreamWrapper* wrapper = reinterpret_cast<StreamWrapper*>(context);
+    delete wrapper;
+}
 } // namespace
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)
@@ -134,6 +146,9 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         }
         case SrcType::ASTC: {
             return MakeRefPtr<AstcImageLoader>();
+        }
+        case SrcType::STREAM: {
+            return MakeRefPtr<StreamImageLoader>();
         }
         default: {
             return nullptr;
@@ -201,6 +216,10 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
     }
     std::shared_ptr<RSData> rsData = nullptr;
     do {
+        if (src.GetSrcType() == SrcType::STREAM) {
+            rsData = LoadImageData(src, loadResultInfo, context);
+            break;
+        }
         rsData = ImageLoader::QueryImageDataFromImageCache(src);
         if (rsData) {
             break;
@@ -380,6 +399,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
             "read data failed, readSize = %{public}d, fileSize = %{public}d, realPath = %{private}s",
             static_cast<int32_t>(readSize), static_cast<int32_t>(fileSize), realPath);
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        EventReport::SendComponentException(ComponentExcepType::FILE_IMAGE_LOADER_ERR);
         return nullptr;
     }
     // Create RSData from the read data.
@@ -957,5 +977,30 @@ void ImageLoader::WriteCacheToFile(const std::string& uri, const std::string& im
             ImageFileCache::GetInstance().WriteCacheFile(uri, data.data(), data.size());
         },
         BgTaskPriority::LOW);
+}
+
+std::shared_ptr<RSData> StreamImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& /* errorInfo */, const WeakPtr<PipelineBase>& /* context */)
+{
+    if (imageSourceInfo.IsSvg() && imageSourceInfo.GetBuffer() != nullptr && imageSourceInfo.GetBufferSize() > 0) {
+        auto rsData = std::make_shared<RSData>();
+
+        StreamWrapper* wrapper = new StreamWrapper { imageSourceInfo.GetBuffer(), imageSourceInfo.GetBufferSize() };
+        CHECK_NULL_RETURN(wrapper, nullptr);
+        if (wrapper->data == nullptr) {
+            delete wrapper;
+            return nullptr;
+        }
+        if (!rsData->BuildWithProc(wrapper->data.get(), wrapper->size, StreamWrapperReleaseProc, wrapper)) {
+            if (wrapper) {
+                delete wrapper;
+            }
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "Load svg from svg buffer failed. %{public}s.",
+                imageSourceInfo.ToString().c_str());
+            return nullptr;
+        }
+        return rsData;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

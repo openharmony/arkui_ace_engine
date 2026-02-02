@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
+#include "adapter/ohos/entrance/ui_session/include/ui_session_trace.h"
 
 namespace OHOS::Ace {
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
@@ -76,12 +77,14 @@ void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
     }
 }
 
-void UiSessionManagerOhos::ReportComponentChangeEvent(const std::string& key, const std::string& value)
+void UiSessionManagerOhos::ReportComponentChangeEvent(
+    const std::string& key, const std::string& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
+            NeedComponentChangeTypeReporting(eventType)) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
@@ -92,12 +95,13 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(const std::string& key, co
 }
 
 void UiSessionManagerOhos::ReportComponentChangeEvent(
-    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value)
+    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
+            NeedComponentChangeTypeReporting(eventType)) {
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value->ToString().data());
@@ -225,6 +229,11 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
     }
 }
 
+void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
+{
+    componentChangeEventMask_ = mask;
+}
+
 void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
 {
     if (status) {
@@ -277,6 +286,11 @@ bool UiSessionManagerOhos::GetRouterChangeEventRegistered()
 bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 {
     return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
+}
+
+bool UiSessionManagerOhos::NeedComponentChangeTypeReporting(uint32_t eventType)
+{
+    return (componentChangeEventMask_ & eventType) != 0;
 }
 
 bool UiSessionManagerOhos::GetScrollEventRegistered()
@@ -342,19 +356,13 @@ void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
 
 void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
 {
+    UI_SESSION_SCOPED_TRACE("[UiSessionManagerOhos] ReportInspectorTreeValue");
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            size_t partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
-            for (size_t i = 0; i <= partSize; i++) {
-                if (i != partSize) {
-                    reportService->ReportInspectorTreeValue(
-                        data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);
-                } else {
-                    reportService->ReportInspectorTreeValue(data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, true);
-                }
-            }
+            int32_t index = 1;
+            reportService->ReportInspectorTreeValue(data, index, true);
         } else {
             LOGW("report component event failed,process id:%{public}d", pair.first);
         }
@@ -469,6 +477,11 @@ void UiSessionManagerOhos::SaveGetPixelMapFunction(GetPixelMapFunction&& functio
     getPixelMapFunction_ = std::move(function);
 }
 
+void UiSessionManagerOhos::SaveGetImagesByIdFunction(GetImagesByIdFunction&& function)
+{
+    getImagesByIdFunction_ = std::move(function);
+}
+
 void UiSessionManagerOhos::SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
     int32_t instanceId)
 {
@@ -526,6 +539,7 @@ void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std:
 
 void UiSessionManagerOhos::GetCurrentPageName()
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     if (pipelineContextPageNameCallback_) {
         auto result = pipelineContextPageNameCallback_();
         SendCurrentPageName(result);
@@ -534,6 +548,7 @@ void UiSessionManagerOhos::GetCurrentPageName()
 
 void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -600,11 +615,13 @@ void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pa
 
 void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     processMap_[key] = id;
 }
 
 void UiSessionManagerOhos::EraseProcessId(const std::string& key)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     processMap_.erase(key);
 }
 
@@ -691,6 +708,41 @@ void UiSessionManagerOhos::GetPixelMap()
     }
 }
 
+void UiSessionManagerOhos::GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs)
+{
+    if (getImagesByIdFunction_) {
+        getImagesByIdFunction_(arkUIIds, arkWebs);
+    } else {
+        LOGW("get images by id function is nullptr");
+    }
+}
+
+void UiSessionManagerOhos::SendArkUIImagesById(int32_t windowId,
+    const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+    MultiImageQueryErrorCode arkUIErrorCode)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["getArkUIImages"]]);
+    if (reportService != nullptr) {
+        reportService->SendArkUIImagesById(windowId, componentImages, arkUIErrorCode);
+    } else {
+        LOGW("send ArkUI images failed,process id:%{public}d", processMap_["getArkUIImages"]);
+    }
+}
+
+void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+    std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["getArkWebImages"]]);
+    if (reportService != nullptr) {
+        reportService->SendArkWebImagesById(windowId, webImages, arkWebErrorCode);
+    } else {
+        LOGW("send ArkWeb images failed,process id:%{public}d", processMap_["getArkWebImages"]);
+    }
+}
+
 void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps)
 {
     auto currentTranslateManager = GetCurrentTranslateManager();
@@ -739,6 +791,7 @@ void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
 
 void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     if (pipelineExeAppAIFunctionCallback_) {
         auto result = pipelineExeAppAIFunctionCallback_(funcName, params);
         SendExeAppAIFunctionResult(result);
@@ -747,6 +800,7 @@ void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const s
 
 void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -826,6 +880,34 @@ void UiSessionManagerOhos::ReportGetStateMgmtInfo(std::vector<std::string> resul
         reportService->ReportGetStateMgmtInfo(results);
     } else {
         LOGW("report component event failed, process id:%{public}d", processMap_["GetStateMgmtInfo"]);
+    }
+}
+
+void UiSessionManagerOhos::SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    getWebInfoByRequestCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::GetWebInfoByRequest(int32_t webId, const std::string& request)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (getWebInfoByRequestCallback_) {
+        getWebInfoByRequestCallback_(webId, request);
+    }
+}
+
+void UiSessionManagerOhos::SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    if (!processMap_.count("GetWebInfoByRequest") || !reportObjectMap_.count(processMap_["GetWebInfoByRequest"])) {
+        LOGW("SendWebInfoByRequest no report proxy");
+        return;
+    }
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["GetWebInfoByRequest"]]);
+    if (reportService) {
+        reportService->SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
     }
 }
 } // namespace OHOS::Ace

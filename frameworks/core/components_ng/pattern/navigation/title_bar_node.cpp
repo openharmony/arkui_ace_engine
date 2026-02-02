@@ -83,6 +83,14 @@ void TitleBarNode::OnAttachToMainTree(bool recursive)
             titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             context->RequestFrame();
         });
+    auto parent = GetParent();
+    while (parent) {
+        auto tag = parent->GetTag();
+        if (tag == V2::SHEET_PAGE_TAG || tag == V2::MODAL_PAGE_TAG) {
+            isParentModalOrSheet_ = true;
+        }
+        parent = parent->GetParent();
+    }
 }
 
 void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
@@ -91,6 +99,7 @@ void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context
     if (menuBarChangeListenerId_ != -1) {
         AppBarView::RemoveRectChangeListener(Claim(context), menuBarChangeListenerId_);
     }
+    isParentModalOrSheet_ = false;
 }
 
 void TitleBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -100,5 +109,11 @@ void TitleBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     CHECK_NULL_VOID(titleBarPattern);
     auto titleBarOptions = titleBarPattern->GetTitleBarOptions();
     titleBarOptions.ToJsonValue(json, filter);
+}
+
+bool TitleBarNode::IsChildEmpty() const
+{
+    bool isMenuEmpty = menu_ ? menu_->GetChildren().empty() : true;
+    return !title_ && !subtitle_ && !backButton_ && isMenuEmpty;
 }
 } // namespace OHOS::Ace::NG

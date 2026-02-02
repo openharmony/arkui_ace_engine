@@ -284,6 +284,7 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         {
             this._select_0_flag = AttributeUpdaterFlag.UPDATE
             this._select_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._select_0_flag = AttributeUpdaterFlag.SKIP
@@ -295,6 +296,7 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -306,6 +308,7 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         {
             this._shape_0_flag = AttributeUpdaterFlag.UPDATE
             this._shape_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._shape_0_flag = AttributeUpdaterFlag.SKIP
@@ -317,6 +320,7 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         {
             this._unselectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._unselectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._unselectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -328,6 +332,7 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         {
             this._mark_0_flag = AttributeUpdaterFlag.UPDATE
             this._mark_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mark_0_flag = AttributeUpdaterFlag.SKIP
@@ -339,6 +344,7 @@ export class CheckboxModifier extends CommonMethodModifier implements CheckboxAt
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP

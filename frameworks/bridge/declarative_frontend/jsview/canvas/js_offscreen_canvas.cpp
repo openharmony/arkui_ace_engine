@@ -210,8 +210,8 @@ napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callbac
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
-        JSException::Throw("%s", "Failed to execute 'transferToImageBitmap' on 'OffscreenCanvas': Cannot transfer an "
-                                 "ImageBitmap from a detached OffscreenCanvas");
+        JSException::Throw(ERROR_CODE_OFFSCREEN_CANVAS_HAS_DETACHED, "%s", "Failed to execute 'transferToImageBitmap'"
+            " on 'OffscreenCanvas': Cannot transfer an ImageBitmap from a detached OffscreenCanvas");
         return nullptr;
     }
     napi_value defaultImage = nullptr;
@@ -223,8 +223,8 @@ napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
-        JSException::Throw(
-            "%s", "Failed to execute 'getContext' on 'OffscreenCanvas': OffscreenCanvas object is detached");
+        JSException::Throw(ERROR_CODE_OFFSCREEN_CANVAS_HAS_DETACHED, "%s",
+            "Failed to execute 'getContext' on 'OffscreenCanvas': OffscreenCanvas object is detached");
         return nullptr;
     }
     napi_value defaultContext = nullptr;

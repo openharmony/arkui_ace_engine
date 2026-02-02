@@ -273,6 +273,30 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setBarHeight0Attribute(value: Length | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setBarHeight0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setAnimationCurveAttribute(value: curves.Curve | curves.ICurve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -375,6 +399,18 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setOnUnselected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setNestedScrollAttribute(value: TabsNestedScrollMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TabsNestedScrollMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setNestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAnimationStartAttribute(value: OnTabsAnimationStartCallback | undefined): void {
@@ -580,7 +616,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setBarMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBarHeightAttribute(height: Length | undefined, noMinHeightLimit: boolean | undefined): void {
+    setBarHeight1Attribute(height: Length | undefined, noMinHeightLimit: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (height !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -608,7 +644,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._TabsAttribute_setBarHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TabsAttribute_setBarHeight1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBarBackgroundBlurStyle1Attribute(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): void {
@@ -721,6 +757,9 @@ export interface TabsAttribute extends CommonMethod {
     barWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method barWidth")
     }
+    barHeight(value: Length | undefined): this {
+        throw new Error("Unimplemented method barHeight")
+    }
     animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
         throw new Error("Unimplemented method animationCurve")
     }
@@ -744,6 +783,9 @@ export interface TabsAttribute extends CommonMethod {
     }
     onUnselected(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onUnselected")
+    }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        throw new Error("Unimplemented method nestedScroll")
     }
     onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
         throw new Error("Unimplemented method onAnimationStart")
@@ -816,6 +858,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     onSelected_value?: ((value0: int32) => void) | undefined
     onTabBarClick_value?: ((value0: int32) => void) | undefined
     onUnselected_value?: ((value0: int32) => void) | undefined
+    nestedScroll_value?: TabsNestedScrollMode | undefined
     onAnimationStart_value?: OnTabsAnimationStartCallback | undefined
     onAnimationEnd_value?: OnTabsAnimationEndCallback | undefined
     onGestureSwipe_value?: OnTabsGestureSwipeCallback | undefined
@@ -846,6 +889,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barWidth(value: Length | undefined): this {
         return this
     }
+    barHeight(value: Length | undefined): this {
+        return this
+    }
     animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
         return this
     }
@@ -868,6 +914,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
         return this
     }
     onUnselected(value: ((value0: int32) => void) | undefined): this {
+        return this
+    }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
         return this
     }
     onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
@@ -933,6 +982,11 @@ export interface TabContentAnimatedTransition {
     transition: ((value0: TabContentTransitionProxy) => void);
 }
 
+export enum TabsNestedScrollMode {
+    SELF_ONLY = 0,
+    SELF_FIRST = 1
+}
+
 export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAttribute {
     getPeer(): ArkTabsPeer {
         if (!this.peer) {
@@ -977,6 +1031,14 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         if (this.checkPriority("barWidth")) {
             const value_casted = value as (Length | undefined)
             this.getPeer()?.setBarWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public barHeight(value: Length | undefined): this {
+        if (this.checkPriority("barHeight")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.setBarHeight0Attribute(value_casted)
             return this
         }
         return this
@@ -1041,6 +1103,14 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         if (this.checkPriority("onUnselected")) {
             const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnUnselectedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        if (this.checkPriority("nestedScroll")) {
+            const value_casted = value as (TabsNestedScrollMode | undefined)
+            this.getPeer()?.setNestedScrollAttribute(value_casted)
             return this
         }
         return this
@@ -1170,7 +1240,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         if (this.checkPriority("barHeight")) {
             const height_casted = height as (Length | undefined)
             const noMinHeightLimit_casted = noMinHeightLimit as (boolean | undefined)
-            this.getPeer()?.setBarHeightAttribute(height_casted, noMinHeightLimit_casted)
+            this.getPeer()?.setBarHeight1Attribute(height_casted, noMinHeightLimit_casted)
             return this
         }
         return this
@@ -1326,7 +1396,7 @@ export class TabsOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForIndexTmpValueForIdx0)
-            } else if (valueHolderForIndexTmpValue instanceof Bindable<int32>) {
+            } else if (valueHolderForIndexTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)

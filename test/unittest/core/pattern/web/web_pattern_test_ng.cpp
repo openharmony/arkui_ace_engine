@@ -22,6 +22,7 @@
 #define protected public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "test/mock/core/common/mock_container.h"
 #undef protected
 #undef private
 
@@ -540,7 +541,11 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     webPattern->InitDragEvent(gestureHub);
     webPattern->InitDragEvent(gestureHub);
     EXPECT_NE(webPattern->dragEvent_, nullptr);
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrent();
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
     rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CROSS, nullptr);
+    MockContainer::TearDown();
     EXPECT_FALSE(rerult);
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params =
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
@@ -652,7 +657,11 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_004, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
     NWeb::NWebCursorInfoMock info;
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrent();
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
     bool rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CONTEXTMENU, nullptr);
+    MockContainer::TearDown();
     EXPECT_FALSE(rerult);
 #endif
 }
@@ -2123,6 +2132,56 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_005, TestSize.Level1)
     webPattern->WebOnMouseEvent(info);
     EXPECT_EQ(webPattern->mouseHoveredX_, 10);
     EXPECT_EQ(webPattern->mouseHoveredY_, 20);
+#endif
+}
+
+/**
+ * @tc.name: WebOnMouseEvent_006
+ * @tc.desc: WebOnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WebOnMouseEvent_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    MouseInfo info;
+    webPattern->WebOnMouseEvent(info);
+    webPattern->SetTextSelectionEnable(true);
+    EXPECT_EQ(webPattern->IsTextSelectionEnable(), true);
+#endif
+}
+
+/**
+ * @tc.name: WebOnMouseEvent_007
+ * @tc.desc: WebOnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WebOnMouseEvent_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    MouseInfo info;
+    webPattern->WebOnMouseEvent(info);
+    webPattern->SetTextSelectionEnable(false);
+    EXPECT_EQ(webPattern->IsTextSelectionEnable(), false);
 #endif
 }
 
@@ -4809,6 +4868,51 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_002, TestSize.Level1)
     webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     webPattern->RemoveSnapshotFrameNode(true);
     webPattern->RemoveSnapshotFrameNode(true);
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: CheckCreateImageFrameNode_001
+ * @tc.desc: CheckCreateImageFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CheckCreateImageFrameNode_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png"), true);
+    std::string snapshotPath1 = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
+    std::string snapshotPath2 = "/data/storage/el2/base/cache/web/snapshot/123456.png";
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath1, 100, 100), false);
+    webPattern->delegate_->Resize(100, 100, false);
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath1, 100, 100), false);
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath2, 100, 100), false);
+    webPattern->snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath1, 100, 100), false);
+    webPattern->delegate_ = nullptr;
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath1, 100, 100), false);
+    webPattern->snapshotImageNodeId_ = std::nullopt;
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath1, 100, 100), false);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->CheckCreateImageFrameNode(snapshotPath1, 100, 100), false);
+
+    webPattern->snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    webPattern->RealRemoveSnapshotFrameNode();
+    webPattern->delegate_ = nullptr;
+    webPattern->RealRemoveSnapshotFrameNode();
+
     ASSERT_NE(webPattern, nullptr);
     MockPipelineContext::TearDown();
 #endif

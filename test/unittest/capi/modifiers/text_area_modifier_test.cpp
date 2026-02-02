@@ -642,7 +642,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
         g_EventTestKey = enterKeyType;
     };
 
-    auto func = Converter::ArkCallback<Opt_TextAreaSubmitCallback>(onSubmitFunc);
+    auto func = Converter::ArkCallback<Opt_TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
     modifier_->setOnSubmit(node_, &func);
     TextFieldCommonEvent event;
     event.SetText(testValue);
@@ -878,12 +878,15 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest2, TestSize.Level1)
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
     ASSERT_NE(modifier_->setMaxLines, nullptr);
     auto maxLines = Converter::ArkValue<Opt_Int32>(1);
-    modifier_->setMaxLines(node_, &maxLines);
+    modifier_->setMaxLines(node_, &maxLines, nullptr);
 
     auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
 
     // Additional conditions
+#ifdef WRONG_API
+    TextFieldModelNG::SetMaxLines(reinterpret_cast<FrameNode*>(node_), 1);
+#endif
     checkVal = GetStringAttribute(node_, "maxLines");
     EXPECT_EQ(checkVal, "1");
 
@@ -939,7 +942,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTest, TestSize.Level1)
     };
 
     for (const auto& [input, value, expectVal] : testPlan) {
-        modifier_->setMaxLines(node_, &value);
+        modifier_->setMaxLines(node_, &value, nullptr);
         checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal) << "Input value is: " << input;
     }
@@ -1871,7 +1874,8 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
             actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
             CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         };
-    auto customBuilder = Converter::ArkCallback<Opt_CustomNodeBuilder>(func);
+    auto customBuilder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(
+        Converter::ArkCallback<Opt_CustomNodeBuilder>(func).value);
     KeyboardOptions keyboardOptions = { .supportAvoidance = true };
     auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 

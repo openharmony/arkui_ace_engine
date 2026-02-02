@@ -55,10 +55,10 @@ import {
   Curve,
   $r,
   KeyEvent,
-  SymbolGlyphModifier,
   Column,
   Row
 } from '@ohos.arkui.component';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import {
   Consume,
   Link,
@@ -68,7 +68,6 @@ import {
   Require,
   State,
   Provide,
-  Prop,
   PropRef
 } from '@ohos.arkui.stateManagement';
 import { ColorMetrics, LengthMetrics } from '@ohos.arkui.node';
@@ -718,7 +717,7 @@ export struct ChipComponent {
     })
   }
 
-  getSuffixIconAction(): Callback<ClickEvent> | undefined {
+  private getSuffixIconAction(): Callback<ClickEvent> | undefined {
     if (this.suffixIcon?.src) {
       if (!this.suffixIcon?.action) {
         return undefined;
@@ -732,14 +731,14 @@ export struct ChipComponent {
     return undefined;
   }
 
-  getSuffixIconFilledColor(): ResourceColor {
+  private getSuffixIconFilledColor(): ResourceColor {
     if (this.isChipActivated()) {
       return this.suffixIcon?.activatedFillColor ?? this.getDefaultActiveIconColor(IconType.PREFIX_ICON);
     }
     return this.suffixIcon?.fillColor ?? this.getDefaultFillIconColor(IconType.SUFFIX_ICON);
   }
 
-  getSuffixIconSize(): SizeOptions {
+  private getSuffixIconSize(): SizeOptions {
     let suffixIconSize: SizeOptions = { width: 0, height: 0 };
     if (typeof this.suffixIcon?.size?.width !== 'undefined' &&
     this.isValidLength(this.suffixIcon!.size!.width as Length)) {
@@ -758,11 +757,11 @@ export struct ChipComponent {
     return suffixIconSize;
   }
 
-  isClosable(): boolean {
+  private isClosable(): boolean {
     return this.allowClose ?? true;
   }
 
-  getSuffixSymbolAction(): Callback<ClickEvent> | undefined {
+  private getSuffixSymbolAction(): Callback<ClickEvent> | undefined {
     if (typeof this.suffixSymbolOptions?.action === 'undefined') {
       return (() => {
         0;
@@ -777,18 +776,18 @@ export struct ChipComponent {
     };
   }
 
-  hasSuffixSymbol(): boolean {
+  private hasSuffixSymbol(): boolean {
     return !!(this.suffixSymbol?.normal || this.suffixSymbol?.activated);
   }
 
-  getPrefixIconFilledColor(): ResourceColor {
+  private getPrefixIconFilledColor(): ResourceColor {
     if (this.isChipActivated()) {
       return this.prefixIcon?.activatedFillColor ?? this.getDefaultActiveIconColor(IconType.PREFIX_ICON);
     }
     return this.prefixIcon?.fillColor ?? this.getDefaultFillIconColor(IconType.PREFIX_ICON);
   }
 
-  getPrefixIconSize(): SizeOptions {
+  private getPrefixIconSize(): SizeOptions {
     let prefixIconSize: SizeOptions = { width: 0, height: 0 };
     if (typeof this.prefixIcon?.size?.width !== 'undefined' &&
     this.isValidLength(this.prefixIcon!.size!.width as Length)) {
@@ -807,7 +806,7 @@ export struct ChipComponent {
     return prefixIconSize;
   }
 
-  getDefaultSymbolColor(iconType: IconType): ResourceColor[] {
+  private getDefaultSymbolColor(iconType: IconType): ResourceColor[] {
     return this.isChipActivated() ? this.getSymbolActiveColor(iconType) :
       this.getSymbolFillColor(iconType);
   }
@@ -867,11 +866,11 @@ export struct ChipComponent {
     return this.theme.defaultSymbol.normalFontColor;
   }
 
-  hasPrefixSymbol(): boolean {
+  private hasPrefixSymbol(): boolean {
     return !!(this.prefixSymbol?.normal || this.prefixSymbol?.activated);
   }
 
-  getChipConstraintSize(): ConstraintSizeOptions | undefined {
+  private getChipConstraintSize(): ConstraintSizeOptions | undefined {
     const constraintSize: ConstraintSizeOptions = {};
     if (typeof this.chipSize === 'string') {
       constraintSize.maxWidth = this.getChipMaxWidth();
@@ -890,7 +889,7 @@ export struct ChipComponent {
     return constraintSize;
   }
 
-  getChipMaxWidth(): Length | undefined {
+  private getChipMaxWidth(): Length | undefined {
     if (this.fontSizeScale >= this.theme.chipNode.suitAgeScale) {
       return (() => {
         0;
@@ -912,7 +911,7 @@ export struct ChipComponent {
     })();
   }
 
-  getChipSize(): SizeOptions | undefined {
+  private getChipSize(): SizeOptions | undefined {
     const chipSize: SizeOptions = {
       width: 'auto',
       height: 'auto'
@@ -932,13 +931,22 @@ export struct ChipComponent {
     return chipSize;
   }
 
-  getChipPadding(): Length | Padding | LocalizedPadding {
+  private copyPadding(src: LocalizedPadding): LocalizedPadding {
+    return {
+      top: src.top,
+      bottom: src.bottom,
+      start: src.start,
+      end: src.end
+    } as LocalizedPadding;
+  }
+
+  private getChipPadding(): Length | Padding | LocalizedPadding {
     let chipTheme = this.theme.chipNode;
     let res: LocalizedPadding;
     if (this.isSmallChipSize()) {
-      res = chipTheme.localizedSmallPadding;
+      res = this.copyPadding(chipTheme.localizedSmallPadding);
     } else {
-      res = chipTheme.localizedNormalPadding;
+      res = this.copyPadding(chipTheme.localizedNormalPadding);
     }
     if (!!(this.chipPadding?.top) && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding!.top!)) {
       res.top = this.chipPadding!.top! as LengthMetrics;
@@ -955,14 +963,14 @@ export struct ChipComponent {
     return res;
   }
 
-  getPrefixSymbolModifier(): SymbolGlyphModifier | undefined {
+  private getPrefixSymbolModifier(): SymbolGlyphModifier | undefined {
     if (this.isChipActivated()) {
       return this.prefixSymbol?.activated;
     }
     return this.prefixSymbol?.normal;
   }
 
-  getLabelMargin(): Length | Padding | LocalizedPadding {
+  private getLabelMargin(): Length | Padding | LocalizedPadding {
     const localizedLabelMargin: LocalizedMargin = {
       start: LengthMetrics.vp(0),
       end: LengthMetrics.vp(0),
@@ -1007,21 +1015,21 @@ export struct ChipComponent {
     return localizedLabelMargin;
   }
 
-  hasSuffix(): boolean {
+  private hasSuffix(): boolean {
     if (this.suffixIcon?.src) {
       return true;
     }
-    return false;
+    return this.isChipActivated() ? !!this.suffixSymbol?.activated : !!this.suffixSymbol?.normal;
   }
 
   private hasPrefix(): boolean {
     if (this.prefixIcon?.src) {
       return true;
     }
-    return false;
+    return this.isChipActivated() ? !!this.prefixSymbol?.activated : !!this.prefixSymbol?.normal;
   }
 
-  getLabelFontWeight(): string | int | FontWeight {
+  private getLabelFontWeight(): string | int | FontWeight {
     if (this.isChipActivated()) {
       return FontWeight.Medium;
     }
@@ -1043,7 +1051,7 @@ export struct ChipComponent {
     }
   }
 
-  getLabelFontFamily(): ResourceStr {
+  private getLabelFontFamily(): ResourceStr {
     return this.label?.fontFamily ?? this.theme.label.fontFamily;
   }
 
@@ -1068,14 +1076,14 @@ export struct ChipComponent {
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
   }
 
-  getLabelFontColor(): ResourceColor {
+  private getLabelFontColor(): ResourceColor {
     if (this.isChipActivated()) {
       return this.label?.activatedFontColor ?? this.getActiveFontColor();
     }
     return this.label?.fontColor ?? this.getFontColor();
   }
 
-  getLabelFontSize(): Dimension {
+  private getLabelFontSize(): Dimension {
     if (!!(this.label.fontSize) && this.isValidLength(this.label!.fontSize!)) {
       return this.label!.fontSize! as Dimension;
     }
@@ -1088,11 +1096,11 @@ export struct ChipComponent {
     return this.theme.label.normalFontSize;
   }
 
-  getChipText(): ResourceStr {
+  private getChipText(): ResourceStr {
     return this.label?.text ?? '';
   }
 
-  deleteChip() {
+  private deleteChip() {
     this.getUIContext()?.animateTo({ curve: Curve.Sharp, duration: 150 }, () => {
       this.chipOpacity = 0;
     });
@@ -1107,22 +1115,22 @@ export struct ChipComponent {
     })
   }
 
-  isChipEnabled(): boolean {
+  private isChipEnabled(): boolean {
     return this.chipEnabled ?? true;
   }
 
-  getChipBorderRadius(): Dimension {
+  private getChipBorderRadius(): Dimension {
     if (typeof this.chipNodeRadius !== 'undefined') {
       return this!.chipNodeRadius as Dimension;
     }
     return this.isSmallChipSize() ? this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius;
   }
 
-  isSmallChipSize() {
+  private isSmallChipSize() {
     return typeof this.chipSize === 'string' && this.chipSize === ChipSize.SMALL;
   }
 
-  getChipBackgroundColor(): ResourceColor {
+  private getChipBackgroundColor(): ResourceColor {
     let themeChipNode = this.theme.chipNode;
     if (this.isChipActivated()) {
       return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
@@ -1132,7 +1140,7 @@ export struct ChipComponent {
       this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }
 
-  getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {
+  private getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {
     if (!color) {
       return defaultColor;
     }
@@ -1209,7 +1217,7 @@ export struct ChipComponent {
     return resolveResourceStr(this.suffixSymbolOptions?.normalAccessibility?.accessibilityText);
   }
 
-  getSuffixSymbolModifier(): SymbolGlyphModifier | undefined {
+  private getSuffixSymbolModifier(): SymbolGlyphModifier | undefined {
     if (this.isChipActivated()) {
       return this.suffixSymbol?.activated;
     }
@@ -1245,11 +1253,11 @@ export struct ChipComponent {
     return resolveResourceStr(this.chipAccessibilityDescription);
   }
 
-  isChipActivated() {
+  private isChipActivated() {
     return this.chipActivated ?? false;
   }
 
-  resourceToNumber(resource: Resource, defaultValue: number): number {
+  private resourceToNumber(resource: Resource, defaultValue: number): number {
     if (!resource || !resource.type) {
       console.error('[Chip] failed: resource get fail');
       return defaultValue;
@@ -1274,7 +1282,7 @@ export struct ChipComponent {
     }
   }
 
-  isValidLength(length: Length | Dimension | undefined): boolean {
+  private isValidLength(length: Length | Dimension | undefined): boolean {
     if (length === undefined) {
       return false;
     }
@@ -1300,7 +1308,7 @@ export struct ChipComponent {
     return false;
   }
 
-  isValidLengthString(length: string): boolean {
+  private isValidLengthString(length: string): boolean {
     const matches = length.match(new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$', 'i'));
     if (!matches || matches.length < 3) {
       return false;

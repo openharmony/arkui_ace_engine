@@ -22,6 +22,7 @@
 #include <optional>
 #include <vector>
 
+#include "ui/base/modifier_property.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -43,10 +44,6 @@ enum class ThresholdType {
     ZERO,    // 0.0f for noanimatable property
 };
 
-enum class PropertyUnit {
-    UNKNOWN,
-    PIXEL_POSITION, // animatable properties are related to position of the object, the unit is pixels
-};
 
 namespace OHOS::Ace::NG {
 
@@ -458,7 +455,7 @@ private:
 };
 
 // Explicit instantiation declarations
-extern template class NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+extern template class ACE_FORCE_EXPORT NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 extern template class NodeAnimatableProperty<OffsetF, AnimatablePropertyOffsetF>;
 
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;

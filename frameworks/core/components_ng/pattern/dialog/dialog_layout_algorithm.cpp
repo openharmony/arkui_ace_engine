@@ -1092,6 +1092,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childOffset = topLeftPoint + dialogOffset;
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "keyboardInsert: %{public}s", keyboardInsert.ToString().c_str());
     auto dialogCorrectionEnabled = FeatureParam::IsDialogCorrectionEnabled();
     DialogOverflowAdjust(childOffset, childSize, dialogCorrectionEnabled);
     auto childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;

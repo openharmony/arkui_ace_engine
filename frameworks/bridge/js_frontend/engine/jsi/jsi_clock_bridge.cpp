@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_clock_bridge.h"
 
+#include "frameworks/bridge/common/dom/dom_type.h"
+
 namespace OHOS::Ace::Framework {
 
 void JsiClockBridge::ParseClockConfig(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& valObject)

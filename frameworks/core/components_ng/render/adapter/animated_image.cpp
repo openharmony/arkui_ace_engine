@@ -71,6 +71,9 @@ AnimatedImage::~AnimatedImage() = default;
 
 void AnimatedImage::PostPlayTask(uint32_t idx, int iteration)
 {
+    if (duration_.empty()) {
+        return;
+    }
     if (idx == static_cast<uint32_t>(duration_.size())) {
         iteration--;
         idx = 0;
@@ -94,13 +97,11 @@ void AnimatedImage::PostPlayTask(uint32_t idx, int iteration)
 std::vector<int> AnimatedImage::GenerateDuration(const std::unique_ptr<SkCodec>& codec)
 {
     std::vector<int> duration;
-    auto info = codec->getFrameInfo();
-    for (int32_t i = 0; i < codec->getFrameCount(); ++i) {
-        if (info[i].fDuration <= 0) {
-            duration.push_back(STANDARD_FRAME_DURATION);
-        } else {
-            duration.push_back(info[i].fDuration);
-        }
+    const auto frameInfos = codec->getFrameInfo();
+    for (const auto& frameInfo : frameInfos) {
+        const int frameDuration =
+            frameInfo.fDuration > 0 ? frameInfo.fDuration : STANDARD_FRAME_DURATION;
+        duration.push_back(frameDuration);
     }
     return duration;
 }

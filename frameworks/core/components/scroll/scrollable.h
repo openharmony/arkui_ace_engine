@@ -68,7 +68,7 @@ using NestableScrollCallback = std::function<ScrollResult(float, int32_t, Nested
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollMotionFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
-class Scrollable : public TouchEventTarget, public RelatedChild {
+class ACE_FORCE_EXPORT Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:

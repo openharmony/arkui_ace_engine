@@ -23,22 +23,26 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { Font_serializer, ResourceColor, Dimension, Font, Length, ResourceStr } from "./units"
-import { CaretStyle_serializer, EditMenuOptions_serializer, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { CaretStyle_serializer, EditMenuOptions_serializer, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer, TextDirection, IMEClient } from "./textCommon"
 import { CancelButtonOptions_serializer, CancelButtonSymbolOptions_serializer, CancelButtonOptions, CancelButtonSymbolOptions } from "./search"
 import { TextDecorationOptions_serializer, InputCounterOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, InputCounterOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Arkui_Component_Units_ResourceStr_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { LengthMetrics_serializer } from "./../Graphics"
 import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from "./richEditor"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Color, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { AttributeModifier, hookTextInputAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors,AttributeModifier, hookTextInputAttributeModifier, AttributeUpdater, WrappedBuilder } from "#handwritten"
+import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { TextInputModifier } from "./../TextInputModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ComponentContentBase } from "arkui.ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 export interface SubmitEvent {
     text: string
     keepEditableState(): void
@@ -1206,6 +1210,106 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTextDirectionAttribute(value: TextDirection | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextDirection)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableAutoFillAnimationAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setEnableAutoFillAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillAttachIMEAttribute(value: ((value0: IMEClient) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOnWillAttachIME(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setStrokeColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setStrokeColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableAutoSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setEnableAutoSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setStrokeWidthAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableSelectedDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setInputFilterAttribute(value: ResourceStr | undefined, error?: ((value0: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1233,12 +1337,20 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setInputFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCustomKeyboardAttribute(value: CustomBuilder | undefined, options?: KeyboardOptions): void {
+    setCustomKeyboardAttribute(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
+            if (valueTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof ComponentContentBase) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ComponentContentBase
+                ComponentContentBase_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1287,7 +1399,8 @@ export enum InputType {
     USER_NAME = 10,
     NEW_PASSWORD = 11,
     NUMBER_DECIMAL = 12,
-    URL = 13
+    URL = 13,
+    ONE_TIME_CODE = 14
 }
 export enum ContentType {
     USER_NAME = 0,
@@ -1586,10 +1699,31 @@ export interface TextInputAttribute extends CommonMethod {
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         throw new Error("Unimplemented method selectedDragPreviewStyle")
     }
+    textDirection(value: TextDirection | undefined): this {
+        throw new Error("Unimplemented method textDirection")
+    }
+    enableAutoFillAnimation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoFillAnimation")
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        throw new Error("Unimplemented method onWillAttachIME")
+    }
+    strokeColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method strokeColor")
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoSpacing")
+    }
+    strokeWidth(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableSelectedDataDetector")
+    }
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         throw new Error("Unimplemented method inputFilter")
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         throw new Error("Unimplemented method customKeyboard")
     }
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
@@ -1671,8 +1805,15 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     compressLeadingPunctuation_value?: boolean | undefined
     includeFontPadding_value?: boolean | undefined
     fallbackLineSpacing_value?: boolean | undefined
+    enableAutoFillAnimation_value?: boolean | undefined
+    onWillAttachIME_value?: ((value0: IMEClient) => void) | undefined
+    strokeColor_value?: ResourceColor | undefined
+    enableAutoSpacing_value?: boolean | undefined
+    strokeWidth_value?: LengthMetrics | undefined
+    enableSelectedDataDetector_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined
     selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
+    textDirection_value?: TextDirection | undefined
     setTextInputOptions(value?: TextInputOptions): this {
         return this
     }
@@ -1895,10 +2036,31 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         return this
     }
+    textDirection(value: TextDirection | undefined): this {
+        return this
+    }
+    enableAutoFillAnimation(value: boolean | undefined): this {
+        return this
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        return this
+    }
+    strokeColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        return this
+    }
+    strokeWidth(value: LengthMetrics | undefined): this {
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        return this
+    }
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         return this
     }
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
@@ -2509,6 +2671,62 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
+    public textDirection(value: TextDirection | undefined): this {
+        if (this.checkPriority("textDirection")) {
+            const value_casted = value as (TextDirection | undefined)
+            this.getPeer()?.setTextDirectionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableAutoFillAnimation(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoFillAnimation")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoFillAnimationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        if (this.checkPriority("onWillAttachIME")) {
+            const value_casted = value as (((value0: IMEClient) => void) | undefined)
+            this.getPeer()?.setOnWillAttachIMEAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public strokeColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("strokeColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.setStrokeColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableAutoSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public strokeWidth(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("strokeWidth")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setStrokeWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableSelectedDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableSelectedDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         if (this.checkPriority("inputFilter")) {
             const value_casted = value as (ResourceStr | undefined)
@@ -2518,9 +2736,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    public customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
-            const value_casted = value as (CustomBuilder | undefined)
+            const value_casted = value as (CustomBuilder | ComponentContentBase | undefined)
             const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.setCustomKeyboardAttribute(value_casted, options_casted)
             return this
@@ -2555,8 +2773,6 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
 export function TextInputImpl(
     @memo
     style: ((attributes: TextInputAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextInputComponent>((): ArkTextInputComponent => {
         return new ArkTextInputComponent()
@@ -2565,7 +2781,6 @@ export function TextInputImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -2880,15 +3095,15 @@ export class TextInputOptions_serializer {
                     const valueHolderForTextTmpValueForIdx0ForIdx1  = valueHolderForTextTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueHolderForTextTmpValue instanceof Bindable<ResourceStr>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
-            } else if (valueHolderForTextTmpValue instanceof Bindable<Resource>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTextTmpValueForIdx2  = valueHolderForTextTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx2)
-            } else if (valueHolderForTextTmpValue instanceof Bindable<string>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForTextTmpValueForIdx3  = valueHolderForTextTmpValue as Bindable<string>
                 Bindable_String_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx3)

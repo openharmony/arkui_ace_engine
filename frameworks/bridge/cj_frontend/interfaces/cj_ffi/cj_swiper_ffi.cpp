@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

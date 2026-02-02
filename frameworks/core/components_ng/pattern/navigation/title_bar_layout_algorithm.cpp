@@ -37,9 +37,6 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "base/utils/measure_util.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
@@ -49,9 +46,9 @@ constexpr int32_t MENU_OFFSET_RATIO = 9;
 constexpr double SUBTITLE_MAX_HEIGHT_RADIO = 0.35;
 constexpr float OVERDRAG_DIVIDE_NUM = 6.0f;
 
-bool NeedAvoidMenuBar(PipelineContext* pipeline)
+bool NeedAvoidMenuBar(PipelineContext* pipeline, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    return pipeline && pipeline->GetInstallationFree();
+    return pipeline && pipeline->GetInstallationFree() && !titleBarNode->IsParentModalOrSheet();
 }
 
 bool NeedAvoidContainerModal(
@@ -277,7 +274,7 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
     auto titleBarOffset = titleBarNode->GetPaintRectOffsetNG();
     RectF avoidArea;
-    if (NeedAvoidMenuBar(pipeline)) {
+    if (NeedAvoidMenuBar(pipeline, titleBarNode)) {
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, afterAvoidWidth);
         auto appBar = container->GetAppBar();
@@ -794,11 +791,8 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         MeasureContext context;
         context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
         context.fontSize = titleFontSize_;
-#ifdef ENABLE_ROSEN_BACKEND
-        minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());
-#else
+        minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
         minTitleHeight_ = 0.0;
-#endif
         initialTitleOffsetY_ = menuOccupiedHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);
@@ -1096,7 +1090,11 @@ void TitleBarLayoutAlgorithm::InitializeTheme(const RefPtr<TitleBarNode>& titleB
         navBackIconWidth_ = backIconWidth_.ConvertToPx();
         navButtonPadding_ = (menuButtonPadding_ + menuButtonPadding_).ConvertToPx();
         navHorizontalMargin_ = navButtonPadding_ + menuCompPadding_.ConvertToPx();
-        fullModeTitleCenter_ = SystemProperties::GetDeviceType() == DeviceType::TV;
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        auto curTitleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+        fullModeTitleCenter_ =
+            SystemProperties::GetDeviceType() == DeviceType::TV && curTitleMode != NavigationTitleMode::FREE;
     }
 }
 
@@ -1139,7 +1137,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(titleBarNode);
     auto pipeline = titleBarNode->GetContext();
-    if (NeedAvoidMenuBar(pipeline) ||
+    if (NeedAvoidMenuBar(pipeline, titleBarNode) ||
         NeedAvoidContainerModal(pipeline, titleBarNode)) {
         // TitleBar need run measure again during Layout
         // when avoiding menuBar in atomic service, or avoiding containerModal.

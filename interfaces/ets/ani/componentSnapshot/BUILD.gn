@@ -24,19 +24,13 @@ ohos_shared_library("componentSnapshot_ani") {
   sources = [ "./src/componentSnapshot.cpp" ]
   external_deps = [
     "image_framework:image",
+    "image_framework:image_native",
     "image_framework:image_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
   ]
   configs = [ "$ace_root:ace_config" ]
-  defines = []
-  if (pixel_map_support) {
-    defines += [ "PIXEL_MAP_SUPPORTED" ]
-  }
-  if (enable_rosen_backend) {
-    defines += [ "ENABLE_ROSEN_BACKEND" ]
-  }
   part_name = "ace_engine"
   subsystem_name = "arkui"
   output_extension = "so"

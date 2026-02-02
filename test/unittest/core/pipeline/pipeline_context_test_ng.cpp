@@ -27,10 +27,12 @@
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -81,6 +83,7 @@ void PipelineContextTestNg::SetUpTestSuite()
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     context_->fontManager_ = FontManager::Create();
+    context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 
@@ -2959,6 +2962,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
      */
     auto focusedWindowId = context_->GetFocusWindowId();
     EXPECT_EQ(focusedWindowId, 0);
+}
+/**
+ * @tc.name: PipelineContextTestNg_FirstFrameSetupRootElement_Test
+ * @tc.desc: Test FlushVsync without creating rootNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameSetupRootElement_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test context_ is available.
+     * @tc.expected: context is available.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps: Creat ContentChangeManager
+     * @tc.expected: contentChangeManager is available.
+     */
+    context_->contentChangeMgr_ = AceType::MakeRefPtr<ContentChangeManager>();
+    ASSERT_NE(context_->contentChangeMgr_, nullptr);
+
+
+    /**
+     * @tc.steps: Text flushvsync without creating rootNode_.
+     * @tc.expected: No crash
+     */
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
 }
 } // namespace NG
 } // namespace OHOS::Ace

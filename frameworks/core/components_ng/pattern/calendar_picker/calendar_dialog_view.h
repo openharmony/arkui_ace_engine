@@ -19,7 +19,6 @@
 #include "base/utils/macros.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"

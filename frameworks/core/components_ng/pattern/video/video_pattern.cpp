@@ -30,14 +30,15 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "frameworks/core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/node_api.h"
 
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -304,21 +305,6 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     return rect;
 }
 
-Gradient ConvertToGradient(Color color)
-{
-    Gradient gradient;
-    GradientColor gradientColorBegin;
-    gradientColorBegin.SetLinearColor(LinearColor(color));
-    gradientColorBegin.SetDimension(Dimension(0.0f));
-    gradient.AddColor(gradientColorBegin);
-    OHOS::Ace::NG::GradientColor gradientColorEnd;
-    gradientColorEnd.SetLinearColor(LinearColor(color));
-    gradientColorEnd.SetDimension(Dimension(1.0f));
-    gradient.AddColor(gradientColorEnd);
-
-    return gradient;
-}
-
 void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
     int32_t instanceId, const SingleTaskExecutor& uiTaskExecutor)
 {
@@ -444,20 +430,17 @@ void VideoPattern::ResetMediaPlayerOnBg()
                 }, "ArkUIVideoFireError");
             return;
         }
-#ifndef OHOS_PLATFORM
         uiTaskExecutor.PostSyncTask([weak, id] {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
             ContainerScope scope(id);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
-#endif
+
         mediaPlayer->SetRenderFirstFrame(showFirstFrame);
-#ifndef OHOS_PLATFORM
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
-#endif
         }, "ArkUIVideoMediaPlayerReset");
 }
 
@@ -486,12 +469,10 @@ void VideoPattern::ResetMediaPlayer()
 
     mediaPlayer_->SetRenderFirstFrame(showFirstFrame_);
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
-#ifndef OHOS_PLATFORM
     PrepareSurface();
     if (mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
     }
-#endif
 }
 
 void VideoPattern::UpdateMediaPlayerOnBg()
@@ -630,13 +611,6 @@ void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
 {
     auto eventHub = GetEventHub<VideoEventHub>();
     switch (status) {
-#ifdef OHOS_PLATFORM
-        case PlaybackStatus::INITIALIZED:
-            if (PrepareSurface() && mediaPlayer_->PrepareAsync() != 0) {
-                TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
-            }
-            break;
-#endif
         case PlaybackStatus::STARTED:
             CHECK_NULL_VOID(eventHub);
             eventHub->FireStartEvent();
@@ -796,10 +770,10 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     }
     CHECK_NULL_VOID(controlBar);
     auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
-    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateMin(0.0f);
-    sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
+    auto sliderModifier = NodeModifier::GetSliderCustomModifier();
+    CHECK_NULL_VOID(sliderModifier);
+    sliderModifier->sliderPaintPropertyUpdateMin(sliderNode, 0.0f);
+    sliderModifier->sliderPaintPropertyUpdateMax(sliderNode, static_cast<float>(duration_));
     sliderNode->MarkModifyDone();
     auto playBtn = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
     ChangePlayButtonTag(playBtn);
@@ -962,16 +936,16 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     if (pos == CURRENT_POS && !isSeeking_) {
         auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
         CHECK_NULL_VOID(sliderNode);
-        auto sliderPattern = sliderNode->GetPattern<SliderPattern>();
-        CHECK_NULL_VOID(sliderPattern);
-        sliderPattern->UpdateValue(static_cast<float>(time));
+        auto sliderModifier = NodeModifier::GetSliderCustomModifier();
+        CHECK_NULL_VOID(sliderModifier);
+        sliderModifier->sliderPatternUpdateValue(sliderNode, static_cast<float>(time));
         sliderNode->MarkModifyDone();
     }
 }
 
-bool VideoPattern::PrepareSurface()
+void VideoPattern::PrepareSurface()
 {
-    CHECK_NULL_RETURN(mediaPlayer_, false);
+    CHECK_NULL_VOID(mediaPlayer_);
     if (!SystemProperties::GetExtSurfaceEnabled()) {
         renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
     }
@@ -981,9 +955,7 @@ bool VideoPattern::PrepareSurface()
     }
     if (mediaPlayer_->SetSurface() != 0) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "mediaPlayer renderSurface set failed");
-        return false;
     }
-    return true;
 }
 
 void VideoPattern::OnAttachToFrameNode()
@@ -1012,6 +984,7 @@ void VideoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
 #endif
+    ACE_UINODE_TRACE(host);
     renderContextForMediaPlayer_->InitContext(false, param);
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -1117,7 +1090,6 @@ void VideoPattern::OnModifyDone()
 
     // Update the control bar and preview image.
     UpdatePreviewImage();
-    UpdateControllerBar();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // Update the media player when video node is not in full screen or current node is full screen node
@@ -1325,9 +1297,9 @@ void VideoPattern::UpdateControllerBar()
     if (needControlBar) {
         auto sliderNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(SLIDER_POS));
         CHECK_NULL_VOID(sliderNode);
-        auto sliderPattern = sliderNode->GetPattern<SliderPattern>();
-        CHECK_NULL_VOID(sliderPattern);
-        sliderPattern->UpdateValue(static_cast<float>(currentPos_));
+        auto sliderModifier = NodeModifier::GetSliderCustomModifier();
+        CHECK_NULL_VOID(sliderModifier);
+        sliderModifier->sliderPatternUpdateValue(sliderNode, static_cast<float>(currentPos_));
         sliderNode->MarkModifyDone();
 
         auto textNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(CURRENT_POS));
@@ -1575,10 +1547,10 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
-    auto sliderNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    auto sliderModifier = NodeModifier::GetSliderCustomModifier();
+    CHECK_NULL_RETURN(sliderModifier, nullptr);
+    auto sliderNode = sliderModifier->createSliderFrameNode(-1);
     CHECK_NULL_RETURN(sliderNode, nullptr);
-    auto sliderLayoutProperty = sliderNode->GetLayoutProperty<SliderLayoutProperty>();
-    CHECK_NULL_RETURN(sliderLayoutProperty, nullptr);
 
     auto sliderEdge = videoTheme->GetSliderEdge();
     PaddingProperty padding;
@@ -1586,16 +1558,15 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     padding.right = CalcLength(sliderEdge.Right());
     padding.top = CalcLength(sliderEdge.Top());
     padding.bottom = CalcLength(sliderEdge.Bottom());
-    sliderLayoutProperty->UpdatePadding(padding);
-    sliderLayoutProperty->UpdateLayoutWeight(1.0);
 
-    SliderOnChangeEvent sliderOnChangeEvent = [weak = WeakClaim(this)](float value, int32_t mode) {
+    sliderModifier->sliderLayoutPropertyUpdatePadding(sliderNode, padding);
+    sliderModifier->sliderLayoutPropertyUpdateLayoutWeight(sliderNode, 1.0);
+    std::function<void(float, int32_t)> sliderOnChangeEvent = [weak = WeakClaim(this)](float value, int32_t mode) {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         videoPattern->OnSliderChange(value, mode);
     };
-    auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
-    sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
+    sliderModifier->sliderEventHubSetOnChange(sliderNode, reinterpret_cast<void*>(&sliderOnChangeEvent));
     auto focusHub = sliderNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     if (InstanceOf<VideoFullScreenPattern>(this)) {
@@ -1609,14 +1580,12 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
         return videoPattern->HandleSliderKeyEvent(keyEvent);
     });
 
-    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
-    sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    sliderPaintProperty->UpdateSelectGradientColor(ConvertToGradient(videoTheme->GetSelectColor()));
-    sliderPaintProperty->UpdateSelectIsResourceColor(true);
-    sliderPaintProperty->UpdateTrackBackgroundColor(ConvertToGradient(videoTheme->GetTrackBgColor()));
-    sliderPaintProperty->UpdateTrackBackgroundIsResourceColor(true);
-    sliderPaintProperty->UpdateValue(static_cast<float>(currentPos_));
+    sliderModifier->sliderPaintPropertyUpdateMax(sliderNode, static_cast<float>(duration_));
+    sliderModifier->sliderPaintPropertyUpdateSelectGradientColor(sliderNode, videoTheme->GetSelectColor().GetValue());
+    sliderModifier->sliderPaintPropertyUpdateSelectIsResourceColor(sliderNode, true);
+    sliderModifier->sliderPaintPropertyUpdateTrackBackgroundColor(sliderNode, videoTheme->GetTrackBgColor().GetValue());
+    sliderModifier->sliderPaintPropertyUpdateTrackBackgroundIsResourceColor(sliderNode, true);
+    sliderModifier->sliderPaintPropertyUpdateValue(sliderNode, static_cast<float>(currentPos_));
     sliderNode->MarkModifyDone();
     return sliderNode;
 }
@@ -1819,9 +1788,10 @@ void VideoPattern::SetResetImpl(
 void VideoPattern::SetMethodCall()
 {
     ContainerScope scope(instanceId_);
-    auto videoController = AceType::MakeRefPtr<VideoController>();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
+    auto videoController = AceType::MakeRefPtr<VideoController>();
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -1889,6 +1859,7 @@ void VideoPattern::Stop()
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer stop", hostId_);
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
+    isStop_ = true;
     SetIsSeeking(false);
 }
 
@@ -2069,6 +2040,7 @@ void VideoPattern::FullScreen()
     CHECK_NULL_VOID(host);
     auto videoNode = AceType::DynamicCast<VideoNode>(host);
     CHECK_NULL_VOID(videoNode);
+    ACE_UINODE_TRACE(host);
     auto fullScreenPattern = AceType::MakeRefPtr<VideoFullScreenPattern>(videoControllerV2_);
     fullScreenPattern->InitFullScreenParam(
         AceType::Claim(this), renderSurface_, mediaPlayer_, renderContextForMediaPlayer_);
@@ -2104,6 +2076,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 {
     CHECK_NULL_VOID(videoPattern);
     currentPos_ = videoPattern->GetCurrentPos();
+    OnUpdateTime(currentPos_, CURRENT_POS);
     if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid() && mediaPlayer_->IsPlaying() != isPlaying_) {
         isPlaying_ = mediaPlayer_->IsPlaying();
         ChangePlayButtonTag();
@@ -2186,6 +2159,7 @@ void VideoPattern::EnableAnalyzer(bool enable)
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
 }
 
@@ -2220,7 +2194,9 @@ void VideoPattern::SetImageAnalyzerConfig(void* config)
 void VideoPattern::SetImageAIOptions(void* options)
 {
     if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::VIDEO_CUSTOM);
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
@@ -2489,6 +2465,7 @@ void VideoPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host)
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Create MediaPlayer SurfaceNode with SkipCheckInMultiInstance",
         hostId_);
 #endif
+    ACE_UINODE_TRACE(host);
     renderContextForMediaPlayer_->InitContext(false, param);
 
     if (SystemProperties::GetExtSurfaceEnabled()) {

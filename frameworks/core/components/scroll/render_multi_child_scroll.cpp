@@ -16,6 +16,7 @@
 #include "core/components/scroll/render_multi_child_scroll.h"
 
 #include "core/common/vibrator/vibrator_proxy.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -158,8 +159,9 @@ void RenderMultiChildScroll::JumpToIndex(int32_t index)
         LOGE("no list to jump");
         return;
     }
-
-    double position = listBase->CalculateItemPosition(index, ScrollType::SCROLL_INDEX);
+    auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+    CHECK_NULL_VOID(modifier);
+    double position = modifier->calculateItemPositionReturn(listBase, index, ScrollType::SCROLL_INDEX);
     if (position < 0.0) {
         LOGE("no this index: %{public}d", index);
         return;
@@ -183,7 +185,9 @@ void RenderMultiChildScroll::JumpToPosition(double position, int32_t source)
         LOGE("no list to jump");
         return;
     }
-    listBase->CalculateItemPosition(position);
+    auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->calculateItemPosition(listBase, position);
     LOGI("jump to position:%{public}lf", position);
     if (CalculateMainScrollExtent()) {
         RenderScroll::JumpToPosition(position, source);
@@ -375,7 +379,9 @@ void RenderMultiChildScroll::OnPredictLayout(int64_t deadline)
             layoutHead = layoutHead - cacheExtent_ - mainOffset;
             layoutTail = layoutTail + cacheExtent_ - mainOffset;
         }
-        listBase->BuildNextItem(layoutHead, layoutTail, curOffset, viewPort_);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->buildNextItem(listBase, layoutHead, layoutTail, curOffset, viewPort_);
     }
 }
 
@@ -384,7 +390,9 @@ void RenderMultiChildScroll::LayoutChild(
 {
     auto listBase = AceType::DynamicCast<RenderList>(child);
     if (listBase) {
-        listBase->ResetLayoutRange(start, end, position, viewPort_);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->resetLayoutRange(listBase, start, end, position, viewPort_);
         listBase->SetLayoutParam(GetLayoutParam());
         listBase->SetNeedLayout(true);
         listBase->OnLayout();
@@ -699,10 +707,12 @@ void RenderMultiChildScroll::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool sm
     }
 
     double position = 0.0;
+    auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+    CHECK_NULL_VOID(modifier);
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-        position = renderList->CalculateItemPosition(0, ScrollType::SCROLL_TOP);
+        position = modifier->calculateItemPositionReturn(renderList, 0, ScrollType::SCROLL_TOP);
     } else {
-        position = renderList->CalculateItemPosition(0, ScrollType::SCROLL_BOTTOM);
+        position = modifier->calculateItemPositionReturn(renderList, 0, ScrollType::SCROLL_BOTTOM);
     }
     if (position < 0.0) {
         LOGE("Get edge position failed.");
@@ -744,10 +754,12 @@ bool RenderMultiChildScroll::ScrollPage(bool reverse, bool smooth, const std::fu
         return false;
     }
     double position = 0.0;
+    auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+    CHECK_NULL_RETURN(modifier, false);
     if (reverse) {
-        position = renderList->CalculateItemPosition(0, ScrollType::SCROLL_PAGE_UP);
+        position = modifier->calculateItemPositionReturn(renderList, 0, ScrollType::SCROLL_PAGE_UP);
     } else {
-        position = renderList->CalculateItemPosition(0, ScrollType::SCROLL_PAGE_DOWN);
+        position = modifier->calculateItemPositionReturn(renderList, 0, ScrollType::SCROLL_PAGE_DOWN);
     }
     if (position < 0.0) {
         LOGE("Get page:%{public}d position failed.", reverse);
@@ -794,7 +806,9 @@ void RenderMultiChildScroll::HandleRotate(double rotateValue, bool isVertical)
         value *= LIST_CONTINUOUS_ROTATION_SENSITYVITY_NORMAL;
     }
     if (listBase->GetSupportItemCenter()) {
-        auto childItem = listBase->GetChildByIndex(listBase->GetCenterIndex());
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        auto childItem = modifier->getChildByIndex(listBase, listBase->GetCenterIndex());
         auto centerItem = RenderListItem::GetRenderListItem(childItem);
         if (centerItem) {
             accumulatedRotationValue_ += value;
@@ -838,7 +852,9 @@ void RenderMultiChildScroll::NotifyDragStart(double startPosition)
         if (!listBase) {
             continue;
         }
-        listBase->NotifyDragStart(startPosition);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->notifyDragStart(listBase, startPosition);
     }
 }
 
@@ -850,7 +866,9 @@ void RenderMultiChildScroll::NotifyDragUpdate(double dragOffset, int32_t source)
         if (!listBase) {
             continue;
         }
-        listBase->NotifyDragUpdate(dragOffset);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->notifyDragUpdate(listBase, dragOffset);
         // switch chain control node in flush chain animation
         double delta = listBase->FlushChainAnimation();
         // fix currentOffset_ after switch control node.
@@ -870,7 +888,9 @@ void RenderMultiChildScroll::ProcessScrollOverCallback(double velocity)
             continue;
         }
         // switch chain control node when notify scroll over
-        listBase->NotifyScrollOver(velocity, IsOutOfTopBoundary(), IsOutOfBottomBoundary());
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->notifyScrollOver(listBase, velocity, IsOutOfTopBoundary(), IsOutOfBottomBoundary());
         double delta = listBase->FlushChainAnimation();
         // fix currentOffset_ after switch control node.
         if (axis_ == Axis::HORIZONTAL) {
@@ -912,8 +932,12 @@ double RenderMultiChildScroll::GetFixPositionOnWatch(double destination, double 
         itemSize = listBase->GetItemPosition(centerIndex + 1) - itemPosition;
     } else {
         // scroll to bottom direction
-        listBase->CalculateItemPosition(listPosition);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_RETURN(modifier, destination);
+        modifier->calculateItemPosition(listBase, listPosition);
         double centerPosition = listPosition + GetMainSize(viewPort_) * HALF_ITEM_SIZE;
+        auto* modifier_item = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+        CHECK_NULL_RETURN(modifier_item, destination);
         for (const auto &itemPair : listBase->GetItems()) {
             int32_t index = itemPair.first;
             auto item = RenderListItem::GetRenderListItem(itemPair.second);
@@ -926,7 +950,7 @@ double RenderMultiChildScroll::GetFixPositionOnWatch(double destination, double 
             if (start < centerPosition && end > centerPosition) {
                 centerIndex = index;
                 itemSize = GetMainSize(item->GetLayoutSize());
-                itemPosition = item->GetPositionInList();
+                itemPosition = modifier_item->getPositionInList(item);
                 break;
             }
         }

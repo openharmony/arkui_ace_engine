@@ -58,7 +58,7 @@ const std::unordered_set<std::string> PATTERN_NOT_SYNC_LOAD_SET = { THEME_PATTER
 const std::unordered_set<std::string> PATTERN_SYNC_LOAD_SET = { THEME_PATTERN_BUTTON, THEME_PATTERN_CAMERA,
     THEME_PATTERN_LIST_ITEM, THEME_PATTERN_ARC_LIST, THEME_PATTERN_ARC_LIST_ITEM, THEME_PATTERN_PICKER,
     THEME_PATTERN_PROGRESS, THEME_PATTERN_SELECT, THEME_PATTERN_STEPPER, THEME_PATTERN_TEXT, THEME_PATTERN_TEXTFIELD,
-    THEME_PATTERN_TEXT_OVERLAY, THEME_PATTERN_CONTAINER_MODAL };
+    THEME_PATTERN_TEXT_OVERLAY, THEME_PATTERN_CONTAINER_MODAL, THEME_PATTERN_CORNER_MARK };
 
 const std::string PATTERN_ASYNC_LOAD_LIST[] = { THEME_BLUR_STYLE_COMMON, THEME_PATTERN_ICON, THEME_PATTERN_SHADOW };
 constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
@@ -399,6 +399,27 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
     return patternStyle;
 }
 
+void ResourceAdapterImplV2::DumpColorMode()
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(resConfig_);
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto colorMode = resConfig_->GetColorMode();
+    auto sysColorMode = container->CurrentColorMode();
+    auto globalSysColorMode = ConvertColorModeToGlobal(sysColorMode);
+    auto localColorMode = pipelineContext->GetLocalColorMode();
+    auto globalLocalColorMode = ConvertColorModeToGlobal(localColorMode);
+    if (globalSysColorMode != colorMode && globalLocalColorMode != colorMode) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "ColorMode exception: SysColorMode[%{public}d] | LocalColorMode[%{public}d] | CurColorMode[%{public}d]",
+            globalSysColorMode, globalLocalColorMode, colorMode);
+    }
+}
+
 Color ResourceAdapterImplV2::GetColor(uint32_t resId)
 {
     uint32_t result = 0;
@@ -412,6 +433,7 @@ Color ResourceAdapterImplV2::GetColor(uint32_t resId)
             std::to_string(resId), "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return ERROR_VALUE_COLOR;
     }
+    DumpColorMode();
     return Color(result);
 }
 
@@ -429,6 +451,7 @@ Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
+    DumpColorMode();
     return Color(result);
 }
 

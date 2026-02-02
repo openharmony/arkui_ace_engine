@@ -249,6 +249,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             this._initialIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._initialIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._initialIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -260,6 +261,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             this._count_0_flag = AttributeUpdaterFlag.UPDATE
             this._count_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._count_0_flag = AttributeUpdaterFlag.SKIP
@@ -271,6 +273,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             this._style_0_flag = AttributeUpdaterFlag.UPDATE
             this._style_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._style_0_flag = AttributeUpdaterFlag.SKIP
@@ -282,6 +285,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             this._loop_0_flag = AttributeUpdaterFlag.UPDATE
             this._loop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._loop_0_flag = AttributeUpdaterFlag.SKIP
@@ -293,6 +297,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
             this._vertical_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._vertical_0_flag = AttributeUpdaterFlag.SKIP
@@ -304,6 +309,7 @@ export class IndicatorComponentModifier extends CommonMethodModifier implements 
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP

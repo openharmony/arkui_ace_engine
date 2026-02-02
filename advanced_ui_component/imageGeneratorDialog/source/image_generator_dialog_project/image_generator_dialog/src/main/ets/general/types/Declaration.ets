@@ -15,9 +15,18 @@
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration'
 
+export const LogTag: string = '[imageGenerator]'
+
 export enum CanvasMode {
   GENERAL_MODE = 0,
-  DOODLE_MODE = 1
+  DOODLE_MODE = 1,
+  DEFAULT = GENERAL_MODE
+}
+
+export enum CanvasLayoutDirection {
+  HORIZONTAL = 0,
+  VERTICAL = 1,
+  DEFAULT = HORIZONTAL
 }
 
 export enum ImageGenerateState {

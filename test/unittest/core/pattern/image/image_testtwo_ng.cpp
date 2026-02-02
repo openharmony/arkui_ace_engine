@@ -339,6 +339,7 @@ HWTEST_F(ImageTestTwoNg, ImagePatternGetSrcTypeToString001, TestSize.Level0)
     EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE_ID).c_str(), "resourceId");
     EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::PIXMAP).c_str(), "pixmap");
     EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASTC).c_str(), "astc");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::STREAM).c_str(), "stream");
 }
 
 /**
@@ -1950,5 +1951,27 @@ HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource002, TestSize.Level1)
     int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
     EXPECT_TRUE(pattern->needBorderRadius_);
+}
+
+/**
+ * @tc.name: SetImageFillSetByUser001
+ * @tc.desc: Verify SetImageFillSetByUser updates layout property on a frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, SetImageFillSetByUser001, TestSize.Level1)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetImageFillSetByUserValue(false));
+
+    ImageModelNG::SetImageFillSetByUser(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(layoutProperty->GetImageFillSetByUserValue(false));
+
+    ImageModelNG::SetImageFillSetByUser(AceType::RawPtr(frameNode), false);
+    EXPECT_FALSE(layoutProperty->GetImageFillSetByUserValue(false));
 }
 } // namespace OHOS::Ace::NG

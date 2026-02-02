@@ -866,4 +866,61 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest033, TestSize.Level1)
     EXPECT_EQ(titleProp->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
     EXPECT_EQ(subTitleProp->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
 }
+
+/**
+ * @tc.name: DialogPatternTest035
+ * @tc.desc: Test dialogPattern.OnDetachFromMainTreeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm and overlayManager instance.
+     * @tc.expected: the DialogLayoutAlgorithm and overlayManager created successfully.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+
+    /**
+     * @tc.steps: step2. Create dialog node and mask node under subwindow context.
+     * @tc.expected: Dialog and mask nodes are created successfully.
+     */
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttons = btnItems;
+    props.isModal = false;
+    props.isShowInSubWindow = true;
+
+    auto dialog = overlayManager->ShowDialog(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto mask = overlayManager->SetDialogMask(props);
+    ASSERT_NE(mask, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    
+    /**
+     * @tc.steps: step3. Create parentOverlayManager to bind the dialog node and mask node.
+     * @tc.expected: The dialog node and mask node are successfully bound in the subwindow.
+     */
+    auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(parentPipelineContext, nullptr);
+    auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+    ASSERT_NE(parentOverlayManager, nullptr);
+
+    parentOverlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+    EXPECT_EQ(parentOverlayManager->maskNodeIdMap_.size(), 1);
+
+    /**
+     * @tc.steps: step4. Test dialog node OnDetachFromMainTree.
+     * @tc.expected: When the dialog detach from mainTree, the associated mask node is closed.
+     */
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->OnDetachFromMainTreeImpl();
+    auto masknode = parentOverlayManager->GetDialog(mask->GetId());
+    EXPECT_EQ(masknode, nullptr);
+}
 } // namespace OHOS::Ace::NG

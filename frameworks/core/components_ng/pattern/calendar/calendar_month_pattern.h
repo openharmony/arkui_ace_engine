@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 
-class CalendarMonthPattern : public Pattern {
+class ACE_FORCE_EXPORT CalendarMonthPattern : public Pattern {
     DECLARE_ACE_TYPE(CalendarMonthPattern, Pattern);
 
 public:

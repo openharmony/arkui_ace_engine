@@ -666,7 +666,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
-void FormManagerDelegate::OnActionEvent(const std::string& action)
+void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
@@ -691,7 +691,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         OnRouterActionEvent(action);
         return;
     } else if (type == "call") {
-        OnCallActionEvent(action);
+        OnCallActionEvent(action, isManuallyClick);
         return;
     }
 
@@ -1020,12 +1020,15 @@ void FormManagerDelegate::SetColorMode(int32_t colorMode)
     formRendererDispatcher->SetColorMode(colorMode);
 }
 
-void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+bool FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
     std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     auto formRendererDispatcher = GetFormRendererDispatcher();
-    CHECK_NULL_VOID(formRendererDispatcher);
+    if (!formRendererDispatcher) {
+        return false;
+    }
     formRendererDispatcher->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    return true;
 }
 
 void FormManagerDelegate::OnAccessibilityChildTreeDeregister()
@@ -1181,20 +1184,18 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
     std::string bundle(bundleName);
     std::string module(moduleName);
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
-    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundle, module, formInfos);
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFullFormsInfoByModule(bundle, module, formInfos);
     if (result != 0) {
         LOGW("Query FormInfo failed.");
         return false;
     }
-
-    auto iter = formInfos.begin();
-    while (iter != formInfos.end()) {
-        if (cardName == iter->name) {
-            formInfo = *iter;
+    for (const auto &item : formInfos) {
+        if (cardName == item.name) {
+            formInfo = item;
             return true;
         }
-        iter++;
     }
+    LOGW("failed to get FormInfo.");
     return false;
 }
 
@@ -1291,7 +1292,7 @@ void FormManagerDelegate::OnRouterActionEvent(const std::string& action)
     }
 }
 
-void FormManagerDelegate::OnCallActionEvent(const std::string& action)
+void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isManuallyClick)
 {
     AAFwk::Want want;
     if (!ParseAction(action, "call", want)) {
@@ -1301,7 +1302,8 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action)
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
         auto instantId = context->GetInstanceId();
-        formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+        formUtils_->BackgroundEvent(runningCardId_, action, instantId,
+            wantCache_.GetElement().GetBundleName(), isManuallyClick);
     }
 }
 

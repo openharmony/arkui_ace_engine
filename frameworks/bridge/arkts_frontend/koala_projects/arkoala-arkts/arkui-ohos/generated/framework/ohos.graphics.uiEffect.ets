@@ -47,50 +47,11 @@ export class uiEffect_VisualEffect_serializer {
 export class uiEffect_BrightnessBlender_serializer {
     public static write(buffer: SerializerBase, value: uiEffect.BrightnessBlender): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForCubicRate  = value.cubicRate
-        valueSerializer.writeFloat64(valueHolderForCubicRate)
-        const valueHolderForQuadraticRate  = value.quadraticRate
-        valueSerializer.writeFloat64(valueHolderForQuadraticRate)
-        const valueHolderForLinearRate  = value.linearRate
-        valueSerializer.writeFloat64(valueHolderForLinearRate)
-        const valueHolderForDegree  = value.degree
-        valueSerializer.writeFloat64(valueHolderForDegree)
-        const valueHolderForSaturation  = value.saturation
-        valueSerializer.writeFloat64(valueHolderForSaturation)
-        const valueHolderForPositiveCoefficient  = value.positiveCoefficient
-        const valueHolderForPositiveCoefficient_0  = valueHolderForPositiveCoefficient[0]
-        valueSerializer.writeFloat64(valueHolderForPositiveCoefficient_0)
-        const valueHolderForPositiveCoefficient_1  = valueHolderForPositiveCoefficient[1]
-        valueSerializer.writeFloat64(valueHolderForPositiveCoefficient_1)
-        const valueHolderForPositiveCoefficient_2  = valueHolderForPositiveCoefficient[2]
-        valueSerializer.writeFloat64(valueHolderForPositiveCoefficient_2)
-        const valueHolderForNegativeCoefficient  = value.negativeCoefficient
-        const valueHolderForNegativeCoefficient_0  = valueHolderForNegativeCoefficient[0]
-        valueSerializer.writeFloat64(valueHolderForNegativeCoefficient_0)
-        const valueHolderForNegativeCoefficient_1  = valueHolderForNegativeCoefficient[1]
-        valueSerializer.writeFloat64(valueHolderForNegativeCoefficient_1)
-        const valueHolderForNegativeCoefficient_2  = valueHolderForNegativeCoefficient[2]
-        valueSerializer.writeFloat64(valueHolderForNegativeCoefficient_2)
-        const valueHolderForFraction  = value.fraction
-        valueSerializer.writeFloat64(valueHolderForFraction)
+        valueSerializer.writePointer(extractors.toUiEffectBrightnessBlenderPtr(value))
     }
     public static read(buffer: DeserializerBase): uiEffect.BrightnessBlender {
         let valueDeserializer : DeserializerBase = buffer
-        const cubicRateTmpResult : double = valueDeserializer.readFloat64()
-        const quadraticRateTmpResult : double = valueDeserializer.readFloat64()
-        const linearRateTmpResult : double = valueDeserializer.readFloat64()
-        const degreeTmpResult : double = valueDeserializer.readFloat64()
-        const saturationTmpResult : double = valueDeserializer.readFloat64()
-        const positiveCoefficientTmpBufValue0 : double = valueDeserializer.readFloat64()
-        const positiveCoefficientTmpBufValue1 : double = valueDeserializer.readFloat64()
-        const positiveCoefficientTmpBufValue2 : double = valueDeserializer.readFloat64()
-        const positiveCoefficientTmpResult : [ double, double, double ] = ([positiveCoefficientTmpBufValue0, positiveCoefficientTmpBufValue1, positiveCoefficientTmpBufValue2] as [ double, double, double ])
-        const negativeCoefficientTmpBufValue0 : double = valueDeserializer.readFloat64()
-        const negativeCoefficientTmpBufValue1 : double = valueDeserializer.readFloat64()
-        const negativeCoefficientTmpBufValue2 : double = valueDeserializer.readFloat64()
-        const negativeCoefficientTmpResult : [ double, double, double ] = ([negativeCoefficientTmpBufValue0, negativeCoefficientTmpBufValue1, negativeCoefficientTmpBufValue2] as [ double, double, double ])
-        const fractionTmpResult : double = valueDeserializer.readFloat64()
-        let value : uiEffect.BrightnessBlender = ({cubicRate: cubicRateTmpResult, quadraticRate: quadraticRateTmpResult, linearRate: linearRateTmpResult, degree: degreeTmpResult, saturation: saturationTmpResult, positiveCoefficient: positiveCoefficientTmpResult, negativeCoefficient: negativeCoefficientTmpResult, fraction: fractionTmpResult} as uiEffect.BrightnessBlender)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromUiEffectBrightnessBlenderPtr(ptr)
     }
 }

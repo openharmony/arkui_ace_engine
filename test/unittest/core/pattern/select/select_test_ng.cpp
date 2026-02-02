@@ -31,6 +31,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -97,6 +98,8 @@ RefPtr<Theme> GetTheme(ThemeType type)
         return AceType::MakeRefPtr<SelectTheme>();
     } else if (type == ScrollBarTheme::TypeId()) {
         return AceType::MakeRefPtr<ScrollBarTheme>();
+    } else if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
     } else {
         return nullptr;
     }
@@ -1310,13 +1313,11 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
 
     // Create a single theme object that you will control for this test.
-    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    const Color themeBgColor = Color::BLUE;
-    selectTheme->backgroundColor_ = themeBgColor;
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
     EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     /**
      * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
      * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
@@ -1330,18 +1331,20 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
     auto options = pattern->GetOptions();
-    auto optionPattern = options.front()->GetPattern<MenuItemPattern>();
+    auto optionNode = options.front();
+    ASSERT_NE(optionNode, nullptr);
+    auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
+    auto optionPaintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    optionPaintProperty->ResetOptionBgColor();
     /**
      * @tc.steps: step4. Set and update background color of option.
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
-    ASSERT_NE(pattern, nullptr);
-    pattern->SetSelectedOptionBgColor(Color::BLACK);
-    pattern->OnColorConfigurationUpdate();
+    optionPattern->OnColorConfigurationUpdate();
     auto selectColor = optionPattern->GetBgColor();
-    EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
-    ViewStackProcessor::GetInstance()->ClearStack();
+    EXPECT_EQ(selectColor, Color::TRANSPARENT);
 }
 
 /**
@@ -1427,6 +1430,40 @@ HWTEST_F(SelectTestNg, SelectKeyboardAvoidMode002, TestSize.Level1)
     selectModelInstance.SetKeyboardAvoidMode(MenuKeyboardAvoidMode::NONE);
     selectPattern->ToJsonMenuAvoidKeyboard(json, filter);
     EXPECT_TRUE(json->Contains("keyboardAvoidMode"));
-    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: SelectMaterial001
+ * @tc.desc: Test Select Material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectModelInstance.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    /**
+     * @tc.steps: step2. Get Select Node.
+     * @tc.expected: Select node will set success.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Set Material.
+     * @tc.expected: Material will set success.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+    material->SetType(type);
+    selectModelInstance.SetMenuSystemMaterial(material);
+    ASSERT_NE(selectPattern->GetMenuSystemMaterial(), nullptr);
+    EXPECT_EQ(selectPattern->GetMenuSystemMaterial()->GetType(), type);
 }
 } // namespace OHOS::Ace::NG

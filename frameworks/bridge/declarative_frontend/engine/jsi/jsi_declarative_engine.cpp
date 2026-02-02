@@ -59,6 +59,7 @@
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -85,6 +86,7 @@
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "frameworks/core/interfaces/native/node/node_api.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -814,7 +816,52 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
     g_declarativeRuntime = runtime;
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+    PreLoadDynamicModule(arkRuntime);
+#endif
 }
+
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
+{
+    static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "Checkbox", "arkui.components.arkcheckbox" },
+        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
+        { "Gauge", "arkui.components.arkgauge" },
+        { "Rating", "arkui.components.arkrating" },
+        { "TimePicker", "arkui.components.arktimepicker" },
+        { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "WaterFlow", "arkui.components.arkwaterflow" },
+        { "FlowItem", "arkui.components.arkflowitem" },
+        { "CalendarPicker", "arkui.components.arkcalendarpicker" },
+        { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
+        { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "Marquee", "arkui.components.arkmarquee" },
+        { "Stepper", "arkui.components.arkstepper" },
+        { "StepperItem", "arkui.components.arkstepperitem" },
+        { "Radio", "arkui.components.arkradio" },
+        { "Slider", "arkui.components.arkslider" },
+        { "Indexer", "arkui.components.arkalphabetindexer" },
+        { "Sidebar", "arkui.components.arksidebarcontainer" },
+        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "ColumnSplit", "arkui.components.arkcolumnsplit" },
+        { "RowSplit", "arkui.components.arkrowsplit" },
+#ifndef ARKUI_WEARABLE
+        { "FolderStack", "arkui.components.arkfolderstack" },
+#endif
+    };
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
+    if (!func || !func->IsFunction(runtime)) {
+        return;
+    }
+    for (const auto& pair : componentToAbcName) {
+        std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(pair.first),
+            runtime->NewString(pair.second) };
+        func->Call(runtime, global, argv, argv.size());
+    }
+}
+#endif
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
 {
@@ -910,6 +957,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
 {
     validCustomRuntime_.erase(env);
+    IFunctionBinding::functions.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -1815,6 +1863,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 return false;
             }
             data->SetAutoReleaseMem(true);
+            extractor->SetAutoCloseFd(true);
             if (arkRuntime->IsStaticOrInvalidFile(data->GetDataPtr(), data->GetDataLen())) {
                 return false;
             }
@@ -2955,6 +3004,11 @@ void JsiDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, con
 
 void JsiDeclarativeEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) {}
 
+bool JsiDeclarativeEngine::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    return false;
+}
+
 void JsiDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args) {}
 
 void JsiDeclarativeEngine::RunGarbageCollection()
@@ -3586,6 +3640,12 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
         return;
     }
     LocalScope scope(vm);
+    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
+        PreloadUIContent(localRuntime_);
+        PreloadArkComponent(localRuntime_);
+        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
+        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
+    }
     switch (mode) {
         case FormJsXNodeLoadMode::NONE:
             return;
@@ -3597,11 +3657,6 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
             break;
         default:
             return;
-    }
-    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
-        PreloadUIContent(localRuntime_);
-        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
-        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
     }
     currentMode_ = mode;
 }

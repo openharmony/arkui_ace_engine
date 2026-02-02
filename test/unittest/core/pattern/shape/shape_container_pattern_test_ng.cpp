@@ -35,10 +35,12 @@
 #include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_static.h"
 #include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_model_static.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
 #include "test/mock/base/mock_pixel_map.h"
 
@@ -47,6 +49,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const int32_t NODE_ID = 1;
 const float LEFT = -20.0f;
 const float TOP = -30.0f;
 const float ZERO = 0.0;
@@ -68,6 +71,24 @@ public:
     }
 
     void Draw(RefPtr<FrameNode> frameNode) override {}
+
+    RefPtr<ShapePaintProperty> GetShapePaintProperty(FrameNode* frameNode)
+    {
+        auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+        if (!pattern) {
+            return nullptr;
+        }
+        return pattern->GetPaintProperty<ShapePaintProperty>();
+    }
+
+    RefPtr<ShapeContainerPaintProperty> GetShapeContainerPaintProperty(FrameNode* frameNode)
+    {
+        auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
+        if (!pattern) {
+            return nullptr;
+        }
+        return pattern->GetPaintProperty<ShapeContainerPaintProperty>();
+    }
 };
 
 /**
@@ -845,5 +866,425 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeWidth001, TestSize.Level1)
     ASSERT_NE(pattern->resourceMgr_, nullptr);
     EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
     g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetStroke_Test
+ * @tc.desc: Test SetStroke function with and without color.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStroke_Test, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<Color> color = Color::RED;
+    ShapeModelStatic::SetStroke(frameNode, color);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStroke().has_value());
+    EXPECT_EQ(paintProp->GetStroke().value(), Color::RED);
+
+    std::optional<Color> noColor;
+    ShapeModelStatic::SetStroke(frameNode, noColor);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetStroke().has_value());
+}
+
+/**
+ * @tc.name: SetFill_Test
+ * @tc.desc: Test SetFill function with and without color.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetFill_Test, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<Color> color = Color::BLUE;
+    ShapeModelStatic::SetFill(frameNode, color);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetFill().has_value());
+    EXPECT_EQ(paintProp->GetFill().value(), Color::BLUE);
+    
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetForegroundColor().has_value());
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), Color::BLUE);
+    EXPECT_TRUE(renderContext->GetForegroundColorFlag().has_value());
+    EXPECT_EQ(renderContext->GetForegroundColorFlag().value(), true);
+
+    std::optional<Color> noColor;
+    ShapeModelStatic::SetFill(frameNode, noColor);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetFill().has_value());
+    EXPECT_EQ(paintProp->GetFill().value(), Color::BLACK);
+    
+    renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_FALSE(renderContext->GetForegroundColor().has_value());
+    EXPECT_TRUE(renderContext->GetForegroundColorFlag().has_value());
+    EXPECT_EQ(renderContext->GetForegroundColorFlag().value(), false);
+}
+
+/**
+ * @tc.name: SetStrokeDashOffset_Test001
+ * @tc.desc: Test SetStrokeDashOffset function with and without dashOffset.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset_Test001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<Dimension> dashOffset = Dimension(10.0);
+    ShapeModelStatic::SetStrokeDashOffset(frameNode, dashOffset);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeDashOffset().has_value());
+    EXPECT_EQ(paintProp->GetStrokeDashOffset().value(), Dimension(10.0));
+
+    std::optional<Dimension> noDashOffset;
+    ShapeModelStatic::SetStrokeDashOffset(frameNode, noDashOffset);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeDashOffset().has_value());
+    EXPECT_EQ(paintProp->GetStrokeDashOffset().value(), 0.0_vp);
+}
+
+/**
+ * @tc.name: SetStrokeLineCap_Test001
+ * @tc.desc: Test SetStrokeLineCap function with and without lineCapStyle.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeLineCap_Test001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<int> lineCapStyle = 1;
+    ShapeModelStatic::SetStrokeLineCap(frameNode, lineCapStyle);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeLineCap().has_value());
+    EXPECT_EQ(paintProp->GetStrokeLineCap().value(), 1);
+
+    std::optional<int> noLineCapStyle;
+    ShapeModelStatic::SetStrokeLineCap(frameNode, noLineCapStyle);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetStrokeLineCap().has_value());
+}
+
+/**
+ * @tc.name: SetStrokeLineJoin_Test001
+ * @tc.desc: Test SetStrokeLineJoin function with and without lineJoinStyle.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeLineJoin_Test001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<int> lineJoinStyle = 2;
+    ShapeModelStatic::SetStrokeLineJoin(frameNode, lineJoinStyle);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeLineJoin().has_value());
+    EXPECT_EQ(paintProp->GetStrokeLineJoin().value(), 2);
+
+    std::optional<int> noLineJoinStyle;
+    ShapeModelStatic::SetStrokeLineJoin(frameNode, noLineJoinStyle);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetStrokeLineJoin().has_value());
+}
+
+/**
+ * @tc.name: SetStrokeMiterLimit_Test001
+ * @tc.desc: Test SetStrokeMiterLimit function with and without miterLimit.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeMiterLimit_Test001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<double> miterLimit = 5.0;
+    ShapeModelStatic::SetStrokeMiterLimit(frameNode, miterLimit);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeMiterLimit().has_value());
+    EXPECT_EQ(paintProp->GetStrokeMiterLimit().value(), 5.0);
+
+    std::optional<double> noMiterLimit;
+    ShapeModelStatic::SetStrokeMiterLimit(frameNode, noMiterLimit);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetStrokeMiterLimit().has_value());
+}
+
+/**
+ * @tc.name: SetFillOpacity_Test001
+ * @tc.desc: Test SetFillOpacity function with and without fillOpacity, including clamp.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetFillOpacity_Test001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<double> fillOpacity = 0.5;
+    ShapeModelStatic::SetFillOpacity(frameNode, fillOpacity);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetFillOpacity().has_value());
+    EXPECT_DOUBLE_EQ(paintProp->GetFillOpacity().value(), 0.5);
+
+    std::optional<double> fillOpacityLow = -0.1;
+    ShapeModelStatic::SetFillOpacity(frameNode, fillOpacityLow);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetFillOpacity().has_value());
+    EXPECT_DOUBLE_EQ(paintProp->GetFillOpacity().value(), 0.0);
+
+    std::optional<double> fillOpacityHigh = 1.5;
+    ShapeModelStatic::SetFillOpacity(frameNode, fillOpacityHigh);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetFillOpacity().has_value());
+    EXPECT_DOUBLE_EQ(paintProp->GetFillOpacity().value(), 1.0);
+
+    std::optional<double> noFillOpacity;
+    ShapeModelStatic::SetFillOpacity(frameNode, noFillOpacity);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetFillOpacity().has_value());
+}
+
+/**
+ * @tc.name: SetStrokeOpacity_Test001
+ * @tc.desc: Test SetStrokeOpacity function with and without strokeOpacity.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeOpacity_Test001, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<double> strokeOpacity = 0.8;
+    ShapeModelStatic::SetStrokeOpacity(frameNode, strokeOpacity);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeOpacity().has_value());
+    EXPECT_DOUBLE_EQ(paintProp->GetStrokeOpacity().value(), 0.8);
+
+    std::optional<double> noStrokeOpacity;
+    ShapeModelStatic::SetStrokeOpacity(frameNode, noStrokeOpacity);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetStrokeOpacity().has_value());
+}
+
+/**
+ * @tc.name: SetStrokeWidth_Test
+ * @tc.desc: Test SetStrokeWidth function with and without strokeWidth.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeWidth_Test, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<Dimension> strokeWidth = Dimension(2.0);
+    ShapeModelStatic::SetStrokeWidth(frameNode, strokeWidth);
+    
+    auto paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_TRUE(paintProp->GetStrokeWidth().has_value());
+    EXPECT_EQ(paintProp->GetStrokeWidth().value(), Dimension(2.0));
+
+    std::optional<Dimension> noStrokeWidth;
+    ShapeModelStatic::SetStrokeWidth(frameNode, noStrokeWidth);
+    
+    paintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(paintProp, nullptr);
+    EXPECT_FALSE(paintProp->GetStrokeWidth().has_value());
+}
+
+/**
+ * @tc.name: SetStrokeDashOffset_Test002
+ * @tc.desc: Test SetStrokeDashOffset function.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset_Test002, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    Dimension dashOffset = Dimension(15.0);
+    ShapeAbstractModelStatic::SetStrokeDashOffset(frameNode, dashOffset);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetStrokeDashOffset().has_value());
+    EXPECT_EQ(shapePaintProp->GetStrokeDashOffset().value(), Dimension(15.0));
+}
+
+/**
+ * @tc.name: SetStrokeLineCap_Test002
+ * @tc.desc: Test SetStrokeLineCap function.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeLineCap_Test002, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    int lineCapStyle = 2;
+    ShapeAbstractModelStatic::SetStrokeLineCap(frameNode, lineCapStyle);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetStrokeLineCap().has_value());
+    EXPECT_EQ(shapePaintProp->GetStrokeLineCap().value(), 2);
+}
+
+/**
+ * @tc.name: SetStrokeLineJoin_Test002
+ * @tc.desc: Test SetStrokeLineJoin function.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeLineJoin_Test002, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    int lineJoinStyle = 3;
+    ShapeAbstractModelStatic::SetStrokeLineJoin(frameNode, lineJoinStyle);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetStrokeLineJoin().has_value());
+    EXPECT_EQ(shapePaintProp->GetStrokeLineJoin().value(), 3);
+}
+
+/**
+ * @tc.name: SetStrokeMiterLimit_Test002
+ * @tc.desc: Test SetStrokeMiterLimit function.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeMiterLimit_Test002, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    double miterLimit = 4.5;
+    ShapeAbstractModelStatic::SetStrokeMiterLimit(frameNode, miterLimit);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetStrokeMiterLimit().has_value());
+    EXPECT_DOUBLE_EQ(shapePaintProp->GetStrokeMiterLimit().value(), 4.5);
+}
+
+/**
+ * @tc.name: SetStrokeOpacity_Test002
+ * @tc.desc: Test SetStrokeOpacity function.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeOpacity_Test002, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    double opacity = 0.75;
+    ShapeAbstractModelStatic::SetStrokeOpacity(frameNode, opacity);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetStrokeOpacity().has_value());
+    EXPECT_DOUBLE_EQ(shapePaintProp->GetStrokeOpacity().value(), 0.75);
+}
+
+/**
+ * @tc.name: SetFillOpacity_Test002
+ * @tc.desc: Test SetFillOpacity function.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetFillOpacity_Test002, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    double opacity = 0.6;
+    ShapeAbstractModelStatic::SetFillOpacity(frameNode, opacity);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetFillOpacity().has_value());
+    EXPECT_DOUBLE_EQ(shapePaintProp->GetFillOpacity().value(), 0.6);
+}
+
+/**
+ * @tc.name: SetAntiAlias_Test
+ * @tc.desc: Test SetAntiAlias function with true and false.
+ */
+HWTEST_F(ShapeContainerPatternTestNg, SetAntiAlias_Test, TestSize.Level1)
+{
+    auto frameNodeRef = ShapeModelStatic::CreateFrameNode(NODE_ID);
+    auto frameNode = AceType::RawPtr(frameNodeRef);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto paintProperty = AceType::MakeRefPtr<ShapePaintProperty>();
+
+    bool antiAlias = true;
+    ShapeAbstractModelStatic::SetAntiAlias(frameNode, antiAlias);
+    
+    auto shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetAntiAlias().has_value());
+    EXPECT_EQ(shapePaintProp->GetAntiAlias().value(), true);
+
+    antiAlias = false;
+    ShapeAbstractModelStatic::SetAntiAlias(frameNode, antiAlias);
+    
+    shapePaintProp = GetShapePaintProperty(frameNode);
+    ASSERT_NE(shapePaintProp, nullptr);
+    EXPECT_TRUE(shapePaintProp->GetAntiAlias().has_value());
+    EXPECT_EQ(shapePaintProp->GetAntiAlias().value(), false);
 }
 } // namespace OHOS::Ace::NG

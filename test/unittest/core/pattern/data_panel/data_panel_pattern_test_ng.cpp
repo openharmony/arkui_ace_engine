@@ -67,6 +67,7 @@ public:
 
 class DataPanelTheme : public Theme {
     DECLARE_ACE_TYPE(DataPanelTheme, Theme);
+
 public:
     DataPanelTheme()
     {
@@ -105,23 +106,23 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest001, TestSize.Level1)
     dataPanel.Create(VALUES, MAX, TYPE_LINE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    
+
     /**
      * @tc.steps: step2. get pattern and test UpdateTrackBackground
      */
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     Color testColor = Color::RED;
     pattern->UpdateTrackBackground(testColor, true); // isFirstLoad = true
-    
+
     /**
      * @tc.expected: step3. property updated and node marked dirty when rerenderable
      */
     auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetTrackBackground(), testColor);
-    
+
     // Test with isFirstLoad = false
     Color testColor2 = Color::BLUE;
     pattern->UpdateTrackBackground(testColor2, false);
@@ -264,7 +265,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest060, TestSize.Level1)
     dataPanel.Create(VALUES, MAX, TYPE_LINE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    
+
     /**
      * @tc.steps: step2. get pattern and test UpdateTrackBackground
      */
@@ -356,8 +357,7 @@ HWTEST_F(DataPanelTestNg, DataPanelStaticTest001, TestSize.Level0)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     DataPanelModelStatic dataPanel;
-    dataPanel.CreateFrameNode(nodeId);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = dataPanel.CreateFrameNode(nodeId);
     EXPECT_NE(frameNode, nullptr);
 
     /**
@@ -373,6 +373,12 @@ HWTEST_F(DataPanelTestNg, DataPanelStaticTest001, TestSize.Level0)
      * @tc.steps: step3. get value from dataPanelPaintProperty.
      * @tc.expected: step3. the value is the same with setting.
      */
+    dataPanel.SetMax(frameNode.GetRawPtr(), MAX);
+    dataPanel.SetValues(frameNode.GetRawPtr(), VALUES);
+    dataPanel.SetType(frameNode.GetRawPtr(), TYPE_CYCLE);
+    EXPECT_TRUE(dataPanelPaintProperty->HasMax());
+    EXPECT_TRUE(dataPanelPaintProperty->HasValues());
+    EXPECT_TRUE(dataPanelPaintProperty->HasDataPanelType());
     EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
     EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
     EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);

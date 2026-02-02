@@ -60,7 +60,7 @@ public:
     {
         return hostTextBase_;
     }
-
+    void CheckHasPasteData(const std::function<void(bool, bool)>& callback);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ProcessOverlayOnAreaChanged(const OverlayRequest& request = OverlayRequest());
     virtual bool PreProcessOverlay(const OverlayRequest& request)
@@ -88,7 +88,7 @@ public:
     void CloseOverlay(bool animation, CloseReason reason);
     void ToggleMenu();
     void ShowMenu();
-    void HideMenu(bool noAnimation = false);
+    void HideMenu(bool noAnimation = false, bool showSubMenu = false);
     void DisableMenu();
     void EnableMenu();
     virtual void UpdateAllHandlesOffset();
@@ -327,6 +327,10 @@ public:
     bool GetDragViewHandleRects(RectF& firstRect, RectF& secondRect);
     void UpdateIsSingleHandle(bool isSingleHandle);
     void AddTaskAfterShowOverlay(std::function<void()>&& task);
+    bool IsAutoFillPaste ()
+    {
+        return isAutoFillPaste;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -414,6 +418,7 @@ protected:
     EdgeF ConvertWindowToScreenDomain(EdgeF edge);
     std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
     void FlushAfterOverlayShowTask();
+    bool isAutoFillPaste = false;
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);

@@ -18,8 +18,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/popup/popup_theme.h"
@@ -222,8 +224,16 @@ void ParseGradientColor(const JSRef<JSArray>& colorArray, PopupGradientColor& gr
 {
     Color gradientColorItem;
     auto colorVal = colorArray->GetValueAt(0);
-    if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
-        gradientColor.gradientColor = gradientColorItem;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = nullptr;
+        if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem, resObj)) {
+            gradientColor.gradientColor = gradientColorItem;
+            gradientColor.gradientColorObj = resObj;
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
+            gradientColor.gradientColor = gradientColorItem;
+        }
     }
     if (colorArray->GetValueAt(1)->IsNumber()) {
         gradientColor.gradientNumber = colorArray->GetValueAt(1)->ToNumber<double>();
@@ -598,7 +608,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     Shadow shadow;
     auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
-        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow, false, true);
         if (!ret) {
             if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
@@ -1292,6 +1302,29 @@ void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
+void JSViewPopups::RegisterMenuMaskColorRes(const RefPtr<ResourceObject>& maskColorResObj, NG::MenuParam& menuParam)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    std::string key = "maskColor";
+    if (!maskColorResObj) {
+        menuParam.RemoveResource(key);
+        return;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& maskColorResObj, NG::MenuParam& menuParam) {
+        Color maskColor;
+        if (!ResourceParseUtils::ParseResColor(maskColorResObj, maskColor)) {
+            return;
+        }
+        if (!menuParam.maskType.has_value()) {
+            menuParam.maskType.emplace();
+        }
+        menuParam.maskType->maskColor = maskColor;
+    };
+    menuParam.AddResource(key, maskColorResObj, std::move(updateFunc));
+}
+
 void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto maskValue = menuOptions->GetProperty("mask");
@@ -1305,9 +1338,12 @@ void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::Men
         auto maskObj = JSRef<JSObject>::Cast(maskValue);
         auto colorValue = maskObj->GetProperty("color");
         Color maskColor;
-        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+        RefPtr<ResourceObject> maskColorResObj;
+        if (JSViewAbstract::ParseJsColor(colorValue, maskColor, maskColorResObj)) {
             menuParam.maskType->maskColor = maskColor;
         }
+        JSViewPopups::RegisterMenuMaskColorRes(maskColorResObj, menuParam);
+
         auto backgroundBlurStyleValue = maskObj->GetProperty("backgroundBlurStyle");
         if (backgroundBlurStyleValue->IsNumber()) {
             auto blurStyle = backgroundBlurStyleValue->ToNumber<int32_t>();
@@ -1316,6 +1352,15 @@ void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::Men
                 menuParam.maskType->maskBackGroundBlurStyle = static_cast<BlurStyle>(blurStyle);
             }
         }
+    }
+}
+
+void JSViewPopups::ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto systemMaterialValue = menuOptions->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        menuParam.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
     }
 }
 
@@ -1575,6 +1620,7 @@ void JSViewPopups::ParseMenuParam(
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
+    JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
 }
@@ -1967,38 +2013,20 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
 
-    std::optional<ResponseType> responseType = std::nullopt;
-    size_t optionsIndex = builderIndex + 1;
-
+    ResponseType responseType = ResponseType::LONG_PRESS;
     if (!info[NUM_ZERO]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[NUM_FIRST]->IsNumber()) {
         auto response = info[NUM_FIRST]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
-        optionsIndex = NUM_SECOND;
     }
 
     menuParam.previewMode = MenuPreviewMode::NONE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     std::function<void()> previewBuildFunc = nullptr;
-    if (info.Length() > optionsIndex && info[optionsIndex]->IsObject()) {
-        ParseBindContentOptionParam(info, info[optionsIndex], menuParam, previewBuildFunc);
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[NUM_SECOND]->IsObject()) {
+        ParseBindContentOptionParam(info, info[NUM_SECOND], menuParam, previewBuildFunc);
     }
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    if (!responseType.has_value() && menuParam.contextMenuRegisterType != NG::ContextMenuRegisterType::CUSTOM_TYPE) {
-        std::function<void(MenuBindingType)> buildFuncWithType =
-            [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]
-                (MenuBindingType type) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("BuildContextMenu");
-                PipelineContext::SetCallBackNode(node);
-                JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(type)));
-                func->ExecuteJS(1, &param);
-            };
-
-        ViewAbstractModel::GetInstance()->BindContextMenu(buildFuncWithType, menuParam, previewBuildFunc);
-        return;
-    }
-
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
                                           node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2007,9 +2035,49 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         func->Execute();
     };
 
-    ViewAbstractModel::GetInstance()->BindContextMenu(
-        responseType.value_or(ResponseType::LONG_PRESS), buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
     ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+}
+
+void JSViewAbstract::JsBindContextMenuWithResponse(const JSCallbackInfo& info)
+{
+    NG::MenuParam menuParam;
+    // Check the parameters
+    if (info.Length() <= PARAMETER_LENGTH_ZERO) {
+        return;
+    }
+    size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
+    if (!info[builderIndex]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[builderIndex]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+
+    size_t optionsIndex = builderIndex + 1;
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    std::function<void()> previewBuildFunc = nullptr;
+    if (info.Length() > optionsIndex && info[optionsIndex]->IsObject()) {
+        ParseBindContentOptionParam(info, info[optionsIndex], menuParam, previewBuildFunc);
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    std::function<void(MenuBindingType)> buildFuncWithType =
+        [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode](MenuBindingType type) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BuildContextMenuWithResponse");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(type)));
+            func->ExecuteJS(1, &param);
+        };
+
+    ViewAbstractModel::GetInstance()->BindContextMenu(buildFuncWithType, menuParam, previewBuildFunc);
 }
 #endif
 
@@ -2227,6 +2295,12 @@ void JSViewAbstract::ParseSheetStyle(
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
+    auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
+    if (systemMaterialObj->IsObject()) {
+        const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
+        sheetStyle.systemMaterial = material->Copy();
+    }
+    
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
         auto prop = obj->GetProperty("instanceId_");
@@ -2505,7 +2579,7 @@ void JSViewAbstract::ParseSheetStyle(
     } else {
         JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle);
     }
-
+    JSViewPopups::SetSheetRenderStrategy(paramObj, sheetStyle);
     ParseDetentSelection(paramObj, sheetStyle);
 
     NG::SheetHeight sheetStruct;
@@ -2528,6 +2602,22 @@ void JSViewAbstract::ParseSheetStyle(
     // parse ModalTransition
     auto modalTransitionValue = paramObj->GetProperty("modalTransition");
     ParseModalTransition(modalTransitionValue, sheetStyle.modalTransition, NG::ModalTransition::DEFAULT);
+}
+
+void JSViewPopups::SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    auto radiusRenderStrategy = paramObj->GetProperty("radiusRenderStrategy");
+    if (!radiusRenderStrategy->IsNumber()) {
+        sheetStyle.radiusRenderStrategy = RenderStrategy::FAST;
+        return;
+    }
+    int32_t strategyValue = radiusRenderStrategy->ToNumber<int32_t>();
+    if (strategyValue < static_cast<int32_t>(RenderStrategy::FAST) ||
+        strategyValue > static_cast<int32_t>(RenderStrategy::OFFSCREEN)) {
+        sheetStyle.radiusRenderStrategy = RenderStrategy::FAST;
+        return;
+    }
+    sheetStyle.radiusRenderStrategy = static_cast<RenderStrategy>(radiusRenderStrategy->ToNumber<int32_t>());
 }
 
 void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)

@@ -1023,4 +1023,199 @@ HWTEST_F(FocusHubTestNg, LostFocusToTabstopTest001, TestSize.Level1)
     columnFocusHub3->RequestNextFocusOfKeyEsc();
     EXPECT_EQ(columnFocusHub->IsCurrentFocus(), true);
 }
+
+/**
+ * @tc.name: OnFocusScope001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, OnFocusScope001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a FrameNode and attach it to EventHub.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+
+    /**
+     * @tc.steps2: Create a parent FocusHub and a child FocusHub sharing the same EventHub.
+     */
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(focusHub, nullptr);
+
+    auto frameNode1 = focusHub->GetFrameNode();
+    EXPECT_NE(frameNode1, nullptr);
+    auto context = frameNode1->GetContextRefPtr();
+    EXPECT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    EXPECT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+    NonPointerEvent nonPointerEvent;
+    nonPointerEvent.sourceType = SourceType::CROWN;
+    FocusEvent focusEvent(nonPointerEvent);
+    focusManager->SetCurrentFocusEvent(focusEvent);
+    focusHub->isFocusUnit_ = true;
+    auto parentNode = FrameNodeOnTree::CreateFrameNode(
+        V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+    auto parentFocusHub = parentNode->GetOrCreateFocusHub();
+    EXPECT_NE(parentFocusHub, nullptr);
+    parentFocusHub->focusType_ = FocusType::SCOPE;
+    frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
+    focusHub->onPaintFocusStateCallback_ = []() { return true; };
+    focusHub->OnFocusScope(false);
+    focusHub->TriggerFocusScroll();
+    focusHub->focusType_ = FocusType::DISABLE;
+    focusHub->isFocusUnit_ = false;
+    focusHub->TriggerFocusScroll();
+    EXPECT_FALSE(focusHub->isFocusUnit_);
+}
+
+/**
+ * @tc.name: OnFocusScope002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, OnFocusScope002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto nodeParent = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1,
+        AceType::MakeRefPtr<FlexLayoutPattern>());
+    frameNode->GetOrCreateFocusHub();
+    frameNode2->GetOrCreateFocusHub();
+    nodeParent->GetOrCreateFocusHub();
+    frameNode->SetParent(nodeParent);
+    frameNode2->SetParent(nodeParent);
+
+    /**
+     * @tc.steps: step2. Create FocusHub.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    /**
+     * @tc.steps: step3. Get parentFocusHub.
+     */
+    focusHub->currentFocus_ = true;
+    auto parent = focusHub->GetParentFocusHub();
+
+    /**
+     * @tc.steps: step4. Test RemoveChild and parentFocusHub RemoveSelf.
+     * @tc.expected: focusHub and parentFocusHub both lostFocus.
+     */
+    parent->currentFocus_ = true;
+    parent->RemoveChild(focusHub);
+    EXPECT_EQ(parent->blurReason_, BlurReason::FRAME_DESTROY);
+    EXPECT_EQ(focusHub->blurReason_, BlurReason::FRAME_DESTROY);
+    parent->focusType_ = FocusType::SCOPE;
+    auto parentNode = FrameNodeOnTree::CreateFrameNode(
+        V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+    frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
+    focusHub->onPaintFocusStateCallback_ = []() { return true; };
+    focusHub->OnFocusScope(true);
+    focusHub->TriggerFocusScroll();
+    focusHub->focusType_ = FocusType::DISABLE;
+    focusHub->isFocusUnit_ = false;
+    focusHub->TriggerFocusScroll();
+    EXPECT_FALSE(focusHub->isFocusUnit_);
+}
+
+/**
+ * @tc.name: HandleEvent001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HandleEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<EventHub> eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    eventHub1->AttachHost(frameNode1);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub1)));
+    KeyEvent keyEvent;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    focusHub->currentFocus_ = false;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
+    focusManager->SetKeyProcessingMode(KeyProcessingMode::ANCESTOR_EVENT);
+    focusHub->SetCurrentFocus(true);
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
+    focusHub->currentFocus_ = true;
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
+ * @tc.name: HandleEvent002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, HandleEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<EventHub> eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    eventHub1->AttachHost(frameNode1);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub1)));
+    KeyEvent keyEvent;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    focusHub->currentFocus_ = false;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
+    focusManager->SetKeyProcessingMode(KeyProcessingMode::ANCESTOR_EVENT);
+    focusHub->SetCurrentFocus(false);
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
+    focusHub->currentFocus_ = true;
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+}
 } // namespace OHOS::Ace::NG

@@ -51,6 +51,8 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<DialogDisplayMode> DIALOG_DISPLAY_MODE = {
+    DialogDisplayMode::SCREEN_BASED, DialogDisplayMode::WINDOW_BASED };
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -359,8 +361,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         if (ParseResourceParam(env, offsetXApi, recv)) {
             CalcDimension offsetX;
             if (ParseResource(recv, offsetX)) {
-                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-                shadowProps.SetOffsetX(xValue);
+                shadowProps.SetOffsetX(offsetX.Value());
             }
         } else {
             CalcDimension offsetX;
@@ -560,9 +561,17 @@ napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
     napi_create_promise(env, &deferred, &result);
     std::function<void(int32_t)> toastCallback = nullptr;
     toastCallback = [env, deferred](int32_t toastId) mutable {
+        napi_handle_scope scope = nullptr;
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG,
+                     "toastCallback failed to open the scope of the handle.");
+            return;
+        }
         napi_value napiToastId = nullptr;
         napi_create_int32(env, toastId, &napiToastId);
         napi_resolve_deferred(env, deferred, napiToastId);
+        napi_close_handle_scope(env, scope);
     };
     if (ShowToast(env, toastInfo, toastCallback)) {
         return result;
@@ -701,6 +710,7 @@ struct PromptAsyncContext {
     napi_value dialogImmersiveModeApi = nullptr;
     napi_value focusableApi = nullptr;
     HasInvertColor hasInvertColor;
+    napi_value displayModeApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1270,18 +1280,15 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         napi_get_named_property(env, asyncContext->shadowApi, "offsetX", &offsetXApi);
         napi_get_named_property(env, asyncContext->shadowApi, "offsetY", &offsetYApi);
         ResourceInfo recv;
-        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (ParseResourceParam(env, offsetXApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
             CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
             auto offsetX = resourceWrapper->GetDimension(recv.resId);
-            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-            shadow.SetOffsetX(xValue);
+            shadow.SetOffsetX(offsetX.Value());
         } else {
             CalcDimension offsetX;
             if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
-                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-                shadow.SetOffsetX(xValue);
+                shadow.SetOffsetX(offsetX.Value());
             }
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
@@ -1375,6 +1382,20 @@ int32_t GetDialogKeyboardAvoidMode(napi_env env, napi_value keyboardAvoidModeApi
     return 0;
 }
 
+DialogDisplayMode GetDialogDisplayMode(napi_env env, napi_value displayModeApi)
+{
+    int32_t mode = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, displayModeApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, displayModeApi, &mode);
+    }
+    if (mode >= 0 && mode < static_cast<int32_t>(DIALOG_DISPLAY_MODE.size())) {
+        return DIALOG_DISPLAY_MODE[mode];
+    }
+    return DIALOG_DISPLAY_MODE[0];
+}
+
 void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
     LevelMode& dialogLevelMode, int32_t& dialogLevelUniqueId, ImmersiveMode& dialogImmersiveMode)
 {
@@ -1439,6 +1460,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
         napi_get_named_property(env, argv[index], "shadow", &asyncContext->shadowApi);
         napi_get_named_property(env, argv[index], "width", &asyncContext->widthApi);
         napi_get_named_property(env, argv[index], "height", &asyncContext->heightApi);
+        napi_get_named_property(env, argv[index], "displayModeInSubWindow", &asyncContext->displayModeApi);
 
         napi_typeof(env, asyncContext->builder, &valueType);
         if (valueType == napi_function) {
@@ -1782,12 +1804,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     auto onLanguageChange = [shadowProps, alignment, offset, maskRect,
         updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) {
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        if (shadowProps.has_value()) {
-            std::optional<Shadow> shadow = shadowProps.value();
-            double offsetX = isRtl ? shadow->GetOffset().GetX() * (-1) : shadow->GetOffset().GetX();
-            shadow->SetOffsetX(offsetX);
-            dialogProps.shadow = shadow.value();
-        }
         if (alignment.has_value()) {
             std::optional<DialogAlignment> pmAlign = alignment.value();
             updateAlignment(pmAlign.value());
@@ -2805,6 +2821,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
         promptDialogAttr.customBuilder = nullptr;
     } else {
         ParseCustomDialogIdCallback(asyncContext, openCallback);
+        promptDialogAttr.dialogDisplayMode = GetDialogDisplayMode(env, asyncContext->displayModeApi);
     }
 
     OpenCustomDialog(env, asyncContext, promptDialogAttr, openCallback);

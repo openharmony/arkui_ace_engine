@@ -27,6 +27,7 @@ RefPtr<RepeatNode> RepeatNode::GetOrCreateRepeatNode(int32_t nodeId)
     if (node) {
         return node;
     }
+    ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<RepeatNode>(nodeId);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;

@@ -205,7 +205,8 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
     static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
         std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
-    static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
+    static void BindDragWithContextMenuParamsStatic(const RefPtr<FrameNode>& targetNode,
+        const NG::MenuParam& menuParam);
 
     static void BindContentCover(FrameNode* targetNode, bool isShow,
         std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
@@ -332,6 +333,7 @@ public:
         const std::optional<ForegroundColorStrategy>& strategy);
     static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
     static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
+    static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender);
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetFocusScopeId(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);

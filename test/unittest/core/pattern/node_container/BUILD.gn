@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("node_container_test_ng") {
+  module_name = "ImperativeFramework-NodeContainer"
   type = "new"
   sources = [ "node_container_test_ng.cpp" ]
 }

@@ -2862,10 +2862,48 @@ HWTEST_F(TitleBarTestNg, ToJsonValue, TestSize.Level1)
     auto ctx = titleBarNode->GetRenderContext();
     ASSERT_NE(ctx, nullptr);
     ctx->UpdateBackgroundColor(Color::RED);
-    
+
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     InspectorFilter filter;
     titleBarNode->ToJsonValue(json, filter);
     ASSERT_NE(json->GetString("backgroundColor"), "0xffff0000");
+}
+
+/**
+ * @tc.name: IsChildEmpty001
+ * @tc.desc: Test IsChildEmpty when all elements are empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, IsChildEmpty001, TestSize.Level1)
+{
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    EXPECT_TRUE(titleBarNode->IsChildEmpty());
+
+    auto titleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    titleBarNode->SetTitle(titleNode);
+    EXPECT_FALSE(titleBarNode->IsChildEmpty());
+}
+
+/**
+ * @tc.name: OnAttachToMainTree
+ * @tc.desc: Test isParentModalOrSheet value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    EXPECT_FALSE(titleBarNode->isParentModalOrSheet_);
+
+    sheetNode->AddChild(titleBarNode);
+    titleBarNode->OnAttachToMainTree(false);
+    EXPECT_TRUE(titleBarNode->isParentModalOrSheet_);
 }
 } // namespace OHOS::Ace::NG

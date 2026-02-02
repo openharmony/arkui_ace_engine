@@ -228,6 +228,14 @@ void SheetPresentationSideLayoutAlgorithm::LayoutTitleBuilder(LayoutWrapper* lay
         offset.SetX(padding.left.value_or(0.0f));
     }
     offset.SetY(padding.top.value_or(0.0f));
+    auto wrapperProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(wrapperProp);
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(wrapperProp);
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.isTitleBuilder.has_value()) {
+        offset += OffsetF(0, SHEET_DRAG_BAR_HEIGHT.ConvertToPx());
+    }
     geometryNode->SetMarginFrameOffset(offset);
     titleBuilderWrapper->Layout();
 }
@@ -250,12 +258,16 @@ void SheetPresentationSideLayoutAlgorithm::LayoutScrollNode(LayoutWrapper* layou
         offset.SetX(padding.left.value_or(0.0f));
     }
     offset.SetY(padding.top.value_or(0.0f));
-
+    auto wrapperProp = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(wrapperProp);
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(wrapperProp);
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto titleBuilder = sheetPattern->GetTitleBuilderNode();
-    if (titleBuilder) {
+    if (titleBuilder && sheetStyle.isTitleBuilder.has_value()) {
         auto titleBuilderNode = titleBuilder->GetGeometryNode();
         CHECK_NULL_VOID(titleBuilderNode);
-        offset += OffsetF(0, titleBuilderNode->GetFrameSize().Height());
+        offset += OffsetF(0, titleBuilderNode->GetFrameSize().Height() + SHEET_DRAG_BAR_HEIGHT.ConvertToPx());
     }
     auto geometryNode = scrollWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(offset);

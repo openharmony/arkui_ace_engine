@@ -19,11 +19,19 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool IsToggleCheckboxPattern(FrameNode* frameNode)
+{
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_RETURN(checkboxModifier, false);
+    auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
+    return checkboxModifier->isToggleCheckboxPattern(node);
+}
+} // namespace
 RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType toggleType)
 {
     switch (toggleType) {
@@ -31,8 +39,10 @@ RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType 
             return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
         }
         case ToggleType::CHECKBOX: {
-            return FrameNode::CreateFrameNode(
-                V2::CHECKBOX_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleCheckBoxPattern>());
+            auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+            CHECK_NULL_RETURN(checkboxModifier, nullptr);
+            return AceType::Claim(
+                reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId)));
         }
         case ToggleType::BUTTON: {
             return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
@@ -87,11 +97,11 @@ void ToggleModelStatic::SetTrackBorderRadius(FrameNode* frameNode, const std::op
 void ToggleModelStatic::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
-        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetChangeEvent(std::move(onChangeEvent));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setCheckboxChangeEvent(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onChangeEvent));
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
@@ -109,9 +119,10 @@ void ToggleModelStatic::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChan
 void ToggleModelStatic::TriggerChange(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
-        checkboxPattern->SetCheckBoxSelect(std::move(value));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setChangeValue(reinterpret_cast<ArkUINodeHandle>(frameNode), value);
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());

@@ -42,6 +42,8 @@ ImageAnimatorPattern::ImageAnimatorPattern()
 
 std::vector<PictureInfo> ImageAnimatorPattern::CreatePictureAnimation(int32_t size)
 {
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     auto pictureAnimation = std::vector<PictureInfo>();
 
     if (durationTotal_ > 0) {
@@ -69,6 +71,7 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(imageFrameNode);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();

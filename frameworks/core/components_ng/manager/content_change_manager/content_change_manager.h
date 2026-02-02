@@ -26,10 +26,19 @@
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+#ifndef IS_RELEASE_VERSION
+class ContentChangeDumpManager;
+#endif
+
 class ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
-    ContentChangeManager() = default;
+    enum ContentIgnoreEventType : uint32_t {
+        NONE = 0,            // no event
+        SCROLL_TO = 1 << 0,  // SCROLL: scrollTo
+    };
+
+    ContentChangeManager();
     virtual ~ContentChangeManager() = default;
     void StartContentChangeReport(const ContentChangeConfig& config);
     void StopContentChangeReport();
@@ -41,15 +50,28 @@ public:
     }
 
     void OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode);
+    void OnScrollChangeStart(const RefPtr<FrameNode>& keyNode);
     void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
-    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode);
-    void OnTextChangeEnd(const RectF& rect);
+    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
+    void OnScrollRemoved(int32_t nodeId);
+    bool IsScrolling() const;
+    void OnTextChangeEnd(const RectF& rect, const RectF& rootRect);
     void OnVsyncStart();
     void OnVsyncEnd(const RectF& rootRect);
     bool IsTextAABBCollecting() const;
 
+    uint32_t ConvertEventStringToEnum(const std::string& type) const;
+    uint32_t GetIgnoreEventMask(const std::string& ignoreEventType) const;
+    bool IsIgnoringEventType(uint32_t type) const;
+
+#ifndef IS_RELEASE_VERSION
+    std::string DumpInfo() const;
+#endif
+
 private:
+    void ProcessSwiperNodes();
+    void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
 
@@ -61,11 +83,15 @@ private:
     static constexpr int32_t DEFAULT_TEXT_MIN_REPORT_TIME = 100;
     float textContentRatio_ = 0.15f; // default text content ratio is 0.15
     uint64_t textContentInterval_ = 100 * NS_PER_MS; // minimum text content change interval is 100 ms.
+    uint32_t ignoreEventMask_ = NONE; // default ignore event mask is no event
     uint64_t lastTextReportTime_ = 0;
     bool textCollecting_ = false;
-    bool scrollReported_ = false;
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes_;
+    std::set<int32_t> scrollingNodes_;
     RectF textAABB_; // Axis-aligned bounding box(AABB) of Text rects.
+#ifndef IS_RELEASE_VERSION
+    std::shared_ptr<ContentChangeDumpManager> dumpMgr_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_CONTENT_CHANGE_MANAGER_H

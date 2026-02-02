@@ -35,24 +35,32 @@ TransparentNodeDetector& TransparentNodeDetector::GetInstance()
 }
 
 bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId,
-    bool isNavigation)
+    bool isUECWindow, bool isSubWindow, bool isDialogWindow, bool isNavigation)
 {
     CHECK_NULL_RETURN(root, false);
     auto pipeline = root->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto container = Container::GetContainer(currentId);
     CHECK_NULL_RETURN(container, false);
-    if (!container->IsHostMainWindow()) {
+    if (isUECWindow || isSubWindow || isDialogWindow) {
         return (pipeline->GetRootWidth() * pipeline->GetRootHeight() >= SystemProperties::GetDeviceWidth() *
             SystemProperties::GetDeviceHeight() * TRANSPARENT_NODE_SIZE_THRESHOLD && root->IsContextTransparent());
     }
 
     if (isNavigation) {
-        RefPtr<NG::FrameNode> topNavDesNode;
-        root->FindTopNavDestination(topNavDesNode);
-        CHECK_NULL_RETURN(topNavDesNode, false);
-        if (!topNavDesNode->IsContextTransparent()) {
-            return false;
+        std::list<RefPtr<NG::FrameNode>> navDesNodes;
+        root->FindTopNavDestination(navDesNodes);
+        CHECK_NULL_RETURN(!navDesNodes.empty(), false);
+        for (auto& navDesNode : navDesNodes) {
+            CHECK_NULL_RETURN(navDesNode, false);
+            auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(navDesNode);
+            CHECK_NULL_RETURN(navDestinationNodeBase, false);
+            auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
+            CHECK_NULL_RETURN(navDestContentFrameNode, false);
+            auto rootNode = navDestContentFrameNode->GetChildren().front();
+            if (rootNode && !rootNode->IsContextTransparent()) {
+                return false;
+            }
         }
     } else {
         auto stageNode = root->GetChildren().front();
@@ -86,19 +94,22 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     auto container = Container::GetContainer(currentId);
     CHECK_NULL_VOID(container);
     bool isUECWindow = container->IsUIExtensionWindow();
-    if (!(isUECWindow || container->IsHostSubWindow() ||
-        container->IsHostDialogWindow() || container->IsHostMainWindow()) || !pipelineContext->GetOnFocus()) {
+    bool isSubWindow = container->IsHostSubWindow();
+    bool isDialogWindow = container->IsHostDialogWindow();
+    bool isMainWindow = container->IsHostMainWindow();
+    if (!(isUECWindow || isSubWindow || isDialogWindow || isMainWindow) || !pipelineContext->GetOnFocus()) {
         return;
     }
     detectCount--;
-    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)),
-        detectCount, currentId, pageUrl, isUECWindow, isNav]() {
+    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)), detectCount, currentId, pageUrl,
+        isUECWindow, isSubWindow, isDialogWindow, isMainWindow, isNav]() {
         ContainerScope scope(currentId);
         auto root = weakNode.Upgrade();
         CHECK_NULL_VOID(root);
         auto pipeline = root->GetContext();
         CHECK_NULL_VOID(pipeline);
-        if (!TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, currentId, isNav)) {
+        if (!TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, currentId,
+            isUECWindow, isSubWindow, isDialogWindow, isNav)) {
             return;
         }
         if (detectCount > 0) {
@@ -109,31 +120,19 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         LOGW("transparent node detected");
         auto window = pipeline->GetWindow();
         CHECK_NULL_VOID(window);
-        TransparentNodeDetector::GetInstance().DumpNodeInfo(root, window);
         auto container = Container::GetContainer(currentId);
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
-        container->IsHostMainWindow() ? EventReport::ReportMainWindowTransparentEvent(pageUrl, bundleName, moduleName)
-            : EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
+        if (isUECWindow || isSubWindow || isDialogWindow) {
+            EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
+        } else {
+            EventReport::ReportMainWindowTransparentEvent(pageUrl, bundleName, moduleName);
+        }
         if (isUECWindow) {
             window->NotifyExtensionTimeout(ERROR_CODE_UIEXTENSION_TRANSPARENT);
         }
     };
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ExtensionTransparentDetector");
-}
-
-void TransparentNodeDetector::DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window)
-{
-    std::string path = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/dump_info.log";
-    std::unique_ptr<std::ofstream> out = std::make_unique<std::ofstream>(path);
-    if (out) {
-        DumpLog::GetInstance().Reset();
-        DumpLog::GetInstance().SetDumpFile(std::move(out));
-        DumpLog::GetInstance().Print(std::string("WindowId: ").append(std::to_string(window->GetWindowId())));
-        DumpLog::GetInstance().Print(std::string("WindowName: ").append(window->GetWindowName()));
-        node->DumpTree(0, true);
-        DumpLog::GetInstance().OutPutDefault();
-    }
 }
 } // namespace OHOS::Ace::NG
 

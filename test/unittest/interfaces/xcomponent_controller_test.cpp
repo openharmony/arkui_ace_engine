@@ -114,4 +114,31 @@ HWTEST_F(XComponentControllerTest, GetSurfaceRotationBySurfaceIdErrorCodeTest, T
     auto code = XComponentController::GetSurfaceRotationBySurfaceId(surfaceId, isSurfaceLock);
     EXPECT_NE(code, 0);
 }
+
+/**
+ * @tc.name: GetXComponentControllerFromAniValueTest
+ * @tc.desc: Test XComponentController::GetXComponentControllerFromAniValue function with invalid input.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentControllerTest, GetXComponentControllerFromAniValueTest, TestSize.Level1)
+{
+    ani_env* env = nullptr;
+    ani_object aniValue = nullptr;
+    auto controller = XComponentController::GetXComponentControllerFromAniValue(env, aniValue);
+    EXPECT_EQ(controller, nullptr);
+}
+
+/**
+ * @tc.name: SetSurfaceCallbackModeFromAniValueTest
+ * @tc.desc: Test XComponentController::SetSurfaceCallbackModeFromAniValue function with invalid input.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentControllerTest, SetSurfaceCallbackModeFromAniValueTest, TestSize.Level1)
+{
+    ani_env* env = nullptr;
+    ani_object aniValue = nullptr;
+    SurfaceCallbackMode mode = SurfaceCallbackMode::DEFAULT;
+    uint32_t code = XComponentController::SetSurfaceCallbackModeFromAniValue(env, aniValue, mode);
+    EXPECT_EQ(code, 1);
+}
 } // namespace OHOS::Ace

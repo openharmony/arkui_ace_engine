@@ -81,6 +81,7 @@ protected:
     std::vector<MenuOptionsParam> GetMenuOptionItems();
     DrawingContext GetDrawingContext(Testing::MockCanvas& canvas);
     void InitTextOverlayTheme(const RefPtr<TextOverlayTheme>& textOverlayTheme);
+    static RefPtr<Theme> GetMockThemeForTest(ThemeType type);
 };
 
 void SelectOverlayTestNg::SetUpTestCase()
@@ -151,6 +152,17 @@ void SelectOverlayTestNg::InitTextOverlayTheme(const RefPtr<TextOverlayTheme>& t
     textOverlayTheme->aiWrite_ = "小艺帮写";
 }
 
+RefPtr<Theme> SelectOverlayTestNg::GetMockThemeForTest(ThemeType type)
+{
+    if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    }
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    textOverlayTheme->showShortcut_ = true;
+    textOverlayTheme->pasteLabel_ = "pasteLabel";
+    return textOverlayTheme;
+}
+
 /**
  * @tc.name: SelectFrameNodeCreator002
  * @tc.desc: Test CreateSelectOverlayNode
@@ -189,6 +201,9 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest001, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     auto menuOptionItems = GetMenuOptionItems();
     selectInfo.menuOptionItems = menuOptionItems;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -197,15 +212,12 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest001, TestSize.Level1)
      * @tc.steps: step2. Create default menu and extension menu .
      * @tc.expected: The default menu and extended menu are created successfully.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1051,6 +1063,9 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility001, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     auto menuOptionItems = GetMenuOptionItems();
     selectInfo.menuOptionItems = menuOptionItems;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -1058,15 +1073,12 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility001, TestSize.Level1)
     /**
      * @tc.steps: step2. Create default menu and extension menu .
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1098,6 +1110,9 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity001, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     auto menuOptionItems = GetMenuOptionItems();
     selectInfo.menuOptionItems = menuOptionItems;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -1105,15 +1120,12 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity001, TestSize.Level1)
     /**
      * @tc.steps: step2. Create default menu and extension menu .
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1282,10 +1294,10 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw001, TestSize.Level1)
     EXPECT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -4873,7 +4885,7 @@ HWTEST_F(SelectOverlayTestNg, GetCreateMenuOptionsParams001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestNg::GetMockThemeForTest);
     auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
@@ -5215,14 +5227,14 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestNg::GetMockThemeForTest);
     auto menuWrapperNoShortCut = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapperNoShortCut, nullptr);
     textOverlayTheme->showShortcut_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestNg::GetMockThemeForTest);
     auto menuWrapperShortCut = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapperShortCut, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
@@ -5276,7 +5288,7 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode002, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestNg::GetMockThemeForTest);
     auto menuWrapperNoShortCut = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapperNoShortCut, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
@@ -6496,6 +6508,9 @@ HWTEST_F(SelectOverlayTestNg, AdjustToInfo, TestSize.Level1)
  */
 HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create selectoverlay node.
+     */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
@@ -6504,6 +6519,10 @@ HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. modify overlay mode and test InitSurfaceChangedCallback.
+     */
     pattern->overlayMode_ = SelectOverlayMode::HANDLE_ONLY;
     pattern->surfaceChangeCallbackId_.reset();
     pattern->InitSurfaceChangedCallback();
@@ -6519,5 +6538,66 @@ HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
     pattern->InitSurfaceChangedCallback();
     pattern->HandleSurfaceChanged();
     EXPECT_TRUE(pattern->surfaceChangeCallbackId_.has_value());
+}
+
+
+/**
+ * @tc.name: PasteButtonTest
+ * @tc.desc: Test add paste item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, PasteButtonTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectOverlayNode and prepare menu items.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showCopy = false;
+    selectInfo.menuInfo.showPaste = false;
+    selectInfo.menuInfo.showCopyAll = false;
+    selectInfo.menuInfo.showCameraInput = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
+
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    MenuOptionsParam menuItem1;
+    menuItem1.content = "item1";
+    menuItem1.id = "OH_DEFAULT_PASTE";
+    menuOptionItems.emplace_back(menuItem1);
+
+    auto info = pattern->GetSelectOverlayInfo();
+    float maxWidth = 1040.0f;
+
+    /**
+     * @tc.steps: step2. Call AddCreateMenuItems with the prepared data.
+     * @tc.expected: The function returns the correct index.
+     */
+    int32_t index = selectOverlayNode->AddCreateMenuItems(menuOptionItems, info, maxWidth);
+    EXPECT_LT(index, static_cast<int32_t>(menuOptionItems.size()));
+
+    /**
+     * @tc.expected: The menu items are correctly added to selectMenuInner_.
+     */
+    auto selectMenuInner = selectOverlayNode->selectMenuInner_;
+    ASSERT_NE(selectMenuInner, nullptr);
+    EXPECT_EQ(selectMenuInner->GetChildren().size(), 1);
 }
 } // namespace OHOS::Ace::NG

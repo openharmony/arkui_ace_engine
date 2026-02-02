@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-class RenderItemProxy : public RenderProxy {
+class ACE_FORCE_EXPORT RenderItemProxy : public RenderProxy {
     DECLARE_ACE_TYPE(RenderItemProxy, RenderProxy);
 
 public:

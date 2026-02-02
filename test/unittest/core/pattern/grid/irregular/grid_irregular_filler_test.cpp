@@ -711,4 +711,136 @@ HWTEST_F(GridIrregularFillerTest, FillToTarget001, TestSize.Level1)
     EXPECT_NE(iter, info.gridMatrix_.end());
     EXPECT_EQ(iter->first, 0);
 }
+
+/**
+ * @tc.name: GridIrregularFiller::MeasureCurrentRow001
+ * @tc.desc: Test GridIrregularFiller::MeasureCurrentRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, MeasureCurrentRow001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    GridLayoutOptions option;
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize { return { .columns = 1, .rows = 1 }; };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    model.SetLayoutOptions(option);
+    CreateFixedItems(10);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 10;
+    info.startIndex_ = 2;
+    info.startMainLineIndex_ = 1;
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    GridIrregularFiller::FillParameters params { .crossLens = { 120.0f, 120.0f }, .crossGap = 0.0f, .mainGap = 0.0f };
+
+    float totalHeight = filler.MeasureCurrentRow(params, 2);
+
+    // Verify the result
+    EXPECT_GT(totalHeight, 0.0f);
+    EXPECT_EQ(info.jumpIndex_, EMPTY_JUMP_INDEX);
+
+    // Check if current row is filled
+    auto rowIt = info.gridMatrix_.find(1);
+    EXPECT_NE(rowIt, info.gridMatrix_.end());
+
+    // Check if startIndex node is measured
+    EXPECT_NE(info.lineHeightMap_.find(1), info.lineHeightMap_.end());
+}
+
+/**
+ * @tc.name: GridIrregularFiller::MeasureCurrentRow002
+ * @tc.desc: Test GridIrregularFiller::MeasureCurrentRow with multi-row item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, MeasureCurrentRow002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    GridLayoutOptions option;
+    option.irregularIndexes = { 2 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 2) {
+            return { .columns = 1, .rows = 2 };
+        }
+        return { .columns = 1, .rows = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    model.SetLayoutOptions(option);
+    CreateFixedItems(10);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 10;
+    info.startIndex_ = 2;
+    info.startMainLineIndex_ = 1;
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    GridIrregularFiller::FillParameters params { .crossLens = { 120.0f, 120.0f }, .crossGap = 0.0f, .mainGap = 5.0f };
+
+    float totalHeight = filler.MeasureCurrentRow(params, 2);
+
+    // Verify the result
+    EXPECT_GT(totalHeight, 0.0f);
+
+    // Check if both rows are filled for the multi-row item
+    EXPECT_NE(info.lineHeightMap_.find(1), info.lineHeightMap_.end());
+    EXPECT_NE(info.lineHeightMap_.find(2), info.lineHeightMap_.end());
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixFromStartIndex001
+ * @tc.desc: Test GridIrregularFiller::FillMatrixFromStartIndex with targetIdx out of bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndex001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo5());
+    CreateFixedItems(11);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 11;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.FillMatrixFromStartIndex(0, 0, 20);
+
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
+    EXPECT_EQ(filler.posY_, 11);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixFromStartIndex002
+ * @tc.desc: Test GridIrregularFiller::FillMatrixFromStartIndex with partially filled matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndex002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo8());
+    CreateFixedItems(7);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 7;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+    };
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.FillMatrixFromStartIndex(0, 1, 6);
+
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
+    EXPECT_EQ(filler.posY_, 4);
+}
 } // namespace OHOS::Ace::NG

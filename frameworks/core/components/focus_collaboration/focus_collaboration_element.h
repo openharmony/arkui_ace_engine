@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-class FocusCollaborationElement : public ComponentGroupElement {
+class ACE_FORCE_EXPORT FocusCollaborationElement : public ComponentGroupElement {
     DECLARE_ACE_TYPE(FocusCollaborationElement, ComponentGroupElement);
 
 public:

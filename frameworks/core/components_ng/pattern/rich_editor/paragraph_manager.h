@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 #include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
 namespace OHOS::Ace::NG {
-class ParagraphManager : public virtual AceType {
+class ACE_FORCE_EXPORT ParagraphManager : public virtual AceType {
     DECLARE_ACE_TYPE(ParagraphManager, AceType);
 
 public:

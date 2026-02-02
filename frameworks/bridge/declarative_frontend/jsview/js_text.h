@@ -111,6 +111,7 @@ public:
 
 private:
     static RefPtr<TextComponentV2> GetComponent();
+    static void SetMarqueeSpacing(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
 };
 
 class JSTextController final : public Referenced {

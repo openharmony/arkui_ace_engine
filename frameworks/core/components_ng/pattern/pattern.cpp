@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/event/focus_hub.h"
  
 namespace OHOS::Ace::NG {
 int32_t Pattern::OnRecvCommand(const std::string& command)
@@ -39,6 +41,12 @@ int32_t Pattern::OnRecvCommand(const std::string& command)
         GestureEvent info;
         clickEventFunc(info);
         return RET_SUCCESS;
+    } else if (event.compare("ShowCornerMark") == 0) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, RET_FAILED);
+        auto cornerMark = AceType::MakeRefPtr<CornerMark>();
+        CHECK_NULL_RETURN(cornerMark, RET_FAILED);
+        return cornerMark->ResponseShowCornerMarkEvent(host, command);
     } else {
         return OnInjectionEvent(command);
     }
@@ -92,5 +100,15 @@ void Pattern::RemoveResObj(const std::string& key)
 void Pattern::UnRegisterResource(const std::string& key)
 {
     RemoveResObj(key);
+}
+
+ScopeFocusAlgorithm Pattern::GetScopeFocusAlgorithm()
+{
+    return ScopeFocusAlgorithm();
+}
+
+FocusPattern Pattern::GetFocusPattern() const
+{
+    return { FocusType::DISABLE, false, FocusStyleType::NONE };
 }
 } // namespace OHOS::Ace::NG

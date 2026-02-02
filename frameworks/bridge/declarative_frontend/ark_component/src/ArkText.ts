@@ -1117,6 +1117,24 @@ class TextSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDr
   }
 }
 
+class TextDirectionModifier extends ModifierWithKey<TextDirection> {
+  constructor(value: TextDirection) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textDirection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().text.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1396,6 +1414,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextSelectedDragPreviewStyleModifier.identity,
         TextSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  textDirection(value: TextDirection): this {
+    modifierWithKey(this._modifiersWithKeys, TextDirectionModifier.identity, TextDirectionModifier, value);
     return this;
   }
 }

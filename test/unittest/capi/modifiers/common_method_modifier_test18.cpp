@@ -208,7 +208,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 {
     // valid value
     Ark_ShadowOptions arkShadowOptions = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(1.0),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0),
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -241,7 +241,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 
     // negative value
     arkShadowOptions = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(-1.0),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0),
     };
     arkOptions = { .builder = *arkBuilder,
         .shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions),
@@ -272,7 +272,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE),
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

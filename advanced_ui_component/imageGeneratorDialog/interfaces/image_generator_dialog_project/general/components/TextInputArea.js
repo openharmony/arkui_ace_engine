@@ -26,7 +26,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-import { ImageGenerateState } from "../types/Declaration";
+import { CanvasLayoutDirection, ImageGenerateState } from "../types/Declaration";
 import { AIGenerateOptions } from '../utils/AIGenerateOptions';
 const textBaseMaxLength = 280;
 export class TextInputArea extends ViewV2 {
@@ -58,6 +58,7 @@ export class TextInputArea extends ViewV2 {
         this.stack = undefined;
         this.updateInputText = '';
         this.textMaxLength = 280;
+        this.curLayoutDirection = CanvasLayoutDirection.DEFAULT;
         this.finalizeConstruction();
     }
     resetStateVarsOnReuse(params) {
@@ -80,6 +81,7 @@ export class TextInputArea extends ViewV2 {
         this.stack = undefined;
         this.updateInputText = '';
         this.textMaxLength = 280;
+        this.resetConsumer("curLayoutDirection", CanvasLayoutDirection.DEFAULT);
         this.resetMonitorsOnReuse();
     }
     getTextMaxLength() {
@@ -304,7 +306,7 @@ export class TextInputArea extends ViewV2 {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.height(this.inputHeight);
-            Column.width(510);
+            Column.width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 510 : 344);
             Column.backgroundColor('#99FFFFFF');
             Column.backdropBlur(120);
             Column.borderRadius(24);
@@ -458,6 +460,9 @@ __decorate([
 __decorate([
     Local
 ], TextInputArea.prototype, "textMaxLength", void 0);
+__decorate([
+    Consumer('globalLayoutDirection')
+], TextInputArea.prototype, "curLayoutDirection", void 0);
 __decorate([
     Monitor('imgCounts', 'isClickKeepLayout', 'updateInputText', 'isSelectedPatches')
 ], TextInputArea.prototype, "watchKeepLayout", null);

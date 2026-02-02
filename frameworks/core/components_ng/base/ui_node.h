@@ -198,6 +198,8 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    void ProcessOffscreenResource();
+
     // Determine if the node is a SyntaxNode, default returns false.
     // SyntaxNode classes need to override the method and return true.
     virtual bool IsSyntaxNode() const
@@ -321,12 +323,15 @@ public:
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
-    void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-        ParamConfig config = ParamConfig());
+    void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
+    void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
+        bool onlyNeedVisible, ParamConfig config = ParamConfig(),
+        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
     bool DumpTreeByComponentName(const std::string& name);
+    void DumpCornerMarkNode(int32_t depth, bool hasJson);
 
     const std::string& GetTag() const
     {
@@ -516,6 +521,7 @@ public:
     virtual void OnReuse();
 
     virtual void NotifyColorModeChange(uint32_t colorMode);
+    virtual void NotifyColorModeChange(uint32_t colorMode, bool recursive);
 
     virtual bool MarkRemoving();
 
@@ -1003,6 +1009,11 @@ public:
         return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_ || isArkTsRenderNode_;
     }
 
+    bool IsBuildByUser() const
+    {
+        return isBuildByJS_ || IsReusableNode() || isRoot_ || isStaticNode_;
+    }
+
     virtual RefPtr<UINode> GetCurrentPageRootNode()
     {
         return nullptr;
@@ -1134,7 +1145,7 @@ public:
     }
 
     void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
-    virtual bool CheckVisibleOrActive()
+    virtual bool IsVisibleAndActive() const
     {
         return true;
     }
@@ -1177,6 +1188,16 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
+    bool IsObservedByLayoutChildren() const
+    {
+        return isObservedByLayoutChildren_;
+    }
+
+    RefPtr<UINode> GetObserverParentForLayoutChildren() const
+    {
+        return layoutChildrenParent_.Upgrade();
+    }
+
     bool IsThreadSafeNode() const
     {
         return isThreadSafeNode_;
@@ -1187,32 +1208,20 @@ public:
         return isFree_;
     }
 
-    void SetIsFree(bool isFree)
+    virtual void SetIsFree(bool isFree)
     {
         isFree_ = isFree;
     }
 
-    void PostAfterAttachMainTreeTask(std::function<void()>&& task)
-    {
-        if (!IsFree()) {
-            TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
-                "PostAfterAttachMainTreeTask failed, node: %{public}d is not free", GetId());
-            return;
-        }
-        afterAttachMainTreeTasks_.emplace_back(std::move(task));
-    }
+    void MarkNodeTreeNotFree();
 
-    void ExecuteAfterAttachMainTreeTasks()
-    {
-        for (auto& task : afterAttachMainTreeTasks_) {
-            if (task) {
-                task();
-            }
-        }
-        afterAttachMainTreeTasks_.clear();
-    }
+    void MarkNodeTreeFree(bool isNeedMarkNodeTreeFree = false);
 
-    void FindTopNavDestination(RefPtr<FrameNode>& result);
+    void PostAfterAttachMainTreeTask(std::function<void()>&& task);
+
+    void ExecuteAfterAttachMainTreeTasks();
+
+    void FindTopNavDestination(std::list<RefPtr<FrameNode>>& result);
 
     bool SubtreeWithIgnoreChild() const
     {
@@ -1221,6 +1230,7 @@ public:
     void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
+    void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -1273,6 +1283,8 @@ protected:
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
+    virtual void OnOffscreenProcessResource() {}
+
     bool isRemoving_ = false;
 
     virtual bool RemoveImmediately() const;
@@ -1319,14 +1331,17 @@ protected:
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
+    std::list<RefPtr<FrameNode>> adoptedChildren_;
 
 private:
+    void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
+        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
     void UpdateForceDarkAllowedNode(const RefPtr<UINode>& child);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
-    void UpdateDrawChildObserver(const RefPtr<UINode>& child);
+    void UpdateDrawLayoutChildObserver(const RefPtr<UINode>& child);
 
     void SetObserverParentForDrawChildren(const RefPtr<UINode>& parent);
     void ClearObserverParentForDrawChildren()
@@ -1338,13 +1353,19 @@ private:
         }
     }
 
-    bool CheckThreadSafeNodeTree(bool needCheck);
+    void SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent);
+    void ClearObserverParentForLayoutChildren();
+
+    bool CheckThreadSafeNodeTree();
+    void MarkNodeNotFree();
+    void MarkNodeFree();
     virtual bool MaybeRelease() override;
     void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);
     void DumpMoreBasicInfo();
 
+    void HandleColorModeChange();
+
     std::list<RefPtr<UINode>> children_;
-    std::list<RefPtr<FrameNode>> adoptedChildren_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
@@ -1356,6 +1377,7 @@ private:
     bool onMainTree_ = false;
     bool isThreadSafeNode_ = false;
     bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
+    bool isRunningPendingUnsafeTask_ = false;
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
@@ -1416,6 +1438,8 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+    WeakPtr<UINode> layoutChildrenParent_;
+    bool isObservedByLayoutChildren_ = false;
     static std::atomic_int32_t count_;
 
     bool isStaticNode_ = false;

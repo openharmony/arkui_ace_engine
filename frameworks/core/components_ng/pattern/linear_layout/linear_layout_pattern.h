@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 // PagePattern is the base class for page render node.

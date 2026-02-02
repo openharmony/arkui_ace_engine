@@ -19,11 +19,10 @@ import { int32 } from '@koalaui/common';
 import {
   GridItemAttribute,
   ArkGridItemPeer,
-  GridItemOptions,
-  Bindable,
-  AttributeModifier,
-  CommonMethod
+  GridItemOptions
 } from '../component/gridItem';
+import { Bindable } from '#generated';
+import { AttributeModifier, CommonMethod } from '../component/common';
 export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
     constructParam(...param: Object[]): this {
         if (param.length > 1) {

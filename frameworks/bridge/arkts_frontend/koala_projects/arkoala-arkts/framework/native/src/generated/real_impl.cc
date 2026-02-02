@@ -1118,7 +1118,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetItemSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_String_Number* value)
+                         const Opt_Union_String_F64* value)
     {
     }
     void SetFontImpl(Ark_NativePointer node,
@@ -1138,7 +1138,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetSelectedImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_Bindable* value)
+                         const Opt_Union_I32_Bindable* value)
     {
     }
     void SetPopupPositionImpl(Ark_NativePointer node,
@@ -1150,7 +1150,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
-                                      const Opt_Number* value)
+                                      const Opt_Float64* value)
     {
     }
     void SetItemBorderRadiusImpl(Ark_NativePointer node,
@@ -1871,6 +1871,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_Boolean* value)
     {
     }
+    void SetExcludeFromRenderGroupImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
     void SetFreezeImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
     {
@@ -1981,6 +1985,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetClickEffectImpl(Ark_NativePointer node,
                             const Opt_ClickEffect* value)
+    {
+    }
+    void SetEnableClickSoundEffectImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
     {
     }
     void SetOnDragStartImpl(Ark_NativePointer node,
@@ -2199,6 +2207,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             const Opt_FocusDrawLevel* value)
     {
     }
+    void SetOnTouchTestDoneImpl(Ark_NativePointer node,
+                                const Opt_TouchTestDoneCallback* value)
+    {
+    }
+    void SetAccessibilityStateDescriptionImpl(Ark_NativePointer node,
+                                              const Opt_Union_String_Resource* value)
+    {
+    }
+    void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
+                                           const Opt_AccessibilityActionOptions* value)
+    {
+    }
     void SetExpandSafeAreaImpl(Ark_NativePointer node,
                                const Opt_Array_SafeAreaType* types,
                                const Opt_Array_SafeAreaEdge* edges)
@@ -2210,7 +2230,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBackgroundImpl(Ark_NativePointer node,
-                           const Opt_CustomNodeBuilder* builder,
+                           const Opt_Union_CustomBuilder_ResourceColor* content,
                            const Opt_BackgroundOptions* options)
     {
     }
@@ -2326,6 +2346,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Opt_DropOptions* dropOptions)
     {
     }
+    void SetOnDragSpringLoadingImpl(Ark_NativePointer node,
+                                const Opt_Callback_SpringLoadingContext_Void* callback_,
+                                const Opt_dragController_DragSpringLoadingConfiguration* configuration)
+    {
+    }
     void SetDragPreview1Impl(Ark_NativePointer node,
                              const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                              const Opt_PreviewConfiguration* config)
@@ -2342,7 +2367,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetAdvancedBlendModeImpl(Ark_NativePointer node,
-                                  const Ark_Union_BlendMode_Blender* effect,
+                                  const Opt_Union_BlendMode_Blender* effect,
                                   const Opt_BlendApplyType* type)
     {
     }
@@ -2367,7 +2392,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBindMenu1Impl(Ark_NativePointer node,
-                          const Opt_Boolean* isShow,
+                          const Opt_Union_Boolean_Bindable* isShow,
                           const Opt_Union_Array_MenuElement_CustomBuilder* content,
                           const Opt_MenuOptions* options)
     {
@@ -2378,13 +2403,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                  const Opt_ContextMenuOptions* options)
     {
     }
-    void SetBindContextMenu1Impl(Ark_NativePointer node,
-                                 const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
-                                 const Opt_ContextMenuOptions* options)
+    void SetBindContextMenuWithResponseImpl(Ark_NativePointer node,
+                                            const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
+                                            const Opt_ContextMenuOptions* options)
     {
     }
-    void SetBindContextMenu2Impl(Ark_NativePointer node,
-                                 const Opt_Boolean* isShown,
+    void SetBindContextMenu1Impl(Ark_NativePointer node,
+                                 const Opt_Union_Boolean_Bindable* isShown,
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_ContextMenuOptions* options)
     {
@@ -2726,10 +2751,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // EffectComponentModifier
     namespace EffectComponentInterfaceModifier {
-    void SetEffectComponentOptionsImpl(Ark_NativePointer node)
+    void SetEffectComponentOptionsImpl(Ark_NativePointer node,
+                                       const Opt_EffectComponentOptions* options)
     {
     }
     } // EffectComponentInterfaceModifier
+    namespace EffectComponentAttributeModifier {
+    void SetAlwaysSnapshotImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
+    } // EffectComponentAttributeModifier
     namespace EllipseModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -2941,10 +2973,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_GaugeShadowOptions* value)
     {
     }
-    void SetIndicatorImpl(Ark_NativePointer node,
-                          const Opt_GaugeIndicatorOptions* value)
-    {
-    }
     void SetPrivacySensitiveImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
     {
@@ -2966,7 +2994,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // GridInterfaceModifier
     namespace GridAttributeModifier {
     void SetColumnsTemplateImpl(Ark_NativePointer node,
-                                const Opt_String* value)
+                                const Opt_Union_String_ItemFillPolicy* value)
     {
     }
     void SetRowsTemplateImpl(Ark_NativePointer node,
@@ -2986,7 +3014,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_I32_String* value)
+                               const Opt_Union_Color_I32_String_Resource* value)
     {
     }
     void SetScrollBarImpl(Ark_NativePointer node,
@@ -3071,6 +3099,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetEditModeOptionsImpl(Ark_NativePointer node,
                                 const Opt_EditModeOptions* value)
+    {
+    }
+    void SetFocusWrapModeImpl(Ark_NativePointer node,
+                              const Opt_FocusWrapMode* value)
+    {
+    }
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -3344,6 +3380,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_ContentTransitionEffect* value)
     {
     }
+    void SetAntialiasedImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+    {
+    }
     } // ImageAttributeModifier
     namespace ImageAnimatorModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -3447,6 +3487,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetAltImpl(Ark_NativePointer node,
                     const Opt_image_PixelMap* value)
+    {
+    }
+    void SetSupportSvg2Impl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
     {
     }
     } // ImageSpanAttributeModifier
@@ -3596,11 +3640,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetContentStartOffsetImpl(Ark_NativePointer node,
-                                   const Opt_Float64* value)
+                                   const Opt_Union_F64_Resource* value)
     {
     }
     void SetContentEndOffsetImpl(Ark_NativePointer node,
-                                 const Opt_Float64* value)
+                                 const Opt_Union_F64_Resource* value)
     {
     }
     void SetDividerImpl(Ark_NativePointer node,
@@ -3645,6 +3689,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetEditModeOptionsImpl(Ark_NativePointer node,
                                 const Opt_EditModeOptions* value)
+    {
+    }
+    void SetFocusWrapModeImpl(Ark_NativePointer node,
+                              const Opt_FocusWrapMode* value)
+    {
+    }
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
+    {
+    }
+    void SetScrollSnapAnimationSpeedImpl(Ark_NativePointer node,
+                                         const Opt_ScrollSnapAnimationSpeed* value)
     {
     }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
@@ -3692,12 +3748,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLanesImpl(Ark_NativePointer node,
-                      const Opt_Union_I32_LengthConstrain* value,
+                      const Opt_Union_I32_LengthConstrain_ItemFillPolicy* value,
                       const Opt_Dimension* gutter)
     {
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Int32* count,
+                             const Opt_Union_I32_CacheCountInfo* count,
                              const Opt_Boolean* show)
     {
     }
@@ -4190,6 +4246,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_Boolean* value)
     {
     }
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_NavigationDividerStyle* value)
+    {
+    }
     void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
                                           const Opt_Boolean* value)
     {
@@ -4348,41 +4408,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // PatternLockAttributeModifier
-    namespace PickerModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        return {};
-    }
-    } // PickerModifier
-    namespace PickerInterfaceModifier {
-    void SetPickerOptionsImpl(Ark_NativePointer node,
-                              const Opt_PickerOptions* options)
-    {
-    }
-    } // PickerInterfaceModifier
-    namespace PickerAttributeModifier {
-    void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_OnPickerCallback* value)
-    {
-    }
-    void SetOnScrollStopImpl(Ark_NativePointer node,
-                             const Opt_OnPickerCallback* value)
-    {
-    }
-    void SetCanLoopImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
-    {
-    }
-    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
-                                     const Opt_Boolean* value)
-    {
-    }
-    void SetSelectionIndicatorImpl(Ark_NativePointer node,
-                                   const Opt_PickerIndicatorStyle* value)
-    {
-    }
-    } // PickerAttributeModifier
     namespace PluginComponentModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -4629,6 +4654,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_Float64* value)
     {
     }
+    void SetMaxPullDownDistanceImpl(Ark_NativePointer node,
+                                    const Opt_Float64* value)
+    {
+    }
     } // RefreshAttributeModifier
     namespace RelativeContainerModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -4731,6 +4760,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                    const Opt_TextDataDetectorConfig* value)
     {
     }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetCaretColorImpl(Ark_NativePointer node,
                            const Opt_ResourceColor* value)
     {
@@ -4791,12 +4824,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Number* value)
     {
     }
+    void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
     void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                    const Opt_KeyboardAppearance* value)
     {
     }
     void SetStopBackPressImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
+    {
+    }
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_ColorMetrics* value)
+    {
+    }
+    void SetUndoStyleImpl(Ark_NativePointer node,
+                          const Opt_UndoStyle* value)
+    {
+    }
+    void SetSingleLineImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
     {
     }
     void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
@@ -4995,6 +5044,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_ScrollDirection* value)
     {
     }
+    void SetMaxZoomScaleImpl(Ark_NativePointer node,
+                             const Opt_Float64* value)
+    {
+    }
+    void SetMinZoomScaleImpl(Ark_NativePointer node,
+                             const Opt_Float64* value)
+    {
+    }
+    void SetZoomScaleImpl(Ark_NativePointer node,
+                          const Opt_Union_F64_Bindable* value)
+    {
+    }
+    void SetEnableBouncesZoomImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
     void SetOnWillScrollImpl(Ark_NativePointer node,
                              const Opt_ScrollOnWillScrollCallback* value)
     {
@@ -5015,12 +5080,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_VoidCallback* value)
     {
     }
+    void SetOnDidZoomImpl(Ark_NativePointer node,
+                          const Opt_ScrollOnDidZoomCallback* value)
+    {
+    }
+    void SetOnZoomStartImpl(Ark_NativePointer node,
+                            const Opt_VoidCallback* value)
+    {
+    }
+    void SetOnZoomStopImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
+    {
+    }
     void SetScrollBarImpl(Ark_NativePointer node,
                           const Opt_BarState* value)
     {
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_I32_String* value)
+                               const Opt_Union_Color_I32_String_Resource* value)
     {
     }
     void SetScrollBarWidthImpl(Ark_NativePointer node,
@@ -5072,11 +5149,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_Number_String* value)
+                               const Opt_Union_Color_I32_String_Resource* value)
     {
     }
     void SetScrollBarWidthImpl(Ark_NativePointer node,
                                const Opt_Union_Number_String* value)
+    {
+    }
+    void SetScrollBarMarginImpl(Ark_NativePointer node,
+                                const Opt_ScrollBarMargin* value)
     {
     }
     void SetNestedScrollImpl(Ark_NativePointer node,
@@ -5089,6 +5170,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetFrictionImpl(Ark_NativePointer node,
                          const Opt_Union_Number_Resource* value)
+    {
+    }
+    void SetContentStartOffsetImpl(Ark_NativePointer node,
+                                   const Opt_Union_F64_Resource* value)
+    {
+    }
+    void SetContentEndOffsetImpl(Ark_NativePointer node,
+                                 const Opt_Union_F64_Resource* value)
+    {
+    }
+    void SetOnWillStartDraggingImpl(Ark_NativePointer node,
+                                    const Opt_VoidCallback* value)
+    {
+    }
+    void SetOnWillStopDraggingImpl(Ark_NativePointer node,
+                                   const Opt_OnWillStopDraggingCallback* value)
+    {
+    }
+    void SetOnDidStopDraggingImpl(Ark_NativePointer node,
+                                  const Opt_OnDidStopDraggingCallback* value)
+    {
+    }
+    void SetOnWillStartFlingImpl(Ark_NativePointer node,
+                                 const Opt_VoidCallback* value)
+    {
+    }
+    void SetOnDidStopFlingImpl(Ark_NativePointer node,
+                               const Opt_VoidCallback* value)
     {
     }
     void SetOnReachStartImpl(Ark_NativePointer node,
@@ -5150,6 +5259,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace ScrollBarAttributeModifier {
     void SetEnableNestedScrollImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
+    {
+    }
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_ColorMetrics* value)
     {
     }
     } // ScrollBarAttributeModifier
@@ -5249,6 +5362,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTextAlignImpl(Ark_NativePointer node,
                           const Opt_TextAlign* value)
+    {
+    }
+    void SetTextVerticalAlignImpl(Ark_NativePointer node,
+                                  const Opt_TextVerticalAlign* value)
     {
     }
     void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -5359,6 +5476,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_SelectedDragPreviewStyle* value)
     {
     }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
+    {
+    }
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* value)
+    {
+    }
+    void SetOnWillAttachIMEImpl(Ark_NativePointer node,
+                                const Opt_Callback_IMEClient_Void* value)
+    {
+    }
+    void SetStrokeColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
+    {
+    }
+    void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetSearchButtonImpl(Ark_NativePointer node,
                              const Opt_String* value,
                              const Opt_SearchButtonOptions* option)
@@ -5374,7 +5515,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
-                               const Opt_CustomNodeBuilder* value,
+                               const Opt_Union_CustomBuilder_ComponentContentBase* value,
                                const Opt_KeyboardOptions* options)
     {
     }
@@ -5661,6 +5802,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_LengthMetrics* value)
     {
     }
+    void SetMenuSystemMaterialImpl(Ark_NativePointer node,
+                               const Opt_uiMaterial_Material* value)
+    {
+    }
     void SetMenuAlignImpl(Ark_NativePointer node,
                           const Opt_MenuAlignType* alignType,
                           const Opt_Offset* offset)
@@ -5939,7 +6084,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6267,6 +6412,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Union_F64_Resource* value)
     {
     }
+    void SetShaderStyleImpl(Ark_NativePointer node,
+                            const Opt_Union_Array_Opt_ShaderStyle_ShaderStyle* value)
+    {
+    }
+    void SetSymbolShadowImpl(Ark_NativePointer node,
+                             const Opt_ShadowOptions* value)
+    {
+    }
     void SetSymbolEffect1Impl(Ark_NativePointer node,
                               const Opt_SymbolEffect* symbolEffect,
                               const Opt_Boolean* isActive)
@@ -6409,6 +6562,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Callback_I32_Void* value)
     {
     }
+    void SetNestedScrollImpl(Ark_NativePointer node,
+                             const Opt_TabsNestedScrollMode* value)
+    {
+    }
     void SetOnAnimationStartImpl(Ark_NativePointer node,
                                  const Opt_OnTabsAnimationStartCallback* value)
     {
@@ -6530,7 +6687,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLineSpacingImpl(Ark_NativePointer node,
-                            const Opt_LengthMetrics* value)
+                            const Opt_LengthMetrics* value,
+                            const Opt_LineSpacingOptions* options)
     {
     }
     void SetTextAlignImpl(Ark_NativePointer node,
@@ -6671,6 +6829,50 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                          const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
+    {
+    }
+    void SetOptimizeTrailingSpaceImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+    }
+    void SetShaderStyleImpl(Ark_NativePointer node,
+                            const Opt_ShaderStyle* value)
+    {
+    }
+    void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetContentTransitionImpl(Ark_NativePointer node,
+                                  const Opt_ContentTransition* value)
+    {
+    }
+    void SetTextContentAlignImpl(Ark_NativePointer node,
+                                 const Opt_TextContentAlign* value)
+    {
+    }
+    void SetMinLinesImpl(Ark_NativePointer node,
+                         const Opt_Int32* value)
+    {
+    }
+    void SetMinLineHeightImpl(Ark_NativePointer node,
+                              const Opt_LengthMetrics* value)
+    {
+    }
+    void SetMaxLineHeightImpl(Ark_NativePointer node,
+                              const Opt_LengthMetrics* value)
+    {
+    }
+    void SetLineHeightMultipleImpl(Ark_NativePointer node,
+                                   const Opt_Float64* value)
+    {
+    }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
     {
     }
     void SetFontImpl(Ark_NativePointer node,
@@ -6843,7 +7045,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetMaxLinesImpl(Ark_NativePointer node,
-                         const Opt_Int32* value)
+                         const Opt_Int32* value,
+                         const Opt_MaxLinesOptions* options)
     {
     }
     void SetWordBreakImpl(Ark_NativePointer node,
@@ -6863,7 +7066,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetLineSpacingImpl(Ark_NativePointer node,
-                            const Opt_LengthMetrics* value)
+                            const Opt_LengthMetrics* value,
+                            const Opt_LineSpacingOptions* options)
     {
     }
     void SetLineHeightImpl(Ark_NativePointer node,
@@ -6954,6 +7158,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_SelectedDragPreviewStyle* value)
     {
     }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
+    {
+    }
+    void SetMinLinesImpl(Ark_NativePointer node,
+                         const Opt_Int32* value)
+    {
+    }
+    void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* value)
+    {
+    }
+    void SetStrokeColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
+    {
+    }
+    void SetOnWillAttachIMEImpl(Ark_NativePointer node,
+                                const Opt_Callback_IMEClient_Void* value)
+    {
+    }
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_ColorMetrics* value)
+    {
+    }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetInputFilterImpl(Ark_NativePointer node,
                             const Opt_ResourceStr* value,
                             const Opt_Callback_String_Void* error)
@@ -6965,7 +7201,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
-                               const Opt_CustomNodeBuilder* value,
+                               const Opt_Union_CustomBuilder_ComponentContentBase* value,
                                const Opt_KeyboardOptions* options)
     {
     }
@@ -7331,13 +7567,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_SelectedDragPreviewStyle* value)
     {
     }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
+    {
+    }
+    void SetEnableAutoFillAnimationImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
+    {
+    }
+    void SetOnWillAttachIMEImpl(Ark_NativePointer node,
+                                const Opt_Callback_IMEClient_Void* value)
+    {
+    }
+    void SetStrokeColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
+    {
+    }
+    void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
+    void SetStrokeWidthImpl(Ark_NativePointer node,
+                            const Opt_LengthMetrics* value)
+    {
+    }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetInputFilterImpl(Ark_NativePointer node,
                             const Opt_ResourceStr* value,
                             const Opt_Callback_String_Void* error)
     {
     }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
-                               const Opt_CustomNodeBuilder* value,
+                               const Opt_Union_CustomBuilder_ComponentContentBase* value,
                                const Opt_KeyboardOptions* options)
     {
     }
@@ -7612,6 +7876,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // UIExtensionComponentAttributeModifier
+    namespace UIPickerComponentModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        return {};
+    }
+    } // UIPickerComponentModifier
+    namespace UIPickerComponentInterfaceModifier {
+    void SetUIPickerComponentOptionsImpl(Ark_NativePointer node,
+                                         const Opt_UIPickerComponentOptions* options)
+    {
+    }
+    } // UIPickerComponentInterfaceModifier
+    namespace UIPickerComponentAttributeModifier {
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnUIPickerComponentCallback* value)
+    {
+    }
+    void SetOnScrollStopImpl(Ark_NativePointer node,
+                             const Opt_OnUIPickerComponentCallback* value)
+    {
+    }
+    void SetCanLoopImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+    {
+    }
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+    }
+    void SetSelectionIndicatorImpl(Ark_NativePointer node,
+                                   const Opt_PickerIndicatorStyle* value)
+    {
+    }
+    } // UIPickerComponentAttributeModifier
     namespace VideoModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -7714,7 +8013,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // WaterFlowInterfaceModifier
     namespace WaterFlowAttributeModifier {
     void SetColumnsTemplateImpl(Ark_NativePointer node,
-                                const Opt_String* value)
+                                const Opt_Union_String_ItemFillPolicy* value)
     {
     }
     void SetItemConstraintSizeImpl(Ark_NativePointer node,
@@ -7739,6 +8038,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetCachedCount0Impl(Ark_NativePointer node,
                              const Opt_Int32* value)
+    {
+    }
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
     {
     }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -8011,6 +8314,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetOnWindowNewImpl(Ark_NativePointer node,
                             const Opt_Callback_OnWindowNewEvent_Void* value)
+    {
+    }
+    void SetOnWindowNewExtImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnWindowNewExtEvent_Void* value)
     {
     }
     void SetOnWindowExitImpl(Ark_NativePointer node,
@@ -8325,8 +8632,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                       const Opt_TextSelectionChangeCallback* value)
     {
     }
+    void SetOnFirstScreenPaintImpl(Ark_NativePointer node,
+                                   const Opt_OnFirstScreenPaintCallback* value)
+    {
+    }
     void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
+    {
+    }
+    void SetEnableAutoFillImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
     {
     }
     void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
@@ -8694,6 +9009,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetUseShadowBatchingImpl,
             CommonMethodModifier::SetUseEffect0Impl,
             CommonMethodModifier::SetRenderGroupImpl,
+            CommonMethodModifier::SetExcludeFromRenderGroupImpl,
             CommonMethodModifier::SetFreezeImpl,
             CommonMethodModifier::SetTranslateImpl,
             CommonMethodModifier::SetScaleImpl,
@@ -8722,6 +9038,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
+            CommonMethodModifier::SetEnableClickSoundEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,
             CommonMethodModifier::SetOnDragEnterImpl,
             CommonMethodModifier::SetOnDragMoveImpl,
@@ -8776,6 +9093,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnTouchInterceptImpl,
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+            CommonMethodModifier::SetOnTouchTestDoneImpl,
+            CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
+            CommonMethodModifier::SetAccessibilityActionOptionsImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
             CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
             CommonMethodModifier::SetBackgroundImpl,
@@ -8801,6 +9121,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetSharedTransitionImpl,
             CommonMethodModifier::SetChainModeImpl,
             CommonMethodModifier::SetOnDrop1Impl,
+            CommonMethodModifier::SetOnDragSpringLoadingImpl,
             CommonMethodModifier::SetDragPreview1Impl,
             CommonMethodModifier::SetOverlayImpl,
             CommonMethodModifier::SetBlendModeImpl,
@@ -8811,8 +9132,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBindMenu0Impl,
             CommonMethodModifier::SetBindMenu1Impl,
             CommonMethodModifier::SetBindContextMenu0Impl,
+            CommonMethodModifier::SetBindContextMenuWithResponseImpl,
             CommonMethodModifier::SetBindContextMenu1Impl,
-            CommonMethodModifier::SetBindContextMenu2Impl,
             CommonMethodModifier::SetBindContentCover0Impl,
             CommonMethodModifier::SetBindContentCover1Impl,
             CommonMethodModifier::SetBindSheetImpl,
@@ -8918,7 +9239,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DataPanelAttributeModifier::SetValueColorsImpl,
             DataPanelAttributeModifier::SetTrackBackgroundColorImpl,
             DataPanelAttributeModifier::SetStrokeWidthImpl,
-            DataPanelAttributeModifier::SetTrackShadowImpl,
         };
         return &ArkUIDataPanelModifierImpl;
     }
@@ -8958,6 +9278,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIEffectComponentModifier ArkUIEffectComponentModifierImpl {
             EffectComponentModifier::ConstructImpl,
             EffectComponentInterfaceModifier::SetEffectComponentOptionsImpl,
+            EffectComponentAttributeModifier::SetAlwaysSnapshotImpl,
         };
         return &ArkUIEffectComponentModifierImpl;
     }
@@ -9053,9 +9374,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GaugeAttributeModifier::SetEndAngleImpl,
             GaugeAttributeModifier::SetColorsImpl,
             GaugeAttributeModifier::SetStrokeWidthImpl,
-            GaugeAttributeModifier::SetDescriptionImpl,
-            GaugeAttributeModifier::SetTrackShadowImpl,
-            GaugeAttributeModifier::SetIndicatorImpl,
             GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
@@ -9093,6 +9411,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::SetFrictionImpl,
             GridAttributeModifier::SetAlignItemsImpl,
             GridAttributeModifier::SetEditModeOptionsImpl,
+            GridAttributeModifier::SetFocusWrapModeImpl,
+            GridAttributeModifier::SetSyncLoadImpl,
             GridAttributeModifier::SetOnScrollFrameBeginImpl,
             GridAttributeModifier::SetOnWillScrollImpl,
             GridAttributeModifier::SetOnDidScrollImpl,
@@ -9186,6 +9506,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttributeModifier::SetOrientationImpl,
             ImageAttributeModifier::SetSupportSvg2Impl,
             ImageAttributeModifier::SetContentTransitionImpl,
+            ImageAttributeModifier::SetAntialiasedImpl,
         };
         return &ArkUIImageModifierImpl;
     }
@@ -9223,6 +9544,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageSpanAttributeModifier::SetOnCompleteImpl,
             ImageSpanAttributeModifier::SetOnErrorImpl,
             ImageSpanAttributeModifier::SetAltImpl,
+            ImageSpanAttributeModifier::SetSupportSvg2Impl,
         };
         return &ArkUIImageSpanModifierImpl;
     }
@@ -9305,6 +9627,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
             ListAttributeModifier::SetStackFromEndImpl,
             ListAttributeModifier::SetEditModeOptionsImpl,
+            ListAttributeModifier::SetFocusWrapModeImpl,
+            ListAttributeModifier::SetSyncLoadImpl,
+            ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,
             ListAttributeModifier::SetOnScrollIndexImpl,
             ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
             ListAttributeModifier::SetOnItemMoveImpl,
@@ -9492,6 +9817,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationAttributeModifier::SetSystemBarStyleImpl,
             NavigationAttributeModifier::SetRecoverableImpl,
             NavigationAttributeModifier::SetEnableDragBarImpl,
+            NavigationAttributeModifier::SetDividerImpl,
             NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
             NavigationAttributeModifier::SetBackButtonIcon1Impl,
             NavigationAttributeModifier::SetTitleImpl,
@@ -9553,20 +9879,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PatternLockAttributeModifier::SetSkipUnselectedPointImpl,
         };
         return &ArkUIPatternLockModifierImpl;
-    }
-
-    const GENERATED_ArkUIPickerModifier* GetPickerModifier()
-    {
-        static const GENERATED_ArkUIPickerModifier ArkUIPickerModifierImpl {
-            PickerModifier::ConstructImpl,
-            PickerInterfaceModifier::SetPickerOptionsImpl,
-            PickerAttributeModifier::SetOnChangeImpl,
-            PickerAttributeModifier::SetOnScrollStopImpl,
-            PickerAttributeModifier::SetCanLoopImpl,
-            PickerAttributeModifier::SetEnableHapticFeedbackImpl,
-            PickerAttributeModifier::SetSelectionIndicatorImpl,
-        };
-        return &ArkUIPickerModifierImpl;
     }
 
     const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
@@ -9674,6 +9986,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RefreshAttributeModifier::SetPullUpToCancelRefreshImpl,
             RefreshAttributeModifier::SetOnOffsetChangeImpl,
             RefreshAttributeModifier::SetPullDownRatioImpl,
+            RefreshAttributeModifier::SetMaxPullDownDistanceImpl,
         };
         return &ArkUIRefreshModifierImpl;
     }
@@ -9716,6 +10029,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetEnableDataDetectorImpl,
             RichEditorAttributeModifier::SetEnablePreviewTextImpl,
             RichEditorAttributeModifier::SetDataDetectorConfigImpl,
+            RichEditorAttributeModifier::SetEnableSelectedDataDetectorImpl,
             RichEditorAttributeModifier::SetCaretColorImpl,
             RichEditorAttributeModifier::SetSelectedBackgroundColorImpl,
             RichEditorAttributeModifier::SetOnEditingChangeImpl,
@@ -9731,8 +10045,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetBarStateImpl,
             RichEditorAttributeModifier::SetMaxLengthImpl,
             RichEditorAttributeModifier::SetMaxLinesImpl,
+            RichEditorAttributeModifier::SetEnableAutoSpacingImpl,
             RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
             RichEditorAttributeModifier::SetStopBackPressImpl,
+            RichEditorAttributeModifier::SetScrollBarColorImpl,
+            RichEditorAttributeModifier::SetUndoStyleImpl,
+            RichEditorAttributeModifier::SetSingleLineImpl,
             RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
             RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
@@ -9825,11 +10143,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollModifier::ConstructImpl,
             ScrollInterfaceModifier::SetScrollOptionsImpl,
             ScrollAttributeModifier::SetScrollableImpl,
+            ScrollAttributeModifier::SetMaxZoomScaleImpl,
+            ScrollAttributeModifier::SetMinZoomScaleImpl,
+            ScrollAttributeModifier::SetZoomScaleImpl,
+            ScrollAttributeModifier::SetEnableBouncesZoomImpl,
             ScrollAttributeModifier::SetOnWillScrollImpl,
             ScrollAttributeModifier::SetOnDidScrollImpl,
             ScrollAttributeModifier::SetOnScrollEdgeImpl,
             ScrollAttributeModifier::SetOnScrollStartImpl,
             ScrollAttributeModifier::SetOnScrollStopImpl,
+            ScrollAttributeModifier::SetOnDidZoomImpl,
+            ScrollAttributeModifier::SetOnZoomStartImpl,
+            ScrollAttributeModifier::SetOnZoomStopImpl,
             ScrollAttributeModifier::SetScrollBarImpl,
             ScrollAttributeModifier::SetScrollBarColorImpl,
             ScrollAttributeModifier::SetScrollBarWidthImpl,
@@ -9852,9 +10177,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::SetScrollBarImpl,
             ScrollableCommonMethodModifier::SetScrollBarColorImpl,
             ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
+            ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
             ScrollableCommonMethodModifier::SetNestedScrollImpl,
             ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::SetFrictionImpl,
+            ScrollableCommonMethodModifier::SetContentStartOffsetImpl,
+            ScrollableCommonMethodModifier::SetContentEndOffsetImpl,
+            ScrollableCommonMethodModifier::SetOnWillStartDraggingImpl,
+            ScrollableCommonMethodModifier::SetOnWillStopDraggingImpl,
+            ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
+            ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
+            ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
             ScrollableCommonMethodModifier::SetOnReachStartImpl,
             ScrollableCommonMethodModifier::SetOnReachEndImpl,
             ScrollableCommonMethodModifier::SetOnScrollStartImpl,
@@ -9875,6 +10208,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollBarModifier::ConstructImpl,
             ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
             ScrollBarAttributeModifier::SetEnableNestedScrollImpl,
+            ScrollBarAttributeModifier::SetScrollBarColorImpl,
         };
         return &ArkUIScrollBarModifierImpl;
     }
@@ -9933,6 +10267,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetIncludeFontPaddingImpl,
             SearchAttributeModifier::SetFallbackLineSpacingImpl,
             SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            SearchAttributeModifier::SetTextDirectionImpl,
+            SearchAttributeModifier::SetStrokeWidthImpl,
+            SearchAttributeModifier::SetOnWillAttachIMEImpl,
+            SearchAttributeModifier::SetStrokeColorImpl,
+            SearchAttributeModifier::SetEnableAutoSpacingImpl,
+            SearchAttributeModifier::SetEnableSelectedDataDetectorImpl,
             SearchAttributeModifier::SetSearchButtonImpl,
             SearchAttributeModifier::SetInputFilterImpl,
             SearchAttributeModifier::SetCustomKeyboardImpl,
@@ -10018,6 +10358,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetBackgroundColorImpl,
             SelectAttributeModifier::SetKeyboardAvoidModeImpl,
             SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
+            SelectAttributeModifier::SetMenuSystemMaterialImpl,
             SelectAttributeModifier::SetMenuAlignImpl,
         };
         return &ArkUISelectModifierImpl;
@@ -10214,6 +10555,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SymbolGlyphAttributeModifier::SetSymbolEffect0Impl,
             SymbolGlyphAttributeModifier::SetMinFontScaleImpl,
             SymbolGlyphAttributeModifier::SetMaxFontScaleImpl,
+            SymbolGlyphAttributeModifier::SetShaderStyleImpl,
+            SymbolGlyphAttributeModifier::SetSymbolShadowImpl,
             SymbolGlyphAttributeModifier::SetSymbolEffect1Impl,
             SymbolGlyphAttributeModifier::SetSymbolEffect2Impl,
         };
@@ -10265,6 +10608,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetOnSelectedImpl,
             TabsAttributeModifier::SetOnTabBarClickImpl,
             TabsAttributeModifier::SetOnUnselectedImpl,
+            TabsAttributeModifier::SetNestedScrollImpl,
             TabsAttributeModifier::SetOnAnimationStartImpl,
             TabsAttributeModifier::SetOnAnimationEndImpl,
             TabsAttributeModifier::SetOnGestureSwipeImpl,
@@ -10301,6 +10645,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetFontStyleImpl,
             TextAttributeModifier::SetLineSpacingImpl,
             TextAttributeModifier::SetTextAlignImpl,
+            TextAttributeModifier::SetTextVerticalAlignImpl,
             TextAttributeModifier::SetLineHeightImpl,
             TextAttributeModifier::SetTextOverflowImpl,
             TextAttributeModifier::SetFontFamilyImpl,
@@ -10335,6 +10680,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetIncludeFontPaddingImpl,
             TextAttributeModifier::SetFallbackLineSpacingImpl,
             TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            TextAttributeModifier::SetTextDirectionImpl,
+            TextAttributeModifier::SetOptimizeTrailingSpaceImpl,
+            TextAttributeModifier::SetShaderStyleImpl,
+            TextAttributeModifier::SetEnableAutoSpacingImpl,
+            TextAttributeModifier::SetContentTransitionImpl,
+            TextAttributeModifier::SetTextContentAlignImpl,
+            TextAttributeModifier::SetMinLinesImpl,
+            TextAttributeModifier::SetMinLineHeightImpl,
+            TextAttributeModifier::SetMaxLineHeightImpl,
+            TextAttributeModifier::SetLineHeightMultipleImpl,
+            TextAttributeModifier::SetEnableSelectedDataDetectorImpl,
             TextAttributeModifier::SetFontImpl,
             TextAttributeModifier::SetFontWeightImpl,
             TextAttributeModifier::SetSelectionImpl,
@@ -10381,7 +10737,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetMinFontScaleImpl,
             TextAreaAttributeModifier::SetMaxFontScaleImpl,
             TextAreaAttributeModifier::SetHeightAdaptivePolicyImpl,
-            TextAreaAttributeModifier::SetMaxLinesImpl,
+            TextAreaAttributeModifier::SetMaxLines0Impl,
             TextAreaAttributeModifier::SetWordBreakImpl,
             TextAreaAttributeModifier::SetLineBreakStrategyImpl,
             TextAreaAttributeModifier::SetDecorationImpl,
@@ -10405,10 +10761,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetStopBackPressImpl,
             TextAreaAttributeModifier::SetOnWillChangeImpl,
             TextAreaAttributeModifier::SetKeyboardAppearanceImpl,
+            TextAreaAttributeModifier::SetMinLinesImpl,
+            TextAreaAttributeModifier::SetEnableAutoSpacingImpl,
+            TextAreaAttributeModifier::SetStrokeWidthImpl,
+            TextAreaAttributeModifier::SetStrokeColorImpl,
+            TextAreaAttributeModifier::SetOnWillAttachIMEImpl,
+            TextAreaAttributeModifier::SetScrollBarColorImpl,
+            TextAreaAttributeModifier::SetEnableSelectedDataDetectorImpl,
             TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextAreaAttributeModifier::SetIncludeFontPaddingImpl,
             TextAreaAttributeModifier::SetFallbackLineSpacingImpl,
             TextAreaAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            TextAreaAttributeModifier::SetTextDirectionImpl,
             TextAreaAttributeModifier::SetInputFilterImpl,
             TextAreaAttributeModifier::SetShowCounterImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
@@ -10509,10 +10873,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetStopBackPressImpl,
             TextInputAttributeModifier::SetOnWillChangeImpl,
             TextInputAttributeModifier::SetKeyboardAppearanceImpl,
+            TextInputAttributeModifier::SetEnableAutoFillAnimationImpl,
+            TextInputAttributeModifier::SetOnWillAttachIMEImpl,
+            TextInputAttributeModifier::SetStrokeColorImpl,
+            TextInputAttributeModifier::SetEnableAutoSpacingImpl,
+            TextInputAttributeModifier::SetStrokeWidthImpl,
+            TextInputAttributeModifier::SetEnableSelectedDataDetectorImpl,
             TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
             TextInputAttributeModifier::SetIncludeFontPaddingImpl,
             TextInputAttributeModifier::SetFallbackLineSpacingImpl,
             TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            TextInputAttributeModifier::SetTextDirectionImpl,
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,
@@ -10618,6 +10989,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIUIExtensionComponentModifierImpl;
     }
 
+    const GENERATED_ArkUIUIPickerComponentModifier* GetUIPickerComponentModifier()
+    {
+        static const GENERATED_ArkUIUIPickerComponentModifier ArkUIUIPickerComponentModifierImpl {
+            UIPickerComponentModifier::ConstructImpl,
+            UIPickerComponentInterfaceModifier::SetUIPickerComponentOptionsImpl,
+            UIPickerComponentAttributeModifier::SetOnChangeImpl,
+            UIPickerComponentAttributeModifier::SetOnScrollStopImpl,
+            UIPickerComponentAttributeModifier::SetCanLoopImpl,
+            UIPickerComponentAttributeModifier::SetEnableHapticFeedbackImpl,
+            UIPickerComponentAttributeModifier::SetSelectionIndicatorImpl,
+        };
+        return &ArkUIUIPickerComponentModifierImpl;
+    }
+
     const GENERATED_ArkUIVideoModifier* GetVideoModifier()
     {
         static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
@@ -10657,6 +11042,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::SetRowsGapImpl,
             WaterFlowAttributeModifier::SetLayoutDirectionImpl,
             WaterFlowAttributeModifier::SetCachedCount0Impl,
+            WaterFlowAttributeModifier::SetSyncLoadImpl,
             WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::SetOnScrollIndexImpl,
             WaterFlowAttributeModifier::SetOnWillScrollImpl,
@@ -10730,6 +11116,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnSslErrorEventImpl,
             WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
             WebAttributeModifier::SetOnWindowNewImpl,
+            WebAttributeModifier::SetOnWindowNewExtImpl,
             WebAttributeModifier::SetOnWindowExitImpl,
             WebAttributeModifier::SetMultiWindowAccessImpl,
             WebAttributeModifier::SetOnInterceptKeyEventImpl,
@@ -10808,7 +11195,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetZoomControlAccessImpl,
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetOnTextSelectionChangeImpl,
+            WebAttributeModifier::SetOnFirstScreenPaintImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
+            WebAttributeModifier::SetEnableAutoFillImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
@@ -10914,7 +11303,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPasteButtonModifier,
             GetPathModifier,
             GetPatternLockModifier,
-            GetPickerModifier,
             GetPluginComponentModifier,
             GetPolygonModifier,
             GetPolylineModifier,
@@ -10962,6 +11350,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetToggleModifier,
             GetToolBarItemModifier,
             GetUIExtensionComponentModifier,
+            GetUIPickerComponentModifier,
             GetVideoModifier,
             GetWaterFlowModifier,
             GetWebModifier,
@@ -11043,6 +11432,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         Ark_Float64 windowY)
     {
     }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_AccessibilityHoverEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_AccessibilityHoverEvent peer,
+                               const Opt_Float64* globalDisplayY)
+    {
+    }
     } // AccessibilityHoverEventAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* options)
@@ -11117,6 +11522,104 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // AppearSymbolEffectAccessor
+    namespace ArcAlphabetIndexerExtenderAccessor {
+    Ark_NativePointer ArcAlphabetIndexerConstructImpl(Ark_Int32 id,
+                                                      Ark_Int32 flags)
+    {
+        return {};
+    }
+    void SetArcAlphabetIndexerInitInfoImpl(Ark_NativePointer node,
+                                           const Array_String* arrayValue,
+                                           const Ark_Union_I32_Bindable* selected)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ColorImpl(Ark_NativePointer node,
+                   const Opt_ColorMetrics* color)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SelectedColorImpl(Ark_NativePointer node,
+                           const Opt_ColorMetrics* color)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void PopupColorImpl(Ark_NativePointer node,
+                        const Opt_ColorMetrics* color)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SelectedBackgroundColorImpl(Ark_NativePointer node,
+                                     const Opt_ColorMetrics* color)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void PopupBackgroundImpl(Ark_NativePointer node,
+                             const Opt_ColorMetrics* color)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void UsePopupImpl(Ark_NativePointer node,
+                      const Opt_Boolean* enabled)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SelectedFontImpl(Ark_NativePointer node,
+                          const Opt_Font* font)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void PopupFontImpl(Ark_NativePointer node,
+                       const Opt_Font* font)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void FontImpl(Ark_NativePointer node,
+                  const Opt_Font* font)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ItemSizeImpl(Ark_NativePointer node,
+                      const Opt_LengthMetrics* size)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SelectedImpl(Ark_NativePointer node,
+                      const Opt_Union_I32_Bindable* index)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void AutoCollapseImpl(Ark_NativePointer node,
+                          const Opt_Boolean* enable)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnSelectImpl(Ark_NativePointer node,
+                      const Opt_Callback_I32_Void* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                      const Opt_BlurStyle* style)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ArcAlphabetIndexerExtenderAccessor
     namespace ArcListExtenderAccessor {
     Ark_NativePointer ConstructorImpl()
     {
@@ -11273,6 +11776,130 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     } // ArcScrollBarExtenderAccessor
+    namespace ArcSwiperControllerHelperAccessor {
+    void DestroyPeerImpl(Ark_ArcSwiperControllerHelper peer)
+    {
+        auto peerImpl = reinterpret_cast<ArcSwiperControllerHelperPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ArcSwiperControllerHelper ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void ShowNextImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void ShowPreviousImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void FinishAnimationImpl(Ark_NativePointer node,
+                             const Opt_VoidCallback* callback_)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ArcSwiperControllerHelperAccessor
+    namespace ArcSwiperExtenderAccessor {
+    Ark_NativePointer ArcSwiperConstructImpl(Ark_Int32 id,
+                                             Ark_Int32 flags)
+    {
+        return {};
+    }
+    void SetConstructInfoImpl(Ark_NativePointer node,
+                              const Opt_ArcSwiperControllerHelper* controller)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void IndexImpl(Ark_NativePointer node,
+                   const Opt_Int32* value)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void IndicatorImpl(Ark_NativePointer node,
+                       const Opt_Union_ArcDotIndicatorInner_Boolean* style)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void DurationImpl(Ark_NativePointer node,
+                      const Opt_Int32* duration)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void VerticalImpl(Ark_NativePointer node,
+                      const Opt_Boolean* isVertical)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void DisableSwipeImpl(Ark_NativePointer node,
+                          const Opt_Boolean* disabled)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                     const Opt_CrownSensitivity* sensitivity)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnChangeImpl(Ark_NativePointer node,
+                      const Opt_Callback_I32_Void* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnAnimationStartImpl(Ark_NativePointer node,
+                              const Opt_AnimationStartHandler* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnAnimationEndImpl(Ark_NativePointer node,
+                            const Opt_AnimationEndHandler* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void OnGestureSwipeImpl(Ark_NativePointer node,
+                            const Opt_GestureSwipeHandler* handler)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void EffectModeImpl(Ark_NativePointer node,
+                        const Opt_EdgeEffect* edgeEffect)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void CustomContentTransitionImpl(Ark_NativePointer node,
+                                     const Opt_SwiperContentAnimatedTransition* transition)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void DisableTransitionAnimationImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* disabled)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // ArcSwiperExtenderAccessor
     namespace AxisEventAccessor {
     void DestroyPeerImpl(Ark_AxisEvent peer)
     {
@@ -11364,6 +11991,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetScrollStepImpl(Ark_AxisEvent peer,
                            const Opt_Int32* scrollStep)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_AxisEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_AxisEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_AxisEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_AxisEvent peer,
+                               const Opt_Float64* globalDisplayY)
     {
     }
     void PropagationImpl(Ark_AxisEvent peer)
@@ -11661,6 +12304,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
                                    Ark_TouchEvent event)
+    {
+        return {};
+    }
+    Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer,
+                                   const Opt_InputEventType* event)
     {
         return {};
     }
@@ -12475,6 +13123,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      const Opt_InteractionHand* hand)
     {
     }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_ClickEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_ClickEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_ClickEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_ClickEvent peer,
+                               const Opt_Float64* globalDisplayY)
+    {
+    }
     void PreventDefaultImpl(Ark_ClickEvent peer)
     {
     }
@@ -12566,6 +13230,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     } // ColorMetricsLinearGradientAccessor
+    namespace ColorShaderStyleAccessor {
+    void DestroyPeerImpl(Ark_ColorShaderStyle peer)
+    {
+        auto peerImpl = reinterpret_cast<ColorShaderStylePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ColorShaderStyle ConstructImpl(const Ark_ResourceColor* color)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_ResourceColor GetColorImpl(Ark_ColorShaderStyle peer)
+    {
+        return {};
+    }
+    void SetColorImpl(Ark_ColorShaderStyle peer,
+                      const Ark_ResourceColor* color)
+    {
+    }
+    } // ColorShaderStyleAccessor
     namespace CommonShapeAccessor {
     void DestroyPeerImpl(Ark_CommonShape peer)
     {
@@ -12836,6 +13525,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ContentTransitionEffectAccessor
+
+    namespace ContextMenuAccessor {
+    void CloseImpl()
+    {
+    }
+    } // ContextMenuAccessor
+    namespace ContentTransitionAccessor {
+    void DestroyPeerImpl(Ark_ContentTransition peer)
+    {
+        auto peerImpl = reinterpret_cast<ContentTransitionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ContentTransition ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    } // ContentTransitionAccessor
     namespace ControllerHandlerAccessor {
     void DestroyPeerImpl(Ark_ControllerHandler peer)
     {
@@ -12999,6 +13711,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // CutEventAccessor
+    namespace DataPanelExtenderAccessor {
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_DataPanelShadowOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullTrackShadowImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // DataPanelExtenderAccessor
     namespace DataResubmissionHandlerAccessor {
     void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
     {
@@ -13236,9 +13961,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_String GetDragSourceImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
+    void SetDataLoadParamsImpl(Ark_DragEvent peer,
+                               const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
+    {
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
+    }
+    Ark_Float64 GetGlobalDisplayXImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
+    Ark_Float64 GetGlobalDisplayYImpl(Ark_DragEvent peer)
+    {
+        return {};
     }
     Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
     {
@@ -13265,6 +14010,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DragEventAccessor
+    namespace DragUtilsAccessor {
+    Ark_Int64 GetForegroundColorValueImpl(const Ark_ResourceColor* resourceColor)
+    {
+        return {};
+    }
+    } // DragUtilsAccessor
     namespace DrawingRenderingContextAccessor {
     void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
     {
@@ -13463,6 +14214,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_String GetSuggestedNameImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_String GetDefaultPathImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Array_String GetDescriptionsImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsAcceptAllOptionExcludedImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Array_Array_AcceptableFileType GetAcceptableFileTypesImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
     } // FileSelectorParamAccessor
     namespace FileSelectorResultAccessor {
     void DestroyPeerImpl(Ark_FileSelectorResult peer)
@@ -13653,6 +14424,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DisposeTreeImpl(Ark_FrameNode peer)
     {
     }
+    void AddSupportedUIStatesImpl(Ark_FrameNode peer,
+                                  Ark_Int32 uiStates,
+                                  const UIStatesChangeHandler* statesChangeHandler,
+                                  Ark_Boolean excludeInner)
+    {
+    }
+    void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
+                                     Ark_Int32 uiStates)
+    {
+    }
     Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
                                             Ark_Boolean options)
     {
@@ -13682,6 +14463,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_Vector2 GetGlobalPositionOnDisplayImpl(Ark_FrameNode peer)
     {
         return {};
     }
@@ -13789,7 +14574,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+    Ark_UICommonEvent GetCommonEventImpl(Ark_NativePointer peer)
     {
         return {};
     }
@@ -13800,6 +14585,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer,
                                      Ark_FrameNode child)
+    {
+        return {};
+    }
+    Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode peer,
+                                                                       Ark_EventQueryType eventType)
     {
         return {};
     }
@@ -13861,6 +14651,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // FullScreenExitHandlerAccessor
+    namespace GaugeExtenderAccessor {
+    void SetIndicatorImpl(Ark_NativePointer node,
+                          const Opt_GaugeIndicatorOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullIndicatorImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_GaugeShadowOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullTrackShadowImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SetDescriptionImpl(Ark_NativePointer node,
+                            const Opt_CustomNodeBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullDescriptionImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // GaugeExtenderAccessor
     namespace GestureAccessor {
     void DestroyPeerImpl(Ark_Gesture peer)
     {
@@ -14091,6 +14916,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void PreventBeginImpl(Ark_GestureRecognizer peer)
+    {
+    }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
     void DestroyPeerImpl(Ark_GestureStyle peer)
@@ -14243,6 +15071,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Float64* displayY)
     {
     }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_HoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_HoverEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_HoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_HoverEvent peer,
+                               const Opt_Float64* globalDisplayY)
+    {
+    }
     void StopPropagationImpl(Ark_HoverEvent peer)
     {
     }
@@ -14318,6 +15162,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_String GetResourceValueImpl(Ark_ImageAttachment peer)
+    {
+        return {};
+    }
     Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     {
         return {};
@@ -14335,6 +15183,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
+    {
+        return {};
+    }
+    Opt_Boolean GetSupportSvg2Impl(Ark_ImageAttachment peer)
+    {
+        return {};
+    }
+    Opt_SizeOptions GetSizeInVpImpl(Ark_ImageAttachment peer)
     {
         return {};
     }
@@ -14420,6 +15276,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ImageDataAccessor
+    namespace IMEClientAccessor {
+    void DestroyPeerImpl(Ark_IMEClient peer)
+    {
+        auto peerImpl = reinterpret_cast<IMEClientPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_IMEClient ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void SetExtraConfigImpl(Ark_IMEClient peer,
+                            const Ark_CustomObject* config)
+    {
+    }
+    Ark_Int32 GetNodeIdImpl(Ark_IMEClient peer)
+    {
+        return {};
+    }
+    void SetNodeIdImpl(Ark_IMEClient peer,
+                       Ark_Int32 nodeId)
+    {
+    }
+    } // IMEClientAccessor
     namespace IndicatorComponentControllerAccessor {
     void DestroyPeerImpl(Ark_IndicatorComponentController peer)
     {
@@ -14502,6 +15387,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             Ark_Scroller childScroller)
     {
     }
+    void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
+    {
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -14569,6 +15457,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
+    void StopPropagationImpl(Ark_KeyEvent peer)
+    {
+    }
     Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
     {
         return {};
@@ -14625,14 +15516,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           Ark_Int64 timestamp)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_KeyEvent peer,
-                                const Callback_Void* stopPropagation)
-    {
-    }
     Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
     {
         return {};
@@ -14655,6 +15538,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetUnicodeImpl(Ark_KeyEvent peer,
                         const Opt_Int64* unicode)
+    {
+    }
+    Opt_Boolean GetIsNumLockOnImpl(Ark_KeyEvent peer)
+    {
+        return {};
+    }
+    void SetIsNumLockOnImpl(Ark_KeyEvent peer,
+                            const Opt_Boolean* isNumLockOn)
+    {
+    }
+    Opt_Boolean GetIsCapsLockOnImpl(Ark_KeyEvent peer)
+    {
+        return {};
+    }
+    void SetIsCapsLockOnImpl(Ark_KeyEvent peer,
+                             const Opt_Boolean* isCapsLockOn)
+    {
+    }
+    Opt_Boolean GetIsScrollLockOnImpl(Ark_KeyEvent peer)
+    {
+        return {};
+    }
+    void SetIsScrollLockOnImpl(Ark_KeyEvent peer,
+                               const Opt_Boolean* isScrollLockOn)
     {
     }
     } // KeyEventAccessor
@@ -14818,6 +15725,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     } // LazyForEachOpsAccessor
+    namespace LeadingMarginSpanAccessor {
+    void DestroyPeerImpl(Ark_LeadingMarginSpan peer)
+    {
+        auto peerImpl = reinterpret_cast<LeadingMarginSpanPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LeadingMarginSpan ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Callback_DrawContext_LeadingMarginSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_LeadingMarginSpan peer)
+    {
+        return {};
+    }
+    void SetOnDraw_callbackImpl(Ark_LeadingMarginSpan peer,
+                                const Callback_DrawContext_LeadingMarginSpanDrawInfo_Void* onDraw_callback)
+    {
+    }
+    Callback_LengthMetrics GetGetLeadingMargin_callbackImpl(Ark_LeadingMarginSpan peer)
+    {
+        return {};
+    }
+    void SetGetLeadingMargin_callbackImpl(Ark_LeadingMarginSpan peer,
+                                          const Callback_LengthMetrics* getLeadingMargin_callback)
+    {
+    }
+    } // LeadingMarginSpanAccessor
     namespace LetterSpacingStyleAccessor {
     void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
     {
@@ -14910,6 +15850,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     } // LinearGradientAccessor
+    namespace LinearGradientStyleAccessor {
+    void DestroyPeerImpl(Ark_LinearGradientStyle peer)
+    {
+        auto peerImpl = reinterpret_cast<LinearGradientStylePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LinearGradientStyle ConstructImpl(const Ark_LinearGradientOptions* options)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_LinearGradientOptions GetOptionsImpl(Ark_LinearGradientStyle peer)
+    {
+        return {};
+    }
+    void SetOptionsImpl(Ark_LinearGradientStyle peer,
+                        const Ark_LinearGradientOptions* options)
+    {
+    }
+    } // LinearGradientStyleAccessor
     namespace LinearIndicatorControllerAccessor {
     void DestroyPeerImpl(Ark_LinearIndicatorController peer)
     {
@@ -14963,6 +15928,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LineHeightStyleAccessor
+    namespace ListItemSwipeActionManagerAccessor {
+    void DestroyPeerImpl(Ark_ListItemSwipeActionManager peer)
+    {
+        auto peerImpl = reinterpret_cast<ListItemSwipeActionManagerPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ListItemSwipeActionManager ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_Int32 ExpandImpl(Ark_FrameNode node,
+                         Ark_ListItemSwipeActionDirection direction)
+    {
+        return {};
+    }
+    Ark_Int32 CollapseImpl(Ark_FrameNode node)
+    {
+        return {};
+    }
+    } // ListItemSwipeActionManagerAccessor
     namespace ListScrollerAccessor {
     void DestroyPeerImpl(Ark_ListScroller peer)
     {
@@ -15289,6 +16280,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
+    void StopPropagationImpl(Ark_MouseEvent peer)
+    {
+    }
     Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
     {
         return {};
@@ -15353,14 +16347,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                   Ark_Float64 y)
     {
     }
-    Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_MouseEvent peer,
-                                const Callback_Void* stopPropagation)
-    {
-    }
     Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
     {
         return {};
@@ -15383,6 +16369,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetPressedButtonsImpl(Ark_MouseEvent peer,
                                const Opt_Array_MouseButton* pressedButtons)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_MouseEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_MouseEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_MouseEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_MouseEvent peer,
+                               const Opt_Float64* globalDisplayY)
     {
     }
     } // MouseEventAccessor
@@ -15984,6 +16986,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // NodeContentExtenderAccessor
+    namespace NumericTextTransitionAccessor {
+    void DestroyPeerImpl(Ark_NumericTextTransition peer)
+    {
+        auto peerImpl = reinterpret_cast<NumericTextTransitionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_NumericTextTransition ConstructImpl(const Opt_NumericTextTransitionOptions* options)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Opt_FlipDirection GetFlipDirectionImpl(Ark_NumericTextTransition peer)
+    {
+        return {};
+    }
+    void SetFlipDirectionImpl(Ark_NumericTextTransition peer,
+                              const Opt_FlipDirection* flipDirection)
+    {
+    }
+    Opt_Boolean GetEnableBlurImpl(Ark_NumericTextTransition peer)
+    {
+        return {};
+    }
+    void SetEnableBlurImpl(Ark_NumericTextTransition peer,
+                           const Opt_Boolean* enableBlur)
+    {
+    }
+    } // NumericTextTransitionAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -16172,6 +17207,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_PanDirection GetDirectionImpl(Ark_PanRecognizer peer)
+    {
+        return {};
+    }
+    Ark_Float64 GetDistanceImpl(Ark_PanRecognizer peer)
+    {
+        return {};
+    }
+    Map_SourceTool_Float64 GetDistanceMapImpl(Ark_PanRecognizer peer)
+    {
+        return {};
+    }
     } // PanRecognizerAccessor
     namespace ParagraphStyleAccessor {
     void DestroyPeerImpl(Ark_ParagraphStyle peer)
@@ -16190,6 +17237,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Opt_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
+    {
+        return {};
+    }
+    Opt_TextVerticalAlign GetTextVerticalAlignImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
@@ -16214,6 +17265,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
+    {
+        return {};
+    }
+    Opt_LeadingMarginSpan GetLeadingMarginSpanImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
@@ -16342,23 +17397,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // PersistentStorageBackendAccessor
-    namespace PickerModifierAccessor {
-    void DestroyPeerImpl(Ark_PickerModifier peer)
-    {
-        auto peerImpl = reinterpret_cast<PickerModifierPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_PickerModifier ConstructImpl()
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    } // PickerModifierAccessor
     namespace PinchGestureEventAccessor {
     void DestroyPeerImpl(Ark_PinchGestureEvent peer)
     {
@@ -16535,6 +17573,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     } // PulseSymbolEffectAccessor
+    namespace RadialGradientStyleAccessor {
+    void DestroyPeerImpl(Ark_RadialGradientStyle peer)
+    {
+        auto peerImpl = reinterpret_cast<RadialGradientStylePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_RadialGradientStyle ConstructImpl(const Ark_RadialGradientOptions* options)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_RadialGradientOptions GetOptionsImpl(Ark_RadialGradientStyle peer)
+    {
+        return {};
+    }
+    void SetOptionsImpl(Ark_RadialGradientStyle peer,
+                        const Ark_RadialGradientOptions* options)
+    {
+    }
+    } // RadialGradientStyleAccessor
     namespace RenderingContextSettingsAccessor {
     void DestroyPeerImpl(Ark_RenderingContextSettings peer)
     {
@@ -16755,7 +17818,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_ReplaceSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
+    Ark_ReplaceSymbolEffect ConstructImpl(const Opt_EffectScope* scope,
+                                          const Opt_ReplaceEffectType* replaceType)
     {
         return {};
     }
@@ -16769,6 +17833,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
                       const Opt_EffectScope* scope)
+    {
+    }
+    Opt_ReplaceEffectType GetReplaceTypeImpl(Ark_ReplaceSymbolEffect peer)
+    {
+        return {};
+    }
+    void SetReplaceTypeImpl(Ark_ReplaceSymbolEffect peer,
+                            const Opt_ReplaceEffectType* replaceType)
     {
     }
     } // ReplaceSymbolEffectAccessor
@@ -16929,6 +18001,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
                             const Ark_RichEditorTextStyle* value)
+    {
+    }
+    void SetTypingParagraphStyleImpl(Ark_RichEditorBaseController peer,
+                                     const Opt_RichEditorParagraphStyle* style)
     {
     }
     void SetSelectionImpl(Ark_RichEditorBaseController peer,
@@ -17155,45 +18231,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RotationRecognizerAccessor
     namespace RouterExtenderAccessor {
-    Ark_NativePointer PushImpl(Ark_NativePointer jsView,
-                               const Ark_String* url,
-                               const Opt_Boolean* recover,
-                               const Opt_RouterFinishCallback* finishCallback)
+    void Push0Impl(Ark_VMContext vmContext,
+                   Ark_AsyncWorkerPtr asyncWorker,
+                   Ark_NativePointer jsView,
+                   const Ark_PageRouterOptions* options,
+                   const Opt_RouterFinishCallback* finishCallback,
+                   const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
     }
-    Ark_NativePointer ReplaceImpl(Ark_NativePointer jsView,
-                                  const Ark_String* url,
-                                  const Opt_Boolean* recover,
-                                  const Opt_RouterFinishCallback* enterFinishCallback)
-    {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
-    }
-    void MoveCommonUnderPageNodeImpl(Ark_NativePointer commonNode,
-                                     Ark_NativePointer pageNode)
+    void Push1Impl(Ark_NativePointer jsView,
+                   const Ark_PageRouterOptions* options,
+                   const Opt_RouterFinishCallback* finishCallback,
+                   const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
-    void BackImpl()
+    void Replace0Impl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer jsView,
+                      const Ark_PageRouterOptions* options,
+                      const Opt_RouterFinishCallback* enterFinishCallback,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
-    void BackWithOptionsImpl(const Ark_String* url,
-                             const Opt_Object* params)
-    {
-    }
-    Ark_NativePointer RunPageImpl(Ark_NativePointer jsView,
-                                  const Ark_String* url,
-                                  const Opt_Boolean* recover,
-                                  const Opt_RouterFinishCallback* finishCallback)
+    void Replace1Impl(Ark_NativePointer jsView,
+                      const Ark_PageRouterOptions* options,
+                      const Opt_RouterFinishCallback* finishCallback,
+                      const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        return {};
+    }
+    void Back0Impl(const Opt_RouterOptionsInner* options)
+    {
+    }
+    void Back1Impl(Ark_Int32 index,
+                   const Opt_String* params)
+    {
+    }
+    void RunPageImpl(Ark_NativePointer jsView,
+                     const Ark_PageRouterOptions* options,
+                     const Opt_RouterFinishCallback* finishCallback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
     }
     void ClearImpl()
     {
@@ -17203,6 +18285,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void HideAlertBeforeBackPageImpl()
     {
+    }
+    Ark_String GetLengthImpl()
+    {
+        return {};
+    }
+    Ark_RouterStateInner GetStateImpl()
+    {
+        return {};
+    }
+    Opt_RouterStateInner GetStateByIndexImpl(Ark_Int32 index)
+    {
+        return {};
+    }
+    Array_RouterStateInner GetStateByUrlImpl(const Ark_String* url)
+    {
+        return {};
+    }
+    Ark_String GetParamsImpl()
+    {
+        return {};
     }
     void PushNamedRoute0Impl(Ark_VMContext vmContext,
                              Ark_AsyncWorkerPtr asyncWorker,
@@ -17215,7 +18317,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PushNamedRoute1Impl(Ark_NativePointer jsView,
                              const Ark_PageRouterOptions* options,
                              const Opt_RouterFinishCallback* finishCallback,
-                             const Opt_AsyncCallback_Void* callback_)
+                             const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -17224,40 +18326,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
-                                const Opt_RouterFinishCallback* finishCallback,
+                                const Opt_RouterFinishCallback* enterFinishCallback,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
     void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
                                 const Opt_RouterFinishCallback* finishCallback,
-                                const Opt_AsyncCallback_Void* callback_)
+                                const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
-    Ark_NativePointer CreateDynamicImpl(const Ark_String* url,
-                                        const Opt_Boolean* recover)
+    Ark_NativePointer CreateDynamicImpl(const Ark_RouterOptionsInner* options)
     {
         return {};
     }
-    Ark_NativePointer PushDynamicImpl(Ark_NativePointer pageNode,
-                                      const Ark_String* url,
-                                      const Opt_Boolean* recover,
-                                      const Opt_RouterFinishCallback* finishCallback)
+    void PushDynamic0Impl(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
+                          Ark_NativePointer pageNode,
+                          const Ark_PageRouterOptions* options,
+                          const Opt_RouterFinishCallback* finishCallback,
+                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
     }
-    Ark_NativePointer ReplaceDynamicImpl(Ark_NativePointer pageNode,
-                                         const Ark_String* url,
-                                         const Opt_Boolean* recover,
-                                         const Opt_RouterFinishCallback* finishCallback)
+    void PushDynamic1Impl(Ark_NativePointer pageNode,
+                          const Ark_PageRouterOptions* options,
+                          const Opt_RouterFinishCallback* finishCallback,
+                          const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        return {};
+    }
+    void ReplaceDynamic0Impl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer pageNode,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* enterFinishCallback,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void ReplaceDynamic1Impl(Ark_NativePointer pageNode,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Opt_Router_BusinessError_Void* callback_)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
     }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
@@ -17432,6 +18547,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_SizeResult ContentSizeImpl(Ark_Scroller peer)
+    {
+        return {};
+    }
     } // ScrollerAccessor
     namespace ScrollMotionAccessor {
     void DestroyPeerImpl(Ark_ScrollMotion peer)
@@ -17543,6 +18662,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     } // SliderExtenderAccessor
+    namespace ShaderStyleAccessor {
+    void DestroyPeerImpl(Ark_ShaderStyle peer)
+    {
+        auto peerImpl = reinterpret_cast<ShaderStylePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ShaderStyle ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    } // ShaderStyleAccessor
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -18272,6 +19408,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
     {
     }
+    void SetStyledPlaceholderImpl(Ark_TextContentControllerBase peer,
+                                  Ark_StyledString styledString)
+    {
+    }
     } // TextContentControllerBaseAccessor
     namespace TextControllerAccessor {
     void DestroyPeerImpl(Ark_TextController peer)
@@ -18631,7 +19771,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // TextTimerControllerAccessor
     namespace ThemeOpsAccessor {
     void SendThemeToNativeImpl(const Array_ResourceColor* colorArray,
-                               Ark_Int32 elmtId)
+                               const Array_ResourceColor* darkColorArray,
+                               Ark_Int32 elmtId,
+                               Ark_Boolean darkSetStatus)
     {
     }
     void SetDefaultThemeImpl(const Array_ResourceColor* colorArray,
@@ -18707,6 +19849,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // TouchEventAccessor
+        namespace TouchRecognizerAccessor {
+    void DestroyPeerImpl(Ark_TouchRecognizer peer)
+    {
+        auto peerImpl = reinterpret_cast<TouchRecognizerPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_TouchRecognizer ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_TouchRecognizer peer)
+    {
+        return {};
+    }
+    void CancelTouchImpl(Ark_TouchRecognizer peer)
+    {
+    }
+    } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
     {
@@ -18921,6 +20087,201 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // UIExtensionProxyAccessor
+    namespace UIGridEventAccessor {
+    void DestroyPeerImpl(Ark_UIGridEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<UIGridEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_UIGridEvent ConstructImpl(Ark_NativePointer node)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void SetOnWillScrollImpl(Ark_UIGridEvent peer,
+                             const Opt_OnWillScrollCallback* callback_)
+    {
+    }
+    void SetOnDidScrollImpl(Ark_UIGridEvent peer,
+                            const Opt_OnScrollCallback* callback_)
+    {
+    }
+    void SetOnScrollIndexImpl(Ark_UIGridEvent peer,
+                              const Opt_OnGridScrollIndexCallback* callback_)
+    {
+    }
+    } // UIGridEventAccessor
+    namespace UIListEventAccessor {
+    void DestroyPeerImpl(Ark_UIListEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<UIListEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_UIListEvent ConstructImpl(Ark_NativePointer node)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void SetOnWillScrollImpl(Ark_UIListEvent peer,
+                             const Opt_OnWillScrollCallback* callback_)
+    {
+    }
+    void SetOnDidScrollImpl(Ark_UIListEvent peer,
+                            const Opt_OnScrollCallback* callback_)
+    {
+    }
+    void SetOnScrollIndexImpl(Ark_UIListEvent peer,
+                              const Opt_OnListScrollIndexCallback* callback_)
+    {
+    }
+    void SetOnScrollVisibleContentChangeImpl(Ark_UIListEvent peer,
+                                             const Opt_OnScrollVisibleContentChangeCallback* callback_)
+    {
+    }
+    } // UIListEventAccessor
+    namespace UIObserverGestureEventOpsAccessor {
+    Ark_Int32 SetOnBeforePanStartImpl(Ark_Int32 instanceId,
+                                      const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnBeforePanEndImpl(Ark_Int32 instanceId,
+                                    const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnAfterPanStartImpl(Ark_Int32 instanceId,
+                                     const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnAfterPanEndImpl(Ark_Int32 instanceId,
+                                   const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnWillClickImpl(Ark_Int32 instanceId,
+                                 const UIObserver_ClickEventListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnDidClickImpl(Ark_Int32 instanceId,
+                                const UIObserver_ClickEventListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnWillTapImpl(Ark_Int32 instanceId,
+                               const UIObserver_GestureEventListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnDidTapImpl(Ark_Int32 instanceId,
+                              const UIObserver_GestureEventListenerCallback* callback)
+    {
+        return {};
+    }
+    } // UIObserverGestureEventOpsAccessor
+    namespace UIScrollableCommonEventAccessor {
+    void DestroyPeerImpl(Ark_UIScrollableCommonEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<UIScrollableCommonEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_UIScrollableCommonEvent ConstructImpl(Ark_NativePointer node)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void SetOnReachStartImpl(Ark_UIScrollableCommonEvent peer,
+                             const Opt_Callback_Void* callback_)
+    {
+    }
+    void SetOnReachEndImpl(Ark_UIScrollableCommonEvent peer,
+                           const Opt_Callback_Void* callback_)
+    {
+    }
+    void SetOnScrollStartImpl(Ark_UIScrollableCommonEvent peer,
+                              const Opt_Callback_Void* callback_)
+    {
+    }
+    void SetOnScrollStopImpl(Ark_UIScrollableCommonEvent peer,
+                             const Opt_Callback_Void* callback_)
+    {
+    }
+    void SetOnScrollFrameBeginImpl(Ark_UIScrollableCommonEvent peer,
+                                   const Opt_OnScrollFrameBeginCallback* callback_)
+    {
+    }
+    } // UIScrollableCommonEventAccessor
+    namespace UIScrollEventAccessor {
+    void DestroyPeerImpl(Ark_UIScrollEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<UIScrollEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_UIScrollEvent ConstructImpl(Ark_NativePointer node)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void SetOnWillScrollImpl(Ark_UIScrollEvent peer,
+                             const Opt_ScrollOnWillScrollCallback* callback_)
+    {
+    }
+    void SetOnDidScrollImpl(Ark_UIScrollEvent peer,
+                            const Opt_ScrollOnScrollCallback* callback_)
+    {
+    }
+    } // UIScrollEventAccessor
+    namespace UIWaterFlowEventAccessor {
+    void DestroyPeerImpl(Ark_UIWaterFlowEvent peer)
+    {
+        auto peerImpl = reinterpret_cast<UIWaterFlowEventPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_UIWaterFlowEvent ConstructImpl(Ark_NativePointer node)
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void SetOnWillScrollImpl(Ark_UIWaterFlowEvent peer,
+                             const Opt_OnWillScrollCallback* callback_)
+    {
+    }
+    void SetOnDidScrollImpl(Ark_UIWaterFlowEvent peer,
+                            const Opt_OnScrollCallback* callback_)
+    {
+    }
+    void SetOnScrollIndexImpl(Ark_UIWaterFlowEvent peer,
+                              const Opt_OnWaterFlowScrollIndexCallback* callback_)
+    {
+    }
+    } // UIWaterFlowEventAccessor
     namespace UrlStyleAccessor {
     void DestroyPeerImpl(Ark_UrlStyle peer)
     {
@@ -19379,6 +20740,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void StopImageAnalyzerImpl(Ark_XComponentController peer)
     {
     }
+    Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
+    {
+        return {};
+    }
+    void UnlockCanvasAndPostImpl(Ark_XComponentController peer,
+                                 Ark_drawing_Canvas canvas)
+    {
+    }
+    void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer,
+                                        const Ark_SurfaceConfig* config)
+    {
+    }
     Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
     {
         return {};
@@ -19478,6 +20851,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AccessibilityHoverEventAccessor::SetWindowXImpl,
             AccessibilityHoverEventAccessor::GetWindowYImpl,
             AccessibilityHoverEventAccessor::SetWindowYImpl,
+            AccessibilityHoverEventAccessor::GetGlobalDisplayXImpl,
+            AccessibilityHoverEventAccessor::SetGlobalDisplayXImpl,
+            AccessibilityHoverEventAccessor::GetGlobalDisplayYImpl,
+            AccessibilityHoverEventAccessor::SetGlobalDisplayYImpl,
         };
         return &AccessibilityHoverEventAccessorImpl;
     }
@@ -19530,6 +20907,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct AppearSymbolEffectPeer {
         virtual ~AppearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* GetArcAlphabetIndexerExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor ArcAlphabetIndexerExtenderAccessorImpl {
+            ArcAlphabetIndexerExtenderAccessor::ArcAlphabetIndexerConstructImpl,
+            ArcAlphabetIndexerExtenderAccessor::SetArcAlphabetIndexerInitInfoImpl,
+            ArcAlphabetIndexerExtenderAccessor::ColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedBackgroundColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupBackgroundImpl,
+            ArcAlphabetIndexerExtenderAccessor::UsePopupImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedFontImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupFontImpl,
+            ArcAlphabetIndexerExtenderAccessor::FontImpl,
+            ArcAlphabetIndexerExtenderAccessor::ItemSizeImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedImpl,
+            ArcAlphabetIndexerExtenderAccessor::AutoCollapseImpl,
+            ArcAlphabetIndexerExtenderAccessor::OnSelectImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupBackgroundBlurStyleImpl,
+        };
+        return &ArcAlphabetIndexerExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor()
     {
         static const GENERATED_ArkUIArcListExtenderAccessor ArcListExtenderAccessorImpl {
@@ -19577,6 +20977,44 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArcScrollBarExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUIArcSwiperControllerHelperAccessor* GetArcSwiperControllerHelperAccessor()
+    {
+        static const GENERATED_ArkUIArcSwiperControllerHelperAccessor ArcSwiperControllerHelperAccessorImpl {
+            ArcSwiperControllerHelperAccessor::DestroyPeerImpl,
+            ArcSwiperControllerHelperAccessor::ConstructImpl,
+            ArcSwiperControllerHelperAccessor::GetFinalizerImpl,
+            ArcSwiperControllerHelperAccessor::ShowNextImpl,
+            ArcSwiperControllerHelperAccessor::ShowPreviousImpl,
+            ArcSwiperControllerHelperAccessor::FinishAnimationImpl,
+        };
+        return &ArcSwiperControllerHelperAccessorImpl;
+    }
+
+    struct ArcSwiperControllerHelperPeer {
+        virtual ~ArcSwiperControllerHelperPeer() = default;
+    };
+    const GENERATED_ArkUIArcSwiperExtenderAccessor* GetArcSwiperExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcSwiperExtenderAccessor ArcSwiperExtenderAccessorImpl {
+            ArcSwiperExtenderAccessor::ArcSwiperConstructImpl,
+            ArcSwiperExtenderAccessor::SetConstructInfoImpl,
+            ArcSwiperExtenderAccessor::IndexImpl,
+            ArcSwiperExtenderAccessor::IndicatorImpl,
+            ArcSwiperExtenderAccessor::DurationImpl,
+            ArcSwiperExtenderAccessor::VerticalImpl,
+            ArcSwiperExtenderAccessor::DisableSwipeImpl,
+            ArcSwiperExtenderAccessor::DigitalCrownSensitivityImpl,
+            ArcSwiperExtenderAccessor::OnChangeImpl,
+            ArcSwiperExtenderAccessor::OnAnimationStartImpl,
+            ArcSwiperExtenderAccessor::OnAnimationEndImpl,
+            ArcSwiperExtenderAccessor::OnGestureSwipeImpl,
+            ArcSwiperExtenderAccessor::EffectModeImpl,
+            ArcSwiperExtenderAccessor::CustomContentTransitionImpl,
+            ArcSwiperExtenderAccessor::DisableTransitionAnimationImpl,
+        };
+        return &ArcSwiperExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
     {
         static const GENERATED_ArkUIAxisEventAccessor AxisEventAccessorImpl {
@@ -19602,6 +21040,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::SetYImpl,
             AxisEventAccessor::GetScrollStepImpl,
             AxisEventAccessor::SetScrollStepImpl,
+            AxisEventAccessor::GetGlobalDisplayXImpl,
+            AxisEventAccessor::SetGlobalDisplayXImpl,
+            AxisEventAccessor::GetGlobalDisplayYImpl,
+            AxisEventAccessor::SetGlobalDisplayYImpl,
             AxisEventAccessor::PropagationImpl,
         };
         return &AxisEventAccessorImpl;
@@ -19737,6 +21179,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
             BuilderNodeOpsAccessor::SetOptionsImpl,
             BuilderNodeOpsAccessor::PostTouchEventImpl,
+            BuilderNodeOpsAccessor::PostInputEventImpl,
             BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
         };
         return &BuilderNodeOpsAccessorImpl;
@@ -19788,6 +21231,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasPathAccessor::MoveToImpl,
             CanvasPathAccessor::QuadraticCurveToImpl,
             CanvasPathAccessor::RectImpl,
+            CanvasPathAccessor::RoundRectImpl,
         };
         return &CanvasPathAccessorImpl;
     }
@@ -19987,6 +21431,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
+            ClickEventAccessor::GetGlobalDisplayXImpl,
+            ClickEventAccessor::SetGlobalDisplayXImpl,
+            ClickEventAccessor::GetGlobalDisplayYImpl,
+            ClickEventAccessor::SetGlobalDisplayYImpl,
             ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
@@ -20052,6 +21500,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ColorMetricsLinearGradientPeer {
         virtual ~ColorMetricsLinearGradientPeer() = default;
     };
+    const GENERATED_ArkUIColorShaderStyleAccessor* GetColorShaderStyleAccessor()
+    {
+        static const GENERATED_ArkUIColorShaderStyleAccessor ColorShaderStyleAccessorImpl {
+            ColorShaderStyleAccessor::DestroyPeerImpl,
+            ColorShaderStyleAccessor::ConstructImpl,
+            ColorShaderStyleAccessor::GetFinalizerImpl,
+            ColorShaderStyleAccessor::GetColorImpl,
+            ColorShaderStyleAccessor::SetColorImpl,
+        };
+        return &ColorShaderStyleAccessorImpl;
+    }
+
+    struct ColorShaderStylePeer {
+        virtual ~ColorShaderStylePeer() = default;
+    };
     const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor()
     {
         static const GENERATED_ArkUICommonShapeAccessor CommonShapeAccessorImpl {
@@ -20078,6 +21541,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ConsoleMessageAccessor::GetSourceIdImpl,
             ConsoleMessageAccessor::GetLineNumberImpl,
             ConsoleMessageAccessor::GetMessageLevelImpl,
+            ConsoleMessageAccessor::GetSourceImpl,
         };
         return &ConsoleMessageAccessorImpl;
     }
@@ -20136,6 +21600,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct ContentTransitionEffectPeer {
         virtual ~ContentTransitionEffectPeer() = default;
+    };
+    const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
+    {
+        static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
+            ContextMenuAccessor::CloseImpl,
+        };
+        return &ContextMenuAccessorImpl;
+    }
+    const GENERATED_ArkUIContentTransitionAccessor* GetContentTransitionAccessor()
+    {
+        static const GENERATED_ArkUIContentTransitionAccessor ContentTransitionAccessorImpl {
+            ContentTransitionAccessor::DestroyPeerImpl,
+            ContentTransitionAccessor::ConstructImpl,
+            ContentTransitionAccessor::GetFinalizerImpl,
+        };
+        return &ContentTransitionAccessorImpl;
+    }
+
+    struct ContentTransitionPeer {
+        virtual ~ContentTransitionPeer() = default;
     };
     const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
     {
@@ -20232,6 +21716,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CutEventPeer {
         virtual ~CutEventPeer() = default;
     };
+    const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDataPanelExtenderAccessor DataPanelExtenderAccessorImpl {
+            DataPanelExtenderAccessor::SetTrackShadowImpl,
+            DataPanelExtenderAccessor::NullTrackShadowImpl,
+        };
+        return &DataPanelExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
     {
         static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
@@ -20354,7 +21847,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
             DragEventAccessor::GetDisplayIdImpl,
+            DragEventAccessor::GetDragSourceImpl,
+            DragEventAccessor::IsRemoteImpl,
+            DragEventAccessor::SetDataLoadParamsImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
+            DragEventAccessor::GetGlobalDisplayXImpl,
+            DragEventAccessor::GetGlobalDisplayYImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
@@ -20368,6 +21866,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DragEventPeer {
         virtual ~DragEventPeer() = default;
     };
+    const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor()
+    {
+        static const GENERATED_ArkUIDragUtilsAccessor DragUtilsAccessorImpl {
+            DragUtilsAccessor::GetForegroundColorValueImpl,
+        };
+        return &DragUtilsAccessorImpl;
+    }
     const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
     {
         static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
@@ -20468,6 +21973,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FileSelectorParamAccessor::GetAcceptTypeImpl,
             FileSelectorParamAccessor::IsCaptureImpl,
             FileSelectorParamAccessor::GetMimeTypesImpl,
+            FileSelectorParamAccessor::GetSuggestedNameImpl,
+            FileSelectorParamAccessor::GetDefaultPathImpl,
+            FileSelectorParamAccessor::GetDescriptionsImpl,
+            FileSelectorParamAccessor::IsAcceptAllOptionExcludedImpl,
+            FileSelectorParamAccessor::GetAcceptableFileTypesImpl,
         };
         return &FileSelectorParamAccessorImpl;
     }
@@ -20553,6 +22063,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetInspectorInfoImpl,
             FrameNodeExtenderAccessor::InvalidateImpl,
             FrameNodeExtenderAccessor::DisposeTreeImpl,
+            FrameNodeExtenderAccessor::AddSupportedUIStatesImpl,
+            FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
             FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
@@ -20561,6 +22073,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::LayoutImpl,
             FrameNodeExtenderAccessor::SetNeedsLayoutImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenImpl,
+            FrameNodeExtenderAccessor::GetGlobalPositionOnDisplayImpl,
             FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
@@ -20586,6 +22099,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
             FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
             FrameNodeExtenderAccessor::GetCommonEventImpl,
+            FrameNodeExtenderAccessor::GetInteractionEventBindingInfoImpl,
             FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
             FrameNodeExtenderAccessor::IsOnMainTreeImpl,
             FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
@@ -20621,6 +22135,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct FullScreenExitHandlerPeer {
         virtual ~FullScreenExitHandlerPeer() = default;
     };
+    const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor()
+    {
+        static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
+            GaugeExtenderAccessor::SetIndicatorImpl,
+            GaugeExtenderAccessor::NullIndicatorImpl,
+            GaugeExtenderAccessor::SetTrackShadowImpl,
+            GaugeExtenderAccessor::NullTrackShadowImpl,
+            GaugeExtenderAccessor::SetDescriptionImpl,
+            GaugeExtenderAccessor::NullDescriptionImpl,
+        };
+        return &GaugeExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIGestureAccessor* GetGestureAccessor()
     {
         static const GENERATED_ArkUIGestureAccessor GestureAccessorImpl {
@@ -20706,6 +22233,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::IsValidImpl,
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
+            GestureRecognizerAccessor::PreventBeginImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -20796,6 +22324,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
+            HoverEventAccessor::GetGlobalDisplayXImpl,
+            HoverEventAccessor::SetGlobalDisplayXImpl,
+            HoverEventAccessor::GetGlobalDisplayYImpl,
+            HoverEventAccessor::SetGlobalDisplayYImpl,
             HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
@@ -20841,11 +22373,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttachmentAccessor::ConstructImpl,
             ImageAttachmentAccessor::GetFinalizerImpl,
             ImageAttachmentAccessor::GetValueImpl,
+            ImageAttachmentAccessor::GetResourceValueImpl,
             ImageAttachmentAccessor::GetSizeImpl,
             ImageAttachmentAccessor::GetVerticalAlignImpl,
             ImageAttachmentAccessor::GetObjectFitImpl,
             ImageAttachmentAccessor::GetLayoutStyleImpl,
             ImageAttachmentAccessor::GetColorFilterImpl,
+            ImageAttachmentAccessor::GetSupportSvg2Impl,
+            ImageAttachmentAccessor::GetSizeInVpImpl,
         };
         return &ImageAttachmentAccessorImpl;
     }
@@ -20890,6 +22425,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ImageDataPeer {
         virtual ~ImageDataPeer() = default;
     };
+    const GENERATED_ArkUIIMEClientAccessor* GetIMEClientAccessor()
+    {
+        static const GENERATED_ArkUIIMEClientAccessor IMEClientAccessorImpl {
+            IMEClientAccessor::DestroyPeerImpl,
+            IMEClientAccessor::ConstructImpl,
+            IMEClientAccessor::GetFinalizerImpl,
+            IMEClientAccessor::SetExtraConfigImpl,
+            IMEClientAccessor::GetNodeIdImpl,
+            IMEClientAccessor::SetNodeIdImpl,
+        };
+        return &IMEClientAccessorImpl;
+    }
+
+    struct IMEClientPeer {
+        virtual ~IMEClientPeer() = default;
+    };
     const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor()
     {
         static const GENERATED_ArkUIIndicatorComponentControllerAccessor IndicatorComponentControllerAccessorImpl {
@@ -20918,6 +22469,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::UnbindTabsFromScrollableImpl,
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
+            IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -20958,6 +22510,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::DestroyPeerImpl,
             KeyEventAccessor::ConstructImpl,
             KeyEventAccessor::GetFinalizerImpl,
+            KeyEventAccessor::StopPropagationImpl,
             KeyEventAccessor::GetTypeImpl,
             KeyEventAccessor::SetTypeImpl,
             KeyEventAccessor::GetKeyCodeImpl,
@@ -20972,14 +22525,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::SetMetaKeyImpl,
             KeyEventAccessor::GetTimestampImpl,
             KeyEventAccessor::SetTimestampImpl,
-            KeyEventAccessor::GetStopPropagationImpl,
-            KeyEventAccessor::SetStopPropagationImpl,
             KeyEventAccessor::GetIntentionCodeImpl,
             KeyEventAccessor::SetIntentionCodeImpl,
             KeyEventAccessor::GetGetModifierKeyStateImpl,
             KeyEventAccessor::SetGetModifierKeyStateImpl,
             KeyEventAccessor::GetUnicodeImpl,
             KeyEventAccessor::SetUnicodeImpl,
+            KeyEventAccessor::GetIsNumLockOnImpl,
+            KeyEventAccessor::SetIsNumLockOnImpl,
+            KeyEventAccessor::GetIsCapsLockOnImpl,
+            KeyEventAccessor::SetIsCapsLockOnImpl,
+            KeyEventAccessor::GetIsScrollLockOnImpl,
+            KeyEventAccessor::SetIsScrollLockOnImpl,
         };
         return &KeyEventAccessorImpl;
     }
@@ -21060,6 +22617,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &LazyForEachOpsAccessorImpl;
     }
+    co
+    nst GENERATED_ArkUILeadingMarginSpanAccessor* GetLeadingMarginSpanAccessor()
+    {
+        static const GENERATED_ArkUILeadingMarginSpanAccessor LeadingMarginSpanAccessorImpl {
+            LeadingMarginSpanAccessor::DestroyPeerImpl,
+            LeadingMarginSpanAccessor::ConstructImpl,
+            LeadingMarginSpanAccessor::GetFinalizerImpl,
+            LeadingMarginSpanAccessor::GetOnDraw_callbackImpl,
+            LeadingMarginSpanAccessor::SetOnDraw_callbackImpl,
+            LeadingMarginSpanAccessor::GetGetLeadingMargin_callbackImpl,
+            LeadingMarginSpanAccessor::SetGetLeadingMargin_callbackImpl,
+        };
+        return &LeadingMarginSpanAccessorImpl;
+    }
+
+    struct LeadingMarginSpanPeer {
+        virtual ~LeadingMarginSpanPeer() = default;
+    };
 
     const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
     {
@@ -21121,6 +22696,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LinearGradientPeer {
         virtual ~LinearGradientPeer() = default;
     };
+    const GENERATED_ArkUILinearGradientStyleAccessor* GetLinearGradientStyleAccessor()
+    {
+        static const GENERATED_ArkUILinearGradientStyleAccessor LinearGradientStyleAccessorImpl {
+            LinearGradientStyleAccessor::DestroyPeerImpl,
+            LinearGradientStyleAccessor::ConstructImpl,
+            LinearGradientStyleAccessor::GetFinalizerImpl,
+            LinearGradientStyleAccessor::GetOptionsImpl,
+            LinearGradientStyleAccessor::SetOptionsImpl,
+        };
+        return &LinearGradientStyleAccessorImpl;
+    }
+
+    struct LinearGradientStylePeer {
+        virtual ~LinearGradientStylePeer() = default;
+    };
     const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor()
     {
         static const GENERATED_ArkUILinearIndicatorControllerAccessor LinearIndicatorControllerAccessorImpl {
@@ -21151,6 +22741,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct LineHeightStylePeer {
         virtual ~LineHeightStylePeer() = default;
+    };
+    const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor()
+    {
+        static const GENERATED_ArkUIListItemSwipeActionManagerAccessor ListItemSwipeActionManagerAccessorImpl {
+            ListItemSwipeActionManagerAccessor::DestroyPeerImpl,
+            ListItemSwipeActionManagerAccessor::ConstructImpl,
+            ListItemSwipeActionManagerAccessor::GetFinalizerImpl,
+            ListItemSwipeActionManagerAccessor::ExpandImpl,
+            ListItemSwipeActionManagerAccessor::CollapseImpl,
+        };
+        return &ListItemSwipeActionManagerAccessorImpl;
+    }
+
+    struct ListItemSwipeActionManagerPeer {
+        virtual ~ListItemSwipeActionManagerPeer() = default;
     };
     const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()
     {
@@ -21283,6 +22888,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::DestroyPeerImpl,
             MouseEventAccessor::ConstructImpl,
             MouseEventAccessor::GetFinalizerImpl,
+            MouseEventAccessor::StopPropagationImpl,
             MouseEventAccessor::GetButtonImpl,
             MouseEventAccessor::SetButtonImpl,
             MouseEventAccessor::GetActionImpl,
@@ -21299,14 +22905,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::SetXImpl,
             MouseEventAccessor::GetYImpl,
             MouseEventAccessor::SetYImpl,
-            MouseEventAccessor::GetStopPropagationImpl,
-            MouseEventAccessor::SetStopPropagationImpl,
             MouseEventAccessor::GetRawDeltaXImpl,
             MouseEventAccessor::SetRawDeltaXImpl,
             MouseEventAccessor::GetRawDeltaYImpl,
             MouseEventAccessor::SetRawDeltaYImpl,
             MouseEventAccessor::GetPressedButtonsImpl,
             MouseEventAccessor::SetPressedButtonsImpl,
+            MouseEventAccessor::GetGlobalDisplayXImpl,
+            MouseEventAccessor::SetGlobalDisplayXImpl,
+            MouseEventAccessor::GetGlobalDisplayYImpl,
+            MouseEventAccessor::SetGlobalDisplayYImpl,
         };
         return &MouseEventAccessorImpl;
     }
@@ -21501,6 +23109,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &NodeContentExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUINumericTextTransitionAccessor* GetNumericTextTransitionAccessor()
+    {
+        static const GENERATED_ArkUINumericTextTransitionAccessor NumericTextTransitionAccessorImpl {
+            NumericTextTransitionAccessor::DestroyPeerImpl,
+            NumericTextTransitionAccessor::ConstructImpl,
+            NumericTextTransitionAccessor::GetFinalizerImpl,
+            NumericTextTransitionAccessor::GetFlipDirectionImpl,
+            NumericTextTransitionAccessor::SetFlipDirectionImpl,
+            NumericTextTransitionAccessor::GetEnableBlurImpl,
+            NumericTextTransitionAccessor::SetEnableBlurImpl,
+        };
+        return &NumericTextTransitionAccessorImpl;
+    }
+
+    struct NumericTextTransitionPeer {
+        virtual ~NumericTextTransitionPeer() = default;
+    };
+
     const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
     {
         static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
@@ -21583,6 +23209,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PanRecognizerAccessor::ConstructImpl,
             PanRecognizerAccessor::GetFinalizerImpl,
             PanRecognizerAccessor::GetPanGestureOptionsImpl,
+            PanRecognizerAccessor::GetDirectionImpl,
+            PanRecognizerAccessor::GetDistanceImpl,
+            PanRecognizerAccessor::GetDistanceMapImpl,
         };
         return &PanRecognizerAccessorImpl;
     }
@@ -21597,12 +23226,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ParagraphStyleAccessor::ConstructImpl,
             ParagraphStyleAccessor::GetFinalizerImpl,
             ParagraphStyleAccessor::GetTextAlignImpl,
+            ParagraphStyleAccessor::GetTextVerticalAlignImpl,
             ParagraphStyleAccessor::GetTextIndentImpl,
             ParagraphStyleAccessor::GetMaxLinesImpl,
             ParagraphStyleAccessor::GetOverflowImpl,
             ParagraphStyleAccessor::GetWordBreakImpl,
             ParagraphStyleAccessor::GetLeadingMarginImpl,
             ParagraphStyleAccessor::GetParagraphSpacingImpl,
+            ParagraphStyleAccessor::GetLeadingMarginSpanImpl,
             ParagraphStyleAccessor::GetTextDirectionImpl,
         };
         return &ParagraphStyleAccessorImpl;
@@ -21688,19 +23319,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &PersistentStorageBackendAccessorImpl;
     }
 
-    const GENERATED_ArkUIPickerModifierAccessor* GetPickerModifierAccessor()
-    {
-        static const GENERATED_ArkUIPickerModifierAccessor PickerModifierAccessorImpl {
-            PickerModifierAccessor::DestroyPeerImpl,
-            PickerModifierAccessor::ConstructImpl,
-            PickerModifierAccessor::GetFinalizerImpl,
-        };
-        return &PickerModifierAccessorImpl;
-    }
-
-    struct PickerModifierPeer {
-        virtual ~PickerModifierPeer() = default;
-    };
     const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
     {
         static const GENERATED_ArkUIPinchGestureEventAccessor PinchGestureEventAccessorImpl {
@@ -21790,6 +23408,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct PulseSymbolEffectPeer {
         virtual ~PulseSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIRadialGradientStyleAccessor* GetRadialGradientStyleAccessor()
+    {
+        static const GENERATED_ArkUIRadialGradientStyleAccessor RadialGradientStyleAccessorImpl {
+            RadialGradientStyleAccessor::DestroyPeerImpl,
+            RadialGradientStyleAccessor::ConstructImpl,
+            RadialGradientStyleAccessor::GetFinalizerImpl,
+            RadialGradientStyleAccessor::GetOptionsImpl,
+            RadialGradientStyleAccessor::SetOptionsImpl,
+        };
+        return &RadialGradientStyleAccessorImpl;
+    }
+
+    struct RadialGradientStylePeer {
+        virtual ~RadialGradientStylePeer() = default;
+    };
     const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor()
     {
         static const GENERATED_ArkUIRenderingContextSettingsAccessor RenderingContextSettingsAccessorImpl {
@@ -21867,6 +23500,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ReplaceSymbolEffectAccessor::GetFinalizerImpl,
             ReplaceSymbolEffectAccessor::GetScopeImpl,
             ReplaceSymbolEffectAccessor::SetScopeImpl,
+            ReplaceSymbolEffectAccessor::GetReplaceTypeImpl,
+            ReplaceSymbolEffectAccessor::SetReplaceTypeImpl,
         };
         return &ReplaceSymbolEffectAccessorImpl;
     }
@@ -21919,6 +23554,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorBaseControllerAccessor::CloseSelectionMenuImpl,
             RichEditorBaseControllerAccessor::GetTypingStyleImpl,
             RichEditorBaseControllerAccessor::SetTypingStyleImpl,
+            RichEditorBaseControllerAccessor::SetTypingParagraphStyleImpl,
             RichEditorBaseControllerAccessor::SetSelectionImpl,
             RichEditorBaseControllerAccessor::IsEditingImpl,
             RichEditorBaseControllerAccessor::StopEditingImpl,
@@ -22024,22 +23660,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
     {
         static const GENERATED_ArkUIRouterExtenderAccessor RouterExtenderAccessorImpl {
-            RouterExtenderAccessor::PushImpl,
-            RouterExtenderAccessor::ReplaceImpl,
-            RouterExtenderAccessor::MoveCommonUnderPageNodeImpl,
-            RouterExtenderAccessor::BackImpl,
-            RouterExtenderAccessor::BackWithOptionsImpl,
+            RouterExtenderAccessor::Push0Impl,
+            RouterExtenderAccessor::Push1Impl,
+            RouterExtenderAccessor::Replace0Impl,
+            RouterExtenderAccessor::Replace1Impl,
+            RouterExtenderAccessor::Back0Impl,
+            RouterExtenderAccessor::Back1Impl,
             RouterExtenderAccessor::RunPageImpl,
             RouterExtenderAccessor::ClearImpl,
             RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
             RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
+            RouterExtenderAccessor::GetLengthImpl,
+            RouterExtenderAccessor::GetStateImpl,
+            RouterExtenderAccessor::GetStateByIndexImpl,
+            RouterExtenderAccessor::GetStateByUrlImpl,
+            RouterExtenderAccessor::GetParamsImpl,
             RouterExtenderAccessor::PushNamedRoute0Impl,
             RouterExtenderAccessor::PushNamedRoute1Impl,
             RouterExtenderAccessor::ReplaceNamedRoute0Impl,
             RouterExtenderAccessor::ReplaceNamedRoute1Impl,
             RouterExtenderAccessor::CreateDynamicImpl,
-            RouterExtenderAccessor::PushDynamicImpl,
-            RouterExtenderAccessor::ReplaceDynamicImpl,
+            RouterExtenderAccessor::PushDynamic0Impl,
+            RouterExtenderAccessor::PushDynamic1Impl,
+            RouterExtenderAccessor::ReplaceDynamic0Impl,
+            RouterExtenderAccessor::ReplaceDynamic1Impl,
         };
         return &RouterExtenderAccessorImpl;
     }
@@ -22117,6 +23761,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollerAccessor::IsAtEndImpl,
             ScrollerAccessor::GetItemRectImpl,
             ScrollerAccessor::GetItemIndexImpl,
+            ScrollerAccessor::ContentSizeImpl,
         };
         return &ScrollerAccessorImpl;
     }
@@ -22192,6 +23837,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &SliderExtenderAccessorImpl;
     }
+
+    const GENERATED_ArkUIShaderStyleAccessor* GetShaderStyleAccessor()
+    {
+        static const GENERATED_ArkUIShaderStyleAccessor ShaderStyleAccessorImpl {
+            ShaderStyleAccessor::DestroyPeerImpl,
+            ShaderStyleAccessor::ConstructImpl,
+            ShaderStyleAccessor::GetFinalizerImpl,
+        };
+        return &ShaderStyleAccessorImpl;
+    }
+
+    struct ShaderStylePeer {
+        virtual ~ShaderStylePeer() = default;
+    };
 
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
@@ -22565,6 +24224,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextContentControllerBaseAccessor::ClearPreviewTextImpl,
             TextContentControllerBaseAccessor::GetTextImpl,
             TextContentControllerBaseAccessor::DeleteBackwardImpl,
+            TextContentControllerBaseAccessor::SetStyledPlaceholderImpl,
         };
         return &TextContentControllerBaseAccessorImpl;
     }
@@ -22773,6 +24433,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TouchEventPeer {
         virtual ~TouchEventPeer() = default;
     };
+        const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
+    {
+        static const GENERATED_ArkUITouchRecognizerAccessor TouchRecognizerAccessorImpl {
+            TouchRecognizerAccessor::DestroyPeerImpl,
+            TouchRecognizerAccessor::ConstructImpl,
+            TouchRecognizerAccessor::GetFinalizerImpl,
+            TouchRecognizerAccessor::GetEventTargetInfoImpl,
+            TouchRecognizerAccessor::CancelTouchImpl,
+        };
+        return &TouchRecognizerAccessorImpl;
+    }
+
+    struct TouchRecognizerPeer {
+        virtual ~TouchRecognizerPeer() = default;
+    };
     const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
     {
         static const GENERATED_ArkUITransitionEffectAccessor TransitionEffectAccessorImpl {
@@ -22858,6 +24533,102 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct UIExtensionProxyPeer {
         virtual ~UIExtensionProxyPeer() = default;
+    };
+    const GENERATED_ArkUIUIGridEventAccessor* GetUIGridEventAccessor()
+    {
+        static const GENERATED_ArkUIUIGridEventAccessor UIGridEventAccessorImpl {
+            UIGridEventAccessor::DestroyPeerImpl,
+            UIGridEventAccessor::ConstructImpl,
+            UIGridEventAccessor::GetFinalizerImpl,
+            UIGridEventAccessor::SetOnWillScrollImpl,
+            UIGridEventAccessor::SetOnDidScrollImpl,
+            UIGridEventAccessor::SetOnScrollIndexImpl,
+        };
+        return &UIGridEventAccessorImpl;
+    }
+
+    struct UIGridEventPeer {
+        virtual ~UIGridEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIListEventAccessor* GetUIListEventAccessor()
+    {
+        static const GENERATED_ArkUIUIListEventAccessor UIListEventAccessorImpl {
+            UIListEventAccessor::DestroyPeerImpl,
+            UIListEventAccessor::ConstructImpl,
+            UIListEventAccessor::GetFinalizerImpl,
+            UIListEventAccessor::SetOnWillScrollImpl,
+            UIListEventAccessor::SetOnDidScrollImpl,
+            UIListEventAccessor::SetOnScrollIndexImpl,
+            UIListEventAccessor::SetOnScrollVisibleContentChangeImpl,
+        };
+        return &UIListEventAccessorImpl;
+    }
+
+    struct UIListEventPeer {
+        virtual ~UIListEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* GetUIObserverGestureEventOpsAccessor()
+    {
+        static const GENERATED_ArkUIUIObserverGestureEventOpsAccessor UIObserverGestureEventOpsAccessorImpl {
+            UIObserverGestureEventOpsAccessor::SetOnBeforePanStartImpl,
+            UIObserverGestureEventOpsAccessor::SetOnBeforePanEndImpl,
+            UIObserverGestureEventOpsAccessor::SetOnAfterPanStartImpl,
+            UIObserverGestureEventOpsAccessor::SetOnAfterPanEndImpl,
+            UIObserverGestureEventOpsAccessor::SetOnWillClickImpl,
+            UIObserverGestureEventOpsAccessor::SetOnDidClickImpl,
+            UIObserverGestureEventOpsAccessor::SetOnWillTapImpl,
+            UIObserverGestureEventOpsAccessor::SetOnDidTapImpl,
+        };
+        return &UIObserverGestureEventOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIUIScrollableCommonEventAccessor* GetUIScrollableCommonEventAccessor()
+    {
+        static const GENERATED_ArkUIUIScrollableCommonEventAccessor UIScrollableCommonEventAccessorImpl {
+            UIScrollableCommonEventAccessor::DestroyPeerImpl,
+            UIScrollableCommonEventAccessor::ConstructImpl,
+            UIScrollableCommonEventAccessor::GetFinalizerImpl,
+            UIScrollableCommonEventAccessor::SetOnReachStartImpl,
+            UIScrollableCommonEventAccessor::SetOnReachEndImpl,
+            UIScrollableCommonEventAccessor::SetOnScrollStartImpl,
+            UIScrollableCommonEventAccessor::SetOnScrollStopImpl,
+            UIScrollableCommonEventAccessor::SetOnScrollFrameBeginImpl,
+        };
+        return &UIScrollableCommonEventAccessorImpl;
+    }
+
+    struct UIScrollableCommonEventPeer {
+        virtual ~UIScrollableCommonEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIScrollEventAccessor* GetUIScrollEventAccessor()
+    {
+        static const GENERATED_ArkUIUIScrollEventAccessor UIScrollEventAccessorImpl {
+            UIScrollEventAccessor::DestroyPeerImpl,
+            UIScrollEventAccessor::ConstructImpl,
+            UIScrollEventAccessor::GetFinalizerImpl,
+            UIScrollEventAccessor::SetOnWillScrollImpl,
+            UIScrollEventAccessor::SetOnDidScrollImpl,
+        };
+        return &UIScrollEventAccessorImpl;
+    }
+
+    struct UIScrollEventPeer {
+        virtual ~UIScrollEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIWaterFlowEventAccessor* GetUIWaterFlowEventAccessor()
+    {
+        static const GENERATED_ArkUIUIWaterFlowEventAccessor UIWaterFlowEventAccessorImpl {
+            UIWaterFlowEventAccessor::DestroyPeerImpl,
+            UIWaterFlowEventAccessor::ConstructImpl,
+            UIWaterFlowEventAccessor::GetFinalizerImpl,
+            UIWaterFlowEventAccessor::SetOnWillScrollImpl,
+            UIWaterFlowEventAccessor::SetOnDidScrollImpl,
+            UIWaterFlowEventAccessor::SetOnScrollIndexImpl,
+        };
+        return &UIWaterFlowEventAccessorImpl;
+    }
+
+    struct UIWaterFlowEventPeer {
+        virtual ~UIWaterFlowEventPeer() = default;
     };
     const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
     {
@@ -23055,6 +24826,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
             XComponentControllerAccessor::StartImageAnalyzerImpl,
             XComponentControllerAccessor::StopImageAnalyzerImpl,
+            XComponentControllerAccessor::LockCanvasImpl,
+            XComponentControllerAccessor::UnlockCanvasAndPostImpl,
+            XComponentControllerAccessor::SetXComponentSurfaceConfigImpl,
             XComponentControllerAccessor::GetOnSurfaceCreatedImpl,
             XComponentControllerAccessor::SetOnSurfaceCreatedImpl,
             XComponentControllerAccessor::GetOnSurfaceChangedImpl,
@@ -23100,9 +24874,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAlertDialogAccessor,
             GetAnimationExtenderAccessor,
             GetAppearSymbolEffectAccessor,
+            GetArcAlphabetIndexerExtenderAccessor,
             GetArcListExtenderAccessor,
             GetArcListItemExtenderAccessor,
-            GetArcScrollBarExtenderAccessor,
+            GetArcSwiperControllerHelperAccessor,
+            GetArcSwiperExtenderAccessor,
             GetAxisEventAccessor,
             GetBackgroundColorStyleAccessor,
             GetBaseEventAccessor,
@@ -23123,17 +24899,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetClientAuthenticationHandlerAccessor,
             GetColorContentAccessor,
             GetColorFilterAccessor,
+            GetColorShaderStyleAccessor,
             GetColorMetricsLinearGradientAccessor,
             GetCommonShapeAccessor,
             GetConsoleMessageAccessor,
             GetContentModifierHelperAccessor,
+            GetContentTransitionAccessor,
             GetContentTransitionEffectAccessor,
+            GetContextMenuAccessor,
             GetControllerHandlerAccessor,
             GetCopyEventAccessor,
             GetCustomDialogControllerAccessor,
             GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
             GetCutEventAccessor,
+            GetDataPanelExtenderAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
@@ -23142,6 +24922,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
             GetDragEventAccessor,
+            GetDragUtilsAccessor,
             GetDrawingRenderingContextAccessor,
             GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,
@@ -23156,6 +24937,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFrameNodeExtenderAccessor,
             GetFrictionMotionAccessor,
             GetFullScreenExitHandlerAccessor,
+            GetGaugeExtenderAccessor,
             GetGestureAccessor,
             GetGestureEventAccessor,
             GetGestureGroupAccessor,
@@ -23171,6 +24953,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetImageAnalyzerControllerAccessor,
             GetImageAttachmentAccessor,
             GetImageBitmapAccessor,
+            GetIMEClientAccessor,
             GetImageDataAccessor,
             GetIndicatorComponentControllerAccessor,
             GetIUIContextAccessor,
@@ -23182,12 +24965,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLayoutPolicyAccessor,
             GetLazyBuildAccessor,
             GetLazyForEachOpsAccessor,
+            GetLeadingMarginSpanAccessor,
             GetLetterSpacingStyleAccessor,
             GetLevelOrderExtenderAccessor,
             GetLifeCycleAccessor,
             GetLinearGradientAccessor,
+            GetLinearGradientStyleAccessor,
             GetLinearIndicatorControllerAccessor,
             GetLineHeightStyleAccessor,
+            GetListItemSwipeActionManagerAccessor,
             GetListScrollerAccessor,
             GetLongPressGestureEventAccessor,
             GetLongPressRecognizerAccessor,
@@ -23202,6 +24988,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNavPathInfoAccessor,
             GetNavPathStackAccessor,
             GetNodeContainerOpsAccessor,
+            GetNumericTextTransitionAccessor,
             GetNodeContentExtenderAccessor,
             GetOffscreenCanvasAccessor,
             GetOffscreenCanvasRenderingContext2DAccessor,
@@ -23214,13 +25001,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPatternLockControllerAccessor,
             GetPermissionRequestAccessor,
             GetPersistentStorageBackendAccessor,
-            GetPickerModifierAccessor,
             GetPinchGestureEventAccessor,
             GetPinchRecognizerAccessor,
             GetPixelMapMockAccessor,
             GetProgressMaskAccessor,
             GetPromptActionExtenderAccessor,
             GetPulseSymbolEffectAccessor,
+            GetRadialGradientStyleAccessor,
             GetRenderingContextSettingsAccessor,
             GetRenderNodeExtenderAccessor,
             GetRenderServiceNodeAccessor,
@@ -23242,6 +25029,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetScrollResultAccessor,
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
+            GetShaderStyleAccessor,
             GetSelectExtenderAccessor,
             GetSliderExtenderAccessor,
             GetSpringMotionAccessor,
@@ -23280,10 +25068,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
             GetTouchEventAccessor,
+            GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,
             GetUIContextAtomicServiceBarAccessor,
             GetUIExtensionProxyAccessor,
+            GetUIGridEventAccessor,
+            GetUIListEventAccessor,
+            GetUIObserverGestureEventOpsAccessor,
+            GetUIScrollableCommonEventAccessor,
+            GetUIScrollEventAccessor,
+            GetUIWaterFlowEventAccessor,
             GetUrlStyleAccessor,
             GetVideoControllerAccessor,
             GetWaterFlowSectionsAccessor,

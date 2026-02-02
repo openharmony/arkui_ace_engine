@@ -138,6 +138,10 @@ public:
         return true;
     }
     virtual void OnHandleIsHidden() {}
+    virtual bool OnHandleBeforeMenuVisibiltyChanged(bool isVisible)
+    {
+        return false;
+    }
 
 private:
     bool isIntercept_ = false;

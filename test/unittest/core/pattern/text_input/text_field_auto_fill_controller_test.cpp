@@ -610,4 +610,67 @@ HWTEST_F(TextFieldAutoFillControllerTest, ResetAutoFillAnimationStatus001, TestS
     autoFillController->ResetAutoFillAnimationStatus();
     ASSERT_EQ(autoFillController->GetAutoFillAnimationStatus(), AutoFillAnimationStatus::INIT);
 }
+/**
+ * @tc.name: GetTextDirection001
+ * @tc.desc: Test GetTextDirection with explicit LTR text direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAutoFillControllerTest, GetTextDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {});
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+
+    /**
+     * @tc.steps: step2. Get layout property and set explicit LTR text direction
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL; // Layout is RTL
+    layoutProperty->UpdateTextDirection(TextDirection::LTR);   // But text is explicitly LTR
+
+    /**
+     * @tc.steps: step3. Call GetTextDirection
+     */
+    auto direction = autoFillController->GetTextDirection(layoutProperty);
+
+    /**
+     * @tc.expected: Return explicit text direction (LTR)
+     */
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: GetTextDirection002
+ * @tc.desc: Test GetTextDirection with INHERIT text direction and RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAutoFillControllerTest, GetTextDirection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {});
+    auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
+    pattern_->autoFillController_ = autoFillController;
+
+    /**
+     * @tc.steps: step2. Get layout property and set layout direction
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    layoutProperty->UpdateTextDirection(TextDirection::INHERIT);
+
+    /**
+     * @tc.steps: step3. Call GetTextDirection
+     */
+    auto direction = autoFillController->GetTextDirection(layoutProperty);
+
+    /**
+     * @tc.expected: Return layout direction (RTL) when text direction is INHERIT
+     */
+    EXPECT_EQ(direction, TextDirection::RTL);
+}
 } // namespace OHOS::Ace::NG

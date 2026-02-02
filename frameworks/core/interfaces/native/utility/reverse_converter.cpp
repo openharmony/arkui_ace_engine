@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -130,6 +131,14 @@ void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>
     dragEvent = peer;
 }
 
+void AssignArkValue(
+    Ark_dragController_SpringLoadingContext& dst, const RefPtr<OHOS::Ace::DragSpringLoadingContext>& src)
+{
+    const auto peer = PeerUtils::CreatePeer<DragController_SpringLoadingContextPeer>();
+    peer->context = src;
+    dst = peer;
+}
+
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 {
     auto data = JsonUtil::ParseJsonString(src);
@@ -205,7 +214,7 @@ void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
 
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
-    dst.radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
+    dst.radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
     dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
         src.GetColor().ColorToString(), ctx);
@@ -681,6 +690,80 @@ void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& s
     }
 }
 
+void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx)
+{
+    // Set center
+    Ark_Tuple_Length_Length center = {};
+    const auto& radialGradient = src.GetRadialGradient();
+    if (radialGradient->radialCenterX.has_value()) {
+        AssignArkValue(center.value0, radialGradient->radialCenterX.value(), ctx);
+    } else {
+        center.value0 = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default center x: 50%
+    }
+    if (radialGradient->radialCenterY.has_value()) {
+        AssignArkValue(center.value1, radialGradient->radialCenterY.value(), ctx);
+    } else {
+        center.value1 = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default center y: 50%
+    }
+    dst.center = center;
+    
+    // Set radius
+    if (radialGradient->radialHorizontalSize.has_value()) {
+        AssignArkValue(dst.radius, radialGradient->radialHorizontalSize.value(), ctx);
+    } else if (radialGradient->radialVerticalSize.has_value()) {
+        AssignArkValue(dst.radius, radialGradient->radialVerticalSize.value(), ctx);
+    } else {
+        dst.radius = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default radius: 50%
+    }
+    
+    // Set colors
+    std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
+    const auto& colors = src.GetColors();
+    for (const auto& gradientColor : colors) {
+        Ark_Tuple_ResourceColor_F64 colorStop = {};
+        colorStop.value0 = ArkUnion<Ark_ResourceColor, Ark_String>(gradientColor.GetColor().ColorToString(), ctx);
+        // Convert percentage back to [0, 1] range
+        float offset = gradientColor.GetDimension().Value() / 100.0f;
+        colorStop.value1 = offset;
+        colorStops.push_back(colorStop);
+    }
+    dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
+    
+    // Set repeating
+    dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
+}
+
+void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx)
+{
+    // Set angle
+    const auto& linearGradient = src.GetLinearGradient();
+    if (linearGradient->angle.has_value()) {
+        const auto& angleValue = linearGradient->angle.value();
+        dst.angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(angleValue.ToString(), ctx);
+    } else {
+        dst.angle = Converter::ArkUnion<Opt_Union_F64_String>(Ark_Empty());
+    }
+    
+    // Set direction
+    dst.direction = Converter::ArkValue<Opt_GradientDirection>(Ark_Empty());
+    
+    // Set colors
+    std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
+    const auto& colors = src.GetColors();
+    for (const auto& gradientColor : colors) {
+        Ark_Tuple_ResourceColor_F64 colorStop = {};
+        colorStop.value0 = ArkUnion<Ark_ResourceColor, Ark_String>(gradientColor.GetColor().ColorToString(), ctx);
+        // Convert percentage back to [0, 1] range
+        float offset = gradientColor.GetDimension().Value() / 100.0f;
+        colorStop.value1 = offset;
+        colorStops.push_back(colorStop);
+    }
+    dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
+    
+    // Set repeating
+    dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
+}
+
 void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
 {
     dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
@@ -763,6 +846,7 @@ std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const
         borderRadius.radiusTopRight = Dimension::FromString(json->GetString("topRight"));
         borderRadius.radiusBottomLeft = Dimension::FromString(json->GetString("bottomLeft"));
         borderRadius.radiusBottomRight = Dimension::FromString(json->GetString("bottomRight"));
+        borderRadius.multiValued = true;
     } else {
         LOGE("Unexpected Border Radius String:%{public}s", ss.c_str());
         return std::nullopt;
@@ -781,10 +865,11 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);
     CHECK_NULL_VOID(borderRadius.has_value());
     if (borderRadius->multiValued) {
-        auto arkBorder = ArkValue<Ark_BorderRadiuses>(borderRadius.value());
-        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
+        auto arkBorder = ArkValue<Ark_BorderRadiuses>(borderRadius.value(), Converter::FC);
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(arkBorder, Converter::FC);
     } else {
-        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(borderRadius->radiusTopLeft);
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(borderRadius->radiusTopLeft,
+            Converter::FC);
     }
 }
 

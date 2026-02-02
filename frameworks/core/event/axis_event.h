@@ -31,7 +31,7 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 
-struct AxisEvent final : public PointerEvent {
+struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
     ~AxisEvent() = default;
     int32_t id = 0;
 
@@ -65,6 +65,7 @@ struct AxisEvent final : public PointerEvent {
 
     int32_t scrollStep = 0;
     uint32_t axes = 0;
+    bool isFalsifyCancel = false;
 
     AxisEvent()
     {
@@ -86,6 +87,7 @@ struct AxisEvent final : public PointerEvent {
     }
 
     AxisEvent CreateScaleEvent(float scale) const;
+    AxisEvent CloneWith(float scale) const;
     Offset GetOffset() const;
     Offset GetScreenOffset() const;
     Offset GetGlobalDisplayOffset() const;
@@ -126,6 +128,7 @@ public:
     const Offset& GetLocalLocation() const;
     const Offset& GetGlobalLocation() const;
     AxisEvent ConvertToAxisEvent() const;
+    const std::shared_ptr<const MMI::PointerEvent>& GetPointerEvent() const;
 
 private:
     AxisAction action_ = AxisAction::NONE;
@@ -141,6 +144,7 @@ private:
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent_;
 };
 
 class CoastingAxisInfo {

@@ -22,7 +22,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -2920,10 +2923,13 @@ ArkUINativeModuleValue TextInputBridge::SetStrokeColor(ArkUIRuntimeCallInfo *run
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputStrokeColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputStrokeColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputStrokeColor(nativeNode, color.GetValue(),
+            AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }

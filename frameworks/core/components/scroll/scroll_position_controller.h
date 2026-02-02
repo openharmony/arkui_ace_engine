@@ -69,7 +69,7 @@ private:
 };
 
 using ScrollEventFunc = std::function<void(std::shared_ptr<ScrollEventInfo>&)>;
-class ACE_EXPORT ScrollPositionController : public ScrollController {
+class ACE_FORCE_EXPORT ScrollPositionController : public ScrollController {
     DECLARE_ACE_TYPE(ScrollPositionController, ScrollController);
 
 public:

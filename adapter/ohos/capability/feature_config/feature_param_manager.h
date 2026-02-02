@@ -35,16 +35,19 @@ public:
     void Init(const std::string& bundleName, std::vector<OHOS::AppExecFwk::Metadata>& metaData);
 
     // SyncLoadParser
-    void SetSyncLoadEnableParam(bool enabled, uint32_t deadline);
+    void SetSyncLoadEnableParam(bool enabled, uint32_t deadline, int64_t startupDelay);
     bool IsSyncLoadEnabled() const;
     uint32_t GetSyncloadResponseDeadline() const;
+    int64_t GetSyncLoadStartupDelay() const;
     // UINodeGcParamParser
     void SetUINodeGcEnabled(bool enabled);
     bool IsUINodeGcEnabled() const;
 
     bool IsPageOverflowEnabled() const;
     bool IsDialogCorrectionEnabled() const;
+    bool IsRnOverflowEnable() const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
+    void SetUiCorrectionRnEnableParam(bool rnOverflowEnabled);
 private:
     void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
@@ -55,15 +58,17 @@ private:
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
-    std::shared_ptr<ConfigParserBase> featureParser_;
-    std::shared_ptr<ConfigParserBase> uiCorrectionParser_;
+    std::shared_ptr<ConfigParserBase> featureParser_ = nullptr;
+    std::shared_ptr<ConfigParserBase> uiCorrectionParser_ = nullptr;
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
+    int64_t syncLoadStartupDelay_ = 0;
     // UINodeGcParamParser
     bool uiNodeGcEnabled_ = false;
     bool pageOverflowEnabled_ = false;
     bool dialogCorrectionEnabled_ = false;
+    bool rnOverflowEnabled_ = false;
 
     friend class ConfigParserBase;
     friend class SyncLoadParser;

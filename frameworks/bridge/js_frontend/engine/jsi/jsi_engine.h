@@ -37,16 +37,18 @@ public:
     {}
     ~JsiEngineInstance() override;
     static std::map<const std::string, std::string> dataMap_;
-    RefPtr<JsAcePage> GetRunningPage() const;
+    ACE_FORCE_EXPORT RefPtr<JsAcePage> GetRunningPage() const;
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     RefPtr<JsAcePage> GetStagingPage() const;
     void SetStagingPage(const RefPtr<JsAcePage>& page);
     void ResetStagingPage(const RefPtr<JsAcePage>& page);
     void SetJsMessageDispatcher(const WeakPtr<JsMessageDispatcher>& dispatcher);
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const;
-    RefPtr<FrontendDelegate> GetFrontendDelegate() const;
+    ACE_FORCE_EXPORT RefPtr<FrontendDelegate> GetFrontendDelegate() const;
     bool FireJsEvent(const std::string& eventStr);
     void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
+    bool CallJsWithReturnBool(
+        const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal = false);
     shared_ptr<JsRuntime> GetJsRuntime() const;
     bool InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject);
     // add Console object to worker
@@ -140,6 +142,8 @@ public:
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
+
+    bool OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args) override;
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 

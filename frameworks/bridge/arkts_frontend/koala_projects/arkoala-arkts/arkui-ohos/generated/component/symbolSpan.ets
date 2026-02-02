@@ -341,8 +341,6 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
 export function SymbolSpanImpl(
     @memo
     style: ((attributes: SymbolSpanAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkSymbolSpanComponent>((): ArkSymbolSpanComponent => {
         return new ArkSymbolSpanComponent()
@@ -351,7 +349,6 @@ export function SymbolSpanImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

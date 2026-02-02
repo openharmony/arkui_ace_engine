@@ -141,6 +141,12 @@ public:
         return itemLayoutConstraint_ != nullptr;
     }
 
+    void ResetItemLayoutConstraint()
+    {
+        itemLayoutConstraint_.reset();
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
     std::optional<std::string> GetFinalColumnsTemplate(double width);

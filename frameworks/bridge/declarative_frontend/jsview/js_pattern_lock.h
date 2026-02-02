@@ -16,57 +16,25 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PATTERN_LOCK_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PATTERN_LOCK_H
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
-class JSPatternLock : public JSViewAbstract {
-public:
-    static void Create(const JSCallbackInfo& info);
-    static void JSBind(BindingTarget globalObj);
-    static void SetSelectedColor(const JSCallbackInfo& info);
-    static void SetActiveColor(const JSCallbackInfo& info);
-    static void SetPathColor(const JSCallbackInfo& info);
-    static void SetRegularColor(const JSCallbackInfo& info);
-    static void SetCircleRadius(const JSCallbackInfo& info);
-    static void SetSideLength(const JSCallbackInfo& info);
-    static void SetPathStrokeWidth(const JSCallbackInfo& info);
-    static void SetAutoReset(const JSCallbackInfo& info);
-    static void SetActiveCircleColor(const JSRef<JSVal>& info);
-    static void SetActiveCircleRadius(const JSRef<JSVal>& info);
-    static void SetEnableWaveEffect(const JSRef<JSVal>& info);
-    static void SetEnableForeground(const JSRef<JSVal>& info);
-    static void SetActivateCircleStyle(const JSCallbackInfo& info);
-    static void SetSkipUnselectedPoint(const JSCallbackInfo& info);
-
-protected:
-    static void SetPatternComplete(const JSCallbackInfo& info);
-    static void SetDotConnect(const JSCallbackInfo& info);
-
-private:
-    static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockComponent>& patternLock);
-    static JSRef<JSArray> ChoosePointToJSValue(std::vector<int> input);
-};
-
-class JSPatternLockController final : public Referenced {
+class JSPatternLockController : public Referenced {
 public:
     JSPatternLockController() = default;
     ~JSPatternLockController() override = default;
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSPatternLockController* controller);
-    void Reset(const JSCallbackInfo& args);
-    void SetChallengeResult(const JSCallbackInfo& args);
     void SetController(const RefPtr<V2::PatternLockController>& controller)
     {
         controller_ = controller;
     }
+    RefPtr<V2::PatternLockController> GetController()
+    {
+        return controller_;
+    }
 
 private:
+    friend class JSPatternLockControllerBinding;
     RefPtr<V2::PatternLockController> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSPatternLockController);
 };

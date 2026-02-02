@@ -542,11 +542,16 @@ HWTEST_F(FormPatternTest, FormPatternTest_014, TestSize.Level1)
     uint32_t windowId = 0;
     int32_t treeId = 0;
     int64_t accessibilityId = 0;
-    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    bool ret = pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
+    EXPECT_EQ(ret, true);
 
     pattern->OnAccessibilityChildTreeDeregister();
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
+
+    pattern->formManagerBridge_ = nullptr;
+    ret = pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -1681,6 +1686,13 @@ HWTEST_F(FormPatternTest, FormPatternTest_042, TestSize.Level1)
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
+
+    pattern->isUnTrust_ = true;
+    float width = 100;
+    float height = 100;
+    float borderWidth = 100;
+    pattern->FireFormSurfaceChangeCallback(width, height, borderWidth);
+    EXPECT_EQ(pattern->isUnTrust_, false);
 }
 
 /**
@@ -2109,14 +2121,14 @@ HWTEST_F(FormPatternTest, FormPatternTest_059, TestSize.Level0)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    float width = 0.1;
-    float height = 0.1;
-    float layoutWidth = 0;
-    float layoutHeight = 0;
+    float width = 0;
+    float height = 0;
+    float layoutWidth = 0.1;
+    float layoutHeight = 0.1;
     float viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
     EXPECT_EQ(viewScale, DEFAULT_VIEW_SCALE);
-    width = 90;
-    height = 90;
+    width = 80;
+    height = 80;
     layoutWidth = 140;
     layoutHeight = 140;
     viewScale = pattern->CalculateViewScale(width, height, layoutWidth, layoutHeight);
@@ -2228,7 +2240,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_SetColorMode, TestSize.Level0)
     // pattern not null
     EXPECT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->formColorMode_, -1);
- 
+
     pattern->SetColorMode(0);
     EXPECT_EQ(pattern->formColorMode_, 0);
 }
@@ -2246,5 +2258,37 @@ HWTEST_F(FormPatternTest, FormPatternTest_064, TestSize.Level0)
     EXPECT_NE(pattern, nullptr);
     pattern->GetRSUIContext();
     EXPECT_FALSE(pattern->rsUIContext_ != nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest_065
+ * @tc.desc: OnAttachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_065, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->isDetachContext_ = true;
+    pattern->OnAttachContext(nullptr);
+    EXPECT_FALSE(pattern->isDetachContext_);
+}
+
+/**
+ * @tc.name: FormPatternTest_066
+ * @tc.desc: OnDetachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_066, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->isDetachContext_ = false;
+    pattern->OnDetachContext(nullptr);
+    EXPECT_TRUE(pattern->isDetachContext_);
 }
 } // namespace OHOS::Ace::NG

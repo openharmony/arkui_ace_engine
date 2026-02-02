@@ -199,6 +199,8 @@ enum class EllipsisMode {
     HEAD,
     MIDDLE,
     TAIL,
+    MULTILINE_HEAD,
+    MULTILINE_MIDDLE,
 };
 
 enum class TextFlipDirection {
@@ -206,27 +208,9 @@ enum class TextFlipDirection {
     UP,
 };
 namespace StringUtils {
-inline std::string ToString(const TextFlipDirection& textFlipDirection)
-{
-    static const LinearEnumMapNode<TextFlipDirection, std::string> table[] = {
-        { TextFlipDirection::DOWN, "down" },
-        { TextFlipDirection::UP, "up" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
-    return iter != -1 ? table[iter].value : "";
-}
+std::string ToString(const TextFlipDirection& textFlipDirection);
 
-inline std::string ToString(const TextDirection& textDirection)
-{
-    static const LinearEnumMapNode<TextDirection, std::string> table[] = {
-        { TextDirection::LTR, "LTR" },
-        { TextDirection::RTL, "RTL" },
-        { TextDirection::INHERIT, "DEFAULT" },
-        { TextDirection::AUTO, "AUTO" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
-    return iter != -1 ? table[iter].value : "";
-}
+std::string ToString(const TextDirection& textDirection);
 } // namespace StringUtils
 
 namespace StringUtils {
@@ -863,6 +847,36 @@ public:                                                                         
         symbolTextStyle_->Set##name(newValue);                                        \
     }
 
+// implement lazy loading and deep copy
+template<class K, class V>
+class ResourceMap {
+public:
+    ResourceMap() = default;
+    ResourceMap(const ResourceMap<K, V>& other)
+    {
+        CopyMap(other);
+    }
+    ResourceMap& operator=(const ResourceMap<K, V>& other)
+    {
+        CopyMap(other);
+        return *this;
+    }
+    size_t Size()
+    {
+        return map_ ? map_->size() : 0;
+    }
+    std::unique_ptr<std::unordered_map<K, V>> map_;
+private:
+    void CopyMap(const ResourceMap<K, V>& other)
+    {
+        if (other.map_) {
+            map_ = std::make_unique<std::unordered_map<K, V>>(*other.map_);
+        } else {
+            map_.reset();
+        }
+    }
+};
+
 class ACE_EXPORT TextStyle final {
 public:
     TextStyle() = default;
@@ -875,8 +889,8 @@ public:
     TextStyle(const Color& textColor) : propTextColor_(textColor) {}
     ~TextStyle() = default;
 
-    bool operator==(const TextStyle& rhs) const;
-    bool operator!=(const TextStyle& rhs) const;
+    ACE_FORCE_EXPORT bool operator==(const TextStyle& rhs) const;
+    ACE_FORCE_EXPORT bool operator!=(const TextStyle& rhs) const;
 
     static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
         const NG::InspectorFilter& filter);
@@ -1130,7 +1144,7 @@ public:
 
     // Only used in old frames.
     // start
-    void SetAdaptTextSize(
+    ACE_FORCE_EXPORT void SetAdaptTextSize(
         const Dimension& maxFontSize, const Dimension& minFontSize, const Dimension& fontSizeStep = 1.0_px);
 
     bool GetAdaptHeight() const
@@ -1371,7 +1385,7 @@ private:
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, TextStyle&)> updateFunc;
     };
-    std::unordered_map<std::string, resourceUpdater> resMap_;
+    ResourceMap<std::string, resourceUpdater> resMap_;
 };
 
 namespace StringUtils {

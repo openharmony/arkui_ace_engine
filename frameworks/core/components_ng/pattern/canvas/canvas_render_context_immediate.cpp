@@ -20,10 +20,13 @@
 namespace OHOS::Ace::NG {
 void CanvasRenderContextImmediate::PushTask(std::function<void(CanvasPaintMethod&)>&& task)
 {
-    if (paintMethod_) {
-        task(*paintMethod_);
-    }
     needRender_ = true;
+    CHECK_NULL_VOID(paintMethod_);
+    if (!isVisible_) {
+        paintMethod_->ClearRecordingCanvas();
+        return;
+    }
+    task(*paintMethod_);
 }
 
 bool CanvasRenderContextImmediate::NeedRender() const

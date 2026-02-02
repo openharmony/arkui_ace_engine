@@ -47,9 +47,11 @@ int32_t UIContentServiceStubImpl::RegisterTextChangeEventCallback(const EventCal
     UiSessionManager::GetInstance()->SetTextChangeEventRegistered(true);
     return NO_ERROR;
 }
-int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
+int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(const EventCallback& eventCallback,
+    uint32_t mask)
 {
     UiSessionManager::GetInstance()->SetComponentChangeEventRegistered(true);
+    UiSessionManager::GetInstance()->SetComponentChangeEventMask(mask);
     return NO_ERROR;
 }
 
@@ -120,6 +122,7 @@ int32_t UIContentServiceStubImpl::UnregisterRouterChangeEventCallback()
 int32_t UIContentServiceStubImpl::UnregisterComponentChangeEventCallback()
 {
     UiSessionManager::GetInstance()->SetComponentChangeEventRegistered(false);
+    UiSessionManager::GetInstance()->SetComponentChangeEventMask(ComponentEventType::COMPONENT_EVENT_NONE);
     return NO_ERROR;
 }
 
@@ -210,6 +213,18 @@ int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::GetImagesById(
+    const std::vector<int32_t>& arkUIIds,
+    const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+        MultiImageQueryErrorCode)>& arkUIfinishCallback,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs,
+    const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    UiSessionManager::GetInstance()->GetMultiImagesById(arkUIIds, arkWebs);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance()->GetCurrentPageName();
@@ -268,6 +283,15 @@ int32_t UIContentServiceStubImpl::GetStateMgmtInfo(const std::string& componentN
     const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback)
 {
     UiSessionManager::GetInstance()->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::GetWebInfoByRequest(
+    int32_t webId,
+    const std::string& request,
+    const GetWebInfoByRequestCallback& finishCallback)
+{
+    UiSessionManager::GetInstance()->GetWebInfoByRequest(webId, request);
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

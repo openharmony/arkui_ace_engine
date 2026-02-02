@@ -15,14 +15,13 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("calendar_picker_test_ng") {
   type = "new"
-  module_name = "Component-Picker"
-  module_output = ""
+  module_name = "DFX-Logs"
   sources = [
     "calendar_dialog_pattern_test_ng.cpp",
     "calendar_dialog_view_test_ng.cpp",
     "calendar_picker_layout_algorithm_test.cpp",
-    "calendar_picker_pattern_test_ng.cpp",
     "calendar_picker_pattern_test.cpp",
+    "calendar_picker_pattern_test_ng.cpp",
     "calendar_picker_resource_test.cpp",
     "calendar_picker_test_ng.cpp",
     "calendar_picker_test_tojson.cpp",

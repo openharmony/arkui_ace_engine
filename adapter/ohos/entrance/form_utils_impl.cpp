@@ -109,8 +109,8 @@ int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
     return externalErrorCode;
 }
 
-int32_t FormUtilsImpl::BackgroundEvent(
-    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
+int32_t FormUtilsImpl::BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
+    const std::string& defaultBundleName, bool isManuallyClick)
 {
     ContainerScope scope(containerId);
     auto container = Container::Current();
@@ -149,6 +149,7 @@ int32_t FormUtilsImpl::BackgroundEvent(
         }
     }
     want.SetParam("params", params->ToString());
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_MANUAL_CLICK_KEY, isManuallyClick);
     return AppExecFwk::FormMgr::GetInstance().BackgroundEvent(formId, want, token);
 }
 } // namespace OHOS::Ace

@@ -57,11 +57,11 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
 RefPtr<UINode> FindAccessibleFocusNode(const RefPtr<UINode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
-    bool isPasteOption = SelectContentOverlayManager::IsPasteOption(node);
-    auto child = node->GetFirstChild();
-    if (isPasteOption && child) {
-        return child->GetFirstChild();
+    auto pasteButtonNode = SelectContentOverlayManager::GetSecurityPasteButtonNode(node);
+    if (pasteButtonNode) {
+        return pasteButtonNode;
     }
+    auto child = node->GetFirstChild();
     if (node->GetTag() == V2::MENU_ITEM_ETS_TAG || node->GetTag() == "SelectMenuButton" ||
         node->GetTag() == V2::PASTE_BUTTON_ETS_TAG || node->GetTag() == V2::OPTION_ETS_TAG ||
         node->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -916,14 +916,20 @@ void SelectContentOverlayManager::ShowOptionMenu()
 {
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
+    if (HandleMenuVisibilityChanged(true)) {
+        return;
+    }
     pattern->UpdateMenuIsShow(true);
 }
 
-void SelectContentOverlayManager::HideOptionMenu(bool noAnimation)
+void SelectContentOverlayManager::HideOptionMenu(bool noAnimation, bool showSubMenu)
 {
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateMenuIsShow(false, noAnimation);
+    if (HandleMenuVisibilityChanged(false)) {
+        return;
+    }
+    pattern->UpdateMenuIsShow(false, noAnimation, showSubMenu);
 }
 
 void SelectContentOverlayManager::ToggleOptionMenu()
@@ -936,7 +942,18 @@ void SelectContentOverlayManager::ToggleOptionMenu()
     shareOverlayInfo_->menuInfo.isShowAIMenuOptionChanged = menuInfo.isShowAIMenuOptionChanged;
     shareOverlayInfo_->menuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
     shareOverlayInfo_->menuInfo.isAskCeliaEnabled = menuInfo.isAskCeliaEnabled;
+    if (HandleMenuVisibilityChanged(!shareOverlayInfo_->menuInfo.menuIsShow)) {
+        return;
+    }
     pattern->UpdateMenuIsShow(!shareOverlayInfo_->menuInfo.menuIsShow);
+}
+
+bool SelectContentOverlayManager::HandleMenuVisibilityChanged(bool isVisible)
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, false);
+    auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_RETURN(callback, false);
+    return callback->OnHandleBeforeMenuVisibiltyChanged(isVisible);
 }
 
 void SelectContentOverlayManager::DisableMenu()
@@ -1523,23 +1540,23 @@ bool SelectContentOverlayManager::IsSelectOverlaySubWindowMenu()
     return selectOverlayPattern->GetIsMenuShowInSubWindow();
 }
 
-bool SelectContentOverlayManager::IsPasteOption(const RefPtr<UINode>& node)
+RefPtr<UINode> SelectContentOverlayManager::GetSecurityPasteButtonNode(const RefPtr<UINode>& node)
 {
-    CHECK_NULL_RETURN(node, false);
-    if (node->GetTag() != V2::OPTION_ETS_TAG) {
-        return false;
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+        return nullptr;
     }
 
-    auto child = node->GetFirstChild();
-    CHECK_NULL_RETURN(child, false);
+    auto child = node->GetLastChild();
+    CHECK_NULL_RETURN(child, nullptr);
     if (child->GetTag() != V2::ROW_ETS_TAG) {
-        return false;
+        return nullptr;
     }
     auto grandChild = child->GetFirstChild();
     if (grandChild && grandChild->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
-        return true;
+        return grandChild;
     }
-    return false;
+    return nullptr;
 }
 
 void SelectContentOverlayManager::UpdateIsSingleHandle(bool isSingleHandle)

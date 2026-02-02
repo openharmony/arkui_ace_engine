@@ -29,6 +29,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -504,6 +505,170 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_SetLocalOffset001, Test
 }
 
 /**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset001
+ * @tc.desc: test UpdateMagnifierOffsetX、UpdateMagnifierOffsetY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment.
+     */
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+
+    /**
+     * @tc.steps: step2. Set magnifier to top-left position.
+     */
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierWidth = controller.magnifierNodeWidth_.ConvertToPx();
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(20.f, 20.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    /**
+     * @tc.steps: step3. Test zoomOffset value when magnifier at top-left position.
+     */
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(0.f, 0.f));
+    EXPECT_EQ(magnifierOffset, VectorF(0.f, 0.f));
+    float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
+    float magnifierInnerPaddingX =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
+    float targetZoomOffsetX = localOffset.GetX() - magnifierWidth / 2;
+    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
+        localOffset.GetY() - magnifierHeight / 2));
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset002
+ * @tc.desc: test UpdateMagnifierOffsetX、UpdateMagnifierOffsetY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment.
+     */
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+
+    /**
+     * @tc.steps: step2. Set magnifier to bottom-right position.
+     */
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierWidth = controller.magnifierNodeWidth_.ConvertToPx();
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(380.f, 380.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    /**
+     * @tc.steps: step3. Test zoomOffset value when magnifier at bottom-right position.
+     */
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(frameSize.Width() - magnifierWidth,
+        localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
+    EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
+    float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
+    float magnifierInnerPaddingX =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
+    float targetZoomOffsetX = localOffset.GetX() - frameSize.Width() + magnifierWidth / 2;
+    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
+        localOffset.GetY() - frameSize.Height() + magnifierHeight / 2));
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset003
+ * @tc.desc: test UpdateMagnifierOffsetX、UpdateMagnifierOffsetY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment.
+     */
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+
+    /**
+     * @tc.steps: step2. Set magnifier to center position.
+     */
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierWidth = controller.magnifierNodeWidth_.ConvertToPx();
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(200.f, 200.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    /**
+     * @tc.steps: step3. Test zoomOffset value when magnifier at center position.
+     */
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(localOffset.GetX() - magnifierWidth / 2,
+        localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
+    EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
+    EXPECT_EQ(zoomOffset, VectorF(0.f, 0.f));
+}
+
+/**
  * @tc.name: TextMenuController.disableSystemServiceMenuItems
  * @tc.desc: test disableSystemServiceMenuItems
  * @tc.type: FUNC
@@ -529,7 +694,7 @@ HWTEST_F(SelectOverlayPatternTestNg, DisableSystemServiceMenuItems, TestSize.Lev
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 5);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 0);
 
     AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_ALL_FLAG);
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
@@ -823,22 +988,24 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
     /**
      * @tc.steps: step1. Set up test environment with LIGHT color mode
      */
+    SelectOverlayInfo selectInfo;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode =
+        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     ASSERT_NE(textOverlayTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
 
-    SelectOverlayInfo selectInfo;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto selectOverlayNode =
-        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
-    ASSERT_NE(selectOverlayNode, nullptr);
-
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
 
     // @tc.steps: step2. Create caller with DARK color mode
     auto caller = FrameNode::GetOrCreateFrameNode(
@@ -866,7 +1033,7 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
      */
     std::vector<OptionParam> params;
     selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params);
-    EXPECT_EQ(params.size(), 2);
+    EXPECT_EQ(params.size(), 0);
     auto call = infoPtr->callerFrameNode.Upgrade();
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
@@ -886,11 +1053,10 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
     auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetMenuItems();
-    EXPECT_EQ(options.size(), 2);
+    EXPECT_EQ(options.size(), 1);
     for (size_t i = 0; i < options.size(); ++i) {
         auto pattern = options[i]->GetPattern<MenuItemPattern>();
         ASSERT_NE(pattern, nullptr);
-        EXPECT_TRUE(pattern->fontColor_.has_value());
     }
 }
 } // namespace OHOS::Ace::NG

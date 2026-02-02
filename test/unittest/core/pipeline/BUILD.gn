@@ -15,8 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("pipeline_context_test_ng") {
   type = "pipeline"
-  module_name = "ace_engine"
-  module_output = "pipeline"
+  module_name = "Pipeline"
   flutter_skia = true
   external_deps = [
     "c_utils:utils",
@@ -39,9 +38,11 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/test/mock/adapter/mock_cpu_boost.cpp",
+    "$ace_root/test/mock/adapter/mock_dynamic_module_helper.cpp",
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
+    "$ace_root/test/mock/adapter/mock_statistic_event_adapter.cpp",
     "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
@@ -64,7 +65,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
-    "$ace_root/test/mock/base/mock_statistic_event_reporter.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/accessibility/accessibility_manager_ng.cpp",
@@ -87,6 +87,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
     "$ace_root/test/mock/core/common/mock_reporter.cpp",
     "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
+    "$ace_root/test/mock/core/common/mock_screen_lock_manager_ohos.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
@@ -127,12 +128,14 @@ ace_unittest("pipeline_context_test_ng") {
     "mock_input_method_manager.cpp",
     "mock_rosen_render_context.cpp",
     "pipeline_context_test_ng.cpp",
+    "pipeline_context_test_ng_five.cpp",
     "pipeline_context_test_ng_four.cpp",
     "pipeline_context_test_ng_new.cpp",
     "pipeline_context_test_ng_three.cpp",
     "pipeline_context_test_ng_two.cpp",
     "resample_and_velocity_test_ng.cpp",
     "velocity_tracker_test.cpp",
+    "$ace_root/test/mock/core/render/mock_path_painter.cpp",
   ]
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]

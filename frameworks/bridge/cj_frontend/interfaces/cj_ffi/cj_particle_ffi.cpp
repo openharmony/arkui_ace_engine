@@ -17,7 +17,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/chart/chart_component.h"
 #include "core/components_ng/pattern/particle/particle_model.h"
 
 using namespace OHOS::Ace;

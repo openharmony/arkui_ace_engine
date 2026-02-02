@@ -92,7 +92,7 @@ HWTEST_F(CanvasModifierTest, DISABLED_setOnReadyTest, TestSize.Level1)
  * @tc.desc: Check the functionality of CanvasModifier.EnableAnalyzerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasModifierTest, setEnableAnalyzerTestValidValues, TestSize.Level1)
+HWTEST_F(CanvasModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
     auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);

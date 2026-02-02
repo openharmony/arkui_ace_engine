@@ -189,7 +189,13 @@ float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
         startOverScroll = StartPosWithMargin() + delta;
     }
     if (offsetEnd_) {
-        endOverScroll = mainSize - (EndPosWithMargin() + footerHeight_ + contentEndOffset_ + delta);
+		// Fix over-scroll when content doesn't fill the viewport.
+		// Use totalOffset_ delta to avoid excessive friction at low scroll speed.
+        if (GetContentHeight() < mainSize) {
+            endOverScroll = totalOffset_;
+        } else {
+            endOverScroll = mainSize - (EndPosWithMargin() + footerHeight_ + contentEndOffset_ + delta);
+        }
     }
 
     // content doesn't fill viewport
@@ -518,7 +524,18 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>&
             mainGap.size(), lanes_.size());
         return;
     }
+	// Note: idx is already updated after deletion, so GetSegment(idx)
+    // might return the wrong segment based on updated segmentTails_
     int32_t segment = GetSegment(idx);
+    if (idx > 0) {
+		// Check if the item to delete is at a section boundary
+        int32_t prevSegment = GetSegment(idx - 1);
+		// If deleting across section boundary, use the previous segment
+        // This ensures we start clearing from the correct section
+        if (prevSegment != segment) {
+            segment = prevSegment;
+        }
+    }
     for (int32_t i = segment; i < static_cast<int32_t>(lanes_.size()); ++i) {
         for (auto& lane : lanes_[i]) {
             while (!lane.items_.empty() && lane.items_.back().idx >= idx) {

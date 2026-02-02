@@ -239,11 +239,10 @@ void ApplyModifierFinish(Ark_NodeHandle nodePtr)
     if (frameNode) {
         frameNode->MarkModifyDone();
         /*
-         * Two conditions for MarkDirtyNode:
-         * 1. if node is not TabContent
-         * 2. if node is TabContent and it should be on the main tree.
+         * Conditions for MarkDirtyNode :
+         * This node should have a parent node to ensure that it is not in the process of being constructed.
          */
-        if (frameNode->IsOnMainTree() || frameNode->GetTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
+        if (frameNode->GetParent()) {
             frameNode->MarkDirtyNode();
         }
     }
@@ -252,7 +251,9 @@ void ApplyModifierFinish(Ark_NodeHandle nodePtr)
 void MarkDirty(Ark_NodeHandle nodePtr, Ark_UInt32 flag)
 {
     auto* uiNode = reinterpret_cast<UINode*>(nodePtr);
-    if (uiNode) {
+    if (uiNode && flag == PROPERTY_UPDATE_MEASURE_SELF_WHEN_ADD_CHILD && uiNode->GetParent()) {
+        uiNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    } else if (uiNode && flag != PROPERTY_UPDATE_MEASURE_SELF_WHEN_ADD_CHILD) {
         uiNode->MarkDirtyNode(flag);
     }
 }

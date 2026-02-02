@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_gradient.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_path.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_util.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_path2d.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context_base.h"
@@ -124,8 +125,10 @@ public:
     void JsReset(const JSCallbackInfo& info);
     void JsSetLetterSpacing(const JSCallbackInfo& info);
 
+    template<StatisticEventType T>
     void JSGetEmpty(const JSCallbackInfo& info)
     {
+        SendStatisticEvent(T);
         return;
     }
 
@@ -194,7 +197,7 @@ protected:
     void ParseFillPattern(const JSCallbackInfo& info);
     void ParseStorkeGradient(const JSCallbackInfo& info);
     void ParseStrokePattern(const JSCallbackInfo& info);
-    JSRenderImage* UnwrapNapiImage(const JSRef<JSObject> jsObject);
+    JSRenderImage* UnwrapNapiImage(const JSRef<JSObject> jsObject, bool isUnion);
 
 protected:
     bool isJudgeSpecialValue_ = false;

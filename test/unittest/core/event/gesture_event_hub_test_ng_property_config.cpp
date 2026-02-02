@@ -1244,6 +1244,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
     PreparedInfoForDrag data;
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
@@ -1321,6 +1323,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest002, TestSize
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
     PreparedInfoForDrag data;
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);

@@ -193,7 +193,7 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
     ASSERT_TRUE(scrollHandler);
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
@@ -203,7 +203,7 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     FlushUITasks(frameNode_);
     res.clear();
     link.clear();
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
@@ -302,6 +302,24 @@ TEST_F(FreeScrollTest, EnableScroll001)
 }
 
 /**
+ * @tc.name: FreeScroll002
+ * @tc.desc: Test scroll enabled
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, EnableScroll002)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ WIDTH, HEIGHT * 2 });
+    CreateScrollDone();
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_->canOverScrollWithDelta_ != nullptr);
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_->reachBarEdgeOverScroll_ != nullptr);
+    EXPECT_TRUE(pattern_->scrollBar2d_->horizontal_->canOverScrollWithDelta_ != nullptr);
+    EXPECT_TRUE(pattern_->scrollBar2d_->horizontal_->reachBarEdgeOverScroll_ != nullptr);
+}
+
+/**
  * @tc.name: InitialOffset001
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC
@@ -357,7 +375,7 @@ TEST_F(FreeScrollTest, ModeChange001)
     TouchTestResult res;
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
@@ -369,7 +387,7 @@ TEST_F(FreeScrollTest, ModeChange001)
     layoutProperty_->UpdateAxis(Axis::VERTICAL);
     pattern_->OnModifyDone();
     ASSERT_FALSE(pattern_->freeScroll_);
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
     EXPECT_EQ(link.size(), 1);
     ASSERT_EQ(*link.begin(), scrollHandler->GetScrollable()->panRecognizerNG_);
 }

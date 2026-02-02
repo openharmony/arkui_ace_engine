@@ -697,6 +697,7 @@ export class TipsDialog extends ViewPU {
                         Text.layoutWeight(1);
                         Text.focusable(false);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.fallbackLineSpacing(true);
                     }, Text);
                     Text.pop();
                 });
@@ -767,6 +768,7 @@ export class TipsDialog extends ViewPU {
                         Text.maxLines(CONTENT_MAX_LINES);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.width('100%');
+                        Text.fallbackLineSpacing(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -801,6 +803,7 @@ export class TipsDialog extends ViewPU {
                                 resolveKeyEvent(event, this.contentScroller);
                             }
                         });
+                        Text.fallbackLineSpacing(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1230,6 +1233,7 @@ export class SelectDialog extends ViewPU {
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.fallbackLineSpacing(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1364,6 +1368,7 @@ export class SelectDialog extends ViewPU {
                             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                             Text.layoutWeight(1);
                             Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
+                            Text.fallbackLineSpacing(true);
                         }, Text);
                         Text.pop();
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1879,6 +1884,7 @@ export class ConfirmDialog extends ViewPU {
                 }
             });
             Text.width('100%');
+            Text.fallbackLineSpacing(true);
         }, Text);
         Text.pop();
         Column.pop();
@@ -1953,6 +1959,7 @@ export class ConfirmDialog extends ViewPU {
             Text.focusable(false);
             Text.layoutWeight(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.fallbackLineSpacing(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -2352,6 +2359,7 @@ export class AlertDialog extends ViewPU {
                     resolveKeyEvent(event, this.contentScroller);
                 }
             });
+            Text.fallbackLineSpacing(true);
         }, Text);
         Text.pop();
         Scroll.pop();
@@ -3443,6 +3451,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
+            Text.fallbackLineSpacing(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -3483,6 +3492,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
+            Text.fallbackLineSpacing(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -4491,6 +4501,7 @@ export class LoadingDialog extends ViewPU {
                 strokeWidth: LengthMetrics.px(0)
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.fallbackLineSpacing(true);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -4600,6 +4611,24 @@ export class PopoverDialog extends ViewPU {
         if (this.targetBuilder === undefined || this.targetBuilder === null) {
             this.targetBuilder = this.emptyBuilder;
         }
+        if (this.popover) {
+            this.popover.placement = this.popover?.placement ?? Placement.Bottom;
+            this.popover.enableArrow = this.popover?.enableArrow ?? true;
+            this.popover.onStateChange = this.popover?.onStateChange ?? ((x25) => {
+                if (!x25.isVisible) {
+                    this.visible = false;
+                }
+            });
+            this.popover.radius = this.popover?.radius ?? {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.corner_radius_level16'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+            this.popover.shadow = this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD;
+            this.popover.backgroundBlurStyle = this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK;
+        }
     }
 
     initialRender() {
@@ -4621,39 +4650,7 @@ export class PopoverDialog extends ViewPU {
                     hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
                 }
             });
-            Column.bindPopup(this.visible, {
-                builder: this.popover?.builder,
-                placement: this.popover?.placement ?? Placement.Bottom,
-                popupColor: this.popover?.popupColor,
-                enableArrow: this.popover?.enableArrow ?? true,
-                autoCancel: this.popover?.autoCancel,
-                onStateChange: this.popover?.onStateChange ?? ((e) => {
-                    if (!e.isVisible) {
-                        this.visible = false;
-                    }
-                }),
-                arrowOffset: this.popover?.arrowOffset,
-                showInSubWindow: this.popover?.showInSubWindow,
-                mask: this.popover?.mask,
-                targetSpace: this.popover?.targetSpace,
-                offset: this.popover?.offset,
-                width: this.popover?.width,
-                arrowPointPosition: this.popover?.arrowPointPosition,
-                arrowWidth: this.popover?.arrowWidth,
-                arrowHeight: this.popover?.arrowHeight,
-                radius: this.popover?.radius ?? {
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.corner_radius_level16'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                },
-                shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-                backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-                focusable: this.popover?.focusable,
-                transition: this.popover?.transition,
-                onWillDismiss: this.popover?.onWillDismiss
-            });
+            Column.bindPopup(this.visible, this.popover);
         }, Column);
         this.targetBuilder.bind(this)();
         Column.pop();

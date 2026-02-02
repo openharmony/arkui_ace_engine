@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_VIBRATOR_VIBRATOR_UTILS_H
 
 #include <string>
+#include "frameworks/base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-class VibratorUtils {
+class ACE_FORCE_EXPORT VibratorUtils {
 public:
     VibratorUtils() = delete;
     ~VibratorUtils() = delete;

@@ -28,6 +28,7 @@ ArkUINativeModuleValue PluginBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
 
     CalcDimension width = 0.0_vp;
     CalcDimension height = 0.0_vp;
@@ -62,6 +63,7 @@ ArkUINativeModuleValue PluginBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
 
     CalcDimension width = 0.0_vp;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width)) {
@@ -89,6 +91,7 @@ ArkUINativeModuleValue PluginBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
 
     CalcDimension height = 0.0_vp;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height)) {
@@ -115,6 +118,7 @@ ArkUINativeModuleValue PluginBridge::ResetSize(ArkUIRuntimeCallInfo* runtimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
     CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
     pluginModifier->resetPluginSize(nativeNode);
@@ -130,6 +134,7 @@ ArkUINativeModuleValue PluginBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
     CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
     pluginModifier->resetPluginWidth(nativeNode);
@@ -145,6 +150,7 @@ ArkUINativeModuleValue PluginBridge::ResetHeight(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     auto pluginModifier = GetArkUINodeModifiers()->getPluginModifier();
     CHECK_NULL_RETURN(pluginModifier, panda::JSValueRef::Undefined(vm));
     pluginModifier->resetPluginHeight(nativeNode);

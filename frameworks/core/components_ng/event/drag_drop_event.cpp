@@ -72,12 +72,15 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
     }
     auto frameNode = gestureEventHub.Upgrade()->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     dragDropInitiatingHandler_ = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
     SetIsNewFwk(true);
 }
 
 void DragDropEventActuator::InitPanAction()
 {
+    auto frameNode = GetFrameNode();
+    ACE_UINODE_TRACE(frameNode);
     if (panRecognizer_ == nullptr) {
         panRecognizer_ = MakeRefPtr<PanRecognizer>(
             DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
@@ -132,8 +135,17 @@ void DragDropEventActuator::InitPanAction()
     });
 }
 
+RefPtr<FrameNode> DragDropEventActuator::GetFrameNode() const
+{
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    return gestureHub->GetFrameNode();
+}
+
 void DragDropEventActuator::InitLongPressAction()
 {
+    auto frameNode = GetFrameNode();
+    ACE_UINODE_TRACE(frameNode);
     if (longPressRecognizer_ == nullptr) {
         longPressRecognizer_ =
             AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, DEFAULT_DRAG_FINGERS, false, true);

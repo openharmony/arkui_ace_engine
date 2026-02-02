@@ -108,6 +108,66 @@ HWTEST_F(TextFieldPatternTestEight, CalculateBoundsRect001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test TextFieldPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get SearchPattern
+     */
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"setSearchText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"addText", "params":{"value":""}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"addText", "params":{"value":"test"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"setText", "params":{"value":"test"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"addText", "params":{"value":"test", "offset":3}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{"start":2, "end":3}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{"start":-1, "end":3}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{"start":2, "end":-1}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
+
+/**
  * @tc.name: CreateObscuredText001
  * @tc.desc: test CreateObscuredText
  * @tc.type: FUNC

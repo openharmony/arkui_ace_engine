@@ -83,14 +83,14 @@ public:
 
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
+            CHECK_NULL_VOID(themeStyle);
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
             if (!themeStyle || !theme || !pattern) {
                 return;
             }
             const double defaultTertiaryColorAlpha = 0.4;
 
-            theme->menuBorder_ = Border(BorderEdge(
-                pattern->GetAttr<Color>("text_overlay_menu_border_color", Color()),
+            theme->menuBorder_ = Border(BorderEdge(pattern->GetAttr<Color>("text_overlay_menu_border_color", Color()),
                 pattern->GetAttr<Dimension>("text_overlay_menu_border_width", 0.0_vp),
                 BorderStyle(
                     static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_menu_border_style", 0.0)))));

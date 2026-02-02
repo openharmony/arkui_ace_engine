@@ -1818,7 +1818,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic028, TestSize.Level1)
         return menuParams;
     };
     NG::OnMenuItemClickCallback onMenuItemClick = [](const NG::MenuItemParam&) -> bool { return false; };
-    TextFieldModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreate), std::move(onMenuItemClick));
+    TextFieldModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreate), std::move(onMenuItemClick), nullptr);
     EXPECT_NE(textFieldPattern->selectOverlay_->onCreateMenuCallback_, nullptr);
     EXPECT_NE(textFieldPattern->selectOverlay_->onMenuItemClick_, nullptr);
 }
@@ -2148,6 +2148,22 @@ HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG002, TestSize.Leve
 }
 
 /**
+ * @tc.name: TextInputAreaDeleteBackwardModelNG003
+ * @tc.desc: test ModelNG DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG003, TestSize.Level1)
+{
+    CreateTextField("DeleteBackward预上屏测试", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
+    FlushLayoutTask(frameNode_);
+    
+    EXPECT_FALSE(pattern_->IsPreviewTextInputting());
+}
+
+/**
  * @tc.name: SetCompressLeadingPunctuation001
  * @tc.desc: test TextInputArea set CompressLeadingPunctuation value
  * @tc.type: FUNC
@@ -2183,5 +2199,73 @@ HWTEST_F(TextInputAreaTest, SetCompressLeadingPunctuation002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), true);
     layoutProperty->UpdateCompressLeadingPunctuation(false);
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), false);
+}
+
+/**
+ * @tc.name: GetTextOverflow001
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetTextOverflow(frameNode, TextOverflow::MARQUEE);
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: GetTextOverflow002
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetTextOverflow(frameNode, TextOverflow::MARQUEE);
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: GetEllipsisMode001
+ * @tc.desc: Test GetEllipsisMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetEllipsisMode001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    EllipsisMode result = textFieldModelNG.GetEllipsisMode(frameNode);
+    EXPECT_EQ(result, EllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: GetEllipsisMode002
+ * @tc.desc: Test GetEllipsisMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetEllipsisMode002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    EllipsisMode result = textFieldModelNG.GetEllipsisMode(frameNode);
+    EXPECT_EQ(result, EllipsisMode::HEAD);
 }
 } // namespace OHOS::Ace::NG

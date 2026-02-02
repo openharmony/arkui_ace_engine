@@ -15,8 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_timer_test_ng") {
   type = "new"
-  module_name = "Component-ShowInfo"
-  module_output = ""
+  module_name = "InfoShowSet-TextTimer"
   sources = [
     "text_timer_builder_test_ng.cpp",
     "text_timer_test_ng.cpp",

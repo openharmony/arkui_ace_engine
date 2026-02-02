@@ -936,6 +936,11 @@ public:
         ViewAbstract::SetRenderGroup(isRenderGroup);
     }
 
+    void SetAdaptiveGroup(bool isRenderGroup, bool adaptive) override
+    {
+        ViewAbstract::SetAdaptiveGroup(isRenderGroup, adaptive);
+    }
+
     void SetExcludeFromRenderGroup(bool exclude) override
     {
         ViewAbstract::SetExcludeFromRenderGroup(exclude);
@@ -1001,9 +1006,19 @@ public:
         ViewAbstract::SetClipShape(basicShape);
     }
 
+    static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+    {
+        ViewAbstract::SetClipShape(frameNode, basicShape);
+    }
+
     void SetClipEdge(bool isClip) override
     {
         ViewAbstract::SetClipEdge(isClip);
+    }
+
+    static void SetClipEdge(FrameNode* frameNode, bool isClip)
+    {
+        ViewAbstract::SetClipEdge(frameNode, isClip);
     }
 
     void SetMask(const RefPtr<BasicShape>& shape) override
@@ -1132,6 +1147,11 @@ public:
     void SetUseEffect(bool useEffect, EffectType effectType) override
     {
         ViewAbstract::SetUseEffect(useEffect, effectType);
+    }
+
+    void SetUseUnion(bool useUnion) override
+    {
+        ViewAbstract::SetUseUnion(useUnion);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override
@@ -1293,6 +1313,11 @@ public:
     void SetDraggable(bool draggable) override
     {
         ViewAbstract::SetDraggable(draggable);
+    }
+
+    void SetEnableClickSoundEffect(bool enabled) override
+    {
+        ViewAbstract::SetEnableClickSoundEffect(enabled);
     }
 
     void SetDragPreviewOptions(const DragPreviewOption& previewOption) override
@@ -1548,6 +1573,7 @@ public:
 
     static void ResetKeyboardShortcutAll(FrameNode* frameNode)
     {
+        CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->ClearSingleKeyboardShortcutAll();
@@ -1613,6 +1639,8 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void SetBackground(std::function<void()>&& buildFunc) override;
+    void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) override;
     void SetBackgroundAlign(const Alignment& align) override
     {
         NG::ViewAbstract::SetBackgroundAlign(align);
@@ -1738,6 +1766,11 @@ public:
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+
+    void ResetColorPicker() override
+    {
+        ViewAbstract::BindColorPicker(ColorPlaceholder::FOREGROUND, ColorPickStrategy::NONE);
     }
 
     void SetForegroundEffect(float radius) override
@@ -1985,7 +2018,7 @@ public:
         const std::string& key, EdgesParam& edges, const RefPtr<ResourceObject>& resObj);
     static void RegisterEdgesWidthResObj(
         const std::string& key, NG::BorderWidthProperty& borderWidth, const RefPtr<ResourceObject>& resObj);
-    static void RegisterEdgeMarginsResObj(
+    ACE_FORCE_EXPORT static void RegisterEdgeMarginsResObj(
         const std::string& key, NG::MarginProperty& margins, const RefPtr<ResourceObject>& resObj);
     static void RegisterLocalizedBorderColor(
         const std::string& key, NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& resObj);

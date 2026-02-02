@@ -30,7 +30,7 @@ public:
     static const Shadow NoneShadow;
 
     // For light theme shadow params, from small shadow to large shadow.
-    static const Shadow DefaultShadowXS;
+    ACE_FORCE_EXPORT static const Shadow DefaultShadowXS;
     static const Shadow DefaultShadowS;
     static const Shadow DefaultShadowM;
     static const Shadow DefaultShadowL;

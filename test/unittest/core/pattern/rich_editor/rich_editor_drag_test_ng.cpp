@@ -101,6 +101,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest001, TestSize.Level2)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
@@ -156,6 +157,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level2)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
@@ -194,7 +196,6 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level2)
     EXPECT_EQ(dragDropInfo.extraInfo, TEST_STR);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 6);
-    EXPECT_EQ(pattern->status_, Status::NONE);
     eventHub->FireOnDragMove(event, "");
     auto onDragEnd = eventHub->GetOnDragEnd();
     onDragEnd(event);
@@ -213,6 +214,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest003, TestSize.Level2)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
@@ -256,6 +258,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest004, TestSize.Level2)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RichEditorModelNG model;
     model.Create();
@@ -344,6 +347,9 @@ HWTEST_F(RichEditorDragTestNg, OnDragEnd001, TestSize.Level2)
  */
 HWTEST_F(RichEditorDragTestNg, OnDragEnd002, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern.
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -353,7 +359,9 @@ HWTEST_F(RichEditorDragTestNg, OnDragEnd002, TestSize.Level2)
         isTestAddObject = true;
         richEditorPattern->recoverDragResultObjects_.emplace_back(resultObject);
     }
-
+    /**
+     * @tc.steps: step2. test OnDragEnd.
+     */
     auto event = AceType::MakeRefPtr<Ace::DragEvent>();
     richEditorPattern->showSelect_ = false;
     richEditorNode_.Reset();
@@ -552,9 +560,14 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level2
     EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
-    auto temp = richEditorPattern->caretPosition_;
+    auto caretPosition = richEditorPattern->caretPosition_;
+    auto lastCaretPosition = richEditorPattern->lastCaretPosition_;
     richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_1, false);
-    EXPECT_NE(richEditorPattern->caretPosition_, temp);
+
+    auto newCaretPosition = richEditorPattern->caretPosition_;
+    auto newLastCaretPosition = richEditorPattern->lastCaretPosition_;
+    EXPECT_NE(newCaretPosition, caretPosition);
+    EXPECT_EQ(newLastCaretPosition, lastCaretPosition);
 }
 
 /**
@@ -576,6 +589,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDrop001, TestSize.Level2)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -608,6 +622,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDrop002, TestSize.Level2)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
 
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();

@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkTextInputPeer, InputType, ContentType, EnterKeyType, OnSubmitCallback, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputAttribute } from "./component/textInput"
@@ -27,10 +27,12 @@ import { CommonMethod, TextDecorationOptions, InputCounterOptions } from "./comp
 import { ResourceColor, Dimension, Font, Length, ResourceStr } from "./component/units"
 import { Color, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode } from "./component/enums"
 import { Resource } from "global.resource"
-import { EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
+import { EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyle, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection, IMEClient } from "./component/textCommon"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { CustomBuilder } from "./component/builder"
 import { CancelButtonOptions, CancelButtonSymbolOptions } from "./component/search"
+import { LengthMetrics } from "arkui.Graphics"
+import { ComponentContentBase } from "arkui.ComponentContent"
 export class TextInputModifier extends CommonMethodModifier implements TextInputAttribute,AttributeModifier<TextInputAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -181,6 +183,20 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _enableAutoFillAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAutoFillAnimation_0_0value?: boolean | undefined
+    _onWillAttachIME_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillAttachIME_0_0value?: ((value0: IMEClient) => void) | undefined
+    _strokeColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeColor_0_0value?: ResourceColor | undefined
+    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAutoSpacing_0_0value?: boolean | undefined
+    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeWidth_0_0value?: LengthMetrics | undefined
+    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableSelectedDataDetector_0_0value?: boolean | undefined
+    _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compressLeadingPunctuation_0_0value?: boolean | undefined
     _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -193,7 +209,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _inputFilter_0_0value?: ResourceStr | undefined
     _inputFilter_0_1value?: ((value0: string) => void) | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | undefined
+    _customKeyboard_0_0value?: CustomBuilder | ComponentContentBase | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     _showCounter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _showCounter_0_0value?: boolean | undefined
@@ -1516,6 +1532,132 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
             }
         }
+        if (this._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
+                }
+            }
+        }
+        if (this._enableAutoFillAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAutoFillAnimation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAutoFillAnimationAttribute((this._enableAutoFillAnimation_0_0value as boolean | undefined));
+                    this._enableAutoFillAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAutoFillAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAutoFillAnimation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAutoFillAnimationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillAttachIME_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as ((value0: IMEClient) => void) | undefined));
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillAttachIMEAttribute((undefined as ((value0: IMEClient) => void) | undefined));
+                }
+            }
+        }
+        if (this._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeColorAttribute((this._strokeColor_0_0value as ResourceColor | undefined));
+                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAutoSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as LengthMetrics | undefined));
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeWidthAttribute((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
+        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._inputFilter_0_flag) {
@@ -1538,7 +1680,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1548,7 +1690,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -2523,6 +2665,97 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
             }
         }
+        if (modifier._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textDirection(modifier._textDirection_0_0value);
+                    break;
+                }
+                default: {
+                    this.textDirection((undefined as TextDirection | undefined));
+                }
+            }
+        }
+        if (modifier._enableAutoFillAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAutoFillAnimation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAutoFillAnimation(modifier._enableAutoFillAnimation_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAutoFillAnimation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillAttachIME_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillAttachIME(modifier._onWillAttachIME_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillAttachIME((undefined as ((value0: IMEClient) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeColor(modifier._strokeColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAutoSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAutoSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeWidth(modifier._strokeWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeWidth((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableSelectedDataDetector((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._inputFilter_0_flag) {
@@ -2545,7 +2778,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.customKeyboard((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    this.customKeyboard((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -2568,6 +2801,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._type_0_flag = AttributeUpdaterFlag.UPDATE
             this._type_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._type_0_flag = AttributeUpdaterFlag.SKIP
@@ -2579,6 +2813,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._contentType_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentType_0_flag = AttributeUpdaterFlag.SKIP
@@ -2590,6 +2825,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._placeholderColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._placeholderColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2601,6 +2837,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._textOverflow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textOverflow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textOverflow_0_flag = AttributeUpdaterFlag.SKIP
@@ -2612,6 +2849,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.UPDATE
             this._textIndent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.SKIP
@@ -2623,6 +2861,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._placeholderFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholderFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._placeholderFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -2634,6 +2873,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.UPDATE
             this._enterKeyType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.SKIP
@@ -2645,6 +2885,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2656,6 +2897,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onEditChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onEditChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onEditChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2667,6 +2909,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSubmit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.SKIP
@@ -2678,6 +2921,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2689,6 +2933,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTextSelectionChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2700,6 +2945,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -2711,6 +2957,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -2722,6 +2969,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2733,6 +2981,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -2744,6 +2993,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -2755,6 +3005,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -2766,6 +3017,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -2777,6 +3029,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCopy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
@@ -2788,6 +3041,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onCut_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCut_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCut_0_flag = AttributeUpdaterFlag.SKIP
@@ -2799,6 +3053,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPaste_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.SKIP
@@ -2810,6 +3065,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOption_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
@@ -2821,6 +3077,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._showPasswordIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._showPasswordIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showPasswordIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -2832,6 +3089,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._textAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -2843,6 +3101,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._style_0_flag = AttributeUpdaterFlag.UPDATE
             this._style_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._style_0_flag = AttributeUpdaterFlag.SKIP
@@ -2854,6 +3113,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._caretStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -2865,6 +3125,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2876,6 +3137,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._caretPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -2887,6 +3149,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableKeyboardOnFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -2898,6 +3161,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._passwordIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._passwordIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._passwordIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -2909,6 +3173,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._showError_0_flag = AttributeUpdaterFlag.UPDATE
             this._showError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showError_0_flag = AttributeUpdaterFlag.SKIP
@@ -2920,6 +3185,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._showUnit_0_flag = AttributeUpdaterFlag.UPDATE
             this._showUnit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showUnit_0_flag = AttributeUpdaterFlag.SKIP
@@ -2931,6 +3197,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._showUnderline_0_flag = AttributeUpdaterFlag.UPDATE
             this._showUnderline_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showUnderline_0_flag = AttributeUpdaterFlag.SKIP
@@ -2942,6 +3209,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._underlineColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._underlineColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._underlineColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2953,6 +3221,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._selectionMenuHidden_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectionMenuHidden_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectionMenuHidden_0_flag = AttributeUpdaterFlag.SKIP
@@ -2964,6 +3233,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._barState_0_flag = AttributeUpdaterFlag.UPDATE
             this._barState_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barState_0_flag = AttributeUpdaterFlag.SKIP
@@ -2975,6 +3245,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLines_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
@@ -2986,6 +3257,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._wordBreak_0_flag = AttributeUpdaterFlag.UPDATE
             this._wordBreak_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._wordBreak_0_flag = AttributeUpdaterFlag.SKIP
@@ -2997,6 +3269,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineBreakStrategy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.SKIP
@@ -3008,6 +3281,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._cancelButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._cancelButton_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cancelButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -3019,6 +3293,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._cancelButton_1_flag = AttributeUpdaterFlag.UPDATE
             this._cancelButton_1_0value = value
+            this._state.fireChange()
         } else
         {
             this._cancelButton_1_flag = AttributeUpdaterFlag.SKIP
@@ -3030,6 +3305,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._selectAll_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectAll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectAll_0_flag = AttributeUpdaterFlag.SKIP
@@ -3041,6 +3317,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -3052,6 +3329,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -3063,6 +3341,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -3074,6 +3353,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -3085,6 +3365,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.UPDATE
             this._heightAdaptivePolicy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.SKIP
@@ -3096,6 +3377,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._enableAutoFill_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAutoFill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAutoFill_0_flag = AttributeUpdaterFlag.SKIP
@@ -3107,6 +3389,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
             this._decoration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._decoration_0_flag = AttributeUpdaterFlag.SKIP
@@ -3118,6 +3401,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._letterSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -3129,6 +3413,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -3140,6 +3425,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._passwordRules_0_flag = AttributeUpdaterFlag.UPDATE
             this._passwordRules_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._passwordRules_0_flag = AttributeUpdaterFlag.SKIP
@@ -3151,6 +3437,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFeature_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
@@ -3162,6 +3449,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._showPassword_0_flag = AttributeUpdaterFlag.UPDATE
             this._showPassword_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._showPassword_0_flag = AttributeUpdaterFlag.SKIP
@@ -3173,6 +3461,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onSecurityStateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSecurityStateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSecurityStateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -3184,6 +3473,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onWillInsert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillInsert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillInsert_0_flag = AttributeUpdaterFlag.SKIP
@@ -3195,6 +3485,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onDidInsert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidInsert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidInsert_0_flag = AttributeUpdaterFlag.SKIP
@@ -3206,6 +3497,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onWillDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -3217,6 +3509,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onDidDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -3228,6 +3521,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMenuOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -3239,6 +3533,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.UPDATE
             this._enablePreviewText_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.SKIP
@@ -3250,6 +3545,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -3261,6 +3557,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._autoCapitalizationMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoCapitalizationMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoCapitalizationMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -3272,6 +3569,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.UPDATE
             this._halfLeading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.SKIP
@@ -3283,6 +3581,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._ellipsisMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._ellipsisMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._ellipsisMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -3294,6 +3593,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.UPDATE
             this._stopBackPress_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.SKIP
@@ -3305,6 +3605,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -3316,6 +3617,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.UPDATE
             this._keyboardAppearance_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
@@ -3327,6 +3629,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
             this._compressLeadingPunctuation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
@@ -3338,6 +3641,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
             this._includeFontPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
@@ -3349,6 +3653,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._fallbackLineSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -3360,9 +3665,88 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedDragPreviewStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textDirection(value: TextDirection | undefined): this {
+        if (((this._textDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textDirection_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableAutoFillAnimation(value: boolean | undefined): this {
+        if (((this._enableAutoFillAnimation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoFillAnimation_0_0value) !== (value)))
+        {
+            this._enableAutoFillAnimation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAutoFillAnimation_0_0value = value
+        } else
+        {
+            this._enableAutoFillAnimation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        if (((this._onWillAttachIME_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillAttachIME_0_0value = value
+        } else
+        {
+            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    strokeColor(value: ResourceColor | undefined): this {
+        if (((this._strokeColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeColor_0_0value = value
+        } else
+        {
+            this._strokeColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
+        {
+            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAutoSpacing_0_0value = value
+        } else
+        {
+            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    strokeWidth(value: LengthMetrics | undefined): this {
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeWidth_0_0value = value
+        } else
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableSelectedDataDetector_0_0value = value
+        } else
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -3372,18 +3756,20 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
             this._inputFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._inputFilter_0_0value = value
             this._inputFilter_0_1value = error
+            this._state.fireChange()
         } else
         {
             this._inputFilter_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE
             this._customKeyboard_0_0value = value
             this._customKeyboard_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.SKIP
@@ -3396,6 +3782,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
             this._showCounter_0_flag = AttributeUpdaterFlag.UPDATE
             this._showCounter_0_0value = value
             this._showCounter_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._showCounter_0_flag = AttributeUpdaterFlag.SKIP

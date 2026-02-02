@@ -14,45 +14,31 @@
  */
 #include "core/interfaces/native/node/row_split_modifier.h"
 
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
+#include "ui/base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-constexpr bool DEFAULT_ROW_SPLIT_RESIZABLE = false;
-void SetRowSplitResizable(ArkUINodeHandle node, ArkUI_Bool resizable)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, resizable);
-}
-
-void ResetRowSplitResizable(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::ROW_SPLIT, DEFAULT_ROW_SPLIT_RESIZABLE);
-}
-
 namespace NodeModifier {
 const ArkUIRowSplitModifier* GetRowSplitModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIRowSplitModifier modifier = {
-        .setRowSplitResizable = SetRowSplitResizable,
-        .resetRowSplitResizable = ResetRowSplitResizable,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const ArkUIRowSplitModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RowSplit");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIRowSplitModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIRowSplitModifier* GetCJUIRowSplitModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIRowSplitModifier modifier = {
-        .setRowSplitResizable = SetRowSplitResizable,
-        .resetRowSplitResizable = ResetRowSplitResizable,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const CJUIRowSplitModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RowSplit");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIRowSplitModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

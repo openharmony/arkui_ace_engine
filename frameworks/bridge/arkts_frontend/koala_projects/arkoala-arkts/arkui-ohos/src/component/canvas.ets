@@ -24,12 +24,12 @@ export function getSystemDensity(): number {
 export class ImageDataInternal {
 }
 export class ImageData {
-    private data_val: Uint8ClampedArray = new Uint8ClampedArray()
+    private data_val: Uint8ClampedArray | undefined = undefined
     private finalWidth: int = 0
     private finalHeight: int = 0
     private unit_val: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
 
-    get data(): Uint8ClampedArray {
+    get data(): Uint8ClampedArray | undefined {
         return this.data_val
     }
     get height(): int {

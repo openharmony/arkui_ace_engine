@@ -241,4 +241,22 @@ void RichEditorModelStatic::SetMaxLines(FrameNode* frameNode, uint32_t value)
     pattern->SetMaxLines(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
 }
+
+void RichEditorModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, IncludeFontPadding, optValue.value_or(false), frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIncludeFontPadding(optValue.value_or(false));
+}
+
+void RichEditorModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, FallbackLineSpacing, optValue.value_or(false), frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFallbackLineSpacing(optValue.value_or(false));
+}
 } // namespace OHOS::Ace::NG

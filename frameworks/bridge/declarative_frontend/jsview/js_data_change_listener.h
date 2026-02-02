@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
+#include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::Framework {
 

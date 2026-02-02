@@ -16,6 +16,7 @@
 
 #include "cj_lambda.h"
 
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -46,10 +47,24 @@ void NativePatternLockController::SetChallengeResult(int64_t challengeResult)
 
 } // namespace OHOS::Ace::Framework
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::PatternLockModelNG* GetPatternLockModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("PatternLock");
+    if (module == nullptr) {
+        LOGF("Can't find patternlock dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::PatternLockModelNG*>(module->GetModel());
+}
+
+}
+
 extern "C" {
 void FfiOHOSAceFrameworkPatternLockCreate(int64_t controllerId)
 {
-    auto patternLock = PatternLockModel::GetInstance()->Create();
+    auto patternLock = GetPatternLockModel()->Create();
     auto controller = FFIData::GetData<NativePatternLockController>(controllerId);
     if (controller) {
         controller->SetController(patternLock);
@@ -67,51 +82,51 @@ void FfiOHOSAceFrameworkPatternLockOnPatternComplete(void (*callback)(VectorInt3
         auto vectorC = eventInfo->GetInput();
         ffiCallback(&vectorC);
     };
-    PatternLockModel::GetInstance()->SetPatternComplete(std::move(onPatternComplete));
+    GetPatternLockModel()->SetPatternComplete(std::move(onPatternComplete));
 }
 void FfiOHOSAceFrameworkPatternLockonDotConnect(void (*callback)(int32_t idx))
 {
     auto onDotConnect = [ffiCallback = CJLambda::Create(callback)](int64_t idx) { ffiCallback(idx); };
-    PatternLockModel::GetInstance()->SetDotConnect(std::move(onDotConnect));
+    GetPatternLockModel()->SetDotConnect(std::move(onDotConnect));
 }
 void FfiOHOSAceFrameworkPatternLockActivateCircleStyle(CJCircleStyleOptions options)
 {
-    PatternLockModel::GetInstance()->SetActiveCircleColor(Color(options.color));
-    PatternLockModel::GetInstance()->SetActiveCircleRadius(
+    GetPatternLockModel()->SetActiveCircleColor(Color(options.color));
+    GetPatternLockModel()->SetActiveCircleRadius(
         Dimension(options.radius, static_cast<DimensionUnit>(options.radiusUnit)));
-    PatternLockModel::GetInstance()->SetEnableWaveEffect(options.enableWaveEffect);
+    GetPatternLockModel()->SetEnableWaveEffect(options.enableWaveEffect);
 }
 void FfiOHOSAceFrameworkPatternLockSelectedColor(uint32_t color)
 {
-    PatternLockModel::GetInstance()->SetSelectedColor(Color(color));
+    GetPatternLockModel()->SetSelectedColor(Color(color));
 }
 void FfiOHOSAceFrameworkPatternLockAutoReset(bool value)
 {
-    PatternLockModel::GetInstance()->SetAutoReset(value);
+    GetPatternLockModel()->SetAutoReset(value);
 }
 void FfiOHOSAceFrameworkPatternLockPathColor(uint32_t color)
 {
-    PatternLockModel::GetInstance()->SetPathColor(Color(color));
+    GetPatternLockModel()->SetPathColor(Color(color));
 }
 void FfiOHOSAceFrameworkPatternLockActiveColor(uint32_t color)
 {
-    PatternLockModel::GetInstance()->SetActiveColor(Color(color));
+    GetPatternLockModel()->SetActiveColor(Color(color));
 }
 void FfiOHOSAceFrameworkPatternLockRegularColor(uint32_t color)
 {
-    PatternLockModel::GetInstance()->SetRegularColor(Color(color));
+    GetPatternLockModel()->SetRegularColor(Color(color));
 }
 void FfiOHOSAceFrameworkPatternLockCircleRadius(double value, int32_t unit)
 {
-    PatternLockModel::GetInstance()->SetCircleRadius(Dimension(value, static_cast<DimensionUnit>(unit)));
+    GetPatternLockModel()->SetCircleRadius(Dimension(value, static_cast<DimensionUnit>(unit)));
 }
 void FfiOHOSAceFrameworkPatternLockSideLength(double value, int32_t unit)
 {
-    PatternLockModel::GetInstance()->SetSideLength(Dimension(value, static_cast<DimensionUnit>(unit)));
+    GetPatternLockModel()->SetSideLength(Dimension(value, static_cast<DimensionUnit>(unit)));
 }
 void FfiOHOSAceFrameworkPatternLockStrokeWidth(double value, int32_t unit)
 {
-    PatternLockModel::GetInstance()->SetStrokeWidth(Dimension(value, static_cast<DimensionUnit>(unit)));
+    GetPatternLockModel()->SetStrokeWidth(Dimension(value, static_cast<DimensionUnit>(unit)));
 }
 int64_t FfiOHOSAceFrameworkPatternLockControllerCreate()
 {

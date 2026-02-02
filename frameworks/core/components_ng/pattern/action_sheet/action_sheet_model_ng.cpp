@@ -70,7 +70,8 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         dialog = overlayManager->ShowDialog(arg, nullptr, false);
         CHECK_NULL_VOID(dialog);
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
 }
 
 void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)

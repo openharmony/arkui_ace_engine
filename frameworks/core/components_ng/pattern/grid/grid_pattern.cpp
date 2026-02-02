@@ -15,12 +15,14 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
-#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
@@ -30,6 +32,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,7 +49,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
     auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
     bool setColumns = false;
-    if (itemFillPolicy.has_value() || columnsTemplate.has_value())  {
+    if (itemFillPolicy.has_value() || columnsTemplate.has_value()) {
         setColumns = true;
     }
     auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
@@ -67,6 +70,11 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
     const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
     const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
+    if (userDefined_) {
+        auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(
+            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
+        return algo;
+    }
     if (UseIrregularLayout()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
             info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
@@ -140,6 +148,7 @@ void GridPattern::OnModifyDone()
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
+        SetScrollBar(DisplayMode::OFF);
         return;
     }
     SetAxis(info_.axis_);
@@ -305,6 +314,7 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
     if (onJSFrameNodeScrollStart) {
         onJSFrameNodeScrollStart();
     }
+    ContentChangeOnScrollStart(host);
 }
 
 void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
@@ -316,6 +326,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
     }
     if (!isInitialized_) {
         FireObserverOnReachStart();
+        ReportOnItemGridEvent("onReachStart");
         CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
         if (onReachStart) {
             onReachStart();
@@ -333,6 +344,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
                                  GreatOrEqual(info_.currentHeight_, -info_.contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
+            ReportOnItemGridEvent("onReachStart");
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid", scrollUpToStart,
                 scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -369,6 +381,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
             GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
         if (scrollDownToEnd || scrollUpToEnd) {
             FireObserverOnReachEnd();
+            ReportOnItemGridEvent("onReachEnd");
             CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
                 scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -455,7 +468,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     float mainContentSize = GetMainContentSize();
     if (info_.offsetEnd_) {
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             float overScroll = 0.0f;
             if (GetTotalHeight() <= mainContentSize) {
                 overScroll = GetTotalOffset();
@@ -472,6 +485,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto userOffset = FireOnWillScroll(-offset);
         userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
+        info_.currentDelta_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(info_.currentOffset_, mainContentSize - itemsHeight - info_.contentEndOffset_)) {
@@ -482,7 +496,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             if (!NearZero(mainContentSize)) {
                 auto friction = CalculateFriction(std::abs(info_.currentOffset_) / mainContentSize);
                 offset *= friction;
@@ -491,6 +505,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto userOffset = FireOnWillScroll(-offset);
         userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
+        info_.currentDelta_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         if (LessNotEqual(info_.currentOffset_, info_.contentStartOffset_)) {
             info_.reachStart_ = false;
@@ -500,6 +515,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto userOffset = FireOnWillScroll(-offset);
     userOffset = FireObserverOnWillScroll(userOffset);
     info_.currentOffset_ -= userOffset;
+    info_.currentDelta_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ScrollablePattern::MarkScrollBarProxyDirty();
     return true;
@@ -577,6 +593,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     ChangeCanStayOverScroll();
+    info_.currentDelta_ = 0;
 
     if (gridLayoutAlgorithm->MeasureInNextFrame()) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
@@ -746,7 +763,7 @@ void GridPattern::ScrollBy(float offset)
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json, filter);
+    SelectableContainerPattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
@@ -872,12 +889,16 @@ void GridPattern::ScrollTo(float position)
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 float GridPattern::EstimateHeight() const
 {
     if (!isConfigScrollable_) {
         return 0.0f;
+    }
+    if (userDefined_) {
+        return info_.totalOffset_;
     }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
@@ -893,7 +914,7 @@ float GridPattern::EstimateHeight() const
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    if (UseIrregularLayout()) {
+    if (UseIrregularLayout() || userDefined_) {
         return info.GetIrregularOffset(mainGap);
     }
     if (!layoutProperty->GetLayoutOptions().has_value()) {
@@ -937,6 +958,9 @@ float GridPattern::GetAverageHeight() const
 
 float GridPattern::GetTotalHeight() const
 {
+    if (userDefined_ && scrollbarInfo_.second.has_value()) {
+        return scrollbarInfo_.second.value();
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     auto geometryNode = host->GetGeometryNode();
@@ -1400,6 +1424,14 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
+void GridPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    json->Put("isScrollable",
+        scrollable_ ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                    : "false");
+    json->Put("scrollDirection", (GetAxis() == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 std::string GridPattern::GetIrregularIndexesString() const
 {
     auto property = GetLayoutProperty<GridLayoutProperty>();
@@ -1479,9 +1511,11 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             SetExtraOffset(extraOffset);
             targetIndex_ = index;
             scrollAlign_ = align;
+            info_.scrollAlign_ = align;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
+            ContentChangeReport(host);
         }
     }
     FireAndCleanScrollingListener();
@@ -1519,7 +1553,11 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
     CHECK_NULL_RETURN(host, false);
     auto&& extraOffset = GetExtraOffset();
     bool success = true;
-    if (UseIrregularLayout()) {
+    if (userDefined_) {
+        success = info_.targetPos_.has_value();
+        targetPos = info_.targetPos_.value_or(0.0f);
+        info_.targetPos_.reset();
+    } else if (UseIrregularLayout()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto size = GridLayoutUtils::GetItemSize(&info_, RawPtr(host), *targetIndex_);
@@ -1820,5 +1858,90 @@ float GridPattern::GetOffsetWithLimit(float offset) const
         return std::max(offset, -remainHeight);
     }
     return 0;
+}
+
+void GridPattern::ReportOnItemGridEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto gridEvent = std::string("Grid.") + event;
+    params->Put("name", gridEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t GridPattern::OnInjectionEvent(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        if (isScrollByRatio) {
+            ScrollPageByRatio(true, ratio, reportEventId);
+        } else {
+            ScrollPage(true);
+        }
+    } else if (ret == "scrollBackward") {
+        if (isScrollByRatio) {
+            ScrollPageByRatio(false, ratio, reportEventId);
+        } else {
+            ScrollPage(false);
+        }
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void GridPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
+{
+    float height = GetMainContentSize();
+
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+
+    SetIsOverScroll(false);
+    StopAnimate();
+    HandleGridScroll(distance, reportEventId);
+}
+
+void GridPattern::HandleGridScroll(float distance, int32_t reportEventId)
+{
+    if (!scrollable_) {
+        ReportScroll(false, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+
+    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        return;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (IsAtTop()) {
+        error = ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom()) {
+        error = ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+    ReportScroll(false, error, reportEventId);
 }
 } // namespace OHOS::Ace::NG

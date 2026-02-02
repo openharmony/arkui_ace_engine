@@ -15,6 +15,10 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 
+#include "bridge/js_frontend/engine/common/base_canvas_bridge.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
+
 #ifndef WINDOWS_PLATFORM
 #include <dlfcn.h>
 #endif
@@ -27,14 +31,15 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animation_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animator_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_badge_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
+#include "frameworks/compatible/components/canvas/bridge/jsi_canvas_bridge.h"
+#include "frameworks/compatible/components/canvas/canvas_modifier_compatible.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_chart_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_clock_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_component_api_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_image_animator_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_input_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_list_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
+#include "frameworks/compatible/components/canvas/bridge/jsi_offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
@@ -53,6 +58,23 @@ extern const uint8_t* _binary_jsMockSystemPlugin_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+
+const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
+{
+    static const ArkUICanvasModifierCompatible* canvasModifier_ = nullptr;
+    if (canvasModifier_) {
+        return canvasModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+    if (loader) {
+        canvasModifier_ = reinterpret_cast<const ArkUICanvasModifierCompatible*>(loader->GetCustomModifier());
+        return canvasModifier_;
+    }
+    return nullptr;
+}
+}
 
 const int SYSTEM_BASE = 10;
 
@@ -353,7 +375,7 @@ void SetDomAttributesWithObject(const shared_ptr<JsRuntime>& runtime, const std:
         auto chartBridge = AceType::MakeRefPtr<JsiChartBridge>();
         chartBridge->ParseAttrSingleSegment(runtime, value);
         command.SetSegments(chartBridge->GetSegments());
-    } else if (keyStr == DOM_CLOCK_CONFIG) {
+    } else if (keyStr == "clockconfig") {
         auto clockBridge = AceType::MakeRefPtr<JsiClockBridge>();
         clockBridge->ParseClockConfig(runtime, value);
         command.SetClockConfig(clockBridge->GetClockConfig());
@@ -447,7 +469,7 @@ void SetDomStyle(
             std::string valStr = value->ToString(runtime);
             styles.emplace_back(keyStr, valStr);
         } else if (value->IsArray(runtime)) {
-            if (strcmp(keyStr.c_str(), DOM_TEXT_FONT_FAMILY) == 0) {
+            if (strcmp(keyStr.c_str(), OHOS::Ace::DOM_TEXT_FONT_FAMILY) == 0) {
                 // Deal with special case such as fontFamily, suppose all the keys in the array are the same.
                 std::string familyStyle;
                 GetStyleFamilyValue(runtime, value, familyStyle);
@@ -1040,6 +1062,24 @@ shared_ptr<JsValue> JsHandleAnimationFrame(
     return runtime->NewNull();
 }
 
+shared_ptr<JsValue> JsHandleCrownEvent(
+    const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
+{
+    std::string callbackId = arg->ToString(runtime);
+    if (callbackId.empty()) {
+        LOGW("system digitalCrown callbackId is null");
+        return runtime->NewNull();
+    }
+    if (methodName == DIGITAL_CROWN_SET_MONITOR_FOR_CROWN_EVENT) {
+        GetFrontendDelegate(runtime)->SetMonitorForCrownEvents(callbackId);
+    } else if (methodName == DIGITAL_CROWN_CLEAR_MONITOR_FOR_CROWN_EVENT) {
+        GetFrontendDelegate(runtime)->ClearMonitorForCrownEvents();
+    } else {
+        LOGW("digitalCrown not support method = %{private}s", methodName.c_str());
+    }
+    return runtime->NewNull();
+}
+
 shared_ptr<JsValue> JsHandleCallback(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
 {
@@ -1330,7 +1370,21 @@ shared_ptr<JsValue> JsHandleOffscreenCanvas(
         int32_t height = ParseIntParams(runtime, arg, "height");
 
         auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
-        auto bridge = AceType::MakeRefPtr<JsiOffscreenCanvasBridge>(pipelineContext, width, height);
+        CanvasBridgeParams params = {
+            .pipeline = pipelineContext, .width = width, .height = height, .isOffscreen = true
+        };
+        const auto* modifier = GetCanvasInnerModifier();
+        void* bridgePtr = modifier->createCanvasBridge(params);
+        if (!bridgePtr) {
+            LOGE("Failed to create OffscreenCanvasBridge");
+            return runtime->NewUndefined();
+        }
+
+        auto bridge = AceType::Claim(reinterpret_cast<BaseCanvasBridge*>(bridgePtr));
+        if (!bridge) {
+            LOGE("Failed to claim BaseCanvasBridge");
+            return runtime->NewUndefined();
+        }
         page->PushOffscreenCanvasBridge(bridge->GetBridgeId(), bridge);
         return bridge->GetBridge(runtime);
     }
@@ -1815,6 +1869,9 @@ shared_ptr<JsValue> JsHandleModule(const std::string& moduleName, const std::str
             { "animation",
                 [](const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
                     const std::string& methodName) { return JsHandleAnimationFrame(runtime, argv[1], methodName); } },
+            { "digitalCrown",
+                [](const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
+                    const std::string& methodName) { return JsHandleCrownEvent(runtime, argv[1], methodName); } },
             { "internal.jsResult",
                 [](const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
                     const std::string& methodName) { return JsHandleCallback(runtime, argv[1], methodName); } },
@@ -3027,6 +3084,33 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
     func->Call(runtime_, global, argv, argv.size());
 }
 
+bool JsiEngineInstance::CallJsWithReturnBool(
+    const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)
+{
+    std::string keepAliveStr = keepAlive ? "true" : "false";
+    std::string callBuff = std::string("[{\"args\": [\"")
+                               .append(callbackId)
+                               .append("\",")
+                               .append(args)
+                               .append(",")
+                               .append(keepAliveStr)
+                               .append("], \"method\":\"callback\"}]");
+    int32_t instanceId = isGlobal ? DEFAULT_APP_ID : runningPage_->GetPageId();
+
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime_->NewString(std::to_string(instanceId)));
+    argv.push_back(runtime_->ParseJson(callBuff));
+
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime_, "callJS");
+    if (!func->IsFunction(runtime_)) {
+        LOGE("\"callJs\" is not a function!");
+        return false;
+    }
+    auto result = func->Call(runtime_, global, argv, argv.size());
+    return (result->ToString(runtime_) == "true");
+}
+
 #if defined(PREVIEW)
 bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
 {
@@ -3540,6 +3624,14 @@ void JsiEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t
         engineInstance_->CallJs(callbackId, std::to_string(timeStamp), false, true);
         engineInstance_->GetFrontendDelegate()->CancelAnimationFrame(callbackId);
     }
+}
+
+bool JsiEngine::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    if (engineInstance_) {
+        return engineInstance_->CallJsWithReturnBool(callbackId, args, true, true);
+    }
+    return false;
 }
 
 void JsiEngine::JsCallback(const std::string& callbackId, const std::string& args)

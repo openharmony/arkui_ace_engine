@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class SimpleSpringNode : public SpringNode {
+class ACE_FORCE_EXPORT SimpleSpringNode : public SpringNode {
     DECLARE_ACE_TYPE(SimpleSpringNode, SpringNode);
 
 public:

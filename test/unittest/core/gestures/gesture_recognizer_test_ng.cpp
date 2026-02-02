@@ -25,7 +25,7 @@ class MockNGGestureRecognizer : public NGGestureRecognizer {
 public:
     MOCK_METHOD(void, ResetStatusOnFinish, (bool isBlocked), ());
     void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
-    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
+    void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) {}
     void HandleTouchDownEvent(const TouchEvent& event) {}
     void HandleTouchUpEvent(const TouchEvent& event) {}
     void HandleTouchMoveEvent(const TouchEvent& event) {}
@@ -47,6 +47,7 @@ public:
         std::map<int32_t, TouchEvent> emptyTouchPoints;
         return emptyTouchPoints;
     }
+    void CheckCurrentFingers() const {};
 };
 class GestureRecognizerTestNg : public GesturesCommonTestNg {
 public:
@@ -1152,5 +1153,661 @@ HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest008, TestSize.Level1)
     };
     UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
     clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionStart_, GestureCallbackType::START);
+}
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test GestureRecognizerTestNg function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->refereeState_ = RefereeState::DETECTING;
+    clickRecognizer->lastRefereeState_ = RefereeState::READY;
+    clickRecognizer->disposal_ = GestureDisposal::REJECT;
+    clickRecognizer->priority_ = GesturePriority::High;
+    clickRecognizer->currentCallbackState_ = CurrentCallbackState::START;
+    clickRecognizer->fromCardOrUIExtension_ = true;
+    clickRecognizer->currentFingers_ = 1;
+    clickRecognizer->isTouchEventFinished_ = true;
+    clickRecognizer->bridgeMode_ = true;
+    clickRecognizer->enabled_ = false;
+    clickRecognizer->isNeedResetVoluntarily_ = true;
+    clickRecognizer->isNeedResetRecognizerState_ = true;
+    clickRecognizer->preventBegin_ = true;
+
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, StartsWith("myButton"));
+    EXPECT_THAT(result, HasSubstr("LST:READY"));
+    EXPECT_THAT(result, HasSubstr("ST:DETECTING"));
+    EXPECT_THAT(result, HasSubstr("DSP:1"));
+    EXPECT_THAT(result, HasSubstr("PRI:1"));
+    EXPECT_THAT(result, HasSubstr("CCST:1"));
+    EXPECT_THAT(result, HasSubstr("FCOU:1"));
+    EXPECT_THAT(result, HasSubstr("CF:1"));
+    EXPECT_THAT(result, HasSubstr("FID:[]"));
+    EXPECT_THAT(result, HasSubstr("ITEF:1"));
+    EXPECT_THAT(result, HasSubstr("BM:1"));
+    EXPECT_THAT(result, HasSubstr("ENB:0"));
+    EXPECT_THAT(result, HasSubstr("NRV:1"));
+    EXPECT_THAT(result, HasSubstr("NRRS:1"));
+    EXPECT_THAT(result, HasSubstr("PB:1"));
+}
+
+/**
+ * @tc.name: GetGestureInfoString002
+ * @tc.desc: Test GestureRecognizerTestNg function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetGestureInfoString002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->fingersId_.insert(1);
+
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, StartsWith("myButton"));
+    EXPECT_THAT(result, HasSubstr("FID:[,1]"));
+}
+
+/**
+ * @tc.name: SetGestureGroupTest001
+ * @tc.desc: Test SetGestureGroup when both groups are valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, SetGestureGroupTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto group1 = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+    auto group2 = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+
+    clickRecognizer->gestureGroup_ = group1;
+    bool result = clickRecognizer->SetGestureGroup(group2);
+    EXPECT_FALSE(result);
+
+    clickRecognizer->gestureGroup_ = nullptr;
+    result = clickRecognizer->SetGestureGroup(group1);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: BatchAdjudicateTest001
+ * @tc.desc: Test BatchAdjudicate with eventImportGestureGroup_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, BatchAdjudicateTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto eventImportGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+    clickRecognizer->eventImportGestureGroup_ = eventImportGroup;
+
+    clickRecognizer->BatchAdjudicate(clickRecognizer, GestureDisposal::ACCEPT);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: ReconcileGestureInfoFromTest001
+ * @tc.desc: Test ReconcileGestureInfoFrom with null recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, ReconcileGestureInfoFromTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> nullRecognizer = nullptr;
+
+    clickRecognizer->ReconcileGestureInfoFrom(nullRecognizer);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: ReconcileGestureInfoFromTest002
+ * @tc.desc: Test ReconcileGestureInfoFrom with valid gestureInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, ReconcileGestureInfoFromTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto otherRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    otherRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER, SourceTool::PEN };
+    otherRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    clickRecognizer->ReconcileGestureInfoFrom(otherRecognizer);
+    EXPECT_EQ(clickRecognizer->gestureInfo_->GetAllowedTypes(), allowedTypes);
+}
+
+/**
+ * @tc.name: SetEventImportGestureGroupTest001
+ * @tc.desc: Test SetEventImportGestureGroup with null gestureGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, SetEventImportGestureGroupTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    WeakPtr<NGGestureRecognizer> nullGroup;
+
+    clickRecognizer->SetEventImportGestureGroup(nullGroup);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: SetEventImportGestureGroupTest002
+ * @tc.desc: Test SetEventImportGestureGroup with valid gestureGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, SetEventImportGestureGroupTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto group = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+
+    clickRecognizer->SetEventImportGestureGroup(group);
+    EXPECT_EQ(clickRecognizer->eventImportGestureGroup_.Upgrade(), group);
+}
+
+/**
+ * @tc.name: ResetStateVoluntarilyTest001
+ * @tc.desc: Test ResetStateVoluntarily with null group
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, ResetStateVoluntarilyTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureGroup_ = nullptr;
+
+    clickRecognizer->ResetStateVoluntarily();
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: ResetStateVoluntarilyTest002
+ * @tc.desc: Test ResetStateVoluntarily with non-RecognizerGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, ResetStateVoluntarilyTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto otherRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureGroup_ = otherRecognizer;
+
+    clickRecognizer->ResetStateVoluntarily();
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: AboutToAcceptTest001
+ * @tc.desc: Test AboutToAccept when refereeState is FAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, AboutToAcceptTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->refereeState_ = RefereeState::FAIL;
+
+    clickRecognizer->AboutToAccept();
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: AboutToAcceptTest002
+ * @tc.desc: Test AboutToAccept with RecognizerGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, AboutToAcceptTest002, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+    recognizerGroup->refereeState_ = RefereeState::DETECTING;
+
+    recognizerGroup->AboutToAccept();
+    EXPECT_EQ(recognizerGroup->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: IsInResponseLinkRecognizersTest001
+ * @tc.desc: Test IsInResponseLinkRecognizers with invalid item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsInResponseLinkRecognizersTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<NGGestureRecognizer> nullPtr = nullptr;
+    ResponseLinkResult responseLinkResult;
+    responseLinkResult.push_back(nullPtr);
+
+    clickRecognizer->SetResponseLinkRecognizers(responseLinkResult);
+    bool result = clickRecognizer->IsInResponseLinkRecognizers();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPendingRecognizerIsInAttachedNodeTest001
+ * @tc.desc: Test CheckPendingRecognizerIsInAttachedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, CheckPendingRecognizerIsInAttachedNodeTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+
+    TouchEvent event;
+    event.x = 99999;
+    event.y = 99999;
+
+    clickRecognizer->CheckPendingRecognizerIsInAttachedNode(event);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: GetCallbackNameTest001
+ * @tc.desc: Test GetCallbackName with various callback types
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetCallbackNameTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto onAction = std::make_unique<GestureEventFunc>([](GestureEvent& info) {});
+    auto onActionStart = std::make_unique<GestureEventFunc>([](GestureEvent& info) {});
+    auto onActionUpdate = std::make_unique<GestureEventFunc>([](GestureEvent& info) {});
+    auto onActionEnd = std::make_unique<GestureEventFunc>([](GestureEvent& info) {});
+    auto onActionCancel = std::make_unique<GestureEventFunc>([](GestureEvent& info) {});
+
+    clickRecognizer->onAction_ = std::move(onAction);
+    EXPECT_EQ(clickRecognizer->GetCallbackName(clickRecognizer->onAction_), "onAction");
+
+    clickRecognizer->onActionStart_ = std::move(onActionStart);
+    EXPECT_EQ(clickRecognizer->GetCallbackName(clickRecognizer->onActionStart_), "onActionStart");
+
+    clickRecognizer->onActionUpdate_ = std::move(onActionUpdate);
+    EXPECT_EQ(clickRecognizer->GetCallbackName(clickRecognizer->onActionUpdate_), "onActionUpdate");
+
+    clickRecognizer->onActionEnd_ = std::move(onActionEnd);
+    EXPECT_EQ(clickRecognizer->GetCallbackName(clickRecognizer->onActionEnd_), "onActionEnd");
+
+    clickRecognizer->onActionCancel_ = std::move(onActionCancel);
+    EXPECT_EQ(clickRecognizer->GetCallbackName(clickRecognizer->onActionCancel_), "onActionCancel");
+}
+
+/**
+ * @tc.name: GetCallbackNameTest002
+ * @tc.desc: Test GetCallbackName with unknown callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetCallbackNameTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto unknownCallback = std::make_unique<GestureEventFunc>([](GestureEvent& info) {});
+
+    std::string result = clickRecognizer->GetCallbackName(unknownCallback);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetActionPhaseTest001
+ * @tc.desc: Test GetActionPhase with various gesture types
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetActionPhaseTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    // PAN with START -> WILL_START
+    auto phase = clickRecognizer->GetActionPhase(GestureCallbackType::START, GestureListenerType::PAN);
+    EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+
+    // PAN with END -> WILL_END
+    phase = clickRecognizer->GetActionPhase(GestureCallbackType::END, GestureListenerType::PAN);
+    EXPECT_EQ(phase, GestureActionPhase::WILL_END);
+
+    // PAN with ACTION -> UNKNOWN
+    phase = clickRecognizer->GetActionPhase(GestureCallbackType::ACTION, GestureListenerType::PAN);
+    EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+
+    // TAP with START -> UNKNOWN
+    phase = clickRecognizer->GetActionPhase(GestureCallbackType::START, GestureListenerType::TAP);
+    EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+
+    // TAP with ACTION -> WILL_START
+    phase = clickRecognizer->GetActionPhase(GestureCallbackType::ACTION, GestureListenerType::TAP);
+    EXPECT_EQ(phase, GestureActionPhase::WILL_START);
+
+    // Unknown callback type -> UNKNOWN
+    phase = clickRecognizer->GetActionPhase(GestureCallbackType::UPDATE, GestureListenerType::PAN);
+    EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+}
+
+/**
+ * @tc.name: IsAllowedTypeTest001
+ * @tc.desc: Test IsAllowedType with null gestureInfo_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsAllowedTypeTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = nullptr;
+
+    bool result = clickRecognizer->IsAllowedType(SourceTool::FINGER);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsAllowedTypeTest002
+ * @tc.desc: Test IsAllowedType with empty allowedTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsAllowedTypeTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+
+    bool result = clickRecognizer->IsAllowedType(SourceTool::FINGER);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsAllowedTypeTest003
+ * @tc.desc: Test IsAllowedType with specific allowedTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsAllowedTypeTest003, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER, SourceTool::PEN };
+    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    bool result = clickRecognizer->IsAllowedType(SourceTool::FINGER);
+    EXPECT_TRUE(result);
+
+    result = clickRecognizer->IsAllowedType(SourceTool::MOUSE);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnRejectBridgeObjTest001
+ * @tc.desc: Test OnRejectBridgeObj with empty bridgeObjList_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, OnRejectBridgeObjTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->bridgeObjList_.clear();
+
+    clickRecognizer->OnRejectBridgeObj();
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: OnRejectBridgeObjTest002
+ * @tc.desc: Test OnRejectBridgeObj with null bridgeObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, OnRejectBridgeObjTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    WeakPtr<NGGestureRecognizer> nullPtr;
+    clickRecognizer->bridgeObjList_.push_back(nullPtr);
+
+    clickRecognizer->OnRejectBridgeObj();
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: HandleEventWithNotAllowedTypeTest001
+ * @tc.desc: Test HandleEvent with TouchEvent when type is not allowed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleEventWithNotAllowedTypeTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
+    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    TouchEvent event;
+    event.id = 1;
+    event.type = TouchType::DOWN;
+    event.sourceTool = SourceTool::MOUSE;
+
+    bool result = clickRecognizer->HandleEvent(event);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleEventWithNotAllowedTypeTest002
+ * @tc.desc: Test HandleEvent with TouchEvent CANCEL when type is not allowed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleEventWithNotAllowedTypeTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
+    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    TouchEvent event;
+    event.id = 1;
+    event.type = TouchType::CANCEL;
+    event.sourceTool = SourceTool::MOUSE;
+
+    bool result = clickRecognizer->HandleEvent(event);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleAxisEventWithNotAllowedTypeTest001
+ * @tc.desc: Test HandleEvent with AxisEvent when type is not allowed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleAxisEventWithNotAllowedTypeTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
+    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    AxisEvent event;
+    event.id = 1;
+    event.action = AxisAction::BEGIN;
+    event.sourceTool = SourceTool::MOUSE;
+
+    bool result = clickRecognizer->HandleEvent(event);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleAxisEventWithNotAllowedTypeTest002
+ * @tc.desc: Test HandleEvent with AxisEvent CANCEL when type is not allowed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleAxisEventWithNotAllowedTypeTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
+    clickRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    AxisEvent event;
+    event.id = 1;
+    event.action = AxisAction::CANCEL;
+    event.sourceTool = SourceTool::MOUSE;
+
+    bool result = clickRecognizer->HandleEvent(event);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleBridgeModeAxisEventTest001
+ * @tc.desc: Test HandleBridgeModeEvent with AxisEvent and null bridgeObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleBridgeModeAxisEventTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    WeakPtr<NGGestureRecognizer> nullPtr;
+    clickRecognizer->bridgeObjList_.push_back(nullPtr);
+
+    AxisEvent event;
+    event.action = AxisAction::BEGIN;
+
+    clickRecognizer->HandleBridgeModeEvent(event);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: GetTransformMatrixTest001
+ * @tc.desc: Test GetTransformMatrix with invalid node
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetTransformMatrixTest001, TestSize.Level1)
+{
+    WeakPtr<FrameNode> invalidNode;
+
+    auto result = NGGestureRecognizer::GetTransformMatrix(invalidNode, false, false, 0);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetTransformMatrixTest002
+ * @tc.desc: Test GetTransformMatrix with null host
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetTransformMatrixTest002, TestSize.Level1)
+{
+    WeakPtr<FrameNode> weakNode;
+    auto result = NGGestureRecognizer::GetTransformMatrix(weakNode, false, false, 0);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: TransformForRecognizerTest001
+ * @tc.desc: Test TransformForRecognizer with invalid node
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, TransformForRecognizerTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    WeakPtr<FrameNode> invalidNode;
+    PointF point(1.0, 1.0);
+
+    clickRecognizer->TransformForRecognizer(point, invalidNode, false, false, 0);
+    EXPECT_EQ(point.GetX(), 1.0);
+    EXPECT_EQ(point.GetY(), 1.0);
+}
+
+/**
+ * @tc.name: TransformForRecognizerTest002
+ * @tc.desc: Test TransformForRecognizer with empty localMatrix_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, TransformForRecognizerTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->localMatrix_.clear();
+
+    PointF point(1.0, 1.0);
+    clickRecognizer->TransformForRecognizer(point, frameNode, false, false, 0);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: IsInAttachedNodeTest001
+ * @tc.desc: Test IsInAttachedNode with invalid frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsInAttachedNodeTest001, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    WeakPtr<FrameNode> invalidNode;
+
+    TouchEvent event;
+    bool result = clickRecognizer->IsInAttachedNode(event, false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsInAttachedNodeTest002
+ * @tc.desc: Test IsInAttachedNode with childTouchTestList match
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsInAttachedNodeTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    TouchEvent event;
+    event.childTouchTestList.push_back("myButton");
+
+    bool result = clickRecognizer->IsInAttachedNode(event, false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsInAttachedNodeTest003
+ * @tc.desc: Test IsInAttachedNode with isRealTime parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, IsInAttachedNodeTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->AttachFrameNode(frameNode);
+
+    TouchEvent event;
+    event.x = 1.0;
+    event.y = 1.0;
+    event.passThrough = true;
+    event.postEventNodeId = 0;
+
+    clickRecognizer->IsInAttachedNode(event, true);
+    EXPECT_NE(clickRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: ShouldResponseTest001
+ * @tc.desc: Test ShouldResponse with RecognizerGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, ShouldResponseTest001, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+
+    bool result = recognizerGroup->ShouldResponse();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ShouldResponseTest002
+ * @tc.desc: Test ShouldResponse with FAIL state
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, ShouldResponseTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->refereeState_ = RefereeState::FAIL;
+
+    // Create a mock ResponseCtrl that returns false
+    clickRecognizer->ShouldResponse();
+    EXPECT_NE(clickRecognizer, nullptr);
 }
 } // namespace OHOS::Ace::NG

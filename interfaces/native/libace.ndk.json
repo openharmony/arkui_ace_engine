@@ -2916,6 +2916,14 @@
         "name": "OH_ArkUI_NotifyDragResult"
     },
     {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NotifySuggestedDropOperation"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NotifyDisableDefaultDropAnimation"
+    },
+    {
         "first_introduced": "19",
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
@@ -4416,35 +4424,35 @@
         "name": "OH_ArkUI_SelectionOptions_GetMenuPolicy"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_RenderNodeUtils_GetRenderNode"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_NativeModule_AdoptChild"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_NativeModule_RemoveAdoptedChild"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextLayoutManager_Dispose"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextLayoutManager_GetLineCount"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextLayoutManager_GetRectsForRange"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextLayoutManager_GetGlyphPositionAtCoordinate"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextLayoutManager_GetLineMetrics"
     },
     {
@@ -4500,135 +4508,131 @@
         "name": "OH_ArkUI_TouchTestInfo_SetTouchResultId"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextEditMenuOptions_Create"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextEditMenuOptions_Dispose"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback"
     },
     {
-        "first_introduced": "23",
-        "name": "OH_ArkUI_TextEditMenuOptions_RegisterOnDestroyMenuCallback"
-    },
-    {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_Create"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_Dispose"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_SetContent"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_GetContent"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_GetIcon"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_SetIcon"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_SetLabelInfo"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_GetLabelInfo"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_SetId"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItem_GetId"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItemArray_GetSize"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItemArray_GetItem"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItemArray_Insert"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItemArray_Erase"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextMenuItemArray_Clear"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_Create"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_Dispose"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_SetSpanType"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_GetSpanType"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_SetContentNode"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_GetContentNode"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_SetResponseType"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_GetResponseType"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback"
     },
     {
-        "first_introduced": "23",
+        "first_introduced": "22",
         "name": "OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback"
     },
     {
@@ -4686,6 +4690,194 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_MotionPathOptions_GetRotatable"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_SetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_GetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_SetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_GetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_SetZ"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_GetZ"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_SetCenterX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_GetCenterX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_SetCenterY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4ScaleOptions_GetCenterY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_SetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_GetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_SetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_GetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_SetZ"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_GetZ"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_SetAngle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_GetAngle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_SetCenterX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_GetCenterX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_SetCenterY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4RotationOptions_GetCenterY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_SetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_GetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_SetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_GetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_SetZ"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4TranslationOptions_GetZ"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_CreateIdentity"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_CreateByElements"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Copy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Invert"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Combine"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Translate"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Scale"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Rotate"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_Skew"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_TransformPoint"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_SetPolyToPoly"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Matrix4_GetElements"
     },
     {
         "first_introduced": "23",
@@ -4798,5 +4990,545 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetTextDecorationType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetTextDecorationType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetTextDecorationStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetThicknessScale"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetThicknessScale"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetTypes"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetTypes"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetDecorationStyleOptions"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetDecorationStyleOptions"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NodeEvent_GetPreventableEvent"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetCaretOffset"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetCaretOffset"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetSelection"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_IsEditing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_StopEditing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetPreviewTextOffset"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetPreviewTextValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetCaretRect"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_DeleteBackward"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetTextAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetTextAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginPixelMap"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginPixelMap"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginWidth"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginWidth"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetWordBreak"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetWordBreak"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLineBreakStrategy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLineBreakStrategy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetParagraphSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetParagraphSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetTextVerticalAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetTextVerticalAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetTypingParagraphStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetTextDirection"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetTextDirection"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetOffsetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetOffsetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetOffsetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetOffsetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetFill"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetFill"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetDecoration"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetDecoration"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetTextShadows"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetTextShadows"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetLineHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetLineHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetLetterSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetLetterSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontFeature"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontFeature"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetHalfLeading"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetHalfLeading"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetTextBackgroundColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetTextBackgroundColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetTextBackgroundRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetTextBackgroundRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetTypingStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetTypingStyle"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_GetNativeAccessibilityProvider"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_StartFakeDrag"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_FakeDragBy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_StopFakeDrag"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_IsFakeDragging"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_ShowPrevious"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_ShowNext"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetSpanType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetSpanType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetContentNode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetResponseType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetResponseType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetMenuType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuDisappearCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetHapticFeedbackMode"
     }
 ]

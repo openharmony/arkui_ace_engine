@@ -88,6 +88,7 @@ typedef struct webview_WebviewControllerPeer {
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
     std::function<void(int32_t)> setWebDetachFunc = nullptr;
     std::function<void(void*, void*, std::function<void(void*)>)> defaultOnShowFileSelectorFunc = nullptr;
+    std::function<void(void*, std::function<void()>)> defaultPermissionClipboardFunc = nullptr;
 } WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
@@ -175,7 +176,8 @@ struct ArkUIDragInfo {
 
 struct ArkUINavigationInfo {
     std::string navigationId;
-    ani_ref navPathStack;
+    ani_long navPathStack;
+    std::optional<ani_int> uniqueId;
 };
 
 struct ArkUINavDestinationInfo {
@@ -186,6 +188,10 @@ struct ArkUINavDestinationInfo {
     std::string navigationId;
     ani_size state;
     ani_size mode;
+    std::optional<std::string> param;
+    std::optional<ani_double> width;
+    std::optional<ani_double> height;
+    ani_long navPathStack;
 };
 
 struct ArkUIRouterPageInfo {
@@ -194,6 +200,8 @@ struct ArkUIRouterPageInfo {
     std::string path;
     ani_size state;
     std::string pageId;
+    std::optional<ani_double> width;
+    std::optional<ani_double> height;
 };
 
 struct AniOverlayOptions {
@@ -214,7 +222,6 @@ struct ArkUIDragPreviewOption {
     bool isNumber = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
-    bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
     bool enableEdgeAutoScroll = true;
     bool enableHapticFeedback = false;
@@ -267,6 +274,7 @@ struct ArkUIDragControllerAsync {
     ArkUIDragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
+    std::function<void()> destroyJsFunction;
     std::shared_ptr<OHOS::Ace::Ani::DragAction> dragAction = nullptr;
 };
 
@@ -288,6 +296,18 @@ struct ArkUIDragPreviewAsync {
     ArkUIPreviewStyle previewStyle;
     ArkUIPreviewAnimation previewAnimation;
     bool hasAnimation = false;
+};
+
+struct ArkUIDragSpringLoadingConfiguration {
+    int32_t stillTimeLimit { -1 };
+    int32_t updateInterval { -1 };
+    int32_t updateNotifyCount { -1 };
+    int32_t updateToFinishInterval { -1 };
+};
+
+struct ArkUIDragInfos {
+    SharedPointerWrapper summary;
+    std::string extraInfo;
 };
 
 struct ArkUILocalizedSnapshotRegion {
@@ -427,6 +447,12 @@ struct ArkUIWaterFlowSection {
     ArkUIWaterFlowSectionPadding margin;
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
+
+struct ArkUIListItemGroupSpace {
+    int32_t unit = 1;
+    float value = 0.0f;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -469,7 +495,8 @@ struct ArkUIAniWebModifier {
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
     ani_ref (*getDragData)(ani_ref event);
-    void (*getDragSummary)(ani_ref event, ani_ref summaryPtr);
+    void (*getDragSummary)(ani_ref event, SharedPointerWrapper& summaryPtr);
+    void (*setDragDataLoadParams)(ani_ref event, void* dataLoadParams);
     void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
@@ -477,9 +504,12 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDrop)(ArkUINodeHandle node, char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
+    void (*enableInternalDropAnimation)(ani_ref event, const std::string& configuration, int32_t& ret);
+    bool (*isOnDropPhase)();
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
-    ani_long (*getUnifiedData)(ani_long peer);
+    SharedPointerWrapper (*getUnifiedData)(ani_long peer);
+    ani_long (*createDataLoadParamsPeer)(void* dataLoadParams);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
@@ -574,10 +604,15 @@ struct ArkUIAniCommonModifier {
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
     void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
+    void (*setIsRecycleInvisibleImageMemory)(ani_boolean isRecycle, ani_int instanceId);
     void (*getBaseEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
+    void(*getCallingScopeUIContext)(int32_t& instance);
+    void(*getLastFocusedUIContext)(int32_t& instance);
+    void(*getLastForegroundUIContext)(int32_t& instance);
+    void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
 };
 struct  ArkUICustomNodeInfo {
@@ -588,6 +623,7 @@ struct  ArkUICustomNodeInfo {
     std::function<void()> onCleanupFunc;
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void(bool, bool)> setActiveFunc;
+    std::function<std::string()> onGetJsViewNameFunc;
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int id, ArkUICustomNodeInfo&& customNodeInfo);
@@ -635,6 +671,16 @@ struct ArkUIAniListModifier {
     void (*syncChildrenSizeOver)(ArkUINodeHandle node);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
 };
+struct ArkUIAniListItemGroupModifier {
+    void (*setListItemGroupHeader)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
+    void (*setListItemGroupHeaderContent)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
+    void (*resetListItemGroupHeader)(ArkUINodeHandle node);
+    void (*setListItemGroupFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setListItemGroupFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*resetListItemGroupFooter)(ArkUINodeHandle node);
+    void (*setListItemGroupStyle)(ArkUINodeHandle node, int32_t style);
+    void (*setListItemGroupSpace)(ArkUINodeHandle node, ArkUIListItemGroupSpace space);
+};
 struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(
         ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
@@ -669,11 +715,18 @@ struct ArkUIAniDragControllerModifier {
     bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
     void* (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg);
-    void (*aniDragPreviewSetForegroundColor)(Ark_ResourceColor value, ArkUIDragPreviewAsync& asyncCtx);
+    void (*aniDragPreviewSetForegroundColor)(ani_long value, ArkUIDragPreviewAsync& asyncCtx);
     void (*aniDragPreviewAnimate)(ArkUIDragPreviewAsync& asyncCtx);
     void (*aniDragActionSetDragEventStrictReportingEnabled)(bool enable);
     void (*aniDragActionCancelDataLoading)(const char* key);
     void (*aniDragActionNotifyDragStartReques)(int requestStatus);
+    void (*aniDragActionEnableDropDisallowedBadge)(bool enabled);
+    int32_t (*aniSpringLoadingContextGetState)(ani_long ptr);
+    int32_t (*aniSpringLoadingContextGetCurrentNotifySequence)(ani_long ptr);
+    void (*aniSpringLoadingContextGetDragInfos)(ani_long ptr, ArkUIDragInfos& info);
+    ArkUIDragSpringLoadingConfiguration (*aniSpringLoadingContextGetCurrentConfig)(ani_long ptr);
+    void (*aniSpringLoadingContextAbort)(ani_long ptr);
+    void (*aniSpringLoadingContextUpdateConfiguration)(ani_long ptr, ArkUIDragSpringLoadingConfiguration& value);
 };
 struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
@@ -811,6 +864,19 @@ struct ArkUIAniVisualEffectModifier {
     void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
 };
 
+struct ArkUIAniDetachedFreeRootModifier {
+    ani_long (*constructDetachedFreeRoot)(ani_int);
+};
+
+struct ArkUIAniGestureEventUIObserverModifier {
+    void (*removePanListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeClickListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeTapListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -824,6 +890,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
+    const ArkUIAniListItemGroupModifier* (*getArkUIAniListItemGroupModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniVisualEffectModifier* (*getVisualEffectAniModifier)();
@@ -851,6 +918,8 @@ struct ArkUIAniModifiers {
     const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
     const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
+    const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
+    const ArkUIAniGestureEventUIObserverModifier* (*getArkUIAniGestureEventUIObserverModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

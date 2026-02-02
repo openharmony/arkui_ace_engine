@@ -34,6 +34,7 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
     isForceRender: boolean = false;
     constructor(owningView: IVariableOwner, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@PropRef', owningView, varName, watchFunc);
+        this.checkValueIsNotFunction(initValue);
         this.sourceValue = initValue;
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
@@ -65,17 +66,19 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (oldValue === newValue) {
             return;
         }
+        this.checkValueIsNotFunction(newValue);
+        let value: T;
         if (isDynamicObject(newValue)) {
-            const value = getObservedObject(newValue);
+            value = getObservedObject(newValue);
             this.localValue.setNoCheck(value);
         } else {
-            const value = uiUtils.makeV1Observed(newValue);
+            value = uiUtils.makeV1Observed(newValue);
             this.localValue.setNoCheck(value);
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.localValue.get(false));
         if (this.setProxyValue) {
-            this.setProxyValue!(newValue);
+            this.setProxyValue!(value);
         }
         this.execWatchFuncs();
     }

@@ -424,7 +424,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill001, TestSize.Level1)
      * @tc.steps: step2. Call DoProcessAutoFill, case Popup
      */
     pattern->needToRequestKeyboardInner_ = true;
-    pattern->DoProcessAutoFill();
+    pattern->DoProcessAutoFill(RequestAutoFillReason::SINGLE_CLICK);
     EXPECT_EQ(pattern->needToRequestKeyboardInner_, true);
 }
 
@@ -466,7 +466,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
      * @tc.steps: step2. Call DoProcessAutoFill, case notPopup,ProcessAutoFill,notImeShow
      */
     pattern->needToRequestKeyboardInner_ = true;
-    pattern->DoProcessAutoFill();
+    pattern->DoProcessAutoFill(RequestAutoFillReason::SINGLE_CLICK);
     EXPECT_EQ(pattern->needToRequestKeyboardInner_, true);
 }
 

@@ -232,7 +232,7 @@ public:
     void AddSelectOverlaySubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     RefPtr<Subwindow> GetOrCreateSelectOverlayWindow(
         int32_t containerId, const ToastWindowType& windowType, uint32_t mainWindowId);
-    RefPtr<Subwindow> GetOrCreateMenuSubWindow(int32_t instanceId);
+    RefPtr<Subwindow> GetOrCreateMenuSubWindow(int32_t instanceId, bool reuse = true);
     void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
     void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);

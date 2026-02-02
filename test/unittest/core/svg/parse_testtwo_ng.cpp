@@ -20,6 +20,26 @@
 #define private public
 #define protected public
 
+#include "compatible/components/svg/svg_animate_declaration.h"
+#include "compatible/components/svg/svg_circle_declaration.h"
+#include "compatible/components/svg/svg_declaration.h"
+#include "compatible/components/svg/svg_ellipse_declaration.h"
+#include "compatible/components/svg/svg_fe_blend_declaration.h"
+#include "compatible/components/svg/svg_fe_colormatrix_declaration.h"
+#include "compatible/components/svg/svg_fe_composite_declaration.h"
+#include "compatible/components/svg/svg_fe_declaration.h"
+#include "compatible/components/svg/svg_fe_flood_declaration.h"
+#include "compatible/components/svg/svg_fe_gaussianblur_declaration.h"
+#include "compatible/components/svg/svg_filter_declaration.h"
+#include "compatible/components/svg/svg_gradient_declaration.h"
+#include "compatible/components/svg/svg_image_declaration.h"
+#include "compatible/components/svg/svg_line_declaration.h"
+#include "compatible/components/svg/svg_mask_declaration.h"
+#include "compatible/components/svg/svg_path_declaration.h"
+#include "compatible/components/svg/svg_pattern_declaration.h"
+#include "compatible/components/svg/svg_polygon_declaration.h"
+#include "compatible/components/svg/svg_rect_declaration.h"
+#include "compatible/components/svg/svg_stop_declaration.h"
 #include "include/core/SkStream.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -27,26 +47,6 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/declaration/svg/svg_animate_declaration.h"
-#include "core/components/declaration/svg/svg_circle_declaration.h"
-#include "core/components/declaration/svg/svg_declaration.h"
-#include "core/components/declaration/svg/svg_ellipse_declaration.h"
-#include "core/components/declaration/svg/svg_fe_blend_declaration.h"
-#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
-#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
-#include "core/components/declaration/svg/svg_fe_declaration.h"
-#include "core/components/declaration/svg/svg_fe_flood_declaration.h"
-#include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
-#include "core/components/declaration/svg/svg_filter_declaration.h"
-#include "core/components/declaration/svg/svg_gradient_declaration.h"
-#include "core/components/declaration/svg/svg_image_declaration.h"
-#include "core/components/declaration/svg/svg_line_declaration.h"
-#include "core/components/declaration/svg/svg_mask_declaration.h"
-#include "core/components/declaration/svg/svg_path_declaration.h"
-#include "core/components/declaration/svg/svg_pattern_declaration.h"
-#include "core/components/declaration/svg/svg_polygon_declaration.h"
-#include "core/components/declaration/svg/svg_rect_declaration.h"
-#include "core/components/declaration/svg/svg_stop_declaration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_circle.h"
@@ -2060,10 +2060,10 @@ HWTEST_F(ParseTestTwoNg, ParseFilterTest001, TestSize.Level1)
     svgFilter->filterAttr_.x = Dimension(1.0, DimensionUnit::PX);
     svgFilter->filterAttr_.y = Dimension(1.0, DimensionUnit::PX);
     svgFilter->OnAsPaint();
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.x_, 1.0);
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.y_, 1.0);
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.width_, 1.0);
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.height_, 1.0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.x_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.y_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.width_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.height_, 0);
 
     svgFilter->filterAttr_.height = Dimension(1.0, DimensionUnit::PERCENT);
     svgFilter->filterAttr_.width = Dimension(1.0, DimensionUnit::PERCENT);

@@ -420,6 +420,31 @@ HWTEST_F(AccessibilityFocusMoveTest, FocusStrategyOsalNGTest004, TestSize.Level1
 }
 
 /**
+ * @tc.name: CheckAndGetReadableInfoToRootTest001
+ * @tc.desc: test CheckAndGetReadableInfoToRoot when framenode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFocusMoveTest, CheckAndGetReadableInfoToRootTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct strategy
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    FocusStrategyOsalNG strategy(jsAccessibilityManager, context, context);
+
+    /**
+     * @tc.steps: step2. test CheckAndGetReadableInfoToRoot when framenode is nullptr
+     */
+    std::list<Accessibility::AccessibilityElementInfo> targetInfos;
+    int32_t windowId = 0;
+    auto result = strategy.CheckAndGetReadableInfoToRoot(nullptr, targetInfos, windowId);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
+}
+
+/**
  * @tc.name: FocusStrategyOsalThirdTest001
  * @tc.desc: ChangeToRoot
  * @tc.type: FUNC

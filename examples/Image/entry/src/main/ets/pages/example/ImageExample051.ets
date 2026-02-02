@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * 图片匹配文本方向示例
+ */
+@Entry
+@Component
+struct ImageExample051 {
+  @State matchTextDirection: boolean = false
+
+  build() {
+    Column() {
+      Text('图片匹配文本方向示例')
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      Image($r('app.media.png'))
+        .width(150)
+        .height(150)
+        .matchTextDirection(this.matchTextDirection)
+        .margin({ bottom: 20 })
+
+      Row() {
+        Button('启用匹配')
+          .onClick(() => {
+            this.matchTextDirection = true
+          })
+          .margin({ right: 10 })
+
+        Button('禁用匹配')
+          .onClick(() => {
+            this.matchTextDirection = false
+          })
+      }
+
+      Text('当前状态: ' + (this.matchTextDirection ? '已启用' : '已禁用'))
+        .fontSize(14)
+        .margin({ top: 10 })
+    }
+    .width('100%')
+    .height('100%')
+    .padding(20)
+  }
+}

@@ -29,7 +29,7 @@ const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
 const auto ATTRIBUTE_SYMBOL_COLOR_LIST_NAME = "symbolColorList";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
-const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
+const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
 const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_EFFECT_STRATEGY_NAME = "effectStrategy";
@@ -568,7 +568,7 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Lev
     auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
-            PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value));
+            PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value, SymbolEffectPeer::Type::REPLACE));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
         modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);

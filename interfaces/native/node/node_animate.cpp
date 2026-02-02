@@ -763,6 +763,8 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetPath(ArkUI_MotionPathOptions* opti
     if (strcpy_s(path, len, svgPath) != 0) {
         delete[] path;
         path = nullptr;
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_ANIMATION,
+            "OH_ArkUI_MotionPathOptions_SetPath: strcpy_s copy svgPath failed, svgPath length: %zu", len);
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     options->path = path;
@@ -776,13 +778,17 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
 
-    int32_t srcLen = static_cast<int32_t>(strlen(options->path));
-    *writeLength = srcLen + 1;
-    if ((srcLen + 1) > bufferSize) {
+    const size_t bufferSizeU = static_cast<size_t>(bufferSize);
+    const size_t srcLen = strlen(options->path);
+    const size_t requiredSize = srcLen + 1;
+    *writeLength = requiredSize;
+    if (requiredSize > bufferSizeU) {
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
-    if (!strcpy_s(svgPathBuffer, bufferSize, options->path)) {
-        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    if (strcpy_s(svgPathBuffer, bufferSizeU, options->path) != 0) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_ANIMATION,
+            "OH_ArkUI_MotionPathOptions_GetPath: strcpy_s copy path failed, required size: %zu", requiredSize);
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

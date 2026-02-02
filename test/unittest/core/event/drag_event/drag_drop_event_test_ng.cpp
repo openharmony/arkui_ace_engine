@@ -1129,4 +1129,29 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue035, TestSize.Level1)
     EXPECT_FALSE(dragDropEventActuator->isDragUserReject_);
     EXPECT_FALSE(dragDropEventActuator->isThumbnailCallbackTriggered_);
 }
+
+/**
+ * @tc.name: DragDropEventTestGetFrameNode001
+ * @tc.desc: Test GetFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestGetFrameNode001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create DragDropEventActuator.
+      */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto res = dragDropEventActuator->GetFrameNode();
+    EXPECT_NE(res, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -21,12 +21,19 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
+namespace CalendarPickerConstants {
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
+}
+
+enum class ArkUIRuntimeCallBackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
+
 enum class CalendarEdgeAlign {
     EDGE_ALIGN_START = 0,
     EDGE_ALIGN_CENTER,

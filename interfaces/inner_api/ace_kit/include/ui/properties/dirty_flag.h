@@ -46,6 +46,8 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 << 9;
 
+//only used in ArkTs1.2
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_WHEN_ADD_CHILD = 1 << 10;
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;

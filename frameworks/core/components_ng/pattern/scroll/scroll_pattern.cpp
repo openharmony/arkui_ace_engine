@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -183,10 +184,17 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, cons
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
-    if (freeScroll_ && scrollBar2d_) {
+    if (freeScroll_) {
         freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetScrollableArea());
-        scrollBar2d_->SyncLayout(
-            layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
+        if (scrollBar2d_) {
+            scrollBar2d_->SyncLayout(
+                layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
+        }
+        auto scrollBarProxy = GetScrollBarProxy();
+        if (scrollBarProxy) {
+            scrollBarProxy->SyncLayout(
+                layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
+        }
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -293,6 +301,22 @@ void ScrollPattern::OnScrollEndCallback()
 #endif
 }
 
+bool ScrollPattern::FreeOverScrollWithDelta(Axis axis, double delta)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    const OffsetF offset = freeScroll_->GetOffset();
+    OffsetF newPos = offset + (axis == Axis::HORIZONTAL ? OffsetF(delta, 0) : OffsetF(0, delta));
+    return (axis == Axis::HORIZONTAL) ?
+        !NearEqual(freeScroll_->ClampPosition(newPos).GetX(), newPos.GetX()) :
+        !NearEqual(freeScroll_->ClampPosition(newPos).GetY(), newPos.GetY());
+}
+
+void ScrollPattern::ProcessFreeScrollOverDrag(const OffsetF velocity)
+{
+    CHECK_NULL_VOID(freeScroll_);
+    freeScroll_->Fling(velocity);
+}
+
 void ScrollPattern::ResetPosition()
 {
     currentOffset_ = 0.0;
@@ -344,6 +368,10 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
 bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
+    if (freeScroll_) {
+        const OffsetF offset = freeScroll_->GetOffset();
+        return !NearEqual(freeScroll_->ClampPosition(offset), offset);
+    }
     if (Positive(scrollableDistance_)) {
         return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
     } else {
@@ -536,6 +564,7 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnR
     CHECK_NULL_VOID(host);
     if (ReachStart(!isInitialized_)) {
         FireObserverOnReachStart();
+        ReportOnItemScrollEvent("onReachStart");
         CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         if (onReachStart) {
@@ -557,6 +586,7 @@ void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReach
     CHECK_NULL_VOID(host);
     if (ReachEnd(false)) {
         FireObserverOnReachEnd();
+        ReportOnItemScrollEvent("OnReachEnd");
         CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         if (onReachEnd) {
@@ -788,6 +818,7 @@ void ScrollPattern::ScrollTo(float position)
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     JumpToPosition(-position - contentStartOffset_, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)
@@ -826,7 +857,8 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
+        CHECK_NULL_RETURN(scroll, 0.0);
+        if (!scroll->IsRowReverse() && !scroll->IsColReverse()) {
             return 0.0;
         }
         return scroll->GetContentStartOffset();
@@ -839,6 +871,18 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
         }
         return 0.0;
     });
+}
+
+void ScrollPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto selfAdjust = geometryNode->GetSelfAdjust();
+    auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
+    scrollBarOverlayModifier->SetAdjustOffset(Offset(-selfAdjust.GetX(), -selfAdjust.GetY()));
 }
 
 void ScrollPattern::UpdateScrollBarOffset()
@@ -1636,6 +1680,15 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("scrollMeasureInfos", infochildren);
 }
 
+void ScrollPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    json->Put(
+        "isScrollable", (!LessOrEqual(scrollableDistance_, 0.0))
+                            ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                            : "false");
+    json->Put("scrollDirection", (GetAxis() == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 void ScrollPattern::ProcessZoomScale()
 {
     if (childScale_ != zoomScale_) {
@@ -1797,12 +1850,6 @@ RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer()
     return gestureGroup_;
 }
 
-bool ScrollPattern::FreeScrollBy(const OffsetF& delta)
-{
-    CHECK_NULL_RETURN(freeScroll_, false);
-    freeScroll_->UpdateOffset(delta);
-    return true;
-}
 bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
@@ -1873,5 +1920,94 @@ TwoDimensionScrollResult ScrollPattern::FireObserverTwoDimensionOnWillScroll(Dim
     result.xOffset = xResult.offset;
     result.yOffset = yResult.offset;
     return result;
+}
+
+bool ScrollPattern::TryFreeScroll(double offset, Axis axis)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    FreeScrollBy(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f }, true);
+    return true;
+}
+
+bool ScrollPattern::FreeScrollBy(const OffsetF& delta, bool canOverScroll)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    freeScroll_->UpdateOffset(delta, canOverScroll);
+    const OffsetF newPos = freeScroll_->GetOffset() + delta;
+    return NearEqual(freeScroll_->ClampPosition(newPos), newPos);
+}
+
+void ScrollPattern::ReportOnItemScrollEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto scrollEvent = std::string("Scroll.") + event;
+    params->Put("name", scrollEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t ScrollPattern::OnInjectionEvent(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f) || !isScrollByRatio) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        ScrollPageByRatio(true, ratio, reportEventId);
+    } else if (ret == "scrollBackward") {
+        ScrollPageByRatio(false, ratio, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void ScrollPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
+{
+    auto height = GetMainContentSize();
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    SetIsOverScroll(false);
+    ScrollHandle(distance, reportEventId);
+    ScrollBy(distance, distance, false);
+}
+
+void ScrollPattern::ScrollHandle(float distance, int32_t reportEventId)
+{
+    if (LessOrEqual(scrollableDistance_, 0.0)) {
+        ReportScroll(true, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+
+    if (HandleEdgeEffect(distance, SCROLL_FROM_JUMP, viewSize_)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        return;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (IsAtTop()) {
+        error = ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom()) {
+        error = ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+    ReportScroll(false, error, reportEventId);
 }
 } // namespace OHOS::Ace::NG

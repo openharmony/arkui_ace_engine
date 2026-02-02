@@ -21,9 +21,18 @@
 
 namespace OHOS::Ace::NG {
 
-enum class DataPanelType {
+enum class ACE_FORCE_EXPORT DataPanelType {
     CIRCLE = 0,
     LINE = 1
+};
+
+enum class ChartType {
+    LINE,
+    BAR,
+    GAUGE,
+    PROGRESS,
+    RAINBOW,
+    LOADING,
 };
 class DataPanelConfiguration : public CommonConfiguration {
     public:
@@ -41,19 +50,29 @@ public:
     void SetEffect(bool isCloseEffect) override;
     void SetValueColors(const std::vector<Gradient>& valueColors) override;
     void SetTrackBackground(const Color& trackBackgroundColor) override;
+    void ResetTrackBackground() override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
+    void ResetStrokeWidth() override;
     void SetShadowOption(const DataPanelShadow& shadowOption) override;
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetValueColorsSetByUser(bool value) override;
+    void SetTrackBackgroundSetByUser(bool value) override;
+    void SetStrokeWidthSetByUser(bool value) override;
 
+    static void CreateDataPanelModelNG(const std::vector<double>& values, double max, int32_t dataPanelType);
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
     static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);
+    static void ResetTrackBackground(FrameNode* frameNode);
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void ResetStrokeWidth(FrameNode* frameNode);
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
     static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
     static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);
-    static void CreateWithResourceObj(FrameNode* frameNode, DataPanelResourceType colorType,
-        const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj);
+    static void SetValueColorsSetByUser(FrameNode* frameNode, bool value);
+    static void SetTrackBackgroundSetByUser(FrameNode* frameNode, bool value);
+    static void SetStrokeWidthSetByUser(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 

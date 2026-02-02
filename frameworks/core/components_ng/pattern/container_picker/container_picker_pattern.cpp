@@ -52,10 +52,11 @@ constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 
 RefPtr<LayoutAlgorithm> ContainerPickerPattern::CreateLayoutAlgorithm()
 {
-    auto layoutAlgorithm = MakeRefPtr<ContainerPickerLayoutAlgorithm>();
-    CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    ACE_UINODE_TRACE(host);
+    auto layoutAlgorithm = MakeRefPtr<ContainerPickerLayoutAlgorithm>();
+    CHECK_NULL_RETURN(layoutAlgorithm, nullptr);
     totalItemCount_ = host->TotalChildCount();
     isLoop_ = IsLoop();
 
@@ -79,6 +80,8 @@ RefPtr<NodePaintMethod> ContainerPickerPattern::CreateNodePaintMethod()
     const auto props = GetLayoutProperty<ContainerPickerLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     auto safeAreaPaddingProperty = props->GetOrCreateSafeAreaPadding();
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     auto paint = MakeRefPtr<ContainerPickerPaintMethod>();
     paint->SetSafeAreaPadding(safeAreaPaddingProperty);
     return paint;
@@ -469,6 +472,8 @@ RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener()
         pattern->OnAroundButtonClick(info.GetLocalLocation().GetY());
     };
 
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
     return listener;
 }
@@ -520,6 +525,8 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
             }
         }
     };
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     auto listener = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     return listener;
 }
@@ -652,6 +659,8 @@ void ContainerPickerPattern::AddPanEvent(const RefPtr<GestureEventHub>& gestureH
         gestureHub->RemovePanEvent(panEvent_);
     }
 
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
 
@@ -1116,6 +1125,7 @@ void ContainerPickerPattern::CreateScrollProperty()
     CHECK_NULL_VOID(!animationCreated_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float value) {
@@ -1181,6 +1191,7 @@ void ContainerPickerPattern::CreateSpringAnimation(float delta)
 {
     animationBreak_ = false;
     auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     auto context = host ? host->GetContextRefPtr() : nullptr;
     auto springCurve =
         MakeRefPtr<SpringCurve>(SPRING_CURVE_VELOCITY, SPRING_CURVE_MASS, SPRING_CURVE_STIFFNESS, SPRING_CURVE_DAMPING);
@@ -1579,6 +1590,7 @@ void ContainerPickerPattern::InitAxisAnimator()
     CHECK_NULL_VOID(!axisAnimator_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContextRefPtr();
     auto axisAnimationCallback = [weak = WeakClaim(this)](float offset) {
         auto scrollable = weak.Upgrade();

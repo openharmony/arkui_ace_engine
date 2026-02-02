@@ -15,6 +15,7 @@
 
 #include "accessibility_property.h"
 
+#include "base/json/json_util.h"
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -552,6 +553,14 @@ bool AccessibilityProperty::CheckHoverConsumeByComponent(const RefPtr<FrameNode>
     return accessibilityProperty->IsAccessibilityHoverConsume(point);
 }
 
+static const std::set<std::string> TAGS_FOCUSABLE_SEARCH_SELF = {
+    V2::PATTERN_LOCK_ETS_TAG,
+    V2::QRCODE_ETS_TAG,
+    V2::IMAGE_ANIMATOR_ETS_TAG,
+    V2::LOADING_PROGRESS_ETS_TAG,
+    V2::VIDEO_ETS_TAG
+};
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -595,6 +604,8 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
         }
     } while (0);
     shouldSearchSelf = IsTagInSubTreeComponent(node->GetTag()) ? true : shouldSearchSelf;
+    shouldSearchSelf = (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end()) ?
+        true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
         if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
@@ -680,9 +691,8 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
 
 bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& node)
 {
-    if (node->IsRootNode()) {
-        return false;
-    }
+    CHECK_NULL_RETURN(node, false);
+    CHECK_EQUAL_RETURN(node->IsRootNode(), true, false);
     bool focusable = false;
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -724,9 +734,11 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             break;
         }
     } while (0);
-    if (IsTagInSubTreeComponent(node->GetTag())) {
-        focusable = true;
-    }
+
+    focusable = focusable ||
+        IsTagInSubTreeComponent(node->GetTag()) ||
+        (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end());
+
     return focusable;
 }
 
@@ -825,7 +837,7 @@ void AccessibilityProperty::SetAccessibilityStateDescription(const std::string& 
     const size_t STATE_DESCRIPTION_MAX_LENGTH = 1000;
     auto strValue = stateDescription.length() > STATE_DESCRIPTION_MAX_LENGTH ?
                     stateDescription.substr(0, STATE_DESCRIPTION_MAX_LENGTH) : stateDescription;
-    if (strValue == accessibilityStateDescription_.value_or("")) {
+    if (accessibilityStateDescription_.has_value() && (strValue == accessibilityStateDescription_.value())) {
         return;
     }
     accessibilityStateDescription_ = strValue;
@@ -834,6 +846,11 @@ void AccessibilityProperty::SetAccessibilityStateDescription(const std::string& 
 std::string AccessibilityProperty::GetAccessibilityStateDescription() const
 {
     return accessibilityStateDescription_.value_or("");
+}
+
+bool AccessibilityProperty::HasAccessibilityStateDescription() const
+{
+    return accessibilityStateDescription_.has_value();
 }
 
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
@@ -1482,5 +1499,16 @@ AccessibilityActionOptions AccessibilityProperty::GetAccessibilityActionOptions(
 void AccessibilityProperty::ResetAccessibilityActionOptions()
 {
     accessibilityActionOptions_.reset();
+}
+
+void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
+    json->PutExtAttr("accessibilityLevel", GetAccessibilityLevel().c_str(), filter);
+    json->PutExtAttr("accessibilityGroup", IsAccessibilityGroup(), filter);
+    json->PutExtAttr("accessibilityVirtualNode", HasAccessibilityVirtualNode(), filter);
+    json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
+    json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
+    json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

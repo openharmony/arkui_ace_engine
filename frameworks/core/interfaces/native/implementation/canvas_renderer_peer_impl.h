@@ -159,6 +159,9 @@ public:
     void Path2DMoveTo(double x, double y) override;
     void Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y) override;
     void Path2DRect(double x, double y, double width, double height) override;
+    void Path2DRoundRect(double x, double y, double width, double height) override;
+    void Path2DRoundRect(double x, double y, double width, double height, double radiusValue) override;
+    void Path2DRoundRect(double x, double y, double width, double height, const std::vector<double>& radiiVec) override;
 
     // inheritance
     void ResetPaintState();
@@ -194,11 +197,6 @@ public:
     void SetAnti(bool anti)
     {
         anti_ = anti;
-    }
-
-    bool GetAnti()
-    {
-        return anti_;
     }
 
     double GetDensity(bool useSystemDensity = false)

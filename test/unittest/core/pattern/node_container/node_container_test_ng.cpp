@@ -1219,4 +1219,27 @@ HWTEST_F(NodeContainerTestNg, AddBaseNode001, TestSize.Level1)
     pattern->AddBaseNode(frameNodeRef);
     EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
 }
+
+/**
+ * @tc.name: NodeContainer Alignment test
+ * @tc.desc: Test the NodeContainer Alignment property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerAlignmentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    auto frameNode = NodeContainerModelNG::CreateFrameNode(0);
+    ASSERT_TRUE(frameNode);
+
+    /**
+     * @tc.steps: step2. the Alignment is Alignment::TOP_LEFT
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    ASSERT_TRUE(layoutProperty->GetPositionProperty());
+    auto alignment = layoutProperty->GetPositionProperty()->GetAlignment();
+    EXPECT_EQ(alignment, Alignment::TOP_LEFT);
+}
 } // namespace OHOS::Ace::NG

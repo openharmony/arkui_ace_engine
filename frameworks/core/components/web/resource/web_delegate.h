@@ -1024,6 +1024,7 @@ public:
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);
     std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
+    std::shared_ptr<OHOS::NWeb::NWebAgentManager> GetNWebAgentManager();
     bool GetForceDarkMode();
     void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration);
     void UpdateDarkMode(const WebDarkMode& mode);
@@ -1094,6 +1095,7 @@ public:
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void WebHandleTouchpadFlingEvent(const double& x, const double& y,
         const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
+    void WebHandleCancelFlingEvent();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     void WebHandleAxisEvent(const double& x, const double& y,
         const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source);
@@ -1141,6 +1143,8 @@ public:
         backgroundColor_ = backgroundColor;
     }
     void NotifyMemoryLevel(int32_t level);
+    // Set is offline web Component when offline mode is inited.
+    void SetIsOfflineWebComponent();
     void SetAudioMuted(bool muted);
     void SetRichtextIdentifier(std::optional<std::string>& richtextData)
     {
@@ -1376,6 +1380,8 @@ public:
     int GetSelectStartIndex() const;
     int GetSelectEndIndex() const;
 
+    void ReportEventJson(const std::string& jsonString);
+
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnMicrophoneCaptureStateChanged(int originalState, int newState);
@@ -1480,6 +1486,7 @@ public:
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
+    void CallBlanklessCallback(int32_t state, const std::string& reason);
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
@@ -1502,7 +1509,7 @@ public:
 
     void SetViewportScaleState();
     std::string GetLastSelectionText() const;
-    void OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay = false);
+    void OnTextSelectionChange(const std::string& selectionText);
     void OnDetectedBlankScreen(const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount);
     void UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold);
@@ -1510,6 +1517,7 @@ public:
     void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
+    void OnMediaCastEnter();
     void SetImeShow(bool visible);
     void OnRequestAutofill(int32_t menuType);
 
@@ -1529,6 +1537,7 @@ public:
     void OnStatusBarClick();
     bool IsQuickMenuShow();
     void WebScrollStopFling();
+    void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1785,7 +1794,10 @@ private:
 
     uint32_t blanklessFrameWidth_ = 0;
     uint32_t blanklessFrameHeight_ = 0;
+    // update when chromium reports to arkui.
     std::string lastSelectionText_ = "";
+    // update when arkui reports to the application side.
+    std::string lastPostSelectionText_ = "";
 #endif
 };
 

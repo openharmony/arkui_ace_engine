@@ -355,6 +355,29 @@ HWTEST_F(WebPatternWebTest, InitInOfflineMode_004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitInOfflineMode_005
+ * @tc.desc: InitInOfflineMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = false;
+    webPattern->InitInOfflineMode();
+    EXPECT_TRUE(webPattern->offlineWebInited_);
+#endif
+}
+
+/**
  * @tc.name: IsNeedResizeVisibleViewport
  * @tc.desc: IsNeedResizeVisibleViewport.
  * @tc.type: FUNC

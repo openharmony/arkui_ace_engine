@@ -46,7 +46,8 @@ public:
     void ExpandConstraintWithSafeArea() override
     {
         auto host = GetHost();
-        if (!host || !host->GetIgnoreLayoutProcess()) {
+        CHECK_NULL_VOID(host);
+        if (!IsExpandConstraintDependencySatisfied()) {
             return;
         }
         auto parent = AceType::DynamicCast<NavDestinationNodeBase>(host->GetAncestorNodeOfFrame(false));

@@ -83,77 +83,55 @@ void JSMatrix2d::JSBind(BindingTarget globalObj)
 
 void JSMatrix2d::JsSetScaleX(const JSCallbackInfo& info)
 {
-    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        return;
-    }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double scaleX = 0;
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], scaleX);
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, scaleX);
         transform_.scaleX = scaleX;
     }
 }
 
 void JSMatrix2d::JsSetRotateY(const JSCallbackInfo& info)
 {
-    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        return;
-    }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double rotateY = 0;
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], rotateY);
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, rotateY);
         transform_.skewY = rotateY;
     }
 }
 
 void JSMatrix2d::JsSetRotateX(const JSCallbackInfo& info)
 {
-    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        return;
-    }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double rotateX = 0;
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], rotateX);
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, rotateX);
         transform_.skewX = rotateX;
     }
 }
 
 void JSMatrix2d::JsSetScaleY(const JSCallbackInfo& info)
 {
-    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        return;
-    }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double scaleY = 0;
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], scaleY);
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, scaleY);
         transform_.scaleY = scaleY;
     }
 }
 
 void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
 {
-    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        return;
-    }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double translateX = 0;
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateX);
-        double density = GetDensity();
-        translateX *= density;
-        transform_.translateX = translateX;
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, translateX);
+        transform_.translateX = translateX *= GetDensity();
     }
 }
 
 void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
 {
-    if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        return;
-    }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         double translateY = 0;
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], translateY);
-        double density = GetDensity();
-        translateY *= density;
-        transform_.translateY = translateY;
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, translateY);
+        transform_.translateY = translateY *= GetDensity();
     }
 }
 
@@ -233,20 +211,21 @@ void JSMatrix2d::JsInvert(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
 {
-    if (info.Length() < JS_MATRIX2D_PARAMETER_COUNTS_1 || info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_3) {
+    auto length = info.Length();
+    if (length < JS_MATRIX2D_PARAMETER_COUNTS_1 || length > JS_MATRIX2D_PARAMETER_COUNTS_3) {
         return;
     }
     double degree = 0;
     double rx = 0;
     double ry = 0;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], degree);
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, degree);
     }
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], rx);
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_1, rx);
     }
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_2]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_2], ry);
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_2 && info[JS_MATRIX2D_PARAMETER_COUNTS_2]->IsNumber()) {
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_2, ry);
     }
     double density = GetDensity();
     rx *= density;
@@ -257,16 +236,17 @@ void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
 {
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2) {
+    auto length = info.Length();
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_2) {
         return;
     }
     double tx = 0;
     double ty = 0;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], tx);
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_0, tx);
     }
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
-        JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], ty);
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+        info.GetDoubleArg(JS_MATRIX2D_PARAMETER_COUNTS_1, ty);
     }
     double density = GetDensity();
     tx *= density;
@@ -277,15 +257,16 @@ void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
 
 void JSMatrix2d::JsScale(const JSCallbackInfo& info)
 {
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2) {
+    auto length = info.Length();
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_2) {
         return;
     }
     double sx = 1.0f;
     double sy = 1.0f;
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_0 && info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_0], sx);
     }
-    if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
+    if (length > JS_MATRIX2D_PARAMETER_COUNTS_1 && info[JS_MATRIX2D_PARAMETER_COUNTS_1]->IsNumber()) {
         JSViewAbstract::ParseJsDouble(info[JS_MATRIX2D_PARAMETER_COUNTS_1], sy);
     }
     NG::Matrix2D::Scale(transform_, sx, sy);

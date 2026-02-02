@@ -97,8 +97,7 @@ void ConvertGetFrameNodeCallbackFun(ani_vm* vm, std::function<ArkUINodeHandle(in
         }
 
         ani_long aniValue;
-        if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "unboxed", ":l", &aniValue)) {
-            env->DestroyLocalScope();
+        if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "toLong", ":l", &aniValue)) {
             return nullptr;
         }
         env->DestroyLocalScope();

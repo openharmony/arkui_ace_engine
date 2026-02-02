@@ -37,11 +37,11 @@ using ProgressCallback = std::function<void(uint32_t)>;
 
 enum class ButtonStateAttribute { COLOR, RADIUS, HEIGHT, WIDTH };
 
-class ACE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, public Measurable {
+class ACE_FORCE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, public Measurable {
     DECLARE_ACE_TYPE(ButtonComponent, ComponentGroup, LabelTarget, Measurable);
 
 public:
-    explicit ButtonComponent(const std::list<RefPtr<Component>>& children);
+    ACE_FORCE_EXPORT explicit ButtonComponent(const std::list<RefPtr<Component>>& children);
     ~ButtonComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
@@ -87,8 +87,8 @@ public:
     void SetRectRadius(const Dimension& radius);
     void SetCatchMode(bool catchMode);
     void SetProgressDiameter(const Dimension& diameter);
-    void SetBackgroundColor(const Color& color);
-    void SetClickedColor(const Color& color);
+    ACE_FORCE_EXPORT void SetBackgroundColor(const Color& color);
+    ACE_FORCE_EXPORT void SetClickedColor(const Color& color);
     void SetDisabledColor(const Color& color);
     void SetFocusColor(const Color& color);
     void SetHoverColor(const Color& color);
@@ -96,10 +96,10 @@ public:
     void SetProgressFocusColor(const Color& color);
     void SetFocusAnimationColor(const Color& color);
     void SetBorderEdge(const BorderEdge& borderEdge);
-    void SetClickedEventId(const EventMarker& eventId);
+    ACE_FORCE_EXPORT void SetClickedEventId(const EventMarker& eventId);
     void SetKeyEnterEventId(const EventMarker& eventId);
     void SetRemoteMessageEventId(const EventMarker& eventId);
-    void SetClickFunction(std::function<void()>&& clickCallback);
+    ACE_FORCE_EXPORT void SetClickFunction(std::function<void()>&& clickCallback);
     void SetDeclaration(const RefPtr<ButtonDeclaration>& declaration);
     void ApplyTheme(const RefPtr<ButtonTheme>& theme);
 
@@ -277,8 +277,9 @@ private:
 class ButtonBuilder {
 public:
     static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text);
-    static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text,
-        TextStyle& textStyle, const Color& textFocusColor = Color(), bool useTextFocus = false);
+    ACE_FORCE_EXPORT static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager,
+        const std::string& text, TextStyle& textStyle, const Color& textFocusColor = Color(),
+        bool useTextFocus = false);
 };
 
 } // namespace OHOS::Ace

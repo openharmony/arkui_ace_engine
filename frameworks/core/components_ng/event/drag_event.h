@@ -290,7 +290,7 @@ public:
     void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
     const RefPtr<FrameNode> GetItemParentNode() const;
-    RefPtr<FrameNode> GetFrameNode();
+    RefPtr<FrameNode> GetFrameNode() const;
     static void PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
        std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale);
     static void PrepareRadiusParametersForDragData(const RefPtr<FrameNode>& frameNode,

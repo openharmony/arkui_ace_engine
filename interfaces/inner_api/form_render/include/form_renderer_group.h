@@ -87,6 +87,7 @@ public:
     void RecoverRenderer(const std::vector<FormRequest>& formRequests, size_t currentCompIndex);
     void UpdateFormSizeOfFormRequests(double width, double height, float borderWidth, float formViewScale);
     bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
+    void SetUiContentParams(const OHOS::AAFwk::Want& want);
 private:
     enum class FormRendererInitState {
         UNINITIALIZED,

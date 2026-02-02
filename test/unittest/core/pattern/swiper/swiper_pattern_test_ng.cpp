@@ -2418,4 +2418,29 @@ HWTEST_F(SwiperPatternTestNg, HandleTargetIndex002, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->targetIndex_, pattern_->runningTargetIndex_);
 }
+
+/**
+ * @tc.name: GetKeyFrameNodeWhenContentChange001
+ * @tc.desc: test GetKeyFrameNodeWhenContentChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, GetKeyFrameNodeWhenContentChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    ASSERT_EQ(pattern_->currentIndex_, 0);
+    std::list<RefPtr<FrameNode>> keyChildren = pattern_->GetKeyFrameNodeWhenContentChanged();
+    ASSERT_EQ(keyChildren.size(), 2);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto children = host->GetChildren();
+    ASSERT_EQ(children.size(), 7);
+    EXPECT_EQ(keyChildren.front(), children.front());
+}
 } // namespace OHOS::Ace::NG

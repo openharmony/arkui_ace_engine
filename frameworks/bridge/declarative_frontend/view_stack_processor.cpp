@@ -19,19 +19,22 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
+#include "compatible/components/stepper/stepper_modifier_api.h"
 #include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components/remote_window/remote_window_component.h"
 #include "core/components/scoring/scoring_component.h"
-#include "core/components/text_field/text_field_component.h"
-#include "core/components/video/video_component_v2.h"
+#include "compatible/components/text_field/text_field_component.h"
+#include "compatible/components/video/video_component_v2.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
-#include "core/components_v2/list/list_item_component.h"
+#include "compatible/components/list_v2/list_item_component.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -147,14 +150,32 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
     return flexItem;
 }
 
-RefPtr<StepperItemComponent> ViewStackProcessor::GetStepperItemComponent()
+const ArkUIStepperItemComponentModifier* GetStepperItemComponentModifier()
 {
+    static const ArkUIStepperItemComponentModifier* stepperItemComponentModifier_ = nullptr;
+    if (stepperItemComponentModifier_) {
+        return stepperItemComponentModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("stepper-item");
+    if (loader) {
+        stepperItemComponentModifier_ =
+            reinterpret_cast<const ArkUIStepperItemComponentModifier*>(loader->GetCustomModifier());
+        return stepperItemComponentModifier_;
+    }
+    return nullptr;
+}
+
+RefPtr<Component> ViewStackProcessor::GetStepperItemComponent()
+{
+    auto* modifier = GetStepperItemComponentModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
     auto& wrappingComponentsMap = componentsStack_.top();
     if (wrappingComponentsMap.find("stepperItem") != wrappingComponentsMap.end()) {
-        return AceType::DynamicCast<StepperItemComponent>(wrappingComponentsMap["stepperItem"]);
+        auto component = wrappingComponentsMap["stepperItem"];
+        return modifier->updateStepperItem(component);
     }
 
-    RefPtr<StepperItemComponent> stepperItem = AceType::MakeRefPtr<StepperItemComponent>(RefPtr<Component>());
+    auto stepperItem = modifier->createStepperItem();
     wrappingComponentsMap.emplace("stepperItem", stepperItem);
     return stepperItem;
 }
@@ -560,9 +581,12 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
     std::unordered_map<std::string, RefPtr<Component>> videoMap;
 
-    bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<V2::WaterFlowItemComponent>(mainComponent);
+    auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+    CHECK_NULL_RETURN(modifier, (std::pair<RefPtr<Component>, RefPtr<Component>>(nullptr, nullptr)));
+    bool isItemComponent =
+        (modifier->instanceOfV2ListItemComponent(mainComponent)) ||
+        AceType::InstanceOf<GridLayoutItemComponent>(mainComponent) ||
+        AceType::InstanceOf<V2::WaterFlowItemComponent>(mainComponent);
 
     RefPtr<Component> itemChildComponent;
 

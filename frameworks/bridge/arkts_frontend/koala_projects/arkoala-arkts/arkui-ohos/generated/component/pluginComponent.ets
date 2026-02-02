@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,8 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { PluginComponentModifier } from "./../PluginComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { RecordData } from "@ohos.base"
+export { RecordData }
 export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: PluginComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -80,7 +82,6 @@ export interface PluginComponentTemplate {
     source: string | undefined;
     bundleName: string | undefined;
 }
-export type RecordData = Object | null | undefined;
 export interface PluginComponentOptions {
     template: PluginComponentTemplate;
     data: RecordData;
@@ -173,8 +174,6 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
 export function PluginComponentImpl(
     @memo
     style: ((attributes: PluginComponentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPluginComponentComponent>((): ArkPluginComponentComponent => {
         return new ArkPluginComponentComponent()
@@ -183,7 +182,6 @@ export function PluginComponentImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

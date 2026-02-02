@@ -1004,6 +1004,40 @@ int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t
 int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult result);
 
 /**
+ * @brief Notify the drop behavior proposal, it can be CUT or COPY, please note that, it just be a proposal,
+ *     the drag source might ignore it. And the request identity will be checked, it should be the same as
+ *     the one returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending}, if it's not, the calling will be ignored.
+ *
+ * @param requestIdentity The identity returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending} interface.
+ * @param operation Indicates the drop behavior.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation setting is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if the call of this method is not
+ *         during the drop handing phase.
+ * @since 24
+ */
+int32_t OH_ArkUI_NotifySuggestedDropOperation(int32_t requestIdentity, ArkUI_DropOperation operation);
+
+/**
+ * @brief Notify that whether to use custom drop animation to replace the system default drop animation.
+ *     By default, the system uses a spread animation to indicate a failed drop and a shrink fade animation
+ *     to indicate a successful drop. You can call this method to notify that disable the default animation,
+ *     and implement new animation as you want. And the request identity will be checked, it should be the same as
+ *     the one returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending}, if it's not, the calling will be ignored.
+ *
+ * @param requestIdentity The identity returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending} interface.
+ * @param disable Indicates whether to disable default drop animtion, true for disabled, false for enabled.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED} if the call of this method is not
+ *         during the drop handing phase.
+ * @since 24
+ */
+int32_t OH_ArkUI_NotifyDisableDefaultDropAnimation(int32_t requestIdentity, bool disable);
+
+/**
  * @brief Notify the system all handling done, the drag end pending can be finished.
  *
  * @param requestIdentify The identify returned by {@link OH_ArkUI_DragEvent_RequestDragEndPending} interface.

@@ -378,7 +378,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, AddSelectIcon005, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    selectTheme->isTV_ = true;
+    selectTheme->menuSelectedIconAlign_ = HorizontalAlign::END;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
 
     MenuItemModelNG MenuItemModelInstance;

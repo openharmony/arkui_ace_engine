@@ -18,10 +18,12 @@
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/event/overflow_scroll_event_hub.h"
  
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MAX_FLING_VELOCITY = 9000;
+constexpr double MAX_GAP_BETWEEN_CONTENT_AND_CHILD = 2.0f;
 } // namespace
 
 bool VerticalOverflowHandler::IsVerticalLayout() const
@@ -100,17 +102,22 @@ void VerticalOverflowHandler::AdjustChildrenOffset(float offset, bool useParentA
     CHECK_NULL_VOID(host);
     int32_t childCount = host->GetTotalChildCount();
     auto selfExpansive = host->SelfExpansive();
+    auto hub = host->GetEventHub<OverflowScrollEventHub>();
     for (int32_t i = 0; i < childCount; i++) {
         auto childNode = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(i));
         if (!childNode) {
             continue;
         }
         auto geometryNode = childNode->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geometryNode);
         auto currentOffset = geometryNode->GetMarginFrameOffset();
         if (selfExpansive && useParentAjust) {
             currentOffset += geometryNode->GetParentAdjust().GetOffset();
         }
         if (geometryNode) {
+            if (hub) {
+                hub->FireOverflowScrollEvent(childNode->GetId(), offset);
+            }
             geometryNode->SetMarginFrameOffset(OffsetF(currentOffset.GetX(), currentOffset.GetY() + offset));
             childNode->ForceSyncGeometryNode();
             childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -141,29 +148,30 @@ void VerticalOverflowHandler::InitOffsetAfterLayout()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto verticalReverse = IsVerticalReverseLayout();
-    if (!scrollDistance_.has_value() || preVerticalReverse_ != verticalReverse) {
+    if (!childFrameTop_.has_value() || preVerticalReverse_ != verticalReverse) {
         preVerticalReverse_ = verticalReverse;
-        scrollDistance_ = totalChildFrameRect_.GetY() - contentRect_.GetY();
-        offsetToChildFrameBottom_ = scrollDistance_.value() + totalChildFrameRect_.Height() - contentRect_.Height();
+        childFrameTop_ = totalChildFrameRect_.GetY() - contentRect_.GetY();
+        offsetToChildFrameBottom_ = childFrameTop_.value() + totalChildFrameRect_.Height() - contentRect_.Height();
         return;
     }
     auto childFrameHeight = totalChildFrameRect_.Height();
     auto contentHeight = contentRect_.Height();
     if (verticalReverse) {
-        scrollDistance_ = offsetToChildFrameBottom_ + contentRect_.Height() - childFrameHeight;
+        childFrameTop_ = offsetToChildFrameBottom_ + contentRect_.Height() - childFrameHeight;
     }
-    scrollDistance_ = std::clamp(scrollDistance_.value(), contentHeight - childFrameHeight, 0.0f);
-    offsetToChildFrameBottom_ = scrollDistance_.value() + childFrameHeight - contentHeight;
+    childFrameTop_ = std::clamp(childFrameTop_.value(), contentHeight - childFrameHeight, 0.0f);
+    offsetToChildFrameBottom_ = childFrameTop_.value() + childFrameHeight - contentHeight;
     auto offsetAdjust = verticalReverse ? childFrameHeight - contentHeight : 0.0f;
-    if ((verticalReverse && !NearEqual(offsetToChildFrameBottom_, 0.0f)) || !NearEqual(scrollDistance_.value(), 0.0f)) {
-        AdjustChildrenOffset(scrollDistance_.value() + offsetAdjust);
+    if ((verticalReverse && !NearEqual(offsetToChildFrameBottom_, 0.0f)) ||
+        !NearEqual(childFrameTop_.value(), totalChildFrameRect_.GetY() - contentRect_.GetY())) {
+        AdjustChildrenOffset(childFrameTop_.value() + offsetAdjust);
     }
 }
 
 bool VerticalOverflowHandler::OutOfBoundary(float offset) const
 {
-    return (NearEqual(scrollDistance_.value_or(0.0f), 0.0f) && GreatNotEqual(offset, 0.0f)) ||
-        (NearEqual(scrollDistance_.value_or(0.0f), contentRect_.Height() - totalChildFrameRect_.Height()) &&
+    return (NearEqual(childFrameTop_.value_or(0.0f), 0.0f) && GreatNotEqual(offset, 0.0f)) ||
+        (NearEqual(childFrameTop_.value_or(0.0f), contentRect_.Height() - totalChildFrameRect_.Height()) &&
         LessNotEqual(offset, 0.0f));
 }
 
@@ -176,11 +184,11 @@ bool VerticalOverflowHandler::HandleScrollImpl(float offset, int32_t source)
     if (OutOfBoundary(offset)) {
         return false;
     }
-    auto currentOffsetValue = scrollDistance_.value_or(0.0f);
+    auto currentOffsetValue = childFrameTop_.value_or(0.0f);
     currentOffsetValue += offset;
-    scrollDistance_ = std::clamp(currentOffsetValue, contentRect_.Height() - totalChildFrameRect_.Height(), 0.0f);
-    offsetToChildFrameBottom_ = scrollDistance_.value() + totalChildFrameRect_.Height() - contentRect_.Height();
-    offset += (scrollDistance_.value() - currentOffsetValue);
+    childFrameTop_ = std::clamp(currentOffsetValue, contentRect_.Height() - totalChildFrameRect_.Height(), 0.0f);
+    offsetToChildFrameBottom_ = childFrameTop_.value() + totalChildFrameRect_.Height() - contentRect_.Height();
+    offset += (childFrameTop_.value() - currentOffsetValue);
     AdjustChildrenOffset(offset, !hasParentAdjust_);
     return true;
 }
@@ -199,7 +207,7 @@ void VerticalOverflowHandler::UnRegisterScrollableEvent()
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
     scrollableEvent_ = nullptr;
-    scrollDistance_.reset();
+    childFrameTop_.reset();
 }
 
 bool VerticalOverflowHandler::IsVerticalOverflow() const
@@ -207,10 +215,13 @@ bool VerticalOverflowHandler::IsVerticalOverflow() const
     return GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top()) ||
         LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom());
 }
-bool VerticalOverflowHandler::IsHorizontalOverflow() const
+
+bool VerticalOverflowHandler::IsOverflow() const
 {
-    return GreatNotEqual(contentRect_.Left(), totalChildFrameRect_.Left()) ||
-        LessNotEqual(contentRect_.Right(), totalChildFrameRect_.Right());
+    return GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top() + MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
+        LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom() - MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
+        GreatNotEqual(contentRect_.Left(), totalChildFrameRect_.Left() + MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
+        LessNotEqual(contentRect_.Right(), totalChildFrameRect_.Right() - MAX_GAP_BETWEEN_CONTENT_AND_CHILD);
 }
 
 void VerticalOverflowHandler::HandleContentOverflow()

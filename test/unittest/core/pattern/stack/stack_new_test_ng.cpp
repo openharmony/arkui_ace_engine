@@ -659,6 +659,8 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
     parentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
     stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(stackNode);
+
+    // Excepect child's frameRect equal parent's frameRect.
     EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
         << child1->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(parent1->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 500.0f))
@@ -667,5 +669,117 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
         << child1->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(parent1->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f))
         << parent1->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: StackOverFlow001
+ * @tc.desc: Test Stack use overflow
+ * @tc.type: ETS
+ */
+HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
+{
+    RefPtr<FrameNode> child;
+    auto stackNode = CreateStack([this, &child](StackModelNG model) {
+        child = CreateStack([this](StackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(800.0f, DimensionUnit::PX));
+        });
+        ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(500.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(30.0f, DimensionUnit::PX));
+    });
+    /* corresponding ets code:
+        Stack() {
+          Stack(){
+          }
+            .width('500px')
+            .height('800px')
+        }
+        .width("500px")
+        .height("500px")
+        .safeAreaPadding(LengthMetrics.px(30))
+    */
+    stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(stackNode);
+    auto pattern = stackNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+
+    // beacause FeatureParam is false, use vOverflowHandler instead.
+    const auto &vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
+    ASSERT_NE(vOverflowHandler, nullptr);
+    std::optional<RectF> totalChildFrameRect;
+    auto childGeometry = child->GetGeometryNode();
+    totalChildFrameRect = childGeometry->GetMarginFrameRect();
+    vOverflowHandler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
+    vOverflowHandler->CreateContentRect();
+    vOverflowHandler->HandleContentOverflow();
+
+    // Expect vOverflowHandler's param is correct.
+    EXPECT_EQ(child->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 800.0f))
+        << child->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, -150.0f))
+        << child->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(vOverflowHandler->GetChildFrameRect(), RectF(0.0f, -150.0f, 500.0f, 800.0f))
+        << vOverflowHandler->GetChildFrameRect().ToString();
+    EXPECT_EQ(vOverflowHandler->GetContentRect(), RectF(30.0f, 30.0f, 440.0f, 440.0f))
+        << vOverflowHandler->GetContentRect().ToString();
+}
+
+/**
+ * @tc.name: StackOverFlow002
+ * @tc.desc: test stack HandleContentOverflow()
+ * @tc.type: ETS
+ */
+HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create flex component and its children
+     */
+    RefPtr<FrameNode> child;
+    auto stackNode = CreateStack([this, &child](StackModelNG model) {
+        child = CreateStack([this](StackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(50.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(100.0f, DimensionUnit::PX));
+        });
+        ViewAbstract::SetWidth(CalcLength(50.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+    });
+    /* corresponding ets code:
+        Stack() {
+          Stack(){
+          }
+            .width('50px')
+            .height('50px')
+        }
+        .width("50px")
+        .height("100px")
+    */
+    stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(stackNode);
+    auto pattern = stackNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    const auto &handler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
+    const auto& childGeometry = child->GetGeometryNode();
+    ASSERT_NE(childGeometry, nullptr);
+    std::optional<RectF> totalChildFrameRect;
+    totalChildFrameRect = childGeometry->GetMarginFrameRect();
+    handler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
+    handler->CreateContentRect();
+    handler->HandleContentOverflow();
+ 
+    /**
+     * @tc.expected: register scrollEvent and initialize
+     */
+    EXPECT_EQ(handler->childFrameTop_.value_or(-1), -25);
+    EXPECT_EQ(handler->offsetToChildFrameBottom_, 25);
+    handler->HandleScrollImpl(-20, 0);
+    /**
+     * @tc.expected: After scrolling up by 20, scrollDistance == 20 and children have correct offset
+     */
+    EXPECT_EQ(handler->childFrameTop_.value_or(-1), -45);
+    EXPECT_EQ(handler->offsetToChildFrameBottom_, 5);
+    EXPECT_EQ(childGeometry->GetMarginFrameOffset(), OffsetF(0, -45));
 }
 } // namespace OHOS::Ace::NG

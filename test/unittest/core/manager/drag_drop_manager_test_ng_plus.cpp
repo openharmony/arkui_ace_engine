@@ -279,4 +279,23 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus006, TestSize.Level
     manager->DispatchLastDragEventVoluntarily(true);
     EXPECT_EQ(manager->preDragPointerEvent_.pointerEventId, manager->lastDragPointerEvent_.pointerEventId);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage_ShouldSkipDragMoveOutForSubwindow001
+ * @tc.desc: Test ShouldSkipDragMoveOutForSubwindow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, ShouldSkipDragMoveOutForSubwindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a dragDropManager.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    /**
+     * @tc.steps: step2. test ShouldSkipDragMoveOutForSubwindow.
+     */
+    auto ret = dragDropManager->ShouldSkipDragMoveOutForSubwindow();
+    ASSERT_EQ(ret, false);
+}
 }

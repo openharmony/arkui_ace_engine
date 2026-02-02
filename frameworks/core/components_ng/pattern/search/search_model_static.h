@@ -43,6 +43,7 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
+    static void SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt);
     static void SetDividerColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
@@ -62,7 +63,7 @@ public:
     static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest);
     static void SetSelectionMenuHidden(FrameNode* frameNode, std::optional<bool>& selectionMenuHidden);
     static void SetEnablePreviewText(FrameNode* frameNode, std::optional<bool>& enablePreviewText);
@@ -76,6 +77,13 @@ public:
     static void SetIncludeFontPadding(FrameNode* frameNode, std::optional<bool>& optValue);
     static void SetFallbackLineSpacing(FrameNode* frameNode, std::optional<bool>& optValue);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, std::optional<bool>& value);
+    static void SetEnableSelectedDataDetector(FrameNode* frameNode, std::optional<bool>& value);
+    static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
+    static void SetCustomKeyboardWithNode(
+ 	    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance);
 private:
 
 };

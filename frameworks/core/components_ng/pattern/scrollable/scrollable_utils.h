@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ struct ScrollableUtils {
      * @param axis The scrollable axis.
      * @return The height expansion amount.
      */
-    static float CheckHeightExpansion(const RefPtr<LayoutProperty>& layoutProps, Axis axis);
+    ACE_FORCE_EXPORT static float CheckHeightExpansion(const RefPtr<LayoutProperty>& layoutProps, Axis axis);
 
     /**
      * @brief Recycle items which are out of boundary.

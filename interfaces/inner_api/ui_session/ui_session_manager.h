@@ -19,12 +19,14 @@
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
 
 #include "base/utils/macros.h"
 
 #include "param_config.h"
+#include "ui_content_proxy_error_code.h"
 #include "ui_session_json_util.h"
 #include "ui_translate_manager.h"
 
@@ -45,6 +47,10 @@ public:
     using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
     using GetStateMgmtInfoFunction = std::function<void(
         const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)>;
+    using GetImagesByIdFunction =
+        std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
+
+    using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -74,13 +80,13 @@ public:
     /**
      * @description: execute click callback when page some component change occurs
      */
-    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
+    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value, uint32_t eventType) {};
 
     /**
      * @description: execute click callback when page some component change occurs
      */
-    virtual void ReportComponentChangeEvent(
-        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
+    virtual void ReportComponentChangeEvent(int32_t nodeId, const std::string& key,
+        const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType) {};
 
     /**
      * @description: execute callback when scroll event occurs
@@ -126,6 +132,7 @@ public:
     virtual void OnRouterChange(const std::string& path, const std::string& event) {};
     virtual void SetRouterChangeEventRegistered(bool status) {};
     virtual void SetComponentChangeEventRegistered(bool status) {};
+    virtual void SetComponentChangeEventMask(uint32_t mask) {};
     virtual void SetScrollEventRegistered(bool status) {};
     virtual void SetLifeCycleEventRegistered(bool status) {};
     virtual void SetSelectTextEventRegistered(bool status) {};
@@ -149,6 +156,10 @@ public:
     {
         return false;
     };
+    virtual bool NeedComponentChangeTypeReporting(uint32_t eventType)
+    {
+        return false;
+    };
     virtual bool GetWebFocusRegistered()
     {
         return false;
@@ -168,6 +179,7 @@ public:
     virtual void SaveBaseInfo(const std::string& info) {};
     virtual void SendBaseInfo(int32_t processId) {};
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
+    virtual void SaveGetImagesByIdFunction(GetImagesByIdFunction&& function) {};
     virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
         int32_t instanceId) {};
     virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
@@ -191,10 +203,22 @@ public:
     virtual void SendTranslateResult(int32_t nodeId, std::string result) {};
     virtual void ResetTranslate(int32_t nodeId = -1) {};
     virtual void GetPixelMap() {};
+    virtual void GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs) {};
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
     virtual void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) {};
+
+    virtual void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) {};
+    virtual void GetWebInfoByRequest(int32_t webId, const std::string& request) {};
+    virtual void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) {};
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
+    virtual void SendArkUIImagesById(int32_t windowId,
+        const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+        MultiImageQueryErrorCode arkUIErrorCode) {};
+    virtual void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) {};
     virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
@@ -227,6 +251,7 @@ protected:
     std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
+    uint32_t componentChangeEventMask_ = 0;
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
@@ -235,6 +260,7 @@ protected:
     NotifyAllWebFunction notifyWebFunction_ = 0;
     GetPixelMapFunction getPixelMapFunction_ = 0;
     GetHitTestInfoFunction getHitTestInfoFunction_ = 0;
+    GetImagesByIdFunction getImagesByIdFunction_ = 0;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
     GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
@@ -256,6 +282,7 @@ protected:
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
     std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;
     std::function<void()> stopContentChangeDetectCallback_;
+    GetWebInfoByRequestFunction getWebInfoByRequestCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

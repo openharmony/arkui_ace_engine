@@ -27,6 +27,7 @@ RefPtr<TextClockController> TextClockModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTCLOCK_ETS_TAG, nodeId);
     auto textClockNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTCLOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextClockPattern>(); });
+    ACE_UINODE_TRACE(textClockNode);
 
     auto pattern = textClockNode->GetPattern<TextClockPattern>();
     if (textClockNode->GetChildren().empty()) {
@@ -59,6 +60,7 @@ void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "textClock.shadow";
@@ -114,9 +116,9 @@ void TextClockModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
-void TextClockModelNG::ResetTextColor()
+void TextClockModelNG::SetTextColorByUser(bool isSetByUser)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, false);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, isSetByUser);
 }
 
 void TextClockModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -164,6 +166,7 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
     auto textClockNode =
         FrameNode::CreateFrameNode(V2::TEXTCLOCK_ETS_TAG, nodeId, AceType::MakeRefPtr<TextClockPattern>());
     CHECK_NULL_RETURN(textClockNode, nullptr);
+    ACE_UINODE_TRACE(textClockNode);
     auto pattern = textClockNode->GetPattern<TextClockPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (textClockNode->GetChildren().empty()) {
@@ -207,6 +210,7 @@ void TextClockModelNG::SetHoursWest(FrameNode* frameNode, float hoursWest)
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "textClock.shadow";
@@ -246,11 +250,6 @@ void TextClockModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 void TextClockModelNG::SetFontColorByUser(FrameNode* frameNode, bool isSetByUser)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, isSetByUser, frameNode);
-}
-
-void TextClockModelNG::ResetFontColor(FrameNode* frameNode)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, false, frameNode);
 }
 
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)

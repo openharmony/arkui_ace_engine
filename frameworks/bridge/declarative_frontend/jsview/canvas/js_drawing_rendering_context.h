@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace::Framework {
@@ -70,7 +71,7 @@ public:
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
-    const JSRef<JSVal>& GetOrCreateContext2D(bool antialias);
+    const JSRef<JSObject>& GetOrCreateContext2D(bool antialias);
 
 protected:
     WeakPtr<AceType> canvasPattern_;
@@ -80,7 +81,8 @@ private:
     JSRef<JSVal> jsCanvasVal_;
     NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
-    JSRef<JSVal> context2d_ {};
+    JSRef<JSObject> context2d_ {};
+    std::shared_ptr<RSCanvas> canvas_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
 

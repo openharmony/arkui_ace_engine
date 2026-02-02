@@ -49,7 +49,7 @@ public:
     virtual void OnDataMoveToNewPlace(size_t from, size_t to) {}
 };
 
-class ACE_EXPORT LazyForEachComponent : public V1::ForEachComponent {
+class ACE_FORCE_EXPORT LazyForEachComponent : public V1::ForEachComponent {
     DECLARE_ACE_TYPE(V2::LazyForEachComponent, V1::ForEachComponent);
 
 public:

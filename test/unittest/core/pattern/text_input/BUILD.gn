@@ -14,8 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_input_test") {
-  module_name = "Component-Text"
-  module_output = ""
+  module_name = "DrawingSet-Line"
   type = "new"
   sources = [
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
@@ -50,36 +49,32 @@ ace_unittest("text_input_test") {
   ]
   cflags = [ "-fno-access-control" ]
 
-  external_deps = [
-  ]
+  external_deps = []
 }
 
-
 ace_unittest("text_field_test_ng") {
-  module_name = "Component-Text"
-  module_output = ""
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "text_input_base.cpp",
-    "text_field_pattern_func_test_two.cpp",
-    "text_field_test_ng_one.cpp",
-    "text_field_test_ng_two.cpp",
-    "text_field_test_ng_three.cpp",
-    "text_field_test_ng_four.cpp",
-    "text_field_test_ng_five.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "text_field_pattern_func_test_two.cpp",
+    "text_field_test_ng_five.cpp",
+    "text_field_test_ng_four.cpp",
+    "text_field_test_ng_one.cpp",
+    "text_field_test_ng_three.cpp",
+    "text_field_test_ng_two.cpp",
+    "text_input_base.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 
-  external_deps = [
-  ]
+  external_deps = []
 }
 
 ace_unittest("text_input_pattern_test") {
-  module_name = "Component-Text"
-  module_output = ""
+  module_name = "TextSet-Text"
   type = "new"
   sources = [
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "text_area_base.cpp",
     "text_field_pattern_test.cpp",
     "text_field_pattern_testeight.cpp",
@@ -93,22 +88,18 @@ ace_unittest("text_input_pattern_test") {
     "text_field_pattern_testthree.cpp",
     "text_field_pattern_testtwo.cpp",
     "text_input_base.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 
-  external_deps = [
-  ]
+  external_deps = []
 }
 
-
 ace_unittest("text_emoji_test") {
-  module_name = "Component-Text"
-  module_output = ""
+  module_name = "TextSet-TextArea"
   type = "new"
   sources = [
-    "text_input_base.cpp",
     "text_field_controller_test.cpp",
+    "text_input_base.cpp",
     "text_input_emoji_test.cpp",
   ]
   cflags = [ "-fno-access-control" ]
@@ -117,4 +108,25 @@ ace_unittest("text_emoji_test") {
     "icu:shared_icui18n",
     "icu:shared_icuuc",
   ]
+}
+
+ace_unittest("text_input_listener_test") {
+  module_name = "TextSet-InputListener"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "on_text_changed_listener_impl_test.cpp",
+    "text_field_pattern_multi_thread_test.cpp",
+    "text_input_base.cpp",
+  ]
+  cflags = [ "-fno-access-control" ]
+
+  external_deps = [
+    "input:libmmi-client",
+    "hilog:libhilog",
+  ]
+  if (defined(global_parts_info.inputmethod_imf)) {
+    external_deps += [ "imf:inputmethod_client" ]
+  }
 }

@@ -207,20 +207,6 @@ void TextClockPattern::InitTextClockController()
     });
 }
 
-void TextClockPattern::OnVisibleChange(bool isVisible)
-{
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
-        "Clock is %{public}s and clock %{public}s running",
-        isVisible ? "visible" : "invisible", isVisible ? "starts" : "stops");
-    if (isVisible && !isSetVisible_) {
-        isSetVisible_ = isVisible;
-        UpdateTimeText();
-    } else if (!isVisible) {
-        isSetVisible_ = isVisible;
-        delayTask_.Cancel();
-    }
-}
-
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
@@ -267,7 +253,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
 
 void TextClockPattern::UpdateTimeText(bool isTimeChange)
 {
-    if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_))) {
+    if (!isStart_ || (!isTimeChange && !isInVisibleArea_)) {
         return;
     }
     FireBuilder();

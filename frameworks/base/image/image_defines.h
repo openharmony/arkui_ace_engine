@@ -31,6 +31,11 @@ enum class ImageType {
     ANIMATED_DRAWABLE,
 };
 
+enum class ImageInnerErrorCode : uint32_t {
+    SK_DATA_CREATE_ERROR = 100001,
+    SK_CODEC_CREATE_ERROR = 100002,
+};
+
 enum class ImageErrorCode : int32_t {
     DEFAULT = -1,
     CREATE_IMAGE_UNKNOWN_SOURCE_TYPE = 101000,

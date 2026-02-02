@@ -58,7 +58,7 @@ Ark_Buffer GetDataImpl(Ark_ImageData peer)
     CHECK_NULL_RETURN(peer, {});
     size_t size = peer->value.data.size() * sizeof(decltype(peer->value.data)::value_type);
     Ark_Buffer result = BufferKeeper::Allocate(size);
-    if (!result.data || result.length < size) {
+    if (!result.data || result.length < 0 || static_cast<size_t>(result.length) < size) {
         return {};
     }
     auto dst = reinterpret_cast<uint32_t*>(result.data);

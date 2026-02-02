@@ -249,6 +249,9 @@ void TextFieldPattern::MoveCaretToContentRectMultiThread(const MoveCaretToConten
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (selectController_) {
+        selectController_->UpdateCaretIndex(value.index);
+    }
     host->PostAfterAttachMainTreeTask([value, weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -629,7 +632,7 @@ void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    if (textfieldPaintProperty->HasPaddingByUser()) {
+    if (!textfieldPaintProperty->HasPaddingByUser()) {
         PaddingProperty paddings;
         auto themePadding = textFieldTheme->GetPadding();
         paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());

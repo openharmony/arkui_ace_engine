@@ -21,7 +21,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -137,6 +137,7 @@ void VideoPattern::PrepareMediaPlayer()
     videoSrcInfo_.moduleName_ = videoSrcInfo.moduleName_;
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] create MediaPlayer.", hostId_);
+        ACE_UINODE_TRACE(GetHost());
         mediaPlayer_->CreateMediaPlayer();
     }
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
@@ -556,6 +557,7 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
+    ACE_UINODE_TRACE(host);
     renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);

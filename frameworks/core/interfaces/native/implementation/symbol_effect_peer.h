@@ -67,8 +67,8 @@ protected:
 
 struct ReplaceSymbolEffectPeer : SymbolEffectPeer {
 protected:
-    explicit ReplaceSymbolEffectPeer(Scope optScope)
-        : SymbolEffectPeer(Type::REPLACE, optScope) {}
+    explicit ReplaceSymbolEffectPeer(Scope optScope, Type type)
+        : SymbolEffectPeer(type, optScope) {}
     ~ReplaceSymbolEffectPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
 };

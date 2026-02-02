@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 class JSQRCodeTheme {
@@ -33,9 +34,13 @@ public:
         }
 
         // normal
+        auto* stack = NG::ViewStackProcessor::GetInstance();
+        CHECK_NULL_VOID(stack);
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
+        CHECK_NULL_VOID(frameNode);
         ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
-        QRCodeModel::GetInstance()->SetQRCodeColor(themeColors->CompForegroundPrimary());
-        QRCodeModel::GetInstance()->SetQRBackgroundColor(themeColors->BackgroundPrimary());
+        NG::QRCodeModelNG::SetQRCodeColor(frameNode, themeColors->CompForegroundPrimary());
+        NG::QRCodeModelNG::SetQRBackgroundColor(frameNode, themeColors->BackgroundPrimary());
 
         // focused
         ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);

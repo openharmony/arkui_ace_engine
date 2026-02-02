@@ -811,6 +811,9 @@ HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetBadgeTextColorValue(), Color::WHITE);
     EXPECT_EQ(layoutProperty->GetBadgeValueValue(), VALUE);
     EXPECT_EQ(layoutProperty->GetBadgePosition(), BadgePosition::LEFT);
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize(), 0.0_vp);
+    EXPECT_EQ(layoutProperty->GetBadgeCircleSize(), 16.0_vp);
+
     /**
      * @tc.steps: step3. Set Value with Number.
      */
@@ -859,6 +862,9 @@ HWTEST_F(BadgeTestNg, BadgeModelNG002, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), BADGE_OUTER_BORDER_WIDTH);
     EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColorValue(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize(), 0.0_vp);
+    EXPECT_EQ(layoutProperty->GetBadgeCircleSize(), 16.0_vp);
+
     /**
      * @tc.steps: step3. Set Value with Number.
      */
@@ -1020,6 +1026,13 @@ HWTEST_F(BadgeTestNg, BadgeDumpInfoTest003, TestSize.Level1)
 HWTEST_F(BadgeTestNg, BadgeDumpInfoTest004, TestSize.Level1)
 {
     BadgeModelNG badge;
+    badge.CreateBadgeFrameNode();
+    GetInstance();
+    ASSERT_NE(pattern_, nullptr);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    pattern_->DumpInfo(json);
+    EXPECT_FALSE(layoutProperty_->HasBadgeCount());
+
     BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
@@ -1046,7 +1059,6 @@ HWTEST_F(BadgeTestNg, BadgeDumpInfoTest004, TestSize.Level1)
     pattern_->OnModifyDone();
 
     // update badge layoutProperty and go to different branch
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     layoutProperty_->UpdateBadgeCount(1);
     pattern_->DumpInfo(json);
     EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 1);

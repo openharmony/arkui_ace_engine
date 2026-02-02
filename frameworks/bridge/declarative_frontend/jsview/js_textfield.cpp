@@ -39,8 +39,8 @@
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/common_text_constants.h"
@@ -49,6 +49,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/image/image_source_info.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_STANDARD_INPUT
@@ -73,8 +74,9 @@ TextFieldModel* TextFieldModel::GetInstance()
         static NG::TextFieldModelNG instance;
         return &instance;
     } else {
-        static Framework::TextFieldModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+        static TextFieldModel* instance = loader ? reinterpret_cast<TextFieldModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }
@@ -318,12 +320,11 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    UnRegisterResource("placeholderColor");
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     Color color = theme->GetPlaceholderColor();
     RefPtr<ResourceObject> resourceObject;
-    UnRegisterResource("placeholderColor");
     if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor", resourceObject)) {
         TextFieldModel::GetInstance()->ResetPlaceholderColor();
         return;
@@ -733,8 +734,8 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resourceObject;
+    UnRegisterResource("fontColor");
     if (!ParseJsColor(info[0], textColor, resourceObject)) {
-        UnRegisterResource("fontColor");
         TextFieldModel::GetInstance()->ResetTextColor();
         return;
     }
@@ -799,6 +800,7 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnRegisterResource("fontFamily");
     std::vector<std::string> fontFamilies;
     RefPtr<ResourceObject> resourceObject;
     if (!ParseJsFontFamilies(info[0], fontFamilies, resourceObject)) {
@@ -806,8 +808,6 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<std::vector<std::string>>("fontFamily", resourceObject, fontFamilies);
-    } else {
-        UnRegisterResource("fontFamily");
     }
     TextFieldModel::GetInstance()->SetFontFamily(fontFamilies);
 }
@@ -884,8 +884,8 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     RefPtr<ResourceObject> resourceObject;
+    UnRegisterResource("backgroundColor");
     if (!ParseJsColor(info[0], backgroundColor, resourceObject)) {
-        UnRegisterResource("backgroundColor");
         TextFieldModel::GetInstance()->ResetBackgroundColor();
         return;
     }
@@ -1287,7 +1287,8 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1586,43 +1587,6 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     ParseOnIconSrc(showVal, passwordIcon);
     ParseOffIconSrc(hideVal, passwordIcon);
     TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
-}
-
-void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
-    const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
-    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
-{
-    if (!textFieldTheme) {
-        return;
-    }
-
-    RefPtr<Decoration> decoration = component->GetDecoration();
-    RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-    }
-    if (boxDecoration) {
-        Border border = decoration->GetBorder();
-        border.SetLeftEdge(boxBorder.Left());
-        border.SetRightEdge(boxBorder.Right());
-        border.SetTopEdge(boxBorder.Top());
-        border.SetBottomEdge(boxBorder.Bottom());
-        border.SetBorderRadius(textFieldTheme->GetBorderRadius());
-        decoration->SetBorder(border);
-        component->SetOriginBorder(decoration->GetBorder());
-
-        if (boxDecoration->GetImage() || boxDecoration->GetGradient().IsValid()) {
-            // clear box properties except background image and radius.
-            boxDecoration->SetBackgroundColor(Color::TRANSPARENT);
-            Border border;
-            border.SetBorderRadius(textFieldTheme->GetBorderRadius());
-            boxDecoration->SetBorder(border);
-        }
-    } else {
-        boxDecoration = AceType::MakeRefPtr<Decoration>();
-        boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
-        boxComponent->SetBackDecoration(boxDecoration);
-    }
 }
 
 void JSTextField::SetShowUnit(const JSCallbackInfo& info)
@@ -2523,9 +2487,14 @@ void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
         return;
     }
     Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("strokeColor");
+    if (!ParseJsColor(info[0], strokeColor, resObj)) {
         TextFieldModel::GetInstance()->ResetStrokeColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<Color>("strokeColor", resObj, strokeColor);
     }
     TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
 }

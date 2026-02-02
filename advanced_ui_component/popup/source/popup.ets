@@ -282,6 +282,7 @@ export struct PopupComponent {
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
+  @State scrollMaxHeight: number | undefined = undefined;
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
@@ -302,9 +303,9 @@ export struct PopupComponent {
 
   private getIconMargin(): LocalizedMargin {
     return {
-      start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
-      end: new LengthMetrics(this.theme.icon.margin.start.value - (this.theme.button.margin.end.value / 2)
-        , this.theme.button.margin.start.unit)
+      start: new LengthMetrics(this.theme.button.margin.start!.value / 2, this.theme.button.margin.start!.unit),
+      end: new LengthMetrics(this.theme.icon.margin.start!.value - (this.theme.button.margin.end!.value / 2)
+        , this.theme.button.margin.start!.unit)
     }
   }
 
@@ -318,7 +319,7 @@ export struct PopupComponent {
 
   private getTitlePadding(): LocalizedPadding {
     return {
-      start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+      start: new LengthMetrics(this.theme.button.margin.start!.value / 2, this.theme.button.margin.start!.unit),
       end: this.theme.closeButton.margin.end
     }
   }
@@ -426,10 +427,10 @@ export struct PopupComponent {
           textMaxWeight = -1
         }
       }
-      textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
-      textMaxWeight -= this.theme.windows.padding.end.value
-      textMaxWeight -= this.theme.button.margin.start.value / 2
-      textMaxWeight -= this.theme.closeButton.margin.end.value
+      textMaxWeight -= (this.theme.windows.padding.start!.value - (this.theme.button.margin.end!.value / 2))
+      textMaxWeight -= this.theme.windows.padding.end!.value
+      textMaxWeight -= this.theme.button.margin.start!.value / 2
+      textMaxWeight -= this.theme.closeButton.margin.end!.value
       textMaxWeight -= this.getCloseButtonWidth() as number
     }
     return textMaxWeight
@@ -441,15 +442,15 @@ export struct PopupComponent {
 
   private getButtonMargin(): LocalizedMargin {
     return {
-      top: LengthMetrics.vp(this.theme.button.textMargin.top.value / 2 - 4),
-      bottom: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2 - 4),
-      start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
-      end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
+      top: LengthMetrics.vp(this.theme.button.textMargin.top!.value / 2 - 4),
+      bottom: LengthMetrics.vp(this.theme.button.textMargin.bottom!.value / 2 - 4),
+      start: LengthMetrics.vp(this.theme.button.margin.start!.value / 2 - 4),
+      end: LengthMetrics.vp(this.theme.button.margin.end!.value / 2 - 4)
     }
   }
 
   private getButtonTextMargin(): LocalizedMargin {
-    return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value) }
+    return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom!.value) }
   }
 
   private getButtonTextPadding(): LocalizedPadding {
@@ -499,8 +500,8 @@ export struct PopupComponent {
   private getWindowsPadding(): LocalizedPadding {
     let top = this.theme.windows.padding.top;
     let bottom =
-      LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
-    let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
+      LengthMetrics.vp(this.theme.windows.padding.bottom!.value - (this.theme.button.textMargin.bottom!.value / 2));
+    let start = LengthMetrics.vp(this.theme.windows.padding.start!.value - (this.theme.button.margin.end!.value / 2));
     let end = this.theme.windows.padding.end;
     let resolvedMaxWidth = this.toVp(this.maxWidth);
     if (resolvedMaxWidth === 0) {
@@ -527,6 +528,7 @@ export struct PopupComponent {
     this.listener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
       setTimeout(() => {
         this.currentScreenStatus = mediaQueryResult.matches
+        this.setScrollMaxHeight(undefined, true)
       }, 10)
     })
   }
@@ -535,26 +537,30 @@ export struct PopupComponent {
     this.listener.off('change')
   }
 
-  getScrollMaxHeight(): number | undefined {
+  setScrollMaxHeight(maxHeight: number | undefined, forceChange: boolean = false) {
     let scrollMaxHeight: number | undefined = undefined;
-    if (this.beforeScreenStatus === undefined ||
-      this.currentScreenStatus !== this.beforeScreenStatus) {
+    if (maxHeight) {
+      scrollMaxHeight = maxHeight!;
+    } else {
       this.applySizeOptions = this.getApplyMaxSize();
-      this.beforeScreenStatus = this.currentScreenStatus
+      let maxHeightInDisplay = this.applySizeOptions?.maxHeight as number;
+      if (this.applyHeight && !forceChange) {
+        scrollMaxHeight = Math.min(this.applyHeight, maxHeightInDisplay)
+      } else {
+        scrollMaxHeight = maxHeightInDisplay;
+      }
     }
-    scrollMaxHeight = px2vp(componentUtils.getRectangleById(this.applycontentKey).size?.height)
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
-    scrollMaxHeight -= this.theme.windows.padding.top.value
-    scrollMaxHeight -= (this.theme.button.textMargin.bottom.value / 2)
-    scrollMaxHeight -= this.theme.title.margin.bottom.value
-    scrollMaxHeight -= (this.theme.windows.padding.bottom.value -
-      (this.theme.button.textMargin.bottom.value / 2))
+    scrollMaxHeight -= this.theme.windows.padding.top!.value
+    scrollMaxHeight -= (this.theme.button.textMargin.bottom!.value / 2)
+    scrollMaxHeight -= this.theme.title.margin.bottom!.value
+    scrollMaxHeight -= (this.theme.windows.padding.bottom!.value -
+      (this.theme.button.textMargin.bottom!.value / 2))
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
-      return scrollMaxHeight
+      this.scrollMaxHeight = scrollMaxHeight;
     } else {
-      scrollMaxHeight = undefined
-      return scrollMaxHeight
+      this.scrollMaxHeight = undefined;
     }
   }
 
@@ -757,6 +763,7 @@ export struct PopupComponent {
           .margin(this.getTitleMargin())
           .onAreaChange((_, rect) => {
             this.titleHeight = rect.height as number
+            this.setScrollMaxHeight(undefined);
           })
 
           Scroll() {
@@ -768,6 +775,7 @@ export struct PopupComponent {
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
+                this.setScrollMaxHeight(undefined);
               })
           }
           .direction(this.popupDirection)
@@ -776,7 +784,7 @@ export struct PopupComponent {
           .padding(this.getMessagePadding())
           .scrollBar(BarState.Auto)
           .scrollable(ScrollDirection.Vertical)
-          .constraintSize({ maxHeight: this.getScrollMaxHeight() })
+          .constraintSize({ maxHeight: this.scrollMaxHeight })
           .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false })
 
           Flex({ wrap: FlexWrap.Wrap }) {
@@ -853,6 +861,7 @@ export struct PopupComponent {
             } else {
               this.buttonHeight = 0
             }
+            this.setScrollMaxHeight(undefined);
           })
         }
         .direction(this.popupDirection)
@@ -861,6 +870,7 @@ export struct PopupComponent {
         Column() {
           Flex().height(0).onAreaChange((_, rect) => {
             this.titleHeight = rect.height as number
+            this.setScrollMaxHeight(undefined);
           })
           Row() {
             Scroll() {
@@ -872,6 +882,7 @@ export struct PopupComponent {
                 .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number
+                  this.setScrollMaxHeight(undefined);
                 })
             }
             .direction(this.popupDirection)
@@ -881,7 +892,7 @@ export struct PopupComponent {
             .padding(this.getMessagePadding())
             .scrollBar(BarState.Auto)
             .scrollable(ScrollDirection.Vertical)
-            .constraintSize({ maxHeight: this.getScrollMaxHeight() })
+            .constraintSize({ maxHeight: this.scrollMaxHeight })
 
             if (this.showClose || this.showClose === void (0)) {
               Button() {
@@ -991,6 +1002,7 @@ export struct PopupComponent {
             } else {
               this.buttonHeight = 0
             }
+            this.setScrollMaxHeight(undefined);
           })
         }
         .direction(this.popupDirection)
@@ -1005,6 +1017,7 @@ export struct PopupComponent {
     .key(this.applycontentKey)
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
+      this.setScrollMaxHeight(this.applyHeight)
     })
   }
 }

@@ -20,15 +20,15 @@
 
 namespace OHOS::Ace::NG {
 
-void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChild)
+void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild)
 {
-    MultiFingersRecognizer::OnBeginGestureReferee(touchId);
+    MultiFingersRecognizer::OnBeginGestureReferee(touchId, originalId);
     if (!needUpdateChild) {
         return;
     }
     for (const auto& child : recognizers_) {
         if (child) {
-            child->BeginReferee(touchId, needUpdateChild);
+            child->BeginReferee(touchId, originalId, needUpdateChild);
         }
     }
 }
@@ -289,5 +289,13 @@ bool RecognizerGroup::IsReady()
         }
     }
     return true;
+}
+
+std::string RecognizerGroup::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",RCRS:");
+    gestureInfoStr.append(std::to_string(remainChildOnResetStatus_));
+    return gestureInfoStr;
 }
 } // namespace OHOS::Ace::NG

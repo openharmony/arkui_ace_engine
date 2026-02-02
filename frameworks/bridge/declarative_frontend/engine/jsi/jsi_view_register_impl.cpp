@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient_binding.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -40,20 +42,14 @@
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
-#include "bridge/declarative_frontend/jsview/js_checkbox.h"
-#include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
-#include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
-#include "bridge/declarative_frontend/jsview/js_counter.h"
-#include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
@@ -61,24 +57,20 @@
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
-#include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_gauge.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
-#include "bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
-#include "bridge/declarative_frontend/jsview/js_indexer.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
@@ -99,10 +91,6 @@
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
-#include "bridge/declarative_frontend/jsview/js_marquee.h"
-#include "bridge/declarative_frontend/jsview/js_menu.h"
-#include "bridge/declarative_frontend/jsview/js_menu_item.h"
-#include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
@@ -115,15 +103,11 @@
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path_shape.h"
-#include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#include "bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
-#ifdef QRCODEGEN_SUPPORT
-#include "bridge/declarative_frontend/jsview/js_qrcode.h"
-#endif
-#include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -134,23 +118,19 @@
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
-#include "bridge/declarative_frontend/jsview/js_row_split.h"
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
+#include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
-#include "bridge/declarative_frontend/jsview/js_side_bar.h"
-#include "bridge/declarative_frontend/jsview/js_slider.h"
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
+#include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
-#include "bridge/declarative_frontend/jsview/js_stepper.h"
-#include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
-#include "bridge/declarative_frontend/jsview/js_symbol.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
@@ -163,11 +143,10 @@
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
+#include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "bridge/declarative_frontend/jsview/js_water_flow.h"
-#include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
-#include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow_sections_binding.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
@@ -190,7 +169,6 @@
 
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
-#include "bridge/declarative_frontend/jsview/js_rating.h"
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
@@ -231,12 +209,6 @@
 #include "bridge/declarative_frontend/jsview/js_richtext.h"
 #include "bridge/declarative_frontend/jsview/js_web.h"
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
-#endif
-
-#ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-#include "bridge/declarative_frontend/jsview/js_camera.h"
-#endif
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
@@ -480,18 +452,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-    { "Counter", JSCounter::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPicker", JSCalendarPicker::JSBind },
-#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
-    { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "FolderStack", JSFolderStack::JSBind},
-#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -509,16 +473,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-    { "Radio", JSRadio::JSBind },
-#ifdef QRCODEGEN_SUPPORT
-    { "QRCode", JSQRCode::JSBind },
-#endif
     { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
-    { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
-    { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
@@ -533,12 +489,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Sheet", JSSheet::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
-    { "LinearGradient", JSLinearGradient::JSBind },
-    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
+    { "LinearGradient", JSLinearGradientBinding::JSBind },
+    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
     { "FormLink", JSFormLink::JSBind },
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     { "FormButton", JSFormButton::JSBind },
@@ -584,21 +538,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
-    { "Counter", JSCounter::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPicker", JSCalendarPicker::JSBind },
-#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
     { "Grid", JSGrid::JSBind },
     { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
-    { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "FolderStack", JSFolderStack::JSBind},
-#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
@@ -617,15 +563,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-    { "Stepper", JSStepper::JSBind },
-    { "StepperItem", JSStepperItem::JSBind },
     { "Toggle", JSToggle::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
-#endif
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -637,11 +578,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
-    { "TimePicker", JSTimePicker::JSBind },
-    { "Picker", JSContainerPicker::JSBind },
+    { "UIPickerComponent", JSContainerPicker::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
-    { "TimePickerDialog", JSTimePickerDialog::JSBind },
 #endif
     { "DatePicker", JSDatePicker::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -649,11 +588,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-    { "RowSplit", JSRowSplit::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
-    { "AlphabetIndexer", JSIndexer::JSBind },
-    { "Hyperlink", JSHyperlink::JSBind },
-    { "Radio", JSRadio::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
@@ -674,10 +608,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
-#ifdef QRCODEGEN_SUPPORT
-    { "QRCode", JSQRCode::JSBind },
-#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
@@ -699,11 +629,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-    { "Camera", JSCamera::JSBind },
-#endif
     { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },
@@ -714,14 +640,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
 #endif
-    { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
-    { "Marquee", JSMarquee::JSBind },
-    { "Menu", JSMenu::JSBind },
-    { "MenuItem", JSMenuItem::JSBind },
-    { "MenuItemGroup", JSMenuItemGroup::JSBind },
     { "Gesture", JSGesture::JSBind },
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },
@@ -733,7 +653,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PanGestureOption", JSPanGestureOption::JSBind },
     { "PanGestureOptions", JSPanGestureOption::JSBind },
     { "NativeCustomDialogController", JSCustomDialogController::JSBind },
-    { "Scroller", JSScroller::JSBind },
+    { "Scroller", JSScrollerBinding::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "IndicatorController", JSIndicatorController::JSBind },
@@ -762,23 +682,18 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
-    { "PatternLock", JSPatternLock::JSBind },
-    { "PatternLockController", JSPatternLockController::JSBind },
+    { "PatternLockController", JSPatternLockControllerBinding::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
-    { "WaterFlow", JSWaterFlow::JSBind },
-    { "FlowItem", JSWaterFlowItem::JSBind },
-    { "NativeWaterFlowSection", JSWaterFlowSections::JSBind },
+    { "NativeWaterFlowSection", JSWaterFlowSectionsBinding::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
-    { "LinearGradient", JSLinearGradient::JSBind },
-    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
+    { "LinearGradient", JSLinearGradientBinding::JSBind },
+    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
     { "AbilityComponent", JSAbilityComponent::JSBind },
@@ -825,7 +740,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
-    { "SymbolGlyph", JSSymbol::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
     { "ContainerSpan",  JSContainerSpan::JSBind},
     { "__RectShape__", JSRectShape::JSBind },
@@ -845,7 +759,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
     { "PinchRecognizer", JSPinchRecognizer::JSBind },
     { "RotationRecognizer", JSRotationRecognizer::JSBind },
-    { "TouchRecognizer", JSTouchRecognizer::JSBind }
+    { "TouchRecognizer", JSTouchRecognizer::JSBind },
+    { "UnionEffectContainer", JSUnionEffectContainer::JSBind },
 };
 
 void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)
@@ -881,7 +796,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSSwiperController::JSBind(globalObj);
     JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
@@ -905,8 +820,8 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSLinearGradient::JSBind(globalObj);
-    JSColorMetricsLinearGradient::JSBind(globalObj);
+    JSLinearGradientBinding::JSBind(globalObj);
+    JSColorMetricsLinearGradientBinding::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSWebController::JSBind(globalObj);
@@ -933,7 +848,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
     JSIndicatorController::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
@@ -945,8 +860,8 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSLinearGradient::JSBind(globalObj);
-    JSColorMetricsLinearGradient::JSBind(globalObj);
+    JSLinearGradientBinding::JSBind(globalObj);
+    JSColorMetricsLinearGradientBinding::JSBind(globalObj);
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
     }
@@ -1079,13 +994,13 @@ void JsBindFormViews(
         JSViewStackProcessor::JSBind(globalObj);
         JSTouchHandler::JSBind(globalObj);
         JSPersistent::JSBind(globalObj);
-        JSScroller::JSBind(globalObj);
+        JSScrollerBinding::JSBind(globalObj);
         JSListScroller::JSBind(globalObj);
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
-        JSLinearGradient::JSBind(globalObj);
-        JSColorMetricsLinearGradient::JSBind(globalObj);
+        JSLinearGradientBinding::JSBind(globalObj);
+        JSColorMetricsLinearGradientBinding::JSBind(globalObj);
         JSPath2D::JSBind(globalObj);
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
@@ -1107,13 +1022,20 @@ void JsBindFormViews(
     }
 }
 
-void JsBindFormViewsForJsXNode(BindingTarget globalObj)
+void JsBindFormViewsForJsXNode(BindingTarget globalObj, bool isFull)
 {
     JSScopeUtil::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
+    if (isFull) {
+        JSIndicator::JSBind(globalObj);
+        JSSwiperController::JSBind(globalObj);
+        JSTextClockController::JSBind(globalObj);
+        JSTextTimerController::JSBind(globalObj);
+        JSIndicatorController::JSBind(globalObj);
+    }
 }
 
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
@@ -1139,7 +1061,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
 

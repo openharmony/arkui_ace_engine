@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,7 +57,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (GetScrollEdgeEffect()) {
         // over scroll in drag update from normal to over scroll.
         float overScroll = layoutInfo_->CalcOverScroll(GetMainContentSize(), delta);
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
         }
@@ -301,6 +302,7 @@ void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart, const 
     auto host = GetHost();
     CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
     FireObserverOnReachStart();
+    ReportOnItemWaterFlowEvent("onReachStart");
     CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
     if (onReachStart) {
@@ -318,6 +320,7 @@ void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnRe
     CHECK_NULL_VOID(host);
     if (layoutInfo_->ReachEnd(prevOffset_, false) && layoutInfo_->repeatDifference_ == 0) {
         FireObserverOnReachEnd();
+        ReportOnItemWaterFlowEvent("onReachEnd");
         CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
         if (onReachEnd) {
@@ -336,6 +339,7 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
 {
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
+    ReportOnItemWaterFlowScrollEvent("onScrollIndex", layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
     CHECK_NULL_VOID(onScrollIndex);
     int32_t endIndex = layoutInfo_->endIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
@@ -349,6 +353,12 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+
+    if (layoutInfo_->isDataValid_) {
+        GetHost()->ChildrenUpdatedFrom(-1);
+    }
+    layoutInfo_->isDataValid_ = true;
+
     prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
     if (!layoutInfo_->measureInNextFrame_) {
         TriggerPostLayoutEvents();
@@ -382,14 +392,10 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         isInitialized_ = true;
     }
 
-    if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
+	// Check if we need to mark node dirty when at section boundary with misalignment
+    if (IsAtSectionBoundary() && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
-
-    if (layoutInfo_->isDataValid_) {
-        GetHost()->ChildrenUpdatedFrom(-1);
-    }
-    layoutInfo_->isDataValid_ = true;
 
     ChangeAnimateOverScroll();
     ChangeCanStayOverScroll();
@@ -614,6 +620,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }
+            ContentChangeReport(GetHost());
         }
     }
     FireAndCleanScrollingListener();
@@ -952,6 +959,17 @@ void WaterFlowPattern::DumpInfoAddSections()
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
 }
 
+void WaterFlowPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    json->Put("isScrollable",
+        IsScrollable() ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                       : "false");
+    json->Put("scrollDirection", (layoutProperty->GetAxis() == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 SizeF WaterFlowPattern::GetChildrenExpandedSize()
 {
     auto viewSize = GetViewSizeMinusPadding();
@@ -992,5 +1010,126 @@ void WaterFlowPattern::ScrollToFocusItem(int32_t itemIdx)
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
     }
+}
+
+bool WaterFlowPattern::IsAtSectionBoundary() const
+{
+    if (layoutInfo_->segmentTails_.empty()) {
+        return layoutInfo_->startIndex_ == 0;
+    }
+
+    int32_t startIdx = layoutInfo_->startIndex_;
+    int32_t segmentIdx = layoutInfo_->GetSegment(startIdx);
+    if (segmentIdx == 0) {
+        return startIdx == 0;
+    }
+
+    // Calculate section start index and check if we're at boundary
+    int32_t sectionStart = layoutInfo_->segmentTails_[segmentIdx - 1] + 1;
+    return startIdx == sectionStart;
+}
+
+void WaterFlowPattern::ReportOnItemWaterFlowEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto waterFlowEvent = std::string("WaterFlow.") + event;
+    params->Put("name", waterFlowEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+void WaterFlowPattern::ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string value = std::string("WaterFlow.") + event;
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("First", startindex);
+    params->Put("Last", endindex);
+
+    auto eventData = JsonUtil::Create();
+    CHECK_NULL_VOID(eventData);
+    eventData->Put("name", value.c_str());
+    eventData->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", host->GetId());
+    json->Put("event", eventData);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t WaterFlowPattern::OnInjectionEvent(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f) || !isScrollByRatio) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        ScrollPageByRatio(true, ratio, reportEventId);
+    } else if (ret == "scrollBackward") {
+        ScrollPageByRatio(false, ratio, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void WaterFlowPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
+{
+    auto height = GetMainContentSize();
+
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    SetIsOverScroll(false);
+    StopAnimate();
+    HandleWaterFlowScroll(distance, reportEventId);
+}
+
+void WaterFlowPattern::HandleWaterFlowScroll(float distance, int32_t reportEventId)
+{
+    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        return;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (!IsScrollable()) {
+        error = ScrollError::SCROLL_NOT_SCROLLABLE_ERROR;
+    } else if (IsAtTop()) {
+        error = ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom()) {
+        error = ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+    ReportScroll(false, error, reportEventId);
 }
 } // namespace OHOS::Ace::NG

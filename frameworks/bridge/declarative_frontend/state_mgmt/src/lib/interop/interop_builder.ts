@@ -16,7 +16,8 @@
 
 function __makeBuilderParameterStaticProxy_Interop_Internal(name: string, value: Object, sourceGetter: Object) : Object {
   if (InteropExtractorModule.makeBuilderParameterStaticProxy === undefined) {
-      throw new Error('makeBuilderParameterStaticProxy error!');
+      // only happened in toolchain error, internal error
+      throw new BusinessError(NOT_IMPLEMENT, 'makeBuilderParameterStaticProxy error!');
   }
   return InteropExtractorModule.makeBuilderParameterStaticProxy(name, value, sourceGetter);
 }

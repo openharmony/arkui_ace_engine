@@ -59,9 +59,12 @@ constexpr double NEG_VALUE_OF_PROGRESS = -100.0;
 constexpr double MAX_VALUE_OF_PROGRESS = 100000.0;
 constexpr double MAX_VALUE_OF_PROGRESS2 = 10000.0;
 constexpr double MAX_NEG_VALUE_OF_PROGRESS = -100000.0;
+constexpr float PROGRESS_COMPONENT_MAXSIZE_WIDTH = 720.0f;
+constexpr float PROGRESS_COMPONENT_MAXSIZE_HEIGHT = 1400.0f;
 constexpr ProgressType PROGRESS_TYPE_LINEAR = ProgressType::LINEAR;
 constexpr ProgressType PROGRESS_TYPE_SCALE = ProgressType::SCALE;
 constexpr ProgressType PROGRESS_TYPE_MOON = ProgressType::MOON;
+constexpr ProgressType PROGRESS_TYPE_RING = ProgressType::RING;
 constexpr int32_t SCALE_COUNT = 120;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
 constexpr Color BG_COLOR = Color(0xffc0c0c0);
@@ -1222,6 +1225,45 @@ HWTEST_F(ProgressBuilderTestNg, ProgressSafeAreaSetTest001, TestSize.Level1)
     ASSERT_NE(progressPattern, nullptr);
     EXPECT_TRUE(progressPattern->IsEnableMatchParent());
     EXPECT_TRUE(progressPattern->IsEnableFix());
+}
+
+/**
+ * @tc.name: ProgressSafeAreaSetTest002
+ * @tc.desc: Test LayoutPolicy of Progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressBuilderTestNg, ProgressSafeAreaSetTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create progress.
+     * @tc.expected: step1. create progress.
+     */
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS2, PROGRESS_TYPE_RING);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. set layoutPolicyProperty match_parent.
+     * @tc.expected: step2. set layoutPolicyProperty match_parent.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty_->layoutPolicy_ = layoutPolicyProperty;
+
+    LayoutConstraintF contentConstraint;
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    LayoutWrapperNode layoutWrapper(frameNode_, nullptr, layoutProperty_);
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step3. Call the function MeasureContent.
+     * @tc.expected: step3. Check the result of MeasureContent.
+     */
+    contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    contentConstraint.parentIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 }
 
 /**

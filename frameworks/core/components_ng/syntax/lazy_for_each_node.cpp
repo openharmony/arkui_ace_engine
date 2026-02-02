@@ -35,6 +35,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
         }
         return node;
     }
+    ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     node->RegisterBuilderListener();
@@ -64,6 +65,7 @@ LazyForEachNode::~LazyForEachNode()
 RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
@@ -121,8 +123,7 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
             node->GetChildren();
-            auto preBuildResult = node->builder_->PreBuild(node->removingNodes_, deadline, node->itemConstraint_,
-                canRunLongPredictTask);
+            auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
             } else {
@@ -130,10 +131,6 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
                 node->itemConstraint_.reset();
             }
             ACE_SCOPED_TRACE("LazyForEach predict finish: %s", node->builder_->DumpHashKey().c_str());
-        }
-        // post idle task to release nodes if there is still nodes in removingNodes_
-        if (!node->removingNodes_.empty()) {
-            node->PostIdleTask(LazyForEachIdleTaskSource::POST_IDLE_TASK);
         }
     });
 }

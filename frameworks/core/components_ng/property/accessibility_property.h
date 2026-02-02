@@ -35,6 +35,10 @@ namespace OHOS::Accessibility {
 class ExtraElementInfo;
 }
 
+namespace OHOS::Ace {
+class JsonValue;
+}
+
 namespace OHOS::Ace::NG {
 struct WindowSceneInfo {
     int32_t left = 0;
@@ -178,16 +182,7 @@ public:
         return -1;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-    {
-        json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
-        json->PutExtAttr("accessibilityLevel", GetAccessibilityLevel().c_str(), filter);
-        json->PutExtAttr("accessibilityGroup", IsAccessibilityGroup(), filter);
-        json->PutExtAttr("accessibilityVirtualNode", HasAccessibilityVirtualNode(), filter);
-        json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
-        json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
-        json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
-    }
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -621,6 +616,7 @@ public:
 
     void SetAccessibilityStateDescription(const std::string& stateDescription);
     std::string GetAccessibilityStateDescription() const;
+    bool HasAccessibilityStateDescription() const;
 
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);

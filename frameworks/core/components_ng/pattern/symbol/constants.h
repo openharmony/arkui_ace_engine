@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SYMBOL_CONSTANTS_H
 
 #include <cstdint>
+#include <functional>
+#include "ui/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
@@ -121,6 +123,12 @@ struct SymbolShadow {
     Color color = Color::BLACK;
     std::pair<float, float> offset{0.0f, 0.0f};
     float radius = 0.0f;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, SymbolShadow&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
     bool operator==(const SymbolShadow& other) const
     {
         return color == other.color &&
@@ -135,6 +143,22 @@ struct SymbolShadow {
                NearZero(offset.first) &&
                NearZero(offset.second) &&
                NearZero(radius);
+    }
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, SymbolShadow&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
     }
 };
 

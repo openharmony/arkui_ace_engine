@@ -15,18 +15,21 @@
 
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient_binding.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
-void JSColorMetricsLinearGradient::JSBind(BindingTarget globalObj)
+void JSColorMetricsLinearGradientBinding::JSBind(BindingTarget globalObj)
 {
     JSClass<JSColorMetricsLinearGradient>::Declare("ColorMetricsLinearGradient");
     JSClass<JSColorMetricsLinearGradient>::Bind(
-        globalObj, JSColorMetricsLinearGradient::Constructor, JSColorMetricsLinearGradient::Destructor);
+        globalObj, JSColorMetricsLinearGradientBinding::Constructor, JSColorMetricsLinearGradientBinding::Destructor);
 }
 
-void JSColorMetricsLinearGradient::Constructor(const JSCallbackInfo& args)
+void JSColorMetricsLinearGradientBinding::Constructor(const JSCallbackInfo& args)
 {
     auto jsColorMetricsLinearGradientPtr = Referenced::MakeRefPtr<JSColorMetricsLinearGradient>();
     jsColorMetricsLinearGradientPtr->IncRefCount();
@@ -52,21 +55,22 @@ void JSColorMetricsLinearGradient::Constructor(const JSCallbackInfo& args)
         auto itemObject = JSRef<JSObject>::Cast(item);
         
         ColorMetricsStop stop;
-        if (!ParseColorMetricsStop(itemObject, stop)) {
+        if (!JSColorMetricsLinearGradientBinding::ParseColorMetricsStop(itemObject, stop)) {
             return;
         }
         jsColorMetricsLinearGradientPtr->colorMetricsGradient_.push_back(stop);
     }
 }
 
-void JSColorMetricsLinearGradient::Destructor(JSColorMetricsLinearGradient* jsColorMetricsLinearGradientPtr)
+void JSColorMetricsLinearGradientBinding::Destructor(JSColorMetricsLinearGradient* jsColorMetricsLinearGradientPtr)
 {
     if (jsColorMetricsLinearGradientPtr != nullptr) {
         jsColorMetricsLinearGradientPtr->DecRefCount();
     }
 }
 
-bool JSColorMetricsLinearGradient::ParseColorMetricsStop(const JSRef<JSObject>& itemObject, ColorMetricsStop& stop)
+bool JSColorMetricsLinearGradientBinding::ParseColorMetricsStop(
+    const JSRef<JSObject>& itemObject, ColorMetricsStop& stop)
 {
     JSRef<JSVal> jsColor = itemObject->GetProperty("color");
     Color color;

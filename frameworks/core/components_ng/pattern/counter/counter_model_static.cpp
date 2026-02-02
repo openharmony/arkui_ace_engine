@@ -22,15 +22,19 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+const char COUNTER_ETS_TAG[] = "Counter";
+const char TEXT_ETS_TAG[] = "Text";
+const char BUTTON_ETS_TAG[] = "Button";
+const char ROW_ETS_TAG[] = "Row";
 namespace {
 constexpr char16_t SUB[] = u"-";
 constexpr char16_t ADD[] = u"+";
 } // namespace
 RefPtr<FrameNode> CounterModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COUNTER_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", COUNTER_ETS_TAG, nodeId);
     auto counterNode = CounterNode::GetOrCreateCounterNode(
-        V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+        COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();
     CHECK_NULL_RETURN(counterPattern, counterNode);
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -129,7 +133,8 @@ void CounterModelStatic::SetOnInc(FrameNode* frameNode, CounterModel::CounterEve
         if (clickEvent) {
             clickEvent();
         }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -147,7 +152,8 @@ void CounterModelStatic::SetOnDec(FrameNode* frameNode, CounterModel::CounterEve
         if (clickEvent) {
             clickEvent();
         }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -156,7 +162,7 @@ RefPtr<FrameNode> CounterModelStatic::CreateButtonChild(
     int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme)
 {
     auto buttonNode =
-        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateCreateWithLabel(false);
@@ -168,7 +174,7 @@ RefPtr<FrameNode> CounterModelStatic::CreateButtonChild(
     buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
     buttonNode->MarkModifyDone();
 
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -189,7 +195,7 @@ RefPtr<FrameNode> CounterModelStatic::CreateContentNodeChild(
     int32_t contentId, const RefPtr<CounterTheme>& counterTheme)
 {
     auto contentNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     contentNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
     contentNode->GetLayoutProperty()->UpdateLayoutWeight(1);
     contentNode->GetRenderContext()->SetClipToFrame(true);

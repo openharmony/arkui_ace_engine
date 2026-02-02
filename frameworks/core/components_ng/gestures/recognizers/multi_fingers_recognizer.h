@@ -100,6 +100,8 @@ public:
         return static_cast<int32_t>(touchPoints_.size());
     }
 
+    int32_t GetOriginalTouchPointsSize() const;
+
     void SetTouchPointsForSucceedBlock()
     {
         backupTouchPointsForSucceedBlock_ = touchPoints_;
@@ -110,10 +112,12 @@ public:
         backupTouchPointsForSucceedBlock_.reset();
     }
 
+    void CheckCurrentFingers() const override;
 protected:
-    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
+    void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
+        touchPoints_[touchId].originalId = originalId;
     }
 
     void RemoveUnsupportEvent(int32_t touchId) override
@@ -153,6 +157,7 @@ protected:
     bool CheckFingerListInDownFingers(int32_t pointId) const;
 
     std::string DumpGestureInfo() const;
+    std::string GetGestureInfoString() const override;
 
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;

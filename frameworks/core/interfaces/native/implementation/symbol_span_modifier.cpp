@@ -54,8 +54,8 @@ void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvertPtr<Dimension>(value);
+    CHECK_NULL_VOID(frameNode && value);
+    auto optValue = Converter::OptConvertFromArkNumStrRes(*value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
     SymbolSpanModelStatic::SetFontSize(frameNode, optValue);

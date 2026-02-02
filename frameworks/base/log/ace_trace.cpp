@@ -15,6 +15,9 @@
 
 #include "base/log/ace_trace.h"
 
+#include "core/common/container.h"
+#include "core/components_ng/base/ui_node.h"
+
 #ifndef WINDOWS_PLATFORM
 #include "securec.h"
 #endif
@@ -148,4 +151,33 @@ AceAsyncScopedTrace::~AceAsyncScopedTrace()
         AceAsyncTraceEnd(taskId_, name_.c_str());
     }
 }
+
+ResTracer::ResTracer(const char* caller, uint32_t traceType, uint64_t traceId)
+{
+    AceSetResTraceId(traceType, traceId, &traceType_, &traceId_);
+}
+
+ResTracer::~ResTracer()
+{
+    uint32_t traceType;
+    uint64_t traceId;
+    AceSetResTraceId(traceType_, traceId_, &traceType, &traceId);
+}
+
+ContainerTracer::ContainerTracer(const char* caller, const Container* container)
+    : ContainerTracer(caller, container ? container->GetInstanceId() : INSTANCE_ID_UNDEFINED)
+{}
+
+ContainerTracer::ContainerTracer(const char* caller)
+    : ContainerTracer(caller, Container::CurrentId())
+{}
+
+UINodeTracer::UINodeTracer(const char* caller, const NG::UINode* uiNode)
+    : UINodeTracer(caller, uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
+{}
+
+UINodeTracer::UINodeTracer(
+    const char* caller, int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern)
+    : UINodeTracer(caller, nodeId)
+{}
 } // namespace OHOS::Ace

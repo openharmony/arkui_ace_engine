@@ -92,6 +92,9 @@ public:
     static void PreloadAceModuleForCustomRuntime(void* runtime);
     static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+    static void PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime);
+#endif
     // crossPlatform Resets the module pre-load flag
     static void ResetModulePreLoadFlag();
     // crossPlatform Prepares for resetting the module pre-load flag
@@ -376,6 +379,8 @@ public:
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
+
+    bool OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args) override;
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 

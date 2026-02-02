@@ -70,4 +70,13 @@ void FrameNode::MarkNeedRenderMultiThread(bool isRenderBoundary)
         parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
     }
 }
+
+void FrameNode::OnInspectorIdUpdateMultiThread(const std::string& id)
+{
+    PostAfterAttachMainTreeTask([weak = WeakClaim(this), id]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->OnInspectorIdUpdate(id);
+    });
+}
 } // namespace OHOS::Ace::NG

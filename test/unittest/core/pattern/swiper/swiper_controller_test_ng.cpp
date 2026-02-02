@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -897,6 +897,29 @@ HWTEST_F(SwiperControllerTestNg, LazyForEachNeedPredict001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindLazyForEachNode001
+ * @tc.desc: Test LazyForEach FindLazyForEachNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, FindLazyForEachNode001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateItemsInLazyForEach();
+    CreateSwiperDone();
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    /**
+     * @tc.steps: step1. lazyforeach node check.
+     * @tc.expected: lazyforeach node.
+     */
+    EXPECT_NE(pattern_->FindLazyForEachNode(lazyForEachNode), std::nullopt);
+    /**
+     * @tc.steps: step2. nullptr node check.
+     * @tc.expected: nullopt.
+     */
+    EXPECT_EQ(pattern_->FindLazyForEachNode(nullptr), std::nullopt);
+}
+
+/**
  * @tc.name: ChangeIndex001
  * @tc.desc: Test ChangeIndex with SwiperDisplayMode::AUTO_LINEAR and item invisible
  * @tc.type: FUNC
@@ -1020,5 +1043,251 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndexWithLoopChange001, TestSize.Level1)
     pattern_->OnModifyDone();
     FlushUITasks();
     EXPECT_TRUE(CurrentIndex(1));
+}
+
+/**
+ * @tc.name: Fakedrag001
+ * @tc.desc: Test startFakeDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, Fakedrag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. first startFakeDrag
+     * @tc.expected: success
+     */
+    bool ret = controller_->StartFakeDrag();
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(pattern_->isFakeDragging_);
+    /**
+     * @tc.steps: step3. startFakeDrag when fakedragging is start
+     * @tc.expected: fail
+     */
+    ret = controller_->StartFakeDrag();
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step4. startFakeDrag when real dragging is start
+     * @tc.expected: fail
+     */
+    pattern_->isDragging_ = true;
+    pattern_->isFakeDragging_ = false;
+    ret = controller_->StartFakeDrag();
+    EXPECT_FALSE(ret);
+    EXPECT_FALSE(pattern_->isFakeDragging_);
+}
+
+/**
+ * @tc.name: Fakedrag002
+ * @tc.desc: Test fakeDragBy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, Fakedrag002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. fakeDrag when fakedrag is not start
+     * @tc.expected: fail
+     */
+    pattern_->isFakeDragging_ = false;
+    bool ret = controller_->FakeDragBy(-1.0f);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step3. fakeDrag when fakedrag is start
+     * @tc.expected: true
+     */
+    pattern_->isFakeDragging_ = true;
+    ret = controller_->FakeDragBy(-1.0f);
+    EXPECT_TRUE(ret);
+    /**
+     * @tc.steps: step4. fakeDrag when offset > 0
+     * @tc.expected: false
+     */
+    ret = controller_->FakeDragBy(1.0f);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step5. fakeDrag when offset < 0
+     * @tc.expected: false
+     */
+    pattern_->itemPosition_.clear();
+    ret = controller_->FakeDragBy(-1.0f);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: Fakedrag003
+ * @tc.desc: Test stopFakeDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, Fakedrag003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. StopFakeDrag when fakedrag is not start
+     * @tc.expected: false
+     */
+    pattern_->isFakeDragging_ = false;
+    bool ret = controller_->StopFakeDrag();
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step3. StopFakeDrag when fakedrag is start
+     * @tc.expected: true
+     */
+    pattern_->isFakeDragging_ = true;
+    ret = controller_->StopFakeDrag();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Fakedrag004
+ * @tc.desc: Test IsFakeDragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, Fakedrag004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. get fakedrag state when fakedrag is not start
+     * @tc.expected: false
+     */
+    pattern_->isFakeDragging_ = false;
+    bool ret = controller_->IsFakeDragging();
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step3. get fakedrag state when fakedrag is start
+     * @tc.expected: true
+     */
+    pattern_->isFakeDragging_ = true;
+    ret = controller_->IsFakeDragging();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Fakedrag005
+ * @tc.desc: Test FakeDragCheckAtStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, Fakedrag005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. (hasCachedCapture_)->(true)
+     * @tc.expected: true
+     */
+    pattern_->hasCachedCapture_ = true;
+    float offset = 0.0f;
+    bool ret = pattern_->FakeDragCheckAtStart(offset);
+    EXPECT_TRUE(ret);
+    /**
+     * @tc.steps: step3. (IsLoop() || itemPosition_.begin()->first != 0)->(true, false)
+     * @tc.expected: true
+     */
+    pattern_->hasCachedCapture_ = false;
+    ret = pattern_->FakeDragCheckAtStart(offset);
+    EXPECT_TRUE(ret);
+    /**
+     * @tc.steps: step4. (IsLoop() || itemPosition_.begin()->first != 0)->(false, true)
+     * @tc.expected: true
+     */
+    layoutProperty_->UpdateLoop(false);
+    auto item = pattern_->itemPosition_.begin()->second;
+    pattern_->itemPosition_.erase(0);
+    ret = pattern_->FakeDragCheckAtStart(offset);
+    /**
+     * @tc.steps: step5. (NeedEnableIgnoreBlankOffset())->(true) NonPositive(remainOffset)->(true)
+     * @tc.expected: false
+     */
+    pattern_->itemPosition_[0] = item;
+    pattern_->prevMarginIgnoreBlank_ = true;
+    ret = pattern_->FakeDragCheckAtStart(offset);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step6. NonPositive(remainOffset)->(false)
+     * @tc.expected: true
+     */
+    pattern_->itemPosition_[0].startPos -= 1.0f;
+    ret = pattern_->FakeDragCheckAtStart(offset);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Fakedrag006
+ * @tc.desc: Test FakeDragCheckAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, Fakedrag006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndex(1);
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. (hasCachedCapture_)->(true)
+     * @tc.expected: true
+     */
+    pattern_->hasCachedCapture_ = true;
+    float offset = 0.0f;
+    bool ret = pattern_->FakeDragCheckAtEnd(offset);
+    EXPECT_TRUE(ret);
+    /**
+     * @tc.steps: step3. (IsLoop() || itemPosition_.rbegin()->first != TotalCount() - 1)->(true, false)
+     * @tc.expected: true
+     */
+    pattern_->hasCachedCapture_ = false;
+    ret = pattern_->FakeDragCheckAtEnd(offset);
+    EXPECT_TRUE(ret);
+    /**
+     * @tc.steps: step4. (IsLoop() || itemPosition_.rbegin()->first != TotalCount() - 1)->(false, true)
+     * @tc.expected: true
+     */
+    layoutProperty_->UpdateLoop(false);
+    auto item = pattern_->itemPosition_.begin()->second;
+    pattern_->itemPosition_[2] = item;
+    ret = pattern_->FakeDragCheckAtEnd(offset);
+    EXPECT_TRUE(ret);
+    /**
+     * @tc.steps: step5. (NeedEnableIgnoreBlankOffset())->(true) NonPositive(remainOffset)->(true)
+     * @tc.expected: false
+     */
+    pattern_->itemPosition_.erase(2);
+    pattern_->prevMarginIgnoreBlank_ = true;
+    ret = pattern_->FakeDragCheckAtEnd(offset);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step6. NonPositive(remainOffset)->(false)
+     * @tc.expected: true
+     */
+    pattern_->itemPosition_[1].endPos += 1.0f;
+    ret = pattern_->FakeDragCheckAtEnd(offset);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

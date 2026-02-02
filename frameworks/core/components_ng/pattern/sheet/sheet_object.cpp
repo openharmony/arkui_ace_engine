@@ -170,6 +170,9 @@ void SheetObject::ClipSheetNode()
     if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
         renderContext->UpdateOuterBorderRadius(borderRadius);
     }
+    if (sheetStyle.radiusRenderStrategy.has_value() && sheetType != SheetType::SHEET_POPUP) {
+        renderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
+    }
     if (sheetType == SheetType::SHEET_POPUP && pattern->GetSheetPopupInfo().showArrow) {
         std::string clipPath = pattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
         auto path = AceType::MakeRefPtr<Path>();
@@ -707,6 +710,8 @@ void SheetObject::AvoidKeyboardInDirtyLayoutProcess()
         // first switch the sheet to the position corresponding to the proportion before rotation
         sheetPattern->TranslateTo(sheetPattern->GetPageHeightWithoutOffset() - sheetPattern->GetHeight());
         sheetPattern->SetWindowRotate(false);
+    } else if (sheetPattern->GetNeedDoubleAvoidAfterLayout()) {
+        AvoidKeyboard(true);
     } else {
         // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
         AvoidKeyboard(false);

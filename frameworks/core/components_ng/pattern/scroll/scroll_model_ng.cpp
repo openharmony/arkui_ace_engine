@@ -361,7 +361,11 @@ ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
     snapOptions.enableSnapToStart = pattern->GetEnableSnapToSide().first;
     snapOptions.enableSnapToEnd = pattern->GetEnableSnapToSide().second;
     snapOptions.snapAlign = static_cast<int32_t>(pattern->GetScrollSnapAlign());
-    snapOptions.paginationParams = pattern->GetSnapPaginations();
+    if (pattern->IsSnapToInterval()) {
+        snapOptions.paginationParams.emplace_back(pattern->GetIntervalSize());
+    } else {
+        snapOptions.paginationParams = pattern->GetSnapPaginations();
+    }
     return snapOptions;
 }
 

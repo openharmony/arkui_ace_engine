@@ -836,7 +836,7 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
     ArkUI_Float32 tempPosition[2];
 
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        targetNode->uiNodeHandle, tempOffset, &tempPosition, false);
+        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false);
     windowPosition->x = tempPosition[0];
     windowPosition->y = tempPosition[1];
     return result;
@@ -853,7 +853,7 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
     ArkUI_Float32 tempPosition[2];
 
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        targetNode->uiNodeHandle, tempOffset, &tempPosition, false);
+        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false);
     position->x = tempPosition[0];
     position->y = tempPosition[1];
     return result;

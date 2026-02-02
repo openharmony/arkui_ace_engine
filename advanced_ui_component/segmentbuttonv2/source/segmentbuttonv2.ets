@@ -26,6 +26,7 @@ import {
 import { SizeT } from '@ohos.arkui.node';
 import { i18n } from '@kit.LocalizationKit';
 import util from '@ohos.util';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 export interface SegmentButtonV2ItemOptions {
   text?: ResourceStr;
@@ -290,6 +291,8 @@ export struct TabSegmentButtonV2 {
   buttonPadding?: LengthMetrics = undefined;
   @Param
   languageDirection?: Direction = undefined;
+  @Param
+  backgroundSystemMaterial?: uiMaterial.Material = undefined;
 
   build() {
     SimpleSegmentButtonV2({
@@ -328,6 +331,7 @@ export struct TabSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
+      backgroundSystemMaterial: this.backgroundSystemMaterial
     })
   }
 }
@@ -400,6 +404,8 @@ export struct CapsuleSegmentButtonV2 {
   buttonPadding?: LengthMetrics = undefined;
   @Param
   languageDirection?: Direction = undefined;
+  @Param
+  backgroundSystemMaterial?: uiMaterial.Material = undefined;
 
   build() {
     SimpleSegmentButtonV2({
@@ -438,6 +444,7 @@ export struct CapsuleSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
+      backgroundSystemMaterial: this.backgroundSystemMaterial
     })
   }
 }
@@ -541,6 +548,9 @@ struct SimpleSegmentButtonV2 {
   @Require
   @Param
   languageDirection?: Direction = undefined;
+  @Require
+  @Param
+  backgroundSystemMaterial?: uiMaterial.Material = undefined;
   @Local
   itemRects: SegmentButtonV2ItemRect[] = [];
   @Local
@@ -813,6 +823,7 @@ struct SimpleSegmentButtonV2 {
       .direction(this.languageDirection)
     }
     .backgroundColor(this.getButtonBackgroundColor())
+    .systemMaterial(this.backgroundSystemMaterial)
     .backgroundEffect(this.buttonBackgroundEffect, { disableSystemAdaptation: true })
     .borderRadius(this.getButtonBorderRadius())
     .clip(false)

@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr uint32_t LINEAR_SPLIT_COLOR = 0xFF707B7C;
+const double DEFAULT_SPLIT_HEIGHT = 2.0;
 
 } // namespace
 

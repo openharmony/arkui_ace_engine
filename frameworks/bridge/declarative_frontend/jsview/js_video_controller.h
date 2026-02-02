@@ -18,7 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "core/components/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
 
 namespace OHOS::Ace::Framework {
 

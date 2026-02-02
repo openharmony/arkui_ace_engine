@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<> void AssignCast(std::optional<int32_t>& dst, const Ark_TextContentControllerOptions& src)
@@ -130,6 +131,17 @@ void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
     CHECK_NULL_VOID(peer && peer->controller_);
     peer->controller_->DeleteBackward();
 }
+void SetStyledPlaceholderImpl(Ark_TextContentControllerBase peer,
+                              Ark_StyledString styledString)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(styledString);
+    if (!peer->controller_) {
+        peer->SetStyledStringCache(styledString->spanString);
+        return;
+    }
+    peer->controller_->SetPlaceholderStyledString(styledString->spanString);
+}
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
 {
@@ -146,6 +158,7 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
         TextContentControllerBaseAccessor::ClearPreviewTextImpl,
         TextContentControllerBaseAccessor::GetTextImpl,
         TextContentControllerBaseAccessor::DeleteBackwardImpl,
+        TextContentControllerBaseAccessor::SetStyledPlaceholderImpl,
     };
     return &TextContentControllerBaseAccessorImpl;
 }

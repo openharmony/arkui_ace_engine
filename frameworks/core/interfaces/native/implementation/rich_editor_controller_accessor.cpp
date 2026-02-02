@@ -58,6 +58,16 @@ TextDecorationStruct Convert(const Ark_DecorationStyleInterface& src)
     return ret;
 }
 
+FONT_FEATURES_LIST GetDefaultFontFeature()
+{
+    FONT_FEATURES_LIST fontFeatures;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, fontFeatures);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, fontFeatures);
+    return textTheme->GetTextStyle().GetFontFeatures();
+}
+
 void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
 {
     if (auto shadowList = Converter::OptConvert<std::vector<Shadow>>(src.textShadow)) {
@@ -83,10 +93,33 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
 
     if (auto fontFeatureSettings = Converter::OptConvert<std::string>(src.fontFeature)) {
         ret.SetFontFeatures(ParseFontFeatureSettings(fontFeatureSettings.value()));
+    } else {
+        ret.SetFontFeatures(GetDefaultFontFeature());
     }
 
     auto textBackgroundStyle = Converter::OptConvert<TextBackgroundStyle>(src.textBackgroundStyle);
     ret.SetTextBackgroundStyle(textBackgroundStyle);
+
+    auto strokeWidth = Converter::OptConvert<OHOS::Ace::Dimension>(src.strokeWidth);
+    Validator::ValidateNonPercent(strokeWidth);
+    if (strokeWidth) {
+        ret.SetStrokeWidth(strokeWidth.value());
+    }
+    if (auto strokeColor = Converter::OptConvert<Color>(src.strokeColor); strokeColor) {
+        ret.SetStrokeColor(strokeColor.value());
+    } else if (auto color = Converter::OptConvert<Color>(src.fontColor); color) {
+        ret.SetStrokeColor(color.value());
+    }
+}
+
+Dimension GetDefaultFontSizeIfInvalid(const Dimension& fontSize)
+{
+    CHECK_NULL_RETURN(fontSize.IsNonPositive(), fontSize);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, fontSize);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, fontSize);
+    return textTheme->GetTextStyle().GetFontSize();
 }
 
 template<>
@@ -97,7 +130,7 @@ TextStyle Convert(const Ark_RichEditorTextStyle& src)
         ret.SetTextColor(color.value());
     }
     if (auto size = Converter::OptConvert<Dimension>(src.fontSize); size) {
-        ret.SetFontSize(size.value());
+        ret.SetFontSize(GetDefaultFontSizeIfInvalid(size.value()));
     }
     if (auto style = Converter::OptConvert<OHOS::Ace::FontStyle>(src.fontStyle); style) {
         ret.SetFontStyle(style.value());
@@ -196,9 +229,11 @@ UpdateParagraphStyle Convert(const Ark_RichEditorParagraphStyle& src)
 {
     UpdateParagraphStyle ret;
     ret.textAlign = Converter::OptConvert<TextAlign>(src.textAlign);
+    ret.textVerticalAlign = Converter::OptConvert<TextVerticalAlign>(src.textVerticalAlign);
     ret.leadingMargin = Converter::OptConvert<LeadingMargin>(src.leadingMargin);
     ret.wordBreak = Converter::OptConvert<WordBreak>(src.wordBreak);
     ret.lineBreakStrategy = Converter::OptConvert<LineBreakStrategy>(src.lineBreakStrategy);
+    ret.paragraphSpacing = Converter::OptConvert<Dimension>(src.paragraphSpacing);
     ret.textDirection = Converter::OptConvert<TextDirection>(src.textDirection);
     return ret;
 }
@@ -237,7 +272,15 @@ MarginProperty Convert(const Ark_RichEditorLayoutStyle& src)
     CalcDimension length;
     MarginProperty ret = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     auto margins = Converter::OptConvert<PaddingProperty>(src.margin);
-    return margins.value_or(ret);
+    if (auto margins = Converter::OptConvert<PaddingProperty>(src.margin)) {
+        PaddingProperty adjustedMargins;
+        adjustedMargins.left =  (margins->left && margins->left->IsValid()) ? margins->left : ret.left;
+        adjustedMargins.top = (margins->top && margins->top->IsValid()) ? margins->top : ret.top;
+        adjustedMargins.right = (margins->right && margins->right->IsValid()) ? margins->right : ret.right;
+        adjustedMargins.bottom = (margins->bottom && margins->bottom->IsValid()) ? margins->bottom : ret.bottom;
+        return adjustedMargins;
+    }
+    return ret;
 }
 
 template<>
@@ -487,6 +530,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
+    dst.textVerticalAlign = Converter::ArkValue<Opt_TextVerticalAlign>(src.textVerticalAlign);
     Ark_LeadingMarginPlaceholder arkLeadingMargin;
     arkLeadingMargin.pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap);
     arkLeadingMargin.size.value0 = Converter::ArkValue<Ark_Dimension>(src.leadingMarginSize[0]);
@@ -509,6 +553,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
+    dst.textVerticalAlign = Converter::ArkValue<Opt_TextVerticalAlign>(src.textVerticalAlign);
     std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
         Dimension::FromString(src.leadingMarginSize[1]) };
     Ark_LeadingMarginPlaceholder arkLeadingMargin = {
@@ -543,7 +588,7 @@ std::vector<To> ArkSelectionConvert(const SelectionInfo& src, ConvContext *ctx)
 {
     std::vector<To> values;
     for (const ResultObject& spanObject : src.GetSelection().resultObjects) {
-        if (spanObject.type == SelectSpanType::TYPESPAN) {
+        if (spanObject.type == SelectSpanType::TYPESPAN || spanObject.type == SelectSpanType::TYPEBUILDERSPAN) {
             auto textSpanResult = ArkValue<Ark_RichEditorTextSpanResult>(spanObject, ctx);
             auto unionValue = ArkUnion<To, Ark_RichEditorTextSpanResult>(textSpanResult);
             values.push_back(unionValue);
@@ -567,6 +612,7 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src, 
     dst.color = ArkUnion<Ark_ResourceColor, Ark_String>(src.decorationColor, ctx);
     dst.style = ArkValue<Opt_TextDecorationStyle>(
         static_cast<OHOS::Ace::TextDecorationStyle>(src.decorationStyle));
+    dst.thicknessScale = ArkValue<Opt_Float64>(src.lineThicknessScale);
 }
 
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx)
@@ -593,6 +639,8 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
     }
     dst.halfLeading = ArkValue<Opt_Boolean>(src.halfLeading);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.textBackgroundStyle, ctx);
+    dst.strokeWidth = ArkValue<Opt_Float64>(src.strokeWidth);
+    dst.strokeColor = ArkUnion<Opt_ResourceColor, Ark_String>(src.strokeColor, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src, ConvContext *ctx)
@@ -780,10 +828,17 @@ void UpdateSpanStyleImpl(Ark_RichEditorController peer,
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<Converter::TextSpanOptionsForUpdate>(*value);
     auto updateSpanStyle = Converter::OptConvert<UpdateSpanStyle>(*value);
-    if (options && updateSpanStyle) {
-        peerImpl->SetUpdateSpanStyle(updateSpanStyle.value());
-        peerImpl->UpdateSpanStyleImpl(options.value());
+    CHECK_NULL_VOID(options && updateSpanStyle);
+    auto& textStyle = options->textStyle;
+    bool isUseFontColor = textStyle.has_value() && !updateSpanStyle->updateTextDecorationColor.has_value()
+        && updateSpanStyle->updateTextColor.has_value();
+    if (isUseFontColor) {
+        auto textColor = textStyle->GetTextColor();
+        updateSpanStyle->updateTextDecorationColor = textColor;
+        textStyle->SetTextDecorationColor(textColor);
     }
+    peerImpl->SetUpdateSpanStyle(updateSpanStyle.value());
+    peerImpl->UpdateSpanStyleImpl(options.value());
 }
 void UpdateParagraphStyleImpl(Ark_RichEditorController peer,
                               const Ark_RichEditorParagraphStyleOptions* value)

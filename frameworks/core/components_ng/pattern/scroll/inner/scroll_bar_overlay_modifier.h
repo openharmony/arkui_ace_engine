@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ enum class HoverAnimationType {
     SHRINK,
 };
 
-class ScrollBarOverlayModifier : public OverlayModifier {
+class ACE_FORCE_EXPORT ScrollBarOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBarOverlayModifier, OverlayModifier);
 
 public:
@@ -157,6 +157,15 @@ public:
         isNavDestinationShow_ = isNavDestinationShow;
     }
 
+    void SetAdjustOffset(Offset adjustOffset)
+    {
+        adjustOffset_ = adjustOffset;
+    }
+
+    Offset GetAdjustOffset() const
+    {
+        return adjustOffset_;
+    }
 protected:
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
 
@@ -183,6 +192,7 @@ private:
     OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
     PositionMode positionMode_ = PositionMode::RIGHT;
 
+    Offset adjustOffset_;
     bool isScrollable_ = true;
     bool isNavDestinationShow_ = true;
 };

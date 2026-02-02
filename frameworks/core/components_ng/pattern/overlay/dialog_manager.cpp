@@ -24,9 +24,11 @@
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::DialogManager);
+}
+
 namespace OHOS::Ace::NG {
-namespace {
-} // namespace
 
 DialogManager::DialogManager() = default;
 

@@ -34,7 +34,7 @@ class DetachedFreeRootProxyNode : public UINode {
 
 public:
     explicit DetachedFreeRootProxyNode(int32_t instanceId)
-        : UINode("DetachedFreeRootProxy", ElementRegister::UndefinedElementId)
+        : UINode("DetachedFreeRootProxy", ElementRegister::GetInstance()->MakeUniqueId())
     {
         const auto& container = Container::GetContainer(instanceId);
         CHECK_NULL_VOID(container);

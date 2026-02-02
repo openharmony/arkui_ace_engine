@@ -216,6 +216,9 @@ void SheetSideObject::ClipSheetNode()
     }
     renderContext->UpdateBorderRadius(borderRadius);
     // innerBorder need to adapt
+    if (sheetStyle.radiusRenderStrategy.has_value()) {
+        renderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
+    }
 }
 
 void SheetSideObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstTransition)

@@ -21,12 +21,12 @@ import { TextBackgroundStyle, BaseSpan } from "./component/span"
 import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ImageSpanAlignment, ImageFit } from "./component/enums"
 import { ColorFilter } from "./component/units"
 import { default as drawing } from "@ohos.graphics.drawing"
@@ -34,7 +34,7 @@ import { ImageErrorCallback, ImageError } from "./component/image"
 import { default as image } from "@ohos.multimedia.image"
 export class ImageSpanModifier extends CommonMethodModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -56,6 +56,8 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
     _onError_0_0value?: ImageErrorCallback | undefined
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alt_0_0value?: image.PixelMap | undefined
+    _supportSvg2_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _supportSvg2_0_0value?: boolean | undefined
     _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -169,6 +171,24 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 default: {
                     this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setAltAttribute((undefined as image.PixelMap | undefined));
+                }
+            }
+        }
+        if (this._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._supportSvg2_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSupportSvg2Attribute((this._supportSvg2_0_0value as boolean | undefined));
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._supportSvg2_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSupportSvg2Attribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -290,6 +310,19 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
+        if (modifier._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._supportSvg2_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.supportSvg2(modifier._supportSvg2_0_0value);
+                    break;
+                }
+                default: {
+                    this.supportSvg2((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._textBackgroundStyle_0_flag) {
@@ -322,6 +355,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._verticalAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._verticalAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._verticalAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -333,6 +367,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._colorFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -344,6 +379,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -355,6 +391,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -366,6 +403,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -377,9 +415,21 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
             this._alt_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    supportSvg2(value: boolean | undefined): this {
+        if (((this._supportSvg2_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportSvg2_0_0value) !== (value)))
+        {
+            this._supportSvg2_0_flag = AttributeUpdaterFlag.UPDATE
+            this._supportSvg2_0_0value = value
+        } else
+        {
+            this._supportSvg2_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -388,6 +438,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textBackgroundStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -399,6 +450,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._baselineOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP

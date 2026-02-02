@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,11 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -447,7 +448,7 @@ void TimePickerRowPattern::UpdateTitleNodeContent()
 {
     if (HasTitleNode()) {
         auto textTitleNode = FrameNode::GetOrCreateFrameNode(
-            V2::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+            TimePickerUtil::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         auto str = GetDialogTitleDate();
         CHECK_NULL_VOID(textTitleNode);
         auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
@@ -570,29 +571,30 @@ void TimePickerRowPattern::CreateAmPmNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto height = pickerTheme->GetDividerSpacing();
     if (!GetHour24() && !HasAmPmNode()) {
-        auto amPmColumnNode = FrameNode::GetOrCreateFrameNode(
-            V2::COLUMN_ETS_TAG, GetAmPmId(), []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+        auto amPmColumnNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::COLUMN_ETS_TAG, GetAmPmId(),
+            []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
         CHECK_NULL_VOID(amPmColumnNode);
         for (uint32_t index = 0; index < AM_PM_COUNT; index++) {
-            auto textNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            auto textNode = FrameNode::CreateFrameNode(TimePickerUtil::TEXT_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);
             textNode->MountToParent(amPmColumnNode);
         }
         SetColumn(amPmColumnNode);
-        auto stackAmPmNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+        auto stackAmPmNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::STACK_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
-        auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        auto buttonNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
         auto blendNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto columnBlendNode = FrameNode::GetOrCreateFrameNode(
-            V2::COLUMN_ETS_TAG, blendNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto columnBlendNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::COLUMN_ETS_TAG, blendNodeId,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         buttonNode->MountToParent(stackAmPmNode);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         amPmColumnNode->MountToParent(columnBlendNode);
@@ -621,26 +623,27 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if (!HasSecondNode()) {
         if (hasSecond_) {
-            auto secondColumnNode = FrameNode::GetOrCreateFrameNode(
-                V2::COLUMN_ETS_TAG, GetSecondId(), []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+            auto secondColumnNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::COLUMN_ETS_TAG, GetSecondId(),
+                []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
             CHECK_NULL_VOID(secondColumnNode);
             for (uint32_t index = 0; index < GetShowCount(); index++) {
-                auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+                auto textNode = FrameNode::CreateFrameNode(TimePickerUtil::TEXT_ETS_TAG,
                     ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
                 CHECK_NULL_VOID(textNode);
                 textNode->MarkModifyDone();
                 textNode->MountToParent(secondColumnNode);
             }
             SetColumn(secondColumnNode);
-            auto stackSecondNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+            auto stackSecondNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::STACK_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
-            auto buttonSecondNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            auto buttonSecondNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
             auto blendNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-            auto columnBlendNode = FrameNode::GetOrCreateFrameNode(
-                V2::COLUMN_ETS_TAG, blendNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto columnBlendNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::COLUMN_ETS_TAG, blendNodeId,
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             buttonSecondNode->MarkModifyDone();
             buttonSecondNode->MountToParent(stackSecondNode);
             secondColumnNode->MarkModifyDone();
@@ -1234,29 +1237,46 @@ void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& butt
 
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
 {
+    // Keep high-level steps terse: update locale state, handle AM/PM reorder, then update dialog buttons.
     FlushAmPmFormatString();
     UpdateLanguageAndAmPmTimeOrder();
-    if (!GetHour24()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto children = host->GetChildren();
-        auto iter = children.begin();
-        CHECK_NULL_VOID(*iter);
-        auto amPmNode = *iter;
-        CHECK_NULL_VOID(amPmNode);
-        if (amPmTimeOrder_ == "01" && isAmPmTimeOrderUpdate_) {
-            // if hasSecond_ is true, then amPmNode should be moved from slot 0 to 3, otherwise from slot 0 to 2
-            hasSecond_ ? amPmNode->MovePosition(3) : amPmNode->MovePosition(2);
-        } else if (amPmTimeOrder_ == "10" && isAmPmTimeOrderUpdate_) {
-            // if hasSecond_ is true, then amPmNode should be moved from slot 3 to 0, otherwise form slot 2 to 0
-            hasSecond_ ? std::advance(iter, 3) : std::advance(iter, 2);
-            amPmNode = *iter;
-            CHECK_NULL_VOID(amPmNode);
-            amPmNode->MovePosition(0);
-        }
-        UpdateNodePositionForUg();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    HandleAmPmReorder();
+    UpdateDialogButtons();
+}
+
+void TimePickerRowPattern::HandleAmPmReorder()
+{
+    if (GetHour24()) {
+        return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    CHECK_EQUAL_VOID(children.empty(), true);
+    auto iter = children.begin();
+    CHECK_NULL_VOID(*iter);
+    auto amPmNode = *iter;
+    CHECK_NULL_VOID(amPmNode);
+    if (amPmTimeOrder_ == "01" && isAmPmTimeOrderUpdate_) {
+        // if hasSecond_ is true, then amPmNode should be moved from slot 0 to 3, otherwise from slot 0 to 2
+        amPmNode->MovePosition(hasSecond_ ? AMPM_FORWARD_WITHSECOND : AMPM_FORWARD_WITHOUTSECOND);
+    } else if (amPmTimeOrder_ == "10" && isAmPmTimeOrderUpdate_) {
+        // if hasSecond_ is true, then amPmNode should be moved from a later slot to 0, otherwise from slot 2 to 0
+        const size_t childrenCount = children.size();
+        const size_t targetIndex = hasSecond_ ? AMPM_FORWARD_WITHSECOND : AMPM_FORWARD_WITHOUTSECOND;
+        if (childrenCount > targetIndex) {
+            auto targetIter = std::next(children.begin(), static_cast<std::ptrdiff_t>(targetIndex));
+            auto candidate = *targetIter;
+            CHECK_NULL_VOID(candidate);
+            candidate->MovePosition(0);
+        }
+    }
+    UpdateNodePositionForUg();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TimePickerRowPattern::UpdateDialogButtons()
+{
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
     CHECK_NULL_VOID(buttonConfirmNode);
     auto confirmNode = AceType::DynamicCast<FrameNode>(buttonConfirmNode->GetFirstChild());

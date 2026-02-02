@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
@@ -49,6 +50,7 @@
 #include "core/components_v2/inspector/inspector.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h"
@@ -101,6 +103,7 @@ static void ProcessCardData(const EcmaVM* vm, const std::string& data, const JSR
     const JSRef<JSFunc>& targetFunc, const char* logPrefix)
 {
     CHECK_NULL_VOID(vm);
+    LocalScope localScope(vm);
     TAG_LOGI(AceLogTag::ACE_FORM, "%s, dataList length: %{public}zu", logPrefix, data.length());
     std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
     CHECK_NULL_VOID(jsonRoot);
@@ -2106,7 +2109,7 @@ void JsRegisterFormJsXNodeFull(BindingTarget globalObj, bool isLiteSetRegistered
     }
     auto arkUINativeModule = arkUINativeModuleRef->ToObject(vm);
     NG::ArkUINativeModule::RegisterArkUINativeModuleFormFull(arkUINativeModule, vm, isLiteSetRegistered);
-    JsBindFormViewsForJsXNode(globalObj);
+    JsBindFormViewsForJsXNode(globalObj, true);
     TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module Full successfully.");
 }
 #endif
@@ -2118,6 +2121,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         return;
     }
     auto vm = runtime->GetEcmaVm();
+    IFunctionBinding::runtime = nativeEngine;
+
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
@@ -2241,8 +2246,15 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomAppBar));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
+    // for image generator dialog use below
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadImageGeneratorDialog"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadImageGeneratorDialog));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "__requireHspModuleForAdvancedUIComponent__"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRequireHspModuleForAdvancedUIComponent));
+    // need to delete this.
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "onXIconClicked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsOnXIconClicked));
+    // for image generator dialog use above
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

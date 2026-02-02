@@ -1024,4 +1024,36 @@ HWTEST_F(FormRenderTest, FormRenderTestSetUIContentProperty007, TestSize.Level0)
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), SetFormBackgroundColor(_)).Times(Exactly(1));
     formRenderer->SetUIContentProperty(want);
 }
+
+/**
+ * @tc.name: FormRenderTest_SetUiContentParams_001
+ * @tc.desc: test SetUiContentParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest_SetUiContentParams_001, TestSize.Level0)
+{
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest_SetUiContentParams_001");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(formRendererGroup);
+    OHOS::AAFwk::Want want;
+    want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
+    want.SetParam(FORM_RENDERER_ALLOW_UPDATE, false);
+    want.SetParam(FORM_RENDER_STATE, true);
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formRendererGroup->AddForm(want, formJsInfo);
+    auto formRenderer = formRendererGroup->formRenderer_;
+    EXPECT_TRUE(formRenderer);
+    OHOS::AAFwk::Want renderWant;
+    formRenderer->SetUiContentParams(renderWant);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+    std::string transparentColor = "#FFFFFFFF";
+    renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
+    renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY, true);
+    formRenderer->SetUiContentParams(renderWant);
+}
 } // namespace OHOS::Ace

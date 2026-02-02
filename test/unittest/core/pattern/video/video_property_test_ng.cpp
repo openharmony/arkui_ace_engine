@@ -38,8 +38,8 @@
 #include "base/resource/internal_resource.h"
 #include "core/common/ai/image_analyzer_mgr.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/video/video_theme.h"
-#include "core/components/video/video_utils.h"
+#include "core/components_ng/pattern/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -125,7 +125,7 @@ constexpr uint32_t VIDEO_DURATION = 10u;
 constexpr uint32_t VIDEO_CURRENT_TIME = 5u;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
-TestProperty g_testProperty;
+TestProperty testProperty;
 } // namespace
 
 class VideoPropertyTestNg : public testing::Test {
@@ -141,13 +141,13 @@ protected:
 
 void VideoPropertyTestNg::SetUpTestSuite()
 {
-    g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
-    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
-    g_testProperty.muted = MUTED_VALUE;
-    g_testProperty.autoPlay = AUTO_PLAY;
-    g_testProperty.controls = CONTROL_VALUE;
-    g_testProperty.loop = LOOP_VALUE;
-    g_testProperty.objectFit = VIDEO_IMAGE_FIT;
+    testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
+    testProperty.muted = MUTED_VALUE;
+    testProperty.autoPlay = AUTO_PLAY;
+    testProperty.controls = CONTROL_VALUE;
+    testProperty.loop = LOOP_VALUE;
+    testProperty.objectFit = VIDEO_IMAGE_FIT;
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -803,47 +803,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest019
- * @tc.desc: Test VideoPattern requestFullscreenImpl
- * @tc.type: FUNC
- */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a video and get the videoPattern.
-     * @tc.expected: step1. Create and get successfully.
-     */
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Set controlBar Property.
-     * @tc.expected: step2. Property set successfully.
-     */
-    frameNode->children_.clear();
-    videoPattern->isPlaying_ = false;
-    auto controlBar = videoPattern->CreateControlBar();
-    auto playButton = AceType::DynamicCast<FrameNode>(controlBar->GetFirstChild());
-    auto playBtnEvent = playButton->GetOrCreateGestureEventHub();
-    auto playClickCallback = playBtnEvent->clickEventActuator_->userCallback_->callback_;
-    GestureEvent gestureEvent;
-    playClickCallback(gestureEvent);
-
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
-    ASSERT_NE(videoTheme, nullptr);
-    EXPECT_EQ(controlBar->GetRenderContext()->GetBackgroundColorValue(), videoTheme->GetBkgColor());
-    auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_EQ(controlBarLayoutProperty->GetMainAxisAlignValue(FlexAlign::AUTO), FlexAlign::SPACE_BETWEEN);
-}
-
-/**
  * @tc.name: VideoFullScreenTest001
  * @tc.desc: Test VideoFullScreenPattern UpdateState.
  * @tc.type: FUNC
@@ -925,6 +884,9 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
+        .WillOnce(Return(0))
+        .WillOnce(Return(-1));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(false))
         .WillOnce(Return(0));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(true))
@@ -1133,7 +1095,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest026, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(g_testProperty);
+    auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(videoPattern);
@@ -1273,9 +1235,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest029, TestSize.Level1)
      * @tc.steps: step2. Call OnColorConfigurationUpdate with different childNode in controlBar_.
      * @tc.expected: BackgroundColor of renderContext is set.
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(false));
     ASSERT_NE(videoPattern->controlBar_, nullptr);

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -223,33 +223,24 @@ template("declarative_js_engine_ark") {
       "modules/jsi_router_module.cpp",
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
-      "nativeModule/arkts_native_alphabet_indexer_bridge.cpp",
       "nativeModule/arkts_native_api_impl_bridge.cpp",
       "nativeModule/arkts_native_badge_bridge.cpp",
       "nativeModule/arkts_native_blank_bridge.cpp",
       "nativeModule/arkts_native_button_bridge.cpp",
-      "nativeModule/arkts_native_calendar_picker_bridge.cpp",
       "nativeModule/arkts_native_canvas_bridge.cpp",
-      "nativeModule/arkts_native_checkbox_bridge.cpp",
-      "nativeModule/arkts_native_checkboxgroup_bridge.cpp",
       "nativeModule/arkts_native_column_bridge.cpp",
-      "nativeModule/arkts_native_column_split_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",
       "nativeModule/arkts_native_common_shape_bridge.cpp",
       "nativeModule/arkts_native_container_picker_bridge.cpp",
       "nativeModule/arkts_native_container_span_bridge.cpp",
-      "nativeModule/arkts_native_counter_bridge.cpp",
-      "nativeModule/arkts_native_data_panel_bridge.cpp",
       "nativeModule/arkts_native_date_picker_bridge.cpp",
       "nativeModule/arkts_native_divider_bridge.cpp",
       "nativeModule/arkts_native_flex_bridge.cpp",
       "nativeModule/arkts_native_frame_node_bridge.cpp",
-      "nativeModule/arkts_native_gauge_bridge.cpp",
       "nativeModule/arkts_native_grid_bridge.cpp",
       "nativeModule/arkts_native_grid_col_bridge.cpp",
       "nativeModule/arkts_native_grid_item_bridge.cpp",
       "nativeModule/arkts_native_grid_row_bridge.cpp",
-      "nativeModule/arkts_native_hyperlink_bridge.cpp",
       "nativeModule/arkts_native_image_animator_bridge.cpp",
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
@@ -261,9 +252,9 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
       "nativeModule/arkts_native_loading_progress_bridge.cpp",
-      "nativeModule/arkts_native_marquee_bridge.cpp",
       "nativeModule/arkts_native_menu_bridge.cpp",
       "nativeModule/arkts_native_menu_item_bridge.cpp",
+      "nativeModule/arkts_native_menu_item_group_bridge.cpp",
       "nativeModule/arkts_native_nav_destination_bridge.cpp",
       "nativeModule/arkts_native_nav_router_bridge.cpp",
       "nativeModule/arkts_native_navigation_bridge.cpp",
@@ -274,12 +265,9 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_panel_bridge.cpp",
       "nativeModule/arkts_native_particle_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
-      "nativeModule/arkts_native_pattern_lock_bridge.cpp",
       "nativeModule/arkts_native_polygon_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
       "nativeModule/arkts_native_progress_bridge.cpp",
-      "nativeModule/arkts_native_radio_bridge.cpp",
-      "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
       "nativeModule/arkts_native_refresh_bridge.cpp",
       "nativeModule/arkts_native_relative_container_bridge.cpp",
@@ -287,21 +275,15 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_resource_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
-      "nativeModule/arkts_native_row_split_bridge.cpp",
       "nativeModule/arkts_native_scroll_bridge.cpp",
       "nativeModule/arkts_native_scrollable_bridge.cpp",
       "nativeModule/arkts_native_scrollbar_bridge.cpp",
       "nativeModule/arkts_native_search_bridge.cpp",
       "nativeModule/arkts_native_select_bridge.cpp",
       "nativeModule/arkts_native_shape_bridge.cpp",
-      "nativeModule/arkts_native_side_bar_container_bridge.cpp",
-      "nativeModule/arkts_native_slider_bridge.cpp",
       "nativeModule/arkts_native_span_bridge.cpp",
       "nativeModule/arkts_native_stack_bridge.cpp",
-      "nativeModule/arkts_native_stepper_bridge.cpp",
-      "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
-      "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
       "nativeModule/arkts_native_symbol_span_bridge.cpp",
       "nativeModule/arkts_native_tabcontent_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
@@ -312,26 +294,17 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_text_timer_bridge.cpp",
       "nativeModule/arkts_native_textpicker_bridge.cpp",
       "nativeModule/arkts_native_theme_bridge.cpp",
-      "nativeModule/arkts_native_timepicker_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
-      "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
+      "utils/jsi_module_loader.cpp",
     ]
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       sources += [ "nativeModule/arkts_native_web_bridge.cpp" ]
-    }
-
-    if (!ace_engine_feature_wearable) {
-      sources += [ "nativeModule/arkts_native_folder_stack_bridge.cpp" ]
-    }
-
-    if (qrcodegen_support) {
-      sources += [ "nativeModule/arkts_native_qrcode_bridge.cpp" ]
     }
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]

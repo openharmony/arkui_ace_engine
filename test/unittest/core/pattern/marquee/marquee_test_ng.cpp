@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <string>
 
@@ -64,6 +65,7 @@ const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+constexpr int32_t INFINITE_LOOP = -1;
 } // namespace
 
 struct TestProperty {
@@ -226,7 +228,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest002, TestSize.Level1)
     bool needSecondPlay = false;
     pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
     pattern->OnAnimationFinish();
-    pattern->OnVisibleChange(needSecondPlay);
+    pattern->OnVisibleAreaChange(needSecondPlay);
     pattern->ChangeAnimationPlayStatus();
     pattern->StopMarqueeAnimation(needSecondPlay);
     AnimationUtils::PauseAnimation(pattern->animation_);
@@ -340,12 +342,12 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
      * @tc.steps: step6. update the loop and direction of marquee and call OnDirtyLayoutWrapperSwap function.
      * @tc.expected: step6. check whether the call is correct.
      */
-    marqueePaintProperty->UpdateLoop(-1);
+    marqueePaintProperty->UpdateLoop(INFINITE_LOOP);
     marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
-    EXPECT_EQ(marqueePaintProperty->GetLoop(), -1);
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), INFINITE_LOOP);
     EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::RIGHT);
     bool needSecondPlay = true;
-    pattern->OnVisibleChange(needSecondPlay);
+    pattern->OnVisibleAreaChange(needSecondPlay);
     pattern->measureChanged_ = true;
     frameNode->MarkDirtyNode();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);

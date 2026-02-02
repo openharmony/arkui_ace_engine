@@ -385,11 +385,11 @@ ArkUINativeModuleValue TabsBridge::SetTabOnUnselected(ArkUIRuntimeCallInfo* runt
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo* info)> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
             TAG_LOGW(AceLogTag::ACE_TABS, "Tabs  OnUnselected callback execute failed.");
@@ -430,12 +430,12 @@ ArkUINativeModuleValue TabsBridge::SetOnContentDidScroll(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, int32_t, float_t, float_t)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](int32_t selectedIndex, int32_t index,
-        float position, float mainAxisLength) {
+    std::function<void(int32_t, int32_t, float_t, float_t)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::NumberRef> selectedIndexParam = panda::NumberRef::New(vm, selectedIndex);
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> positionParam = panda::NumberRef::New(vm, position);
@@ -1189,6 +1189,40 @@ ArkUINativeModuleValue TabsBridge::ResetTabEdgeEffect(ArkUIRuntimeCallInfo* runt
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TabsBridge::SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    if (valueArg->IsNumber()) {
+        int32_t index = valueArg->Int32Value(vm);
+        int32_t values[1] = { 0 };
+        if (index < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+            index > static_cast<int32_t>(NestedScrollMode::SELF_FIRST)) {
+                index = 0;
+        }
+        values[0] = index;
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsNestedScroll(nativeNode, &values);
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsNestedScroll(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsNestedScroll(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TabsBridge::SetTabPageFlipMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1334,10 +1368,11 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnSelected(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
             TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onSelected callback execute failed.");
@@ -1411,8 +1446,9 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnChange(ArkUIRuntimeCallInfo* runtime
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(const BaseEventInfo* info)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                  const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
@@ -1422,7 +1458,7 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnChange(ArkUIRuntimeCallInfo* runtime
         }
         ACE_SCORING_EVENT("Tabs.onChange");
         ACE_SCOPED_TRACE("Tabs.onChange index %d", tabsInfo->GetIndex());
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, tabsInfo->GetIndex()) };
         func->Call(vm, func.ToLocal(), params, 1);
     };
@@ -1456,8 +1492,9 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnTabBarClick(ArkUIRuntimeCallInfo* ru
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(const BaseEventInfo* info)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                  const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
@@ -1466,7 +1503,7 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnTabBarClick(ArkUIRuntimeCallInfo* ru
             return;
         }
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, tabsInfo->GetIndex()) };
         func->Call(vm, func.ToLocal(), params, 1);
     };
@@ -1502,11 +1539,11 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnAnimationStart(ArkUIRuntimeCallInfo*
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(int32_t, int32_t, const AnimationCallbackInfo&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
             int32_t index, int32_t targetIndex, const AnimationCallbackInfo& extraInfo) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(frameWeakNode);
             panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
             panda::Local<panda::NumberRef> targetIndexParam = panda::NumberRef::New(vm, targetIndex);
             const char* keys[] = { "currentOffset", "targetOffset", "velocity" };
@@ -1548,10 +1585,11 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnAnimationEnd(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(int32_t, const AnimationCallbackInfo&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](int32_t index, const AnimationCallbackInfo& extraInfo) {
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        int32_t index, const AnimationCallbackInfo& extraInfo) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(frameWeakNode);
             panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
             const char* keys[] = { "currentOffset", "targetOffset", "velocity" };
             Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value_or(0.0f)),
@@ -1591,10 +1629,11 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnGestureSwipe(ArkUIRuntimeCallInfo* r
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(int32_t, const AnimationCallbackInfo&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](int32_t index, const AnimationCallbackInfo& extraInfo) {
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        int32_t index, const AnimationCallbackInfo& extraInfo) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(frameWeakNode);
             panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
             const char* keys[] = { "currentOffset", "targetOffset", "velocity" };
             Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value_or(0.0f)),
@@ -1633,11 +1672,11 @@ ArkUINativeModuleValue TabsBridge::SetTabsOnContentWillChange(ArkUIRuntimeCallIn
     }
 
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(int32_t, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                         int32_t currentIndex, int32_t comingIndex) -> bool {
+    std::function<bool(int32_t, int32_t)> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](int32_t currentIndex, int32_t comingIndex) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
 
         panda::Local<panda::NumberRef> currentIndexParam = panda::NumberRef::New(vm, currentIndex);
         panda::Local<panda::NumberRef> comingIndexParam = panda::NumberRef::New(vm, comingIndex);

@@ -137,6 +137,7 @@ public:
     static void RemovePopupItemBackground(FrameNode* frameNode);
     static void RemovePopupTitleBackground(FrameNode* frameNode);
     static void ChangeFlagForSetByUser(FrameNode* frameNode, std::string type, bool setByUser);
+    static void CreateStatic(std::vector<std::string>& indexerArray, int32_t selectedVal, bool isArc = false);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

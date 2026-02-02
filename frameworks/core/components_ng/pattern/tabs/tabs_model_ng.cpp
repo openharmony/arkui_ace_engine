@@ -58,8 +58,7 @@ constexpr int32_t TAB_BAR_Z_INDEX = 3;
 constexpr int32_t EFFECT_Z_INDEX = 1;
 } // namespace
 
-void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
-    const RefPtr<SwiperController>& swiperController)
+void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<SwiperController>& swiperController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -1175,6 +1174,32 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+}
+
+void TabsModelNG::SetNestedScroll(FrameNode* frameNode, int32_t nestedOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    NestedScrollOptions option;
+    option.forward = static_cast<NestedScrollMode>(nestedOpt);
+    option.backward = static_cast<NestedScrollMode>(nestedOpt);
+    swiperPattern->SetNestedScroll(option);
+}
+
+void TabsModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetNestedScroll(nestedOpt);
 }
 
 void TabsModelNG::SetTabBarIndex(FrameNode* frameNode, int32_t index)

@@ -74,13 +74,13 @@ import { ArkMarqueeNode } from './typedNode/ArkMarqueeNode'
 import { ArkSymbolGlyphNode } from './typedNode/ArkSymbolGlyphNode'
 import { ArkXComponentNode } from "./typedNode/ArkXComponentNode"
 import { ModifierType } from './typedNode/ArkCommonModifier'
-import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { ListOptions, ListAttribute, ArkListPeer, UIListEvent, UIListEventInternal } from './component/list'
 import { ListItemOptions, ListItemAttribute, ArkListItemPeer } from './component/listItem'
 import { ListItemGroupOptions, ListItemGroupAttribute, ArkListItemGroupPeer } from './component/listItemGroup'
-import { Scroller, ScrollAttribute, ArkScrollPeer } from './component/scroll'
-import { GridLayoutOptions, GridAttribute, ArkGridPeer } from './component/grid'
+import { Scroller, ScrollAttribute, ArkScrollPeer, UIScrollEvent, UIScrollEventInternal } from './component/scroll'
+import { GridLayoutOptions, GridAttribute, ArkGridPeer, UIGridEvent, UIGridEventInternal } from './component/grid'
 import { GridItemOptions, GridItemAttribute, ArkGridItemPeer } from './component/gridItem'
-import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer } from './component/waterFlow'
+import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer, UIWaterFlowEvent, UIWaterFlowEventInternal } from './component/waterFlow'
 import { FlowItemAttribute, ArkFlowItemPeer } from './component/flowItem'
 import { ColumnOptions, ColumnOptionsV2, ColumnAttribute, ArkColumnPeer } from './component/column'
 import { RowOptions, RowOptionsV2, RowAttribute, ArkRowPeer } from './component/row'
@@ -103,13 +103,13 @@ import { DividerAttribute, ArkDividerPeer } from './component/divider'
 import { BlankAttribute, ArkBlankPeer } from './component/blank'
 import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
 import { SwiperController, SwiperAttribute, ArkSwiperPeer } from './component/swiper'
-import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
-import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
-import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
+import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer, TextAreaController } from './component/textArea'
+import { TextInputOptions, TextInputAttribute, ArkTextInputPeer, TextInputController } from './component/textInput'
+import { TextOptions, TextAttribute, ArkTextPeer, TextController } from './component/text'
 import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
 import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
-import { XComponentType, AnimationPropertyType } from './component/enums'
+import { XComponentType, AnimationPropertyType, EventQueryType } from './component/enums'
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
@@ -125,6 +125,12 @@ import { Vector2 } from "./Graphics.ets"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
+}
+export interface InteractionEventBindingInfo {
+    baseEventRegistered: boolean;
+    nodeEventRegistered: boolean;
+    nativeEventRegistered: boolean;
+    builtInEventRegistered: boolean;
 }
 export interface LayoutConstraint {
     maxSize: Size;
@@ -165,6 +171,14 @@ export enum ExpandMode {
     EXPAND = 1,
     LAZY_EXPAND = 2,
 }
+export enum UIState {
+    NORMAL = 0,
+    PRESSED = 1 << 0,
+    FOCUSED = 1 << 1,
+    DISABLED = 1 << 2,
+    SELECTED = 1 << 3
+}
+export type UIStatesChangeHandler = (node: FrameNode, currentUIStates: int) => void;
 export class FrameNodeFinalizationRegisterProxy {
     constructor() { }
     public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
@@ -226,7 +240,7 @@ export class FrameNode implements MaterializedBase {
     get gestureEvent(): UIGestureEvent {
         if (this._gestureEvent === undefined) {
             this._gestureEvent = new UIGestureEvent();
-            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this.peer!.ptr as KPointer));
+            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this._nodeId));
         }
         return this._gestureEvent as UIGestureEvent;
     }
@@ -365,6 +379,9 @@ export class FrameNode implements MaterializedBase {
         return node;
     }
     public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
+        if (this.isDisposed()) {
+            return null;
+        }
         let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
             expand_casted = expandMode;
@@ -458,6 +475,9 @@ export class FrameNode implements MaterializedBase {
         this.nodePtr_ = undefined;
         this.renderNode_?.resetNodePtr();
     }
+    public isDisposed(): boolean {
+        return (this.nodePtr_ == undefined);
+    }
     public resetNodePtr(): void {
         if (this.peer?.ptr) {
             this.peer?.close();
@@ -474,6 +494,9 @@ export class FrameNode implements MaterializedBase {
     }
     public getPositionToScreen(): NodePosition {
         return FrameNodeExtender.getPositionToScreen(this);
+    }
+    public getGlobalPositionOnDisplay(): NodePosition {
+        return FrameNodeExtender.getGlobalPositionOnDisplay(this);
     }
     public getPositionToWindow(): NodePosition {
         return FrameNodeExtender.getPositionToWindow(this);
@@ -574,8 +597,29 @@ export class FrameNode implements MaterializedBase {
     public invalidate(): void {
         FrameNodeExtender.invalidate(this);
     };
+    public disposeTreeRecursively(): void {
+        let theChildCount = this.getChildrenCount();
+        for (let i = 0;i < theChildCount; i++) {
+            const childI = this.getChild(i);
+            if (childI) {
+                childI.disposeTreeRecursively();
+            }
+        }
+        this.nodePtr_ = undefined;
+    }
     public disposeTree(): void {
+        this.disposeTreeRecursively();
         FrameNodeExtender.disposeTree(this);
+    };
+    public addSupportedUIStates(uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean | undefined): void {
+        let exclude_casted: boolean = false;
+        if (excludeInner !== undefined && excludeInner !== null) {
+            exclude_casted = excludeInner;
+        }
+        FrameNodeExtender.addSupportedUIStates(this, uiStates, statesChangeHandler, exclude_casted);
+    };
+    public removeSupportedUIStates(uiStates: int32): void {
+        FrameNodeExtender.removeSupportedUIStates(this, uiStates);
     };
     public setCrossLanguageOptions(options: CrossLanguageOptions): void {
         let errorMessage: string = 'The FrameNode cannot be set whether to support cross-language common attribute setting.';
@@ -604,12 +648,20 @@ export class FrameNode implements MaterializedBase {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
         throw new BusinessError(100025, error);
     }
+    if (this.isDisposed()) {
+        const error = Error('The current node has been disposed.');
+        throw new BusinessError(100026, error);
+    }
     if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
         const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
+    }
+    if (child.isDisposed()) {
+        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
         throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
@@ -625,12 +677,20 @@ export class FrameNode implements MaterializedBase {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
         throw new BusinessError(100025, error);
     }
+    if (this.isDisposed()) {
+        const error = Error('The current node has been disposed.');
+        throw new BusinessError(100026, error);
+    }
     if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
         const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
+    }
+    if (child.isDisposed()) {
+        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
         throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
@@ -683,6 +743,14 @@ export class FrameNode implements MaterializedBase {
     public recycle(): void {
         FrameNodeExtender.recycle(this)
         return
+    }
+    public getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo | undefined {
+        const info = FrameNodeExtender.getInteractionEventBindingInfo_serialize(this, eventType);
+        if (!info || (!info.baseEventRegistered && !info.nodeEventRegistered &&
+            !info.nativeEventRegistered && !info.builtInEventRegistered)) {
+            return undefined;
+        }
+        return info;
     }
     public createAnimation(property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
         const property_casted = property as (AnimationPropertyType)
@@ -769,18 +837,24 @@ export class FrameNode implements MaterializedBase {
             const error = Error("The parameter 'positionByLocal' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
             throw new BusinessError(401, error);
         }
-        if (this.nodePtr_ == undefined) {
+        if (this.nodePtr_ === undefined) {
             const error = Error("The current FrameNode has been disposed.");
-            throw new BusinessError(10026, error);
+            throw new BusinessError(100026, error);
         }
         const instanceId = this.instanceId_!.toInt();
         let channels: Array<number> = [];
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
         channels = FrameNodeExtender.convertPositionToWindow(this, positionByLocal);
         ArkUIAniModule._Common_Restore_InstanceId();
-        if (channels.length < 3 || channels[0] === 0) {
-            const error = new Error("The current FrameNode is not on the main tree.");
-            throw new BusinessError(10028, error);
+        if (channels.length < 3) {
+            if(channels[0] === 0) {
+                const error = new Error("The parameter has error!");
+                throw new BusinessError(401, error);
+            }
+            if(channels[0] === 2) {
+                const error = new Error("The current FrameNode is not on the main tree.");
+                throw new BusinessError(100028, error);
+            }
         }
         const x = channels[1];
         const y = channels[2];
@@ -795,18 +869,24 @@ export class FrameNode implements MaterializedBase {
             const error = Error("The parameter 'positionByWindow' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
             throw new BusinessError(401, error);
         }
-        if (this.nodePtr_ == undefined) {
+        if (this.nodePtr_ === undefined) {
             const error = Error("The current FrameNode has been disposed.");
-            throw new BusinessError(10026, error);
+            throw new BusinessError(100026, error);
         }
         const instanceId = this.instanceId_!.toInt();
         let channels: Array<number> = [];
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
         channels = FrameNodeExtender.convertPositionFromWindow(this, positionByWindow);
         ArkUIAniModule._Common_Restore_InstanceId();
-        if (channels.length < 3 || channels[0] === 0) {
-            const error = new Error("The current FrameNode is not on the main tree.");
-            throw new BusinessError(10028, error);
+        if (channels.length < 3) {
+            if(channels[0] === 0) {
+                const error = new Error("The parameter has error!");
+                throw new BusinessError(401, error);
+            }
+            if(channels[0] === 2) {
+                const error = new Error("The current FrameNode is not on the main tree.");
+                throw new BusinessError(100028, error);
+            }
         }
         const x = channels[1];
         const y = channels[2];
@@ -816,6 +896,10 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.isOnRenderTree(this);
     }
     public isOnMainTree(): boolean {
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed. Code: 100026");
+            throw new BusinessError(100026, error);
+        }
         return FrameNodeExtender.isOnMainTree(this);
     }
       public invalidateAttributes(): void {
@@ -1446,6 +1530,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getColumnAttribute(node: FrameNode): ColumnAttribute | undefined {
+        if (node.getType() !== 'Column') {
+            return undefined
+        }
+        let columnNode = node as ColumnFrameNode
+        if (columnNode !== undefined) {
+            return columnNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createRowNode(context: UIContext): RowFrameNode {
         return new RowFrameNode(context, 'Row', (node: FrameNode, type: ModifierType): ArkRowNode => {
             let arknode = new ArkRowNode();
@@ -1454,6 +1550,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getRowAttribute(node: FrameNode): RowAttribute | undefined {
+        if (node.getType() !== 'Row') {
+            return undefined
+        }
+        let rowNode = node as RowFrameNode
+        if (rowNode !== undefined) {
+            return rowNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1468,6 +1576,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getStackAttribute(node: FrameNode): StackAttribute | undefined {
+        if (node.getType() !== 'Stack') {
+            return undefined
+        }
+        let stackNode = node as StackFrameNode
+        if (stackNode !== undefined) {
+            return stackNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createFlexNode(context: UIContext): FlexFrameNode {
         return new FlexFrameNode(context, 'Flex', (node: FrameNode, type: ModifierType): ArkFlexNode => {
             let arknode = new ArkFlexNode();
@@ -1476,6 +1596,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getFlexAttribute(node: FrameNode): FlexAttribute | undefined {
+        if (node.getType() !== 'Flex') {
+            return undefined
+        }
+        let flexNode = node as FlexFrameNode
+        if (flexNode !== undefined) {
+            return flexNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1534,6 +1666,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getRelativeContainerAttribute(node: FrameNode): RelativeContainerAttribute | undefined {
+        if (node.getType() !== 'RelativeContainer') {
+            return undefined
+        }
+        let relativeContainerNode = node as RelativeContainerFrameNode
+        if (relativeContainerNode !== undefined) {
+            return relativeContainerNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createListNode(context: UIContext): ListFrameNode {
         return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
             let arknode = new ArkListNode();
@@ -1542,6 +1686,46 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getListAttribute(node: FrameNode): ListAttribute | undefined {
+        if (node.getType() !== 'List') {
+            return undefined
+        }
+        let listNode = node as ListFrameNode
+        if (listNode !== undefined) {
+            return listNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getListEvent(node: FrameNode): UIListEvent | undefined {
+        if (node.getNodeType() !== 'List') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIListEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindListController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'List') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let listNode = node as ListFrameNode
+        if (!listNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        listNode.initialize({scroller: controller})
+        return
     }
 
     // @ts-ignore
@@ -1556,6 +1740,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getListItemAttribute(node: FrameNode): ListItemAttribute | undefined {
+        if (node.getType() !== 'ListItem') {
+            return undefined
+        }
+        let listItemNode = node as ListItemFrameNode
+        if (listItemNode !== undefined) {
+            return listItemNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createListItemGroupNode(context: UIContext): ListItemGroupFrameNode {
         return new ListItemGroupFrameNode(context, 'ListItemGroup', (node: FrameNode, type: ModifierType): ArkListItemGroupNode => {
             let arknode = new ArkListItemGroupNode();
@@ -1564,6 +1760,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getListItemGroupAttribute(node: FrameNode): ListItemGroupAttribute | undefined {
+        if (node.getType() !== 'ListItemGroup') {
+            return undefined
+        }
+        let listItemGroupNode = node as ListItemGroupFrameNode
+        if (listItemGroupNode !== undefined) {
+            return listItemGroupNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1578,6 +1786,46 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getScrollAttribute(node: FrameNode): ScrollAttribute | undefined {
+        if (node.getType() !== 'Scroll') {
+            return undefined
+        }
+        let scrollNode = node as ScrollFrameNode
+        if (scrollNode !== undefined) {
+            return scrollNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getScrollEvent(node: FrameNode): UIScrollEvent | undefined {
+        if (node.getNodeType() !== 'Scroll') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIScrollEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindScrollController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Scroll') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let scrollNode = node as ScrollFrameNode
+        if (!scrollNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        scrollNode.initialize(controller)
+        return
+    }
+
+    // @ts-ignore
     export function createGridNode(context: UIContext): GridFrameNode {
         return new GridFrameNode(context, 'Grid', (node: FrameNode, type: ModifierType): ArkGridNode => {
             let arknode = new ArkGridNode();
@@ -1586,6 +1834,48 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getGridAttribute(node: FrameNode): GridAttribute | undefined {
+        if (node.getType() !== 'Grid') {
+            return undefined
+        }
+        let gridNode = node as GridFrameNode
+        if (gridNode !== undefined) {
+            return gridNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getGridEvent(node: FrameNode): UIGridEvent | undefined {
+        if (node.getNodeType() !== 'Grid') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIGridEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindGridController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Grid') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let gridNode = node as GridFrameNode
+        if (!gridNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        let arkGridNode = gridNode.attribute as ArkGridNode;
+        arkGridNode.getPeer()?.setGridOptionsAttribute(controller, undefined)
+        arkGridNode.markDirty()
+        return
     }
 
     // @ts-ignore
@@ -1600,6 +1890,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getGridItemAttribute(node: FrameNode): GridItemAttribute | undefined {
+        if (node.getType() !== 'GridItem') {
+            return undefined
+        }
+        let gridItemNode = node as GridItemFrameNode
+        if (gridItemNode !== undefined) {
+            return gridItemNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createWaterFlowNode(context: UIContext): WaterFlowFrameNode {
         return new WaterFlowFrameNode(context, 'WaterFlow', (node: FrameNode, type: ModifierType): ArkWaterFlowNode => {
             let arknode = new ArkWaterFlowNode();
@@ -1611,6 +1913,46 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getWaterFlowAttribute(node: FrameNode): WaterFlowAttribute | undefined {
+        if (node.getType() !== 'WaterFlow') {
+            return undefined
+        }
+        let waterFlowNode = node as WaterFlowFrameNode
+        if (waterFlowNode !== undefined) {
+            return waterFlowNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getWaterFlowEvent(node: FrameNode): UIWaterFlowEvent | undefined {
+        if (node.getNodeType() !== 'WaterFlow') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIWaterFlowEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindWaterFlowController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'WaterFlow') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let waterFlowNode = node as WaterFlowFrameNode
+        if (!waterFlowNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        waterFlowNode.initialize({scroller: controller})
+        return
+    }
+
+    // @ts-ignore
     export function createFlowItemNode(context: UIContext): FlowItemFrameNode {
         return new FlowItemFrameNode(context, 'FlowItem', (node: FrameNode, type: ModifierType): ArkFlowItemNode => {
             let arknode = new ArkFlowItemNode();
@@ -1619,6 +1961,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    function getFlowItemAttribute(node: FrameNode): FlowItemAttribute | undefined {
+        if (node.getType() !== 'FlowItem') {
+            return undefined
+        }
+        let flowItemNode = node as FlowItemFrameNode
+        if (flowItemNode !== undefined) {
+            return flowItemNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1655,6 +2009,33 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getTextAreaAttribute(node: FrameNode): TextAreaAttribute | undefined {
+        if (node.getType() !== 'TextArea') {
+            return undefined
+        }
+        let textAreaNode = node as TextAreaFrameNode
+        if (textAreaNode !== undefined) {
+            return textAreaNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindTextAreaController(node: FrameNode, controller: TextAreaController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextArea') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let textAreaNode = node as TextAreaFrameNode
+        if (!textAreaNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        textAreaNode.initialize({controller: controller})
+        return
+    }
+
+    // @ts-ignore
     function createTextInputNode(context: UIContext): TextInputFrameNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
@@ -1666,6 +2047,33 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getTextInputAttribute(node: FrameNode): TextInputAttribute | undefined {
+        if (node.getType() !== 'TextInput') {
+            return undefined
+        }
+        let textInputNode = node as TextInputFrameNode
+        if (textInputNode !== undefined) {
+            return textInputNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindTextInputController(node: FrameNode, controller: TextInputController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextInput') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let textInputNode = node as TextInputFrameNode
+        if (!textInputNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        textInputNode.initialize({controller: controller})
+        return
+    }
+
+    // @ts-ignore
     function createTextNode(context: UIContext): TextFrameNode {
         return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
             let arknode = new ArkTextNode();
@@ -1674,6 +2082,34 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+
+    // @ts-ignore
+    export function getTextAttribute(node: FrameNode): TextAttribute | undefined {
+        if (node.getType() !== 'Text') {
+            return undefined
+        }
+        let textNode = node as TextFrameNode
+        if (textNode !== undefined) {
+            return textNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindTextController(node: FrameNode, controller: TextController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Text') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let textNode = node as TextFrameNode
+        if (!textNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        textNode.initialize(undefined, {controller: controller})
+        return
     }
 
     class ArkMarqueePeerCustom extends ArkMarqueePeer {
@@ -1706,6 +2142,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    function getXComponentAttribute(node: FrameNode): XComponentAttribute | undefined {
+        if (node.getType() !== 'XComponent') {
+            return undefined
+        }
+        let xComponentNode = node as XComponentFrameNode
+        if (xComponentNode !== undefined) {
+            return xComponentNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1771,6 +2219,66 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    function getRadioAttribute(node: FrameNode): RadioAttribute | undefined {
+        if (node.getType() !== 'Radio') {
+            return undefined
+        }
+        let radioNode = node as RadioFrameNode
+        if (radioNode !== undefined) {
+            return radioNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getToggleAttribute(node: FrameNode): ToggleAttribute | undefined {
+        if (node.getType() !== 'Toggle') {
+            return undefined
+        }
+        let toggleNode = node as ToggleFrameNode
+        if (toggleNode !== undefined) {
+            return toggleNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getSliderAttribute(node: FrameNode): SliderAttribute | undefined {
+        if (node.getType() !== 'Slider') {
+            return undefined
+        }
+        let sliderNode = node as SliderFrameNode
+        if (sliderNode !== undefined) {
+            return sliderNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getButtonAttribute(node: FrameNode): ButtonAttribute | undefined {
+        if (node.getType() !== 'Button') {
+            return undefined
+        }
+        let buttonNode = node as ButtonFrameNode
+        if (buttonNode !== undefined) {
+            return buttonNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getCheckboxAttribute(node: FrameNode): CheckboxAttribute | undefined {
+        if (node.getType() !== "Checkbox") {
+            return undefined
+        }
+        let checkboxNode = node as CheckboxFrameNode
+        if (checkboxNode !== undefined) {
+            return checkboxNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createBadgeNode(context: UIContext): BadgeFrameNode {
         return new BadgeFrameNode(context, 'Badge', (node: FrameNode, type: ModifierType): ArkBadgeNode => {
             let arknode = new ArkBadgeNode();
@@ -1804,6 +2312,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getProgressAttribute(node: FrameNode): ProgressAttribute | undefined {
+        if (node.getType() !== 'Progress') {
+            return undefined
+        }
+        let progressNode = node as ProgressFrameNode
+        if (progressNode !== undefined) {
+            return progressNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createLoadingProgressNode(context: UIContext): LoadingProgressFrameNode {
         return new LoadingProgressFrameNode(context, 'LoadingProgress', (node: FrameNode, type: ModifierType): ArkLoadingProgressNode => {
             let arknode = new ArkLoadingProgressNode();
@@ -1812,6 +2332,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getLoadingProgressAttribute(node: FrameNode): LoadingProgressAttribute | undefined {
+        if (node.getType() !== 'Progress') {
+            return undefined
+        }
+        let loadingProgressNode = node as LoadingProgressFrameNode
+        if (loadingProgressNode !== undefined) {
+            return loadingProgressNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -2034,7 +2566,7 @@ export class NodeAdapter implements MaterializedBase {
         let result = new Array<FrameNode>();
         let nodes = ArkUIAniModule._NodeAdapter_GetAllItems(this.peer!.ptr!);
         if (nodes !== undefined) {
-            nodes.forEach((nodeId: number, index: number, arr: Array<number>) => {
+            nodes.forEach((nodeId: number, index: int, arr: Array<number>) => {
                 if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
                     let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
                     result.push(frameNode!);

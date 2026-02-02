@@ -38,8 +38,9 @@ public:
     ~StartingWindowLayoutHelper() = default;
 
     RefPtr<FrameNode> CreateStartingWindowNode(const Rosen::StartingWindowInfo& startingWindowInfo,
-        const std::string& bundleName, const std::string& moduleName);
+        const std::string& bundleName, const std::string& moduleName, bool syncLoadStartingWindow = false);
     void MeasureChildNode(const SizeF& parentSize);
+    static void SetImagePatternSyncLoad(const RefPtr<FrameNode>& node);
 
 private:
     void MeasureUpperAreaNode(
@@ -47,6 +48,7 @@ private:
     Rosen::StartingWindowInfo startingWindowInfo_;
     WeakPtr<FrameNode> upperAreaNode_;
     WeakPtr<FrameNode> brandNode_;
+    static bool syncLoad_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STARTING_WINDOW_LAYOUT_HELPER_H

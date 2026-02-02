@@ -15,11 +15,8 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("ressched_report_test") {
-  module_out_path = frameworks_test_output_path
-
   type = "pipeline"
-  module_name = "ace_engine"
-  module_output = "pipeline"
+  module_name = "DrawingSet-Rect"
   flutter_skia = true
 
   external_deps = [
@@ -81,6 +78,7 @@ ace_unittest("ressched_report_test") {
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
     "$ace_root/test/mock/core/common/mock_reporter.cpp",
     "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
+    "$ace_root/test/mock/core/common/mock_screen_lock_manager_ohos.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",

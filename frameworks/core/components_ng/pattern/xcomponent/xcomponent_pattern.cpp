@@ -18,9 +18,11 @@
 #include <cmath>
 #include <cstdlib>
 
+#include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
+#include "base/display_manager/display_manager.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -35,6 +37,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -48,6 +51,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "feature/anco_manager/rs_ext_node_operation.h"
+#include "screen_manager/screen_types.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "ui/rs_ui_context.h"
@@ -74,11 +78,46 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr char X_COMPONENT_COMPENSATION_ANGLE[] = "xcomponentCompensationAngle";
+const int32_t ROTATION_0 = 0;
+const int32_t ROTATION_90 = 90;
+const int32_t ROTATION_180 = 180;
+const int32_t ROTATION_270 = 270;
+constexpr char UNKNOWN[] = "0";
+constexpr char FULL[] = "1";
+constexpr char MAIN[] = "2";
+constexpr char SUB[] = "3";
+constexpr char COORDINATION[] = "4";
+#endif
 
 #if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
 const int TEXTURETYPE_XCOMPONENT = 1;
 #endif
 
+void SendStatisticEvent(RefPtr<FrameNode> frameNode, StatisticEventType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
+}
+
+void SendStatisticEvent(RefPtr<FrameNode> frameNode, std::list<StatisticEventType>& types)
+{
+    CHECK_NULL_VOID(!types.empty());
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    for (auto type : types) {
+        statisticEventReporter->SendEvent(type);
+    }
+    types.clear();
+}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -244,6 +283,7 @@ void XComponentPattern::RegisterTransformHintCallback(PipelineContext* context)
 
 void XComponentPattern::Initialize()
 {
+    ACE_UINODE_TRACE(GetHost());
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         InitSurface();
         InitEvent();
@@ -263,6 +303,7 @@ void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+    SendStatisticEvent(host, statisticEventTypes_);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
@@ -288,6 +329,9 @@ void XComponentPattern::OnAttachToMainTree()
     auto bundleName = pipelineContext->GetBundleName();
     PerfMonitor::GetPerfMonitor()->ReportSurface(renderSurface_->GetUniqueIdNum(), renderSurface_->GetPSurfaceName(),
         customNode->GetJSViewName(), bundleName.c_str(), getpid());
+    if (pipelineContext->GetXComponentDisplayConstraintEnabled()) {
+        host->RegisterNodeChangeListener();
+    }
 }
 
 void XComponentPattern::OnDetachFromMainTree()
@@ -310,10 +354,86 @@ void XComponentPattern::OnDetachFromMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
+    host->UnregisterNodeChangeListener();
 }
+
+#ifdef ENABLE_ROSEN_BACKEND
+std::string FoldDisplayModeToString(FoldDisplayMode foldDisplayMode)
+{
+    switch (foldDisplayMode) {
+        case FoldDisplayMode::UNKNOWN: return UNKNOWN;
+        case FoldDisplayMode::FULL: return FULL;
+        case FoldDisplayMode::MAIN: return MAIN;
+        case FoldDisplayMode::SUB: return SUB;
+        case FoldDisplayMode::COORDINATION: return COORDINATION;
+        default: return "0";
+    }
+}
+ 
+Rosen::ScreenRotation RotationIntToScreenRotation(int32_t rotation)
+{
+    switch (rotation) {
+        case ROTATION_0: return Rosen::ScreenRotation::ROTATION_0;
+        case ROTATION_90: return Rosen::ScreenRotation::ROTATION_90;
+        case ROTATION_180: return Rosen::ScreenRotation::ROTATION_180;
+        case ROTATION_270: return Rosen::ScreenRotation::ROTATION_270;
+        default: return Rosen::ScreenRotation::INVALID_SCREEN_ROTATION;
+    }
+}
+ 
+std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
+{
+    if (angleConfigJson == "") {
+        LOGE("UIContent set compensation angle empty");
+        return nullptr;
+    }
+    auto jsonConfig = JsonUtil::ParseJsonString(angleConfigJson);
+    if (jsonConfig == nullptr) {
+        LOGE("UIContent set compensasion angle %{public}s is invalid", angleConfigJson.c_str());
+        return nullptr;
+    }
+    auto angleConfig = jsonConfig->GetObject(X_COMPONENT_COMPENSATION_ANGLE);
+    if (angleConfig == nullptr) {
+        LOGE("UIContent can not get angle info from %{public}s", angleConfigJson.c_str());
+        return nullptr;
+    }
+    auto result = angleConfig->ToString();
+    LOGI("get angle info: %{public}s", result.c_str());
+    return JsonUtil::ParseJsonString(result);
+}
+ 
+void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
+    const std::string& xcomponentId)
+{
+#ifndef CROSS_PLATFORM
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(context);
+    std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
+    CHECK_NULL_VOID(rsSurfaceNode);
+    auto& angleConfigJsonStr = UIContent::GetXComponentCompensationAngle();
+    auto angleConfigJson = GetXComponentCompensationAngle(angleConfigJsonStr);
+    CHECK_NULL_VOID(angleConfigJson);
+    auto displyMode = FoldDisplayModeToString(foldDisplayMode);
+    int32_t rotationInt = angleConfigJson->GetInt(displyMode, -1);
+    auto rotation = RotationIntToScreenRotation(rotationInt);
+    if (rotation == Rosen::ScreenRotation::INVALID_SCREEN_ROTATION) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT,
+            "XComponent[%{public}s]'s can not get rotation FoldDisplayMode %{public}s angleConfig %{public}s",
+            xcomponentId.c_str(), displyMode.c_str(), angleConfigJson->ToString().c_str());
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s set rotation %{public}d",
+        xcomponentId.c_str(), rotationInt);
+    rsSurfaceNode->SetAppRotationCorrection(rotation);
+#endif
+}
+#endif
 
 void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 {
+    ACE_UINODE_TRACE(GetHost());
     renderContextForSurface_ = RenderContext::Create();
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
@@ -331,6 +451,9 @@ void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
     renderContextForSurface_->InitContext(false, param);
 
     renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+#ifdef ENABLE_ROSEN_BACKEND
+    SetCompensationAngleToRS(renderContextForSurface_, DisplayManager::GetInstance().GetFoldDisplayMode(), GetId());
+#endif
 }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -399,6 +522,69 @@ void XComponentPattern::RequestFocus()
     focusHub->RequestFocusImmediately();
 }
 #endif
+
+void XComponentPattern::PushType(StatisticEventType type)
+{
+    statisticEventTypes_.emplace_back(type);
+}
+
+void XComponentPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    if (context->GetXComponentDisplayConstraintEnabled()) {
+        AddLayoutTask();
+    }
+}
+
+void XComponentPattern::AddLayoutTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto displayWindowRect = pipeline->GetDisplayWindowRectInfo();
+
+    auto windowWidth = displayWindowRect.Width();
+    auto windowHeight = displayWindowRect.Height();
+
+    auto windowRelativeOffset = host->GetTransformRelativeOffset();
+
+    auto relativeOffsetX = windowRelativeOffset.GetX();
+    auto relativeOffsetY = windowRelativeOffset.GetY();
+    auto xcomponentWidth = drawSize_.Width();
+    auto xcomponentHeight = drawSize_.Height();
+
+    auto overlapWidth = fmin(windowWidth - relativeOffsetX, xcomponentWidth) - fmax(-relativeOffsetX, 0);
+    auto overlapHeight = fmin(windowHeight - relativeOffsetY, xcomponentHeight) - fmax(-relativeOffsetY, 0);
+    auto overlapOffsetX = fmax(-relativeOffsetX, 0);
+    auto overlapOffsetY = fmax(-relativeOffsetY, 0);
+
+    if (NearZero(surfaceSize_.Width()) || NearZero(surfaceSize_.Height())) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "xcLOG XComponent[%{public}s] surfaceSize is near zero, skip scaling.",
+            GetId().c_str());
+        return;
+    }
+
+    auto scaleX = overlapWidth / surfaceSize_.Width();
+    auto scaleY = overlapHeight / surfaceSize_.Height();
+    auto scale = std::min(scaleX, scaleY);
+
+    scale = std::max(scale, 0.0);
+
+    SizeF newSurfaceSize(surfaceSize_.Width() * scale, surfaceSize_.Height() * scale);
+    surfaceSize_ = newSurfaceSize;
+
+    surfaceOffset_.SetX((overlapWidth - surfaceSize_.Width()) / 2.0f + overlapOffsetX);
+    surfaceOffset_.SetY((overlapHeight - surfaceSize_.Height()) / 2.0f + overlapOffsetY);
+    paintRect_ = { surfaceOffset_, surfaceSize_ };
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetBounds(
+        paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+    handlingSurfaceRenderContext_->RequestNextFrame();
+}
 
 void XComponentPattern::OnAttachToFrameNode()
 {
@@ -595,6 +781,17 @@ void XComponentPattern::OnAttachContext(PipelineContext* context)
     if (!isTypedNode_) {
         InitializeAccessibility();
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    foldDisplayCallbackId_ = context->RegisterFoldDisplayModeChangedCallback(
+        [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto displyMode = FoldDisplayModeToString(foldDisplayMode);
+            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s FoldDisplayMode change to %{public}s",
+                pattern->GetId().c_str(), displyMode.c_str());
+            SetCompensationAngleToRS(pattern->renderContextForSurface_, foldDisplayMode, pattern->GetId());
+        });
+#endif
 }
 
 void XComponentPattern::OnDetachContext(PipelineContext* context)
@@ -604,6 +801,7 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     CHECK_NULL_VOID(host);
     UninitializeAccessibility(host.GetRawPtr());
     context->RemoveWindowStateChangedCallback(host->GetId());
+    context->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallbackId_);
 }
 
 void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -748,6 +946,7 @@ void XComponentPattern::NativeXComponentDispatchTouchEvent(
     const auto* callback = nativeXComponentImpl_->GetCallback();
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchTouchEvent);
+    LOG_CALLBACK(callback->DispatchTouchEvent);
     callback->DispatchTouchEvent(nativeXComponent_.get(), surface);
 }
 
@@ -1005,6 +1204,7 @@ void XComponentPattern::InitNativeNodeCallbacks()
         CHECK_NULL_VOID(host);
         host->AddChild(node);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SendStatisticEvent(host, StatisticEventType::XCOMPONENT_NATIVE_ATTACH_NATIVE_ROOT_NODE);
     };
 
     auto OnDetachRootNativeNode = [](void* container, void* root) {
@@ -1014,6 +1214,7 @@ void XComponentPattern::InitNativeNodeCallbacks()
         auto host = AceType::Claim(reinterpret_cast<NG::FrameNode*>(container));
         CHECK_NULL_VOID(host);
         host->RemoveChild(node);
+        SendStatisticEvent(host, StatisticEventType::XCOMPONENT_NATIVE_DETACH_NATIVE_ROOT_NODE);
     };
 
     nativeXComponentImpl_->registerNativeNodeCallbacks(
@@ -1260,6 +1461,7 @@ void XComponentPattern::HandleMouseHoverEvent(bool isHover)
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchHoverEvent);
+    LOG_CALLBACK(callback->DispatchHoverEvent);
     callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
@@ -1275,6 +1477,7 @@ void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXCompo
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchMouseEvent);
+    LOG_CALLBACK(callback->DispatchMouseEvent);
     callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
 }
 
@@ -1372,6 +1575,7 @@ void XComponentPattern::FireExternalEvent(
     RefPtr<NG::PipelineContext> context, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_NULL_VOID(context);
+    ACE_UINODE_TRACE(GetHost());
 #ifdef NG_BUILD
     auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
 #else
@@ -1783,6 +1987,7 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(callback->OnSurfaceCreated);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated[w:%f,h:%f]", GetId().c_str(), width, height);
+        LOG_CALLBACK(callback->OnSurfaceCreated);
         callback->OnSurfaceCreated(nativeXComponent_.get(), nativeWindow_);
     } else {
         auto host = GetHost();
@@ -1814,6 +2019,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
         CHECK_NULL_VOID(callback->OnSurfaceChanged);
         {
             ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceChanged[w:%f,h:%f]", GetId().c_str(), width, height);
+            LOG_CALLBACK(callback->OnSurfaceChanged);
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
@@ -1835,6 +2041,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
         CHECK_NULL_VOID(callback->OnSurfaceDestroyed);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceDestroyed", GetId().c_str());
         ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());
+        LOG_CALLBACK(callback->OnSurfaceDestroyed);
         callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
         nativeXComponentImpl_->SetSurface(nullptr);
     } else if (isTypedNode_) {

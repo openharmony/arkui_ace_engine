@@ -1319,10 +1319,11 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
     }
     bool hasValidContent = !toolBarNode->GetChildren().empty();
     toolBarNode->SetHasValidContent(hasValidContent);
-    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
+    bool needHideToolbar = toolBarNode->IsHideToolBar() || !hasValidContent;
+    rowProperty->UpdateVisibility(needHideToolbar ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems, MoreButtonOptions&& opt)
@@ -1951,10 +1952,11 @@ void NavigationModelNG::SetToolBarItems(FrameNode* frameNode, std::vector<NG::Ba
     }
     bool hasValidContent = !toolBarNode->GetChildren().empty();
     toolBarNode->SetHasValidContent(hasValidContent);
-    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
+    bool needHideToolbar = toolBarNode->IsHideToolBar() || !hasValidContent;
+    rowProperty->UpdateVisibility(needHideToolbar ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void NavigationModelNG::SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange)
@@ -3264,5 +3266,165 @@ void NavigationModelNG::SetBackButtonTitleResource(FrameNode* frameNode, std::st
     NavigationTitleUtil::SetAccessibility(backButtonNode, text);
     NavigationTitleUtil::SetBackButtonText(titleBarNode, text, "navigation.backButtonIcon.accessibilityText",
                                            resObj);
+}
+
+void NavigationModelNG::UpdateDividerVisibility(bool isVisible)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    UpdateDividerVisibility(navigationNode, isVisible);
+}
+
+void NavigationModelNG::UpdateDividerVisibility(FrameNode* frameNode, bool isShow)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navigationNode->GetDividerNode());
+    CHECK_NULL_VOID(dividerNode);
+    auto layoutProperty = dividerNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+}
+
+void NavigationModelNG::UpdateDefineColor(bool isDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, isDefined, frameNode);
+}
+
+void NavigationModelNG::UpdateDividerStartMargin(const CalcDimension& start, const RefPtr<ResourceObject>& startRes)
+{
+    auto navigationNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    UpdateDividerStartMargin(navigationNode, start, startRes);
+}
+
+void NavigationModelNG::UpdateDividerStartMargin(FrameNode* navigationNode,
+    const CalcDimension& start, const RefPtr<ResourceObject>& startRes)
+{
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerStartMargin, start, navigationNode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    std::string key = "navigation.dividerStyle.marginStart";
+    if (!startRes) {
+        navigationPattern->RemoveResObj(key);
+        return;
+    }
+    auto updateDividerStartFunc = [key, weakNode = AceType::WeakClaim(navigationNode)](
+        const RefPtr<ResourceObject>& res) {
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(weakNode.Upgrade());
+        CHECK_NULL_VOID(navigationNode);
+        auto pattern = navigationNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string startValue = pattern->GetResCacheMapByKey(key);
+        CalcDimension start = CalcDimension(0.0);
+        if (startValue.empty()) {
+            ResourceParseUtils::ParseResDimensionPx(res, start);
+            pattern->AddResCache(key, start.ToString());
+        } else {
+            StringUtils::StringToCalcDimensionNG(startValue, start);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerStartMargin, start, navigationNode);
+    };
+    navigationPattern->AddResObj(key, startRes, std::move(updateDividerStartFunc));
+}
+
+void NavigationModelNG::UpdateDividerEndMargin(const CalcDimension& end, const RefPtr<ResourceObject>& endRes)
+{
+    auto navigationNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    UpdateDividerEndMargin(navigationNode, end, endRes);
+}
+
+void NavigationModelNG::UpdateDividerEndMargin(FrameNode* frameNode, const CalcDimension& end,
+    const RefPtr<ResourceObject>& endRes)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerEndMargin, end, frameNode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    std::string key = "navigation.dividerStyle.marginEnd";
+    if (!endRes) {
+        navigationPattern->RemoveResObj(key);
+        return;
+    }
+    auto updateDividerEndFunc = [key, weakNode = AceType::WeakClaim(frameNode)](
+        const RefPtr<ResourceObject>& res) {
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(weakNode.Upgrade());
+        CHECK_NULL_VOID(navigationNode);
+        auto pattern = navigationNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string endValue = pattern->GetResCacheMapByKey(key);
+        CalcDimension end = CalcDimension(0.0);
+        if (endValue.empty()) {
+            ResourceParseUtils::ParseResDimensionPx(res, end);
+            pattern->AddResCache(key, end.ToString());
+        } else {
+            StringUtils::StringToCalcDimensionNG(endValue, end);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerEndMargin, end, navigationNode);
+    };
+    navigationPattern->AddResObj(key, endRes, std::move(updateDividerEndFunc));
+}
+
+void NavigationModelNG::UpdateDividerColor(const Color& color, const RefPtr<ResourceObject>& colorRes)
+{
+    UpdateDividerColor(ViewStackProcessor::GetInstance()->GetMainFrameNode(), color, colorRes);
+}
+
+void NavigationModelNG::UpdateDividerColor(FrameNode* frameNode, const Color& color,
+    const RefPtr<ResourceObject>& colorRes)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerColor, color, navigationNode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    std::string key = "navigation.dividerStyle.color";
+    if (!colorRes) {
+        navigationPattern->RemoveResObj(key);
+        return;
+    }
+    auto UpdateDividerColorFunc = [key, weakNode = AceType::WeakClaim(navigationNode)](
+        const RefPtr<ResourceObject>& res) {
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(weakNode.Upgrade());
+        CHECK_NULL_VOID(navigationNode);
+        auto pattern = navigationNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string colorValue = pattern->GetResCacheMapByKey(key);
+        Color color;
+        if (colorValue.empty()) {
+            ResourceParseUtils::ParseResColor(res, color);
+            pattern->AddResCache(key, color.ColorToString());
+        } else {
+            Color::ParseColorString(colorValue, color);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerColor, color, navigationNode);
+    };
+    navigationPattern->AddResObj(key, colorRes, std::move(UpdateDividerColorFunc));
+}
+
+void NavigationModelNG::ResetDividerStyle(FrameNode* frameNode)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, false, navigationNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerStartMargin, CalcDimension(0.0f),
+        navigationNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerEndMargin, CalcDimension(0.0f),
+        navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    UpdateDividerStartMargin(navigationNode, CalcDimension(0.0f), nullptr);
+    UpdateDividerEndMargin(navigationNode, CalcDimension(0.0f), nullptr);
 }
 } // namespace OHOS::Ace::NG

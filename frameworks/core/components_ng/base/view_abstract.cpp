@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -1704,6 +1705,40 @@ void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderWidthString = pattern->GetResCacheMapByKey("borderWidth");
+        CalcDimension borderWidth;
+        if (borderWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, borderWidth);
+            pattern->AddResCache("borderWidth", borderWidth.ToString());
+        } else {
+            borderWidth = StringUtils::StringToCalcDimension(borderWidthString);
+        }
+        BorderWidthProperty borderWidthProperty;
+        if (Negative(borderWidth.Value())) {
+            borderWidthProperty.SetBorderWidth(Dimension(0));
+        } else {
+            borderWidthProperty.SetBorderWidth(borderWidth);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        pattern->UpdateBorderResource();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -3779,8 +3814,59 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
+        auto outlineGradient = param->GetOutlineLinearGradient();
+        UpdatePopupBorderColorResource(outlineGradient, frameNode, true);
+        auto innerGradient = param->GetInnerBorderLinearGradient();
+        UpdatePopupBorderColorResource(innerGradient, frameNode, false);
     }
 #endif
+}
+
+void ViewAbstract::UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    int32_t index = 0;
+    for (const auto& objParam : gradientProperties.gradientColors) {
+        RefPtr<ResourceObject> resValueObj = objParam.gradientColorObj;
+        std::string keyValue = "popupborderColor" + std::to_string(index);
+        if (isOutlineGradient) {
+            keyValue = "popupOutlineColor" + std::to_string(index);
+        } else {
+            keyValue = "popupInnerlineColor" + std::to_string(index);
+        }
+        AddResObjWithCallBack(keyValue, resValueObj, index, frameNode, isOutlineGradient);
+        index++;
+    }
+}
+
+void ViewAbstract::AddResObjWithCallBack(
+    std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [index, key, isOutlineGradient, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(resObj);
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::FromString(color);
+        }
+        pattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
@@ -4357,7 +4443,8 @@ void ViewAbstract::DismissDialog()
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
         dialogPattern->OverlayDismissDialog(dialogNode);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
 }
 
@@ -5636,43 +5723,51 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     CHECK_NULL_VOID(renderContext);
     renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
-        auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
-        auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
-        auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weak.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pipeline = frameNode->GetContextWithCheck();
-            CHECK_NULL_VOID(pipeline);
-            auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
-            if (!materialTheme) {
-                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
-                return;
-            }
-            auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
-            if (!params) {
-                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
-                return;
-            }
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
-        };
-        if (SystemProperties::ConfigChangePerform()) {
-            auto pattern = frameNode->GetPattern();
-            CHECK_NULL_VOID(pattern);
-            updateFunc(nullptr);
-            if (materialType != MaterialType::NONE) {
-                RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-                pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
-            } else {
-                pattern->RemoveResObj("viewAbstract.uiMaterial");
-            }
+        ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    }
+}
+
+void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material)
+{
+    auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
+    auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+    auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        if (!materialTheme) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
+        auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+        if (!params) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
+            return;
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
+        pattern->OnUiMaterialParamUpdate(params.value());
+    };
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
         updateFunc(nullptr);
+        if (materialType != MaterialType::NONE) {
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+        } else {
+            pattern->RemoveResObj("viewAbstract.uiMaterial");
+        }
+        return;
     }
+    updateFunc(nullptr);
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -5888,6 +5983,15 @@ void ViewAbstract::SetUseEffect(bool useEffect, EffectType effectType)
     SetUseEffect(frameNode, useEffect, effectType);
 }
 
+void ViewAbstract::SetUseUnion(bool useUnion)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetUseUnion(frameNode, useUnion);
+}
+
 void ViewAbstract::SetFreeze(bool freeze)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -6074,6 +6178,19 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
+void ViewAbstract::SetAdaptiveGroup(bool isRenderGroup, bool adaptive)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& ctx = frameNode->GetRenderContext();
+    if (ctx) {
+        ctx->UpdateAdaptiveGroup(isRenderGroup, adaptive);
+    }
+}
+
 void ViewAbstract::SetExcludeFromRenderGroup(bool exclude)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -6151,6 +6268,47 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
 }
 
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+    const std::optional<Dimension>& radiusBottomRight)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radiusTopLeft;
+    borderRadius.radiusTopRight = radiusTopRight;
+    borderRadius.radiusBottomLeft = radiusBottomLeft;
+    borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+}
+
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderRadiusString = pattern->GetResCacheMapByKey("borderRadius");
+        CalcDimension borderRadius;
+        if (borderRadiusString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, borderRadius);
+            pattern->AddResCache("borderRadius", borderRadius.ToString());
+        } else {
+            borderRadius = StringUtils::StringToCalcDimension(borderRadiusString);
+        }
+        BorderRadiusProperty borderRadiusProperty;
+        borderRadiusProperty.SetRadius(borderRadius);
+        borderRadiusProperty.multiValued = false;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadiusProperty, frameNode);
+        pattern->UpdateBorderResource();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -6190,6 +6348,19 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
 }
 
+void ViewAbstract::SetBorderWidth(NG::FrameNode* frameNode, const std::optional<Dimension>& left,
+    const std::optional<Dimension>& right, const std::optional<Dimension>& top,
+    const std::optional<Dimension>& bottom)
+{
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = left;
+    borderWidth.rightDimen = right;
+    borderWidth.topDimen = top;
+    borderWidth.bottomDimen = bottom;
+    borderWidth.multiValued = true;
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+}
+
 void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -6221,6 +6392,33 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
 }
 
+void ViewAbstract::SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderColorString = pattern->GetResCacheMapByKey("borderColor");
+        Color borderColor;
+        if (borderColorString.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, borderColor);
+            pattern->AddResCache("borderColor", borderColor.ColorToString());
+        } else {
+            borderColor = Color::ColorFromString(borderColorString);
+        }
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(borderColor);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        pattern->UpdateBorderResource();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
 {
     CHECK_NULL_VOID(frameNode);
@@ -6242,6 +6440,15 @@ void ViewAbstract::UpdateLayoutPolicyProperty(FrameNode* frameNode, const Layout
     if (layoutProperty) {
         layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
         layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
+    }
+}
+
+void ViewAbstract::UpdateOnlyLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
     }
 }
 
@@ -6899,6 +7106,11 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
     }
 }
 
+void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnionEffect, useUnion, frameNode);
+}
+
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
     auto renderContext = frameNode->GetRenderContext();
@@ -7152,7 +7364,6 @@ void ViewAbstract::SetGroupDefaultFocus(FrameNode* frameNode, bool isSet)
 void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
 {
     CHECK_NULL_VOID(frameNode);
-    FREE_NODE_CHECK(frameNode, SetFocusable, frameNode, focusable);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(focusable);
@@ -7847,7 +8058,7 @@ ChainInfo ViewAbstract::GetChainStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, chainInfo);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), chainInfo);
-    layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
+    chainInfo = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
     if (chainInfo.direction.has_value()) {
         return chainInfo;
     }
@@ -8179,6 +8390,19 @@ void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLe
     ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
 }
 
+void ViewAbstract::SetEnableClickSoundEffect(bool enabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetEnableClickSoundEffect(enabled);
+}
+
+void ViewAbstract::SetEnableClickSoundEffect(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetEnableClickSoundEffect(enabled);
+}
+
 void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
     const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
@@ -8264,7 +8488,6 @@ void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
 {
-    FREE_NODE_CHECK(frameNode, SetOnClick, frameNode, std::move(clickEventFunc), distanceThreshold);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -8281,7 +8504,6 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
 
 void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
 {
-    FREE_NODE_CHECK(frameNode, SetOnClick, frameNode, std::move(clickEventFunc), distanceThreshold);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -10351,9 +10573,9 @@ void ViewAbstract::ResetResObj(const std::string& key)
 int32_t ViewAbstract::GetWindowWidthBreakpoint()
 {
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, -1);
+    CHECK_NULL_RETURN(container, -2); // container is null
     auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, -1);
+    CHECK_NULL_RETURN(window, -3); // window is null
     double density = PipelineBase::GetCurrentDensity();
     double width = 0.0;
     if (NearZero(density)) {
@@ -10379,9 +10601,9 @@ int32_t ViewAbstract::GetWindowWidthBreakpoint()
 int32_t ViewAbstract::GetWindowHeightBreakpoint()
 {
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, -1);
+    CHECK_NULL_RETURN(container, -2); // container is null
     auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, -1);
+    CHECK_NULL_RETURN(window, -3); // window is null
     auto width = window->GetCurrentWindowRect().Width();
     auto height = window->GetCurrentWindowRect().Height();
     auto aspectRatio = 0.0;

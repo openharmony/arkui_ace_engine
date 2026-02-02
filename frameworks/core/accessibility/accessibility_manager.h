@@ -358,7 +358,7 @@ public:
         isReg_ = state;
     }
 
-    int32_t GetTreeId() const
+    virtual int32_t GetTreeId(int32_t instanceId = -1)
     {
         return treeId_;
     }

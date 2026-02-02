@@ -26,36 +26,13 @@
 #include "ui/base/type_info_base.h"
 #include "ui/base/utils/type_definition.h"
 #include "ui/event/event_constants.h"
+#include "ui/base/event_source.h"
 
 namespace OHOS::Ace {
 
 using ConvertInfo = std::pair<UIInputEventType, UIInputEventType>;
 
 enum class KeyCode : int32_t;
-
-enum class SourceType : int32_t {
-    NONE = 0,
-    MOUSE = 1,
-    TOUCH = 2,
-    TOUCH_PAD = 3,
-    KEYBOARD = 4,
-    JOYSTICK = 5,
-    CROWN = 6,
-};
-
-enum class SourceTool : int32_t {
-    UNKNOWN = 0,
-    FINGER = 1,
-    PEN = 2,
-    RUBBER = 3,
-    BRUSH = 4,
-    PENCIL = 5,
-    AIRBRUSH = 6,
-    MOUSE = 7,
-    LENS = 8,
-    TOUCHPAD = 9,
-    JOYSTICK = 10,
-};
 
 struct EventTarget final {
     std::string id;
@@ -121,6 +98,16 @@ public:
     void SetTargetDisplayId(int32_t targetDisplayId)
     {
         targetDisplayId_ = targetDisplayId;
+    }
+
+    void SetEventId(int32_t eventId)
+    {
+        eventId_ = eventId;
+    }
+
+    int32_t GetEventId() const
+    {
+        return eventId_;
     }
 
     SourceType GetSourceDevice() const
@@ -309,6 +296,8 @@ protected:
     int64_t deviceId_ = 0;
     // Will be used in drag.
     int32_t targetDisplayId_ = 0;
+    // Used in event info manager
+    int32_t eventId_ = -1;
     bool stopPropagation_ = false;
     bool preventDefault_ = false;
     std::string patternName_;

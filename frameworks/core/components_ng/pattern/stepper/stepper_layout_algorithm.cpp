@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/stepper/stepper_layout_algorithm.h"
 
+#include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -210,11 +211,11 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
 void StepperLayoutAlgorithm::MeasureText(
     const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft)
 {
-    CHECK_NULL_VOID(layoutWrapper->GetHostTag() == std::string(V2::BUTTON_ETS_TAG));
+    CHECK_NULL_VOID(layoutWrapper->GetHostTag() == std::string(BUTTON_ETS_TAG));
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(rowWrapper->GetHostTag() == std::string(V2::ROW_ETS_TAG));
+    CHECK_NULL_VOID(rowWrapper->GetHostTag() == std::string(ROW_ETS_TAG));
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(isLeft ? 1 : 0);
-    CHECK_NULL_VOID(textWrapper->GetHostTag() == std::string(V2::TEXT_ETS_TAG));
+    CHECK_NULL_VOID(textWrapper->GetHostTag() == std::string(TEXT_ETS_TAG));
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

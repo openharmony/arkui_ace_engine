@@ -49,7 +49,7 @@ export class HomeTitle extends ViewV2 {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.height(56);
-            Row.width(618);
+            Row.width('100%');
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();

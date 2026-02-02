@@ -151,6 +151,19 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: animationControllerTest
+ * @tc.desc: Test the function ResetController of the class AnimatableMatrix4.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimatableMatrix4Test, AnimationControllerTest001, TestSize.Level1)
+{
+    AnimatableMatrix4 animatableMatrix4Obj1;
+    animatableMatrix4Obj1.ResetController();
+    animatableMatrix4Obj1.animationController_ = CREATE_ANIMATOR(nullptr);
+    EXPECT_NE(animatableMatrix4Obj1.animationController_, nullptr);
+}
+
+/**
  * @tc.name: AnimatableMatrix4Test005
  * @tc.desc: Test the function ResetAnimatableMatrix of the class AnimatableMatrix4.
  * @tc.type: FUNC

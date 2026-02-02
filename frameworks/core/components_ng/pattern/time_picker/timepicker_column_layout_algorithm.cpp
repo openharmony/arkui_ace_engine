@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -59,7 +60,10 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF frameSize = { -1.0f, -1.0f };
 
     uint32_t showCount = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto isFloatingWindow = container->IsFloatingWindow();
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE && !isFloatingWindow) {
         showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
 

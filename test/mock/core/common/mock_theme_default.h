@@ -18,7 +18,7 @@
 
 #include "gmock/gmock.h"
 
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT MockThemeDefault {

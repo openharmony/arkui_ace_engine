@@ -1414,4 +1414,269 @@ HWTEST_F(TextTestNgOne, TextContentModifierSetSymbolColor001, TestSize.Level1)
     EXPECT_EQ(resultColors->size(), 1);
     EXPECT_EQ((*resultColors)[0], LinearColor(Color::GREEN));
 }
+
+/**
+ * @tc.name: TextLayoutProperty01
+ * @tc.desc: test text_pattern.h CreateLayoutProperty function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, TextLayoutProperty01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<LayoutProperty> textLayoutProperty = textPattern->CreateLayoutProperty();
+    ASSERT_NE(textLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: SetClipEdge001
+ * @tc.desc: Test TextModelNG::SetClipEdge with clip=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetClipEdge with true.
+     * @tc.expected: ClipEdge property is updated to true, and SetClipToFrame is called.
+     */
+    textModelNG.SetClipEdge(true);
+
+    /**
+     * @tc.steps: step3. verify ClipEdge property is set correctly.
+     */
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), true);
+
+    /**
+     * @tc.steps: step4. verify renderContext exists.
+     */
+    EXPECT_NE(frameNode->GetRenderContext(), nullptr);
+}
+
+/**
+ * @tc.name: SetClipEdge002
+ * @tc.desc: Test TextModelNG::SetClipEdge with clip=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetClipEdge with false.
+     * @tc.expected: ClipEdge property is updated to false.
+     */
+    textModelNG.SetClipEdge(false);
+
+    /**
+     * @tc.steps: step3. verify ClipEdge property is set correctly.
+     */
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
+
+    /**
+     * @tc.steps: step4. verify renderContext exists.
+     */
+    EXPECT_NE(frameNode->GetRenderContext(), nullptr);
+}
+
+/**
+ * @tc.name: SetClipEdge003
+ * @tc.desc: Test TextModelNG::SetClipEdge with toggle between true and false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set ClipEdge to true.
+     */
+    textModelNG.SetClipEdge(true);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), true);
+
+    /**
+     * @tc.steps: step3. toggle ClipEdge to false.
+     * @tc.expected: ClipEdge property is updated to false.
+     */
+    textModelNG.SetClipEdge(false);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
+
+    /**
+     * @tc.steps: step4. toggle ClipEdge back to true.
+     * @tc.expected: ClipEdge property is updated to true.
+     */
+    textModelNG.SetClipEdge(true);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), true);
+}
+
+/**
+ * @tc.name: SetClipEdge004
+ * @tc.desc: Test TextModelNG::SetClipEdge default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. verify default ClipEdge value is false (not set).
+     * @tc.expected: ClipEdge should be nullopt or false by default.
+     */
+    bool clipEdgeValue = textLayoutProperty->GetClipEdgeValue(false);
+    EXPECT_EQ(clipEdgeValue, false);
+}
+
+/**
+ * @tc.name: SetClipEdge005
+ * @tc.desc: Test TextModelNG::SetClipEdge with different TextModelNG instances
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create first TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG1;
+    textModelNG1.Create(CREATE_VALUE_W);
+    auto frameNode1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode1, nullptr);
+    auto textLayoutProperty1 = frameNode1->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty1, nullptr);
+
+    /**
+     * @tc.steps: step2. set ClipEdge to true on first instance.
+     * @tc.expected: ClipEdge property is updated to true.
+     */
+    textModelNG1.SetClipEdge(true);
+    EXPECT_EQ(textLayoutProperty1->GetClipEdge(), true);
+
+    /**
+     * @tc.steps: step3. create second TextModelNG instance.
+     */
+    TextModelNG textModelNG2;
+    textModelNG2.Create(u"Second Text");
+    auto frameNode2 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode2, nullptr);
+    auto textLayoutProperty2 = frameNode2->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty2, nullptr);
+
+    /**
+     * @tc.steps: step4. set ClipEdge to false on second instance.
+     * @tc.expected: Each instance maintains its own ClipEdge value.
+     */
+    textModelNG2.SetClipEdge(false);
+    EXPECT_EQ(textLayoutProperty2->GetClipEdge(), false);
+    EXPECT_EQ(textLayoutProperty1->GetClipEdge(), true); // First instance unchanged
+}
+
+/**
+ * @tc.name: SetClipEdge006
+ * @tc.desc: Test TextModelNG::SetClipEdge with consecutive calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetClipEdge consecutively with alternating values.
+     * @tc.expected: ClipEdge property should update correctly each time.
+     */
+    textModelNG.SetClipEdge(true);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), true);
+
+    textModelNG.SetClipEdge(false);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
+
+    textModelNG.SetClipEdge(true);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), true);
+
+    textModelNG.SetClipEdge(false);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
+}
+
+/**
+ * @tc.name: SetClipEdge007
+ * @tc.desc: Test TextModelNG::SetClipEdge multiple times with same value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, SetClipEdge007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TextModelNG and frameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetClipEdge(true) multiple times.
+     * @tc.expected: should handle duplicate calls gracefully.
+     */
+    textModelNG.SetClipEdge(true);
+    textModelNG.SetClipEdge(true);
+    textModelNG.SetClipEdge(true);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), true);
+
+    /**
+     * @tc.steps: step3. call SetClipEdge(false) multiple times.
+     * @tc.expected: should handle duplicate calls gracefully.
+     */
+    textModelNG.SetClipEdge(false);
+    textModelNG.SetClipEdge(false);
+    EXPECT_EQ(textLayoutProperty->GetClipEdge(), false);
+}
 } // namespace OHOS::Ace::NG

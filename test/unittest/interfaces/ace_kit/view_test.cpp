@@ -246,5 +246,37 @@ HWTEST_F(ViewTest, LinearGradientBlurViewTest002, TestSize.Level1)
     EXPECT_EQ(graphicsProperty->CheckLinearGradientBlur(blurPara), true);
     EXPECT_EQ(graphicsProperty->GetLinearGradientBlurValue(), blurPara);
 }
+
+/**
+ * @tc.name: ScaleTest001
+ * @tc.desc: Test SetScale of view
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewTest, ScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize View.
+     * @tc.expected: All pointer is non-null.
+     */
+    View view;
+    auto node = AbstractViewFactory::CreateFrameNode("test", 0, AceType::MakeRefPtr<MockAceKitPattern>());
+    EXPECT_NE(node, nullptr);
+    view.node_ = node;
+ 
+    /**
+     * @tc.steps: Initialize scale parameters and SetScale
+     */
+    float x = 1.0f;
+    float y = 1.0f;
+    view.SetScale(x, y);
+ 
+    /**
+     * @tc.steps: call GetScale to verify scale is setted.
+     */
+    auto frameNode = reinterpret_cast<AceNode*>(node->GetHandle());
+    auto res = NG::ViewAbstract::GetScale(frameNode);
+    EXPECT_EQ(res.x, 1.0f);
+    EXPECT_EQ(res.y, 1.0f);
+}
 }
 

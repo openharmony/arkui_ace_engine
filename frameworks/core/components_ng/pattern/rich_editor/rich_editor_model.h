@@ -84,6 +84,8 @@ struct UpdateSpanStyle {
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
         updateUrlAddress.reset();
+        updateStrokeWidth.reset();
+        updateStrokeColor.reset();
 
         updateLineHeight.reset();
         updateHalfLeading.reset();
@@ -96,6 +98,7 @@ struct UpdateSpanStyle {
         marginProp.reset();
         borderRadius.reset();
         isInitDecoration = false;
+        strokeColorFollowFontColor = false;
 
         updateSymbolColor.reset();
         updateSymbolFontSize.reset();
@@ -116,6 +119,8 @@ struct UpdateSpanStyle {
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
+    std::optional<CalcDimension> updateStrokeWidth = std::nullopt;
+    std::optional<Color> updateStrokeColor = std::nullopt;
     std::optional<std::u16string> updateUrlAddress = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
@@ -131,6 +136,7 @@ struct UpdateSpanStyle {
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     bool isInitDecoration = false;
+    bool strokeColorFollowFontColor = false;
     
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<CalcDimension> updateSymbolFontSize = std::nullopt;
@@ -167,6 +173,13 @@ struct UpdateSpanStyle {
         }
     }
 
+    const RefPtr<ResourceObject>& GetResource(const std::string& key) const
+    {
+        static const RefPtr<ResourceObject> invalidResObj = nullptr;
+        auto iter = resMap_.find(key);
+        return iter == resMap_.end() ? invalidResObj : iter->second.resObj;
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -188,6 +201,7 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, strokeColorFollowFontColor);
         return jsonValue->ToString();
     }
 };
@@ -248,6 +262,7 @@ struct TextSpanOptions : SpanOptionBase {
     UserGestureOptions userGestureOption;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
+    bool strokeColorFollowFontColor = false;
 
     std::string ToString() const
     {
@@ -258,6 +273,7 @@ struct TextSpanOptions : SpanOptionBase {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paraStyle);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, strokeColorFollowFontColor);
         return jsonValue->ToString();
     }
 };
@@ -432,7 +448,8 @@ public:
     virtual void SetScrollBarColor(std::optional<Color> value) {};
     virtual void SetIncludeFontPadding(bool enabled) {};
     virtual void SetFallbackLineSpacing(bool enabled) {};
-    virtual void SetSingleLine(bool iaEnable) {};
+    virtual void SetSingleLine(bool enabled) {};
+    virtual void ResetSingleLine() {};
     virtual void SetSelectedDragPreviewStyle(const Color& value) {};
     virtual void ResetSelectedDragPreviewStyle() {};
 

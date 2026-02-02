@@ -343,5 +343,14 @@ bool FormRendererGroup::IsManagerDelegateValid(const OHOS::AAFwk::Want& want)
     }
     return formRenderer_->IsManagerDelegateValid(want);
 }
+
+void FormRendererGroup::SetUiContentParams(const OHOS::AAFwk::Want& want)
+{
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("SetUiContentParams failed, formRenderer is null");
+        return;
+    }
+    formRenderer_->SetUiContentParams(want);
+}
 }  // namespace Ace
 }  // namespace OHOS

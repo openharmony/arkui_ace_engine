@@ -769,8 +769,10 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
-        if (scrollEndCallback_) {
-            scrollEndCallback_();
+        if (!DragEndOverScroll()) {
+            if (scrollEndCallback_) {
+                scrollEndCallback_();
+            }
         }
         isDriving_ = false;
         SnapAnimationOptions snapAnimationOptions = {
@@ -789,7 +791,6 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         if (scrollBarOnDidStopDraggingCallback_) {
             scrollBarOnDidStopDraggingCallback_(isWillFling);
         }
-        DragEndOverScroll();
         return;
     }
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
@@ -809,8 +810,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         .animationVelocity = -velocity,
         .dragDistance = CalcPatternOffset(GetDragOffset()),
         .snapDirection = SnapDirection::NONE,
-        .fromScrollBar = !isTouchScreen_,
         .source = SCROLL_FROM_BAR,
+        .fromScrollBar = !isTouchScreen_,
     };
     if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
         isDriving_ = false;
@@ -876,11 +877,13 @@ void ScrollBar::CalcFlingVelocity(float offset)
     lastVsyncTime_ = currentVsync;
 }
 
-void ScrollBar::DragEndOverScroll()
+bool ScrollBar::DragEndOverScroll()
 {
     if (isTouchScreen_ && dragEndReachEdge_ && reachBarEdgeOverScroll_) {
         reachBarEdgeOverScroll_(.0f);
+        return true;
     }
+    return false;
 }
 
 void ScrollBar::ProcessFrictionMotionStop()
@@ -888,7 +891,7 @@ void ScrollBar::ProcessFrictionMotionStop()
     if (scrollBarOnDidStopFlingCallback_) {
         scrollBarOnDidStopFlingCallback_();
     }
-    if (scrollEndCallback_) {
+    if (scrollEndCallback_ && !(isTouchScreen_ && canOverScrollWithDelta_ && canOverScrollWithDelta_(.0f))) {
         scrollEndCallback_();
     }
     isDriving_ = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,19 +34,18 @@
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -69,7 +68,9 @@ SwiperModel* SwiperModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::SwiperModelNG());
             } else {
-                instance_.reset(new Framework::SwiperModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("swiper");
+                static SwiperModel* instance = loader ? reinterpret_cast<SwiperModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }
@@ -1516,6 +1517,10 @@ void JSSwiperController::JSBind(BindingTarget globalObj)
     JSClass<JSSwiperController>::CustomMethod("changeIndex", &JSSwiperController::ChangeIndex);
     JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::CustomMethod("preloadItems", &JSSwiperController::PreloadItems);
+    JSClass<JSSwiperController>::CustomMethod("startFakeDrag", &JSSwiperController::StartFakeDrag);
+    JSClass<JSSwiperController>::CustomMethod("fakeDragBy", &JSSwiperController::FakeDragBy);
+    JSClass<JSSwiperController>::CustomMethod("stopFakeDrag", &JSSwiperController::StopFakeDrag);
+    JSClass<JSSwiperController>::CustomMethod("isFakeDragging", &JSSwiperController::IsFakeDragging);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
 
@@ -1683,6 +1688,63 @@ void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
     }
 
     OldPreloadItems(args);
+}
+
+void JSSwiperController::StartFakeDrag(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (!controller_) {
+        auto retVal = JSRef<JSVal>::Make(ToJSValue(false));
+        args.SetReturnValue(retVal);
+        return;
+    }
+    bool ret = controller_->StartFakeDrag();
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(ret));
+    args.SetReturnValue(retVal);
+}
+
+void JSSwiperController::FakeDragBy(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (!controller_) {
+        auto retVal = JSRef<JSVal>::Make(ToJSValue(false));
+        args.SetReturnValue(retVal);
+        return;
+    }
+    if (!args[0]->IsNumber()) {
+        auto retVal = JSRef<JSVal>::Make(ToJSValue(false));
+        args.SetReturnValue(retVal);
+        return;
+    }
+    bool ret = controller_->FakeDragBy(args[0]->ToNumber<float>());
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(ret));
+    args.SetReturnValue(retVal);
+}
+
+void JSSwiperController::StopFakeDrag(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (!controller_) {
+        auto retVal = JSRef<JSVal>::Make(ToJSValue(false));
+        args.SetReturnValue(retVal);
+        return;
+    }
+    bool ret = controller_->StopFakeDrag();
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(ret));
+    args.SetReturnValue(retVal);
+}
+
+void JSSwiperController::IsFakeDragging(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (!controller_) {
+        auto retVal = JSRef<JSVal>::Make(ToJSValue(false));
+        args.SetReturnValue(retVal);
+        return;
+    }
+    bool ret = controller_->IsFakeDragging();
+    auto retVal = JSRef<JSVal>::Make(ToJSValue(ret));
+    args.SetReturnValue(retVal);
 }
 
 void JSSwiper::SetNestedScroll(const JSCallbackInfo& args)

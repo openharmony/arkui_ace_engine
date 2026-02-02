@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 
 // SequencedRecognizer identifies only single click events.
 // For long press and double click, see: LongPressRecognizer and DoubleClickRecognizer.
-class ACE_EXPORT SequencedRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT SequencedRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(SequencedRecognizer, MultiFingersRecognizer);
 
 public:

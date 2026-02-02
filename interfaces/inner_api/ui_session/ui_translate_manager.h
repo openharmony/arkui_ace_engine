@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "ui_session_json_util.h"
-
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {

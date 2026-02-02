@@ -14,11 +14,14 @@
  */
 
 import { DragEvent, DragPreviewOptions, ICurve, CustomBuilder, Callback, DragItemInfo } from 'arkui/framework'
+import { int64, int32 } from '@koalaui/common'
 import { TouchPoint, ResourceColor } from 'arkui/framework'
 import { Curve } from 'arkui/framework'
 import { UnifiedData, PixelMap } from "#external";
 import { ArkUIAniModule } from "arkui.ani"
 import { KPointer } from '@koalaui/interop';
+import { DragUtils } from '#generated'
+import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 export namespace dragController {
 
     export enum DragStatus {
@@ -49,10 +52,12 @@ export namespace dragController {
             this.className = className;
         }
         public clean(): void {
-            if (this.className == "DragAction") {
+            if (this.className === 'DragAction') {
                 ArkUIAniModule._DragController_cleanDragAction(this.ptr);
-            } else if (this.className == "DragPreview") {
+            } else if (this.className === 'DragPreview') {
                 ArkUIAniModule._DragController_cleanDragPreview(this.ptr);
+            } else if (this.className == "SpringLoadingContext") {
+                ArkUIAniModule._DragController_cleanSpringLoadingContext(this.ptr);
             }
         }
     }
@@ -72,7 +77,8 @@ export namespace dragController {
             this.registerCleaner(this.dragPreview)
         }
         public setForegroundColor(color: ResourceColor) {
-            ArkUIAniModule._DragController_setForegroundColor(color, this.dragPreview);
+            let colorValue : int64 = DragUtils.GetForegroundColorValue(color);
+            ArkUIAniModule._DragController_setForegroundColor(colorValue, this.dragPreview);
         }
         public animate(options: AnimationOptions, handler: () =>void) {
             ArkUIAniModule._DragController_animate(options, handler, this.dragPreview);
@@ -167,6 +173,113 @@ export namespace dragController {
         }
         unregisterCleaner(): void {
             destroyRegister.unregister(unregisterToken);
+        }
+    }
+
+    export enum DragSpringLoadingState {
+        BEGIN = 0,
+        UPDATE = 1,
+        END = 2,
+        CANCEL = 3
+    }
+
+    export interface DragSpringLoadingConfiguration {
+        stillTimeLimit?: int32;
+        updateInterval?: int32;
+        updateNotifyCount?: int32;
+        updateToFinishInterval?: int32;
+    }
+
+    export class DragSpringLoadingConfigurationInner implements DragSpringLoadingConfiguration {
+        _stillTimeLimit?: int32;
+        _updateInterval?: int32;
+        _updateNotifyCount?: int32;
+        _updateToFinishInterval?: int32;
+        constructor(stillTimeLimit: int32, updateInterval: int32, updateNotifyCount: int32, updateToFinishInterval: int32) {
+            this._stillTimeLimit = stillTimeLimit;
+            this._updateInterval = updateInterval;
+            this._updateNotifyCount = updateNotifyCount;
+            this._updateToFinishInterval = updateToFinishInterval;
+        }
+        set stillTimeLimit(value: int32 | undefined) {
+            this._stillTimeLimit = value;
+        }
+        get stillTimeLimit() : int32 | undefined {
+            return this._stillTimeLimit;
+        }
+        set updateInterval(value: int32 | undefined) {
+            this._updateInterval = value;
+        }
+        get updateInterval() : int32 | undefined {
+            return this._updateInterval;
+        }
+        set updateNotifyCount(value: int32 | undefined) {
+            this._updateNotifyCount = value;
+        }
+        get updateNotifyCount() : int32 | undefined {
+            return this._updateNotifyCount;
+        }
+        set updateToFinishInterval(value: int32 | undefined) {
+            this._updateToFinishInterval = value;
+        }
+        get updateToFinishInterval() : int32 | undefined {
+            return this._updateToFinishInterval;
+        }
+    }
+
+    export interface SpringLoadingDragInfos {
+        dataSummary?: unifiedDataChannel.Summary;
+        extraInfos?: string;
+    }
+
+    export class SpringLoadingDragInfosInner implements SpringLoadingDragInfos {
+        _dataSummary?: unifiedDataChannel.Summary;
+        _extraInfos?: string;
+        constructor(stillTimeLimit?: unifiedDataChannel.Summary, extraInfos?: string) {
+            this._dataSummary = stillTimeLimit;
+            this._extraInfos = extraInfos;
+        }
+        set dataSummary(value: unifiedDataChannel.Summary | undefined) {
+            this._dataSummary = value;
+        }
+        get dataSummary() : unifiedDataChannel.Summary | undefined {
+            return this._dataSummary;
+        }
+        set extraInfos(value: string | undefined) {
+            this._extraInfos = value;
+        }
+        get extraInfos() : string | undefined {
+            return this._extraInfos;
+        }
+    }
+    
+    export class SpringLoadingContext {
+        state: DragSpringLoadingState;
+        currentNotifySequence: int32;
+        dragInfos?: SpringLoadingDragInfos;
+        currentConfig?: DragSpringLoadingConfiguration;
+        peer: KPointer;
+        private cleaner: Cleaner | null = null;
+        constructor(result:KPointer) {
+            this.peer = result;
+            this.registerCleaner(this.peer)
+            this.state = ArkUIAniModule._DragSpringLoadingContext_get_state(this.peer)
+            this.currentNotifySequence = ArkUIAniModule._DragSpringLoadingContext_get_currentNotifySequence(this.peer)
+            this.dragInfos = ArkUIAniModule._DragSpringLoadingContext_get_dragInfos(this.peer)
+            this.currentConfig = ArkUIAniModule._DragSpringLoadingContext_get_currentConfig(this.peer)
+        }
+        registerCleaner(ptr: KPointer) {
+            this.cleaner = new Cleaner("SpringLoadingContext", ptr);
+            destroyRegister.register(this, this.cleaner!, unregisterToken);
+        }
+        unregisterCleaner() {
+            destroyRegister.unregister(unregisterToken);
+        }
+        public abort():void {
+            ArkUIAniModule._DragSpringLoadingContext_abort(this.peer)
+        }
+        public updateConfiguration(config: DragSpringLoadingConfiguration) {
+            ArkUIAniModule._DragSpringLoadingContext_updateConfiguration(this.peer, config)
         }
     }
 }

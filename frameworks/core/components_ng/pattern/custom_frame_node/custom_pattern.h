@@ -16,16 +16,34 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_FRAME_NODE_CUSTOM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_FRAME_NODE_CUSTOM_PATTERN_H
 
+#include <cstdint>
+#include <memory>
+
+#include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
+
+struct ArkUI_AccessibilityProvider;
+
+namespace OHOS::Ace {
+class AccessibilityChildTreeCallback;
+class AccessibilityManager;
+class AccessibilityProvider;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class AccessibilitySessionAdapter;
+class FrameNode;
+class PipelineContext;
+class VerticalOverflowHandler;
 
 class ACE_EXPORT CustomPattern : public Pattern {
     DECLARE_ACE_TYPE(CustomPattern, Pattern);
 
 public:
-    CustomPattern() = default;
-    ~CustomPattern() override = default;
+    CustomPattern();
+    ~CustomPattern() override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -36,10 +54,38 @@ public:
         return { focusHub->GetFocusType(), focusHub->GetFocusable() };
     }
 
-    bool ReusedNodeSkipMeasure() override
+    bool ReusedNodeSkipMeasure() override;
+    ArkUI_AccessibilityProvider* GetNativeAccessibilityProvider();
+    void InitializeAccessibility(PipelineContext* context);
+    void UninitializeAccessibility(FrameNode* frameNode, PipelineContext* context);
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
+    bool OnAccessibilityChildTreeDeregister(FrameNode* frameNode = nullptr);
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    void InitializeAccessibilityCallback();
+    void HandleRegisterAccessibilityEvent(bool isRegister);
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
+
+    RefPtr<EventHub> CreateEventHub() override;
+
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override;
+
+    void DumpInfo() override;
+
+    bool GetIsVertical() const override
     {
-        return AceApplicationInfo::GetInstance().IsReusedNodeSkipMeasure();
+        return true;
     }
+
+private:
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext* context) override;
+    std::shared_ptr<ArkUI_AccessibilityProvider> arkuiAccessibilityProvider_;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    RefPtr<AccessibilityProvider> accessibilityProvider_;
+    RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
+    uint32_t windowId_ = 0;
+    int32_t treeId_ = -1;
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
 } // namespace OHOS::Ace::NG
 

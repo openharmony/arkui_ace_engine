@@ -35,17 +35,17 @@ enum class ProgressType {
     CAPSULE = 9,
 };
 
-class ACE_EXPORT ProgressComponent : public RenderComponent {
+class ACE_FORCE_EXPORT ProgressComponent : public RenderComponent {
     DECLARE_ACE_TYPE(ProgressComponent, RenderComponent);
 
 public:
-    ProgressComponent(double min, double value, double cachedValue, double max, ProgressType type);
+    ACE_FORCE_EXPORT ProgressComponent(double min, double value, double cachedValue, double max, ProgressType type);
     ~ProgressComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    void InitStyle(const RefPtr<ProgressTheme>& theme);
+    ACE_FORCE_EXPORT void InitStyle(const RefPtr<ProgressTheme>& theme);
 
     RefPtr<TrackComponent> GetTrack() const
     {

@@ -55,7 +55,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     exclusiveRecognizer->recognizers_.clear();
-    exclusiveRecognizer->OnBeginGestureReferee(0, false);
+    exclusiveRecognizer->OnBeginGestureReferee(0, 0, false);
     EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
@@ -64,7 +64,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     exclusiveRecognizer->recognizers_.clear();
-    exclusiveRecognizer->OnBeginGestureReferee(0, true);
+    exclusiveRecognizer->OnBeginGestureReferee(0, 0, true);
     EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
@@ -74,7 +74,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
      */
     exclusiveRecognizer->recognizers_.clear();
     exclusiveRecognizer->recognizers_.push_back(nullptr);
-    exclusiveRecognizer->OnBeginGestureReferee(0, true);
+    exclusiveRecognizer->OnBeginGestureReferee(0, 0, true);
     EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
@@ -84,7 +84,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
      */
     exclusiveRecognizer->recognizers_.clear();
     exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer->OnBeginGestureReferee(0, true);
+    exclusiveRecognizer->OnBeginGestureReferee(0, 0, true);
     EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
@@ -718,7 +718,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest009, TestSize.Level1)
     TouchEvent touchEvent;
     bool result;
     touchEvent.id = 0;
-    clickRecognizer1->BeginReferee(0);
+    clickRecognizer1->BeginReferee(0, 0);
     result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
     EXPECT_EQ(clickRecognizer1->refereeState_, RefereeState::READY);

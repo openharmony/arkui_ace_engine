@@ -32,7 +32,6 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/components/custom_paint/custom_paint_component.h"
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 
 namespace OHOS::Ace::Framework {

@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/common/manager_interface.h"
 #include "core/components/stack/stack_element.h"
-#include "core/components/text_field/render_text_field.h"
+#include "compatible/components/text_field/render_text_field.h"
 
 namespace OHOS::Ace {
 
@@ -48,9 +48,9 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
-    void ClearOnFocusTextField();
+    ACE_FORCE_EXPORT void ClearOnFocusTextField();
 
-    bool ResetSlidingPanelParentHeight();
+    ACE_FORCE_EXPORT bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
     void SetHeight(float height);

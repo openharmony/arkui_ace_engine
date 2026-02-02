@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace {
 
@@ -93,7 +93,7 @@ public:
     virtual void SetItemFillPolicy(PresetFillType fillType) = 0;
     virtual void ResetItemFillPolicy() = 0;
     virtual void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) {};
-    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
+    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
         return nullptr;
     }

@@ -49,6 +49,10 @@ ProgressModel* ProgressModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr double DEFAULT_TOTAL_VALUE = 100.0;
+} // namespace
+
 void JSProgress::Create(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -56,22 +60,26 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
-    auto value = 0;
+    double value = 0.0;
     auto jsValue = paramObject->GetProperty("value");
     if (jsValue->IsNumber()) {
         value = jsValue->ToNumber<double>();
+        if (std::isnan(value) || LessNotEqual(value, 0.0)) {
+            value = 0.0;
+        }
     }
 
-    auto total = 100;
+    double total = DEFAULT_TOTAL_VALUE;
     auto jsTotal = paramObject->GetProperty("total");
-    if (jsTotal->IsNumber() && jsTotal->ToNumber<int>() > 0) {
-        total = jsTotal->ToNumber<int>();
+    if (jsTotal->IsNumber()) {
+        total = jsTotal->ToNumber<double>();
+        if (std::isnan(total) || LessOrEqual(total, 0.0)) {
+            total = DEFAULT_TOTAL_VALUE;
+        }
     }
 
-    if (value > total) {
+    if (GreatNotEqual(value, total)) {
         value = total;
-    } else if (value < 0) {
-        value = 0;
     }
 
     auto jsStyle = paramObject->GetProperty("type");
@@ -125,8 +133,8 @@ void JSProgress::SetValue(double value)
     if (std::isnan(value)) {
         return;
     }
-    if (value < 0) {
-        value = 0;
+    if (LessNotEqual(value, 0.0)) {
+        value = 0.0;
     }
     ProgressModel::GetInstance()->SetValue(value);
 }
@@ -137,6 +145,10 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
     NG::Gradient gradient;
     bool gradientColorByUser = true;
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::COLOR, nullptr);
+    }
     if (ConvertGradientColor(info[0], gradient)) {
         ProgressModel::GetInstance()->SetGradientColor(gradient);
     } else {
@@ -148,11 +160,9 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
                                                                  : theme->GetTrackParseFailedSelectedColor();
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
                 endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
-                               ? theme->GetRingProgressEndSideColor()
-                               : colorVal;
+                    ? theme->GetRingProgressEndSideColor() : colorVal;
                 beginColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
-                                 ? theme->GetRingProgressBeginSideColor()
-                                 : colorVal;
+                    ? theme->GetRingProgressBeginSideColor() : colorVal;
             } else {
                 endColor = theme->GetRingProgressEndSideColor();
                 beginColor = theme->GetRingProgressBeginSideColor();
@@ -183,6 +193,26 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::SmoothEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSSweepingEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeRadius, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingStrokeWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingShadow, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingStatus, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingSweepingEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::CapsuleBorderWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::CapsuleBorderColor, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::CapsuleSweepingEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::ShowDefaultPercentage, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::Text, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontSize, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontColor, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontWeight, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::PSStrokeWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::PSScaleWidth, nullptr);
+    }
     if (!info[0]->IsObject()) {
         return;
     }
@@ -333,6 +363,7 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     bool state = CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR, bgColorResObj);
     if (SystemProperties::ConfigChangePerform()) {
         ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::BackgroundColor, bgColorResObj);
+        ProgressModel::GetInstance()->SetBackgroundColorByUser(state);
     }
     if (!state) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
@@ -341,7 +372,6 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
                    : (g_progressType == ProgressType::RING)  ? theme->GetRingProgressParseFailedBgColor()
                                                              : theme->GetTrackParseFailedBgColor();
     }
-
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 
@@ -487,6 +517,49 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     }
 }
 
+void JSProgress::ParseGradientColor(
+    NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, Color& color, int32_t& indx)
+{
+    CompleteResourceObjectFromColor(colorResObj, color, true);
+    auto&& updateFunc = [indx](const RefPtr<ResourceObject>& colorResObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t index = 0; index < colorLength; index++) {
+            NG::GradientColor gradColor = colorVector[index];
+            if (index == indx) {
+                Color color;
+                ResourceParseUtils::ParseResColor(colorResObj, color);
+                gradColor.SetLinearColor(LinearColor(color));
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "LinearGradient.gradient.color" + std::to_string(indx);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
+}
+
+void JSProgress::ParseGradientOffset(NG::Gradient& gradient, RefPtr<ResourceObject>& offsetResObj, int32_t& indx)
+{
+    CHECK_NULL_VOID(offsetResObj);
+    auto&& updateFunc = [indx](const RefPtr<ResourceObject>& offsetResObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t index = 0; index < colorLength; index++) {
+            NG::GradientColor gradColor = colorVector[index];
+            if (index == indx) {
+                CalcDimension offset;
+                ResourceParseUtils::ParseResDimensionVp(offsetResObj, offset);
+                gradColor.SetDimension(offset);
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "LinearGradient.gradient.offset" + std::to_string(indx);
+    gradient.AddResource(key, offsetResObj, std::move(updateFunc));
+}
+
 bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
 {
     if (param->IsNull() || param->IsUndefined() || !param->IsObject()) {
@@ -507,24 +580,37 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
     if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }
+    auto jsGradient = jsLinearGradient->GetGradient();
+    auto jsGradientResObj = jsLinearGradient->GetGradientResObj();
 
-    size_t size = jsLinearGradient->GetGradient().size();
-    if (size == 1) {
-        // If there is only one color, then this color is used for both the begin and end side.
+    size_t size = jsGradient.size();
+    for (size_t i = 0; i < size; i++) {
         NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().front().first));
-        gradientColor.SetDimension(jsLinearGradient->GetGradient().front().second);
-        gradient.AddColor(gradientColor);
-        gradient.AddColor(gradientColor);
-        return true;
-    }
+        Color color = jsGradient.at(i).first;
+        CalcDimension offset = jsGradient.at(i).second;
+        if (SystemProperties::ConfigChangePerform()) {
+            int32_t indx = static_cast<int32_t>(i);
+            if (jsGradientResObj.at(i).first) {
+                ResourceParseUtils::ParseResColor(jsGradientResObj.at(i).first, color);
+            }
+            ParseGradientColor(gradient, jsGradientResObj.at(i).first, color, indx);
+            if (jsGradientResObj.at(i).second) {
+                ResourceParseUtils::ParseResDimensionVp(jsGradientResObj.at(i).second, offset);
+                ParseGradientOffset(gradient, jsGradientResObj.at(i).second, indx);
+            }
+        }
+        if (Negative(offset.ConvertToVp())) {
+            offset = Dimension(0.0, DimensionUnit::VP);
+        }
 
-    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
-        NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
-        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        if (GreatNotEqual(offset.ConvertToVp(), 1.0)) {
+            offset = Dimension(1.0, DimensionUnit::VP);
+        }
+        gradientColor.SetLinearColor(LinearColor(color));
+        gradientColor.SetDimension(offset);
         gradient.AddColor(gradientColor);
     }
+    ProgressModel::GetInstance()->SetGradientColorResObj(gradient);
     return true;
 }
 

@@ -228,7 +228,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy002, TestSize.Lev
     bool needSecondPlay = false;
     pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
     pattern->OnAnimationFinish();
-    pattern->OnVisibleChange(needSecondPlay);
+    pattern->OnVisibleAreaChange(needSecondPlay);
     pattern->ChangeAnimationPlayStatus();
     pattern->StopMarqueeAnimation(needSecondPlay);
     AnimationUtils::PauseAnimation(pattern->animation_);
@@ -349,7 +349,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy004, TestSize.Lev
     EXPECT_EQ(marqueePaintProperty->GetLoop(), -1);
     EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::RIGHT);
     bool needSecondPlay = true;
-    pattern->OnVisibleChange(needSecondPlay);
+    pattern->OnVisibleAreaChange(needSecondPlay);
     pattern->measureChanged_ = true;
     frameNode->MarkDirtyNode();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);

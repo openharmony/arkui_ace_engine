@@ -17,26 +17,89 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
+import { FrameNode } from "arkui.FrameNode"
+import { BusinessError } from '#external';
+
+const ERROR_CODE_PARAM_ERROR = 100023;
+const ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE = 106203;
+
+export class ListItemSwipeActionManagerInternal {
+    public static fromPtr(ptr: KPointer): ListItemSwipeActionManager {
+        return new ListItemSwipeActionManager(ptr)
+    }
+}
+export class ListItemSwipeActionManager implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ListItemSwipeActionManager.getFinalizer())
+    }
+    constructor() {
+        this(ListItemSwipeActionManager.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ListItemSwipeActionManager_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ListItemSwipeActionManager_getFinalizer()
+    }
+    static expand_serialize(node: FrameNode, direction: ListItemSwipeActionDirection): int32 {
+        const retval = ArkUIGeneratedNativeModule._ListItemSwipeActionManager_expand(extractors.toFrameNodePtr(node), direction.valueOf())
+        return retval
+    }
+    static collapse_serialize(node: FrameNode): int32 {
+        const retval = ArkUIGeneratedNativeModule._ListItemSwipeActionManager_collapse(extractors.toFrameNodePtr(node))
+        return retval
+    }
+    public static expand(node: FrameNode, direction: ListItemSwipeActionDirection): void {
+        const node_casted = node as (FrameNode)
+        const direction_casted = direction as (ListItemSwipeActionDirection)
+        let flag = ListItemSwipeActionManager.expand_serialize(node_casted, direction_casted)
+        if (flag === ERROR_CODE_PARAM_ERROR) {
+            const error = Error('The component type of the node is incorrect');
+            throw new BusinessError(100023, error);
+        } else if (flag === ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE) {
+            const error = Error('The node not mounted to component tree');
+            throw new BusinessError(106203, error);
+        }
+        return
+    }
+    public static collapse(node: FrameNode): void {
+        const node_casted = node as (FrameNode)
+        let flag = ListItemSwipeActionManager.collapse_serialize(node_casted)
+        if (flag === ERROR_CODE_PARAM_ERROR) {
+            const error = Error('The component type of the node is incorrect');
+            throw new BusinessError(100023, error);
+        } else if (flag === ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE) {
+            const error = Error('The node not mounted to component tree');
+            throw new BusinessError(106203, error);
+        }
+        return
+    }
+}
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -83,7 +146,7 @@ export class ArkListItemPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -130,9 +193,13 @@ export enum SwipeActionState {
     EXPANDED = 1,
     ACTIONING = 2
 }
+export enum ListItemSwipeActionDirection {
+    START = 0,
+    END = 1
+}
 export interface SwipeActionItem {
     builder?: CustomBuilder;
-    builderComponent?: ComponentContent;
+    builderComponent?: ComponentContentBase;
     actionAreaDistance?: Length;
     onAction?: (() => void);
     onEnterActionArea?: (() => void);
@@ -260,6 +327,17 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         super.applyOptionsFinish(traceName)
     }
 }
+export class ListItemSwipeActionManager_serializer {
+    public static write(buffer: SerializerBase, value: ListItemSwipeActionManager): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ListItemSwipeActionManager {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ListItemSwipeActionManagerInternal.fromPtr(ptr)
+    }
+}
 export class ListItemOptions_serializer {
     public static write(buffer: SerializerBase, value: ListItemOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -299,7 +377,7 @@ export class SwipeActionItem_serializer {
         if (valueHolderForBuilderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBuilderComponentTmpValue  = valueHolderForBuilderComponent!
-            ComponentContent_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
+            ComponentContentBase_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -376,11 +454,11 @@ export class SwipeActionItem_serializer {
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const builderComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let builderComponentTmpBuf : ComponentContent | undefined = undefined
+        let builderComponentTmpBuf : ComponentContentBase | undefined = undefined
         if ((builderComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            builderComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
+            builderComponentTmpBuf = (ComponentContentBase_serializer.read(valueDeserializer) as ComponentContentBase)
         }
-        const builderComponentTmpResult : ComponentContent | undefined = builderComponentTmpBuf
+        const builderComponentTmpResult : ComponentContentBase | undefined = builderComponentTmpBuf
         const actionAreaDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let actionAreaDistanceTmpBuf : Length | undefined = undefined
         if ((actionAreaDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

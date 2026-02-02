@@ -413,10 +413,7 @@ public:
 
     void CreateEventHubInner();
 
-    const RefPtr<FocusHub>& GetFocusHub() const
-    {
-        return focusHub_;
-    }
+    const RefPtr<FocusHub>& GetFocusHub() const;
 
     bool HasVirtualNodeAccessibilityProperty() override
     {
@@ -426,15 +423,7 @@ public:
         return false;
     }
 
-    FocusType GetFocusType() const
-    {
-        FocusType type = FocusType::DISABLE;
-        auto focusHub = GetFocusHub();
-        if (focusHub) {
-            type = focusHub->GetFocusType();
-        }
-        return type;
-    }
+    FocusType GetFocusType() const;
 
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
@@ -535,6 +524,7 @@ public:
     void OnReuse() override;
 
     void NotifyColorModeChange(uint32_t colorMode) override;
+    void NotifyColorModeChange(uint32_t colorMode, bool recursive) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
 
@@ -561,6 +551,8 @@ public:
     VectorF GetTransformScaleRelativeToWindow() const;
 
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
+
+    RectF GetTransformRectRelativeToWindowOnlyVisible(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
@@ -784,6 +776,16 @@ public:
         allowDrop_ = allowDrop;
     }
 
+    void SetEnableClickSoundEffect(bool enabled)
+    {
+        enableClickSoundEffect_ = enabled;
+    }
+
+    bool GetEnableClickSoundEffect()
+    {
+        return enableClickSoundEffect_;
+    }
+
     const std::set<std::string>& GetAllowDrop() const
     {
         return allowDrop_;
@@ -806,7 +808,10 @@ public:
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
+        SetOverlayNodeIsFree(IsFree());
     }
+
+    void SetOverlayNodeIsFree(bool isFree);
 
     RefPtr<FrameNode> GetOverlayNode() const
     {
@@ -1013,33 +1018,6 @@ public:
     bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode();
     bool IsGeometrySizeChange() const;
-
-    template<typename T>
-    RefPtr<T> FindFocusChildNodeOfClass()
-    {
-        const auto& children = GetChildren();
-        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-            auto& child = *iter;
-            auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
-            if (target && target->eventHub_) {
-                auto focusEvent = target->eventHub_->GetFocusHub();
-                if (focusEvent && focusEvent->IsCurrentFocus()) {
-                    return AceType::DynamicCast<T>(target);
-                }
-            }
-        }
-
-        if (AceType::InstanceOf<T>(this)) {
-            auto target = DynamicCast<FrameNode>(this);
-            if (target && target->eventHub_) {
-                auto focusEvent = target->eventHub_->GetFocusHub();
-                if (focusEvent && focusEvent->IsCurrentFocus()) {
-                    return Claim(AceType::DynamicCast<T>(this));
-                }
-            }
-        }
-        return nullptr;
-    }
 
     void ParseRegionAndAdd(const CalcDimensionRect& region, const ScaleProperty& scaleProperty,
         const RectF& rect, std::vector<RectF>& responseRegionResult);
@@ -1424,7 +1402,7 @@ public:
         return GetTag() == V2::SCREEN_ETS_TAG;
     }
 
-    bool CheckVisibleOrActive() override;
+    bool IsVisibleAndActive() const override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
     {
@@ -1463,7 +1441,7 @@ public:
     std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content);
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
-    void ReportSelectedText();
+    void ReportSelectedText(bool isRegister);
 
     void ResetLastFrameNodeRect()
     {
@@ -1486,6 +1464,16 @@ public:
         }
     }
 
+    const RefPtr<FrameNode>& GetCornerMarkNode() const
+    {
+        return cornerMarkNode_;
+    }
+
+    void SetCornerMarkNode(const RefPtr<FrameNode>& cornerMarkNode)
+    {
+        cornerMarkNode_ = cornerMarkNode;
+    }
+
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
@@ -1496,7 +1484,13 @@ public:
 
     void OnContentChangeRegister(const ContentChangeConfig& config);
     void OnContentChangeUnregister();
+    void SetIsFree(bool isFree) override;
+    bool IsPendingOnMainRenderTree() const
+    {
+        return isPendingState_;
+    }
 
+    void UpdateBackground();
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1540,8 +1534,18 @@ private:
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
+    void ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+        const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren);
+    void CleanRenderTreeLifeCycle();
+    void DetachFromRenderTree(bool isOnMainTree, bool recursive = true);
+    void AttachToRenderTree(bool isOnMainTree, bool recursive = true);
+    void OnDetachFromMainRenderTree();
+    void OnAttachToMainRenderTree();
+    void OnOffscreenProcessResource() override;
 
     bool IsPaintRectWithTransformValid();
+
+    void DetachRsNodeInAdoptedChildren();
 
     // dump self info.
     void DumpDragInfo();
@@ -1657,6 +1661,8 @@ private:
 
     void ResetPredictNodes();
     void HandleAreaChangeDestruct();
+    void HandleLanguageConfigurationUpdate(const ConfigurationChange& configurationChange);
+    void HandleColorModeConfigurationUpdate(const ConfigurationChange& configurationChange);
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
@@ -1669,7 +1675,7 @@ private:
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
-    void UpdateBackground();
+    void OnInspectorIdUpdateMultiThread(const std::string& id);
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
@@ -1748,6 +1754,7 @@ private:
 
     ColorMode colorMode_ = ColorMode::LIGHT;
 
+    bool enableClickSoundEffect_ = true;
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;
@@ -1779,6 +1786,8 @@ private:
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;
+    // Marks whether this FrameNode has been attached to the main RenderTree and is awaiting a matching detach.
+    bool isPendingState_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

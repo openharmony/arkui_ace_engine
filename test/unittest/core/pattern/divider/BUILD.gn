@@ -15,13 +15,12 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("divider_test_ng") {
   type = "new"
-  module_name = "Component-Layout"
-  module_output = ""
+  module_name = "Modifier-AttributeUpdater"
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng_static.cpp",
     "divider_base_test_ng.cpp",
     "divider_base_test_ng.h",
     "divider_new_test_ng.cpp",
     "old_cases/divider_test_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_model_ng_static.cpp",
   ]
 }

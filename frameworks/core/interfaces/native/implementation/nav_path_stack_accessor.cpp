@@ -206,7 +206,7 @@ void PushDestinationByName0Impl(Ark_VMContext vmContext,
     auto convAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
     auto info = std::make_shared<NavigationContext::PathInfo>(convName, convParam);
 
-    auto execFunc = [peer, info, convAnimated, finishFunc]() {
+    auto execFunc = [peer, info, convAnimated, finishFunc]() mutable {
         auto navStack = peer->GetNavPathStack();
         if (!navStack) {
             LOGE("NavPathStackAccessor::PushDestinationByName0Impl. Navigation Stack isn't bound to a component.");
@@ -215,8 +215,8 @@ void PushDestinationByName0Impl(Ark_VMContext vmContext,
                 "parameter types; 3. Parameter verification failed.");
             return;
         }
-        info->promise_ = finishFunc;
-        navStack->NavigationContext::PathStack::PushDestinationByName(info->name_, info->param_, nullptr, convAnimated);
+        navStack->NavigationContext::PathStack::PushDestinationByName(
+            info->name_, info->param_, nullptr, convAnimated, std::move(finishFunc));
     };
     promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
@@ -245,7 +245,7 @@ void PushDestinationByName1Impl(Ark_VMContext vmContext,
     auto convAnimated = Converter::OptConvertPtr<bool>(animated).value_or(true);
     auto info = std::make_shared<NavigationContext::PathInfo>(convName, convParam, convOnPop);
 
-    auto execFunc = [peer, info, convAnimated, finishFunc]() {
+    auto execFunc = [peer, info, convAnimated, finishFunc]() mutable {
         auto navStack = peer->GetNavPathStack();
         if (!navStack) {
             LOGE("NavPathStackAccessor::PushDestinationByName1Impl. Navigation Stack isn't bound to a component.");
@@ -254,9 +254,8 @@ void PushDestinationByName1Impl(Ark_VMContext vmContext,
                 "parameter types; 3. Parameter verification failed.");
             return;
         }
-        info->promise_ = finishFunc;
         navStack->NavigationContext::PathStack::PushDestinationByName(
-            info->name_, info->param_, info->onPop_, convAnimated);
+            info->name_, info->param_, info->onPop_, convAnimated, std::move(finishFunc));
     };
     promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
@@ -510,11 +509,10 @@ Array_String GetAllPathNameImpl(Ark_NavPathStack peer)
     std::vector<std::string> result;
     auto invalidVal = Converter::ArkValue<Array_String>(result, Converter::FC);
     CHECK_NULL_RETURN(peer, invalidVal);
-    auto navStack = peer->GetNavPathStack();
+    auto navStack = peer->GetBaseNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
-    std::vector<std::string> allName = navStack->NavigationContext::PathStack::GetAllPathName();
+    std::vector<std::string> allName = navStack->GetAllPathName();
     Array_String values = Converter::ArkValue<Array_String>(allName, Converter::FC);
-    Ark_Int32 len = values.length;
     return values;
 }
 Opt_Object GetParamByIndexImpl(Ark_NavPathStack peer,

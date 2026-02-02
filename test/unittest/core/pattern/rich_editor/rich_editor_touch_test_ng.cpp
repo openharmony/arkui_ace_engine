@@ -468,6 +468,15 @@ HWTEST_F(RichEditorTouchTestNg, UpdateCaretByTouchMove001, TestSize.Level0)
     richEditorPattern->magnifierController_ = nullptr;
     richEditorPattern->UpdateCaretByTouchMove(offset);
     EXPECT_FALSE(exist);
+    richEditorPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(richEditorPattern);
+    ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
+    EXPECT_FALSE(richEditorPattern->magnifierController_->GetShowMagnifier());
+    richEditorPattern->UpdateCaretByTouchMove(offset);
+    EXPECT_EQ(richEditorPattern->magnifierAnimation_, nullptr);
+    richEditorPattern->magnifierController_->SetColorModeChange(true);
+    EXPECT_TRUE(richEditorPattern->magnifierController_->IsColorModeChange());
+    richEditorPattern->UpdateCaretByTouchMove(offset);
+    EXPECT_EQ(richEditorPattern->magnifierAnimation_, nullptr);
 }
 
 /**

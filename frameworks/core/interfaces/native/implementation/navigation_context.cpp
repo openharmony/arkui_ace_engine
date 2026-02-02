@@ -152,9 +152,11 @@ void PathStack::PushPath(PathInfo info, const std::optional<NavigationOptions>& 
 }
 
 PushDestinationResultType PathStack::PushDestinationByName(const std::string& name,
-    const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated)
+    const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated,
+    std::function<void(int32_t errorCode, std::string errorMessage)>&& promise)
 {
     PathInfo info(name, param, onPop);
+    info.promise_ = std::move(promise);
     isReplace_ = NO_ANIM_NO_REPLACE;
     animated_ = animated.value_or(DEFAULT_ANIMATED);
     std::tie(info.index_, info.navDestinationId_) = FindInPopArray(info);
@@ -193,7 +195,7 @@ void PathStack::ReplacePath(PathInfo info, const std::optional<NavigationOptions
         it->param_ = info.param_;
         it->onPop_ = info.onPop_;
         it->index_ = -1;
-        if (it == (pathArray_.end() - 1)) {
+        if (it != (pathArray_.end() - 1)) {
             auto targetInfo = *it;
             it = pathArray_.erase(it);
             if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
@@ -239,7 +241,7 @@ ReplaceDestinationResultType PathStack::ReplaceDestination(PathInfo info,
         it->param_ = info.param_;
         it->onPop_ = info.onPop_;
         it->index_ = -1;
-        if (it == (pathArray_.end() - 1)) {
+        if (it != (pathArray_.end() - 1)) {
             auto targetInfo = *it;
             it = pathArray_.erase(it);
             if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
@@ -355,29 +357,50 @@ int PathStack::PopToName(const std::string& name, const std::optional<bool>& ani
     return idx;
 }
 
-void PathStack::PopToIndex(size_t index, const std::optional<bool>& animated)
+void PathStack::PopToIndex(int32_t index, const std::optional<bool>& animated)
 {
-    auto it = std::next(pathArray_.begin(), index);
-    if (it >= pathArray_.end()) {
+    if (index == -1) {
+        // clearAll
+        PopToInternal(pathArray_.begin(), animated, true, true);
         return;
     }
+    if (index < 0 || index >= static_cast<int32_t>(pathArray_.size())) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "PopToIndex with invalid index: %{public}d, stackSize:%{public}d",
+            index, static_cast<int32_t>(pathArray_.size()));
+        return;
+    }
+    auto it = std::next(pathArray_.begin(), index);
     PopToInternal(it, animated);
 }
 
-void PathStack::PopToIndex(size_t index, const std::optional<bool>& animated, Ark_Object result)
+void PathStack::PopToIndex(int32_t index, const std::optional<bool>& animated, Ark_Object result)
 {
-    auto it = std::next(pathArray_.begin(), index);
-    if (it >= pathArray_.end()) {
+    if (index == -1) {
+        // clearAll
+        PopToInternal(pathArray_.begin(), animated, result, true);
         return;
     }
+    if (index < 0 || index >= static_cast<int32_t>(pathArray_.size())) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "PopToIndex with invalid index: %{public}d, stackSize:%{public}d",
+            index, static_cast<int32_t>(pathArray_.size()));
+        return;
+    }
+    auto it = std::next(pathArray_.begin(), index);
     PopToInternal(it, animated, result);
 }
 
 void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
-    const std::optional<bool>& animated, bool needFireOnResult)
+    const std::optional<bool>& animated, bool needFireOnResult, bool clearAll)
 {
+    if (pathArray_.empty() || it == pathArray_.end()) {
+        return;
+    }
     auto currentPathInfo = pathArray_.back();
-    pathArray_.erase(std::next(it, 1), pathArray_.end());
+    if (clearAll) {
+        pathArray_.clear();
+    } else {
+        pathArray_.erase(std::next(it, 1), pathArray_.end());
+    }
     isReplace_ = NO_ANIM_NO_REPLACE;
 
     if (onPopCallback_) {
@@ -394,10 +417,17 @@ void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
 }
 
 void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
-    const std::optional<bool>& animated, Ark_Object result)
+    const std::optional<bool>& animated, Ark_Object result, bool clearAll)
 {
+    if (pathArray_.empty() || it == pathArray_.end()) {
+        return;
+    }
     auto currentPathInfo = pathArray_.back();
-    pathArray_.erase(std::next(it, 1), pathArray_.end());
+    if (clearAll) {
+        pathArray_.clear();
+    } else {
+        pathArray_.erase(std::next(it, 1), pathArray_.end());
+    }
     isReplace_ = NO_ANIM_NO_REPLACE;
 
     auto arkPathInfo = Converter::ArkValue<Ark_NavPathInfo>(currentPathInfo);
@@ -719,27 +749,30 @@ void NavigationStack::SetDestinationIdToJsStack(int32_t index, const std::string
     }
 }
 
-bool NavigationStack::CreateNavDestinationByRouterMap(
-    const std::string& name, int32_t index, RefPtr<NG::UINode>& node)
+int32_t NavigationStack::CreateNavDestinationByRouterMap(
+    const std::string& name, int32_t index, RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "create NavDestination by router map, name:%{public}s, index:%{public}d", name.c_str(), index);
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
+    CHECK_NULL_RETURN(container, ERROR_CODE_INTERNAL_ERROR);
     auto navigationRoute = container->GetNavigationRoute();
     if (!navigationRoute) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation route is invalid");
-        return false;
+        return ERROR_CODE_INTERNAL_ERROR;
     }
     if (!navigationRoute->HasLoaded(name) && navigationRoute->LoadPage(name) != 0) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
-        return false;
+        return (navDestBuilder_ == nullptr) ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
+            : ERROR_CODE_DESTINATION_NOT_FOUND;
     }
-    CHECK_NULL_RETURN(createNavDestinationCallback_, false);
-    auto tempNode = createNavDestinationCallback_(index);
-    CHECK_NULL_RETURN(tempNode, false);
-    node = tempNode;
-    return true;
+    CHECK_NULL_RETURN(createNavDestinationCallback_, ERROR_CODE_INTERNAL_ERROR);
+    node = createNavDestinationCallback_(index);
+    CHECK_NULL_RETURN(node, ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED);
+    if (!GetNavDestinationNodeInUINode(node, desNode)) {
+        return ERROR_CODE_DESTINATION_NOT_FOUND;
+    }
+    return ERROR_CODE_NO_ERROR;
 }
 
 std::string NavigationStack::ErrorToMessage(int32_t code)
@@ -780,14 +813,13 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     }
     if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
         errorCode = ERROR_CODE_NO_ERROR;
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (navDestinationPattern) {
+            SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
+        }
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
-        RefPtr<UINode> tempNode = nullptr;
-        if (CreateNavDestinationByRouterMap(name, index, tempNode) &&
-            GetNavDestinationNodeInUINode(tempNode, desNode)) {
-            errorCode = ERROR_CODE_NO_ERROR;
-            targetNode = tempNode;
-        }
+        errorCode = CreateNavDestinationByRouterMap(name, index, targetNode, desNode);
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
@@ -795,6 +827,11 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         node = AceType::DynamicCast<NG::UINode>(
             NavDestinationModelStatic::CreateFrameNode(0, navPathInfo));
         FirePromise(pathInfo, errorCode);
+        auto navNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
+        CHECK_NULL_RETURN(navNode, true);
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(navNode->GetPattern());
+        CHECK_NULL_RETURN(navDestinationPattern, true);
+        SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
         return true;
     }
     node = targetNode;
@@ -986,10 +1023,10 @@ void NavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t
 {
     auto pathInfo = PathStack::GetPathInfo(index);
     CHECK_NULL_VOID(pathInfo);
-    bool needUpdate = pathInfo->needUpdate_;
     if (!pathInfo->needUpdate_) {
         return;
     }
+    bool needUpdate = pathInfo->needUpdate_;
     pathInfo->needUpdate_ = false;
 
     RefPtr<NG::NavDestinationGroupNode> desNode;

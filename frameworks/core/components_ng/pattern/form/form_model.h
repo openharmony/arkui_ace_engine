@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 

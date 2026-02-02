@@ -29,9 +29,11 @@ public:
     // SyncLoadParser
     static bool IsSyncLoadEnabled();
     static uint32_t GetSyncloadResponseDeadline();
+    static int64_t GetSyncLoadStartupDelay();
     // UINodeGcParamParser
     static bool IsUINodeGcEnabled();
     static bool IsPageOverflowEnabled();
+    static bool IsRnOverflowEnable();
     static bool IsDialogCorrectionEnabled();
 };
 } // namespace OHOS::Ace

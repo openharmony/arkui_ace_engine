@@ -39,6 +39,7 @@ void AniThemeModule::UpdateColorMode(int32_t colorMode)
             container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorModeValue);
 #endif
         auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
         pipelineContext->SetLocalColorMode(colorModeValue);
     }
 }

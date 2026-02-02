@@ -834,6 +834,12 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    recycleInvisibleImageMemory(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().common.recycleInvisibleImageMemory(value, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     getCursorController() {
         if (this.cursorController_ == null) {
             this.cursorController_ = new CursorController(this.instanceId_);
@@ -997,6 +1003,12 @@ class UIContext {
             this.magnifier_ = new Magnifier(this.instanceId_);
         }
         return this.magnifier_;
+    }
+    
+    setCustomKeyboardContinueFeature(feature) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.setCustomKeyboardContinueFeature(feature);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 
@@ -1311,6 +1323,13 @@ class Router {
     getLength() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = this.ohos_router.getLength();
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+
+    getStackSize() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_router.getStackSize();
         __JSScopeUtil__.restoreInstanceId();
         return result;
     }

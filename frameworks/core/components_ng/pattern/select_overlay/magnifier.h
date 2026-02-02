@@ -34,6 +34,7 @@ constexpr Dimension MAGNIFIER_SHADOWOFFSETY = 8.0_vp;
 constexpr Dimension MAGNIFIER_SHADOWSIZE = 10.0_vp;
 constexpr float MAGNIFIER_FACTOR = 1.4f;
 constexpr float MAGNIFIER_SHADOWSTRENGTH = 0.08f;
+constexpr float ZOOM_OFFSET_Y = 10.f;
 constexpr int32_t ANIMATION_DURATION_150 = 150;
 } // namespace
 class Magnifier : public virtual AceType {

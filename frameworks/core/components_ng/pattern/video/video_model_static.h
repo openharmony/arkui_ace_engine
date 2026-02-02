@@ -26,6 +26,7 @@ public:
     static void SetSrc(FrameNode* frameNode,
         const std::string& src, const std::string& bundleName, const std::string& moduleName);
     static void SetShowFirstFrame(FrameNode* frameNode, bool showFirstFrame);
+    static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static void SetProgressRate(FrameNode* frameNode, double progressRate);
     static void SetPosterSourceInfo(FrameNode* frameNode, const ImageSourceInfo& posterSourceInfo);
     static void SetVideoController(FrameNode* frameNode, const RefPtr<VideoControllerV2>& videoController);

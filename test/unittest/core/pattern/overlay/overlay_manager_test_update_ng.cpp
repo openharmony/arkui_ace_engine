@@ -36,8 +36,8 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
@@ -2067,5 +2067,4 @@ HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRender001, TestSize.Level1)
     Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingMD, MockContainer::GetMockColorMode());
     EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
-
 } // namespace OHOS::Ace::NG

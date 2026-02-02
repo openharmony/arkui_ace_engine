@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    using UnionBadgeOptions = std::variant<Ark_BadgePosition, Ark_Position>;
 struct Position {
     std::optional<int> badgePosition;
     std::optional<bool> isPositionXy = false;
@@ -36,18 +35,21 @@ struct Style {
     std::optional<Dimension> badgeCircleSize;
     std::optional<Dimension> badgeBorderWidth;
     std::optional<FontWeight> badgeFontWeight;
+    std::optional<Color> badgeOuterBorderColor;
+    std::optional<Dimension> badgeOuterBorderWidth;
+    std::optional<bool> badgeEnableAutoAvoidance;
 };
 }
 
 namespace Converter {
 template<>
-void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
+Position Convert(const Ark_Position& src)
 {
-    dst->isPositionXy = true;
-    dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
-    dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
-    Validator::ValidateNonNegative(dst->badgePositionX);
-    Validator::ValidateNonNegative(dst->badgePositionY);
+    Position dst;
+    dst.isPositionXy = true;
+    dst.badgePositionX = Converter::OptConvert<Dimension>(src.x);
+    dst.badgePositionY = Converter::OptConvert<Dimension>(src.y);
+    return dst;
 }
 
 template<>
@@ -57,6 +59,7 @@ void AssignCast(std::optional<Position>& dst, const Ark_BadgePosition& src)
         case ARK_BADGE_POSITION_RIGHT_TOP:
         case ARK_BADGE_POSITION_RIGHT:
         case ARK_BADGE_POSITION_LEFT:
+            dst = Position();
             dst->isPositionXy = false;
             dst->badgePosition = src;
             break;
@@ -71,16 +74,20 @@ Style Convert(const Ark_BadgeStyle& src)
     dst.badgeColor = Converter::OptConvert<Color>(src.badgeColor);
     dst.badgeTextColor = Converter::OptConvert<Color>(src.color);
     dst.badgeBorderColor = Converter::OptConvert<Color>(src.borderColor);
-    dst.badgeFontSize = Converter::OptConvert<Dimension>(src.fontSize);
-    dst.badgeCircleSize = Converter::OptConvert<Dimension>(src.badgeSize);
+    dst.badgeFontSize = Converter::OptConvertFromF64ResourceStr(src.fontSize, DimensionUnit::FP);
+    dst.badgeCircleSize = Converter::OptConvertFromF64ResourceStr(src.badgeSize, DimensionUnit::FP);
     dst.badgeBorderWidth = Converter::OptConvert<Dimension>(src.borderWidth);
     dst.badgeFontWeight = Converter::OptConvert<FontWeight>(src.fontWeight);
+    dst.badgeOuterBorderColor = Converter::OptConvert<Color>(src.outerBorderColor);
+    dst.badgeOuterBorderWidth = Converter::OptConvert<Dimension>(src.outerBorderWidth);
+    dst.badgeEnableAutoAvoidance = Converter::OptConvert<bool>(src.enableAutoAvoidance);
     Validator::ValidateNonNegative(dst.badgeFontSize);
     Validator::ValidateNonNegative(dst.badgeCircleSize);
     Validator::ValidateNonNegative(dst.badgeBorderWidth);
     Validator::ValidateNonPercent(dst.badgeFontSize);
     Validator::ValidateNonPercent(dst.badgeCircleSize);
     Validator::ValidateNonPercent(dst.badgeBorderWidth);
+    Validator::ValidateNonPercent(dst.badgeOuterBorderWidth);
     return dst;
 }
 
@@ -91,10 +98,12 @@ BadgeParameters ConverterHelper(const T& src)
     auto position = Converter::OptConvert<Position>(src.position);
     Style style = Converter::Convert<Style>(src.style);
 
-    dst.isPositionXy = position->isPositionXy;
-    dst.badgePositionX = position->badgePositionX;
-    dst.badgePositionY = position->badgePositionY;
-    dst.badgePosition = position->badgePosition;
+    if (position) {
+        dst.isPositionXy = position->isPositionXy;
+        dst.badgePositionX = position->badgePositionX;
+        dst.badgePositionY = position->badgePositionY;
+        dst.badgePosition = position->badgePosition;
+    }
 
     dst.badgeColor = style.badgeColor;
     dst.badgeTextColor = style.badgeTextColor;
@@ -103,6 +112,9 @@ BadgeParameters ConverterHelper(const T& src)
     dst.badgeCircleSize = style.badgeCircleSize;
     dst.badgeBorderWidth = style.badgeBorderWidth;
     dst.badgeFontWeight = style.badgeFontWeight;
+    dst.badgeOuterBorderColor = style.badgeOuterBorderColor;
+    dst.badgeOuterBorderWidth = style.badgeOuterBorderWidth;
+    dst.isEnableAutoAvoidance = style.badgeEnableAutoAvoidance;
     return dst;
 }
 
@@ -137,15 +149,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // BadgeModifier
 namespace BadgeInterfaceModifier {
-
-BadgeParameters ParseBadgeParameter(const Ark_Union_BadgeParamWithNumber_BadgeParamWithString* value)
-{
-    if (value->selector == SELECTOR_ID_0) {
-        return  Converter::Convert<BadgeParameters>(value->value0);
-    }
-    return Converter::Convert<BadgeParameters>(value->value1);
-}
-
 void SetBadgeOptionsImpl(Ark_NativePointer node,
                          const Ark_Union_BadgeParamWithNumber_BadgeParamWithString* value)
 {
@@ -153,7 +156,9 @@ void SetBadgeOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    BadgeParameters badgeParameters = ParseBadgeParameter(value);
+    auto convValue = Converter::OptConvert<BadgeParameters>(*value);
+    CHECK_NULL_VOID(convValue);
+    auto badgeParameters = *convValue;
     bool isDefaultFontSize = !badgeParameters.badgeFontSize.has_value();
     bool isDefaultBadgeSize = !badgeParameters.badgeCircleSize.has_value();
 

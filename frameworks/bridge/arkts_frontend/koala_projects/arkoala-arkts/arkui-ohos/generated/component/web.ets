@@ -322,6 +322,21 @@ export class FileSelectorParam implements MaterializedBase {
     public getMimeTypes(): Array<string> {
         return this.getMimeTypes_serialize()
     }
+    public getSuggestedName(): string {
+        return this.getSuggestedName_serialize()
+    }
+    public getDefaultPath(): string {
+        return this.getDefaultPath_serialize()
+    }
+    public getDescriptions(): Array<string> {
+        return this.getDescriptions_serialize()
+    }
+    public isAcceptAllOptionExcluded(): boolean {
+        return this.isAcceptAllOptionExcluded_serialize()
+    }
+    public getAcceptableFileTypes(): Array<Array<AcceptableFileType>> {
+        return this.getAcceptableFileTypes_serialize()
+    }
     getTitle_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
         return retval
@@ -354,6 +369,45 @@ export class FileSelectorParam implements MaterializedBase {
             buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    getSuggestedName_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getSuggestedName(this.peer!.ptr)
+        return retval
+    }
+    getDefaultPath_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getDefaultPath(this.peer!.ptr)
+        return retval
+    }
+    getDescriptions_serialize(): Array<string> {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getDescriptions(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    isAcceptAllOptionExcluded_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_isAcceptAllOptionExcluded(this.peer!.ptr)
+        return retval
+    }
+    getAcceptableFileTypes_serialize(): Array<Array<AcceptableFileType>> {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptableFileTypes(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<Array<AcceptableFileType>> = new Array<Array<AcceptableFileType>>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            const bufferTempBufLength : int32 = retvalDeserializer.readInt32()
+            let bufferTempBuf : Array<AcceptableFileType> = new Array<AcceptableFileType>(bufferTempBufLength)
+            for (let bufferTempBufBufCounterI = 0; bufferTempBufBufCounterI < bufferTempBufLength; bufferTempBufBufCounterI++) {
+                bufferTempBuf[bufferTempBufBufCounterI] = AcceptableFileType_serializer.read(retvalDeserializer)
+            }
+            buffer[bufferBufCounterI] = bufferTempBuf
+        }
+        const returnResult : Array<Array<AcceptableFileType>> = buffer
         return returnResult
     }
 }
@@ -2040,6 +2094,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnWindowExit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnWindowNewExtAttribute(value: ((value0: OnWindowNewExtEvent) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnWindowNewExt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setMultiWindowAccessAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -2992,6 +3058,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnFirstScreenPaintAttribute(value: OnFirstScreenPaintCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnFirstScreenPaint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEnableImageAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3002,6 +3080,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setEnableImageAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableAutoFillAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableAutoFill(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnMicrophoneCaptureStateChangeAttribute(value: OnMicrophoneCaptureStateChangeCallback | undefined): void {
@@ -3269,7 +3359,7 @@ export enum ContextMenuInputFieldType {
     PASSWORD = 2,
     Password = 2,
     NUMBER_DATA = 3,
-    Number = 3,
+    Number_data = 3,
     TELEPHONE = 4,
     Telephone = 4,
     OTHER = 5,
@@ -3543,6 +3633,26 @@ export interface OnWindowNewEvent {
     targetUrl: string;
     handler: ControllerHandler;
 }
+export enum NavigationPolicy {
+    NEW_POPUP = 0,
+    NEW_WINDOW = 1,
+    NEW_BACKGROUND_TAB = 2,
+    NEW_FOREGROUND_TAB = 3
+}
+export interface WindowFeatures {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+}
+export interface OnWindowNewExtEvent {
+    isAlert: boolean;
+    isUserTrigger: boolean;
+    targetUrl: string;
+    handler: ControllerHandler;
+    windowFeatures: WindowFeatures;
+    navigationPolicy: NavigationPolicy;
+}
 export interface OnTouchIconUrlReceivedEvent {
     url: string;
     precomposed: boolean;
@@ -3646,6 +3756,12 @@ export interface BlankScreenDetectionConfig {
     detectionMethods?: Array<BlankScreenDetectionMethod>;
     contentfulNodesCountThreshold?: int32;
 }
+export interface FirstScreenPaint {
+    url: string;
+    navigationStartTime: int64;
+    firstScreenPaintTime: int64;
+}
+export type OnFirstScreenPaintCallback = (firstScreenPaint: FirstScreenPaint) => void;
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
         throw new Error("Unimplemented method setWebOptions")
@@ -3826,6 +3942,9 @@ export interface WebAttribute extends CommonMethod {
     }
     onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onWindowNew")
+    }
+    onWindowNewExt(value: ((value0: OnWindowNewExtEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onWindowNewExt")
     }
     onWindowExit(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onWindowExit")
@@ -4061,8 +4180,14 @@ export interface WebAttribute extends CommonMethod {
     onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
         throw new Error("Unimplemented method onTextSelectionChange")
     }
+    onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
+        throw new Error("Unimplemented method onFirstScreenPaint")
+    }
     enableImageAnalyzer(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableImageAnalyzer")
+    }
+    enableAutoFill(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoFill")
     }
     onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
         throw new Error("Unimplemented method onMicrophoneCaptureStateChange")
@@ -4140,6 +4265,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onSslErrorEvent_value?: OnSslErrorEventCallback | undefined
     onClientAuthenticationRequest_value?: ((value0: OnClientAuthenticationEvent) => void) | undefined
     onWindowNew_value?: ((value0: OnWindowNewEvent) => void) | undefined
+    onWindowNewExt_value?: ((value0: OnWindowNewExtEvent) => void) | undefined
     onWindowExit_value?: (() => void) | undefined
     multiWindowAccess_value?: boolean | undefined
     onInterceptKeyEvent_value?: ((event: KeyEvent) => boolean) | undefined
@@ -4218,7 +4344,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     zoomControlAccess_value?: boolean | undefined
     enableSelectedDataDetector_value?: boolean | undefined
     onTextSelectionChange_value?: TextSelectionChangeCallback | undefined
+    onFirstScreenPaint_value?: OnFirstScreenPaintCallback | undefined
     enableImageAnalyzer_value?: boolean | undefined
+    enableAutoFill_value?: boolean | undefined
     onMicrophoneCaptureStateChange_value?: OnMicrophoneCaptureStateChangeCallback | undefined
     onCameraCaptureStateChange_value?: OnCameraCaptureStateChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -4400,6 +4528,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
+        return this
+    }
+    onWindowNewExt(value: ((value0: OnWindowNewExtEvent) => void) | undefined): this {
         return this
     }
     onWindowExit(value: (() => void) | undefined): this {
@@ -4636,7 +4767,13 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
         return this
     }
+    onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
+        return this
+    }
     enableImageAnalyzer(value: boolean | undefined): this {
+        return this
+    }
+    enableAutoFill(value: boolean | undefined): this {
         return this
     }
     onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
@@ -4674,6 +4811,10 @@ export interface NestedScrollOptionsExt {
 export interface EmbedOptions {
     supportDefaultIntrinsicSize?: boolean;
     supportCssDisplayChange?: boolean;
+}
+export interface AcceptableFileType {
+    mimeType: string;
+    acceptableType: Array<string>;
 }
 export enum GestureFocusMode {
     DEFAULT = 0,
@@ -5180,6 +5321,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onWindowNew")) {
             const value_casted = value as (((value0: OnWindowNewEvent) => void) | undefined)
             this.getPeer()?.setOnWindowNewAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWindowNewExt(value: ((value0: OnWindowNewExtEvent) => void) | undefined): this {
+        if (this.checkPriority("onWindowNewExt")) {
+            const value_casted = value as (((value0: OnWindowNewExtEvent) => void) | undefined)
+            this.getPeer()?.setOnWindowNewExtAttribute(value_casted)
             return this
         }
         return this
@@ -5816,6 +5965,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public enableAutoFill(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoFill")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoFillAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
         if (this.checkPriority("onMicrophoneCaptureStateChange")) {
             const value_casted = value as (OnMicrophoneCaptureStateChangeCallback | undefined)
@@ -5828,6 +5985,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onCameraCaptureStateChange")) {
             const value_casted = value as (OnCameraCaptureStateChangeCallback | undefined)
             this.getPeer()?.setOnCameraCaptureStateChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
+        if (this.checkPriority("onFirstScreenPaint")) {
+            const value_casted = value as (OnFirstScreenPaintCallback | undefined)
+            this.getPeer()?.setOnFirstScreenPaintAttribute(value_casted)
             return this
         }
         return this
@@ -6333,6 +6498,53 @@ export class WebResourceResponse_serializer {
         return WebResourceResponseInternal.fromPtr(ptr)
     }
 }
+export class WindowFeatures_serializer {
+    public static write(buffer: SerializerBase, value: WindowFeatures): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForHeight  = value.height
+        valueSerializer.writeFloat64(valueHolderForHeight)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeFloat64(valueHolderForWidth)
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): WindowFeatures {
+        let valueDeserializer : DeserializerBase = buffer
+        const heightTmpResult : double = valueDeserializer.readFloat64()
+        const widthTmpResult : double = valueDeserializer.readFloat64()
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : WindowFeatures = ({height: heightTmpResult, width: widthTmpResult, x: xTmpResult, y: yTmpResult} as WindowFeatures)
+        return value
+    }
+}
+export class AcceptableFileType_serializer {
+    public static write(buffer: SerializerBase, value: AcceptableFileType): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForMimeType  = value.mimeType
+        valueSerializer.writeString(valueHolderForMimeType)
+        const valueHolderForAcceptableType  = value.acceptableType
+        valueSerializer.writeInt32((valueHolderForAcceptableType.length).toInt())
+        for (let valueHolderForAcceptableTypeCounterI = 0; valueHolderForAcceptableTypeCounterI < valueHolderForAcceptableType.length; valueHolderForAcceptableTypeCounterI++) {
+            const valueHolderForAcceptableTypeTmpElement : string = valueHolderForAcceptableType[valueHolderForAcceptableTypeCounterI]
+            valueSerializer.writeString(valueHolderForAcceptableTypeTmpElement)
+        }
+    }
+    public static read(buffer: DeserializerBase): AcceptableFileType {
+        let valueDeserializer : DeserializerBase = buffer
+        const mimeTypeTmpResult : string = (valueDeserializer.readString() as string)
+        const acceptableTypeTmpBufLength : int32 = valueDeserializer.readInt32()
+        let acceptableTypeTmpBuf : Array<string> = new Array<string>(acceptableTypeTmpBufLength)
+        for (let acceptableTypeTmpBufBufCounterI = 0; acceptableTypeTmpBufBufCounterI < acceptableTypeTmpBufLength; acceptableTypeTmpBufBufCounterI++) {
+            acceptableTypeTmpBuf[acceptableTypeTmpBufBufCounterI] = (valueDeserializer.readString() as string)
+        }
+        const acceptableTypeTmpResult : Array<string> = acceptableTypeTmpBuf
+        let value : AcceptableFileType = ({mimeType: mimeTypeTmpResult, acceptableType: acceptableTypeTmpResult} as AcceptableFileType)
+        return value
+    }
+}
 export class AdsBlockedDetails_serializer {
     public static write(buffer: SerializerBase, value: AdsBlockedDetails): void {
         let valueSerializer : SerializerBase = buffer
@@ -6528,6 +6740,25 @@ export class FirstMeaningfulPaint_serializer {
         }
         const firstMeaningfulPaintTimeTmpResult : int64 | undefined = firstMeaningfulPaintTimeTmpBuf
         let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTimeTmpResult, firstMeaningfulPaintTime: firstMeaningfulPaintTimeTmpResult} as FirstMeaningfulPaint)
+        return value
+    }
+}
+export class FirstScreenPaint_serializer {
+    public static write(buffer: SerializerBase, value: FirstScreenPaint): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+        const valueHolderForNavigationStartTime  = value.navigationStartTime
+        valueSerializer.writeInt64(valueHolderForNavigationStartTime)
+        const valueHolderForFirstScreenPaintTime  = value.firstScreenPaintTime
+        valueSerializer.writeInt64(valueHolderForFirstScreenPaintTime)
+    }
+    public static read(buffer: DeserializerBase): FirstScreenPaint {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        const navigationStartTimeTmpResult : int64 = valueDeserializer.readInt64()
+        const firstScreenPaintTimeTmpResult : int64 = valueDeserializer.readInt64()
+        let value : FirstScreenPaint = ({url: urlTmpResult, navigationStartTime: navigationStartTimeTmpResult, firstScreenPaintTime: firstScreenPaintTimeTmpResult} as FirstScreenPaint)
         return value
     }
 }
@@ -7514,6 +7745,34 @@ export class OnWindowNewEvent_serializer {
         const targetUrlTmpResult : string = (valueDeserializer.readString() as string)
         const handlerTmpResult : ControllerHandler = (ControllerHandler_serializer.read(valueDeserializer) as ControllerHandler)
         let value : OnWindowNewEvent = ({isAlert: isAlertTmpResult, isUserTrigger: isUserTriggerTmpResult, targetUrl: targetUrlTmpResult, handler: handlerTmpResult} as OnWindowNewEvent)
+        return value
+    }
+}
+export class OnWindowNewExtEvent_serializer {
+    public static write(buffer: SerializerBase, value: OnWindowNewExtEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForIsAlert  = value.isAlert
+        valueSerializer.writeBoolean(valueHolderForIsAlert)
+        const valueHolderForIsUserTrigger  = value.isUserTrigger
+        valueSerializer.writeBoolean(valueHolderForIsUserTrigger)
+        const valueHolderForTargetUrl  = value.targetUrl
+        valueSerializer.writeString(valueHolderForTargetUrl)
+        const valueHolderForHandler  = value.handler
+        ControllerHandler_serializer.write(valueSerializer, valueHolderForHandler)
+        const valueHolderForWindowFeatures  = value.windowFeatures
+        WindowFeatures_serializer.write(valueSerializer, valueHolderForWindowFeatures)
+        const valueHolderForNavigationPolicy  = value.navigationPolicy
+        valueSerializer.writeInt32(valueHolderForNavigationPolicy.valueOf())
+    }
+    public static read(buffer: DeserializerBase): OnWindowNewExtEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        const isAlertTmpResult : boolean = valueDeserializer.readBoolean()
+        const isUserTriggerTmpResult : boolean = valueDeserializer.readBoolean()
+        const targetUrlTmpResult : string = (valueDeserializer.readString() as string)
+        const handlerTmpResult : ControllerHandler = (ControllerHandler_serializer.read(valueDeserializer) as ControllerHandler)
+        const windowFeaturesTmpResult : WindowFeatures = WindowFeatures_serializer.read(valueDeserializer)
+        const navigationPolicyTmpResult : NavigationPolicy = NavigationPolicy.fromValue(valueDeserializer.readInt32())
+        let value : OnWindowNewExtEvent = ({isAlert: isAlertTmpResult, isUserTrigger: isUserTriggerTmpResult, targetUrl: targetUrlTmpResult, handler: handlerTmpResult, windowFeatures: windowFeaturesTmpResult, navigationPolicy: navigationPolicyTmpResult} as OnWindowNewExtEvent)
         return value
     }
 }

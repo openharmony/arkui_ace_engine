@@ -22,6 +22,12 @@
 
 namespace OHOS::Ace {
 
+struct DragEventData {
+    uint64_t timestampMs = 0;
+    double coordinateX = 0.0;
+    double coordinateY = 0.0;
+};
+
 class PropagationEventInfo : public virtual TypeInfoBase {
     DECLARE_RELATIONSHIP_OF_CLASSES(PropagationEventInfo, TypeInfoBase);
 

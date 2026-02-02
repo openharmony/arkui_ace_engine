@@ -425,6 +425,23 @@ public:
         }
     }
 
+    void OnColorConfigurationUpdate() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(theme);
+        auto layout = GetLayoutProperty<TabContentLayoutProperty>();
+        CHECK_NULL_VOID(layout);
+        if (!layout->HasIndicatorColorSetByUser() || !layout->GetIndicatorColorSetByUserValue()) {
+            auto currentIndicator = GetIndicatorStyle();
+            currentIndicator.color = theme->GetActiveIndicatorColor();
+            SetIndicatorStyle(currentIndicator);
+        }
+    }
+
     void OnColorModeChange(uint32_t colorMode) override
     {
         CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());

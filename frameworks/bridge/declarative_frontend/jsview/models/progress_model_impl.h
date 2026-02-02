@@ -28,6 +28,7 @@ public:
     void SetColor(const Color& value) override;
     void ResetColor() override {}
     void SetBackgroundColor(const Color& value) override;
+    void SetBackgroundColorByUser(bool value) override {};
     void ResetBackgroundColor() override {}
     void SetStrokeWidth(const Dimension& value) override;
     void SetScaleCount(int32_t value) override;
@@ -51,6 +52,7 @@ public:
     void SetRingSweepingEffect(bool value) override {};
     void SetLinearSweepingEffect(bool value) override {};
     void SetSmoothEffect(bool value) override {};
+    void SetGradientColorResObj(const NG::Gradient& value) override {};
     void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
     void SetCapsuleStyleFontColor(bool value) override {};
     void SetCapsuleStyle(bool value) override {};

@@ -1,0 +1,136 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_CUSTOM_GRID_CUSTOM_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_CUSTOM_GRID_CUSTOM_LAYOUT_ALGORITHM_H
+
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+
+namespace OHOS::Ace::NG {
+class GridCustomLayoutAlgorithm : public GridLayoutBaseAlgorithm {
+    DECLARE_ACE_TYPE(GridCustomLayoutAlgorithm, GridLayoutBaseAlgorithm);
+
+public:
+    explicit GridCustomLayoutAlgorithm(
+        GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
+        : GridLayoutBaseAlgorithm(std::move(info)), canOverScrollStart_(canOverScrollStart),
+          canOverScrollEnd_(canOverScrollEnd) {};
+
+    ~GridCustomLayoutAlgorithm() override = default;
+
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
+
+private:
+    /**
+     * @brief Measures the size of Grid based on the given GridLayoutProperty.
+     * @param props The GridLayoutProperty object containing the layout properties.
+     * @return The main-axis length of Grid contentRect.
+     */
+    float MeasureSelf(const RefPtr<GridLayoutProperty>& props);
+
+    /**
+     * @brief Initializes member variables based on the given GridLayoutProperty.
+     * @param props The GridLayoutProperty object containing the layout properties.
+     */
+    void Init(const RefPtr<GridLayoutProperty>& props);
+
+    GridStartLineInfo GetStartIndexByIndex(int32_t index, const GridLayoutOptions& options);
+    GridStartLineInfo GetStartIndexByOffset(float offset, const GridLayoutOptions& options);
+    void ClearCache();
+    void FillCurrentLine(int32_t startIndex);
+    void MeasureBackward(float mainSize);
+    void MeasureForward(float mainSize);
+    void MeasureToTarget(float mainSize);
+    void MeasureOnJump(float mainSize);
+    void MeasureOnOffset(float mainSize);
+    void FillBackward(float mainSize);
+    void JumpToTargetOffset(float mainSize);
+    float JumpToTargetIndex(float mainSize, int32_t targetIndex);
+    /**
+     * @brief Check if offset is larger than the entire viewport. If so, skip measuring intermediate items and jump
+     * directly to the estimated destination.
+     *
+     * @param mainSize main-axis length of the viewport.
+     * @return true if a skip is performed.
+     */
+    bool TrySkipping(float mainSize);
+
+    /**
+     * @brief Update variables in GridLayoutInfo at the end of Layout.
+     */
+    void UpdateLayoutInfo();
+
+    /**
+     * @brief Check if layout states (matrix, height map) need to be reset during Init.
+     */
+    void CheckForReset();
+
+    bool NeedJump(float mainSize);
+
+    bool CheckStartLineValid();
+    /**
+     * @brief post delayed task to preload GridItems in cache range.
+     */
+    void PreloadItems(int32_t cacheCnt);
+    /**
+     * @brief immediately create & measure GridItems in cache range.
+     */
+    void SyncPreloadItems(int32_t cacheCnt);
+    void AdaptToChildMainSize(RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize);
+
+    bool TargetOffsetInCache();
+
+    bool IsTargetRowInCache(int32_t jumpIndex);
+
+    bool IsIrregularLine(int32_t lineIndex) const override;
+
+    /**
+     * @brief Calculates the cross positions based on the padding.
+     * @param padding The padding property of the layout.
+     * @return A vector containing the cross positions.
+     */
+    std::vector<float> CalculateCrossPositions(const PaddingPropertyF& padding);
+
+    /**
+     * @brief Performs the layout of the children based on the main offset.
+     * @param mainOffset The main offset of the layout.
+     * @param cacheLine number of lines of cache items to layout
+     * @return number of cached items laid out in front and back
+     */
+    std::pair<int32_t, int32_t> LayoutChildren(float mainOffset, int32_t cacheLine);
+
+    LayoutWrapper* wrapper_ = nullptr;
+
+    std::vector<float> crossLens_; /**< The column widths of the GridItems. */
+    float crossGap_ = 0.0f;        /**< The cross-axis gap between GridItems. */
+    float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
+
+    bool enableSkip_ = true;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
+    bool reloadFlag_ = false;
+
+    SizeF frameSize_;
+    double originalWidth_ = 0.0;
+
+    ACE_DISALLOW_COPY_AND_MOVE(GridCustomLayoutAlgorithm);
+};
+
+} // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_CUSTOM_GRID_CUSTOM_LAYOUT_ALGORITHM_H

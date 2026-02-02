@@ -416,6 +416,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     UpdateOverlay(layoutWrapper);
     isLayouted_ = true;
+    layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
 }
 
 void GridScrollLayoutAlgorithm::ClearUnlayoutedItems(LayoutWrapper* layoutWrapper)
@@ -534,7 +535,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             if (canOverScrollStart_) {
                 info_.UpdateEndIndex(offset, mainSize, mainGap_);
             }
-            layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
             return;
         }
         // we need lastline if blank at start is not fully filled when start line is shorter
@@ -549,7 +549,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     } else {
         info_.UpdateEndIndex(info_.currentOffset_, mainSize, mainGap_);
     }
-    layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     if (info_.targetIndex_.has_value()) {
         info_.targetIndex_.reset();
     } else {
@@ -1271,16 +1270,30 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
+        // Calculate height difference between old line height and new average cell height
         auto deltaHeight = info_.lineHeightMap_[line] - cellAveLength_;
-        if (Positive(deltaHeight) && isScrollableSpringMotionRunning && !info_.reachStart_) {
+        // Handle spring rebound height compensation when all conditions are met:
+        // 1. deltaHeight > 0: old line height is greater than new average height (line is compressed)
+        // 2. isScrollableSpringMotionRunning: spring scroll animation is running
+        // 3. !info_.reachStart_: not reached start position
+        // 4. Negative(mainLength): mainLength is negative (in out of start)
+        // mainLength represents the current layout offset along main axis
+        if (Positive(deltaHeight) && isScrollableSpringMotionRunning && !info_.reachStart_ && Negative(mainLength)) {
+            // Add reduced height difference to mainLength for compensation
             mainLength += deltaHeight;
+            // Sync current offset with mainLength
             info_.currentOffset_ = mainLength;
+            // Calculate total content height after subtracting deltaHeight
             float totalHeight = GetContentHeight(wrapper_) - deltaHeight;
+            // If last main size is greater than or equal to new total height,
+            // content may be fully visible in viewport, adjust offset to maintain correct visual position
             if (info_.lastMainSize_ >= totalHeight) {
                 info_.currentOffset_ += totalHeight - info_.lastMainSize_;
             }
         }
+        // Update current line height to the new average cell height
         info_.lineHeightMap_[line] = cellAveLength_;
+        // Accumulate mainLength offset: current line height + main axis gap
         mainLength += cellAveLength_ + mainGap_;
     }
     // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]

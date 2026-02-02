@@ -2466,4 +2466,28 @@ HWTEST_F(NavdestinationTestNg, GetFullTitleWidth004, TestSize.Level1)
     ui.titleBarLayoutAlgorithm->GetFullTitleWidth(false, occupiedWidth);
     EXPECT_EQ(occupiedWidth, paddingRight);
 }
+
+/**
+ * @tc.name: GetFullTitleWidth005
+ * @tc.desc: Test GetFullTitleWidth with isCustom=true (should add 0).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetFullTitleWidth005, TestSize.Level1)
+{
+    UIComponents ui;
+    InitChildrenComponent(ui);
+    float occupiedWidth = 0.0f;
+    float paddingRight = 10.0f;
+    float menuOccupiedWidth = 0.0f;
+    Dimension menuCompPadding = 0.0_vp;
+    
+    ui.titleBarLayoutAlgorithm->fullModeTitleCenter_ = false;
+    ui.titleBarLayoutAlgorithm->paddingRight_ = paddingRight;
+    ui.titleBarLayoutAlgorithm->menuOccupiedWidth_ = menuOccupiedWidth;
+    ui.titleBarLayoutAlgorithm->menuCompPadding_ = menuCompPadding;
+    
+    ui.titleBarLayoutAlgorithm->GetFullTitleWidth(true, occupiedWidth);
+    
+    EXPECT_EQ(occupiedWidth, 0.0f);
+}
 } // namespace OHOS::Ace::NG

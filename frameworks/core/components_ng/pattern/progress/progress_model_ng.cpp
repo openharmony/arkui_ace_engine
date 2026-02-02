@@ -35,6 +35,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PROGRESS_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
@@ -81,6 +82,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
 
     auto pros = frameNode->GetPaintProperty<ProgressPaintProperty>();
     if (pros) {
+        pros->ResetBackgroundColorSetByUser();
         pros->ResetCapsuleStyleFontColorSetByUser();
         pros->ResetCapsuleStyleSetByUser();
         pros->ResetGradientColorSetByUser();
@@ -150,21 +152,22 @@ void ProgressModelNG::ResetGradientColor()
 
 void ProgressModelNG::SetBackgroundColor(const Color& value)
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedBgColor(true);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value);
 }
 
-void ProgressModelNG::ResetBackgroundColor()
+void ProgressModelNG::SetBackgroundColorByUser(bool value)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedBgColor(false);
+    pattern->SetUserInitiatedBgColor(value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColorSetByUser, value);
+}
+
+void ProgressModelNG::ResetBackgroundColor()
+{
+    SetBackgroundColorByUser(false);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
 }
 
@@ -649,6 +652,7 @@ void ProgressModelNG::SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&
 void ProgressModelNG::ProgressInitialize(
     FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type)
 {
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
@@ -664,11 +668,7 @@ void ProgressModelNG::ProgressInitialize(
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
-    if (type == ProgressType::CAPSULE) {
-        progressFocusNode->SetFocusable(true);
-    } else {
-        progressFocusNode->SetFocusable(false);
-    }
+    progressFocusNode->SetFocusable(type == ProgressType::CAPSULE);
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -820,6 +820,23 @@ void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<Resour
         pattern->UpdateColor(result, isFirstLoad);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ProgressModelNG::SetGradientColorResObj(const NG::Gradient& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        NG::Gradient& gradientValue = const_cast<NG::Gradient&>(value);
+        gradientValue.ReloadResources();
+        SetGradientColor(AceType::RawPtr(frameNode), gradientValue);
+    };
+    pattern->AddResObj("progress.color", resObj, std::move(updateFunc));
 }
 
 void ProgressModelNG::SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)

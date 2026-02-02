@@ -41,7 +41,7 @@ public:
 private:
     std::vector<int> input_;
 };
-class ACE_EXPORT PatternLockComponent : public RenderComponent {
+class ACE_FORCE_EXPORT PatternLockComponent : public RenderComponent {
     DECLARE_ACE_TYPE(PatternLockComponent, RenderComponent);
 
 public:
@@ -51,7 +51,7 @@ public:
     RefPtr<Element> CreateElement() override;
     void SetCircleRadius(const Dimension& circleRadius);
     void SetSideLength(const Dimension& sideLength);
-    void SetRegularColor(const Color& regularColor);
+    ACE_FORCE_EXPORT void SetRegularColor(const Color& regularColor);
     void SetSelectedColor(const Color& selectedColor);
     void SetActiveColor(const Color& regularColor);
     void SetPathColor(const Color& regularColor);

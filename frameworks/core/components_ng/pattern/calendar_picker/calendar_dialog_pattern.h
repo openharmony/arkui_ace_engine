@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 
 namespace OHOS::Ace::NG {
 class CalendarDialogPattern : public LinearLayoutPattern {

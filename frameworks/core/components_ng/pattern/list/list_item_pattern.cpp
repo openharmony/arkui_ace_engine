@@ -44,6 +44,11 @@ constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
+void ListItemPattern::SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder)
+{
+    shallowBuilder_ = std::move(shallowBuilder);
+}
+
 void ListItemPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -1471,6 +1476,21 @@ bool ListItemPattern::RenderCustomChild(int64_t deadline)
         shallowBuilder_.Reset();
     }
     return true;
+}
+
+FocusPattern ListItemPattern::GetFocusPattern() const
+{
+    if (listItemStyle_ == V2::ListItemStyle::CARD) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+        auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
+        CHECK_NULL_RETURN(listItemTheme, FocusPattern());
+        FocusPaintParam paintParam;
+        paintParam.SetPaintColor(listItemTheme->GetItemFocusBorderColor());
+        paintParam.SetPaintWidth(listItemTheme->GetItemFocusBorderWidth());
+        return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER, paintParam };
+    }
+    return { FocusType::SCOPE, true };
 }
 
 void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

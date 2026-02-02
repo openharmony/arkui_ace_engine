@@ -19,7 +19,7 @@
 #define protected public
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "test/mock/adapter/mock_uisession_manager.h"
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -1573,9 +1573,11 @@ HWTEST_F(StageTestNg, StageLayoutAlgorithmTest001, TestSize.Level1)
     StageLayoutAlgorithm stageLayoutAlgorithm;
     stageLayoutAlgorithm.Measure(AccessibilityManager::RawPtr(layoutWrapper));
     stageLayoutAlgorithm.Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    auto childFrameSize = childLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto stageSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     bool bEqual =
         childLayoutWrapper->GetGeometryNode()->GetFrameOffset() ==
-        OffsetF(stageLayoutAlgorithm.childInsets_.left_.Length(), stageLayoutAlgorithm.childInsets_.top_.Length());
+        OffsetF((stageSize.Width() - childFrameSize.Width()) / 2, (stageSize.Height() - childFrameSize.Height()) / 2);
     EXPECT_TRUE(bEqual);
 }
 

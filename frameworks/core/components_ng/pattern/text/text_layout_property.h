@@ -122,7 +122,7 @@ struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeSpacing, CalcDimension);
 };
 
-class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
+class ACE_FORCE_EXPORT TextLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TextLayoutProperty, LayoutProperty);
 
 public:
@@ -151,6 +151,7 @@ public:
         ResetCursorColor();
         ResetSelectedBackgroundColor();
         ResetTextColorFlagByUser();
+        ResetClipEdge();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -248,6 +249,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlHoverColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlPressedColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsTextMaxlinesFirst, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ClipEdge, bool, PROPERTY_UPDATE_RENDER);
 
     // symbol
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
@@ -344,6 +346,7 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propClipEdge_ = CloneClipEdge();
         value->propNeedReCreateParagraph_ = true;
     }
 

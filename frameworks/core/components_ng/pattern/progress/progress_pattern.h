@@ -94,10 +94,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void SetTextFromUser(bool value)
     {
@@ -192,8 +189,11 @@ private:
     void InitColorProperty(ProgressAnimatableProperty& progressAnimatableProperty,
         const RefPtr<ProgressTheme>& progressTheme, const RefPtr<ProgressPaintProperty>& paintProperty);
     void CalculateStrokeWidth(const SizeF& contentSize);
+    void RegisterVisibleAreaChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -226,6 +226,7 @@ private:
     void FireBuilder();
     void ReportProgressEvent();
     void OnColorConfigurationUpdate() override;
+    void ProcessColorOnColorConfigurationUpdate();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -257,6 +258,7 @@ private:
     bool isModifierInitiatedColor_ = false;
     bool isModifierInitiatedBgColor_ = false;
     double reportLastValue_ = 0.0f;
+    bool hasVisibleChangeRegistered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -410,8 +410,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
 export function DatePickerImpl(
     @memo
     style: ((attributes: DatePickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkDatePickerComponent>((): ArkDatePickerComponent => {
         return new ArkDatePickerComponent()
@@ -420,7 +418,6 @@ export function DatePickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -462,7 +459,7 @@ export class DatePickerOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
                 valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
                 Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)
@@ -684,7 +681,7 @@ export class DatePickerDialogOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
                 valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
                 Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)

@@ -21,10 +21,11 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "arkoala_api_generated.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;

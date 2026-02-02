@@ -506,6 +506,7 @@ void ImagePattern::OnImageLoadSuccess()
      * Animated images maintain their own dirty marking logic, so no need to trigger here.
      */
     CHECK_NULL_VOID(isStaticImage);
+    isRecycledImage_ = false;
     host->MarkNeedRenderOnly();
 }
 
@@ -622,6 +623,7 @@ void ImagePattern::PreprocessYUVDecodeFormat(const RefPtr<FrameNode>& host)
     auto obj = loadingCtx_->GetImageObject();
     CHECK_NULL_VOID(obj);
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProperty && (renderProperty->HasImageResizableSlice() ||
         renderProperty->HasImageResizableLattice());
@@ -825,6 +827,7 @@ void ImagePattern::InitFromThemeIfNeed()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
@@ -903,6 +906,7 @@ void ImagePattern::CreateObscuredImage()
     CHECK_NULL_VOID(layoutConstraint);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
@@ -917,6 +921,7 @@ ImageDfxConfig ImagePattern::CreateImageDfxConfig(const ImageSourceInfo& src)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ImageDfxConfig());
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, ImageDfxConfig());
     return {
@@ -938,6 +943,8 @@ void ImagePattern::ClearReloadFlagsAfterLoad()
 
 void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 {
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     if (loadingCtx_) {
         auto srcKey = src.GetKey();
         auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
@@ -962,7 +969,6 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     if (!needLayout) {
         loadingCtx_->FinishMeasure();
     } else {
-        auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         if (pipeline && host->GetId() != INVALID_ID) {
@@ -981,6 +987,7 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
         auto host = GetHost();
+        ACE_UINODE_TRACE(host);
 
         altImageDfxConfig_ = CreateImageDfxConfig(altImageSourceInfo);
         altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -996,6 +1003,7 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
@@ -1196,6 +1204,7 @@ void ImagePattern::InitOnKeyEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto focusHub = hub->GetOrCreateFocusHub();
@@ -1397,19 +1406,24 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 bool ImagePattern::RecycleImageData()
 {
-    // when image component is [onShow] , [no cache], do not clean image data
-    bool isDataNoCache = (!loadingCtx_ || (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
-                                              SystemProperties::GetDownloadByNetworkEnabled() &&
-                                              DownloadManager::GetInstance()->IsContains(
-                                                  loadingCtx_->GetSourceInfo().GetSrc()) == false));
-    if (isShow_ || isDataNoCache) {
-        return false;
-    }
     auto frameNode = GetHost();
     if (!frameNode) {
+        return false; 
+    }
+    auto pipeline = frameNode->GetContext();
+    if (!pipeline) {
         return false;
     }
-    frameNode->SetTrimMemRecycle(true);
+    // Use app-level recycle setting if provided; otherwise fall back to system default.
+    std::optional<bool> isAppRecycleEnabled = pipeline->GetIsRecycleInvisibleImageMemory();
+    bool enableImageRecycle = isAppRecycleEnabled.value_or(SystemProperties::GetRecycleImageEnabled());
+    if (!enableImageRecycle) {
+        return false;
+    }
+    // For network images, only recycle image data when cache is available to avoid re-download.
+    if (loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
+        return false;
+    }
     loadingCtx_ = nullptr;
     auto rsRenderContext = frameNode->GetRenderContext();
     if (!rsRenderContext) {
@@ -1419,11 +1433,13 @@ bool ImagePattern::RecycleImageData()
         imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
     altErrorCtx_ = nullptr;
     altErrorImage_ = nullptr;
+    isRecycledImage_ = true;
     ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
     return true;
 }
@@ -1489,17 +1505,29 @@ void ImagePattern::UnregisterWindowStateChangedCallback()
 
 void ImagePattern::OnWindowHide()
 {
-    isShow_ = false;
-}
-
-void ImagePattern::OnWindowShow()
-{
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageReloadNeeded_);
-    isShow_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!host->IsTrimMemRecycle()) {
+    if (!isRecycledImage_ && !host->IsPendingOnMainRenderTree()) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowHide recycle ImageData: %{public}s-%{private}s",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
+        RecycleImageData();
+    }
+}
+
+void ImagePattern::OnAttachToMainRenderTree()
+{
+    if (isRecycledImage_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnAttachToMainRenderTree reload ImageData: %{public}s-%{private}s",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
+        LoadImageDataIfNeed();
+    }
+}
+
+void ImagePattern::OnOffscreenProcessResource()
+{
+    if (isRecycledImage_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnOffscreenProcessResource reload ImageData: %{public}s-%{private}s",
+            imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         LoadImageDataIfNeed();
     }
 }
@@ -1644,6 +1672,7 @@ void ImagePattern::InitCopy()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->SetLongPressEvent(longPressEvent_);
 
@@ -1799,6 +1828,8 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         json->PutExtAttr("imageWidth", std::to_string(loadingCtx_->GetOriginImageSize().Width()).c_str(), filter);
         json->PutExtAttr("imageHeight", std::to_string(loadingCtx_->GetOriginImageSize().Height()).c_str(), filter);
     }
+    bool antiAlias = renderProp->GetAntiAliasValue(false);
+    json->PutExtAttr("antialiased", antiAlias ? "true" : "false", filter);
 }
 
 void ImagePattern::DumpLayoutInfo()
@@ -2010,11 +2041,30 @@ void ImagePattern::DumpSvgInfo()
     DumpLog::GetInstance().AddDesc(std::string("Svg:").append(imageObject->GetDumpInfo()));
 }
 
+bool ImagePattern::GetIsRecycleInvisibleImageMemory() const
+{
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return false; 
+    }
+    auto pipeline = frameNode->GetContext();
+    if (!pipeline) {
+        return false;
+    }
+    return pipeline->GetIsRecycleInvisibleImageMemory().value_or(false);
+}
+
 void ImagePattern::DumpOtherInfo()
 {
     DumpLog::GetInstance().AddDesc("---- Image Component (Excluding Layout and Drawing) Other Info Dump ----");
     DumpLog::GetInstance().AddDesc(renderedImageInfo_.ToString());
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
+    DumpLog::GetInstance().AddDesc(std::string("SystemRecycleImageEnabled:")
+                                       .append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("UserRecycleImageEnabled:").append(GetIsRecycleInvisibleImageMemory() ? "true" : "false"));
+    isRecycledImage_ ? DumpLog::GetInstance().AddDesc("isRecycled:true")
+                     : DumpLog::GetInstance().AddDesc("isRecycled:false");
 
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
@@ -2138,6 +2188,23 @@ void ImagePattern::OnIconConfigurationUpdate()
     OnConfigurationUpdate();
 }
 
+bool ImagePattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    isFullyInitializedFromTheme_ = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, false);
+    if (imageLayoutProperty->GetImageSourceInfo().has_value()) {
+        auto src = imageLayoutProperty->GetImageSourceInfo().value();
+        src.UpdateLocalColorMode(host->GetLocalColorMode());
+        imageLayoutProperty->UpdateImageSourceInfo(src);
+        LoadImageDataIfNeed();
+        return true;
+    }
+    return false;
+}
+
 void ImagePattern::OnConfigurationUpdate()
 {
     isFullyInitializedFromTheme_ = false;
@@ -2242,7 +2309,7 @@ std::string ImagePattern::GetSrcTypeToString(SrcType srcType)
         { SrcType::MEMORY, "memory" }, { SrcType::BASE64, "base64" }, { SrcType::INTERNAL, "internal" },
         { SrcType::RESOURCE, "resource" }, { SrcType::DATA_ABILITY, "dataAbility" },
         { SrcType::DATA_ABILITY_DECODED, "dataAbilityDecoded" }, { SrcType::RESOURCE_ID, "resourceId" },
-        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" } };
+        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" }, { SrcType::STREAM, "stream" } };
 
     auto iter = typeMap.find(srcType);
     if (iter != typeMap.end()) {
@@ -2695,6 +2762,8 @@ void ImagePattern::LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceI
         CreateLoadFailCallbackForAltError());
     if (!altErrorCtx_ || altErrorCtx_->GetSourceInfo() != altErrorImageSourceInfo ||
         (altErrorCtx_ && altErrorImageSourceInfo.IsSvg())) {
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
         altErrorImageDfxConfig_ = CreateImageDfxConfig(altErrorImageSourceInfo);
         altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
             altErrorImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altErrorImageDfxConfig_);

@@ -34,7 +34,7 @@ namespace Converter {
 inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
     ConvContext *ctx)
 {
-    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+    dst.offsetRemain = Converter::ArkValue<Ark_Float64>(src.offset);
 }
 } // Converter
 
@@ -63,16 +63,16 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollBarUpdateTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number index,
-        const Ark_Number offset, const Callback_ComputedBarAttribute_Void continuation) {
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Int32 index,
+        const Ark_Float64 offset, const Callback_ComputedBarAttribute_Void continuation) {
         Ark_ComputedBarAttribute arkResult {
             .totalOffset = offset,
             .totalLength = index
         };
         CallbackHelper(continuation).InvokeSync(arkResult);
     };
-    auto func = Converter::ArkValue<Callback_Number_Number_ComputedBarAttribute>(nullptr, callSyncFunc);
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(func);
+    auto func = Converter::ArkValue<Callback_I32_F64_ComputedBarAttribute>(nullptr, callSyncFunc);
+    auto optFunc = Converter::ArkValue<Opt_Callback_I32_F64_ComputedBarAttribute>(func);
     modifier_->setOnScrollBarUpdate(node_, &optFunc);
 
     auto result = eventHub->FireOnScrollBarUpdate(1000, Dimension(2, DimensionUnit::VP));
@@ -95,10 +95,10 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
 
     struct CheckEvent { int32_t nodeId; int32_t index; Dimension offset; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Number_ComputedBarAttribute onScrollBarUpdate = {
+    Callback_I32_F64_ComputedBarAttribute onScrollBarUpdate = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](const Ark_Int32 resourceId,
-            const Ark_Number index, const Ark_Number offset, const Callback_ComputedBarAttribute_Void continuation)
+            const Ark_Int32 index, const Ark_Float64 offset, const Callback_ComputedBarAttribute_Void continuation)
             {
                 checkEvent = {
                     .nodeId = resourceId,
@@ -108,7 +108,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
         }
     };
 
-    auto optOnScrollBarUpdate = Converter::ArkValue<Opt_Callback_Number_Number_ComputedBarAttribute>(onScrollBarUpdate);
+    auto optOnScrollBarUpdate = Converter::ArkValue<Opt_Callback_I32_F64_ComputedBarAttribute>(onScrollBarUpdate);
     modifier_->setOnScrollBarUpdate(node_, &optOnScrollBarUpdate);
 
     // index: 11, offset: 12 invalid
@@ -165,7 +165,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 
     static constexpr int32_t contextId = 123;
     static bool isCalled = false;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Int32 first, const Ark_Int32 last) {
         isCalled = true;
         checkEvent = {
             .nodeId = resourceId,
@@ -174,10 +174,10 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
         };
     };
 
-    Callback_Number_Number_Void arkCallback =
-        Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
+    auto arkCallback =
+        Converter::ArkValue<Callback_I32_I32_Void>(checkCallback, contextId);
 
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_Number_Void>(arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_I32_I32_Void>(arkCallback);
     modifier_->setOnScrollIndex(node_, &optCallback);
 
     auto onScrollIndex = eventHub->GetOnScrollIndex();
@@ -224,7 +224,7 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Le
 
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_ItemDragInfo event, const Ark_Number itemIndex,
+        const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
         const Callback_Opt_CustomBuilder_Void continuation
     ) {
         // check input values
@@ -286,7 +286,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
 
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_ItemDragInfo event, const Ark_Number itemIndex,
+        const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
         const Callback_Opt_CustomBuilder_Void continuation
     ) {
         // check input values
@@ -386,10 +386,10 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
         int32_t insertIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Number_Void onItemDragMove = {
+    Callback_ItemDragInfo_I32_I32_Void onItemDragMove = {
         .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Number itemIndex,
-            const Ark_Number insertIndex)
+        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
+            const Ark_Int32 insertIndex)
             {
                 checkEvent = {
                     .nodeId = nodeId,
@@ -400,7 +400,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragMoveTest, TestSize.Level1)
             }
     };
 
-    auto optOnItemDragMove = Converter::ArkValue<Opt_Callback_ItemDragInfo_Number_Number_Void>(onItemDragMove);
+    auto optOnItemDragMove = Converter::ArkValue<Opt_Callback_ItemDragInfo_I32_I32_Void>(onItemDragMove);
     modifier_->setOnItemDragMove(node_, &optOnItemDragMove);
 
     dragInfo.SetX(987);
@@ -434,10 +434,10 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
         int32_t itemIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Void onItemDragLeave = {
+    Callback_ItemDragInfo_I32_Void onItemDragLeave = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId,
-            const Ark_ItemDragInfo event, const Ark_Number itemIndex)
+            const Ark_ItemDragInfo event, const Ark_Int32 itemIndex)
             {
                 checkEvent = {
                     .nodeId = nodeId,
@@ -447,7 +447,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragLeaveTest, TestSize.Level1)
         }
     };
 
-    auto optOnItemDragLeave = Converter::ArkValue<Opt_Callback_ItemDragInfo_Number_Void>(onItemDragLeave);
+    auto optOnItemDragLeave = Converter::ArkValue<Opt_Callback_ItemDragInfo_I32_Void>(onItemDragLeave);
     modifier_->setOnItemDragLeave(node_, &optOnItemDragLeave);
 
     dragInfo.SetX(135);
@@ -482,10 +482,10 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
         bool isSuccess;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Number_Boolean_Void onItemDrop = {
+    Callback_ItemDragInfo_I32_I32_Boolean_Void onItemDrop = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event,
-        const Ark_Number itemIndex, const Ark_Number insertIndex, const Ark_Boolean isSuccess)
+        const Ark_Int32 itemIndex, const Ark_Int32 insertIndex, const Ark_Boolean isSuccess)
         {
             checkEvent = {
                 .nodeId = nodeId,
@@ -497,7 +497,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
         }
     };
 
-    auto optOnItemDrop = Converter::ArkValue<Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void>(onItemDrop);
+    auto optOnItemDrop = Converter::ArkValue<Opt_Callback_ItemDragInfo_I32_I32_Boolean_Void>(onItemDrop);
     modifier_->setOnItemDrop(node_, &optOnItemDrop);
 
     dragInfo.SetX(975);
@@ -531,7 +531,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollFrameBeginTest, TestSize.Level1)
 
     static const Ark_Int32 expectedResId = 123;
     auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number offset, Ark_ScrollState state,
+        const Ark_Float64 offset, Ark_ScrollState state,
         const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);

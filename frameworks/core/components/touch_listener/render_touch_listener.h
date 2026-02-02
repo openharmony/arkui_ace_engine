@@ -32,7 +32,7 @@ class ACE_EXPORT RenderTouchListener final : public RenderProxy, public TouchEve
 public:
     RenderTouchListener();
     ~RenderTouchListener() override = default;
-    static RefPtr<RenderNode> Create();
+    ACE_FORCE_EXPORT static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
 
     void SetOnTouchDown(const OnTouchEventCallback& onTouchDown) const

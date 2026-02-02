@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,31 +81,6 @@ class BaseNode extends ViewBuildNodeBase {
     }
 }
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-class Disposable {
-    constructor() {
-        this.isDisposed_ = false;
-    }
-    dispose() {
-        this.isDisposed_ = true;
-    }
-    isDisposed() {
-        return this.isDisposed_;
-    }
-}
-/*
  * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,10 +96,9 @@ class Disposable {
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
-/// <reference path="./disposable.ts" />
-class BuilderNodeCommonBase extends Disposable {
+class BuilderNodeCommonBase {
     constructor() {
-        super();
+        this._isDisposed = false;
     }
     update(params) {
         this._JSBuilderNode.update(params);
@@ -154,11 +128,11 @@ class BuilderNodeCommonBase extends Disposable {
         if (this.isDisposed()) {
             return;
         }
-        super.dispose();
+        this._isDisposed = true;
         this._JSBuilderNode.dispose();
     }
     isDisposed() {
-        return super.isDisposed() && (this._JSBuilderNode?.isDisposed() ?? true);
+        return this._isDisposed && (this._JSBuilderNode?.isDisposed() ?? true);
     }
     reuse(param) {
         this._JSBuilderNode.reuse(param);
@@ -199,7 +173,7 @@ class JSBuilderNode extends BaseNode {
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this._supportNestingBuilder = false;
-        this.disposable_ = new Disposable();
+        this._isDisposed = false;
         this.inheritFreeze = false;
         this.allowFreezeWhenInactive = false;
         this.parentallowFreeze = false;
@@ -315,7 +289,7 @@ class JSBuilderNode extends BaseNode {
         }
     }
     clearChildBuilderNodeWeakMap() {
-        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+        this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
             if (child instanceof JSBuilderNode) {
                 child.__parentViewOfBuildNode = undefined;
@@ -595,17 +569,17 @@ class JSBuilderNode extends BaseNode {
         if (this.isDisposed()) {
             return;
         }
-        this.disposable_.dispose();
+        this._isDisposed = true;
         if (this.nodePtr_) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
         }
         this.frameNode_?.dispose();
     }
     isDisposed() {
-        return this.disposable_.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
+        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
     }
     disposeNode() {
-        super.disposeNode();
+        this._isDisposed = true;
         this.nodePtr_ = null;
         this._nativeRef = null;
         this.frameNode_?.resetNodePtr();
@@ -715,9 +689,8 @@ class ReactiveBuilderNodeBase extends JSBuilderNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class NodeAdapter extends Disposable {
+class NodeAdapter {
     constructor() {
-        super();
         this.nodeRefs_ = new Array();
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
@@ -728,7 +701,7 @@ class NodeAdapter extends Disposable {
         return getUINativeModule().nodeAdapter.getNodeType(this.nativePtr_);
     }
     dispose() {
-        super.dispose();
+        this._isDisposed = true;
         if (this.nativePtr_) {
             getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
         }
@@ -740,7 +713,7 @@ class NodeAdapter extends Disposable {
         this.nativePtr_ = null;
     }
     isDisposed() {
-        return super.isDisposed() && (this.nativePtr_ === undefined || this.nativePtr_ === null);
+        return this._isDisposed && (this.nativePtr_ === undefined || this.nativePtr_ === null);
     }
     set totalNodeCount(count) {
         if (count < 0) {
@@ -984,7 +957,6 @@ class NodeController {
         }
     }
 }
-/// <reference path="./disposable.ts" />
 var ExpandMode;
 (function (ExpandMode) {
     ExpandMode[ExpandMode["NOT_EXPAND"] = 0] = "NOT_EXPAND";
@@ -1014,8 +986,11 @@ errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child'
 function getFrameNodeRawPtr(frameNode) {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
+function createFrameNodeByTrans(nativePointer, uiContext, nodeType) {
+return new TransFrameNode(uiContext, nodeType, undefined, nativePointer);
+}
 class FrameNode extends Disposable {
-    constructor(uiContext, type, options) {
+    constructor(uiContext, type, options, nativePointer) {
         super();
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
@@ -1028,6 +1003,7 @@ class FrameNode extends Disposable {
         this.instanceId_ = uiContext.instanceId_;
         this.uiContext_ = uiContext;
         this._nodeId = -1;
+        this._isDisposed = false;
         this._childList = new Map();
         if (type === 'BuilderRootFrameNode') {
             this.renderNode_ = new RenderNode(type);
@@ -1041,10 +1017,19 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (type === undefined || type === "CustomFrameNode") {
             this.renderNode_ = new RenderNode('CustomFrameNode');
-            result = getUINativeModule().frameNode.createFrameNode(this);
+            if (nativePointer === null || nativePointer === undefined) {
+                result = getUINativeModule().frameNode.createFrameNode(this);
+            }
+            else {
+                result = getUINativeModule().frameNode.createTransFrameNode(this, nativePtr);
+            }
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+            if (nativePointer === undefined || nativePointer === null) {
+                result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+            } else {
+                result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, nativePointer);
+            }
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -1052,6 +1037,8 @@ class FrameNode extends Disposable {
         this.nodePtr_ = this._nativeRef?.getNativeHandle();
         this.renderNode_?.setNodePtr(result?.nativeStrongRef);
         this.renderNode_?.setFrameNode(new WeakRef(this));
+        this.type_ = type;
+        this.rawPtr_ = result?.rawPtr_;
         if (result === undefined || this._nodeId === -1) {
             return;
         }
@@ -1127,7 +1114,7 @@ class FrameNode extends Disposable {
         if (this.isDisposed()) {
             return;
         }
-        super.dispose();
+        this._isDisposed = true;
         if (this.nodePtr_) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
         }
@@ -1139,7 +1126,7 @@ class FrameNode extends Disposable {
     }
     isDisposed() {
         let node = this.getNodePtr();
-        return super.isDisposed() && (node === undefined || node === null);
+        return this._isDisposed && (node === undefined || node === null);
     }
     static disposeTreeRecursively(node) {
         if (node === null) {
@@ -1470,6 +1457,9 @@ class FrameNode extends Disposable {
         return getUINativeModule().frameNode.isAttached(this.getNodePtr());
     }
     isOnMainTree() {
+        if (this.isDisposed()) {
+            throw { message: 'The current node has been disposed.', code: 100026 };
+          }
         return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
     }
     getInspectorInfo() {
@@ -1677,7 +1667,7 @@ class FrameNode extends Disposable {
             throw { message: "The parameter 'positionByLocal' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
         }
         if (this.isDisposed()) {
-            throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+            throw { message: 'The current FrameNode has been disposed.', code: 100026 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(this.getNodePtr(), positionByLocal.x, positionByLocal.y);
@@ -1686,7 +1676,7 @@ class FrameNode extends Disposable {
             throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
         }
         if (offsetPosition[0] === 0) {
-            throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+            throw { message: 'The current FrameNode is not on the main tree.', code: 100028 };
         }
         return { x: offsetPosition[1], y: offsetPosition[2] };
     }
@@ -1698,7 +1688,7 @@ class FrameNode extends Disposable {
             throw { message: "The parameter 'positionByWindow' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
         }
         if (this.isDisposed()) {
-            throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+            throw { message: 'The current FrameNode has been disposed.', code: 100026 };
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(this.getNodePtr(), positionByWindow.x, positionByWindow.y);
@@ -1707,7 +1697,7 @@ class FrameNode extends Disposable {
             throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
         }
         if (offsetPosition[0] === 0) {
-            throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+            throw { message: 'The current FrameNode is not on the main tree.', code: 100028 };
         }
         return { x: offsetPosition[1], y: offsetPosition[2] };
     }
@@ -1767,6 +1757,51 @@ class FrameNode extends Disposable {
             return getUINativeModule().frameNode.isOnRenderTree(this.nodePtr_);
         }
         return false;
+    }
+}
+
+class TransFrameNode extends FrameNode {
+    constructor(uiContext, type, options, nativePointer) {
+        super(uiContext, type, options, nativePointer);
+    }
+    isTransferred() {
+        return true;
+    }
+    getRenderNode() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getRenderNode');
+    }
+    getCustomProperty(name) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getCustomProperty');
+    }
+    get commonAttribute() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonAttribute');
+    }
+    get commonEvent() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonEvent');
+    }
+    get gestureEvent() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support gestureEvent');
+    }
+    setMeasuredSize(size) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setMeasuredSize');
+    }
+    setLayoutPosition(position) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setLayoutPosition');
+    }
+    measure(constraint) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support measure');
+    }
+    layout(position) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support layout');
+    }
+    setNeedsLayout() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setNeedsLayout');
+    }
+    invalidate() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support invalidate');
+    }
+    addComponentContent(content) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support addComponentContent');
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -1868,7 +1903,7 @@ class TypedFrameNode extends FrameNode {
         this.attrCreator_ = attrCreator;
     }
     dispose() {
-        this.isDisposed_ = true;
+        this._isDisposed = true;
         if (this.nodePtr_) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
         }
@@ -2030,22 +2065,30 @@ const __creatorMap__ = new Map([
         }],
     ['WaterFlow', (context) => {
             return new TypedFrameNode(context, 'WaterFlow', (node, type) => {
-                return new ArkWaterFlowComponent(node, type);
+                getUINativeModule().loadNativeModule('WaterFlow');
+                let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+                return module.createComponent(node, type);
             });
         }],
     ['SymbolGlyph', (context) => {
             return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
-                return new ArkSymbolGlyphComponent(node, type);
+                getUINativeModule().loadNativeModule('SymbolGlyph');
+                let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+                return module.createComponent(node, type);
             });
         }],
     ['FlowItem', (context) => {
             return new TypedFrameNode(context, 'FlowItem', (node, type) => {
-                return new ArkFlowItemComponent(node, type);
+                getUINativeModule().loadNativeModule('FlowItem');
+                let module = globalThis.requireNapi('arkui.components.arkflowitem');
+                return module.createComponent(node, type);
             });
         }],
     ['QRCode', (context) => {
             return new TypedFrameNode(context, 'QRCode', (node, type) => {
-                return new ArkQRCodeComponent(node, type);
+                getUINativeModule().loadNativeModule('QRCode');
+ 	            let module = globalThis.requireNapi('arkui.components.arkqrcode');
+ 	            return module.createComponent(node, type);
             });
         }],
     ['Badge', (context) => {
@@ -2075,7 +2118,9 @@ const __creatorMap__ = new Map([
         }],
     ['Marquee', (context) => {
             return new TypedFrameNode(context, 'Marquee', (node, type) => {
-                return new ArkMarqueeComponent(node, type);
+                getUINativeModule().loadNativeModule('Marquee');
+                let module = globalThis.requireNapi('arkui.components.arkmarquee');
+                return module.createComponent(node, type);
             });
         }],
     ['TextArea', (context) => {
@@ -2085,27 +2130,37 @@ const __creatorMap__ = new Map([
         }],
     ['Checkbox', (context) => {
             return new TypedFrameNode(context, 'Checkbox', (node, type) => {
-                return new ArkCheckboxComponent(node, type);
+                getUINativeModule().loadNativeModule('Checkbox');
+                let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+                return module.createComponent(node, type);
             });
         }],
     ['CheckboxGroup', (context) => {
             return new TypedFrameNode(context, 'CheckboxGroup', (node, type) => {
-                return new ArkCheckboxGroupComponent(node, type);
+                getUINativeModule().loadNativeModule('CheckboxGroup');
+                let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
+                return module.createComponent(node, type);
             });
         }],
     ['Radio', (context) => {
             return new TypedFrameNode(context, 'Radio', (node, type) => {
-                return new ArkRadioComponent(node, type);
+                getUINativeModule().loadNativeModule('Radio');
+                let module = globalThis.requireNapi('arkui.components.arkradio');
+                return module.createComponent(node, type);
             });
         }],
     ['Rating', (context) => {
             return new TypedFrameNode(context, 'Rating', (node, type) => {
-                return new ArkRatingComponent(node, type);
+                getUINativeModule().loadNativeModule('Rating');
+                let module = globalThis.requireNapi('arkui.components.arkrating');
+                return module.createComponent(node, type);
             });
         }],
     ['Slider', (context) => {
             return new TypedFrameNode(context, 'Slider', (node, type) => {
-                return new ArkSliderComponent(node, type);
+                getUINativeModule().loadNativeModule('Slider');
+                let module = globalThis.requireNapi('arkui.components.arkslider');
+                return module.createComponent(node, type);
             });
         }],
     ['Select', (context) => {
@@ -2177,7 +2232,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('WaterFlow');
+        let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['FlowItem', (node) => {
@@ -2187,7 +2244,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('FlowItem');
+        let module = globalThis.requireNapi('arkui.components.arkflowitem');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Grid', (node) => {
@@ -2257,7 +2316,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Checkbox');
+        let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Radio', (node) => {
@@ -2267,7 +2328,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Radio');
+        let module = globalThis.requireNapi('arkui.components.arkradio');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Slider', (node) => {
@@ -2277,7 +2340,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Slider');
+        let module = globalThis.requireNapi('arkui.components.arkslider');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Toggle', (node) => {
@@ -2807,11 +2872,11 @@ class ShapeMask extends BaseShape {
         this.strokeWidth = 0;
     }
 }
-class RenderNode extends Disposable {
+class RenderNode {
     constructor(type, cptrVal = 0) {
-        super();
+        this._isDisposed = false;
         this.nodePtr = null;
-        this.type = type; // use for transfer 
+        this.type = type; // use for transfer
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
@@ -3197,7 +3262,7 @@ class RenderNode extends Disposable {
         if (this.isDisposed()) {
             return;
         }
-        super.dispose();
+        this._isDisposed = true;
         if (this.nodePtr) {
             getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
         }
@@ -3208,7 +3273,7 @@ class RenderNode extends Disposable {
         this.nodePtr = null;
     }
     isDisposed() {
-        return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
+        return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
     }
     getNodePtr() {
         return this.nodePtr;
@@ -3429,7 +3494,7 @@ class Content {
 class ComponentContentCommonBase extends Content {
     constructor() {
         super();
-        this.disposable_ = new Disposable();
+        this._isDisposed = false;
     }
     update(params) {
         this.builderNode_.update(params);
@@ -3459,16 +3524,16 @@ class ComponentContentCommonBase extends Content {
         this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
+        this._isDisposed = true;
         if (this.getNodePtr()) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
         }
-        this.disposable_.dispose();
         this.detachFromParent();
         this.attachNodeRef_?.dispose();
         this.builderNode_?.dispose();
     }
     isDisposed() {
-        return this.disposable_.isDisposed() && (this.builderNode_?.isDisposed() ?? true);
+        return this._isDisposed && (this.builderNode_?.isDisposed() ?? true);
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {

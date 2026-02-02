@@ -80,22 +80,67 @@ abstract class ViewPU extends PUV2ViewBase
   private delayRecycleNodeRerenderDeep: boolean = false;
 
   // store the current key -> consume, which has the default value
-  public defaultConsume_: Map<string, SynchedPropertyTwoWayPU<any>> = new Map<string, SynchedPropertyTwoWayPU<any>>();
+  public defaultConsume__?: Map<string, SynchedPropertyTwoWayPU<any>>;
 
   // store the current key -> consume, which has reconnect to the provide
-  public reconnectConsume_: Map<string, SynchedPropertyTwoWayPU<any>> = new Map<string, SynchedPropertyTwoWayPU<any>>();
+  public reconnectConsume__?: Map<string, SynchedPropertyTwoWayPU<any>>;
 
   // @Provide'd variables by this class and its ancestors
-  protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
+  protected providedVars__?: Map<string, ObservedPropertyAbstractPU<any>>;
 
   // Set of elmtIds that need re-render
-  public dirtyElementIdsNeedsUpdateSynchronously_: Set<number> = new Set<number>();
+  public dirtyElementIdsNeedsUpdateSynchronously__?: Set<number>;
 
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
 
   private ownObservedPropertiesStore__?: Set<ObservedPropertyAbstractPU<any>>;
+
+  get providedVars_(): Map<string, ObservedPropertyAbstractPU<any>> | undefined {
+    return this.providedVars__;
+  }
+
+  getOrCreateProvidedVars(): Map<string, ObservedPropertyAbstractPU<any>> {
+    if (!this.providedVars__) {
+      this.providedVars__ = new Map<string, ObservedPropertyAbstractPU<any>>;
+    }
+    return this.providedVars__;
+  }
+
+  get dirtyElementIdsNeedsUpdateSynchronously_(): Set<number> | undefined {
+    return this.dirtyElementIdsNeedsUpdateSynchronously__;
+  }
+
+  getOrCreateDirtyElementIdsNeedsUpdateSynchronously(): Set<number> {
+    if (!this.dirtyElementIdsNeedsUpdateSynchronously__) {
+      this.dirtyElementIdsNeedsUpdateSynchronously__ = new Set<number>;
+    }
+    return this.dirtyElementIdsNeedsUpdateSynchronously__;
+  }
+
+
+  get defaultConsume_(): Map<string, SynchedPropertyTwoWayPU<any>> | undefined {
+    return this.defaultConsume__;
+  }
+
+  getOrCreateDefaultConsume(): Map<string, SynchedPropertyTwoWayPU<any>> {
+    if (!this.defaultConsume__) {
+      this.defaultConsume__ = new Map<string, SynchedPropertyTwoWayPU<any>>();
+    }
+    return this.defaultConsume__;
+  }
+
+  get reconnectConsume_(): Map<string, SynchedPropertyTwoWayPU<any>> | undefined {
+    return this.reconnectConsume__;
+  }
+
+  getOrCreateReconnectConsume(): Map<string, SynchedPropertyTwoWayPU<any>> {
+    if (!this.reconnectConsume__) {
+      this.reconnectConsume__ = new Map<string, SynchedPropertyTwoWayPU<any>>();
+    }
+    return this.reconnectConsume__;
+  }
 
   private get ownObservedPropertiesStore_() {
     if (!this.ownObservedPropertiesStore__) {
@@ -131,7 +176,8 @@ abstract class ViewPU extends PUV2ViewBase
       if (usesStateMgmtVersion === 2) {
         const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
-        throw new Error(error);
+        // toolchain can check
+        throw new BusinessError(USE_V1_STATE_IN_COMPONENTV2, error);
       }
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
@@ -220,6 +266,10 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  protected finalizeConstruction(): void {
+    this.__customComponentExecuteInit__Internal();
+  }
+
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -282,7 +332,7 @@ abstract class ViewPU extends PUV2ViewBase
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
-    this.providedVars_.clear();
+    this.providedVars_?.clear();
     if (this.ownObservedPropertiesStore__) {
       this.ownObservedPropertiesStore__.clear();
     }
@@ -335,7 +385,7 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
-  public getRecycleDump(): string {
+  public __getRecycleDump_internal(): string {
     return this.recycleManager_?.getDumpInfo();
   }
 
@@ -511,9 +561,9 @@ abstract class ViewPU extends PUV2ViewBase
     if (dependentElmtIds?.size && !this.isFirstRender()) {
       for (const elmtId of dependentElmtIds) {
         if (this.hasRecycleManager()) {
-          this.dirtyElementIdsNeedsUpdateSynchronously_.add(this.recycleManager_.proxyNodeId(elmtId));
+          this.getOrCreateDirtyElementIdsNeedsUpdateSynchronously().add(this.recycleManager_.proxyNodeId(elmtId));
         } else {
-          this.dirtyElementIdsNeedsUpdateSynchronously_.add(elmtId);
+          this.getOrCreateDirtyElementIdsNeedsUpdateSynchronously().add(elmtId);
         }
       }
       SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
@@ -532,7 +582,7 @@ abstract class ViewPU extends PUV2ViewBase
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number> | undefined): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
-    aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName,
+    stateMgmtDFX.enableDebug && aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName,
       dependentElmtIds ? dependentElmtIds.size : 0, this.id__(),
       this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {
@@ -686,10 +736,10 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride: boolean = false) {
     if (!allowOverride && this.findProvidePU__(providedPropName)) {
-      throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
+      throw new BusinessError(DUPLICATE_PROVIDE_KEY, `${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
     store.setDecoratorInfo('@Provide');
-    this.providedVars_.set(providedPropName, store);
+    this.getOrCreateProvidedVars().set(providedPropName, store);
   }
 
   /*
@@ -697,7 +747,7 @@ abstract class ViewPU extends PUV2ViewBase
     if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
   */
   public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-    return this.providedVars_.get(providedPropName) ||
+    return this.providedVars_?.get(providedPropName) ||
     (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
     (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
   }
@@ -722,7 +772,7 @@ abstract class ViewPU extends PUV2ViewBase
         providedVarStore = new ObservedPropertyPU(defaultValue, this, consumeVarName);
         providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
-        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
+        throw new BusinessError(MISSING_PROVIDE_DEFAULT_VALUE_FOR_CONSUME_CONSUMER, `${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
           Fail to resolve @Consume(${providedPropName}).`);
       }
     }
@@ -735,19 +785,19 @@ abstract class ViewPU extends PUV2ViewBase
     };
     let consumeVal = providedVarStore.createSync(factory) as SynchedPropertyTwoWayPU<T>;
     if (providedVarStore.__isFake_ObservedPropertyAbstract_Internal()) {
-      this.defaultConsume_.set(providedPropName, consumeVal);
+      this.getOrCreateDefaultConsume().set(providedPropName, consumeVal);
     }
     return consumeVal;
   }
 
   public reconnectToConsume(): void {
-    this.defaultConsume_.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
+    this.defaultConsume_?.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
       let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
       if (providedVarStore) {
         stateMgmtConsole.debug(`${value.debugInfo()} connected to the provide ${providedVarStore.debugInfo()}`);
         value.resetSource(providedVarStore);
         // store the consume reconnect to provide
-        this.reconnectConsume_.set(providedPropName, value);
+        this.getOrCreateReconnectConsume().set(providedPropName, value);
         value.getDependencies()?.forEach((id: number) => {
           this.UpdateElement(id);
         })
@@ -756,6 +806,9 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public disconnectedConsume(): void {
+    if (!this.reconnectConsume_) {
+      return;
+    }
     for (const [key, value] of this.reconnectConsume_) {
       // try to findProvide again
       // need to set Parent undefine first
@@ -767,7 +820,7 @@ abstract class ViewPU extends PUV2ViewBase
         value.getDependencies()?.forEach((id: number) => {
           this.UpdateElement(id);
         })
-        this.reconnectConsume_.delete(key);
+        this.reconnectConsume_!.delete(key);
       }
     }
   }
@@ -1032,6 +1085,10 @@ abstract class ViewPU extends PUV2ViewBase
         const params = param ? param : this.paramsGenerator_();
         this.updateStateVars(params);
         this.aboutToReuse(params);
+        this.__lifecycle__Internal.setParams(params as Record<string, Object>);
+        if (this['__newLifecycleNeedWork__Internal']) {
+          this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_REUSE);
+        }
       }
     }, 'aboutToReuse', this.constructor.name);
 
@@ -1063,6 +1120,9 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToRecycleInternal`);
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
+      if (this['__newLifecycleNeedWork__Internal']) {
+        this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_RECYCLE);
+      }
     }, 'aboutToRecycle', this.constructor.name);
     if (this.preventRecursiveRecycle_) {
       this.preventRecursiveRecycle_ = false;
@@ -1219,7 +1279,7 @@ abstract class ViewPU extends PUV2ViewBase
       // ViewPU should not have a ReusableV2 Component, throw error!
       const error = `@Component cannot have a child @ReusableV2 component !`;
       stateMgmtConsole.applicationError(error);
-      throw new Error(error);
+      throw new BusinessError(USE_REUSABLE_V2_IN_COMPONENT, error);
   }
 
   protected mutableBuilderImpl<Args extends Object[]>(
@@ -1254,11 +1314,11 @@ abstract class ViewPU extends PUV2ViewBase
       try {
         value = JSON.parse(value);
       } catch {
-        stateMgmtConsole.warn('Invalid json string');
+        stateMgmtConsole.error('Invalid json string');
         return undefined;
       }
     }
-    if (value === null || value === undefined || typeof value !== 'object') {
+    if (value === null || value === undefined) {
       return undefined;
     }
     return this.__findPathValueInJson__Internal(value, jsonPath);

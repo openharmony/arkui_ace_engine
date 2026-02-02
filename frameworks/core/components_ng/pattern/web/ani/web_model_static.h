@@ -135,6 +135,7 @@ public:
     static void SetOnDetectedBlankScreen(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetBlankScreenDetectionConfig(FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
+    static void SetOnFirstScreenPaint(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetResourceLoadId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnFullScreenExit(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
@@ -148,6 +149,8 @@ public:
     static void SetOnOverrideErrorPage(
         FrameNode* frameNode, std::function<std::string(const BaseEventInfo* info)>&& callback);
     static void SetPermissionRequestEventId(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetPermissionClipboard(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetScreenCaptureRequestEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
@@ -165,6 +168,8 @@ public:
     static void SetOnSslSelectCertRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetWindowNewEvent(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
+    static void SetWindowNewExtEvent(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
     static void SetWindowExitEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
@@ -226,6 +231,7 @@ public:
     static void SetBackToTop(FrameNode* frameNode, bool isEnabled);
     static void SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled);
     static void SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
     static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);

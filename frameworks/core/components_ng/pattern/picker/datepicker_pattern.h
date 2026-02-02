@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include <optional>
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -44,7 +44,7 @@ constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr Dimension PICKER_MARGIN_FROM_CHECK_BOX = 10.0_vp;
 }
 
-class DatePickerPattern : public LinearLayoutPattern {
+class ACE_FORCE_EXPORT DatePickerPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(DatePickerPattern, LinearLayoutPattern);
 
 public:
@@ -367,6 +367,11 @@ public:
     {
         isDateOrderChange_ = dateOrder != dateOrder_;
         dateOrder_ = dateOrder;
+    }
+
+    std::string GetDateOrder()
+    {
+        return dateOrder_;
     }
 
     static std::string GetYearFormatString(uint32_t year)
@@ -810,6 +815,7 @@ public:
     void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
     void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
     void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+    void UpdateDateOrder();
 
 private:
     void OnModifyDone() override;
@@ -861,7 +867,6 @@ private:
     void InitFocusKeyEvent();
     void FlushChildNodes();
     void UpdateLunarSwitch();
-    void UpdateDateOrder();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 

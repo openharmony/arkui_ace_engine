@@ -13,9 +13,20 @@
  * limitations under the License.
  */
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/canvas/canvas_render_context_deferred.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void SendStatisticEvent(StatisticEventType type)
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
+}
+
 void CanvasRenderContextDeferred::PushTask(std::function<void(CanvasPaintMethod&)>&& task)
 {
     static constexpr uint32_t suggestSize = 100000;
@@ -23,6 +34,7 @@ void CanvasRenderContextDeferred::PushTask(std::function<void(CanvasPaintMethod&
     if (tasks_.size() >= suggestSize && tasks_.size() % suggestSize == 0) {
         TAG_LOGI(AceLogTag::ACE_CANVAS, "[%{public}s] Canvas task size: %{public}zu", customNodeName_.c_str(),
             tasks_.size());
+        SendStatisticEvent(StatisticEventType::CANVAS_TASKS_OVERFLOW);
     }
 }
 

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class SoleChildComponent : public RenderComponent, public SingleChild {
+class ACE_FORCE_EXPORT SoleChildComponent : public RenderComponent, public SingleChild {
     DECLARE_ACE_TYPE(SoleChildComponent, RenderComponent, SingleChild);
 
 public:

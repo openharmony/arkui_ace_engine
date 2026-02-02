@@ -52,6 +52,8 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
     _onOffsetChange_0_0value?: ((value0: double) => void) | undefined
     _pullDownRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _pullDownRatio_0_0value?: double | undefined
+    _maxPullDownDistance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxPullDownDistance_0_0value?: double | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -200,6 +202,24 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (this._maxPullDownDistance_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxPullDownDistance_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxPullDownDistanceAttribute((this._maxPullDownDistance_0_0value as double | undefined));
+                    this._maxPullDownDistance_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxPullDownDistance_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxPullDownDistance_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxPullDownDistanceAttribute((undefined as double | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: RefreshModifier): void {
         super.mergeModifier(modifier)
@@ -307,12 +327,26 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
                 }
             }
         }
+        if (modifier._maxPullDownDistance_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxPullDownDistance_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxPullDownDistance(modifier._maxPullDownDistance_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxPullDownDistance((undefined as double | undefined));
+                }
+            }
+        }
     }
     onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
         if (((this._onStateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onStateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -324,6 +358,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._onRefreshing_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRefreshing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRefreshing_0_flag = AttributeUpdaterFlag.SKIP
@@ -335,6 +370,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._refreshOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._refreshOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._refreshOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -346,6 +382,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._pullToRefresh_0_flag = AttributeUpdaterFlag.UPDATE
             this._pullToRefresh_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pullToRefresh_0_flag = AttributeUpdaterFlag.SKIP
@@ -368,6 +405,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._onOffsetChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onOffsetChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onOffsetChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -379,9 +417,21 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._pullDownRatio_0_flag = AttributeUpdaterFlag.UPDATE
             this._pullDownRatio_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pullDownRatio_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    maxPullDownDistance(value: double | undefined): this {
+        if (((this._maxPullDownDistance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxPullDownDistance_0_0value) !== (value)))
+        {
+            this._maxPullDownDistance_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxPullDownDistance_0_0value = value
+        } else
+        {
+            this._maxPullDownDistance_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -386,7 +386,7 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult, bool inBarRect = false);
-    Color GetForegroundColor() const;
+    ACE_FORCE_EXPORT Color GetForegroundColor() const;
     void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme);
     void SetNormalWidth(const Dimension& normalWidth, const RefPtr<PipelineContext>& context = nullptr);
     void SetScrollable(bool isScrollable);
@@ -675,7 +675,7 @@ private:
     void GetRadiusAndPadding(
         float& startRadius, float& endRadius, float& padding, const RefPtr<PipelineContext>& context = nullptr);
     void CalcFlingVelocity(float offset);
-    void DragEndOverScroll();
+    bool DragEndOverScroll();
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;

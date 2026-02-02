@@ -18,27 +18,32 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
-#include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {
 public:
     static constexpr int32_t DEFAULT_ALPHA = 255;
     static constexpr double DEFAULT_OPACITY = 0.2;
+    inline static std::shared_mutex themeMutex_;
     
     static std::optional<JSTheme> GetTheme()
     {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
         return JSThemeScope::jsCurrentTheme;
     }
 
     static std::optional<JSThemeColors> GetThemeColors()
     {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
         return (JSThemeScope::jsCurrentTheme) ?
             std::make_optional(JSThemeScope::jsCurrentTheme->Colors()) : std::nullopt;
+    }
+
+    static void SwapCurrentTheme(std::optional<JSTheme>& themeOpt)
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
+        JSThemeScope::jsCurrentTheme.swap(themeOpt);
     }
 };
 }

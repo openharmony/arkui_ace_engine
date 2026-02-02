@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_SHADOW_THEME_H
 
 #include <string>
+#include <mutex>
 #include "theme_attributes.h"
 
 #include "base/utils/device_config.h"
@@ -52,6 +53,8 @@ private:
     const static std::unordered_map<ShadowStyle, std::string> validShadowStyles_;
     RefPtr<ThemeStyle> themeStyle_;
     std::unordered_map<uint32_t, Shadow> shadowStyles_;
+
+    std::mutex shadowMultiThreadMutex_;
 };
 
 } // namespace OHOS::Ace

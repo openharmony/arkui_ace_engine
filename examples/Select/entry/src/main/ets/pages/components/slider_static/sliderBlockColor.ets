@@ -28,7 +28,7 @@ struct SliderBlockColorStatic {
   @State colorGradient: LinearGradient = 
     new LinearGradient([{ color: '#FFFFFF', offset: 0 }, { color: '#007DFF', offset: 1 }])
   private resColor0: ResourceColor = Color.Pink;
-  private resColor1: ResourceColor = $r('app.color.green_color');
+  private resColor1: ResourceColor = $r('app.color.background_color_1');
   private resColor2: ResourceColor = '#0000ff';
   private resColor3: ResourceColor = 'rgb(255, 0, 0)';
 

@@ -35,6 +35,7 @@ RefPtr<PluginNode> PluginNode::GetOrCreatePluginNode(
     }
 
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     pluginNode = AceType::MakeRefPtr<PluginNode>(tag, nodeId, pattern, false);
     pluginNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(pluginNode);

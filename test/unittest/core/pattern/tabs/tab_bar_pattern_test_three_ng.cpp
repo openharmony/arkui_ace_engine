@@ -581,6 +581,7 @@ HWTEST_F(TabBarPatternThreeTestNg, OnCustomContentTransition001, TestSize.Level1
     tabBarPattern->OnCustomContentTransition(fromIndex, toIndex);
 
     EXPECT_EQ(swiperPattern->customAnimationToIndex_, toIndex);
+    EXPECT_EQ(swiperPattern->customAnimationPrevIndex_, fromIndex);
 }
 
 /**

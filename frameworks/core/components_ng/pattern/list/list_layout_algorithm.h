@@ -25,8 +25,8 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
-#include "core/components_v2/list/list_component.h"
-#include "core/components_v2/list/list_properties.h"
+#include "compatible/components/list_v2/list_component.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -61,7 +61,7 @@ struct PredictLayoutItem {
     int32_t index;
     int32_t forwardCacheCount;
     int32_t backwardCacheCount;
-    bool forceCache = false;
+    bool forceCache = true;
 };
 
 struct ListPredictLayoutParamV2 {
@@ -499,6 +499,8 @@ public:
 
     static int32_t GetListLanesByFillType(PresetFillType fillType, WidthBreakpoint point);
 
+    float GetChildMainSize(const RefPtr<LayoutWrapper>& wrapper, int32_t index);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -692,6 +694,7 @@ private:
 
     float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
     bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
+    bool LayoutReachStart(float currentStartPos, float startMainPos, int32_t currentIndex);
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

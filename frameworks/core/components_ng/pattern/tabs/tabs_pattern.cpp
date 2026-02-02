@@ -547,27 +547,15 @@ std::string TabsPattern::ProvideRestoreInfo()
 
 void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
     if (!info->IsValid() || !info->IsObject()) {
         return;
     }
     auto jsonIsOn = info->GetValue("Index");
-    swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
-
-    swiperPattern->OnRestoreInfo(restoreInfo);
-    tabBarPattern->OnRestoreInfo(restoreInfo);
+    auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    CHECK_NULL_VOID(jsonIsOn);
+    tabsLayoutProperty->UpdateIndexSetByUser(jsonIsOn->GetInt());
 }
 
 void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
@@ -1013,6 +1001,32 @@ void TabsPattern::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScro
     swiperPattern->SetOnContentDidScroll(std::move(toSwiperCallback));
 }
 
+void TabsPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(theme);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    if (!tabsLayoutProperty->HasDividerColorSetByUser() || !tabsLayoutProperty->GetDividerColorSetByUserValue()) {
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.color = theme->GetDividerColor();
+        tabsLayoutProperty->UpdateDivider(currentDivider);
+        auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+        CHECK_NULL_VOID(dividerFrameNode);
+        auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(currentDivider.color);
+    }
+}
+
 void TabsPattern::OnColorModeChange(uint32_t colorMode)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
@@ -1039,7 +1053,31 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
+    UpdateTabBarOverlap(tabsLayoutProperty);
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsPattern::UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty)
+{
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    if (!tabsLayoutProperty->HasBarOverlap()) {
+        return;
+    }
+    bool barOverlap = tabsLayoutProperty->GetBarOverlapValue();
+    BlurStyleOption styleOption;
+    if (barOverlap) {
+        styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto target = tabBarNode->GetRenderContext();
+    if (target) {
+        target->UpdateBackBlurStyle(styleOption);
+    }
 }
 
 void TabsPattern::DumpInfo()
