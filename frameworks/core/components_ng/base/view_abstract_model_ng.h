@@ -1315,11 +1315,6 @@ public:
         ViewAbstract::SetDraggable(draggable);
     }
 
-    void SetEnableClickSoundEffect(bool enabled) override
-    {
-        ViewAbstract::SetEnableClickSoundEffect(enabled);
-    }
-
     void SetDragPreviewOptions(const DragPreviewOption& previewOption) override
     {
         ViewAbstract::SetDragPreviewOptions(previewOption);

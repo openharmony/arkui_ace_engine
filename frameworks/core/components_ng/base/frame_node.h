@@ -776,16 +776,6 @@ public:
         allowDrop_ = allowDrop;
     }
 
-    void SetEnableClickSoundEffect(bool enabled)
-    {
-        enableClickSoundEffect_ = enabled;
-    }
-
-    bool GetEnableClickSoundEffect()
-    {
-        return enableClickSoundEffect_;
-    }
-
     const std::set<std::string>& GetAllowDrop() const
     {
         return allowDrop_;
@@ -1754,7 +1744,6 @@ private:
 
     ColorMode colorMode_ = ColorMode::LIGHT;
 
-    bool enableClickSoundEffect_ = true;
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;

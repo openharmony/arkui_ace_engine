@@ -6187,10 +6187,6 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetClickEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetClickEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetClickEffect));
-    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableClickSoundEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetEnableClickSoundEffect));
-    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableClickSoundEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetEnableClickSoundEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKeyBoardShortCut"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetKeyBoardShortCut));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyBoardShortCut"),

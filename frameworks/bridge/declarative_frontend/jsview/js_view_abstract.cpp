@@ -9663,7 +9663,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
-    JSClass<JSViewAbstract>::StaticMethod("enableClickSoundEffect", &JSViewAbstract::JsSetEnableClickSoundEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
@@ -11272,18 +11271,6 @@ void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetClickEffectLevel((ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
-}
-
-void JSViewAbstract::JsSetEnableClickSoundEffect(const JSCallbackInfo& info)
-{
-    if (info[0]->IsUndefined()) {
-        ViewAbstractModel::GetInstance()->SetEnableClickSoundEffect(true);
-    }
-    bool enabled = true;
-    if (info[0]->IsBoolean()) {
-        enabled = info[0]->ToBoolean();
-    }
-    ViewAbstractModel::GetInstance()->SetEnableClickSoundEffect(enabled);
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)

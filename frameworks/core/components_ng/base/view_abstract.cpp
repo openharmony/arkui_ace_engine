@@ -8473,19 +8473,6 @@ void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLe
     ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
 }
 
-void ViewAbstract::SetEnableClickSoundEffect(bool enabled)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetEnableClickSoundEffect(enabled);
-}
-
-void ViewAbstract::SetEnableClickSoundEffect(FrameNode* frameNode, bool enabled)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetEnableClickSoundEffect(enabled);
-}
-
 void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
     const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {

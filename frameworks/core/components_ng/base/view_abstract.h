@@ -652,9 +652,6 @@ public:
     // clickEffect
     static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
-    // enableClickSoundEffect
-    static void SetEnableClickSoundEffect(bool enabled);
-
     // custom animatable property
     static void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
@@ -902,7 +899,6 @@ public:
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static HoverEffectType GetHoverEffect(FrameNode* frameNode);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
-    static void SetEnableClickSoundEffect(FrameNode* frameNode, bool enabled);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 

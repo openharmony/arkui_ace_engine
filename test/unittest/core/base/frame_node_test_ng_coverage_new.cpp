@@ -1916,34 +1916,4 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue03, TestSize.Level1)
     EXPECT_FALSE(jsonValue->GetBool("enabled", false));
 }
 
-/**
- * @tc.name: FrameNodeSetEnableClickSoundEffect001
- * @tc.desc: Test method SetEnableClickSoundEffect
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeSetEnableClickSoundEffect001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    EXPECT_NE(frameNode->pattern_, nullptr);
-    frameNode->isActive_ = true;
-    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
-
-    /**
-     * @tc.steps: step2. call SetEnableClickSoundEffect.
-     * @tc.expected: expect GetEnableClickSoundEffect is true.
-     */
-    bool enable = frameNode->GetEnableClickSoundEffect();
-    EXPECT_EQ(enable, true);
-
-    frameNode->SetEnableClickSoundEffect(false);
-    enable = frameNode->GetEnableClickSoundEffect();
-    EXPECT_EQ(enable, false);
-
-    frameNode->SetEnableClickSoundEffect(true);
-    enable = frameNode->GetEnableClickSoundEffect();
-    EXPECT_EQ(enable, true);
-}
 } // namespace OHOS::Ace::NG
