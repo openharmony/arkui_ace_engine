@@ -326,7 +326,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation001, TestSize.Level1)
     ASSERT_NE(preTopNavDestinationEventHub, nullptr);
     preTopNavDestinationEventHub->SetEnabledInternal(false);
 
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
+    navigationPattern->ReplaceTransition(preTopNavDestinationNode, newTopNavDestinationNode);
     EXPECT_TRUE(preTopNavDestinationEventHub->enabled_);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
@@ -361,7 +361,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation002, TestSize.Level1)
     ASSERT_NE(navBarEventHub, nullptr);
     navBarEventHub->SetEnabledInternal(false);
 
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
+    navigationPattern->ReplaceTransition(preTopNavDestinationNode, newTopNavDestinationNode);
     EXPECT_FALSE(preTopNavDestinationEventHub->enabled_);
     EXPECT_FALSE(navBarEventHub->enabled_);
     NavigationPatternTestThreeNg::TearDownTestSuite();
@@ -395,7 +395,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation003, TestSize.Level1)
     ASSERT_NE(navBarEventHub, nullptr);
     navBarEventHub->SetEnabledInternal(false);
 
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
+    navigationPattern->ReplaceTransition(preTopNavDestinationNode, newTopNavDestinationNode);
     EXPECT_FALSE(navBarEventHub->enabled_);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
@@ -428,7 +428,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation004, TestSize.Level1)
     ASSERT_NE(navBarEventHub, nullptr);
     navBarEventHub->SetEnabledInternal(false);
 
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
+    navigationPattern->ReplaceTransition(preTopNavDestinationNode, newTopNavDestinationNode);
     EXPECT_TRUE(navBarEventHub->enabled_);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }

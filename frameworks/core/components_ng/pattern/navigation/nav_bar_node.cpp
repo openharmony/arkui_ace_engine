@@ -185,6 +185,14 @@ bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
 {
     auto navigation = DynamicCast<NavigationGroupNode>(node);
     CHECK_NULL_RETURN(navigation, false);
+    auto navPattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, false);
+
+    // In force split mode with navBar as home, it's visible
+    if (navPattern->IsForceSplitSuccess() && navPattern->IsNavBarIsHome()) {
+        return false;
+    }
+
     auto lastStandardIndex = navigation->GetLastStandardIndex();
     bool isInvisible = navigation->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0;
     return isInvisible;
