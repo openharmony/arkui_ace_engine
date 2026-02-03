@@ -181,7 +181,10 @@ void SetOnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optCallback = Converter::GetOptPtr(value);
-    CHECK_NULL_VOID(optCallback);
+    if (!optCallback) {
+        CheckBoxModelNG::SetOnChange(frameNode, nullptr);
+        return;
+    }
     auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const bool value) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
     };
