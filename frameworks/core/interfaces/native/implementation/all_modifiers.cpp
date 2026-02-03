@@ -247,8 +247,10 @@ const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
 const GENERATED_ArkUIDialogExtenderAccessor* GetDialogExtenderAccessor();
 const GENERATED_ArkUIDigitIndicatorAccessor* GetDigitIndicatorAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
+const GENERATED_ArkUIDismissContentCoverActionAccessor* GetDismissContentCoverActionAccessor();
 const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
+const GENERATED_ArkUIDismissSheetActionAccessor* GetDismissSheetActionAccessor();
 const GENERATED_ArkUIDotIndicatorAccessor* GetDotIndicatorAccessor();
 const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
 const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor();
@@ -361,6 +363,7 @@ const GENERATED_ArkUIScrollResultAccessor* GetScrollResultAccessor();
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor();
 const GENERATED_ArkUIShaderStyleAccessor* GetShaderStyleAccessor();
+const GENERATED_ArkUISheetDismissAccessor* GetSheetDismissAccessor();
 const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor();
 const GENERATED_ArkUISliderExtenderAccessor* GetSliderExtenderAccessor();
 const GENERATED_ArkUISpringBackActionAccessor* GetSpringBackActionAccessor();
@@ -598,8 +601,10 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetDialogExtenderAccessor,
         GetDigitIndicatorAccessor,
         GetDisappearSymbolEffectAccessor,
+        GetDismissContentCoverActionAccessor,
         GetDismissDialogActionAccessor,
         GetDismissPopupActionAccessor,
+        GetDismissSheetActionAccessor,
         GetDotIndicatorAccessor,
         GetDragEventAccessor,
         GetDragUtilsAccessor,
@@ -712,6 +717,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSearchControllerAccessor,
         GetSearchOpsAccessor,
         GetShaderStyleAccessor,
+        GetSheetDismissAccessor,
         GetSelectExtenderAccessor,
         GetSliderExtenderAccessor,
         GetSpringBackActionAccessor,

@@ -32052,6 +32052,76 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DisappearSymbolEffectAccessor
+    namespace DismissContentCoverActionAccessor {
+    void DestroyPeerImpl(Ark_DismissContentCoverAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissContentCoverAction ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_DismissContentCoverAction>(100);
+        }
+        string out("new DismissContentCoverAction(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_DismissContentCoverAction>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_DismissContentCoverAction>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void DismissImpl(Ark_DismissContentCoverAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("dismiss(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissContentCoverAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getReason(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissContentCoverAction peer,
+                       Ark_DismissReason reason)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setReason(");
+        WriteToString(&out, reason);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DismissContentCoverActionAccessor
     namespace DismissDialogActionAccessor {
     void DestroyPeerImpl(Ark_DismissDialogAction peer)
     {
@@ -32192,6 +32262,77 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DismissPopupActionAccessor
+
+    namespace DismissSheetActionAccessor {
+    void DestroyPeerImpl(Ark_DismissSheetAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissSheetAction ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_DismissSheetAction>(100);
+        }
+        string out("new DismissSheetAction(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_DismissSheetAction>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_DismissSheetAction>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void DismissImpl(Ark_DismissSheetAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("dismiss(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissSheetAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getReason(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissSheetAction peer,
+                       Ark_DismissReason reason)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setReason(");
+        WriteToString(&out, reason);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DismissSheetActionAccessor
     namespace DragEventAccessor {
     void DestroyPeerImpl(Ark_DragEvent peer)
     {
@@ -45138,6 +45279,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     } // ShaderStyleAccessor
+
+    namespace SheetDismissAccessor {
+    void DestroyPeerImpl(Ark_SheetDismiss peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_SheetDismiss ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_SheetDismiss>(100);
+        }
+        string out("new SheetDismiss(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_SheetDismiss>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_SheetDismiss>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void DismissImpl(Ark_SheetDismiss peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("dismiss(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // SheetDismissAccessor    
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -51773,6 +51961,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DisappearSymbolEffectPeer {
         virtual ~DisappearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIDismissContentCoverActionAccessor* GetDismissContentCoverActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissContentCoverActionAccessor dismissContentCoverActionAccessorImpl {
+            DismissContentCoverActionAccessor::DestroyPeerImpl,
+            DismissContentCoverActionAccessor::ConstructImpl,
+            DismissContentCoverActionAccessor::GetFinalizerImpl,
+            DismissContentCoverActionAccessor::DismissImpl,
+            DismissContentCoverActionAccessor::GetReasonImpl,
+            DismissContentCoverActionAccessor::SetReasonImpl,
+        };
+        return &dismissContentCoverActionAccessorImpl;
+    }
+
+    struct DismissContentCoverActionPeer {
+        virtual ~DismissContentCoverActionPeer() = default;
+    };
+
     const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor()
     {
         static const GENERATED_ArkUIArcListExtenderAccessor ArcListExtenderAccessorImpl {
@@ -51890,6 +52095,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+    const GENERATED_ArkUIDismissSheetActionAccessor* GetDismissSheetActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissSheetActionAccessor dismissSheetActionAccessorImpl {
+            DismissSheetActionAccessor::DestroyPeerImpl,
+            DismissSheetActionAccessor::ConstructImpl,
+            DismissSheetActionAccessor::GetFinalizerImpl,
+            DismissSheetActionAccessor::DismissImpl,
+            DismissSheetActionAccessor::GetReasonImpl,
+            DismissSheetActionAccessor::SetReasonImpl,
+        };
+        return &dismissSheetActionAccessorImpl;
+    }
+
+    struct DismissSheetActionPeer {
+        virtual ~DismissSheetActionPeer() = default;
+    };
+
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
     {
         static const GENERATED_ArkUIDragEventAccessor DragEventAccessorImpl {
@@ -53911,6 +54133,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ShaderStylePeer {
         virtual ~ShaderStylePeer() = default;
     };
+    const GENERATED_ArkUISheetDismissAccessor* GetSheetDismissAccessor()
+    {
+        static const GENERATED_ArkUISheetDismissAccessor sheetDismissAccessorImpl {
+            SheetDismissAccessor::DestroyPeerImpl,
+            SheetDismissAccessor::ConstructImpl,
+            SheetDismissAccessor::GetFinalizerImpl,
+            SheetDismissAccessor::DismissImpl,
+        };
+        return &sheetDismissAccessorImpl;
+    }
+
+    struct SheetDismissPeer {
+        virtual ~SheetDismissPeer() = default;
+    };
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     {
         static const GENERATED_ArkUISpringMotionAccessor SpringMotionAccessorImpl {
@@ -54980,8 +55216,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDecorationStyleAccessor,
             GetDialogExtenderAccessor,
             GetDisappearSymbolEffectAccessor,
+            GetDismissContentCoverActionAccessor,
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissSheetActionAccessor,
             GetDragEventAccessor,
             GetDragUtilsAccessor,
             GetDrawingRenderingContextAccessor,
@@ -55091,6 +55329,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
             GetShaderStyleAccessor,
+            GetSheetDismissAccessor,
             GetSelectExtenderAccessor,
             GetSliderExtenderAccessor,
             GetSpringMotionAccessor,

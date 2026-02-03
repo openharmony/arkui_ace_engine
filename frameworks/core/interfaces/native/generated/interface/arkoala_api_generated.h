@@ -376,6 +376,9 @@ typedef struct Opt_DatePickerDialog Opt_DatePickerDialog;
 typedef struct DigitIndicatorPeer DigitIndicatorPeer;
 typedef struct DigitIndicatorPeer* Ark_DigitIndicator;
 typedef struct Opt_DigitIndicator Opt_DigitIndicator;
+typedef struct DismissSheetActionPeer DismissSheetActionPeer;
+typedef struct DismissSheetActionPeer* Ark_DismissSheetAction;
+typedef struct Opt_DismissSheetAction Opt_DismissSheetAction;
 typedef struct DotIndicatorPeer DotIndicatorPeer;
 typedef struct DotIndicatorPeer* Ark_DotIndicator;
 typedef struct Opt_DotIndicator Opt_DotIndicator;
@@ -675,6 +678,9 @@ typedef struct Opt_SearchController Opt_SearchController;
 typedef struct ShaderStylePeer ShaderStylePeer;
 typedef struct ShaderStylePeer* Ark_ShaderStyle;
 typedef struct Opt_ShaderStyle Opt_ShaderStyle;
+typedef struct SheetDismissPeer SheetDismissPeer;
+typedef struct SheetDismissPeer* Ark_SheetDismiss;
+typedef struct Opt_SheetDismiss Opt_SheetDismiss;
 typedef struct Ark_Size Ark_Size;
 typedef struct Opt_Size Opt_Size;
 typedef struct Ark_SizeF64Inner Ark_SizeF64Inner;
@@ -2097,7 +2103,8 @@ typedef struct Opt_DirectionalEdgesT Opt_DirectionalEdgesT;
 typedef struct DisappearSymbolEffectPeer DisappearSymbolEffectPeer;
 typedef struct DisappearSymbolEffectPeer* Ark_DisappearSymbolEffect;
 typedef struct Opt_DisappearSymbolEffect Opt_DisappearSymbolEffect;
-typedef struct Ark_DismissContentCoverAction Ark_DismissContentCoverAction;
+typedef struct DismissContentCoverActionPeer DismissContentCoverActionPeer;
+typedef struct DismissContentCoverActionPeer* Ark_DismissContentCoverAction;
 typedef struct Opt_DismissContentCoverAction Opt_DismissContentCoverAction;
 typedef struct DismissDialogActionPeer DismissDialogActionPeer;
 typedef struct DismissDialogActionPeer* Ark_DismissDialogAction;
@@ -2105,8 +2112,6 @@ typedef struct Opt_DismissDialogAction Opt_DismissDialogAction;
 typedef struct DismissPopupActionPeer DismissPopupActionPeer;
 typedef struct DismissPopupActionPeer* Ark_DismissPopupAction;
 typedef struct Opt_DismissPopupAction Opt_DismissPopupAction;
-typedef struct Ark_DismissSheetAction Ark_DismissSheetAction;
-typedef struct Opt_DismissSheetAction Opt_DismissSheetAction;
 typedef struct Ark_DisturbanceFieldOptionsInner Ark_DisturbanceFieldOptionsInner;
 typedef struct Opt_DisturbanceFieldOptionsInner Opt_DisturbanceFieldOptionsInner;
 typedef struct Ark_DoubleAnimationParam Ark_DoubleAnimationParam;
@@ -2557,8 +2562,6 @@ typedef struct Ark_ScrollPageOptions Ark_ScrollPageOptions;
 typedef struct Opt_ScrollPageOptions Opt_ScrollPageOptions;
 typedef struct Ark_SelectionOptions Ark_SelectionOptions;
 typedef struct Opt_SelectionOptions Opt_SelectionOptions;
-typedef struct Ark_SheetDismiss Ark_SheetDismiss;
-typedef struct Opt_SheetDismiss Opt_SheetDismiss;
 typedef struct Ark_SizeTLengthMetrics Ark_SizeTLengthMetrics;
 typedef struct Opt_SizeTLengthMetrics Opt_SizeTLengthMetrics;
 typedef struct SkillPeer SkillPeer;
@@ -8152,6 +8155,10 @@ typedef struct Opt_DigitIndicator {
     Ark_Tag tag;
     Ark_DigitIndicator value;
 } Opt_DigitIndicator;
+typedef struct Opt_DismissSheetAction {
+    Ark_Tag tag;
+    Ark_DismissSheetAction value;
+} Opt_DismissSheetAction;
 typedef struct Opt_DotIndicator {
     Ark_Tag tag;
     Ark_DotIndicator value;
@@ -8897,6 +8904,10 @@ typedef struct Opt_ShaderStyle {
     Ark_Tag tag;
     Ark_ShaderStyle value;
 } Opt_ShaderStyle;
+typedef struct Opt_SheetDismiss {
+    Ark_Tag tag;
+    Ark_SheetDismiss value;
+} Opt_SheetDismiss;
 typedef struct Ark_Size {
     /* kind: Interface */
     Ark_Float64 width;
@@ -15262,11 +15273,6 @@ typedef struct Opt_DisappearSymbolEffect {
     Ark_Tag tag;
     Ark_DisappearSymbolEffect value;
 } Opt_DisappearSymbolEffect;
-typedef struct Ark_DismissContentCoverAction {
-    /* kind: Interface */
-    VoidCallback dismiss;
-    Ark_DismissReason reason;
-} Ark_DismissContentCoverAction;
 typedef struct Opt_DismissContentCoverAction {
     Ark_Tag tag;
     Ark_DismissContentCoverAction value;
@@ -15279,15 +15285,6 @@ typedef struct Opt_DismissPopupAction {
     Ark_Tag tag;
     Ark_DismissPopupAction value;
 } Opt_DismissPopupAction;
-typedef struct Ark_DismissSheetAction {
-    /* kind: Interface */
-    VoidCallback dismiss;
-    Ark_DismissReason reason;
-} Ark_DismissSheetAction;
-typedef struct Opt_DismissSheetAction {
-    Ark_Tag tag;
-    Ark_DismissSheetAction value;
-} Opt_DismissSheetAction;
 typedef struct Ark_DisturbanceFieldOptionsInner {
     /* kind: Interface */
     Opt_Float64 strength;
@@ -17279,14 +17276,6 @@ typedef struct Opt_SelectionOptions {
     Ark_Tag tag;
     Ark_SelectionOptions value;
 } Opt_SelectionOptions;
-typedef struct Ark_SheetDismiss {
-    /* kind: Interface */
-    VoidCallback dismiss;
-} Ark_SheetDismiss;
-typedef struct Opt_SheetDismiss {
-    Ark_Tag tag;
-    Ark_SheetDismiss value;
-} Opt_SheetDismiss;
 typedef struct Ark_SizeTLengthMetrics {
     /* kind: Interface */
     Ark_LengthMetrics width;
@@ -28876,6 +28865,16 @@ typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
                      const Opt_EffectScope* scope);
 } GENERATED_ArkUIDisappearSymbolEffectAccessor;
 
+typedef struct GENERATED_ArkUIDismissContentCoverActionAccessor {
+    void (*destroyPeer)(Ark_DismissContentCoverAction peer);
+    Ark_DismissContentCoverAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dismiss)(Ark_DismissContentCoverAction peer);
+    Ark_DismissReason (*getReason)(Ark_DismissContentCoverAction peer);
+    void (*setReason)(Ark_DismissContentCoverAction peer,
+                      Ark_DismissReason reason);
+} GENERATED_ArkUIDismissContentCoverActionAccessor;
+
 typedef struct GENERATED_ArkUIDismissDialogActionAccessor {
     void (*destroyPeer)(Ark_DismissDialogAction peer);
     Ark_DismissDialogAction (*construct)();
@@ -28895,6 +28894,16 @@ typedef struct GENERATED_ArkUIDismissPopupActionAccessor {
     void (*setReason)(Ark_DismissPopupAction peer,
                       Ark_DismissReason reason);
 } GENERATED_ArkUIDismissPopupActionAccessor;
+
+typedef struct GENERATED_ArkUIDismissSheetActionAccessor {
+    void (*destroyPeer)(Ark_DismissSheetAction peer);
+    Ark_DismissSheetAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dismiss)(Ark_DismissSheetAction peer);
+    Ark_DismissReason (*getReason)(Ark_DismissSheetAction peer);
+    void (*setReason)(Ark_DismissSheetAction peer,
+                      Ark_DismissReason reason);
+} GENERATED_ArkUIDismissSheetActionAccessor;
 
 typedef struct GENERATED_ArkUIDotIndicatorAccessor {
     void (*destroyPeer)(Ark_DotIndicator peer);
@@ -30951,6 +30960,13 @@ typedef struct GENERATED_ArkUISelectExtenderAccessor {
                        const Opt_DividerOptions* options);
 } GENERATED_ArkUISelectExtenderAccessor;
 
+typedef struct GENERATED_ArkUISheetDismissAccessor {
+    void (*destroyPeer)(Ark_SheetDismiss peer);
+    Ark_SheetDismiss (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dismiss)(Ark_SheetDismiss peer);
+} GENERATED_ArkUISheetDismissAccessor;
+
 typedef struct GENERATED_ArkUISliderExtenderAccessor {
     void (*setPrefix)(Ark_NativePointer node,
                       Ark_NativePointer prefixNode,
@@ -31971,8 +31987,10 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDialogExtenderAccessor* (*getDialogExtenderAccessor)();
     const GENERATED_ArkUIDigitIndicatorAccessor* (*getDigitIndicatorAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
+    const GENERATED_ArkUIDismissContentCoverActionAccessor* (*getDismissContentCoverActionAccessor)();
     const GENERATED_ArkUIDismissDialogActionAccessor* (*getDismissDialogActionAccessor)();
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
+    const GENERATED_ArkUIDismissSheetActionAccessor* (*getDismissSheetActionAccessor)();
     const GENERATED_ArkUIDotIndicatorAccessor* (*getDotIndicatorAccessor)();
     const GENERATED_ArkUIDragEventAccessor* (*getDragEventAccessor)();
     const GENERATED_ArkUIDragUtilsAccessor* (*getDragUtilsAccessor)();
@@ -32085,6 +32103,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUISearchControllerAccessor* (*getSearchControllerAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUIShaderStyleAccessor* (*getShaderStyleAccessor)();
+    const GENERATED_ArkUISheetDismissAccessor* (*getSheetDismissAccessor)();
     const GENERATED_ArkUISelectExtenderAccessor* (*getSelectExtenderAccessor)();
     const GENERATED_ArkUISliderExtenderAccessor* (*getSliderExtenderAccessor)();
     const GENERATED_ArkUISpringBackActionAccessor* (*getSpringBackActionAccessor)();

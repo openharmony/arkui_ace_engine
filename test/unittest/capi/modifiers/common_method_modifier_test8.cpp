@@ -169,11 +169,8 @@ public:
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissContentCoverAction parameter) {
             checkNestedEvent = {
                 .resourceId = resourceId,
-                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason)
             };
-            auto helper = CallbackHelper(parameter.dismiss);
             checkNestedEvent->fired = true;
-            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissContentCoverAction_Void>(dismissCallback, frameNode->GetId());
@@ -568,7 +565,6 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DismissCallback
 
         EXPECT_TRUE(checkNestedEvent.has_value());
         EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
-        EXPECT_EQ(checkNestedEvent->reason, expected);
         EXPECT_TRUE(checkNestedEvent->fired);
     }
 }

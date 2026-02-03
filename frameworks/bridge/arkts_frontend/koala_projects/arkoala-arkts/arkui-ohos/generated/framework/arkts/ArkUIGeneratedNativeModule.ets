@@ -4334,6 +4334,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DisappearSymbolEffect_setScope(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _DismissContentCoverAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
     native static _DismissDialogAction_construct(): KPointer
     @ani.unsafe.Direct
     native static _DismissDialogAction_getFinalizer(): KPointer
@@ -4353,6 +4363,16 @@ export class ArkUIGeneratedNativeModule {
     native static _DismissPopupAction_getReason(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_setReason(ptr: KPointer, reason: KInt): void
     @ani.unsafe.Direct
     native static _DotIndicator_construct(): KPointer
     @ani.unsafe.Direct
@@ -6197,6 +6217,12 @@ export class ArkUIGeneratedNativeModule {
     native static _ShaderStyle_construct(): KPointer
     @ani.unsafe.Direct
     native static _ShaderStyle_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _SheetDismiss_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _SheetDismiss_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _SheetDismiss_dismiss(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _SpringMotion_construct(start: number, end: number, velocity: number, prop: KPointer): KPointer
     @ani.unsafe.Direct
