@@ -1037,6 +1037,8 @@ typedef struct Array_font_UIFontGenericInfo Array_font_UIFontGenericInfo;
 typedef struct Opt_Array_font_UIFontGenericInfo Opt_Array_font_UIFontGenericInfo;
 typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
+typedef struct Array_GestureActionPhase Array_GestureActionPhase;
+typedef struct Opt_Array_GestureActionPhase Opt_Array_GestureActionPhase;
 typedef struct Array_GestureRecognizer Array_GestureRecognizer;
 typedef struct Opt_Array_GestureRecognizer Opt_Array_GestureRecognizer;
 typedef struct Array_GuideLineStyle Array_GuideLineStyle;
@@ -1907,6 +1909,8 @@ typedef struct UIObserver_ClickEventListenerCallback UIObserver_ClickEventListen
 typedef struct Opt_UIObserver_ClickEventListenerCallback Opt_UIObserver_ClickEventListenerCallback;
 typedef struct UIObserver_GestureEventListenerCallback UIObserver_GestureEventListenerCallback;
 typedef struct Opt_UIObserver_GestureEventListenerCallback Opt_UIObserver_GestureEventListenerCallback;
+typedef struct UIObserver_GestureListenerCallback UIObserver_GestureListenerCallback;
+typedef struct Opt_UIObserver_GestureListenerCallback Opt_UIObserver_GestureListenerCallback;
 typedef struct UIObserver_PanListenerCallback UIObserver_PanListenerCallback;
 typedef struct Opt_UIObserver_PanListenerCallback Opt_UIObserver_PanListenerCallback;
 typedef struct UIStatesChangeHandler UIStatesChangeHandler;
@@ -2246,6 +2250,8 @@ typedef struct Opt_InputCounterOptions Opt_InputCounterOptions;
 typedef struct IMEClientPeer IMEClientPeer;
 typedef struct IMEClientPeer* Ark_IMEClient;
 typedef struct Opt_IMEClient Opt_IMEClient;
+typedef struct Ark_InnerGestureObserverConfigs Ark_InnerGestureObserverConfigs;
+typedef struct Opt_InnerGestureObserverConfigs Opt_InnerGestureObserverConfigs;
 typedef struct Ark_InsertValue Ark_InsertValue;
 typedef struct Opt_InsertValue Opt_InsertValue;
 typedef struct Ark_IntelligentTrackingPreventionDetails Ark_IntelligentTrackingPreventionDetails;
@@ -3535,6 +3541,8 @@ typedef struct HoverEventPeer* Ark_HoverEvent;
 typedef struct Opt_HoverEvent Opt_HoverEvent;
 typedef struct Ark_ImageAttachmentLayoutStyle Ark_ImageAttachmentLayoutStyle;
 typedef struct Opt_ImageAttachmentLayoutStyle Opt_ImageAttachmentLayoutStyle;
+typedef struct Ark_InnerGestureTriggerInfo Ark_InnerGestureTriggerInfo;
+typedef struct Opt_InnerGestureTriggerInfo Opt_InnerGestureTriggerInfo;
 typedef struct LongPressGestureEventPeer LongPressGestureEventPeer;
 typedef struct LongPressGestureEventPeer* Ark_LongPressGestureEvent;
 typedef struct Opt_LongPressGestureEvent Opt_LongPressGestureEvent;
@@ -5164,6 +5172,14 @@ typedef struct Opt_FunctionKey {
     Ark_Tag tag;
     Ark_FunctionKey value;
 } Opt_FunctionKey;
+typedef enum Ark_GestureActionPhase {
+    ARK_GESTURE_ACTION_PHASE_WILL_START = 0,
+    ARK_GESTURE_ACTION_PHASE_WILL_END = 1,
+} Ark_GestureActionPhase;
+typedef struct Opt_GestureActionPhase {
+    Ark_Tag tag;
+    Ark_GestureActionPhase value;
+} Opt_GestureActionPhase;
 typedef enum Ark_GestureControl_GestureType {
     ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE = 0,
     ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE = 1,
@@ -5198,6 +5214,18 @@ typedef struct Opt_GestureJudgeResult {
     Ark_Tag tag;
     Ark_GestureJudgeResult value;
 } Opt_GestureJudgeResult;
+typedef enum Ark_GestureListenerType {
+    ARK_GESTURE_LISTENER_TYPE_TAP = 0,
+    ARK_GESTURE_LISTENER_TYPE_LONG_PRESS = 1,
+    ARK_GESTURE_LISTENER_TYPE_PAN = 2,
+    ARK_GESTURE_LISTENER_TYPE_PINCH = 3,
+    ARK_GESTURE_LISTENER_TYPE_SWIPE = 4,
+    ARK_GESTURE_LISTENER_TYPE_ROTATION = 5,
+} Ark_GestureListenerType;
+typedef struct Opt_GestureListenerType {
+    Ark_Tag tag;
+    Ark_GestureListenerType value;
+} Opt_GestureListenerType;
 typedef enum Ark_GestureMask {
     ARK_GESTURE_MASK_NORMAL = 0,
     ARK_GESTURE_MASK_IGNORE_INTERNAL = 1,
@@ -5632,6 +5660,11 @@ typedef struct Opt_LayoutMode {
 typedef enum Ark_LayoutSafeAreaEdge {
     ARK_LAYOUT_SAFE_AREA_EDGE_TOP = 0,
     ARK_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1,
+    ARK_LAYOUT_SAFE_AREA_EDGE_START = 2,
+    ARK_LAYOUT_SAFE_AREA_EDGE_END = 3,
+    ARK_LAYOUT_SAFE_AREA_EDGE_VERTICAL = 4,
+    ARK_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = 5,
+    ARK_LAYOUT_SAFE_AREA_EDGE_ALL = 6,
 } Ark_LayoutSafeAreaEdge;
 typedef struct Opt_LayoutSafeAreaEdge {
     Ark_Tag tag;
@@ -10121,6 +10154,15 @@ typedef struct Opt_Array_FractionStop {
     Ark_Tag tag;
     Array_FractionStop value;
 } Opt_Array_FractionStop;
+typedef struct Array_GestureActionPhase {
+    /* kind: ContainerType */
+    Ark_GestureActionPhase* array;
+    Ark_Int32 length;
+} Array_GestureActionPhase;
+typedef struct Opt_Array_GestureActionPhase {
+    Ark_Tag tag;
+    Array_GestureActionPhase value;
+} Opt_Array_GestureActionPhase;
 typedef struct Array_GestureRecognizer {
     /* kind: ContainerType */
     Ark_GestureRecognizer* array;
@@ -14414,6 +14456,16 @@ typedef struct Opt_UIObserver_GestureEventListenerCallback {
     Ark_Tag tag;
     UIObserver_GestureEventListenerCallback value;
 } Opt_UIObserver_GestureEventListenerCallback;
+typedef struct UIObserver_GestureListenerCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode);
+} UIObserver_GestureListenerCallback;
+typedef struct Opt_UIObserver_GestureListenerCallback {
+    Ark_Tag tag;
+    UIObserver_GestureListenerCallback value;
+} Opt_UIObserver_GestureListenerCallback;
 typedef struct UIObserver_PanListenerCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15891,6 +15943,14 @@ typedef struct Opt_IntelligentTrackingPreventionDetails {
     Ark_Tag tag;
     Ark_IntelligentTrackingPreventionDetails value;
 } Opt_IntelligentTrackingPreventionDetails;
+typedef struct Ark_InnerGestureObserverConfigs {
+    /* kind: Interface */
+    Array_GestureActionPhase actionPhases;
+} Ark_InnerGestureObserverConfigs;
+typedef struct Opt_InnerGestureObserverConfigs {
+    Ark_Tag tag;
+    Ark_InnerGestureObserverConfigs value;
+} Opt_InnerGestureObserverConfigs;
 typedef struct Ark_intl_DateTimeOptions {
     /* kind: Interface */
     Opt_String locale;
@@ -22704,6 +22764,16 @@ typedef struct Opt_ImageAttachmentLayoutStyle {
     Ark_Tag tag;
     Ark_ImageAttachmentLayoutStyle value;
 } Opt_ImageAttachmentLayoutStyle;
+typedef struct Ark_InnerGestureTriggerInfo {
+    /* kind: Interface */
+    Ark_GestureEvent event;
+    Ark_GestureRecognizer current;
+    Ark_GestureActionPhase currentPhase;
+} Ark_InnerGestureTriggerInfo;
+typedef struct Opt_InnerGestureTriggerInfo {
+    Ark_Tag tag;
+    Ark_InnerGestureTriggerInfo value;
+} Opt_InnerGestureTriggerInfo;
 typedef struct Opt_LongPressGestureEvent {
     Ark_Tag tag;
     Ark_LongPressGestureEvent value;
@@ -28308,7 +28378,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                                               Ark_Float64 startAngle,
                                               Ark_Float64 x,
                                               Ark_Float64 y);
-    Ark_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
+    Opt_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
                                       Ark_Float64 sx,
                                       Ark_Float64 sy,
                                       Ark_Float64 sw,
@@ -31487,6 +31557,9 @@ typedef struct GENERATED_ArkUIUIObserverGestureEventOpsAccessor {
                               const UIObserver_GestureEventListenerCallback* callback);
     Ark_Int32 (*setOnDidTap)(Ark_Int32 instanceId,
                              const UIObserver_GestureEventListenerCallback* callback);
+    Ark_Int32 (*addGlobalGestureListener)(Ark_GestureListenerType type,
+                                        const Ark_InnerGestureObserverConfigs* option,
+                                        const UIObserver_GestureListenerCallback* callback);
 } GENERATED_ArkUIUIObserverGestureEventOpsAccessor;
 
 typedef struct GENERATED_ArkUIUIScrollableCommonEventAccessor {

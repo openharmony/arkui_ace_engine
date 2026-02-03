@@ -469,6 +469,7 @@ class JSCheckbox extends JSViewAbstract {
   }
   static margin(value) {
     getUINativeModule().checkbox.setMargin(true, value);
+    JSViewAbstract.margin(value);
   }
   static onChange(callback) {
     getUINativeModule().checkbox.setCheckboxOnChange(true, callback);

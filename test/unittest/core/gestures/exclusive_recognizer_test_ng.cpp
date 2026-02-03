@@ -937,4 +937,326 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest009, TestSize.Level1)
     exclusiveRecognizer->CleanRecognizerState();
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 }
+
+/**
+ * @tc.name: ExclusiveRecognizerTest010
+ * @tc.desc: Test ExclusiveRecognizer OnAccepted with RecognizerGroup child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer with nested ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> innerRecognizers = {clickRecognizerPtr};
+    RefPtr<ExclusiveRecognizer> innerExclusive = AceType::MakeRefPtr<ExclusiveRecognizer>(innerRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> outerRecognizers = {innerExclusive};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(outerRecognizers);
+
+    /**
+     * @tc.steps: step2. call OnAccepted with activeRecognizer set to test RecognizerGroup path.
+     */
+    exclusiveRecognizer->activeRecognizer_ = innerExclusive;
+    exclusiveRecognizer->OnAccepted();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest011
+ * @tc.desc: Test ExclusiveRecognizer OnAccepted with bridge mode recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer with bridge mode recognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> bridgeRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    bridgeRecognizer->SetBridgeMode(true);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr, bridgeRecognizer};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call OnAccepted with activeRecognizer set to test bridge mode path.
+     */
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->OnAccepted();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest012
+ * @tc.desc: Test ExclusiveRecognizer OnRejected with RecognizerGroup child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer with nested ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> innerRecognizers = {clickRecognizerPtr};
+    RefPtr<ExclusiveRecognizer> innerExclusive = AceType::MakeRefPtr<ExclusiveRecognizer>(innerRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> outerRecognizers = {innerExclusive};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(outerRecognizers);
+
+    /**
+     * @tc.steps: step2. call OnRejected to test RecognizerGroup path.
+     */
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(innerExclusive->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest013
+ * @tc.desc: Test ExclusiveRecognizer OnRejected with bridge mode recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer with bridge mode recognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> bridgeRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    bridgeRecognizer->SetBridgeMode(true);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr, bridgeRecognizer};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call OnRejected to test bridge mode path.
+     */
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest014
+ * @tc.desc: Test ExclusiveRecognizer HandleAcceptDisposal with MultiFingersRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call HandleAcceptDisposal with MultiFingersRecognizer to test SetTouchPointsForSucceedBlock.
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_FALSE(exclusiveRecognizer->activeRecognizer_ == nullptr);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest015
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal with newBlockRecognizer null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call HandleRejectDisposal when prevState is PENDING but no blocked recognizer.
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest016
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal with CheckAllFailed true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call HandleRejectDisposal when prevState is not PENDING.
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest017
+ * @tc.desc: Test ExclusiveRecognizer DispatchEventToActiveRecognizers while loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr, clickRecognizerPtr2};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call DispatchEventToActiveRecognizers to test while loop and count > 0 path.
+     */
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::DOWN;
+    clickRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizerPtr2->touchPoints_[touchEvent.id] = touchEvent;
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->DispatchEventToActiveRecognizers(touchEvent);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, clickRecognizerPtr);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest018
+ * @tc.desc: Test ExclusiveRecognizer DispatchEventToActiveRecognizers with blockRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> blockRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr, blockRecognizer};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call DispatchEventToActiveRecognizers to test blockRecognizer path.
+     */
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.type = TouchType::MOVE;
+    clickRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    blockRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    blockRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->DispatchEventToActiveRecognizers(touchEvent);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, clickRecognizerPtr);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest019
+ * @tc.desc: Test ExclusiveRecognizer CheckAndSetRecognizerCleanFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call CheckAndSetRecognizerCleanFlag when activeRecognizer matches.
+     */
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->CheckAndSetRecognizerCleanFlag(clickRecognizerPtr);
+    EXPECT_TRUE(exclusiveRecognizer->IsNeedResetRecognizerState());
+
+    /**
+     * @tc.steps: step3. call CheckAndSetRecognizerCleanFlag when activeRecognizer doesn't match.
+     */
+    RefPtr<ClickRecognizer> otherRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    exclusiveRecognizer->SetIsNeedResetRecognizer(false);
+    exclusiveRecognizer->CheckAndSetRecognizerCleanFlag(otherRecognizer);
+    EXPECT_FALSE(exclusiveRecognizer->IsNeedResetRecognizerState());
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest020
+ * @tc.desc: Test ExclusiveRecognizer CleanRecognizerStateVoluntarily with RecognizerGroup child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer with nested ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> innerRecognizers = {clickRecognizerPtr};
+    RefPtr<ExclusiveRecognizer> innerExclusive = AceType::MakeRefPtr<ExclusiveRecognizer>(innerRecognizers);
+    std::vector<RefPtr<NGGestureRecognizer>> outerRecognizers = {innerExclusive};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(outerRecognizers);
+
+    /**
+     * @tc.steps: step2. call CleanRecognizerStateVoluntarily to test RecognizerGroup path.
+     */
+    exclusiveRecognizer->CleanRecognizerStateVoluntarily();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest021
+ * @tc.desc: Test ExclusiveRecognizer CleanRecognizerStateVoluntarily with IsNeedResetRecognizerState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call CleanRecognizerStateVoluntarily when IsNeedResetRecognizerState is true.
+     */
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->SetIsNeedResetRecognizer(true);
+    exclusiveRecognizer->CleanRecognizerStateVoluntarily();
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerTest022
+ * @tc.desc: Test ExclusiveRecognizer ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call ForceCleanRecognizer.
+     */
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->refereeState_ = RefereeState::SUCCEED;
+    exclusiveRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::READY);
+}
 } // namespace OHOS::Ace::NG

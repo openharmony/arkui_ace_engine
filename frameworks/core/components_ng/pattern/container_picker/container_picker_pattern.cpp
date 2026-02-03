@@ -81,9 +81,7 @@ RefPtr<NodePaintMethod> ContainerPickerPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(props, nullptr);
     auto safeAreaPaddingProperty = props->GetOrCreateSafeAreaPadding();
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     auto paint = MakeRefPtr<ContainerPickerPaintMethod>();
     paint->SetSafeAreaPadding(safeAreaPaddingProperty);
     return paint;
@@ -475,9 +473,7 @@ RefPtr<ClickEvent> ContainerPickerPattern::CreateItemClickEventListener()
     };
 
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
     return listener;
 }
@@ -530,9 +526,7 @@ RefPtr<TouchEventImpl> ContainerPickerPattern::CreateItemTouchEventListener()
         }
     };
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     auto listener = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     return listener;
 }
@@ -666,9 +660,7 @@ void ContainerPickerPattern::AddPanEvent(const RefPtr<GestureEventHub>& gestureH
     }
 
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
 

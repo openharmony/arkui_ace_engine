@@ -1335,4 +1335,32 @@ HWTEST_F(CheckBoxGroupTwoTestNG, ResetComponentColor, TestSize.Level1)
     ret = paintProperty->GetCheckBoxGroupUnSelectedColor();
     EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetInactiveColor());
 }
+
+/**
+ * @tc.name: CreateCheckboxGroup
+ * @tc.desc: Test CreateCheckboxGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTwoTestNG, CreateCheckboxGroup, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CheckBoxGroup frame node and checkbox groupName.
+     * @tc.expected: step1. groupName equal GROUP_NAME.
+     */
+    CheckBoxGroupModelNG::CreateCheckboxGroup(GROUP_NAME);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto groupName = CheckBoxGroupModelNG::GetCheckboxGroupName(frameNode);
+    EXPECT_EQ(groupName, GROUP_NAME);
+
+    /**
+     * @tc.steps: step2. Create CheckBoxGroup frame node and checkbox groupName.
+     * @tc.expected: step2. groupName equal "".
+     */
+    CheckBoxGroupModelNG::CreateCheckboxGroup(std::nullopt);
+    frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    groupName = CheckBoxGroupModelNG::GetCheckboxGroupName(frameNode);
+    EXPECT_EQ(groupName, "");
+}
 } // namespace OHOS::Ace::NG

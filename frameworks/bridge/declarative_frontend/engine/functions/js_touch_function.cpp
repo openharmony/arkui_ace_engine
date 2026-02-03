@@ -111,10 +111,10 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     return eventObj;
 }
 
-void JsTouchFunction::Execute(EcmaVM* vm, TouchEventInfo& info)
+void JsTouchFunction::Execute(EcmaVM* vm, TouchEventInfo& info, const WeakPtr<NG::FrameNode>& node)
 {
     auto infoPtr = std::make_shared<TouchEventInfo>(info);
-    auto obj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
+    auto obj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
     JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
     JsFunction::ExecuteJS(1, &param);
     info.SetStopPropagation(infoPtr->IsStopPropagation());

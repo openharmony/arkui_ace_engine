@@ -184,6 +184,8 @@ adapter/ohos/osal/resource_convertor.h @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.cpp @arkui_framework_resource
 adapter/ohos/osal/resource_theme_style.h @arkui_framework_resource
 adapter/ohos/osal/ressched_report.cpp @arkui_framework_resource
+adapter/ohos/osal/screen_lock_manager_ohos.cpp @huawei_g_five
+adapter/ohos/osal/screen_lock_manager_ohos.h @huawei_g_five
 adapter/ohos/osal/statistic_event_adapter.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.cpp @arkui_framework_xnode
 adapter/ohos/osal/socperf_client_impl.h @arkui_framework_xnode
@@ -214,6 +216,8 @@ adapter/preview/entrance/window_free_container.cpp @arkui_framework_xnode
 adapter/preview/ @arkuilayout1
 adapter/preview/osal/advance/data_detector_adapter.cpp @huawei_g_five
 adapter/preview/osal/click_sound_effect_manager.cpp @ArkUI_Event
+adapter/preview/osal/screen_lock_manager_preview.cpp @huawei_g_five
+adapter/preview/osal/screen_lock_manager_preview.h @huawei_g_five
 
 [Advanced UI Components]
 advanced_ui_component/arcslider/
@@ -259,7 +263,7 @@ advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
 advanced_ui_component_static/popup/ @arkuipopupwindow_all
 
 [Advanced UI Components Static]
-advanced_ui_component_static/assembled_advanced_ui_component/ @wangrunsen
+advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomponent
 
 [Extend UI Components]
 component_ext/arc_swiper/
@@ -1847,6 +1851,7 @@ frameworks/core/common/ai/image_analyzer_default.h @arkui001
 frameworks/core/common/ai/image_analyzer_loader.h @arkui001
 frameworks/core/common/ai/image_analyzer_manager.h @arkui001
 frameworks/core/common/ai/image_analyzer_mgr.h @arkui001
+frameworks/core/common/screen_lock/screen_lock_manager.h @huawei_g_five
 frameworks/core/common/share/text_share_adapter.h @huawei_g_five
 frameworks/core/common/share/text_share_default.h @huawei_g_five
 frameworks/core/common/share/text_share_loader.h @huawei_g_five

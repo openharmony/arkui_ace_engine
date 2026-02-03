@@ -843,6 +843,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Slider", "arkui.components.arkslider" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },
+        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
         { "ColumnSplit", "arkui.components.arkcolumnsplit" },
         { "RowSplit", "arkui.components.arkrowsplit" },
 #ifndef ARKUI_WEARABLE

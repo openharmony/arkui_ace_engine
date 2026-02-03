@@ -5352,6 +5352,42 @@ void callManagedUIObserver_GestureEventListenerCallbackSync(Ark_VMContext vmCont
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedUIObserver_GestureListenerCallback(Ark_Int32 resourceId, Ark_InnerGestureTriggerInfo info, Opt_FrameNode frameNode)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_UIObserver_GestureListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    InnerGestureTriggerInfo_serializer::write(argsSerializer, info);
+    if (runtimeType(frameNode) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto frameNodeTmpValue = frameNode.value;
+        FrameNode_serializer::write(argsSerializer, frameNodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedUIObserver_GestureListenerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_InnerGestureTriggerInfo info, Opt_FrameNode frameNode)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_UIObserver_GestureListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    InnerGestureTriggerInfo_serializer::write(argsSerializer, info);
+    if (runtimeType(frameNode) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto frameNodeTmpValue = frameNode.value;
+        FrameNode_serializer::write(argsSerializer, frameNodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedUIObserver_PanListenerCallback(Ark_Int32 resourceId, Ark_GestureEvent event, Ark_GestureRecognizer current, Opt_FrameNode node)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9624,6 +9660,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequest);
         case Kind_UIObserver_ClickEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_ClickEventListenerCallback);
         case Kind_UIObserver_GestureEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_GestureEventListenerCallback);
+        case Kind_UIObserver_GestureListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_GestureListenerCallback);
         case Kind_UIObserver_PanListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_PanListenerCallback);
         case Kind_UIStatesChangeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedUIStatesChangeHandler);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallback);
@@ -9981,6 +10018,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequestSync);
         case Kind_UIObserver_ClickEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_ClickEventListenerCallbackSync);
         case Kind_UIObserver_GestureEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_GestureEventListenerCallbackSync);
+        case Kind_UIObserver_GestureListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_GestureListenerCallbackSync);
         case Kind_UIObserver_PanListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_PanListenerCallbackSync);
         case Kind_UIStatesChangeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedUIStatesChangeHandlerSync);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallbackSync);

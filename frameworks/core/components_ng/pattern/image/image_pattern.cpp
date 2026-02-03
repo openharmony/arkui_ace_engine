@@ -944,9 +944,7 @@ void ImagePattern::ClearReloadFlagsAfterLoad()
 void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     if (loadingCtx_) {
         auto srcKey = src.GetKey();
         auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
@@ -2765,9 +2763,7 @@ void ImagePattern::LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceI
     if (!altErrorCtx_ || altErrorCtx_->GetSourceInfo() != altErrorImageSourceInfo ||
         (altErrorCtx_ && altErrorImageSourceInfo.IsSvg())) {
         auto host = GetHost();
-        if (host) {
-            ACE_UINODE_TRACE(host);
-        }
+        ACE_UINODE_TRACE(host);
         altErrorImageDfxConfig_ = CreateImageDfxConfig(altErrorImageSourceInfo);
         altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
             altErrorImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altErrorImageDfxConfig_);

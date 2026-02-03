@@ -363,6 +363,7 @@ typedef enum CallbackKind {
     Kind_Type_WebAttribute_onInterceptRequest = 1165932304,
     Kind_UIObserver_ClickEventListenerCallback = -898651636,
     Kind_UIObserver_GestureEventListenerCallback = -1782552987,
+    Kind_UIObserver_GestureListenerCallback = -557909783,
     Kind_UIObserver_PanListenerCallback = -2113342607,
     Kind_UIStatesChangeHandler = 1846087828,
     Kind_UpdateTransitionCallback = -448105339,

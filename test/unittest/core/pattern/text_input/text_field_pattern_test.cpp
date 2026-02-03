@@ -2014,6 +2014,14 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
     controller->isShowMagnifier_ = true;
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, true);
+
+
+    /**
+     * @tc.steps: step3. GetMagnifierController
+     *
+     */
+    result = controller->GetShowMagnifier();
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -2749,6 +2757,9 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
 {
+    /**
+    * @tc.steps: step1. create target node.
+    */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -2765,6 +2776,9 @@ HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
  */
 HWTEST_F(TextFieldPatternTest, HandleOnTranslate001, TestSize.Level1)
 {
+    /**
+    * @tc.steps: step1. create target node.
+    */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);

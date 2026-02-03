@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
-declare class ForEach {
-  static create(): void;
-  static pop(): void;
-  static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[],
-    duplicateIds: number[], removedChildElmtIds: number[]): void;
-  static createNewChildStart(id: string, parentNode: JSBuilderNode): void;
-  static createNewChildFinish(id: string, parentNode: JSBuilderNode): void;
-}
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SCREEN_LOCK_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SCREEN_LOCK_MANAGER_H
+
+namespace OHOS::Ace {
+
+class ScreenLockManager {
+public:
+    ScreenLockManager() = default;
+    ~ScreenLockManager() = default;
+    static bool IsScreenLocked();
+};
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SCREEN_LOCK_MANAGER_H

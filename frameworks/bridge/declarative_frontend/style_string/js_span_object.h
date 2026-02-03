@@ -369,14 +369,14 @@ public:
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     void SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj);
-    JSRef<JSObject>& GetJsCustomSpanObject();
+    JSRef<JSObject> GetJsCustomSpanObject();
     void AddStyledString(const WeakPtr<SpanStringBase>& spanString) override;
     void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
     RefPtr<JSNativeCustomSpan> customSpan_;
-    JSRef<JSObject> customSpanObj_;
+    JSWeak<JSObject> customSpanObj_;
 };
 
 class JSNativeLeadingMarginSpan : public virtual AceType {

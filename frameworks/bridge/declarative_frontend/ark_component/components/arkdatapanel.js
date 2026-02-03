@@ -157,11 +157,7 @@ DataPanelValueColorsModifier.identity = Symbol('dataPanelValueColors');
 
 class JSDataPanel extends JSViewAbstract {
     static create(params) {
-        if (params !== undefined) {
-            getUINativeModule().dataPanel.create(params.values ?? 0, params.max ?? 100, params.type ?? 0);
-        } else {
-            getUINativeModule().dataPanel.create(0, 100, 0);
-        }
+        getUINativeModule().dataPanel.create(params);
     }
 
     static closeEffect(value) {

@@ -120,6 +120,9 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle001, TestSize.Level0)
  */
 HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Init pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -129,7 +132,7 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level0)
     ASSERT_NE(contentNode, nullptr);
 
     /**
-     * @tc.steps: step1. set typing style
+     * @tc.steps: step2. set typing style
      */
     TextStyle style;
     style.SetTextColor(TEXT_COLOR_VALUE);
@@ -151,7 +154,7 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level0)
     richEditorController->SetTypingStyle(typingStyle, style);
     
     /**
-     * @tc.steps: step2. get typing style
+     * @tc.steps: step3. get typing style
      */
     auto typingStyleResult = richEditorController->GetTypingStyle();
     EXPECT_TRUE(typingStyleResult.has_value());
@@ -160,7 +163,7 @@ HWTEST_F(RichEditorStyleTestNg, TextbackgroundStyle002, TestSize.Level0)
     EXPECT_EQ(backgroundResult.value(), textBackgroundStyle);
 
     /**
-     * @tc.steps: step3. insert value
+     * @tc.steps: step4. insert value
      */
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(INIT_VALUE_1);

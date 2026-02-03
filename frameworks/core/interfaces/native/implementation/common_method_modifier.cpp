@@ -36,6 +36,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -2164,62 +2166,6 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContex
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id, ctx);
 }
-void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
 
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src, ConvContext *ctx)
 {
@@ -2435,6 +2381,15 @@ void SetResponseRegionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetResponseRegion(frameNode, *convArray);
+        if (frameNode->GetTag() == V2::RADIO_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<RadioPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        }
     } else {
         ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
@@ -5465,20 +5420,48 @@ void SetBackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    
+    Alignment alignment = Alignment::CENTER;
+    uint32_t parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    bool hasEdges = false;
+    if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto alignOpt = Converter::OptConvert<Alignment>(options->value.align);
+        if (alignOpt) {
+            alignment = alignOpt.value();
+        }
+        const auto& optEdges = options->value.ignoresLayoutSafeAreaEdges;
+        if (optEdges.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(optEdges.value);
+            uint32_t mask = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+            for (auto edgeValue : edgeRawArray) {
+                mask |= edgeValue;
+            }
+            parsedEdges = mask;
+            hasEdges = true;
+        }
+    }
     Converter::VisitUnionPtr(content,
-        [frameNode, optAlign, node](const CustomNodeBuilder& builder) {
-            CallbackHelper(builder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-                CHECK_NULL_VOID(uiNode);
-                auto builderFunc = [uiNode]() -> RefPtr<UINode> {
-                    return uiNode;
-                };
-                ViewAbstract::SetIsBuilderBackground(frameNode, true);
-                ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, optAlign);
+        [frameNode, alignment, parsedEdges, hasEdges, node](const CustomNodeBuilder& builder) {
+            CallbackHelper(builder).BuildAsync(
+                [frameNode, alignment, parsedEdges, hasEdges](const RefPtr<UINode>& uiNode) {
+                    CHECK_NULL_VOID(uiNode);
+                    auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                        return uiNode;
+                    };
+                    uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+                    ViewAbstract::SetIsBuilderBackground(frameNode, true);
+                    bool isTransitionBackground = !(ignoreLayoutSafeAreaEdges == NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+                    ViewAbstract::SetIsTransitionBackground(frameNode, isTransitionBackground);
+                    ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+                    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
+                    ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, alignment);
                 }, node);
         },
-        [frameNode](const Ark_ResourceColor& resourceColor) {
+        [frameNode, alignment, parsedEdges, hasEdges](const Ark_ResourceColor& resourceColor) {
+            uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+            ViewAbstract::SetIsBuilderBackground(frameNode, false);
+            ViewAbstract::SetIsTransitionBackground(frameNode, true);
+            ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+            ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
             auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
             ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
         },

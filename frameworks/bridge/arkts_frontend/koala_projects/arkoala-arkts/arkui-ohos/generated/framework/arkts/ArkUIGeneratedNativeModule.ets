@@ -3853,7 +3853,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CanvasRenderer_createConicGradient(ptr: KPointer, startAngle: KDouble, x: KDouble, y: KDouble): KPointer
     @ani.unsafe.Quick
-    native static _CanvasRenderer_getPixelMap(ptr: KPointer, sx: KDouble, sy: KDouble, sw: KDouble, sh: KDouble): KPointer
+    native static _CanvasRenderer_getPixelMap(ptr: KPointer, sx: KDouble, sy: KDouble, sw: KDouble, sh: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _CanvasRenderer_getLineDash(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -6742,6 +6742,8 @@ export class ArkUIGeneratedNativeModule {
     native static _UIObserverGestureEventOps_setOnWillTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnDidTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_addGlobalGestureListener(type: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
     native static _UIScrollableCommonEvent_construct(ptr: KPointer): KPointer
     @ani.unsafe.Direct

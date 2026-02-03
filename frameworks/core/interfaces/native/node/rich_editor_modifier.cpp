@@ -1609,7 +1609,7 @@ ArkUIRichEditorTextStyle GetRichEditorTypingStyle(ArkUINodeHandle node)
         textStyle.fontStyle = static_cast<int32_t>(typingStyle.updateItalicFontStyle.value());
     }
     if (typingStyle.updateFontWeight.has_value()) {
-        textStyle.fontWeight = static_cast<int32_t>(typingStyle.updateFontWeight.value());
+        textStyle.fontWeight = static_cast<uint32_t>(typingStyle.updateFontWeight.value());
     }
     if (typingStyle.updateFontFamily.has_value()) {
         textStyle.fontFamily = V2::ConvertFontFamily(typingStyle.updateFontFamily.value());

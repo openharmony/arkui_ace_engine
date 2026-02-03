@@ -1445,6 +1445,7 @@ void SetTextInputPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, 
 void ResetTextInputPadding(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextInputPadding(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();

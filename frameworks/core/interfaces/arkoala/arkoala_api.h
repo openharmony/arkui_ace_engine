@@ -24,6 +24,17 @@
 #include <utility>
 #include "core/common/resource/resource_object.h"
 
+#ifdef __cplusplus
+namespace OHOS::Ace {
+struct SymbolShadow;
+struct SymbolGradient;
+}
+
+namespace OHOS::Ace::NG {
+class SymbolEffectOptions;
+}
+#endif
+
 /*
  * ATTENTION. Keep this file self contained.
  * Make sure it has all necessary type declarations.
@@ -6098,8 +6109,6 @@ struct ArkUICheckboxModifier {
     void (*setCheckboxChangeEvent)(ArkUINodeHandle node, void* callback);
     void (*setCheckboxJsPadding)(const struct ArkUIPaddingType* oldVlaue, const struct ArkUIPaddingType* newVlaue,
         ArkUI_Bool flag);
-    void (*setCheckboxJsMargin)(
-        const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -6145,8 +6154,6 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupPadding)(const struct ArkUIPaddingType* oldVlaue, const struct ArkUIPaddingType* newVlaue,
         ArkUI_Bool flag);
     void (*setCheckboxGroupChangeEvent)(void* callback);
-    void (*setCheckboxGroupSize)(
-        ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth);
 };
 
 struct ArkUIImageSpanModifier {
@@ -7224,6 +7231,9 @@ struct ArkUITextTimerModifier {
 };
 
 struct ArkUISymbolGlyphModifier {
+    void (*create)(ArkUI_Uint32 symbolId);
+    void (*setSymbolFontFamilies)(std::vector<std::string>& value);
+    void (*setSymbolGlyphType)(ArkUI_Uint32 value);
     void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size);
     void (*resetFontColor)(ArkUINodeHandle node);
     void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resourceRawPtr);
@@ -7246,6 +7256,15 @@ struct ArkUISymbolGlyphModifier {
     void (*setCustomSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
     void (*setFontColorWithPlaceholder)(
         ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Uint32 colorPlaceholder, ArkUI_Int32 size);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*jsClip)(ArkUINodeHandle node);
+    void (*setSymbolEffectOptions)(ArkUINodeHandle node, const OHOS::Ace::NG::SymbolEffectOptions* options);
+    void (*setSymbolShadow)(ArkUINodeHandle node, const OHOS::Ace::SymbolShadow* shadow);
+    void (*resetSymbolShadow)(ArkUINodeHandle node);
+    void (*setShaderStyle)(ArkUINodeHandle node, const OHOS::Ace::SymbolGradient* gradients, ArkUI_Int32 size);
+    void (*resetShaderStyle)(ArkUINodeHandle node);
+    void (*setFontColorJs)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size,
+        ArkUI_Int32* resIndexes, void** resObjects, ArkUI_Int32 resSize);
 };
 
 struct ArkUISymbolSpanModifier {

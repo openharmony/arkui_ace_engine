@@ -392,6 +392,41 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest014)
 }
 
 /**
+ * @tc.name: RebuildCache001
+ * @tc.desc: Test Rebuild Cache for LazyForEach and Repeat node.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, RebuildCache001)
+{
+    int32_t total_4 = 4;
+    int32_t total_8 = 8;
+    int32_t cache = 4;
+    /**
+     * @tc.steps: step1. Test Rebuild Cache for LazyForEach node
+     */
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    CreateChildren(lazyNode, TOTAL_COUNT);
+    lazyNode->DoSetActiveChildRange(1, total_4, cache, cache, false);
+    lazyNode->GetChildren();
+    EXPECT_EQ(lazyNode->children_.size(), total_4);
+    lazyNode->DoSetActiveChildRange(1, total_8, cache, cache, false);
+    lazyNode->GetChildren();
+    EXPECT_EQ(lazyNode->children_.size(), total_8);
+
+    /**
+     * @tc.steps: step2. Test Rebuild Cache for Repeat node
+     */
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    CreateChildren(repeatNode, TOTAL_COUNT);
+    repeatNode->DoSetActiveChildRange(1, total_4, 0, 0, false);
+    repeatNode->GetChildren();
+    EXPECT_EQ(repeatNode->children_.size(), total_4);
+    repeatNode->DoSetActiveChildRange(1, total_8, cache, cache, false);
+    repeatNode->GetChildren();
+    EXPECT_EQ(repeatNode->children_.size(), total_4);
+}
+
+/**
  * @tc.name: ArkoalaLazyNodeTest015
  * @tc.desc: Test ArkoalaLazyNode PostIdleTask.
  * @tc.type: FUNC

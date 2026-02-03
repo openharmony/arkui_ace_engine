@@ -124,6 +124,8 @@ std::function<std::string()> JsGetCustomMapFunc(panda::ecmascript::EcmaVM* vm, i
 class JSViewAbstract {
 public:
     static RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+    static RefPtr<ResourceObject> GetResourceObjectInternal(const JSRef<JSObject>& jsObj, bool hasGetterOnId);
+    static RefPtr<ResourceObject> GetResourceObjectWithId(const JSRef<JSObject>& jsObj, bool hasGetterOnId);
     static void SetPixelRoundMode(const JSCallbackInfo& info);
     static uint8_t GetPixelRoundMode();
     static void GetAngle(
@@ -385,8 +387,8 @@ public:
 
     // for dynamic $r
     static void CompleteResourceObject(JSRef<JSObject>& jsObj);
-    static void CompleteResourceObjectWithBundleName(
-        JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId);
+    static void CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
+        std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue);
     static void CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
     static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
@@ -924,7 +926,7 @@ private:
     static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
         RefPtr<ResourceWrapper>& resourceWrapper);
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, JSRef<JSVal>& resId);
     static bool ParseResourceToDoubleByName(
         const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseResourceToDoubleById(
@@ -943,7 +945,7 @@ private:
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
     static void CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName,
-        int32_t& resIdValue, int32_t& resTypeValue);
+        int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId);
     static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
         const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);

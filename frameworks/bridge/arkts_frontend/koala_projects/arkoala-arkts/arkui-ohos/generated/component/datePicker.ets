@@ -410,8 +410,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
 export function DatePickerImpl(
     @memo
     style: ((attributes: DatePickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkDatePickerComponent>((): ArkDatePickerComponent => {
         return new ArkDatePickerComponent()
@@ -420,7 +418,6 @@ export function DatePickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

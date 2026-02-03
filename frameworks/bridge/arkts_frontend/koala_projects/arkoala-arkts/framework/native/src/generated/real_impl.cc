@@ -20190,6 +20190,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Int32 AddGlobalGestureListenerImpl(Ark_GestureListenerType type,
+                                           const Ark_InnerGestureObserverConfigs* option,
+                                           const UIObserver_GestureListenerCallback* callback)
+    {
+        return {};
+    }
     } // UIObserverGestureEventOpsAccessor
     namespace UIScrollableCommonEventAccessor {
     void DestroyPeerImpl(Ark_UIScrollableCommonEvent peer)
@@ -24578,6 +24584,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             UIObserverGestureEventOpsAccessor::SetOnDidClickImpl,
             UIObserverGestureEventOpsAccessor::SetOnWillTapImpl,
             UIObserverGestureEventOpsAccessor::SetOnDidTapImpl,
+            UIObserverGestureEventOpsAccessor::AddGlobalGestureListenerImpl,
         };
         return &UIObserverGestureEventOpsAccessorImpl;
     }

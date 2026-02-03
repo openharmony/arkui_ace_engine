@@ -1390,16 +1390,17 @@ void JSCustomSpan::SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj)
     customSpanObj_ = customSpanObj;
 }
 
-JSRef<JSObject>& JSCustomSpan::GetJsCustomSpanObject()
+JSRef<JSObject> JSCustomSpan::GetJsCustomSpanObject()
 {
-    return customSpanObj_;
+    return customSpanObj_.Lock();
 }
 RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
 {
     if (end - start > 1) {
         return nullptr;
     }
-    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_, GetOnMeasure(), GetOnDraw(), start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_.Lock(),
+        GetOnMeasure(), GetOnDraw(), start, end);
     return spanBase;
 }
 
@@ -1409,9 +1410,13 @@ bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (!customSpan) {
         return false;
     }
-    return (customSpan->customSpanObj_)
-        ->GetLocalHandle()
-        ->IsStrictEquals(customSpanObj_->GetEcmaVM(), customSpanObj_->GetLocalHandle());
+    auto customSpanObj = customSpanObj_.Lock();
+    auto otherSpanObj = customSpan->customSpanObj_.Lock();
+    if (customSpanObj->IsEmpty() || otherSpanObj->IsEmpty()) {
+        return false;
+    }
+    return otherSpanObj->GetLocalHandle()
+        ->IsStrictEquals(customSpanObj->GetEcmaVM(), customSpanObj->GetLocalHandle());
 }
 
 std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(

@@ -725,4 +725,61 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
     EXPECT_EQ(vOverflowHandler->GetContentRect(), RectF(30.0f, 30.0f, 440.0f, 440.0f))
         << vOverflowHandler->GetContentRect().ToString();
 }
+
+/**
+ * @tc.name: StackOverFlow002
+ * @tc.desc: test stack HandleContentOverflow()
+ * @tc.type: ETS
+ */
+HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create flex component and its children
+     */
+    RefPtr<FrameNode> child;
+    auto stackNode = CreateStack([this, &child](StackModelNG model) {
+        child = CreateStack([this](StackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(50.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(100.0f, DimensionUnit::PX));
+        });
+        ViewAbstract::SetWidth(CalcLength(50.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+    });
+    /* corresponding ets code:
+        Stack() {
+          Stack(){
+          }
+            .width('50px')
+            .height('50px')
+        }
+        .width("50px")
+        .height("100px")
+    */
+    stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(stackNode);
+    auto pattern = stackNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    const auto &handler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
+    const auto& childGeometry = child->GetGeometryNode();
+    ASSERT_NE(childGeometry, nullptr);
+    std::optional<RectF> totalChildFrameRect;
+    totalChildFrameRect = childGeometry->GetMarginFrameRect();
+    handler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
+    handler->CreateContentRect();
+    handler->HandleContentOverflow();
+ 
+    /**
+     * @tc.expected: register scrollEvent and initialize
+     */
+    EXPECT_EQ(handler->childFrameTop_.value_or(-1), -25);
+    EXPECT_EQ(handler->offsetToChildFrameBottom_, 25);
+    handler->HandleScrollImpl(-20, 0);
+    /**
+     * @tc.expected: After scrolling up by 20, scrollDistance == 20 and children have correct offset
+     */
+    EXPECT_EQ(handler->childFrameTop_.value_or(-1), -45);
+    EXPECT_EQ(handler->offsetToChildFrameBottom_, 5);
+    EXPECT_EQ(childGeometry->GetMarginFrameOffset(), OffsetF(0, -45));
+}
 } // namespace OHOS::Ace::NG
