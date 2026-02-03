@@ -99,6 +99,49 @@ void SetSpanFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight, void* resRa
         uiNode, "fontWeight", static_cast<FontWeight>(fontWeight), resRawPtr);
 }
 
+void SetSpanVariableFontWeight(ArkUINodeHandle node, ArkUI_Int32 variableFontWeight, void* resRawPtr)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::SetVariableFontWeight(uiNode, variableFontWeight);
+}
+
+void ResetSpanVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::ResetVariableFontWeight(uiNode);
+}
+
+void SetSpanEnableVariableFontWeight(ArkUINodeHandle node, ArkUI_Bool enableVariableFontWeight, void* resRawPtr)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::SetEnableVariableFontWeight(uiNode, enableVariableFontWeight);
+}
+
+void ResetSpanEnableVariableFontWeight(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::ResetEnableVariableFontWeight(uiNode);
+}
+
+void SetSpanEnableDeviceFontWeightCategory(ArkUINodeHandle node,
+    ArkUI_Bool enableDeviceFontWeightCategory, void* resRawPtr)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::SetEnableDeviceFontWeightCategory(uiNode, enableDeviceFontWeightCategory);
+}
+
+void ResetSpanEnableDeviceFontWeightCategory(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::ResetEnableDeviceFontWeightCategory(uiNode);
+}
+
 int32_t GetSpanFontWeight(ArkUINodeHandle node)
 {
     int32_t defaultFontWeight = static_cast<int32_t>(DEFAULT_FONT_WEIGHT);
@@ -639,6 +682,12 @@ const ArkUISpanModifier* GetSpanModifier()
         .resetSpanTextCase = ResetSpanTextCase,
         .setSpanFontWeight = SetSpanFontWeight,
         .resetSpanFontWeight = ResetSpanFontWeight,
+        .setSpanVariableFontWeight = SetSpanVariableFontWeight,
+        .resetSpanVariableFontWeight = ResetSpanVariableFontWeight,
+        .setSpanEnableVariableFontWeight = SetSpanEnableVariableFontWeight,
+        .resetSpanEnableVariableFontWeight = ResetSpanEnableVariableFontWeight,
+        .setSpanEnableDeviceFontWeightCategory = SetSpanEnableDeviceFontWeightCategory,
+        .resetSpanEnableDeviceFontWeightCategory = ResetSpanEnableDeviceFontWeightCategory,
         .setSpanLineHeight = SetSpanLineHeight,
         .resetSpanLineHeight = ResetSpanLineHeight,
         .setSpanFontStyle = SetSpanFontStyle,
@@ -698,6 +747,12 @@ const CJUISpanModifier* GetCJUISpanModifier()
         .resetSpanTextCase = ResetSpanTextCase,
         .setSpanFontWeight = SetSpanFontWeight,
         .resetSpanFontWeight = ResetSpanFontWeight,
+        .setSpanVariableFontWeight = SetSpanVariableFontWeight,
+        .resetSpanVariableFontWeight = ResetSpanVariableFontWeight,
+        .setSpanEnableVariableFontWeight = SetSpanEnableVariableFontWeight,
+        .resetSpanEnableVariableFontWeight = ResetSpanEnableVariableFontWeight,
+        .setSpanEnableDeviceFontWeightCategory = SetSpanEnableDeviceFontWeightCategory,
+        .resetSpanEnableDeviceFontWeightCategory = ResetSpanEnableDeviceFontWeightCategory,
         .setSpanLineHeight = SetSpanLineHeight,
         .resetSpanLineHeight = ResetSpanLineHeight,
         .setSpanFontStyle = SetSpanFontStyle,

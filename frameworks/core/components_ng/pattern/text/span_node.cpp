@@ -720,7 +720,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto spanTextStyle = textStyle;
     UseSelfStyle(fontStyle, textLineStyle, spanTextStyle, false);
     if (fontStyle && fontStyle->HasFontWeight()) {
-        spanTextStyle.SetEnableVariableFontWeight(false);
+        spanTextStyle.SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
     }
     auto fontManager = pipelineContext->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (spanTextStyle.GetFontFamilies().empty())) {
@@ -756,7 +756,7 @@ bool SpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<Fram
     CHECK_NULL_RETURN(textStyle_.has_value(), true);
     UpdateReLayoutTextStyle(textStyle_.value(), textStyle, unicode != 0);
     if (fontStyle && fontStyle->HasFontWeight()) {
-        textStyle_.value().SetEnableVariableFontWeight(false);
+        textStyle_.value().SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
     } else {
         textStyle_.value().SetEnableVariableFontWeight(textStyle.GetEnableVariableFontWeight());
     }
@@ -826,6 +826,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextCase, TextCase);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, VariableFontWeight, VariableFontWeight);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
 
     UPDATE_SPAN_TEXT_STYLE(fontStyle, StrokeWidth, StrokeWidth);
@@ -1237,6 +1238,9 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
     COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
     COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
+    COPY_TEXT_STYLE(fontStyle, VariableFontWeight, UpdateVariableFontWeight);
+    COPY_TEXT_STYLE(fontStyle, EnableVariableFontWeight, UpdateEnableVariableFontWeight);
+    COPY_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, UpdateEnableDeviceFontWeightCategory);
 }
 
 void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
@@ -1308,6 +1312,11 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows, TextShadows);
     WRITE_TLV_INHERIT(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle, FontStyle);
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
+
+    WRITE_TEXT_STYLE_TLV(fontStyle, VariableFontWeight, TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT, Int32);
+    WRITE_TEXT_STYLE_TLV(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
+    WRITE_TEXT_STYLE_TLV(
+        fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
@@ -1381,6 +1390,11 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateVariableFontWeight, TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT, Int32);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateEnableVariableFontWeight,
+                TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateEnableDeviceFontWeightCategory,
+                TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateStrokeWidth, TLV_SPAN_FONT_STYLE_STROKEWIDTH, Dimension);

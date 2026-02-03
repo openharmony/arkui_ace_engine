@@ -158,6 +158,10 @@ constexpr uint8_t TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG = 0xA3;
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION = 0xA4;
 constexpr uint8_t TLV_TEXTDIRECTION_TAG = 0xA5;
 
+constexpr uint8_t TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT = 0xA6;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT = 0xA7;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY = 0xA8;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \

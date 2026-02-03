@@ -76,7 +76,8 @@ const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALI
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
-
+const int32_t NUM_1 = 1;
+const int32_t NUM_2 = 2;
 } // namespace
 
 void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
@@ -142,6 +143,88 @@ void JSSpan::SetFont(const JSCallbackInfo& info)
         JSText::GetFontInfo(info, font);
     }
     SpanModel::GetInstance()->SetFont(font);
+
+    if (info.Length() < NUM_2) {
+        ResetFontWeightConfigs();
+        return;
+    }
+    ProcessVariableFontWeight(info);
+    ProcessFontConfigs(info);
+}
+
+void JSSpan::ResetFontWeightConfigs()
+{
+    SpanModel::GetInstance()->ResetVariableFontWeight();
+    SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+    SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+}
+
+void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        SpanModel::GetInstance()->ResetVariableFontWeight();
+        return;
+    }
+    auto paramFontObject = JSRef<JSObject>::Cast(info[0]);
+    auto fontWeight = paramFontObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
+    if (fontWeight->IsNull() || fontWeight->IsUndefined()) {
+        SpanModel::GetInstance()->ResetVariableFontWeight();
+        return;
+    }
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    ParseJsInt32(fontWeight, variableFontWeight);
+    SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+}
+
+void JSSpan::ProcessFontConfigs(const JSCallbackInfo& info)
+{
+    if (!info[1]->IsObject()) {
+        SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+        SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[1]);
+    if (!paramObject->HasProperty("fontWeightConfigs")) {
+        SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+        SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+        return;
+    }
+    auto fontWeightValue = paramObject->GetProperty("fontWeightConfigs");
+    if (fontWeightValue->IsNull() || fontWeightValue->IsUndefined() || !fontWeightValue->IsObject()) {
+        SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+        SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+        return;
+    }
+    auto fontWeightConfigsObject = JSRef<JSObject>::Cast(fontWeightValue);
+    ProcessFontWeightConfigObject(fontWeightConfigsObject);
+}
+
+void JSSpan::ProcessFontWeightConfigObject(const JSRef<JSObject>& paramObject)
+{
+    if (paramObject->HasProperty("enableVariableFontWeight")) {
+        auto enableVariableFontWeight = paramObject->GetProperty("enableVariableFontWeight");
+        if (!enableVariableFontWeight->IsNull() && !enableVariableFontWeight->IsUndefined() &&
+            enableVariableFontWeight->IsBoolean()) {
+            SpanModel::GetInstance()->SetEnableVariableFontWeight(enableVariableFontWeight->ToBoolean());
+        } else {
+            SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+        }
+    } else {
+        SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+    }
+
+    if (paramObject->HasProperty("enableDeviceFontWeightCategory")) {
+        auto enableDeviceFontWeightCategory = paramObject->GetProperty("enableDeviceFontWeightCategory");
+        if (!enableDeviceFontWeightCategory->IsNull() && !enableDeviceFontWeightCategory->IsUndefined() &&
+            enableDeviceFontWeightCategory->IsBoolean()) {
+            SpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(
+                enableDeviceFontWeightCategory->ToBoolean());
+        } else {
+            SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+        }
+    } else {
+        SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+    }
 }
 
 void JSSpan::SetFontSize(const JSCallbackInfo& info)
@@ -168,7 +251,8 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
 
 void JSSpan::SetFontWeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < NUM_1) {
+        ResetFontWeightConfigs();
         return;
     }
     UnregisterSpanResource("fontWeight");
@@ -184,6 +268,21 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
         RegisterSpanResource<FontWeight>("fontWeight", resObj, ConvertStrToFontWeight(fontWeight));
     }
     SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+
+    if (info.Length() < NUM_2) {
+        ResetFontWeightConfigs();
+        return;
+    }
+    auto tmpInfo = info[1];
+    if (!tmpInfo->IsObject()) {
+        ResetFontWeightConfigs();
+        return;
+    }
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    ParseJsInt32(args, variableFontWeight);
+    SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
+    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
+    ProcessFontWeightConfigObject(paramObject);
 }
 
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
