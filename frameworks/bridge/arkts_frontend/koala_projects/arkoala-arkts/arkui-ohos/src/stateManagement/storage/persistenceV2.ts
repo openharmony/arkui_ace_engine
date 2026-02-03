@@ -425,7 +425,7 @@ export class PersistenceV2Impl {
         }
 
         if (this.entriesMap_.has(key)) {
-            StorageHelper.checkTypeByType(key, ttype, this.typeMap_.get(key)!);
+            StorageHelper.checkTypeByType<Any>(key, ttype, this.typeMap_.get(key)!);
             const existingValue = this.entriesMap_.get(key) as StoragePropertyV2<T>;
             return existingValue.get();
         }
@@ -478,7 +478,7 @@ export class PersistenceV2Impl {
 
         // In memory, return if globalEntriesMap_ exist
         if (this.globalEntriesMap_.has(key)) {
-            StorageHelper.checkTypeByType(key, connectOptions.type, this.typeMap_.get(key)!);
+            StorageHelper.checkTypeByType<Any>(key, connectOptions.type, this.typeMap_.get(key)!);
             const existingValue = this.globalEntriesMap_.get(key) as StoragePropertyV2<T>;
             return existingValue!.get() as T;
         }
@@ -537,7 +537,7 @@ export class PersistenceV2Impl {
     }
 
     public remove(keyOrType: string | Class): boolean {
-        let key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        let key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
         if (!key) {
             return false;
         }
@@ -546,7 +546,7 @@ export class PersistenceV2Impl {
     }
 
     public save(keyOrType: string | Class): boolean {
-        let key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        let key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
         if (!key) {
             return false;
         }
@@ -796,7 +796,7 @@ export class PersistenceV2Impl {
                 if ((property === undefined) || (property!.get() === undefined)) {
                     throw new Error("unable to create default value the key: " + key);
                 }
-                const newValueTuple = PersistenceV2Impl.fromJsonWithType(key, undefined, jsonElement, property!.get() as SerializableObject);
+                const newValueTuple = PersistenceV2Impl.fromJsonWithType<Object>(key, undefined, jsonElement, property!.get() as SerializableObject);
                 newObservedValue = property!.get();
             }
 

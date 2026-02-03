@@ -345,7 +345,7 @@ export function registerTransferCompatibleBuilderCallback(): void {
 export function registerTransferCompatibleUpdatableBuilderCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerTransferCompatibleUpdatableBuilderCallback');
-    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder(builder).unwrap()!};
+    const callback = (builder: (args: Any) => void) => { return transferCompatibleUpdatableBuilder<Object>(builder).unwrap()!};
     registerCallback.invoke(callback);
 }
 
