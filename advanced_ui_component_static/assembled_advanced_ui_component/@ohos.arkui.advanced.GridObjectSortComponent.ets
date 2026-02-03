@@ -1654,7 +1654,6 @@ export struct GridObjectSortComponent {
                 this.content = select;
                 this.isTouchDown = true;
               }
-
               if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isTouchDown = false;
                 this.getUIContext()?.animateTo({
