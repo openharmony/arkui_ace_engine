@@ -74,8 +74,6 @@ public:
     static ArkUINativeModuleValue ResetTabClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabPageFlipMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabPageFlipMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetWidthAuto(ArkUIRuntimeCallInfo* runtimeCallInfo);

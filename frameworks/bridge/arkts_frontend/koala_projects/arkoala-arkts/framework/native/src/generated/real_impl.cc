@@ -6562,10 +6562,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Callback_I32_Void* value)
     {
     }
-    void SetNestedScrollImpl(Ark_NativePointer node,
-                             const Opt_TabsNestedScrollMode* value)
-    {
-    }
     void SetOnAnimationStartImpl(Ark_NativePointer node,
                                  const Opt_OnTabsAnimationStartCallback* value)
     {
@@ -10608,7 +10604,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetOnSelectedImpl,
             TabsAttributeModifier::SetOnTabBarClickImpl,
             TabsAttributeModifier::SetOnUnselectedImpl,
-            TabsAttributeModifier::SetNestedScrollImpl,
             TabsAttributeModifier::SetOnAnimationStartImpl,
             TabsAttributeModifier::SetOnAnimationEndImpl,
             TabsAttributeModifier::SetOnGestureSwipeImpl,

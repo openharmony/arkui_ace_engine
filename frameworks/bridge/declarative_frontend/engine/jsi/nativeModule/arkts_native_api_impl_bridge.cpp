@@ -3408,10 +3408,6 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabEdgeEffect));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabEdgeEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabEdgeEffect));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNestedScroll"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetNestedScroll));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNestedScroll"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetNestedScroll));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabPageFlipMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabPageFlipMode));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabPageFlipMode"),

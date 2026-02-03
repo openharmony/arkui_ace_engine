@@ -1189,40 +1189,6 @@ ArkUINativeModuleValue TabsBridge::ResetTabEdgeEffect(ArkUIRuntimeCallInfo* runt
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TabsBridge::SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    if (valueArg->IsNumber()) {
-        int32_t index = valueArg->Int32Value(vm);
-        int32_t values[1] = { 0 };
-        if (index < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
-            index > static_cast<int32_t>(NestedScrollMode::SELF_FIRST)) {
-                index = 0;
-        }
-        values[0] = index;
-        GetArkUINodeModifiers()->getTabsModifier()->setTabsNestedScroll(nativeNode, &values);
-    } else {
-        GetArkUINodeModifiers()->getTabsModifier()->resetTabsNestedScroll(nativeNode);
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue TabsBridge::ResetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTabsModifier()->resetTabsNestedScroll(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue TabsBridge::SetTabPageFlipMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

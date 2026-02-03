@@ -4318,12 +4318,6 @@ let SwiperNestedScrollMode;
   SwiperNestedScrollMode[SwiperNestedScrollMode.SELF_FIRST = 1] = 'SELF_FIRST';
 })(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
 
-let TabsNestedScrollMode;
-(function (TabsNestedScrollMode) {
-  TabsNestedScrollMode[TabsNestedScrollMode.SELF_ONLY = 0] = 'SELF_ONLY';
-  TabsNestedScrollMode[TabsNestedScrollMode.SELF_FIRST = 1] = 'SELF_FIRST';
-})(TabsNestedScrollMode || (TabsNestedScrollMode = {}));
-
 let PageFlipMode;
 (function (PageFlipMode) {
   PageFlipMode[PageFlipMode.CONTINUOUS = 0] = 'CONTINUOUS';

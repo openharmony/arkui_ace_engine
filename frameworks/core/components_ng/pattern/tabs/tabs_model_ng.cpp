@@ -1176,32 +1176,6 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
     swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
-void TabsModelNG::SetNestedScroll(FrameNode* frameNode, int32_t nestedOpt)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    NestedScrollOptions option;
-    option.forward = static_cast<NestedScrollMode>(nestedOpt);
-    option.backward = static_cast<NestedScrollMode>(nestedOpt);
-    swiperPattern->SetNestedScroll(option);
-}
-
-void TabsModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
-{
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    swiperPattern->SetNestedScroll(nestedOpt);
-}
-
 void TabsModelNG::SetTabBarIndex(FrameNode* frameNode, int32_t index)
 {
     CHECK_NULL_VOID(frameNode);
