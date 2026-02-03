@@ -85,6 +85,29 @@ static bool CheckKeyAndValueTypeEqual(int32_t styledKey, size_t valueTypeId)
 }
 
 template<>
+CustomSpanImpl* Convert(const Ark_CustomSpanWrapper& src)
+{
+    auto castSpanImpl = reinterpret_cast<CustomSpanNativePeer *>(src.nativeObj);
+    CHECK_NULL_RETURN(castSpanImpl, nullptr);
+    castSpanImpl->SetHolder(std::make_shared<ResourceObjectHolder>(src.managed));
+    castSpanImpl->SetOnMeasure([arkCallback = CallbackHelper(src.onMeasure_callback)](
+        const CustomSpanMeasureInfo& measureInfo) {
+        auto arkMeasureInfo = Converter::ArkValue<Ark_CustomSpanMeasureInfo>(measureInfo);
+        std::optional<CustomSpanMetrics> result = arkCallback.InvokeWithOptConvertResult<CustomSpanMetrics,
+            Ark_CustomSpanMetrics, Callback_CustomSpanMetrics_Void>(arkMeasureInfo);
+        return result.value_or(CustomSpanMetrics());
+    });
+    castSpanImpl->SetOnDraw([arkCallback = CallbackHelper(src.onDraw_callback)](
+        NG::DrawingContext& drawingContext,
+        const CustomSpanOptions& customSpanOptions) {
+        auto arkCtxPtr = reinterpret_cast<Ark_DrawContext>(std::addressof(drawingContext));
+        auto arkInfo = Converter::ArkValue<Ark_CustomSpanDrawInfo>(customSpanOptions);
+        arkCallback.InvokeSync(arkCtxPtr, arkInfo);
+    });
+    return castSpanImpl;
+}
+
+template<>
 RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
 {
     RefPtr<SpanBase> result;
@@ -95,11 +118,16 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
         [&result, start, end, &src](const auto& peer) {
             CHECK_NULL_VOID(peer && peer->span);
             auto valueTypeId = Converter::Convert<int32_t>(src.styledValue.selector);
-            // Ark_CustomSpan, Ark_ImageAttachment will be declined by this check
+            // Ark_CustomSpanNative, Ark_ImageAttachment will be declined by this check
             if (!CheckKeyAndValueTypeEqual(static_cast<int32_t>(src.styledKey), valueTypeId)) {
                 return;
             }
             result = peer->span->GetSubSpan(start, end);
+        },
+        [&result, start, end](const Ark_CustomSpanWrapper& arkCustomSpanWrap) {
+            auto castSpanImpl = Convert<CustomSpanImpl *>(arkCustomSpanWrap); 
+            CHECK_NULL_VOID(castSpanImpl);
+            result = castSpanImpl->GetSubSpan(start, end);
         },
         [&result, start, end](const Ark_UserDataSpan& value) {
             result = AceType::MakeRefPtr<UserDataSpanHolder>(value, start, end);
@@ -107,6 +135,55 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
         []() {}
     );
     return result;
+}
+} // namespace OHOS::Ace::NG::Converter
+
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src, ConvContext *ctx)
+{
+    dst.x = ArkValue<Ark_Float64>(src.x);
+    dst.lineTop = ArkValue<Ark_Float64>(src.lineTop);
+    dst.lineBottom = ArkValue<Ark_Float64>(src.lineBottom);
+    dst.baseline = ArkValue<Ark_Float64>(src.baseline);
+}
+
+void AssignArkValue(Ark_CustomSpanMeasureInfo& dst, const CustomSpanMeasureInfo& src, ConvContext *ctx)
+{
+    dst.fontSize = ArkValue<Ark_Float64>(src.fontSize);
+}
+
+void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src, ConvContext *ctx)
+{
+    dst.width = ArkValue<Ark_Float64>(src.width);
+    dst.height = ArkValue<Opt_Float64>(src.height);
+}
+
+template<>
+CustomSpanMetrics Convert(const Ark_CustomSpanMetrics& src)
+{
+    return CustomSpanMetrics {
+        .width = Converter::Convert<float>(src.width),
+        .height = Converter::OptConvert<float>(src.height)
+    };
+}
+
+template<>
+CustomSpanOptions Convert(const Ark_CustomSpanDrawInfo& src)
+{
+    return CustomSpanOptions {
+        .x = Convert<float>(src.x),
+        .lineTop = Convert<float>(src.lineTop),
+        .lineBottom = Convert<float>(src.lineBottom),
+        .baseline = Convert<float>(src.baseline),
+    };
+}
+
+template<>
+CustomSpanMeasureInfo Convert(const Ark_CustomSpanMeasureInfo& src)
+{
+    return CustomSpanMeasureInfo {
+        .fontSize = Convert<float>(src.fontSize)
+    };
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -178,10 +255,10 @@ Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan
                 auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<SpanString>(options);
             },
-            [&peer](const Ark_CustomSpan& arkCustomSpan) {
-                CustomSpanPeer* peerCustomSpan = arkCustomSpan;
-                CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
-                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+            [&peer](const Ark_CustomSpanWrapper& arkCustomSpanWrap) {
+                auto castSpanImpl = Convert<CustomSpanImpl *>(arkCustomSpanWrap); 
+                CHECK_NULL_VOID(castSpanImpl);
+                auto customSpan = AceType::Claim<CustomSpan>(castSpanImpl);
                 peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
@@ -225,7 +302,11 @@ Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
     } else {
         spans = peer->spanString->GetSpans(spanStart, spanLength);
     }
-    return Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
+    APP_LOGE("GLEB, StyledStringAccessor::GetStylesImpl, spans.size=%{public}d", spans.size());
+    auto optSpanStyle = Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
+    APP_LOGE("GLEB, StyledStringAccessor::GetStylesImpl, optSpanStyle.value.length=%{public}d", optSpanStyle.value.length);
+    return optSpanStyle;
+    // return Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
 }
 Ark_Boolean EqualsImpl(Ark_StyledString peer,
                        Ark_StyledString other)
@@ -421,5 +502,4 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
     };
     return &StyledStringAccessorImpl;
 }
-
 }

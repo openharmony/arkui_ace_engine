@@ -133,7 +133,7 @@ HWTEST_F(CustomSpanAccessorTest, DISABLED_setOnDraw_callbackTestOnDraw, TestSize
  */
 HWTEST_F(CustomSpanAccessorTest, invalidateTest, TestSize.Level1)
 {
-    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer_);
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpanNative>(peer_);
     auto inputStyles = Converter::ArkValue<Opt_Array_StyleOptions>();
     Ark_StyledString styledStringPeer =
         accessors_->getStyledStringAccessor()->construct(&value, &inputStyles);

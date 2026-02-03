@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
+#include "custom_span_peer.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomSpanNativeAccessor {
 void DestroyPeerImpl(Ark_CustomSpanNative peer)
 {
-    auto peerImpl = reinterpret_cast<CustomSpanNativePeerImpl *>(peer);
-    if (peerImpl) {
-        delete peerImpl;
+    if (peer) {
+        peer->DecRefCount();
     }
 }
 Ark_CustomSpanNative ConstructImpl()
 {
-    return {};
+    auto peer = AceType::MakeRefPtr<OHOS::Ace::NG::CustomSpanImpl>();
+    peer->IncRefCount();
+    return reinterpret_cast<CustomSpanNativePeer *>(Referenced::RawPtr(peer));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -36,6 +37,8 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void InvalidateImpl(Ark_CustomSpanNative peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->Invalidate();
 }
 } // CustomSpanNativeAccessor
 const GENERATED_ArkUICustomSpanNativeAccessor* GetCustomSpanNativeAccessor()
@@ -48,8 +51,4 @@ const GENERATED_ArkUICustomSpanNativeAccessor* GetCustomSpanNativeAccessor()
     };
     return &CustomSpanNativeAccessorImpl;
 }
-
-struct CustomSpanNativePeer {
-    virtual ~CustomSpanNativePeer() = default;
-};
 }

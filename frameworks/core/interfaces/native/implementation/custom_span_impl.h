@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "resource_object_holder.h"
 
 namespace OHOS::Ace::NG {
 class CustomSpanImpl : public CustomSpan {
@@ -28,21 +29,53 @@ class CustomSpanImpl : public CustomSpan {
     CustomSpanImpl(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
         std::optional<std::function<void(OHOS::Ace::NG::DrawingContext&, CustomSpanOptions)>> onDraw,
         const std::shared_ptr<SpanSet>& spanSet, int32_t start, int32_t end)
-        : CustomSpan(onMeasure, onDraw, start, end), spanStringBaseSet_(spanSet) {}
+        : CustomSpan(onMeasure, onDraw, start, end), spanStringBaseSet_(spanSet), holder_{nullptr} {}
+
+    CustomSpanImpl(CustomSpanImpl& other, int32_t start, int32_t end)
+        : CustomSpan(other.GetOnMeasure(), other.GetOnDraw(), start, end)
+            , spanStringBaseSet_(other.spanStringBaseSet_), holder_{other.holder_}
+        {
+            APP_LOGE("GLEB, CustomSpanImpl::ctor(other), this=%{public}p, holder_=%{public}p", this, holder_.get());
+        }
 
 public:
-    CustomSpanImpl() : spanStringBaseSet_(new SpanSet()) {}
+    CustomSpanImpl() : spanStringBaseSet_(new SpanSet()), holder_{nullptr}
+    {
+        APP_LOGE("GLEB, CustomSpanImpl::ctor, this=%{public}p, holder_=%{public}p", this, holder_.get());
+    }
+    ~CustomSpanImpl()
+    {
+        APP_LOGE("GLEB, CustomSpanImpl::dtor, this=%{public}p, holder_=%{public}p", this, holder_.get());
+        holder_= nullptr;
+    }
+    
+    void SetHolder(const std::shared_ptr<ResourceObjectHolder>& holder)
+    {
+        APP_LOGE("GLEB, CustomSpanImpl::SetHolder, this=%{public}p, holder_=%{public}p, holder=%{public}p", this, holder_.get(), holder.get());
+        if (!holder_) {
+            holder_ = holder;
+        }
+    }
+    const std::shared_ptr<ResourceObjectHolder>& GetHolder()
+    {
+        return holder_;
+    }
 
     void AddStyledString(const WeakPtr<SpanStringBase>& spanString) override
     {
+        APP_LOGE("GLEB, CustomSpanImpl::AddStyledString, this=%{public}p, %{public}p", this, holder_.get());
         if (spanStringBaseSet_) {
             spanStringBaseSet_->insert(spanString);
         }
     }
     void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) override
     {
+        APP_LOGE("GLEB, CustomSpanImpl::RemoveStyledString, this=%{public}p, %{public}p", this, holder_.get());
         if (spanStringBaseSet_) {
             spanStringBaseSet_->erase(spanString);
+            // if (spanStringBaseSet_->empty())  {
+            //     holder_= nullptr;
+            // }
         }
     }
     void Invalidate()
@@ -64,11 +97,12 @@ public:
         if (end - start > 1) {
             return nullptr;
         }
-        auto span = MakeRefPtr<CustomSpanImpl>(GetOnMeasure(), GetOnDraw(), spanStringBaseSet_, start, end);
+        auto span = MakeRefPtr<CustomSpanImpl>(*this, start, end);
         return AceType::DynamicCast<SpanBase>(span);
     }
 private:
     std::shared_ptr<SpanSet> spanStringBaseSet_;
+    std::shared_ptr<ResourceObjectHolder> holder_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INT7ERFACES_NATIVE_IMPLEMENTATION_CUSTOM_SPAN_IMPL_H

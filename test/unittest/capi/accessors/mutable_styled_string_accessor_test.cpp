@@ -87,8 +87,8 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_constructTest, TestSize.Level
 HWTEST_F(MutableStyledStringAccessorTest, constructTestCustomSpan, TestSize.Level1)
 {
     auto styles = Converter::ArkValue<Opt_Array_StyleOptions>();
-    Ark_CustomSpan customSpan = accessors_->getCustomSpanAccessor()->construct();
-    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(customSpan);
+    Ark_CustomSpanNative customSpan = accessors_->getCustomSpanAccessor()->construct();
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpanNative>(customSpan);
     auto peer = this->accessor_->construct(&value, &styles);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->GetMutableString(), nullptr);

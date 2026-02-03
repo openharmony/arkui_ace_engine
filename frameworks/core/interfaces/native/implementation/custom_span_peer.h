@@ -16,16 +16,5 @@
 #pragma once
 
 #include "custom_span_impl.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
-struct CustomSpanPeer final {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CustomSpanImpl> span;
-
-protected:
-    explicit CustomSpanPeer(OHOS::Ace::RefPtr<OHOS::Ace::NG::CustomSpanImpl> spn = nullptr): span(spn) {};
-    ~CustomSpanPeer()
-    {
-        span = nullptr;
-    }
-    friend OHOS::Ace::NG::PeerUtils;
-};
+struct CustomSpanNativePeer final: public OHOS::Ace::NG::CustomSpanImpl {};
