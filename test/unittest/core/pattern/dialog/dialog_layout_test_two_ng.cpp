@@ -62,7 +62,6 @@ constexpr float FIRST_ITEM_HEIGHT = 50.0f;
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 constexpr float DEFAULT_WIDTH = 600.0f;
 constexpr float DEFAULT_HEIGHT = 1000.0f;
-constexpr float HALF = 2.0f;
 } // namespace
 
 class MockDialogTheme : public DialogTheme, public ButtonTheme {
@@ -870,7 +869,7 @@ HWTEST_F(DialogLayoutTwoTestNg, DialogLayoutAlgorithmMeasure, TestSize.Level1)
     dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
     dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
     EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 1);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), DEFAULT_WIDTH / HALF);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), DEFAULT_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), DEFAULT_HEIGHT);
 }
 } // namespace OHOS::Ace::NG
