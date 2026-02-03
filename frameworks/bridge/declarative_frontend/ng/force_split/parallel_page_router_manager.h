@@ -54,6 +54,9 @@ private:
     bool LoadRelatedPage(const std::string& url, const RefPtr<ParallelStageManager>& manager);
     bool LoadPlaceHolderPage(const RefPtr<ParallelStageManager>& manager);
 
+    void SwitchNavigationForceSplitModeIfNeeded(const RefPtr<FrameNode>& newTopPage) override;
+    void DisableNavigationForceSplitIfNeeded(const RefPtr<PipelineContext>& context) override;
+
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPageRouterManager);
 
     bool hasTryLoadPlaceholderOrRelatedPage_ = false;

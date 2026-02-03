@@ -24,6 +24,7 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -72,6 +73,10 @@ void ParallelPageRouterManager::LoadPage(
     bool needClearSecondaryPage = CheckSecondaryPageNeedClear(isPush);
     if (!CheckStackSize(target, needClearSecondaryPage)) {
         return;
+    }
+    if (needTransition) {
+        // pushUrl, pushNamedRouter
+        DisableNavigationForceSplitIfNeeded(context);
     }
     NotifyForceFullScreenChangeIfNeeded(target.url, context);
     LoadCompleteManagerStartCollect(target.url);
@@ -522,5 +527,46 @@ void ParallelPageRouterManager::LoadCompleteManagerStartCollect(const std::strin
     if (!pageRouterStack_.empty() && pipelineContext) {
         pipelineContext->GetLoadCompleteManager()->StartCollect(url);
     }
+}
+
+void ParallelPageRouterManager::SwitchNavigationForceSplitModeIfNeeded(const RefPtr<FrameNode>& newTopPage)
+{
+    CHECK_NULL_VOID(newTopPage);
+    auto context = newTopPage->GetContext();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(false)) {
+        return;
+    }
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto forceSplitNav = navMgr->GetExistForceSplitNav();
+    if (!forceSplitNav.first) {
+        return;
+    }
+    auto targetNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, forceSplitNav.second);
+    CHECK_NULL_VOID(targetNode);
+    auto navPattern = targetNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navPattern);
+    auto targetPage = navPattern->GetNavBasePageNode();
+    forceSplitMgr->SetNavigationForceSplitEnableInternal(targetPage == newTopPage);
+}
+
+void ParallelPageRouterManager::DisableNavigationForceSplitIfNeeded(const RefPtr<PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (!forceSplitMgr->IsForceSplitSupported(false)) {
+        return;
+    }
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto forceSplitNav = navMgr->GetExistForceSplitNav();
+    if (!forceSplitNav.first) {
+        return;
+    }
+    forceSplitMgr->SetNavigationForceSplitEnableInternal(false);
 }
 } // namespace OHOS::Ace::NG

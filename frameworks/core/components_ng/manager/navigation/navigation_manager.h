@@ -102,9 +102,6 @@ public:
         pipeline_ = pipeline;
     }
 
-    void AddNavigationDumpCallback(const RefPtr<FrameNode>& navigationNode, const DumpCallback& callback);
-    void RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth);
-
     void OnDumpInfo();
 
     void AddNavigationUpdateCallback(std::function<void()> callback)
@@ -234,7 +231,6 @@ public:
         }
         return false;
     }
-    bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);
 
     std::string GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam);
     void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart);
@@ -287,6 +283,8 @@ public:
     {
         return disableDivider_;
     }
+    void AttachNavigation(const RefPtr<FrameNode>& navigationNode);
+    void DetachNavigation(const RefPtr<FrameNode>& navigationNode);
     //-------force split end-------
 
     int32_t RegisterNavigateChangeCallback(TransitionCallback callback);
@@ -294,34 +292,19 @@ public:
     void FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to);
 
 private:
-    struct DumpMapKey {
-        int32_t nodeId;
-        int32_t depth;
-
-        DumpMapKey(int32_t n, int32_t d) : nodeId(n), depth(d) {}
-        bool operator== (const DumpMapKey& o) const
-        {
-            return nodeId == o.nodeId && depth == o.depth;
-        }
-        bool operator< (const DumpMapKey& o) const
-        {
-            if (depth != o.depth) {
-                return depth < o.depth;
-            }
-            return nodeId < o.nodeId;
-        }
-    };
-
     RefPtr<FrameNode> GetNavigationByInspectorId(const std::string& id) const;
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
     bool IsCustomDialogValid(const RefPtr<UINode>& node);
     NavigationIntentInfo ParseNavigationIntentInfo(const std::string& intentInfoSerialized);
 
+    //-------force split begin-------
+    void TryFindNewTargetNavigation();
+    //-------force split end-------
+
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
     // record all the navigation in current UI-Context. The key is the page/model id where the navigation is located.
     std::unordered_map<int32_t, std::vector<NavigationInfo>> navigationMap_;
-    std::map<DumpMapKey, DumpCallback> dumpMap_;
     std::vector<std::function<void()>> updateCallbacks_;
     bool isInteractive_ = false;
 
@@ -351,6 +334,24 @@ private:
     std::optional<int32_t> forceSplitNavigationDepth_;
     bool disablePlaceholder_ = false;
     bool disableDivider_ = false;
+    struct TargetNavigationKey {
+        int32_t nodeId;
+        int32_t depth;
+
+        TargetNavigationKey(int32_t n, int32_t d) : nodeId(n), depth(d) {}
+        bool operator== (const TargetNavigationKey& o) const
+        {
+            return nodeId == o.nodeId && depth == o.depth;
+        }
+        bool operator< (const TargetNavigationKey& o) const
+        {
+            if (depth != o.depth) {
+                return depth < o.depth;
+            }
+            return nodeId < o.nodeId;
+        }
+    };
+    std::map<TargetNavigationKey, WeakPtr<FrameNode>> targetNavigationMap_;
     //-------force split end-------
 };
 } // namespace OHOS::Ace::NG
