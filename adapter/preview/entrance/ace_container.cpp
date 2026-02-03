@@ -519,6 +519,7 @@ void AceContainer::CreateContainer(
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, useNewPipeline, useCurrentEventRunner);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
+    ContainerScope::Add(instanceId);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -797,9 +798,10 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     SystemProperties::SetResolution(deviceConfig.density);
     SetColorMode(deviceConfig.colorMode);
     auto resConfig = resourceInfo_.GetResourceConfiguration();
-    if (resConfig.GetDeviceType() == deviceConfig.deviceType &&
-        resConfig.GetOrientation() == deviceConfig.orientation && resConfig.GetDensity() == deviceConfig.density &&
-        resConfig.GetColorMode() == deviceConfig.colorMode && resConfig.GetFontRatio() == deviceConfig.fontRatio) {
+    if (resConfig.GetDeviceType() == deviceConfig.deviceType && resConfig.GetColorMode() == deviceConfig.colorMode &&
+        resConfig.GetOrientation() == deviceConfig.orientation &&
+        NearEqual(resConfig.GetDensity(), deviceConfig.density) &&
+        NearEqual(resConfig.GetFontRatio(), deviceConfig.fontRatio)) {
         return;
     } else {
         resConfig.SetDeviceType(deviceConfig.deviceType);
