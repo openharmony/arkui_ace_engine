@@ -123,6 +123,9 @@ TouchType GetTouchTypeFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
 AxisAction GetAxisActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+bool ProcessMouseToTouchEvent(const MouseEvent& event, TouchEvent& touchEvent, int32_t pointerAction);
+
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_MMI_EVENT_CONVERTOR_H
