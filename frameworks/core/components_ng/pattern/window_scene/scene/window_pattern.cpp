@@ -665,9 +665,10 @@ void WindowPattern::CreateStartingWindow()
     std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
     session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
     bool isDark = Rosen::SceneSessionManager::GetInstance().IsStartWindowDark(session_->GetSessionInfo());
-    if (session_->GetShowRecent() && session_->GetScenePersistence() &&
-        session_->GetScenePersistence()->HasStartWindowPersistence(isDark)) {
-        sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetStartWindowPath(isDark),
+    std::string startWindowPersistencePath =
+        Rosen::SceneSessionManager::GetInstance().GetStartWindowPersistencePath(sessionInfo.bundleName_, isDark);
+    if (!startWindowPersistencePath.empty()) {
+        sourceInfo = ImageSourceInfo("file://" + startWindowPersistencePath,
             sessionInfo.bundleName_, sessionInfo.moduleName_);
         session_->ResetPreloadStartingWindow();
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use persistence in recent id:%{public}d", session_->GetPersistentId());
