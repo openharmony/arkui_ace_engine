@@ -595,8 +595,7 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * case 1: .value[0...15].f32: 16 floating-point numbers. The .size should not be 0, and it is expected to be 16. \n
- 	 * case 2: .object is a pointer to ArkUI_Matrix4 and the .size should be 0. \n
+     * .data[0...15].f32: 16 floating-point numbers. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .data[0...15].f32: 16 floating-point numbers. \n
