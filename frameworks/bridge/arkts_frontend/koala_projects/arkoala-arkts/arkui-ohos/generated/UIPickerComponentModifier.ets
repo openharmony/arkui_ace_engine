@@ -22,17 +22,9 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkUIPickerComponentPeer, OnUIPickerComponentCallback, PickerIndicatorStyle, UIPickerComponentAttribute } from "./component/uiPickerComponent"
 import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 export class UIPickerComponentModifier extends CommonMethodModifier implements UIPickerComponentAttribute,AttributeModifier<UIPickerComponentAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState;
-    _addr: ArrayBuffer = new ArrayBuffer(4096);
-    _flagArray: Uint8Array = new Uint8Array(this._addr);
-    constructor() {
-        super();
-        this._flagArray.fill(0);
-    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -42,105 +34,106 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
     applyFocusedAttribute(instance: UIPickerComponentAttribute): void { }
     applyDisabledAttribute(instance: UIPickerComponentAttribute): void { }
     applySelectedAttribute(instance: UIPickerComponentAttribute): void { }
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: OnUIPickerComponentCallback | undefined
+    _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollStop_0_0value?: OnUIPickerComponentCallback | undefined
+    _canLoop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _canLoop_0_0value?: boolean | undefined
+    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _selectionIndicator_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selectionIndicator_0_0value?: PickerIndicatorStyle | undefined
     applyModifierPatch(node: PeerNode): void {
-        super.applyModifierPatch(node)
         this._state.addRef()
+        super.applyModifierPatch(node)
         const peer = node as ArkUIPickerComponentPeer;
-        const flagArray = this._flagArray;
-        this.applyModifierPatch0(peer, flagArray);
-    }
-    applyModifierPatch0(peer: ArkUIPickerComponentPeer, flagArray: Uint8Array): void {
-        if (flagArray[0] != 0)
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[0]) {
-                case 1: {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.setOnChangeAttribute((this._onChange_0_0value as OnUIPickerComponentCallback | undefined));
-                    flagArray[0] = 2;
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case 3: {
-                    flagArray[0] = 2;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    flagArray[0] = 0;
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnChangeAttribute((undefined as OnUIPickerComponentCallback | undefined));
                 }
             }
         }
-        if (flagArray[1] != 0)
+        if (this._onScrollStop_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[1]) {
-                case 1: {
+            switch (this._onScrollStop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.setOnScrollStopAttribute((this._onScrollStop_0_0value as OnUIPickerComponentCallback | undefined));
-                    flagArray[1] = 2;
+                    this._onScrollStop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case 3: {
-                    flagArray[1] = 2;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onScrollStop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    flagArray[1] = 0;
+                    this._onScrollStop_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnScrollStopAttribute((undefined as OnUIPickerComponentCallback | undefined));
                 }
             }
         }
-        if (flagArray[2] != 0)
+        if (this._canLoop_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[2]) {
-                case 1: {
+            switch (this._canLoop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.setCanLoopAttribute((this._canLoop_0_0value as boolean | undefined));
-                    flagArray[2] = 2;
+                    this._canLoop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case 3: {
-                    flagArray[2] = 2;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._canLoop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    flagArray[2] = 0;
+                    this._canLoop_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setCanLoopAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[3] != 0)
+        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[3]) {
-                case 1: {
+            switch (this._enableHapticFeedback_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
-                    flagArray[3] = 2;
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case 3: {
-                    flagArray[3] = 2;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    flagArray[3] = 0;
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[4] != 0)
+        if (this._selectionIndicator_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[4]) {
-                case 1: {
+            switch (this._selectionIndicator_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.setSelectionIndicatorAttribute((this._selectionIndicator_0_0value as PickerIndicatorStyle | undefined));
-                    flagArray[4] = 2;
+                    this._selectionIndicator_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case 3: {
-                    flagArray[4] = 2;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectionIndicator_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    flagArray[4] = 0;
+                    this._selectionIndicator_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setSelectionIndicatorAttribute((undefined as PickerIndicatorStyle | undefined));
                 }
             }
@@ -149,15 +142,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
     mergeModifier(modifier: UIPickerComponentModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        const flagArray = modifier._flagArray;
-        this.mergeModifier0(modifier, flagArray);
-    }
-    mergeModifier0(modifier: UIPickerComponentModifier, flagArray: Uint8Array): void {
-        if (flagArray[0] != 0)
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[0]) {
-                case 1:
-                case 3: {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.onChange(modifier._onChange_0_0value);
                     break;
                 }
@@ -166,11 +155,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[1] != 0)
+        if (modifier._onScrollStop_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[1]) {
-                case 1:
-                case 3: {
+            switch (modifier._onScrollStop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.onScrollStop(modifier._onScrollStop_0_0value);
                     break;
                 }
@@ -179,11 +168,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[2] != 0)
+        if (modifier._canLoop_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[2]) {
-                case 1:
-                case 3: {
+            switch (modifier._canLoop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.canLoop(modifier._canLoop_0_0value);
                     break;
                 }
@@ -192,11 +181,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[3] != 0)
+        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[3]) {
-                case 1:
-                case 3: {
+            switch (modifier._enableHapticFeedback_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
                     break;
                 }
@@ -205,11 +194,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[4] != 0)
+        if (modifier._selectionIndicator_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (flagArray[4]) {
-                case 1:
-                case 3: {
+            switch (modifier._selectionIndicator_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.selectionIndicator(modifier._selectionIndicator_0_0value);
                     break;
                 }
@@ -220,62 +209,62 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
         }
     }
     onChange(value: OnUIPickerComponentCallback | undefined): this {
-        if (((this._flagArray[0]) == (0)) || (true))
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._flagArray[0] = 1
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
             this._state.fireChange()
         } else
         {
-            this._flagArray[0] = 3
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     onScrollStop(value: OnUIPickerComponentCallback | undefined): this {
-        if (((this._flagArray[1]) == (0)) || (true))
+        if (((this._onScrollStop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._flagArray[1] = 1
+            this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
             this._state.fireChange()
         } else
         {
-            this._flagArray[1] = 3
+            this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     canLoop(value: boolean | undefined): this {
-        if (((this._flagArray[2]) == (0)) || ((this._canLoop_0_0value) !== (value)))
+        if (((this._canLoop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._canLoop_0_0value) !== (value)))
         {
-            this._flagArray[2] = 1
+            this._canLoop_0_flag = AttributeUpdaterFlag.UPDATE
             this._canLoop_0_0value = value
             this._state.fireChange()
         } else
         {
-            this._flagArray[2] = 3
+            this._canLoop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._flagArray[3]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value)))
+        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
         {
-            this._flagArray[3] = 1
+            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
         } else
         {
-            this._flagArray[3] = 3
+            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     selectionIndicator(value: PickerIndicatorStyle | undefined): this {
-        if (((this._flagArray[4]) == (0)) || (true))
+        if (((this._selectionIndicator_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._flagArray[4] = 1
+            this._selectionIndicator_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectionIndicator_0_0value = value
             this._state.fireChange()
         } else
         {
-            this._flagArray[4] = 3
+            this._selectionIndicator_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
