@@ -107,7 +107,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
-  protected __lifecycle__Internal: CustomComponentLifecycle;
+  protected __lifecycle__Internal: CustomComponentLifecycle | undefined;
 
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
@@ -142,7 +142,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     } else {
       this.id_ = elmtId;
     }
-    this.__lifecycle__Internal = new CustomComponentLifecycle(this);
 
     stateMgmtConsole.debug(`PUV2ViewBase constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
@@ -167,12 +166,15 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
     if (this['__newLifecycleNeedWork__Internal']) {
-      return this.__lifecycle__Internal.handleEvent(eventId);
+      return this.__getLifecycle__Internal()?.handleEvent(eventId);
     }
     return false;
   }
 
   public __getLifecycle__Internal(): CustomComponentLifecycle {
+    if (!this.__lifecycle__Internal) {
+      this.__lifecycle__Internal = new CustomComponentLifecycle(this);
+    }
     return this.__lifecycle__Internal;
   }
 
