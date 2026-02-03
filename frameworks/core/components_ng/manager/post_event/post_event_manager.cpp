@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 
 #include "core/common/stylus/stylus_detector_mgr.h"
+#include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -64,10 +65,10 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
     CHECK_NULL_RETURN(eventManager, false);
     touchEvent.passThrough = true;
     passThroughResult_ = false;
+    if (!CheckTouchEvent(uiNode, touchEvent, eventManager->GetInstanceId())) {
+        return false;
+    }
     if (touchEvent.type != TouchType::MOVE) {
-        if (!CheckTouchEvent(uiNode, touchEvent)) {
-            return false;
-        }
         postInputEventAction_.push_back({ uiNode, touchEvent });
     }
     // Check if there's a pending drag cancel operation
@@ -103,11 +104,27 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
     passThroughResult_ = false;
     auto eventManager = pipelineContext->GetEventManager();
     CHECK_NULL_RETURN(eventManager, false);
+    if (!CheckMouseEvent(uiNode, mouseEvent, eventManager->GetInstanceId())) {
+        return false;
+    }
+    if (mouseEvent.action == MouseAction::PRESS || mouseEvent.action == MouseAction::RELEASE ||
+        mouseEvent.action == MouseAction::CANCEL) {
+        postMouseEventAction_.push_back({ uiNode, mouseEvent });
+    }
+    if (mouseEvent.action == MouseAction::WINDOW_ENTER || mouseEvent.action == MouseAction::WINDOW_LEAVE) {
+        postMouseEventWindowAction_.push_back({ uiNode, mouseEvent });
+    }
     if (!eventManager->IsDragCancelPending()) {
         pipelineContext->OnMouseEvent(mouseEvent, frameNode);
     }
     mouseEvent.passThrough = false;
     targetNode_.Reset();
+    if (mouseEvent.action == MouseAction::RELEASE || mouseEvent.action == MouseAction::CANCEL) {
+        ClearPostInputActions(uiNode, mouseEvent.id, PostInputEventType::MOUSE);
+    }
+    if (mouseEvent.action == MouseAction::WINDOW_LEAVE) {
+        ClearMouseWindowAction(uiNode, mouseEvent.id);
+    }
     return passThroughResult_;
 }
 
@@ -122,12 +139,24 @@ bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent
     CHECK_NULL_RETURN(pipelineContext, false);
     axisEvent.passThrough = true;
     passThroughResult_ = false;
+    auto eventManager = pipelineContext->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    if (!CheckAxisEvent(uiNode, axisEvent, eventManager->GetInstanceId())) {
+        return false;
+    }
+    if (axisEvent.action != AxisAction::UPDATE) {
+        postAxisEventAction_.push_back({ uiNode, axisEvent });
+    }
     pipelineContext->OnAxisEvent(axisEvent, frameNode);
     axisEvent.passThrough = false;
+    if (axisEvent.action == AxisAction::END || axisEvent.action == AxisAction::CANCEL) {
+        ClearPostInputActions(uiNode, axisEvent.id, PostInputEventType::AXIS);
+    }
     return passThroughResult_;
 }
 
-bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)
+bool PostEventManager::CheckTouchEvent(
+    const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent, const int32_t instanceId)
 {
     CHECK_NULL_RETURN(targetNode, false);
     bool hasDown = false;
@@ -146,9 +175,15 @@ bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, con
     switch (touchEvent.type) {
         case TouchType::DOWN:
             if (hasDown && !hasUpOrCancel) {
-                TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                     "CheckTouchEvent: duplicate DOWN event detected for id=%{public}d, dropping this event",
                     touchEvent.id);
+                // todo, when get DOWN twice, falsifyCancel for touchEvent, return true.
+                std::stringstream oss;
+                oss << "id: " << touchEvent.id << ", TouchEvent receive DOWN event twice";
+                GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::POST_EVENT_ERROR,
+                    touchEvent.touchEventId, touchEvent.id, oss.str() };
+                NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId);
                 return false;
             }
             if (hasUpOrCancel) {
@@ -157,6 +192,15 @@ bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, con
             return true;
         case TouchType::UP:
         case TouchType::CANCEL:
+            if (!hasDown) {
+                std::stringstream oss;
+                oss << "id: " << touchEvent.id << ", TouchEvent receive UP/CANCEL event without receive DOWN event";
+                GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::POST_EVENT_ERROR,
+                    touchEvent.touchEventId, touchEvent.id, oss.str() };
+                NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId);
+            }
+            return hasDown && !hasUpOrCancel;
+        case TouchType::MOVE:
             return hasDown && !hasUpOrCancel;
         default:
             TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "CheckTouchEvent: unsupported touch type=%{public}d, id=%{public}d",
@@ -165,15 +209,134 @@ bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, con
     }
 }
 
-void PostEventManager::ClearPostInputActions(const RefPtr<NG::UINode>& targetNode, int32_t id)
+void PostEventManager::ClearPostInputActions(const RefPtr<NG::UINode>& targetNode, int32_t id, PostInputEventType type)
 {
-    for (auto item = postInputEventAction_.begin(); item != postInputEventAction_.end();) {
-        if (item->targetNode == targetNode && item->touchEvent.id == id) {
-            item = postInputEventAction_.erase(item);
+    switch (type) {
+        case PostInputEventType::TOUCH:
+            for (auto item = postInputEventAction_.begin(); item != postInputEventAction_.end();) {
+                if (item->targetNode == targetNode && item->touchEvent.id == id) {
+                    item = postInputEventAction_.erase(item);
+                } else {
+                    ++item;
+                }
+            }
+            break;
+        case PostInputEventType::MOUSE:
+            for (auto item = postMouseEventAction_.begin(); item != postMouseEventAction_.end();) {
+                if (item->targetNode == targetNode && item->mouseEvent.id == id) {
+                    item = postMouseEventAction_.erase(item);
+                } else {
+                    ++item;
+                }
+            }
+            break;
+        case PostInputEventType::AXIS:
+            for (auto item = postAxisEventAction_.begin(); item != postAxisEventAction_.end();) {
+                if (item->targetNode == targetNode && item->axisEvent.id == id) {
+                    item = postAxisEventAction_.erase(item);
+                } else {
+                    ++item;
+                }
+            }
+            break;
+        default:
+            return;
+    }
+}
+
+void PostEventManager::ClearMouseWindowAction(const RefPtr<NG::UINode>& targetNode, int32_t id)
+{
+    for (auto item = postMouseEventWindowAction_.begin(); item != postMouseEventWindowAction_.end();) {
+        if (item->targetNode == targetNode && item->mouseEvent.id == id) {
+            item = postMouseEventWindowAction_.erase(item);
         } else {
             ++item;
         }
     }
+}
+
+MouseEventState PostEventManager::CollectMouseEventState(const RefPtr<NG::UINode>& targetNode, int32_t id)
+{
+    MouseEventState state;
+    for (const auto& item : postMouseEventAction_) {
+        if (item.targetNode != targetNode || item.mouseEvent.id != id) {
+            continue;
+        }
+        if (item.mouseEvent.action == MouseAction::PRESS) {
+            state.hasPress = true;
+        }
+        if (item.mouseEvent.action == MouseAction::RELEASE || item.mouseEvent.action == MouseAction::CANCEL) {
+            state.hasReleaseOrCancel = true;
+        }
+    }
+    for (const auto& item : postMouseEventWindowAction_) {
+        if (item.targetNode != targetNode || item.mouseEvent.id != id) {
+            continue;
+        }
+        if (item.mouseEvent.action == MouseAction::WINDOW_ENTER) {
+            state.hasWindowEnter = true;
+        }
+        if (item.mouseEvent.action == MouseAction::WINDOW_LEAVE || item.mouseEvent.action == MouseAction::CANCEL) {
+            state.hasWindowLeaveOrCancel = true;
+        }
+    }
+    return state;
+}
+
+bool PostEventManager::HandleMousePressEvent(
+    const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id, const int32_t instanceId)
+{
+    if (state.hasPress && !state.hasReleaseOrCancel) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "CheckMouseEvent: duplicate PRESS event detected for id=%{public}d, dropping this event", id);
+        // todo, when get PRESS twice, falsifyCancel for mouseEvent.
+        std::stringstream oss;
+        oss << "id: " << id << ", MouseEvent, receive PRESS event twice";
+        GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::POST_EVENT_ERROR, -1,
+            id, oss.str() };
+        NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId);
+    }
+    if (state.hasReleaseOrCancel) {
+        ClearPostInputActions(targetNode, id, PostInputEventType::MOUSE);
+    }
+    return true;
+}
+
+bool PostEventManager::HandleMouseReleaseEvent(const MouseEventState& state, int32_t id)
+{
+    if (!state.hasPress) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "CheckMouseEvent: receive RELEASE/CANCEL event without receive PRESS event, id: %{public}d", id);
+    }
+    return state.hasPress && !state.hasReleaseOrCancel;
+}
+
+bool PostEventManager::HandleMouseWindowEnterEvent(
+    const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id, const int32_t instanceId)
+{
+    if (state.hasWindowEnter && !state.hasWindowLeaveOrCancel) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "CheckMouseEvent: duplicate WindowEnter event detected for id=%{public}d, dropping this event", id);
+        // todo, when get WINDOW_ENTER twice, falsifyCancel for mouseEvent.
+        std::stringstream oss;
+        oss << "id: " << id << ", MouseEvent, receive WindowEnter event twice";
+        GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::POST_EVENT_ERROR, -1,
+            id, oss.str() };
+        NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId);
+    }
+    if (state.hasReleaseOrCancel) {
+        ClearMouseWindowAction(targetNode, id);
+    }
+    return true;
+}
+
+bool PostEventManager::HandleMouseWindowLeaveEvent(const MouseEventState& state, int32_t id)
+{
+    if (!state.hasWindowEnter) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "CheckMouseEvent: receive WindowLeave event without receive WindowEnter event, id: %{public}d", id);
+    }
+    return state.hasWindowEnter && !state.hasWindowLeaveOrCancel;
 }
 
 bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent)
@@ -328,5 +491,85 @@ void PostEventManager::SetPassThroughResult(bool passThroughResult)
 RefPtr<FrameNode> PostEventManager::GetPostTargetNode()
 {
     return targetNode_.Upgrade();
+}
+
+bool PostEventManager::CheckMouseEvent(
+    const RefPtr<NG::UINode>& targetNode, const MouseEvent& mouseEvent, const int32_t instanceId)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+
+    auto state = CollectMouseEventState(targetNode, mouseEvent.id);
+
+    switch (mouseEvent.action) {
+        case MouseAction::PRESS:
+            return HandleMousePressEvent(state, targetNode, mouseEvent.id, instanceId);
+        case MouseAction::MOVE:
+            return true;
+        case MouseAction::RELEASE:
+        case MouseAction::CANCEL:
+            return HandleMouseReleaseEvent(state, mouseEvent.id);
+        case MouseAction::WINDOW_ENTER:
+            return HandleMouseWindowEnterEvent(state, targetNode, mouseEvent.id, instanceId);
+        case MouseAction::WINDOW_LEAVE:
+            return HandleMouseWindowLeaveEvent(state, mouseEvent.id);
+        default:
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                "CheckMouseEvent: unsupported mouseEvent action=%{public}d, id=%{public}d",
+                static_cast<int>(mouseEvent.action), mouseEvent.id);
+            return false;
+    }
+}
+
+bool PostEventManager::CheckAxisEvent(
+    const RefPtr<NG::UINode>& targetNode, const AxisEvent& axisEvent, const int32_t instanceId)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    bool hasBegin = false;
+    bool hasEndOrCancel = false;
+
+    for (const auto& item : postAxisEventAction_) {
+        if (item.targetNode != targetNode || item.axisEvent.id != axisEvent.id) {
+            continue;
+        }
+        if (item.axisEvent.action == AxisAction::BEGIN) {
+            hasBegin = true;
+        }
+        if (item.axisEvent.action == AxisAction::END || item.axisEvent.action == AxisAction::CANCEL) {
+            hasEndOrCancel = true;
+        }
+    }
+
+    switch (axisEvent.action) {
+        case AxisAction::BEGIN:
+            if (hasBegin && !hasEndOrCancel) {
+                TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+                    "CheckAxisEvent: duplicate BEGIN event detected for id=%{public}d, dropping this event",
+                    axisEvent.id);
+                // todo, when get BEGIN twice, falsifyCancel for axisEvent.
+                std::stringstream oss;
+                oss << "id: " << axisEvent.id << ", AxisEvent, receive BEGIN event twice";
+                GeneralInteractionErrorInfo errorInfo { GeneralInteractionErrorType::POST_EVENT_ERROR, axisEvent.id, -1,
+                    oss.str() };
+                NG::GeneralInteractionErrorReporter::GetInstance().Submit(errorInfo, instanceId);
+            }
+            if (hasEndOrCancel) {
+                ClearPostInputActions(targetNode, axisEvent.id, PostInputEventType::AXIS);
+            }
+            return true;
+        case AxisAction::UPDATE:
+            return hasBegin && !hasEndOrCancel;
+        case AxisAction::END:
+        case AxisAction::CANCEL:
+            if (!hasBegin) {
+                TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+                    "CheckAxisEvent: receive END/CANCEL event without receive BEGIN event, axisId: %{public}d",
+                    axisEvent.id);
+            }
+            return hasBegin && !hasEndOrCancel;
+        default:
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "CheckAxisEvent: unsupported axis action=%{public}d, id=%{public}d",
+                static_cast<int>(axisEvent.action), axisEvent.id);
+            return false;
+    }
 }
 } // namespace OHOS::Ace::NG

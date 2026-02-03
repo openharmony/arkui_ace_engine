@@ -206,6 +206,7 @@ enum class GeneralInteractionErrorType {
     FOCUS_VIEW_STACK_EMPTY_ERROR,
     FOCUS_VIEW_STACK_TOP_UNFOCUSABLE_ERROR,
     OVERLAY_ERROR,
+    POST_EVENT_ERROR
 };
 
 struct GeneralInteractionErrorInfo {
