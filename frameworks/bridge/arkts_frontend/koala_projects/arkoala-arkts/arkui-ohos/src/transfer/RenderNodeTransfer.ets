@@ -152,7 +152,7 @@ export class RenderNodeTransfer {
         if (module.isUndefined() || module.isNull()) {
             throw Error("The arkui.node is not defined, convert fail.");
         }
-        let clsName = module.getProperty('RenderNode');
+        let clsName = module.getProperty('default').getProperty('RenderNode');
         if (clsName.isUndefined() || clsName.isNull()) {
             throw Error("RenderNode is not a class, convert fail.");
         }
