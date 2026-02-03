@@ -1515,4 +1515,33 @@ HWTEST_F(TextFieldPatternTestTwo, RegisterFormFontCallback, TestSize.Level0)
     fontChangeCallback();
     EXPECT_TRUE(hasChanged);
 }
+
+/**
+ * @tc.name: UpdateFocusOffsetIfNeed001
+ * @tc.desc: test testInput text UpdateFocusOffsetIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, UpdateFocusOffsetIfNeed001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->hoverAndPressBgColorEnabled_ = true;
+    pattern->ProcessFocusStyle();
+    EXPECT_EQ(pattern->IsTV(), true);
+
+    RoundRect paintRect;
+    pattern->UpdateFocusOffsetIfNeed(paintRect);
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x, 0.0f);
+}
 } // namespace OHOS::Ace::NG

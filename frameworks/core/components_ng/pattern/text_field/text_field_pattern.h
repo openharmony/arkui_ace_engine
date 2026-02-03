@@ -1753,21 +1753,7 @@ public:
         isFocusedBeforeClick_ = isFocusedBeforeClick;
     }
 
-    void UpdateFoucsOffsetIfNeed(RoundRect& paintRect)
-    {
-        auto textFieldTheme = GetTheme();
-        CHECK_NULL_VOID(textFieldTheme);
-        auto focusPaintPadding = textFieldTheme->GetIconFocusPadding().ConvertToPx();
-        RectF rect = paintRect.GetRect();
-        auto x = rect.GetX();
-        auto y = rect.GetY();
-        auto width = rect.Width();
-        auto height = rect.Height();
-        paintRect.SetRect({x - focusPaintPadding, y - focusPaintPadding,
-            width + 2 * focusPaintPadding, height + 2 * focusPaintPadding});
-        float cornerRadius = width / 2 + focusPaintPadding;
-        paintRect.SetCornerRadius(cornerRadius);
-    }
+    void UpdateFocusOffsetIfNeed(RoundRect& paintRect);
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
