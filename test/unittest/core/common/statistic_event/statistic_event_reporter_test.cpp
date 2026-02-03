@@ -228,6 +228,24 @@ HWTEST_F(StatisticEventReporterTest, ConvertToEventName004, TestSize.Level1)
 
 /**
  * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test ConvertToEventName of VIDEO
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, ConvertToEventName006, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+    StatisticEventInfo event = reporter->ConvertToEvent(StatisticEventType::VIDEO_INVALID_PROGRESS_RATE);
+    EXPECT_EQ(event.eventName, "VIDEO");
+    EXPECT_EQ(event.subEventName, "INVALID_PROGRESS_RATE");
+
+    event = reporter->ConvertToEvent(StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE);
+    EXPECT_EQ(event.eventName, "VIDEO");
+    EXPECT_EQ(event.subEventName, "EXCEED_PROGRESS_RATE");
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
  * @tc.desc: Test SendEvent
  * @tc.type: FUNC
  */
