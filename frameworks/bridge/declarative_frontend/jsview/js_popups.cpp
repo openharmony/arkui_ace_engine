@@ -1728,7 +1728,11 @@ void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG
     }
     auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
     NG::BorderRadiusProperty previewBorderRadius;
-    JSViewPopups::ParseMenuPreviewBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    if (SystemProperties::ConfigChangePerform()) {
+        JSViewPopups::ParseMenuPreviewBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    } else {
+        JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    }
     menuParam.previewBorderRadius = previewBorderRadius;
 }
 
@@ -3479,156 +3483,27 @@ void JSViewPopups::ParseMenuOutlineColorWithResourceObj(const RefPtr<ResourceObj
     }
 }
 
-bool JSViewPopups::ParseMenuPreviewBorderRadiusObject(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props)
-{
-    CalcDimension borderRadius;
-    RefPtr<ResourceObject> resObj;
-    if (!JSViewAbstract::ParseJsDimensionVpNG(args, borderRadius, resObj)) {
-        return false;
-    }
-    props.SetRadius(borderRadius);
-    props.multiValued = false;
-    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
-        CalcDimension radiusValue;
-        ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusValue);
-        props.SetRadius(radiusValue);
-        props.multiValued = false;
-    };
-    props.AddResource("menu.borderRadius", resObj, std::move(updateFunc));
-    return true;
-}
-
-void JSViewPopups::SetBorderRadiusProps(
-    const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName)
-{
-    if (dim.IsNegative() || propName == nullptr) {
-        return;
-    }
-    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (propName == BOTTOM_LEFT_PROPERTY) {
-        props.radiusBottomLeft = dim;
-    } else if (propName == BOTTOM_RIGHT_PROPERTY) {
-        props.radiusBottomRight = dim;
-    } else if (propName == TOP_LEFT_PROPERTY) {
-        props.radiusTopLeft = dim;
-    } else if (propName == TOP_RIGHT_PROPERTY) {
-        props.radiusTopRight = dim;
-    } else if (propName == TOP_START_PROPERTY || propName == TOP_END_PROPERTY) {
-        if (isRightToLeft) {
-            props.radiusTopRight = dim;
-            return;
-        }
-        props.radiusTopLeft = dim;
-    } else if (propName == BOTTOM_START_PROPERTY || propName == BOTTOM_END_PROPERTY) {
-        if (isRightToLeft) {
-            props.radiusBottomRight = dim;
-            return;
-        }
-        props.radiusBottomLeft = dim;
-    }
-}
-
-void JSViewPopups::ParseBorderRadiusProps(
-    const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
-{
-    CHECK_NULL_VOID(key);
-    if (!object->HasProperty(key)) {
-        return;
-    }
-    CalcDimension radius;
-    RefPtr<ResourceObject> resObj;
-    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(key), radius, resObj)) {
-        SetBorderRadiusProps(radius, props, key);
-    }
-    if (!resObj) {
-        return;
-    }
-    auto&& updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
-        CalcDimension value;
-        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, value)) {
-            SetBorderRadiusProps(value, props, key);
-        }
-    };
-    props.AddResource("menu.borderRadius." + std::string(key), resObj, std::move(updateFunc));
-}
-
-void CheckDimensionUnit(CalcDimension& checkDimension, bool notPercent)
-{
-    if (notPercent && checkDimension.Unit() == DimensionUnit::PERCENT) {
-        checkDimension.Reset();
-        return;
-    }
-}
-
-void JSViewPopups::ParseBorderRadiusPropsByLengthMetrics(
-    const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
-{
-    CHECK_NULL_VOID(key);
-    if (!object->HasProperty(key) || !object->GetProperty(key)->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> radiusObj = JSRef<JSObject>::Cast(object->GetProperty(key));
-    CalcDimension radius;
-    RefPtr<ResourceObject> resObj = nullptr;
-    if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(radiusObj, radius, resObj)) {
-        CheckDimensionUnit(radius, false);
-        SetBorderRadiusProps(radius, props, key);
-    }
-    if (!resObj) {
-        return;
-    }
-    auto unit = radius.Unit();
-    auto&& updateFunc = [unit, key](
-                            const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
-        CalcDimension value;
-        if (ResourceParseUtils::ParseResDimension(resObj, value, unit)) {
-            CheckDimensionUnit(value, false);
-            SetBorderRadiusProps(value, props, key);
-        }
-    };
-    props.AddResource("menu.borderRadius." + std::string(key), resObj, std::move(updateFunc));
-}
-
-void JSViewPopups::ParseMenuPreviewBorderRadiusMultiObject(
-    const JSRef<JSObject>& object, NG::BorderRadiusProperty& props)
-{
-    if (JSViewAbstract::CheckLengthMetrics(object)) {
-        ParseBorderRadiusPropsByLengthMetrics(BOTTOM_START_PROPERTY, object, props);
-        ParseBorderRadiusPropsByLengthMetrics(BOTTOM_END_PROPERTY, object, props);
-        ParseBorderRadiusPropsByLengthMetrics(TOP_START_PROPERTY, object, props);
-        ParseBorderRadiusPropsByLengthMetrics(TOP_END_PROPERTY, object, props);
-        return;
-    }
-    ParseBorderRadiusProps(TOP_LEFT_PROPERTY, object, props);
-    ParseBorderRadiusProps(TOP_RIGHT_PROPERTY, object, props);
-    ParseBorderRadiusProps(BOTTOM_LEFT_PROPERTY, object, props);
-    ParseBorderRadiusProps(BOTTOM_RIGHT_PROPERTY, object, props);
-}
-
-void JSViewPopups::ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+void JSViewPopups::ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_MENU, "radius is not correct type");
         return;
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        if (ParseMenuPreviewBorderRadiusObject(args, radius)) {
-            return;
-        }
-        if (args->IsObject()) {
-            JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-            ParseMenuPreviewBorderRadiusMultiObject(object, radius);
-            radius.multiValued = true;
-            return;
-        }
-    }
-    CalcDimension borderRadius;
-    if (JSViewAbstract::ParseJsDimensionVpNG(args, borderRadius, true)) {
-        radius = NG::BorderRadiusProperty(borderRadius);
-        radius.multiValued = false;
+    CalcDimension radius;
+    RefPtr<ResourceObject> resObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(args, radius, resObj, true)) {
+        props = NG::BorderRadiusProperty(radius);
+        props.multiValued = false;
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& props) {
+            CalcDimension radiusValue;
+            ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusValue);
+            props.SetRadius(radiusValue);
+            props.multiValued = false;
+        };
+        props.AddResource("menu.borderRadius", resObj, std::move(updateFunc));
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        JSViewAbstract::ParseCommonBorderRadiusProps(object, radius, false);
+        JSViewAbstract::ParseBindSheetBorderRadiusProps(object, props);
     }
-    return;
 }
 }
