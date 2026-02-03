@@ -421,8 +421,6 @@ void CounterDecorator::HandleNonTextArea()
     RectF frameRect = decoratedGeometryNode->GetFrameRect();
     RectF contentRect = decoratedGeometryNode->GetContentRect();
     float countX = contentRect.GetX();
-    auto responseArea = textFieldPattern->GetResponseArea();
-    auto cleanNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
     auto updateCountXWithArea = [&countX, isRTL](const std::vector<RefPtr<TextInputResponseArea>>& areas) {
         for (auto area : areas) {
             if (!area) {
@@ -440,7 +438,7 @@ void CounterDecorator::HandleNonTextArea()
         countX = isRTL ? countX - textFieldPattern->GetPaddingLeft() :
                          countX + textFieldPattern->GetPaddingRight();
     }
-    updateCountXWithArea({responseArea, cleanNodeResponseArea});
+    updateCountXWithArea(textFieldPattern->GetAllResponseArea());
     auto curFontScale = pipeline->GetFontScale();
     auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
         (frameRect.Bottom() - frameRect.Top() + theme->GetCounterTextMarginOffset().ConvertToPx());

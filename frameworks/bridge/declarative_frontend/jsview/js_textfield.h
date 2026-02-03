@@ -131,6 +131,7 @@ public:
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
     static void SetCancelButton(const JSCallbackInfo& info);
+    static void SetVoiceButton(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);

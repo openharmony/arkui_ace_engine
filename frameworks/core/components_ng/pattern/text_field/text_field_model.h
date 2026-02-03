@@ -425,6 +425,7 @@ public:
     virtual void SetCancelButtonSymbol(bool isShowSymbol) = 0;
     virtual void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
+    virtual void SetIsShowVoiceButton(bool isShowButton) {};
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
