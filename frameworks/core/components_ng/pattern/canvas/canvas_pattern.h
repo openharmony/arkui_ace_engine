@@ -185,7 +185,7 @@ public:
     void UpdateShadowOffsetY(double offsetY);
     void UpdateTextAlign(TextAlign align);
     void UpdateTextBaseline(TextBaseline baseline);
-    void UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern);
+    void UpdateStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern);
     void UpdateStrokeColor(const Color& color);
     void UpdateFontWeight(FontWeight weight);
     void UpdateFontStyle(FontStyle style);
@@ -194,7 +194,7 @@ public:
     void UpdateLetterSpacing(const Dimension& letterSpacing);
     void UpdateLineJoin(LineJoinStyle join);
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient);
-    void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
+    void UpdateFillPattern(const std::shared_ptr<Ace::Pattern>& pattern);
     void UpdateShadowColor(const Color& color);
     void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient);
     void SetTextDirection(TextDirection direction);
