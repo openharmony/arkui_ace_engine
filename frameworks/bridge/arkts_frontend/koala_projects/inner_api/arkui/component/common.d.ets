@@ -137,7 +137,6 @@ import {
     GeometryTransitionOptions,
     StateStyles,
     PixelStretchEffectOptions,
-    GestureRecognizerJudgeBeginCallback,
     ShouldBuiltInRecognizerParallelWithCallback,
     SizeChangeCallback,
     SafeAreaType,
@@ -374,10 +373,6 @@ export interface CommonMethod {
     backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this;
     onGestureJudgeBegin(
         value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined
-    ): this;
-    onGestureRecognizerJudgeBegin(
-        callback_: GestureRecognizerJudgeBeginCallback | undefined,
-        exposeInnerGesture?: boolean
     ): this;
     shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this;
     monopolizeEvents(value: boolean | undefined): this;
@@ -659,11 +654,6 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public onGestureJudgeBeginAttribute(
         value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined
     ): void;
-    public onGestureRecognizerJudgeBegin0Attribute(value: GestureRecognizerJudgeBeginCallback | undefined): void;
-    public onGestureRecognizerJudgeBegin1Attribute(
-        callback_: GestureRecognizerJudgeBeginCallback | undefined,
-        exposeInnerGesture: boolean | undefined
-    ): void;
     public shouldBuiltInRecognizerParallelWithAttribute(
         value: ShouldBuiltInRecognizerParallelWithCallback | undefined
     ): void;
@@ -939,10 +929,6 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public onGestureJudgeBegin(
         value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined
     ): this;
-    public onGestureRecognizerJudgeBegin(
-        callback_: GestureRecognizerJudgeBeginCallback | undefined,
-        exposeInnerGesture?: boolean
-    ): this;
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this;
     public monopolizeEvents(value: boolean | undefined): this;
     public onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this;
@@ -1163,7 +1149,6 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public onGestureJudgeBegin_value?:
         ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult)
         | undefined;
-    public onGestureRecognizerJudgeBegin_value?: GestureRecognizerJudgeBeginCallback | undefined;
     public shouldBuiltInRecognizerParallelWith_value?: ShouldBuiltInRecognizerParallelWithCallback | undefined;
     public monopolizeEvents_value?: boolean | undefined;
     public onTouchIntercept_value?: ((parameter: TouchEvent) => HitTestMode) | undefined;
@@ -1334,10 +1319,6 @@ export declare class ArkCommonMethodStyle implements CommonMethod {
     public backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this;
     public onGestureJudgeBegin(
         value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined
-    ): this;
-    public onGestureRecognizerJudgeBegin(
-        callback_: GestureRecognizerJudgeBeginCallback | undefined,
-        exposeInnerGesture?: boolean
     ): this;
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this;
     public monopolizeEvents(value: boolean | undefined): this;

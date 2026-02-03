@@ -1243,15 +1243,6 @@ struct CustomDialogContentComponent {
           } as Margin)
           .enableNestedScroll(true)
           .hitTestBehavior(HitTestMode.Transparent)
-          .onGestureRecognizerJudgeBegin((event: BaseGestureEvent, current: GestureRecognizer,
-            others: Array<GestureRecognizer>) => {
-            if (current) {
-              if (current.getType() == GestureControl.GestureType.LONG_PRESS_GESTURE) {
-                return GestureJudgeResult.REJECT;
-              }
-            }
-            return GestureJudgeResult.CONTINUE;
-          })
       }.height('auto')
 
     }
