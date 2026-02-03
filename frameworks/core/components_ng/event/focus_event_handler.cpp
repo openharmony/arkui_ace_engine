@@ -111,6 +111,8 @@ bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
     }
 
     if (HasCustomKeyEventDispatch(event)) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d hasCustomKeyEventDispatch",
+            GetFrameName().c_str(), GetFrameId());
         return HandleCustomEventDispatch(event);
     }
 
