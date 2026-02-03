@@ -38,6 +38,8 @@ public:
     void SetOnStart(std::function<void()>&& onChange) override;
     void SetOnBounce(std::function<void()>&& onChange) override;
     void SetOnFinish(std::function<void()>&& onChange) override;
+    void SetMarqueeSpacing(const std::optional<CalcDimension>& spacing) override;
+    void SetMarqueeDelay(const std::optional<int32_t>& delay) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetAllowScale(FrameNode* frameNode, const bool allowScale);
@@ -66,6 +68,10 @@ public:
     static void ResetLoop(FrameNode* frameNode);
     static void SetDirection(FrameNode* frameNode, const std::optional<MarqueeDirection>& direction);
     static void ResetDirection(FrameNode* frameNode);
+    static void SetMarqueeSpacing(FrameNode* frameNode, const std::optional<CalcDimension>& spacing);
+    static void ResetMarqueeSpacing(FrameNode* frameNode);
+    static void SetMarqueeDelay(FrameNode* frameNode, const std::optional<int32_t>& delay);
+    static void ResetMarqueeDelay(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
