@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@kit.ArkUI';
-import { MyComponent } from '../common/MyComponent'
+import { MyComponent } from '../../common/MyComponent'
 
 class MenuItemPrivateAttrOptions {
   selected?: boolean | undefined
