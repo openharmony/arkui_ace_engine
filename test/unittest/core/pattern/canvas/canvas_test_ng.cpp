@@ -886,4 +886,36 @@ HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest002, TestSize.Level1)
 
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: CanvasUINodeTraceTest001
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in CanvasPaintMethod::UpdateRecordingCanvas
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasUINodeTraceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Canvas node.
+     * @tc.expected: Canvas node created successfully.
+     */
+    g_canvasTestProperty.immediateRender = true;
+    g_canvasTestProperty.unit = CanvasUnit::PX;
+    uint64_t nodeId = 12345;
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+
+    /**
+     * @tc.steps: step2. Reset trace and call UpdateRecordingCanvas which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    ResetLastTraceId();
+    paintMethod->UpdateRecordingCanvas(300.0f, 300.0f);
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, nodeId);
+}
 } // namespace OHOS::Ace::NG
