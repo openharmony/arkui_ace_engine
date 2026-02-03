@@ -215,8 +215,8 @@ void UiTranslateManagerImpl::TraverseAddArkWebImages(const std::vector<int32_t>&
     int32_t webComponentId, const std::function<void(int32_t, const std::map<int32_t,
     std::shared_ptr<Media::PixelMap>>&, MultiImageQueryErrorCode)>& webQueryCallback)
 {
-    auto frameNode =
-        AceType::DynamicCast<NG::FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(webComponentId));
+    auto iter = listenerMap_.find(webComponentId);
+    auto frameNode = iter == listenerMap_.end() ? nullptr : iter->second.Upgrade();
     if (frameNode == nullptr || frameNode->GetPattern<NG::WebPattern>() == nullptr) {
         std::map<int32_t, std::shared_ptr<Media::PixelMap>> emptyMap;
         for (auto webImageId : webImageIds) {
