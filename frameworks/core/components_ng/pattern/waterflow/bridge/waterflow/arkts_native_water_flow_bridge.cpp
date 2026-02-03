@@ -255,6 +255,33 @@ void SetNativeWaterFlowSection(
     ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
 }
 
+void BindSectionChangeCallback(Framework::JSWaterFlowSections* section,
+    RefPtr<WaterFlowSections>& waterFlowSections, NG::FrameNode* frameNode)
+{
+    auto id = Container::CurrentId();
+    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
+                        weakNode = AceType::WeakClaim(frameNode)](size_t start, size_t deleteCount,
+                        std::vector<NG::WaterFlowSections::Section>& newSections,
+                        const std::vector<NG::WaterFlowSections::Section>& allSections) {
+        ContainerScope scope(id);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto context = node->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weakNode, all = allSections]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto nodeSection = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(node.GetRawPtr());
+            nodeSection->ChangeData(start, deleteCount, change);
+            if (nodeSection->GetSectionInfo().size() != all.size()) {
+                nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
+            }
+        });
+        context->RequestFrame();
+    };
+    section->SetOnSectionChangedCallback(frameNode, callback);
+}
+
 void UpdateSections(EcmaVM* vm, const Local<JSValueRef>& sections, RefPtr<WaterFlowSections>& waterFlowSections,
     NG::FrameNode* frameNode)
 {
@@ -280,31 +307,15 @@ void UpdateSections(EcmaVM* vm, const Local<JSValueRef>& sections, RefPtr<WaterF
     Framework::JSWaterFlowSections* section =
         static_cast<Framework::JSWaterFlowSections*>(nativeSectionObj->GetNativePointerField(vm, 0));
     CHECK_NULL_VOID(section);
-    if (section->IsBound(frameNode)) {
+    bool isBound = section->IsBound(frameNode);
+	// Check if C++ sections data was reset (recovery scenario: sections undefined -> has data)
+    bool isSectionsEmpty = waterFlowSections->GetSectionInfo().empty();
+    if (isBound && !isSectionsEmpty) {
         return;
     }
-    auto id = Container::CurrentId();
-    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
-                        weakNode = AceType::WeakClaim(frameNode)](size_t start, size_t deleteCount,
-                        std::vector<NG::WaterFlowSections::Section>& newSections,
-                        const std::vector<NG::WaterFlowSections::Section>& allSections) {
-        ContainerScope scope(id);
-        auto node = weakNode.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto context = node->GetContext();
-        CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weakNode, all = allSections]() {
-            auto node = weakNode.Upgrade();
-            CHECK_NULL_VOID(node);
-            auto nodeSection = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(node.GetRawPtr());
-            nodeSection->ChangeData(start, deleteCount, change);
-            if (nodeSection->GetSectionInfo().size() != all.size()) {
-                nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
-            }
-        });
-        context->RequestFrame();
-    };
-    section->SetOnSectionChangedCallback(frameNode, callback);
+    if (!isBound) {
+        BindSectionChangeCallback(section, waterFlowSections, frameNode);
+    }
     // Used for makeObserved to listen and refresh status.
     ArkTSUtils::GetProperty(vm, sectionsObject, "changeFlag");
     auto allSections = ArkTSUtils::GetProperty(vm, sectionsObject, "sectionArray");
