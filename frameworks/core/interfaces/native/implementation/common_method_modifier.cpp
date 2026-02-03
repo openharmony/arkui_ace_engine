@@ -6213,6 +6213,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     Converter::VisitUnion(menuOption->preview,
         [&menuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
@@ -6274,6 +6275,7 @@ void BindContextMenuBoth(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     for (auto& type : responseTypeArray) {
         auto triggerMenuParam = menuParam;
         Converter::VisitUnion(menuOption->preview,
