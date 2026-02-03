@@ -48,9 +48,13 @@
 #include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
 namespace {
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
 {
+#ifdef ACE_UNITTEST
+    return GetCheckboxStaticContentModifier();
+#else
     static const GENERATED_ArkUICheckboxContentModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Checkbox");
@@ -62,6 +66,7 @@ const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
             module->GetCustomModifier("contentModifier"));
     }
     return cachedModifier;
+#endif
 }
 
 const GENERATED_ArkUICheckboxGroupContentModifier* GetCheckboxGroupContentModifier()
@@ -134,7 +139,6 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<ButtonTriggerClickCallback>(handler);
         arkConfig.triggerClick = triggerCallback.ArkValue();
-        arkConfig.triggerClick.resource.hold(arkConfig.triggerClick.resource.resourceId); // Creates memory leak!
         auto btnNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([btnNode](const RefPtr<UINode>& uiNode) mutable {
             btnNode->AddChild(uiNode);
@@ -467,7 +471,6 @@ void ContentModifierToggleImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

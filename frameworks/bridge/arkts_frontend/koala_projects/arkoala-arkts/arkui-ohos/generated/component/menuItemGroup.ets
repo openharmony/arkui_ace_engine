@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -206,7 +206,7 @@ export class MenuItemGroupOptions_serializer {
                 const headerTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const headerTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const headerTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                headerTmpBuf_ = ():void => {
+                const headerTmpBuf_BufUClosure  = ():void => {
                     const headerTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     headerTmpBuf_BufUBufArgsSerializer.writeInt32(headerTmpBuf_BufUBufResource.resourceId);
                     headerTmpBuf_BufUBufArgsSerializer.writePointer(headerTmpBuf_BufUBufCall);
@@ -215,6 +215,8 @@ export class MenuItemGroupOptions_serializer {
                     headerTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(headerTmpBuf_BufUClosure, headerTmpBuf_BufUBufResource)
+                headerTmpBuf_ = headerTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for headerTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -241,7 +243,7 @@ export class MenuItemGroupOptions_serializer {
                 const footerTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const footerTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const footerTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                footerTmpBuf_ = ():void => {
+                const footerTmpBuf_BufUClosure  = ():void => {
                     const footerTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     footerTmpBuf_BufUBufArgsSerializer.writeInt32(footerTmpBuf_BufUBufResource.resourceId);
                     footerTmpBuf_BufUBufArgsSerializer.writePointer(footerTmpBuf_BufUBufCall);
@@ -250,6 +252,8 @@ export class MenuItemGroupOptions_serializer {
                     footerTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(footerTmpBuf_BufUClosure, footerTmpBuf_BufUBufResource)
+                footerTmpBuf_ = footerTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for footerTmpBuf_ has to be chosen through deserialisation.")
             }

@@ -18,7 +18,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
-#include "core/interfaces/native/implementation/checkbox_group_configuration_peer.h"
+#include "core/components_ng/pattern/checkboxgroup/bridge/checkbox_group_configuration_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -202,12 +202,6 @@ void ContentModifierCheckBoxGroupImpl(
         arkConfig->name_ = config.name_;
         arkConfig->status_ = Converter::ArkValue<Ark_SelectStatus>(static_cast<int>(config.status_));
         arkConfig->node_ = node;
-        auto handler = [frameNode](Ark_Boolean retValue) {
-            CheckBoxGroupModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
-        };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
-        arkConfig->triggerChange_ = triggerCallback.ArkValue();
-        arkConfig->triggerChange_.resource.hold(arkConfig->triggerChange_.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

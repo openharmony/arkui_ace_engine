@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -294,7 +294,7 @@ export class RatingConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: double) => void) = (value0: double):void => {
+        const triggerChangeTmpBufClosure  = (value0: double):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
@@ -304,6 +304,8 @@ export class RatingConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : ((value0: double) => void) = triggerChangeTmpBufClosure
         let value : RatingConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, rating: ratingTmpResult, indicator: indicatorTmpResult, stars: starsTmpResult, stepSize: stepSizeTmpResult, triggerChange: triggerChangeTmpResult} as RatingConfiguration)
         return value
     }

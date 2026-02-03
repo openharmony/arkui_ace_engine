@@ -27,7 +27,6 @@ struct CheckBoxGroupConfigurationPeer {
     Ark_SelectStatus status_ = {};
     Ark_ContentModifier contentModifier_ = {};
     Ark_NativePointer node_ = {};
-    Callback_Boolean_Void triggerChange_ = {};
 protected:
     CheckBoxGroupConfigurationPeer() {}
     ~CheckBoxGroupConfigurationPeer() {}
