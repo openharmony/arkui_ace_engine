@@ -57,7 +57,7 @@ type DumpObjectType = Array<[string, Any]>;
 
 class DecoratorInfo {
     decorator?: string;
-    propertyName?: string;
+    propertyName?: string | Array<string>;
     value?: Any;
     syncPeers?: DecoratorInfo[];
     id?: int;
@@ -132,49 +132,6 @@ export class StateMgmtDFX {
         }
     }
 
-    static dumpV2ComputedAndMonitor(view: Any, dumpInfo: DumpInfo): void {
-        Object.getOwnPropertyNames(view as Object)
-            .filter((varName) => {
-                return (
-                    varName.startsWith('__computed') ||
-                    varName.startsWith('__monitor')
-                );
-            })
-            .forEach((varName) => {
-                const field = StateMgmtDFX.getField(varName, view as Object);
-                if (field !== undefined) {
-                    const value = field!.getValue(view as Object);
-                    if (value && value instanceof ComputedDecoratedVariable) {
-                        dumpInfo.observedPropertiesInfo.push({
-                            decorator: value.decorator,
-                            propertyName: value.varName,
-                            value: StateMgmtDFX.getRawValue(value),
-                            syncPeers: [],
-                            id: -1,
-                            dependentElementIds: {
-                                mode: 'Compatible Mode',
-                                propertyDependencies: [],
-                                trackPropertiesDependencies: []
-                            }
-                        });
-                    } else if (value && value instanceof MonitorFunctionDecorator) {
-                        const propertyName = varName.replace('__monitor_', '');
-                        dumpInfo.observedPropertiesInfo.push({
-                            decorator: value.decorator,
-                            propertyName: propertyName,
-                            syncPeers: [],
-                            id: -1,
-                            dependentElementIds: {
-                                mode: 'Compatible Mode',
-                                propertyDependencies: [],
-                                trackPropertiesDependencies: []
-                            }
-                        });
-                    }
-                }
-            });
-    }
-
     static dumpV2VariableInfo(view: Any, dumpInfo: DumpInfo): void {
         try {
             if (view instanceof ExtendableComponent) {
@@ -197,9 +154,33 @@ export class StateMgmtDFX {
                                     trackPropertiesDependencies: []
                                 }
                             });
+                        } else if (ownProperty && ownProperty instanceof ComputedDecoratedVariable) {
+                            dumpInfo.observedPropertiesInfo.push({
+                                decorator: ownProperty.decorator,
+                                propertyName: ownProperty.varName,
+                                value: StateMgmtDFX.getRawValue(ownProperty.get()),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
+                            });
+                        } else if (ownProperty && ownProperty instanceof MonitorFunctionDecorator) {
+                            dumpInfo.observedPropertiesInfo.push({
+                                decorator: ownProperty.decorator,
+                                propertyName: StateMgmtDFX.getRawValue(ownProperty.path) as Array<string>,
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
+                            });
                         }
                     });
-                StateMgmtDFX.dumpV2ComputedAndMonitor(view, dumpInfo);
             }
         } catch(e) {
             StateMgmtConsole.warn(`dumpV2VariableInfo failed, error message is ${e.message}`);
