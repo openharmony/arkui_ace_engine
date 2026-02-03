@@ -649,12 +649,8 @@ bool UIObserverHandler::IsSwiperContentObserverEmpty()
 void UIObserverHandler::NotifyWinSizeLayoutBreakpointChangeFunc(
     int32_t instanceId, const WindowSizeBreakpoint& breakpoint)
 {
-    if (winSizeLayoutBreakpointHandleFunc_) {
-        winSizeLayoutBreakpointHandleFunc_(instanceId, breakpoint);
-    }
-    if (winSizeLayoutBreakpointHandleFuncAni_) {
-        winSizeLayoutBreakpointHandleFuncAni_(instanceId, breakpoint);
-    }
+    CHECK_NULL_VOID(winSizeLayoutBreakpointHandleFunc_);
+    winSizeLayoutBreakpointHandleFunc_(instanceId, breakpoint);
 }
 
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
@@ -695,11 +691,6 @@ void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 void UIObserverHandler::SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func)
 {
     winSizeLayoutBreakpointHandleFunc_ = std::move(func);
-}
-
-void UIObserverHandler::SetWinSizeLayoutBreakpointChangeFuncAni(WinSizeLayoutBreakpointHandleFuncAni func)
-{
-    winSizeLayoutBreakpointHandleFuncAni_ = std::move(func);
 }
 
 void UIObserverHandler::SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func)

@@ -205,12 +205,6 @@ ArktsFrontend::ArktsFrontend(void* runtime)
     env->GetVM(&vm_);
 }
 
-ArktsFrontend::~ArktsFrontend()
-{
-    auto instanceId = instanceId_;
-    RemoveAvailableInstanceId(instanceId);
-}
-
 ani_object LegacyLoadPage(ani_env* env)
 {
     do {
@@ -302,64 +296,7 @@ bool ArktsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& ta
         }
     }
 
-    auto instanceId = instanceId_;
-    AddAvailableInstanceId(instanceId);
-
     return true;
-}
-
-void ArktsFrontend::AddAvailableInstanceId(int32_t instanceId)
-{
-    if (instanceId < 0) {
-        LOGE("Cannot add available instance ID: invalid instance ID");
-        return;
-    }
-    auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    void* runtime = container->GetSharedRuntime();
-    if (runtime) {
-        auto* env = Ani::AniUtils::GetAniEnv(vm_);
-        CHECK_NULL_VOID(env);
-        ani_class uiContextClass;
-        if (env->FindClass("arkui.base.UIContextUtil.UIContextUtil", &uiContextClass) != ANI_OK) {
-            LOGE("FindClass arkui.base.UIContextUtil.UIContextUtil failed");
-            return;
-        }
-        if (env->Class_CallStaticMethodByName_Void(uiContextClass, "addAvailableInstanceId", "i:", instanceId) !=
-            ANI_OK) {
-            LOGE("Call addAvailableInstanceId method failed");
-            return;
-        }
-    }
-}
-
-void ArktsFrontend::RemoveAvailableInstanceId(int32_t instanceId)
-{
-    if (instanceId < 0) {
-        LOGE("Cannot remove available instance ID: invalid instance ID");
-        return;
-    }
-    auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    void* runtime = container->GetSharedRuntime();
-    if (runtime) {
-        auto* env = Ani::AniUtils::GetAniEnv(vm_);
-        CHECK_NULL_VOID(env);
-        ani_class uiContextClass;
-        if (env->FindClass("arkui.base.UIContextUtil.UIContextUtil", &uiContextClass) != ANI_OK) {
-            LOGE("FindClass arkui.base.UIContextUtil.UIContextUtil failed");
-            return;
-        }
-        if (env->Class_CallStaticMethodByName_Void(uiContextClass, "removeAvailableInstanceId", "i:", instanceId) !=
-            ANI_OK) {
-            LOGE("Call removeAvailableInstanceId method failed");
-            return;
-        }
-    }
 }
 
 bool ArktsFrontend::GetNavigationRegisterClassName(const std::string& pageSourceFile, std::string& className)

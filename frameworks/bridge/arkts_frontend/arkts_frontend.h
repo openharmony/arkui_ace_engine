@@ -79,7 +79,7 @@ class ACE_FORCE_EXPORT ArktsFrontend : public Frontend {
 
 public:
     explicit ArktsFrontend(void* runtime);
-    ~ArktsFrontend() override;
+    ~ArktsFrontend() override = default;
 
     void SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback)
     {
@@ -444,8 +444,6 @@ public:
     void OpenStateMgmtInterop() override;
     void NotifyArkoalaConfigurationChange(bool isNeedUpdate) override;
     void InitXBarProxy() override;
-    void RemoveAvailableInstanceId(int32_t instanceId);
-    void AddAvailableInstanceId(int32_t instanceId);
 protected:
     bool LoadNavDestinationPage(const std::string bundleName, const std::string& moduleName,
         const std::string& pageSourceFile, bool isSingleton);

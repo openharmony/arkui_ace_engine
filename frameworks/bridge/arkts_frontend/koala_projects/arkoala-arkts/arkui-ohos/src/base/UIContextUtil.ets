@@ -39,36 +39,6 @@ export class UIContextUtil {
         return context;
     }
 
-    static isAvailableCountMap_: Map<int32, int32> = new Map<int32, int32>();
-
-    static addAvailableInstanceId(instanceId: int32): void {
-        if (!UIContextUtil.isAvailableCountMap_.has(instanceId)) {
-            UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
-        }
-        const value = UIContextUtil.isAvailableCountMap_.get(instanceId);
-
-        if (value === 1){
-            if (instanceId >= 0) {
-                UIContextUtil.isAvailableCountMap_.set(instanceId, 0);
-                UIContextImpl.availableInstanceIds_.add(instanceId);
-            }
-        } else if (value === 0) {
-            UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
-        }  
-    }
-
-    static removeAvailableInstanceId(instanceId: int32): void {
-        const value = UIContextUtil.isAvailableCountMap_.get(instanceId);
-        if (value === 0){
-            if (instanceId >= 0) {
-                UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
-                UIContextImpl.availableInstanceIds_.delete(instanceId);
-            }
-        } else if (value === 1) {
-            UIContextUtil.isAvailableCountMap_.set(instanceId, 0);
-        }
-    }
-
     static addUIContext(instanceId: int32, uiContext: UIContext): void {
         UIContextUtil.contextMap_.set(instanceId, uiContext);
     }

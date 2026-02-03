@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
-HeightBreakpoint, WidthBreakpoint, Axis } from "@ohos.arkui.component"
+Axis } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
@@ -72,9 +72,6 @@ import { Size } from '@ohos.arkui.node'
     export native function onTabChange(options: ObserverOptions, callback: Callback<ObserverOptions>): void;
     export native function offTabChange(options: ObserverOptions, callback?: Callback<ObserverOptions>): void;
 
-    export native function onWindowSizeLayoutBreakpointChange(callback: Callback<WindowSizeLayoutBreakpointInfo>): void;
-    export native function offWindowSizeLayoutBreakpointChange(callback?: Callback<WindowSizeLayoutBreakpointInfo>): void;
-
     export class DensityInfo {
         density: number;
     }
@@ -130,9 +127,6 @@ import { Size } from '@ohos.arkui.node'
         public native onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
         public native offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
 
-        public native onWindowSizeLayoutBreakpointChange(callback: Callback<WindowSizeLayoutBreakpointInfo>): void;
- 	    public native offWindowSizeLayoutBreakpointChange(callback?: Callback<WindowSizeLayoutBreakpointInfo>): void;
-
         public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
         public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
         public native onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
@@ -159,10 +153,6 @@ import { Size } from '@ohos.arkui.node'
         navigationId: string;
         pathStack: NavPathStack;
         uniqueId?: int;
-    }
-    export class WindowSizeLayoutBreakpointInfo {
-        widthBreakpoint: WidthBreakpoint;
-        heightBreakpoint: HeightBreakpoint;
     }
 
     export class NavigationInfoImpl implements NavigationInfo {

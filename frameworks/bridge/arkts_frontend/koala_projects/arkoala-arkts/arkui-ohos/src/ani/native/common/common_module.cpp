@@ -1816,58 +1816,6 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
             env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
     }
 }
-ani_int GetCallingScopeUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
-{
-    const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_RETURN(modifier, -1);
-    int32_t instanceId = -1;
-    modifier->getCommonAniModifier()->getCallingScopeUIContext(instanceId);
-    ani_int ani_instanceId = static_cast<ani_int>(instanceId);
-    return ani_instanceId;
-}
-
-ani_int GetLastFocusedUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
-{
-    const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_RETURN(modifier, -1);
-    int32_t instanceId = -1;
-    modifier->getCommonAniModifier()->getLastFocusedUIContext(instanceId);
-    ani_int ani_instanceId = static_cast<ani_int>(instanceId);
-    return ani_instanceId;
-}
-
-ani_int GetLastForegroundUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
-{
-    const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_RETURN(modifier, -1);
-    int32_t instanceId = -1;
-    modifier->getCommonAniModifier()->getLastForegroundUIContext(instanceId);
-    ani_int ani_instanceId = static_cast<ani_int>(instanceId);
-    return ani_instanceId;
-}
-
-ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]] ani_object obj)
-{
-    ani_array resultArray = nullptr;
-    const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_RETURN(modifier, resultArray);
-    std::vector<int32_t> instanceIds;
-    modifier->getCommonAniModifier()->getAllInstanceIds(instanceIds);
-    ani_ref undefined {};
-    auto status = env->GetUndefined(&undefined);
-    auto arraySize = instanceIds.size();
-    env->Array_New(arraySize, undefined, &resultArray);
-    ani_class intCls {};
-    ani_method intCtor {};
-    status = env->FindClass("std.core.Int", &intCls);
-    status = env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor);
-    ani_object result {};
-    for (int i = 0; i < arraySize; ++i) {
-        status = env->Object_New(intCls, intCtor, &result, ani_int(instanceIds[i]));
-        status = env->Array_Set(resultArray, i, result);
-    }
-    return resultArray;
-}
 
 ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
 {
