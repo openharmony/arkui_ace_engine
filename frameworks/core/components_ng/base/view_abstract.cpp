@@ -4476,30 +4476,22 @@ void ViewAbstract::ShowMenuPreview(
 
 int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
 {
-    std::cout << "ViewAbstract::OpenMenu AA" << std::endl;
     if (!customNode) {
-        std::cout << "ViewAbstract::OpenMenu AA.1" << std::endl;
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
         return ERROR_CODE_DIALOG_CONTENT_ERROR;
     }
-    std::cout << "ViewAbstract::OpenMenu BB" << std::endl;
     auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
     if (!targetNode) {
-        std::cout << "ViewAbstract::OpenMenu BB.1" << std::endl;
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
         return ERROR_CODE_TARGET_INFO_NOT_EXIST;
     }
-    std::cout << "ViewAbstract::OpenMenu CC" << std::endl;
     if (!targetNode->IsOnMainTree()) {
-        std::cout << "ViewAbstract::OpenMenu CC.1" << std::endl;
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
         return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
     auto overlayManager = GetCurOverlayManager(customNode);
     CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);
-    std::cout << "ViewAbstract::OpenMenu DD" << std::endl;
     if (overlayManager->GetMenuNodeWithExistContent(customNode)) {
-        std::cout << "ViewAbstract::OpenMenu DD.1" << std::endl;
         TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of menu already existed.");
         return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
     }
@@ -4510,24 +4502,19 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     }
     auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
     CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
-    std::cout << "ViewAbstract::OpenMenu EE" << std::endl;
     ShowMenuPreview(targetNode, wrapperNode, menuParam);
     auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, ERROR_CODE_INTERNAL_ERROR);
-    std::cout << "ViewAbstract::OpenMenu FF" << std::endl;
     menuWrapperPattern->RegisterMenuCallback(wrapperNode, menuParam);
     menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
     auto menu = menuWrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
-    std::cout << "ViewAbstract::OpenMenu GG" << std::endl;
     auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
     CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
-    std::cout << "ViewAbstract::OpenMenu HH" << std::endl;
     auto node = WeakPtr<UINode>(customNode);
     menuPattern->SetCustomNode(node);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
-    std::cout << "ViewAbstract::OpenMenu II" << std::endl;
     menuWrapperPattern->SetIsOpenMenu(true);
     NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
     if (menuParam.anchorPosition.has_value()) {
@@ -4538,11 +4525,9 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
                         targetNodePosition.GetY() };
     }
     if (menuParam.isShowInSubWindow) {
-        std::cout << "ViewAbstract::OpenMenu JJ" << std::endl;
         SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuPosition);
         return ERROR_CODE_NO_ERROR;
     }
-    std::cout << "ViewAbstract::OpenMenu KK" << std::endl;
     overlayManager->ShowMenu(targetNode->GetId(), menuPosition, wrapperNode);
     return ERROR_CODE_NO_ERROR;
 }
