@@ -131,6 +131,7 @@ void SwiperModelStatic::SetArrowStyle(FrameNode* frameNode, const SwiperArrowPar
 
 RefPtr<FrameNode> SwiperModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto swiperNode = ElementRegister::GetInstance()->GetSpecificItemById<SwiperNode>(nodeId);
     if (swiperNode) {
         if (swiperNode->GetTag() == V2::SWIPER_ETS_TAG) {

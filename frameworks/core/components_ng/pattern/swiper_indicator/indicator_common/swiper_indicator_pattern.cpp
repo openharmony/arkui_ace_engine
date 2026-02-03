@@ -57,7 +57,7 @@ void SwiperIndicatorPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    ACE_UINODE_TRACE(host);
     if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
         UpdateDigitalIndicator();
     } else {

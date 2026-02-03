@@ -38,6 +38,7 @@ constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode, const MenuParam& menuParam)
 {
+    ACE_UINODE_TRACE(navBarNode);
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
@@ -117,6 +118,7 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
 RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG::BarItem>& menuItems,
     const RefPtr<NavBarNode>& navBarNode, bool isCreateLandscapeMenu)
 {
+    ACE_UINODE_TRACE(navBarNode);
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_RETURN(menuNode, nullptr);

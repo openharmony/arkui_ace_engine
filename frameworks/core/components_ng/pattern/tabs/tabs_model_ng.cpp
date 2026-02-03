@@ -63,6 +63,7 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Sw
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][index:%d]", V2::TABS_ETS_TAG, nodeId, index);
+    ACE_UINODE_TRACE(nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, swiperController);
     ViewStackProcessor::GetInstance()->Push(tabsNode);
@@ -138,6 +139,7 @@ void TabsModelNG::InitUnselectedMaskNode(const RefPtr<FrameNode>& unselectedMask
 
 RefPtr<OHOS::Ace::NG::FrameNode> InitEffectNode(RefPtr<TabsNode> tabsNode)
 {
+    ACE_UINODE_TRACE(tabsNode);
     auto effectNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, tabsNode->GetEffectId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
 
@@ -229,6 +231,7 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
 
 RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -1221,6 +1224,7 @@ void TabsModelNG::SetTabBarIndex(FrameNode* frameNode, int32_t index)
 void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto nodeId = frameNode->GetId();
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     CHECK_NULL_VOID(tabsNode);

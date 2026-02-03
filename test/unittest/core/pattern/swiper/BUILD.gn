@@ -59,5 +59,6 @@ ace_unittest("swiper_test_ng") {
     "swiper_ui_observer_test_ng.cpp",
     "swiper_ui_session_adapter_test_ng.cpp",
     "swiper_utils_test_ng.cpp",
+    "swiper_layout_algorithm_fakedrag_test_ng.cpp",
   ]
 }

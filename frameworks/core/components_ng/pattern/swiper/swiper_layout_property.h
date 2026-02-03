@@ -69,6 +69,9 @@ public:
         value->propLoop_ = CloneLoop();
         value->propIndicatorInteractive_ = CloneIndicatorInteractive();
         value->propDisableSwipe_ = CloneDisableSwipe();
+        value->propSwipeByGroup_ = CloneSwipeByGroup();
+        value->propMaintainVisibleContentPosition_ = CloneMaintainVisibleContentPosition();
+        value->propFillType_ = CloneFillType();
         value->ignoreItemSpace_ = ignoreItemSpace_;
         return value;
     }
@@ -105,6 +108,9 @@ public:
         ResetLoop();
         ResetIndicatorInteractive();
         ResetDisableSwipe();
+        ResetSwipeByGroup();
+        ResetMaintainVisibleContentPosition();
+        ResetFillType();
         ignoreItemSpace_ = false;
     }
 
@@ -157,6 +163,8 @@ public:
         json->PutExtAttr("indicatorInteractive", propIndicatorInteractive_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("swipeByGroup", propSwipeByGroup_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("maintainVisibleContentPosition",
+            propMaintainVisibleContentPosition_.value_or(false) ? "true" : "false", filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

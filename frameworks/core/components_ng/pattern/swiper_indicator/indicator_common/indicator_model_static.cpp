@@ -25,6 +25,7 @@ const uint32_t DEFAULT_SWIPER_CURRENT_INDEX = 0;
 
 RefPtr<FrameNode> IndicatorModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     return FrameNode::CreateFrameNode(
         V2::INDICATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<IndicatorPattern>());
 }

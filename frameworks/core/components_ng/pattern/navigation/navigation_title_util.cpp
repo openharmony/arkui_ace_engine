@@ -105,6 +105,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     const std::vector<NG::BarItem>& menuItems, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase,
     bool isButtonEnabled, const std::string& field, const std::string& parentId, bool isCreateLandscapeMenu)
 {
+    ACE_UINODE_TRACE(navDestinationNodeBase);
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_RETURN(menuNode, nullptr);
@@ -638,6 +639,7 @@ void NavigationTitleUtil::CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& ti
     const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle)
 {
     CHECK_NULL_VOID(titleBarNode);
+    ACE_UINODE_TRACE(titleBarNode);
     if (ignoreMainTitle) {
         return;
     }
@@ -674,6 +676,7 @@ void NavigationTitleUtil::CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& tit
     const NG::NavigationTitleInfo& titleInfo)
 {
     CHECK_NULL_VOID(titleBarNode);
+    ACE_UINODE_TRACE(titleBarNode);
     auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
     if (!titleInfo.hasSubTitle) {
         // remove subtitle if any.
@@ -708,6 +711,7 @@ void NavigationTitleUtil::CreateOrUpdateDestinationMainTitle(const RefPtr<TitleB
     const NG::NavigationTitleInfo& titleInfo)
 {
     CHECK_NULL_VOID(titleBarNode);
+    ACE_UINODE_TRACE(titleBarNode);
     auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     if (!titleInfo.hasMainTitle) {
         // remove main title if any.
@@ -745,6 +749,7 @@ void NavigationTitleUtil::CreateOrUpdateDestinationSubtitle(const RefPtr<TitleBa
     const NG::NavigationTitleInfo& titleInfo)
 {
     CHECK_NULL_VOID(titleBarNode);
+    ACE_UINODE_TRACE(titleBarNode);
     auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
     if (!titleInfo.hasSubTitle) {
         // remove subtitle if any.

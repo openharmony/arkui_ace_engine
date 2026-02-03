@@ -172,6 +172,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    ACE_UINODE_TRACE(host);
     auto props = host->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
 
@@ -320,6 +321,7 @@ void SwiperPattern::InitCapture()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
     bool hasCachedCapture = SwiperUtils::IsStretch(props) && props->GetLoop().value_or(true) && !IsSwipeByGroup() &&
@@ -467,6 +469,7 @@ void SwiperPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     swiperId_ = host->GetId();
     auto hub = host->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(hub);
@@ -1415,6 +1418,8 @@ void SwiperPattern::HandleRunningTranslateAnimation()
 
 void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo)
 {
+    // // Tracking animation memory profiling.
+    ACE_UINODE_TRACE(GetHost());
     auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
     auto iter = itemPosition_.find(targetIndexValue);
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
@@ -5644,6 +5649,7 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         [weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
+            ACE_UINODE_TRACE(frameNode);
             auto pattern = frameNode->GetPattern<SwiperPattern>();
             CHECK_NULL_VOID(pattern);
             if (!canUseLongPredictTask || !pattern->GetRequestLongPredict()) {
@@ -7323,6 +7329,7 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindForEachNode(const RefPtr<UINode
 
 RefPtr<NodePaintMethod> SwiperPattern::CreateNodePaintMethod()
 {
+    ACE_UINODE_TRACE(GetHost());
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     const auto& paddingProperty = props->GetPaddingProperty();
@@ -7886,6 +7893,7 @@ void SwiperPattern::UpdateDefaultColor()
 
 void SwiperPattern::OnColorModeChange(uint32_t colorMode)
 {
+    ACE_UINODE_TRACE(GetHost());
     UpdateDefaultColor();
     Pattern::OnColorModeChange(colorMode);
     if (!isBindIndicator_) {
