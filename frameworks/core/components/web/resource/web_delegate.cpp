@@ -5980,6 +5980,13 @@ void WebDelegate::AccessibilitySendPageChange()
             }
             delegate->SetPageFinishedState(true);
             if (webNode->IsOnMainTree()) {
+                if (webPattern->IsAccessibilitySamePage()) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange IsAccessibilitySamePage accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
+                    return;
+                }
                 if (!webPattern->CheckVisible()) {
                     bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);
                     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -5996,8 +6003,11 @@ void WebDelegate::AccessibilitySendPageChange()
                     accessibilityManager->ReleasePageEvent(webNode, true, true);
                     return;
                 }
+                auto accessibilityProperty = webNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                CHECK_NULL_VOID(accessibilityProperty);
                 auto navigationMgr = context->GetNavigationManager();
-                if (navigationMgr && navigationMgr->IsNavigationInAnimation()) {
+                if (navigationMgr && navigationMgr->IsNavigationInAnimation() &&
+                    !accessibilityProperty->HasAccessibilitySamePage()) {
                     TAG_LOGI(AceLogTag::ACE_WEB,
                         "WebDelegate::AccessibilitySendPageChange IsNavigationInAnimation accessibilityId = "
                         "%{public}" PRId64,

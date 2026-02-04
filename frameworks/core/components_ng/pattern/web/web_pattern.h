@@ -802,6 +802,7 @@ public:
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
+    bool IsAccessibilitySamePage();
     void UpdateScrollBarWithBorderRadius();
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
@@ -1673,6 +1674,7 @@ private:
     int showMagnifierFingerId_ = -1;
 
     std::unique_ptr<WebDomDocument> webDomDocument_;
+    bool useSemiSamePage_ {false};  // is true mean SemiSamePage has been used
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
