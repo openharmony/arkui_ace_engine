@@ -157,6 +157,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.percentReference.SetHeight(
             std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     }
+    if (pipeline->IsCurrentInForceSplitMode()) {
+        childLayoutConstraint.percentReference.SetWidth(pipeline->GetRootWidth() / HALF);
+        childLayoutConstraint.maxSize.SetWidth(pipeline->GetRootWidth() / HALF);
+    }
 
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
@@ -921,6 +925,9 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
+    if (pipelineContext->IsCurrentInForceSplitMode()) {
+        maxSize.SetWidth(maxSize.Width() / HALF);
+    }
     wrapperSize_ = layoutConstraint->maxSize;
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
@@ -933,6 +940,9 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     if ((expandSafeAreaOpts && (expandSafeAreaOpts->type & SAFE_AREA_TYPE_KEYBOARD)) ||
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         needAvoidKeyboard = false;
+    }
+    if (pipelineContext->IsCurrentInForceSplitMode()) {
+        topLeftPoint.SetX(topLeftPoint.GetX() + pipelineContext->GetRootWidth() / HALF);
     }
     auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
     AvoidScreen(childOffset, prop, dialogChildSize_);
