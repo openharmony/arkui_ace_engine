@@ -1069,6 +1069,18 @@ void ResolveUIContext(std::vector<int32_t>& instnace)
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }
 
+ani_long GetPageRootNodeInStatic()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context) {
+        auto node = context->GetPageRootNode();
+        if (node) {
+            return reinterpret_cast<ani_long>(node.GetRawPtr());
+        }
+    }
+    return 0;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -1154,6 +1166,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getLastForegroundUIContext = OHOS::Ace::NG::GetLastForegroundUIContext,
         .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
+        .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
     };
     return &impl;
 }

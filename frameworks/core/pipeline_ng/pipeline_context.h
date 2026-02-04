@@ -529,6 +529,10 @@ public:
         return sharedTransitionManager_;
     }
 
+    RefPtr<FrameNode> GetPageRootNode();
+    // Helper functions for in-order traversal of UINode children
+    RefPtr<FrameNode> FindPageRootNodeInOrder(const RefPtr<UINode>& node);
+
 #ifdef WINDOW_SCENE_SUPPORTED
     const RefPtr<UIExtensionManager>& GetUIExtensionManager()
     {

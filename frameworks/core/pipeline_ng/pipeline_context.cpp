@@ -7455,6 +7455,34 @@ RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
     return contentChangeMgr_;
 }
 
+RefPtr<FrameNode> PipelineContext::GetPageRootNode()
+{
+    if (stageManager_ && stageManager_->GetLastPage()) {
+        return FindPageRootNodeInOrder(stageManager_->GetLastPage());
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> PipelineContext::FindPageRootNodeInOrder(const RefPtr<UINode>& node)
+{
+    // Perform in-order traversal: check current node, then recurse through all children
+    if (!node) {
+        return nullptr;
+    }
+    // Check if current node is a valid FrameNode (not PAGE_ETS_TAG)
+    if (AceType::InstanceOf<NG::FrameNode>(node) && node->GetTag() != V2::PAGE_ETS_TAG) {
+        return AceType::DynamicCast<NG::FrameNode>(node);
+    }
+    // Recursively check all children in order (not just first child)
+    for (const auto& child : node->GetChildren()) {
+        auto result = FindPageRootNodeInOrder(child);
+        if (result) {
+            return result; // Early return on first match
+        }
+    }
+    return nullptr;
+}
+
 void PipelineContext::GetStateMgmtInfo(
     const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
 {

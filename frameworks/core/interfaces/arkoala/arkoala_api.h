@@ -8251,6 +8251,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*convertPositionFromWindow)(
         ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
     ArkUI_AccessibilityProvider* (*getAccessibilityProvider)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getPageRootNode)(ArkUI_Int32 instanceId);
 };
 
 struct ArkUINodeContentEvent {
@@ -8758,6 +8759,7 @@ struct ArkUIBasicAPI {
     ArkUI_Int32 (*greatOrEqualTargetAPIVersion)(ArkUI_Int32 version);
     void (*registerNodeAsyncCommonEventReceiver)(EventReceiver eventReceiver);
     void (*unRegisterNodeAsyncCommonEventReceiver)();
+    ArkUI_Int32 (*checkUIContextInvalide)(ArkUI_Int32 instanceId);
 };
 
 struct ArkUIMultiThreadManagerAPI {
