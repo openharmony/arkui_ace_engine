@@ -2325,8 +2325,6 @@ typedef struct Ark_LocalizedHorizontalAlignParam Ark_LocalizedHorizontalAlignPar
 typedef struct Opt_LocalizedHorizontalAlignParam Opt_LocalizedHorizontalAlignParam;
 typedef struct Ark_LocalizedVerticalAlignParam Ark_LocalizedVerticalAlignParam;
 typedef struct Opt_LocalizedVerticalAlignParam Opt_LocalizedVerticalAlignParam;
-typedef struct Ark_MarqueeOptions Ark_MarqueeOptions;
-typedef struct Opt_MarqueeOptions Opt_MarqueeOptions;
 typedef struct Matrix2DPeer Matrix2DPeer;
 typedef struct Matrix2DPeer* Ark_Matrix2D;
 typedef struct Opt_Matrix2D Opt_Matrix2D;
@@ -2997,6 +2995,8 @@ typedef struct Ark_LocalizedPosition Ark_LocalizedPosition;
 typedef struct Opt_LocalizedPosition Opt_LocalizedPosition;
 typedef struct Ark_LunarSwitchStyle Ark_LunarSwitchStyle;
 typedef struct Opt_LunarSwitchStyle Opt_LunarSwitchStyle;
+typedef struct Ark_MarqueeOptions Ark_MarqueeOptions;
+typedef struct Opt_MarqueeOptions Opt_MarqueeOptions;
 typedef struct Ark_MeasureOptions Ark_MeasureOptions;
 typedef struct Opt_MeasureOptions Opt_MeasureOptions;
 typedef struct Ark_MenuElement Ark_MenuElement;
@@ -16252,18 +16252,6 @@ typedef struct Opt_LocalizedVerticalAlignParam {
     Ark_Tag tag;
     Ark_LocalizedVerticalAlignParam value;
 } Opt_LocalizedVerticalAlignParam;
-typedef struct Ark_MarqueeOptions {
-    /* kind: Interface */
-    Opt_Boolean start;
-    Opt_Float64 step;
-    Opt_Int32 loop;
-    Opt_Boolean fromStart;
-    Opt_String src;
-} Ark_MarqueeOptions;
-typedef struct Opt_MarqueeOptions {
-    Ark_Tag tag;
-    Ark_MarqueeOptions value;
-} Opt_MarqueeOptions;
 typedef struct Opt_Matrix2D {
     Ark_Tag tag;
     Ark_Matrix2D value;
@@ -19628,6 +19616,20 @@ typedef struct Opt_LunarSwitchStyle {
     Ark_Tag tag;
     Ark_LunarSwitchStyle value;
 } Opt_LunarSwitchStyle;
+typedef struct Ark_MarqueeOptions {
+    /* kind: Interface */
+    Opt_Boolean start;
+    Opt_Float64 step;
+    Opt_Int32 loop;
+    Opt_Boolean fromStart;
+    Opt_String src;
+    Opt_Int32 delay;
+    Opt_LengthMetrics spacing;
+} Ark_MarqueeOptions;
+typedef struct Opt_MarqueeOptions {
+    Ark_Tag tag;
+    Ark_MarqueeOptions value;
+} Opt_MarqueeOptions;
 typedef struct Ark_MeasureOptions {
     /* kind: Interface */
     Ark_Union_String_Resource textContent;

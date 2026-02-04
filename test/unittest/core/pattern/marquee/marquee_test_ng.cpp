@@ -1913,6 +1913,10 @@ HWTEST_F(MarqueeTestNg, OnWindowSizeChanged_004, TestSize.Level1)
 HWTEST_F(MarqueeTestNg, GetTextDirection_001, TestSize.Level1)
 {
     MarqueePattern marqueeModel;
+    /*
+     * step1: set TextDirection to RTL
+     *
+     */
     std::string content = "HelloWorld";
     auto res = marqueeModel.GetTextDirection(content, TextDirection::RTL);
     EXPECT_EQ(res, TextDirection::RTL);
@@ -1927,6 +1931,10 @@ HWTEST_F(MarqueeTestNg, GetTextDirection_002, TestSize.Level1)
 {
     MarqueePattern marqueeModel;
     std::string content = "HelloWorld";
+    /*
+     * step1: set TextDirection to Auto
+     *
+     */
     auto res = marqueeModel.GetTextDirection(content, TextDirection::AUTO);
     EXPECT_EQ(res, TextDirection::LTR);
 }
