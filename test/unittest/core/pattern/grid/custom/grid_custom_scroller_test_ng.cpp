@@ -512,5 +512,11 @@ HWTEST_F(GridCustomScrollerTestNg, IrregularScrollToIndexStartTest, TestSize.Lev
     EXPECT_EQ(pattern_->info_.prevOffset_, -100.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1300);
     EXPECT_EQ(pattern_->info_.startIndex_, 18);
+
+    ScrollToIndex(20, smooth, scrollAlign);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -100.f);
+    EXPECT_EQ(pattern_->info_.prevOffset_, -100.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 1300);
+    EXPECT_EQ(pattern_->info_.startIndex_, 18);
 }
 } // namespace OHOS::Ace::NG

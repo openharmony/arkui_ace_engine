@@ -276,67 +276,6 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     return { childHeight, constraint };
 }
 
-float GridIrregularFiller::MeasureCurrentRow(const FillParameters& params, int32_t itemIdx)
-{
-    // 1. 初始化位置和索引
-    int32_t currentRow = info_->startMainLineIndex_;
-    posY_ = currentRow;
-    posX_ = 0;
-    int32_t idx = info_->startIndex_;
-    int32_t childrenCount = info_->GetChildrenCount();
-
-    // 2. 填充当前行的Matrix
-    while (posY_ == currentRow && idx < childrenCount) {
-        if (!FindNextItem(idx)) {
-            FillOne(idx);
-        }
-        idx++;
-    }
-
-    // 3. 测量行内每个节点
-    auto rowIt = info_->gridMatrix_.find(currentRow);
-    if (rowIt == info_->gridMatrix_.end()) {
-        TAG_LOGW(AceLogTag::ACE_GRID, "current row %{public}d not found in gridMatrix_", currentRow);
-        return 0.0f;
-    }
-
-    // 记录startIndex节点的位置信息
-    int32_t startIndexCol = -1;
-
-    for (const auto& [col, itemIdx] : rowIt->second) {
-        if (itemIdx >= 0) { // 只处理实际节点，跳过标记为 -idx 的节点
-            // 记录startIndex的列位置
-            if (itemIdx == info_->startIndex_) {
-                startIndexCol = col;
-            }
-            // 测量节点
-            MeasureItem(params, itemIdx, col, currentRow, false);
-        }
-    }
-
-    // 4. 计算并返回startIndex节点的总高度
-    if (startIndexCol == -1) {
-        TAG_LOGW(AceLogTag::ACE_GRID, "startIndex %{public}d not found in current row %{public}d", info_->startIndex_,
-            currentRow);
-        return 0.0f;
-    }
-
-    // 获取startIndex节点的大小信息
-    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
-    int32_t rows = itemSize.rows;
-
-    // 计算总高度：sum(line heights for all rows it spans) + (rows - 1) * mainGap
-    float totalHeight = 0.0f;
-    for (int32_t i = 0; i < rows; ++i) {
-        auto lineHeightIt = info_->lineHeightMap_.find(currentRow + i);
-        if (lineHeightIt != info_->lineHeightMap_.end()) {
-            totalHeight += lineHeightIt->second;
-        }
-    }
-    totalHeight += (rows - 1) * params.mainGap;
-    return totalHeight;
-}
-
 int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
 {
     auto res = info_->FindEndIdx(lineIdx);
@@ -507,5 +446,61 @@ void GridIrregularFiller::SetItemInfo(
         .mainEnd = row + size.rows - 1,
         .crossStart = col,
         .crossEnd = col + size.columns - 1 });
+}
+
+float GridIrregularFiller::FillMatrixFromStartIndexWithMeasure(
+    const FillParameters& params, int32_t startLine, int32_t startIndex, int32_t targetIdx)
+{
+    if (targetIdx >= info_->GetChildrenCount()) {
+        targetIdx = info_->GetChildrenCount() - 1;
+    }
+    if (targetIdx < 0 || startIndex < 0 || startLine < 0) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "Invalid parameters in FillMatrixFromStartIndexWithMeasure");
+        return 0.0f;
+    }
+
+    posY_ = startLine;
+    int32_t idx = startIndex;
+    int32_t targetLine = -1; // Record the line where targetIdx is located
+
+    // ━━━ Step 1: Fill matrix to targetIdx and record targetLine ━━━
+    while (idx <= targetIdx) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+
+        // Record the line where targetIdx is located
+        if (idx == targetIdx) {
+            targetLine = posY_;
+        }
+
+        // Measure current item (update lineHeightMap_)
+        MeasureItem(params, idx, posX_, posY_, false);
+        idx++;
+    }
+
+    // ━━━ Step 2: Only calculate height within targetLine range ━━━
+    if (targetLine == -1) {
+        targetLine = posY_; // If not found, use the last line
+    }
+
+    // Get the number of rows occupied by targetIdx (handle row-spanning items)
+    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, targetIdx);
+    int32_t rowSpan = itemSize.rows; // Number of rows occupied by targetIdx
+
+    // Only accumulate height from targetLine to targetLine+rowSpan-1
+    float totalHeight = 0.0f;
+    for (int32_t i = 0; i < rowSpan; i++) {
+        auto it = info_->lineHeightMap_.find(targetLine + i);
+        if (it != info_->lineHeightMap_.end()) {
+            totalHeight += it->second;
+            // Only add gap if not the last row
+            if (i < rowSpan - 1) {
+                totalHeight += params.mainGap;
+            }
+        }
+    }
+
+    return totalHeight;
 }
 } // namespace OHOS::Ace::NG
