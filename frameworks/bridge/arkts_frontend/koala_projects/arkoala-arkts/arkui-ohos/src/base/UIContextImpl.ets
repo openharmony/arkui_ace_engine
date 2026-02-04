@@ -29,7 +29,7 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
-    CustomKeyboardContinueFeature } from '@ohos/arkui/UIContext';
+    CustomKeyboardContinueFeature, Magnifier as UIMagnifier } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -56,7 +56,7 @@ import { GlobalScopeUicontextTextMenu } from "#generated"
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { SizeOptions, ResourceColor } from 'arkui/component/units';
 import { Frame } from 'arkui/Graphics';
-import { TextMenuOptions } from 'arkui/component/textCommon';
+import { TextMenuOptions, TextLayoutOptions, Paragraph } from 'arkui/component/textCommon';
 import { focusController } from '@ohos/arkui/focusController';
 import { KeyProcessingMode } from 'arkui/component/focus';
 import { componentUtils } from '@ohos/arkui/componentUtils';
@@ -79,11 +79,13 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
     DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback, BusinessError } from "@ohos.base"
-import { IUIContext, SystemOps, UIObserverGestureEventOps } from 'arkui/component/idlize';
+import { IUIContext, SystemOps, UIObserverGestureEventOps, Magnifier as MagnifierIdlize,
+    MagnifierInternal } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 import { FreeRootNode } from '../CallbackTransformer';
+import { StyledString } from "arkui/component/styledString"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1393,6 +1395,33 @@ export class DetachedRootEntryManager {
     }
 }
 
+export class MagnifierImpl extends UIMagnifier {
+    instanceId_: int32;
+    peerPtr: KPointer;
+    magnifier: MagnifierIdlize;
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+        this.peerPtr = MagnifierIdlize.construct();
+        this.magnifier = MagnifierInternal.fromPtr(this.peerPtr);
+    }
+    public bind(id: string): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.magnifier.bind(id)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public show(x: double, y: double): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.magnifier.show(x, y)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public unbind(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.magnifier.unbind()
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class UIContextImpl extends UIContext {
     instanceId_: int32 = -1;
     observer_ :UIObserver |null = null;
@@ -1410,6 +1439,7 @@ export class UIContextImpl extends UIContext {
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
     measureUtils_: MeasureUtilsImpl;
+    magnifier_: MagnifierImpl;
     textMenuController_: TextMenuControllerImpl;
     detachedRootEntryManager_: DetachedRootEntryManager;
     isDebugMode_: boolean = false;
@@ -1436,6 +1466,7 @@ export class UIContextImpl extends UIContext {
         this.cursorController_ = new CursorControllerImpl(instanceId);
         this.font_ = new FontImpl(instanceId);
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
+        this.magnifier_ = new MagnifierImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
         this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
         this.isDebugMode_ = ArkUIAniModule._IsDebugMode(instanceId) !== 0;
@@ -2085,5 +2116,9 @@ export class UIContextImpl extends UIContext {
 
     public setUpdateConfiguration(value: boolean) {
         this.isUpdateConfiguration_ = value;
+    }
+
+    public getMagnifier(): UIMagnifier {
+        return this.magnifier_;
     }
 }

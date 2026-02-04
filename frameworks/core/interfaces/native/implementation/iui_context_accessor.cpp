@@ -337,6 +337,17 @@ std::optional<int32_t> ConvertNumber(const Ark_Union_Number_String& src)
 }
 } // namespace
 namespace IUIContextAccessor {
+void DestroyPeerImpl(Ark_IUIContext peer)
+{
+}
+Ark_IUIContext ConstructImpl()
+{
+    return {};
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
 void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
 {
     CHECK_NULL_VOID(id);
@@ -489,10 +500,17 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
+Ark_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+{
+    return {};
+}
 } // namespace IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
     static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+        IUIContextAccessor::DestroyPeerImpl,
+        IUIContextAccessor::ConstructImpl,
+        IUIContextAccessor::GetFinalizerImpl,
         IUIContextAccessor::FreezeUINode0Impl,
         IUIContextAccessor::FreezeUINode1Impl,
         IUIContextAccessor::DispatchKeyEventImpl,
@@ -504,8 +522,12 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+        IUIContextAccessor::GetMagnifierImpl,
     };
     return &IUIContextAccessorImpl;
 }
 
+struct IUIContextPeer {
+    virtual ~IUIContextPeer() = default;
+};
 } // namespace OHOS::Ace::NG::GeneratedModifier

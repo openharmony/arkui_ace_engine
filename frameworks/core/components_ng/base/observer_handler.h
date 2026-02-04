@@ -332,6 +332,7 @@ public:
     using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     using TabContentHandleFuncForAni = std::function<void(const NG::TabContentInfo& info)>;
     using TextChangeEventHandleFunc = void (*)(const TextChangeEventInfo&);
+    using TextChangeEventHandleFuncForAni = std::function<void(const TextChangeEventInfo& info)>;
     using SwiperContentUpdateHandleFunc = void (*)(const SwiperContentInfo&);
     using SwiperContentObservrEmptyFunc = bool (*)();
     using RouterPageSizeChangeHandleFunc = void (*)(const RouterPageInfoNG&);
@@ -386,6 +387,7 @@ public:
     using DidClickHandleFuncForAni = std::function<void()>;
     void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
     void SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func);
+    void SetHandleTextChangeEventFuncForAni(TextChangeEventHandleFuncForAni&& func);
     void SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func);
     void SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func);
     void SetRouterPageSizeChangeHandleFunc(RouterPageSizeChangeHandleFunc func);
@@ -478,6 +480,7 @@ private:
     TabChangeHandleFuncForAni tabChangeHandleFuncForAni_ = nullptr;
     GestureHandleFunc gestureHandleFunc_ = nullptr;
     TextChangeEventHandleFunc textChangeEventHandleFunc_ = nullptr;
+    TextChangeEventHandleFuncForAni textChangeEventHandleFuncForAni_ = nullptr;
     SwiperContentUpdateHandleFunc swiperContentUpdateHandleFunc_ = nullptr;
     SwiperContentObservrEmptyFunc swiperContentObservrEmptyFunc_ = nullptr;
 

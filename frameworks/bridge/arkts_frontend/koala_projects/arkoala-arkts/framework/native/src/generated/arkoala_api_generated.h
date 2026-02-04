@@ -513,6 +513,9 @@ typedef struct Opt_LoadingProgressConfiguration Opt_LoadingProgressConfiguration
 typedef struct LongPressRecognizerPeer LongPressRecognizerPeer;
 typedef struct LongPressRecognizerPeer* Ark_LongPressRecognizer;
 typedef struct Opt_LongPressRecognizer Opt_LongPressRecognizer;
+typedef struct MagnifierPeer MagnifierPeer;
+typedef struct MagnifierPeer* Ark_Magnifier;
+typedef struct Opt_Magnifier Opt_Magnifier;
 typedef struct Ark_Matrix4 Ark_Matrix4;
 typedef struct Opt_Matrix4 Opt_Matrix4;
 typedef struct matrix4_Matrix4TransitPeer matrix4_Matrix4TransitPeer;
@@ -2275,6 +2278,9 @@ typedef struct Ark_ItemDragEventHandler Ark_ItemDragEventHandler;
 typedef struct Opt_ItemDragEventHandler Opt_ItemDragEventHandler;
 typedef struct Ark_ItemDragInfo Ark_ItemDragInfo;
 typedef struct Opt_ItemDragInfo Opt_ItemDragInfo;
+typedef struct IUIContextPeer IUIContextPeer;
+typedef struct IUIContextPeer* Ark_IUIContext;
+typedef struct Opt_IUIContext Opt_IUIContext;
 typedef struct Ark_ItemFillPolicy Ark_ItemFillPolicy;
 typedef struct Opt_ItemFillPolicy Opt_ItemFillPolicy;
 typedef struct Ark_JavaScriptProxy Ark_JavaScriptProxy;
@@ -2622,6 +2628,10 @@ typedef struct Ark_TextContentControllerOptions Ark_TextContentControllerOptions
 typedef struct Opt_TextContentControllerOptions Opt_TextContentControllerOptions;
 typedef struct Ark_TextMenuOptions Ark_TextMenuOptions;
 typedef struct Opt_TextMenuOptions Opt_TextMenuOptions;
+typedef struct Ark_TextLayoutOptions Ark_TextLayoutOptions;
+typedef struct Opt_TextLayoutOptions Opt_TextLayoutOptions;
+typedef struct Ark_KeyboardAppearanceConfig Ark_KeyboardAppearanceConfig;
+typedef struct Opt_KeyboardAppearanceConfig Opt_KeyboardAppearanceConfig;
 typedef struct Ark_TextRange Ark_TextRange;
 typedef struct Opt_TextRange Opt_TextRange;
 typedef struct TextShadowStylePeer TextShadowStylePeer;
@@ -8368,6 +8378,10 @@ typedef struct Opt_InvertOptions {
     Ark_Tag tag;
     Ark_InvertOptions value;
 } Opt_InvertOptions;
+typedef struct Opt_IUIContext {
+    Ark_Tag tag;
+    Ark_IUIContext value;
+} Opt_IUIContext;
 typedef struct Opt_JsGeolocation {
     Ark_Tag tag;
     Ark_JsGeolocation value;
@@ -8434,6 +8448,10 @@ typedef struct Opt_LongPressRecognizer {
     Ark_Tag tag;
     Ark_LongPressRecognizer value;
 } Opt_LongPressRecognizer;
+typedef struct Opt_Magnifier {
+    Ark_Tag tag;
+    Ark_Magnifier value;
+} Opt_Magnifier;
 typedef struct Ark_Matrix4 {
     /* kind: Interface */
     Ark_Float64 value0;
@@ -17530,6 +17548,23 @@ typedef struct Opt_TextMenuOptions {
     Ark_Tag tag;
     Ark_TextMenuOptions value;
 } Opt_TextMenuOptions;
+typedef struct Ark_TextLayoutOptions {
+    /* kind: Interface */
+    Opt_LengthMetrics constraintWidth;
+} Ark_TextLayoutOptions;
+typedef struct Opt_TextLayoutOptions {
+    Ark_Tag tag;
+    Ark_TextLayoutOptions value;
+} Opt_TextLayoutOptions;
+typedef struct Ark_KeyboardAppearanceConfig {
+    /* kind: Interface */
+    Opt_KeyboardGradientMode gradientMode;
+    Opt_KeyboardFluidLightMode fluidLightMode;
+} Ark_KeyboardAppearanceConfig;
+typedef struct Opt_KeyboardAppearanceConfig {
+    Ark_Tag tag;
+    Ark_KeyboardAppearanceConfig value;
+} Opt_KeyboardAppearanceConfig;
 typedef struct Ark_TextRange {
     /* kind: Interface */
     Opt_Int32 start;
@@ -29546,6 +29581,9 @@ typedef struct GENERATED_ArkUIIndicatorComponentControllerAccessor {
 } GENERATED_ArkUIIndicatorComponentControllerAccessor;
 
 typedef struct GENERATED_ArkUIIUIContextAccessor {
+    void (*destroyPeer)(Ark_IUIContext peer);
+    Ark_IUIContext (*construct)();
+    Ark_NativePointer (*getFinalizer)();
     void (*freezeUINode0)(const Ark_String* id,
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(Ark_Int32 id,
@@ -29579,6 +29617,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
+    Ark_Magnifier (*getMagnifier)(Ark_IUIContext peer);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
@@ -29832,6 +29871,18 @@ typedef struct GENERATED_ArkUILongPressRecognizerAccessor {
     Ark_Boolean (*isRepeat)(Ark_LongPressRecognizer peer);
     Ark_Int32 (*getDuration)(Ark_LongPressRecognizer peer);
 } GENERATED_ArkUILongPressRecognizerAccessor;
+
+typedef struct GENERATED_ArkUIMagnifierAccessor {
+    void (*destroyPeer)(Ark_Magnifier peer);
+    Ark_Magnifier (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*bind)(Ark_Magnifier peer,
+                 const Ark_String* id);
+    void (*show)(Ark_Magnifier peer,
+                 Ark_Float64 x,
+                 Ark_Float64 y);
+    void (*unbind)(Ark_Magnifier peer);
+} GENERATED_ArkUIMagnifierAccessor;
 
 typedef struct GENERATED_ArkUIMatrix2DAccessor {
     void (*destroyPeer)(Ark_Matrix2D peer);
@@ -32065,6 +32116,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIListScrollerAccessor* (*getListScrollerAccessor)();
     const GENERATED_ArkUILongPressGestureEventAccessor* (*getLongPressGestureEventAccessor)();
     const GENERATED_ArkUILongPressRecognizerAccessor* (*getLongPressRecognizerAccessor)();
+    const GENERATED_ArkUIMagnifierAccessor* (*getMagnifierAccessor)();
     const GENERATED_ArkUIMatrix2DAccessor* (*getMatrix2DAccessor)();
     const GENERATED_ArkUIMeasurableAccessor* (*getMeasurableAccessor)();
     const GENERATED_ArkUIMenuItemConfigurationAccessor* (*getMenuItemConfigurationAccessor)();

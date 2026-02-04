@@ -646,8 +646,12 @@ void UIObserverHandler::NotifyNavDestinationSwitchForAni(
 
 void UIObserverHandler::NotifyTextChangeEvent(const TextChangeEventInfo& info)
 {
-    CHECK_NULL_VOID(textChangeEventHandleFunc_);
-    textChangeEventHandleFunc_(info);
+    if (textChangeEventHandleFunc_) {
+        textChangeEventHandleFunc_(info);
+    }
+    if (textChangeEventHandleFuncForAni_) {
+        textChangeEventHandleFuncForAni_(info);
+    }
 }
 
 void UIObserverHandler::NotifySwiperContentUpdate(const SwiperContentInfo& info)
@@ -811,6 +815,11 @@ void UIObserverHandler::SetHandleTabChangeFuncForAni(TabChangeHandleFuncForAni f
 void UIObserverHandler::SetHandleTextChangeEventFunc(TextChangeEventHandleFunc&& func)
 {
     textChangeEventHandleFunc_ = std::move(func);
+}
+
+void UIObserverHandler::SetHandleTextChangeEventFuncForAni(TextChangeEventHandleFuncForAni&& func)
+{
+    textChangeEventHandleFuncForAni_ = std::move(func);
 }
 
 void UIObserverHandler::SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHandleFunc&& func)

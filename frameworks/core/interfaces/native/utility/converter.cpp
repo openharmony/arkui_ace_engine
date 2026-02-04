@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/ellipse_shape_peer.h"
@@ -3898,13 +3899,27 @@ OverflowMode Convert(const Ark_MaxLinesOptions& src)
 }
 
 template<>
+KeyboardAppearanceConfig Convert(const Ark_KeyboardAppearanceConfig& src)
+{
+    KeyboardAppearanceConfig dst;
+    dst.fluidLightMode = Converter::OptConvert<KeyboardFluidLightMode>(src.fluidLightMode).value_or(
+        KeyboardFluidLightMode::NONE);
+    dst.gradientMode = Converter::OptConvert<KeyboardGradientMode>(src.gradientMode).value_or(
+        KeyboardGradientMode::NONE);
+    return dst;
+}
+
+template<>
 ACE_FORCE_EXPORT SymbolShadow Convert(const Ark_ShadowOptions& src)
 {
     SymbolShadow dst;
     dst.color = Converter::OptConvert<Color>(src.color).value_or(Color::BLACK);
-    dst.offset.first = Converter::OptConvert<float>(src.offsetX).value_or(0.0f);
-    dst.offset.second = Converter::OptConvert<float>(src.offsetY).value_or(0.0f);
-    dst.radius = Converter::OptConvert<float>(src.radius).value_or(0.0f);
+    dst.offset.first = PipelineBase::Vp2PxWithCurrentDensity(
+        Converter::OptConvert<float>(src.offsetX).value_or(0.0f));
+    dst.offset.second = PipelineBase::Vp2PxWithCurrentDensity(
+        Converter::OptConvert<float>(src.offsetY).value_or(0.0f));
+    dst.radius = PipelineBase::Vp2PxWithCurrentDensity(
+        Converter::OptConvert<float>(src.radius).value_or(0.0f));
     return dst;
 }
 

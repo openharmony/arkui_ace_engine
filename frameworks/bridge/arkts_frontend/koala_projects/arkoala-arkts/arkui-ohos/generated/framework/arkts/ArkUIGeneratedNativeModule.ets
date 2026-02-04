@@ -5041,6 +5041,10 @@ export class ArkUIGeneratedNativeModule {
     native static _IndicatorComponentController_showPrevious(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _IndicatorComponentController_changeIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _IUIContext_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _IUIContext_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
@@ -5062,6 +5066,8 @@ export class ArkUIGeneratedNativeModule {
     native static _IUIContext_unbindTabsFromNestedScrollable(tabsController: KPointer, parentScroller: KPointer, childScroller: KPointer): void
     @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _IUIContext_getMagnifier(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _JsGeolocation_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -5287,6 +5293,16 @@ export class ArkUIGeneratedNativeModule {
     native static _LongPressRecognizer_isRepeat(ptr: KPointer): boolean
     @ani.unsafe.Direct
     native static _LongPressRecognizer_getDuration(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _Magnifier_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _Magnifier_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _Magnifier_bind(ptr: KPointer, id: KStringPtr): void
+    @ani.unsafe.Quick
+    native static _Magnifier_show(ptr: KPointer, x: KDouble, y: KDouble): void
+    @ani.unsafe.Direct
+    native static _Magnifier_unbind(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _Matrix2D_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
