@@ -152,7 +152,7 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     std::string weight = DEFAULT_FONT_WEIGHT;
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     RefPtr<ResourceObject> resObj;
-    if (!secondArg->IsNull()) {
+    if (!secondArg->IsNull() && !secondArg->IsUndefined()) {
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
             variableFontWeight = secondArg->Int32Value(vm);
@@ -162,18 +162,21 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
             }
             variableFontWeight = StringUtils::StringToInt(weight);
         }
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
+            static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
+            variableFontWeight, AceType::RawPtr(resObj));
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontWeight(nativeNode);
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanVariableFontWeight(nativeNode);
     }
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
-        static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
-        variableFontWeight, AceType::RawPtr(resObj));
-    if (!thirdArg->IsNull() && thirdArg->IsBoolean()) {
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() && thirdArg->IsBoolean()) {
         GetArkUINodeModifiers()->getSpanModifier()->setSpanEnableVariableFontWeight(nativeNode,
             thirdArg->BooleaValue(vm), AceType::RawPtr(resObj));
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanEnableVariableFontWeight(nativeNode);
     }
-    if (!fourthArg->IsNull() && fourthArg->IsBoolean()) {
+    if (!fourthArg->IsNull() && !fourthArg->IsUndefined() && fourthArg->IsBoolean()) {
         GetArkUINodeModifiers()->getSpanModifier()->setSpanEnableDeviceFontWeightCategory(nativeNode,
             fourthArg->BooleaValue(vm), AceType::RawPtr(resObj));
     } else {
