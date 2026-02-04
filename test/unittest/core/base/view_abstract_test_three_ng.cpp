@@ -1210,7 +1210,7 @@ HWTEST_F(ViewAbstractTestThreeNg, ViewAbstractTestNg0055, TestSize.Level1)
     double result;
     ResourceParseUtils::ParseResDouble(resObj, result);
     opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");
-    EXPECT_EQ(opacityStr, "");
+    EXPECT_EQ(opacityStr, std::to_string(result));
     pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     g_isConfigChangePerform = false;
 }
