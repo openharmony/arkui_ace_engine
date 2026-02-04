@@ -119,6 +119,7 @@ HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayout
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::isOpenYuvDecode_ = false;
+int32_t SystemProperties::previewStatus_ = 0;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -420,7 +421,7 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 
 int32_t SystemProperties::GetPreviewStatus()
 {
-    return -1;
+    return 0;
 }
 
 bool SystemProperties::GetCompatibleInputTransEnabled()
