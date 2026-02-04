@@ -5802,10 +5802,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_LengthMetrics* value)
     {
     }
-    void SetMenuSystemMaterialImpl(Ark_NativePointer node,
-                               const Opt_uiMaterial_Material* value)
-    {
-    }
     void SetMenuAlignImpl(Ark_NativePointer node,
                           const Opt_MenuAlignType* alignType,
                           const Opt_Offset* offset)
@@ -10354,7 +10350,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetBackgroundColorImpl,
             SelectAttributeModifier::SetKeyboardAvoidModeImpl,
             SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
-            SelectAttributeModifier::SetMenuSystemMaterialImpl,
             SelectAttributeModifier::SetMenuAlignImpl,
         };
         return &ArkUISelectModifierImpl;

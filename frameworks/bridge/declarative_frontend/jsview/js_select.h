@@ -73,7 +73,6 @@ public:
     static void SetShowDefaultSelectedIcon(const JSCallbackInfo& info);
     static void SetKeyboardAvoidMode(const JSCallbackInfo& info);
     static void SetMinKeyboardAvoidDistance(const JSCallbackInfo& info);
-    static void SetMenuSystemMaterial(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

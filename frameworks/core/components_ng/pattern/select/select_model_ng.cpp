@@ -1355,21 +1355,4 @@ void SelectModelNG::SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std:
     }
 }
 
-void SelectModelNG::SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    SetMenuSystemMaterial(frameNode, menuSystemMaterial);
-}
-
-void SelectModelNG::SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiMaterial>& menuSystemMaterial)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (menuSystemMaterial) {
-        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
-        CHECK_NULL_VOID(pattern);
-        pattern->SetMenuSystemMaterial(menuSystemMaterial);
-    }
-}
-
 } // namespace OHOS::Ace::NG
