@@ -16,6 +16,7 @@
 #include <shared_mutex>
 #include "base/i18n/localization.h"
 
+#include "base/utils/linear_map.h"
 #include "chnsecal.h"
 #if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
 #include "lunar_calendar.h"

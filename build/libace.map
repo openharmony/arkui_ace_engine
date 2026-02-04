@@ -156,6 +156,8 @@
       OHOS::Ace::ViewPartialUpdateModel::*;
       OHOS::Ace::AlertDialogModel::*;
       OHOS::Ace::StringUtils::*;
+      void?OHOS::Ace::StringUtils::TransformStrCase*;
+      void?OHOS::Ace::StringUtils::StringSplitter*;
       OHOS::Ace::UtfUtils::*;
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;
