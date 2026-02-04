@@ -1,7 +1,7 @@
 ---
 name: build-error-analyzer
 description: This skill should be used when the user asks to "分析构建错误", "analyze build errors", "查看编译错误", "检查构建日志", "诊断链接错误", "fix build errors", "resolve compilation errors", "分析 last_error.log", "extract build error", "分析SDK的编译错误", "分析 SDK 编译错误", "analyze SDK build errors", "check SDK errors", "诊断 sdk 编译错误", or mentions analyzing build failures, compilation errors, linker errors, undefined symbols, SDK compilation errors, or needs to fix build issues. Focuses on reading last_error.log from out/<product>/ directory (or out/sdk/ for SDK builds) and providing specific fix recommendations based on error patterns and historical cases.
-version: 0.7.0
+version: 0.9.0
 ---
 
 # Build Error Analyzer Skill
@@ -885,6 +885,175 @@ ld.lld: error: undefined symbol: OHOS::Ace::ClassName::MethodName(...)
 
 **⚠️ Critical**: Only add source files, do NOT modify cflags/configs/defines
 
+### Case 8: Struct RefPtr Member - Helper Method Pattern
+
+**Location**: `references/forward-declaration-struct-helper-method.md`
+
+**Error signature**:
+```
+error: member access into incomplete type 'OHOS::Ace::PixelMap'
+    shadowInfo.pixelMap->GetPixelMapSharedPtr()
+                         ^
+note: forward declaration of 'OHOS::Ace::PixelMap'
+class PixelMap;
+```
+
+**Context**: Pure data structure (POD struct) contains `RefPtr<T>` member and needs `->` access
+
+**Common causes**:
+- Struct contains `RefPtr<T>` member variable
+- Code needs to call `->` operator on the smart pointer
+- Direct call to `pixelMap->Method()` triggers incomplete type error
+- Cannot use Case 6 approach because struct has no its own .cpp file
+
+**Root Cause**:
+- `RefPtr<T>::operator->()` returns `LifeCycleCheckable::PtrHolder<T>`
+- `PtrHolder` constructor/destructor needs complete type definition to access `usingCount_`
+- Pure data structures don't have their own implementation file
+
+**Solution**: Add helper method to encapsulate type access:
+1. Declare helper method in struct: `std::shared_ptr<::OHOS::Media::PixelMap> GetPixelMapSharedPtr() const;`
+2. Create new implementation file (e.g., `interaction_data.cpp`)
+3. Implement helper method in .cpp with full include: `#include "base/image/pixel_map.h"`
+4. Update usage to call helper method instead of direct `->` access
+5. Add new .cpp to BUILD.gn source set
+
+**Key Points**:
+- Use fully-qualified name `::OHOS::Media::PixelMap` to avoid namespace confusion
+- Keep forward declaration in header, full definition only in .cpp
+- Helper method encapsulates complete type access
+- Reduces header dependencies while maintaining clean API
+
+**When to use**:
+- ✅ Pure data structures (POD struct) with smart pointer members
+- ✅ Need to dereference smart pointer with `->` or `*`
+- ✅ Cannot add .cpp to existing struct
+- ❌ Classes with their own .cpp file (use Case 6 instead)
+- ❌ Only need constructor/destructor (use Case 6 instead)
+
+### Case 9: LTO Virtual Thunk - libace.map Export
+
+**Location**: `references/lto-virtual-thunk-libace-map-export.md`
+
+**Error signature**:
+```
+ld.lld: error: undefined symbol: virtual thunk to OHOS::Ace::TouchEventTarget::~TouchEventTarget()
+>>> referenced by ld-temp.o
+>>>               lto.tmp:(construction vtable for OHOS::Ace::TouchEventTarget-in-OHOS::Ace::V2::ListScrollBarController)
+>>> referenced by ld-temp.o
+>>>               lto.tmp:(construction vtable for OHOS::Ace::TouchEventTarget-in-OHOS::Ace::VerticalDragRecognizer)
+```
+
+**Context**: Class with virtual functions used as base class, destructor declared in header and implemented in .cpp (forward declaration optimization), LTO (Link Time Optimization) enabled
+
+**Common causes**:
+- Class has virtual functions and is used as base class
+- Forward declaration optimization: destructor in .cpp file (not inline)
+- LTO creates virtual thunks for derived classes
+- Virtual thunk symbols not exported from library
+
+**Root Cause**:
+- LTO optimizes virtual function tables during linking
+- Creates **virtual thunk** symbols to adjust this pointer for derived classes
+- These virtual thunk symbols must be available at link time
+- If destructor not inline, LTO-generated virtual thunk may not be exported
+- Common mistake: reverting to inline destructor (`= default` in header)
+
+**Solution**: Keep forward declaration optimization, add libace.map exports:
+1. **Keep destructor in .cpp file**: `~TouchEventTarget() override;` in header, implementation in .cpp
+2. **Add to libace.map**:
+   - `OHOS::Ace::TouchEventTarget::*;` - Export all class symbols
+   - `virtual?thunk?to?OHOS::Ace::TouchEventTarget::*;` - Export LTO virtual thunks
+3. **DO NOT revert** to inline definition in header
+
+**Key Points**:
+- Two export patterns required: `ClassName::*;` AND `virtual?thunk?to::ClassName::*;`
+- Wildcard `*` matches all methods including virtual thunks
+- Maintains forward declaration optimization
+- No need to sacrifice header optimization for LTO
+
+**Why This Works**:
+1. **Compilation phase**: Header uses forward declaration, .cpp has implementation
+2. **LTO link phase**: LTO optimizes vtables, creates virtual thunks
+3. **Symbol export**: libace.maps patterns match virtual thunks, export to dynamic symbol table
+4. **Runtime**: Derived class vtables can reference virtual thunks correctly
+
+**When to use**:
+- ✅ Classes with virtual functions used as base classes
+- ✅ Using forward declaration optimization (destructor not inline)
+- ✅ Linker errors: "undefined symbol: virtual thunk to ClassName::~ClassName()"
+- ✅ Using LTO (Link Time Optimization)
+- ❌ Classes not used as base classes (won't have virtual thunks)
+- ❌ Destructor already inline in header (no optimization to maintain)
+- ❌ Not using LTO (traditional compilation doesn't create virtual thunks)
+
+**Common Mistakes**:
+- ❌ Reverting to inline destructor (loses forward declaration optimization)
+- ❌ Only exporting `ClassName::*;` without virtual thunk pattern
+- ❌ Forgetting to add libace.map entry at all
+
+### Case 10: MinGW - dllexport Declaration Mismatch
+
+**Location**: `references/mingw-dllexport-declaration-mismatch.md`
+
+**Error signature**:
+```
+error: redeclaration of 'OHOS::Ace::NG::PaddingPropertyT::SetEdges' cannot add 'dllexport' attribute
+void PaddingPropertyT<T>::SetEdges(const T& leftValue, const T& rightValue, const T& topValue, const T& bottomValue)
+                          ^
+note: previous declaration is here
+    void SetEdges(const T& leftValue, const T& rightValue, const T& topValue, const T& bottomValue);
+         ^
+```
+
+**Context**: MinGW/Windows platform compilation only
+
+**Key features**:
+- Only occurs on MinGW/Windows builds (not Linux/MacOS)
+- Error message: "redeclaration cannot add 'dllexport' attribute"
+- Header declaration and .cpp implementation have inconsistent export attributes
+- Usually triggered after adding `ACE_FORCE_EXPORT` to template methods
+
+**Common causes**:
+- Header file method declaration missing `ACE_FORCE_EXPORT`
+- Implementation file has `ACE_FORCE_EXPORT` but header doesn't
+- Only some overloaded methods have export attribute (inconsistent)
+- MinGW requires strict consistency between declaration and definition
+
+**Root Cause**:
+- MinGW DLL export rules require declaration and definition export attributes to match exactly
+- If header has no `__declspec(dllexport)` but implementation has it → compilation fails
+- Unlike Linux/MacOS which are more lenient with visibility attributes
+
+**Solution**: Add `ACE_FORCE_EXPORT` to ALL overloaded method declarations in header:
+```cpp
+// Header file - add to ALL declarations
+ACE_FORCE_EXPORT void SetEdges(const T& padding);
+ACE_FORCE_EXPORT void SetEdges(const T&, const T&, const T&, const T&);  // ✅ Don't forget
+ACE_FORCE_EXPORT bool operator==(const PaddingPropertyT& value) const;
+ACE_FORCE_EXPORT bool operator!=(const PaddingPropertyT& value) const;  // ✅ Don't forget
+```
+
+**Key Points**:
+- Add to header file declarations (not just .cpp implementations)
+- Ensure ALL overloaded methods are marked (don't miss any)
+- Implementation file must also have `ACE_FORCE_EXPORT`
+- Test on MinGW platform (Windows build)
+
+**When to use**:
+- ✅ MinGW/Windows compilation errors
+- ✅ Error: "cannot add 'dllexport' attribute"
+- ✅ Template methods with export attributes
+- ❌ Linux/MacOS only (different rules)
+- ❌ Link errors (this is a compilation error)
+
+**Prevention checklist**:
+1. ✅ Confirm need for export (cross-module usage)
+2. ✅ Add `ACE_FORCE_EXPORT` to ALL header declarations
+3. ✅ Add `ACE_FORCE_EXPORT` to ALL .cpp definitions
+4. ✅ Check all overloaded versions (don't miss any)
+5. ✅ Test compilation on MinGW platform
+
 ## Analysis Commands
 
 ### Check Symbol Existence
@@ -1262,6 +1431,23 @@ void TouchPoint::CovertId()
 - ✅ **Provide recommendations ONLY** → do NOT automatically modify code
 
 ## Version History
+
+- **0.9.0** (2026-02-04): LTO Virtual Thunk Export Solution
+  - ✨ 新增 LTO Virtual Thunk 导出案例分析：`lto-virtual-thunk-libace-map-export.md`
+  - 📝 新增 Case 9：基类虚函数 + LTO 的 libace.map 导出解决方案
+  - 🎯 核心观点：保持前向声明优化，不要回退到 inline 定义
+  - 💡 关键技术：在 libace.map 中同时导出 `ClassName::*;` 和 `virtual?thunk?to::ClassName::*;`
+  - 🔧 LTO 工作原理：链接时创建 virtual thunk 调整 this 指针
+  - 📊 符号导出模式：通配符 `*` 匹配所有方法和 virtual thunk
+  - ⚠️ 常见错误：只导出类符号而忘记导出 virtual thunk
+
+- **0.8.0** (2026-02-04): Struct RefPtr Member Optimization
+  - ✨ 新增结构体智能指针成员优化案例分析：`forward-declaration-struct-helper-method.md`
+  - 📝 新增 Case 8：纯数据结构中 RefPtr 成员的辅助方法模式
+  - 🎯 与 Case 6 的区别：Case 6 适用于有自己 .cpp 的类，Case 8 适用于纯数据结构
+  - 💡 关键技术：使用辅助方法封装完整类型访问，保持头文件前向声明优化
+  - 🔧 完全限定名 `::OHOS::Media::PixelMap` 避免命名空间混淆
+  - 📊 编译性能优化：减少头文件依赖，降低重编译范围
 
 - **0.7.0** (2026-02-02): Test Linking Error Support
   - ✨ 新增测试链接错误案例分析：`test-missing-source-files.md`
