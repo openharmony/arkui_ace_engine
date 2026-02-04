@@ -52,4 +52,5 @@ declare class NativeViewPartialUpdate {
   getDialogController(): object;
   registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun: (newInstanceId: number) => void): void;
   setCreatorId(id: number): void;
+  registerUpdateJSInstanceCallback(callback: () => void): void;
 }

@@ -2124,11 +2124,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
+
+    bool enableCustomComponentCrossAbility =
+        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
+        });
+    AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
-         "useNewPipe: %{public}d",
+         "useNewPipe: %{public}d, enableCustomComponentCrossAbility: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, apiCompatibleVersion, apiTargetVersion,
-        apiReleaseType.c_str(), useNewPipe);
+        apiReleaseType.c_str(), useNewPipe, enableCustomComponentCrossAbility);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
