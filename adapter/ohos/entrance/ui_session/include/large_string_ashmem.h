@@ -36,6 +36,7 @@ private:
     void ClearAshmem();
 
     sptr<Ashmem> ashmem_;
+    int32_t stringSize_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_LARGE_STRING_ASHMEM_H
