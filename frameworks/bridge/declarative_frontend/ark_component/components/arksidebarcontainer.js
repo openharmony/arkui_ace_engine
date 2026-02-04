@@ -362,5 +362,5 @@ function exportComponent() {
 function exportView() {
     globalThis.SideBarContainer = JSSideBarContainer;
 }
-
-export default { ArkSideBarContainerComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkSideBarContainerComponent, createComponent, exportComponent, exportView, loadComponent };

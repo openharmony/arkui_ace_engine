@@ -157,5 +157,5 @@ function exportComponent() {
 function exportView() {
   globalThis.FolderStack = JSFolderStack;
 }
-
-export default { ArkFolderStackComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkFolderStackComponent, createComponent, exportComponent, exportView, loadComponent };

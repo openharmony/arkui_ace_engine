@@ -12,18 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const overrideMap = new Map();
 overrideMap.set(
   'ArkCheckboxComponent',
   new Map([
     ['Symbol(width)', (()=>{
       let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      return module.CheckboxWidthModifier;
+      return module.getCheckboxWidthModifier();
     })()],
     ['Symbol(height)', (()=>{
       let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      return module.CheckboxHeightModifier;
+      return module.getCheckboxHeightModifier();
     })()],
   ])
 );
@@ -3080,7 +3079,6 @@ class UnionEffectContainerModifier extends ArkUnionEffectContainerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-
 export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
   GridModifier, GridColModifier, GridItemModifier, GridRowModifier, HyperlinkModifier, ImageAnimatorModifier, ImageModifier, ImageSpanModifier, LineModifier,

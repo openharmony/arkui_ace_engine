@@ -25,6 +25,8 @@ abcpreload_obj_path = base_output_path + "/abc_preload.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 arkTheme_obj_path = base_output_path + "/abc_ark_theme.o"
 arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
+arkcommon_obj_path = base_output_path + "/abc_ark_common.o"
+arkdynamiccomponent_obj_path = base_output_path + "/abc_ark_dynamiccomponent.o"
 
 es2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
@@ -76,6 +78,26 @@ es2abc_gen_abc("gen_jsPreload_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsPreload.js" ]
   out_puts = [ base_output_path + "/jsPreload.abc" ]
+}
+
+es2abc_gen_abc("gen_arkCommon_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkCommon.js")
+  dst_file = rebase_path(base_output_path + "/arkCommon.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkCommon.js" ]
+  out_puts = [ base_output_path + "/arkCommon.abc" ]
+}
+
+es2abc_gen_abc("gen_arkDynamicComponent_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkDynamicComponent.js")
+  dst_file = rebase_path(base_output_path + "/arkDynamicComponent.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkDynamicComponent.js" ]
+  out_puts = [ base_output_path + "/arkDynamicComponent.abc" ]
 }
 
 es2abc_gen_abc("gen_arkComponent_abc") {
@@ -146,6 +168,24 @@ gen_obj("abc_preload") {
   }
   output = abcpreload_obj_path
   snapshot_dep = [ ":gen_jsPreload_abc" ]
+}
+
+gen_obj("abc_ark_common") {
+  input = base_output_path + "/arkCommon.abc"
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
+    arkcommon_obj_path = base_output_path + "/arkCommon.c"
+  }
+  output = arkcommon_obj_path
+  snapshot_dep = [ ":gen_arkCommon_abc" ]
+}
+
+gen_obj("abc_ark_dynamiccomponent") {
+  input = base_output_path + "/arkDynamicComponent.abc"
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
+    arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.c"
+  }
+  output = arkdynamiccomponent_obj_path
+  snapshot_dep = [ ":gen_arkDynamicComponent_abc" ]
 }
 
 gen_obj("abc_ark_component") {
@@ -448,6 +488,8 @@ template("declarative_js_engine_ark") {
     }
 
     deps += [
+      ":gen_obj_src_abc_ark_common",
+      ":gen_obj_src_abc_ark_dynamiccomponent",
       ":gen_obj_src_abc_ark_component",
       ":gen_obj_src_abc_ark_theme",
       ":gen_obj_src_abc_enum_style",

@@ -658,5 +658,5 @@ function exportComponent() {
 function exportView() {
   globalThis.WaterFlow = JSWaterFlow;
 }
-
-export default { ArkWaterFlowComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkWaterFlowComponent, createComponent, exportComponent, exportView, loadComponent };

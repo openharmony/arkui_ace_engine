@@ -496,4 +496,7 @@ function exportView() {
   globalThis.CalendarPicker = JSCalendarPicker;
 }
 
-export default { ArkCalendarPickerComponent, createComponent, exportComponent, exportView, exportDialogView };
+function loadComponent() {}
+export default { ArkCalendarPickerComponent, createComponent, exportComponent, exportView, exportDialogView,
+    loadComponent
+ };

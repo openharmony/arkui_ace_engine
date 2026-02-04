@@ -95,6 +95,8 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
+extern const char _binary_arkCommon_abc_start[];
+extern const char _binary_arkDynamicComponent_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
@@ -105,12 +107,16 @@ extern const char _binary_jsPreload_abc_end[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_end[];
+extern const char _binary_arkCommon_abc_end[];
+extern const char _binary_arkDynamicComponent_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
 extern const char* _binary_jsUIContext_abc_end;
+extern const char* _binary_arkCommon_abc_end;
+extern const char* _binary_arkDynamicComponent_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 extern const char* _binary_arkTheme_abc_end;
 #endif
@@ -248,6 +254,20 @@ inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
     int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
 #endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
+}
+
+inline bool PreloadArkCommon(const shared_ptr<JsRuntime>& runtime)
+{
+    std::string str("arkui_binary_arkCommon_abc_loadFile");
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_arkCommon_abc_start, _binary_arkCommon_abc_end - _binary_arkCommon_abc_start, str);
+}
+
+inline bool PreloadArkDynamicComponent(const shared_ptr<JsRuntime>& runtime)
+{
+    std::string str("arkui_binary_arkDynamicComponent_abc_loadFile");
+    return runtime->EvaluateJsCode((uint8_t*)_binary_arkDynamicComponent_abc_start,
+        _binary_arkDynamicComponent_abc_end - _binary_arkDynamicComponent_abc_start, str);
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
@@ -572,7 +592,9 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
             PreloadUIContent(runtime_);
+            PreloadArkCommon(runtime_);
             PreloadArkComponent(runtime_);
+            PreloadArkDynamicComponent(runtime_);
             PreloadArkTheme(runtime_);
         }
     }
@@ -599,7 +621,9 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         LOGI("preload js enums in InitAceModule");
         PreloadJsEnums(runtime_);
+        PreloadArkCommon(runtime_);
         PreloadArkComponent(runtime_);
+        PreloadArkDynamicComponent(runtime_);
         PreloadArkTheme(runtime_);
         PreloadUIContent(runtime_);
     }
@@ -742,9 +766,25 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 
     PreloadUIContent(arkRuntime);
 
+    // preload ark common
+    bool arkCommonResult = PreloadArkCommon(arkRuntime);
+    if (!arkCommonResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark declarative component
+    bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
+    if (!arkDeclarativeComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -883,9 +923,24 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 
     PreloadUIContent(arkRuntime);
 
+    bool arkCommonResult = PreloadArkCommon(arkRuntime);
+    if (!arkCommonResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark declarative component
+    bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
+    if (!arkDeclarativeComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -3586,9 +3641,16 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         return;
     }
 
-    // preload ark component
-    bool arkComponentResult = PreloadArkComponent(arkRuntime);
-    if (!arkComponentResult) {
+    bool arkCommonResult = PreloadArkCommon(arkRuntime);
+    if (!arkCommonResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark arkDeclarativeComponent
+    bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
+    if (!arkDeclarativeComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
