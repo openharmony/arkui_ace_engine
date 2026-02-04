@@ -132,6 +132,15 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
     return {};
 }
 
+void TextFieldManagerNG::TriggerCaretInfoUpdateOnScaleChange()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->UpdateCaretInfoToController(true);
+}
+
 RectF TextFieldManagerNG::GetFocusedNodeCaretRect()
 {
     auto node = onFocusTextField_.Upgrade();
