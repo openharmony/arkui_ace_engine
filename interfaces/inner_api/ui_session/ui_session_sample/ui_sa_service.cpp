@@ -37,10 +37,12 @@ constexpr int32_t PARAMS_OFFSET = 1;
 constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 5;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
+constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
 constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 3;
 constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE = 4;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
+constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
 
 std::string GetCurrentTimestampStr()
 {
@@ -97,6 +99,9 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "RegisterComponentChangeEventCallback", &UiSaService::HandleRegisterComponentChangeEventCallback },
     { "UnregisterComponentChangeEventCallback", &UiSaService::HandleUnregisterComponentChangeEventCallback },
     { "ExeAppAIFunction", &UiSaService::HandleExeAppAIFunction },
+    { "GetWebViewCurrentLanguage", &UiSaService::HandleGetWebViewCurrentLanguage },
+    { "StartWebViewTranslate", &UiSaService::HandleStartWebViewTranslate },
+    { "GetStateMgmtInfo", &UiSaService::HandleGetStateMgmtInfo },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -400,6 +405,45 @@ void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::v
         service->ExeAppAIFunction(funcName, paramsJson, finishCallback);
         LOGI("[ExeAppAIFunction] call ExeAppAIFunction funcName=%{public}s, params=%{public}s", funcName.c_str(),
             paramsJson.c_str());
+    }
+}
+
+void UiSaService::HandleGetWebViewCurrentLanguage(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    auto finishCallback = [](std::string data) {
+        LOGI("[GetWebViewCurrentLanguage] currentLanguage = %{public}s", data.c_str());
+    };
+    service->GetWebViewCurrentLanguage(finishCallback);
+    LOGI("[GetWebViewCurrentLanguage] call GetWebViewCurrentLanguage");
+}
+
+void UiSaService::HandleStartWebViewTranslate(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= START_WEB_VIEW_TRANSLATE) {
+        std::string data = params[1];
+        auto finishCallback = [](int32_t code, std::string result) {
+            LOGI("[StartWebViewTranslate] finishCallback code=%{public}d, result=%{public}s", code, result.c_str());
+        };
+        service->StartWebViewTranslate(data, finishCallback);
+        LOGI("[StartWebViewTranslate] call StartWebViewTranslate data=%{public}s", data.c_str());
+    }
+}
+
+void UiSaService::HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= GET_STATE_MGMT_INFO_PARAMS) {
+        std::string componentName = params[1];
+        std::string propertyName = params[2];
+        std::string jsonPath = params[3];
+        auto finishCallback = [](std::vector<std::string> results) {
+            LOGI("[GetStateMgmtInfo] finishCallback results.size=%{public}zu", results.size());
+            for (const auto& result : results) {
+                LOGI("[GetStateMgmtInfo] finishCallback result=%{public}s", result.c_str());
+            }
+        };
+        service->GetStateMgmtInfo(componentName, propertyName, jsonPath, finishCallback);
+        LOGI("[GetStateMgmtInfo] call GetStateMgmtInfo componentName=%{public}s, propertyName=%{public}s, "
+            "jsonPath=%{public}s", componentName.c_str(), propertyName.c_str(), jsonPath.c_str());
     }
 }
 } // namespace OHOS::Ace

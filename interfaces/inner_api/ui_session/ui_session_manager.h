@@ -20,6 +20,7 @@
 #include <functional>
 #include <map>
 #include <unordered_map>
+#include <set>
 #include <mutex>
 #include <shared_mutex>
 
@@ -194,7 +195,7 @@ public:
     virtual void SendCurrentPageName(const std::string& result) {};
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
-    virtual void EraseProcessId(const std::string& key) {};
+    virtual void EraseProcessId(const std::string& key, int32_t targetPid) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
     virtual void GetStateMgmtInfo(
         const std::string& componentName, const std::string& propertyName, const std::string& jsonPath) {};
@@ -245,7 +246,7 @@ protected:
     UiSessionManager() = default;
     virtual ~UiSessionManager() = default;
 
-    std::map<std::string, int32_t> processMap_;
+    std::map<std::string, std::set<int32_t>> processMap_;
     std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
     std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
     std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;

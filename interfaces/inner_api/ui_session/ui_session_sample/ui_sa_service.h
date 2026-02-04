@@ -49,6 +49,9 @@ public:
     void HandleRegisterComponentChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleUnregisterComponentChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetWebViewCurrentLanguage(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleStartWebViewTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::vector<std::string> params);
 
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);

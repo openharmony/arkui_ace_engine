@@ -33,7 +33,7 @@ void UiSessionManagerOhos::ReportClickEvent(const std::string& data)
         if (reportService != nullptr) {
             reportService->ReportClickEvent(data);
         } else {
-            LOGW("report click event failed,process id:%{public}d", pair.first);
+            LOGW("report click event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -46,7 +46,7 @@ void UiSessionManagerOhos::ReportSearchEvent(const std::string& data)
         if (reportService != nullptr) {
             reportService->ReportSearchEvent(data);
         } else {
-            LOGW("report search event failed,process id:%{public}d", pair.first);
+            LOGW("report search event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -59,7 +59,7 @@ void UiSessionManagerOhos::ReportTextChangeEvent(const std::string& data)
         if (reportService != nullptr) {
             reportService->ReportTextChangeEvent(data);
         } else {
-            LOGW("report text change event failed,process id:%{public}d", pair.first);
+            LOGW("report text change event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -72,7 +72,7 @@ void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
         if (reportService != nullptr) {
             reportService->ReportRouterChangeEvent(data);
         } else {
-            LOGW("report switch event failed,process id:%{public}d", pair.first);
+            LOGW("report switch event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -89,7 +89,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
-            LOGW("report component change event failed,process id:%{public}d", pair.first);
+            LOGW("report component change event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -107,7 +107,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             data->Put(key.data(), value->ToString().data());
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
-            LOGW("report component event failed,process id:%{public}d", pair.first);
+            LOGW("report component event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -139,7 +139,7 @@ void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
         if (reportService != nullptr && GetScrollEventRegistered()) {
             reportService->ReportScrollEvent(data);
         } else {
-            LOGW("report scroll event failed,process id:%{public}d", pair.first);
+            LOGW("report scroll event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -152,7 +152,7 @@ void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
         if (reportService != nullptr && GetLifeCycleEventRegistered()) {
             reportService->ReportLifeCycleEvent(data);
         } else {
-            LOGW("report life cycle event failed,process id:%{public}d", pair.first);
+            LOGW("report life cycle event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -165,7 +165,7 @@ void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
         if (reportService != nullptr && GetSelectTextEventRegistered()) {
             reportService->ReportSelectTextEvent(data);
         } else {
-            LOGW("report select text event failed,process id:%{public}d", pair.first);
+            LOGW("report select text event failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -175,9 +175,18 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
         std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
         LOGW("agent process dead,processId:%{public}d", processId);
+        if (processMap_.count("translate") && processMap_["translate"].size() == 1 &&
+            *processMap_["translate"].begin() == processId) {
+            ResetTranslate(-1);
+        }
         // reportMap remove this processId
         this->reportObjectMap_.erase(processId);
+        // processMap remove this processId
+        for (auto& [_, processSet] : processMap_) {
+            processSet.erase(processId);
+        }
     });
     reportStub->AddDeathRecipient(uiReportProxyRecipient);
     std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
@@ -358,15 +367,21 @@ void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
 {
     UI_SESSION_SCOPED_TRACE("[UiSessionManagerOhos] ReportInspectorTreeValue");
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    for (auto pair : reportObjectMap_) {
-        auto reportService = iface_cast<ReportService>(pair.second);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("getInspectorTree") || processMap_["getInspectorTree"].empty()) {
+        LOGW("ReportInspectorTreeValue no report proxy");
+        return;
+    }
+    for (const auto& pid : processMap_["getInspectorTree"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
         if (reportService != nullptr) {
             int32_t index = 1;
             reportService->ReportInspectorTreeValue(data, index, true);
         } else {
-            LOGW("report component event failed,process id:%{public}d", pair.first);
+            LOGW("report inspector tree value failed, process id:%{public}d", pid);
         }
     }
+    processMap_["getInspectorTree"].clear();
 }
 
 void UiSessionManagerOhos::NotifyAllWebPattern(bool isRegister)
@@ -412,7 +427,7 @@ void UiSessionManagerOhos::ReportHitTestNodeInfos(const std::string& data)
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService == nullptr) {
-            LOGW("report hitTestNodeInfos failed,process id:%{public}d", pair.first);
+            LOGW("report hitTestNodeInfos failed, process id:%{public}d", pair.first);
             continue;
         }
 
@@ -554,7 +569,7 @@ void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
         if (reportService != nullptr) {
             reportService->SendCurrentPageName(result);
         } else {
-            LOGW("report send current page name failed,process id:%{public}d", pair.first);
+            LOGW("report send current page name failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -608,30 +623,41 @@ void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pa
         if (reportService != nullptr) {
             reportService->SendSpecifiedContentOffsets(offsets);
         } else {
-            LOGW("report send specified content offsets failed,process id:%{public}d", pair.first);
+            LOGW("report send specified content offsets failed, process id:%{public}d", pair.first);
         }
     }
 }
 
 void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    processMap_[key] = id;
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    processMap_[key].emplace(id);
 }
 
-void UiSessionManagerOhos::EraseProcessId(const std::string& key)
+void UiSessionManagerOhos::EraseProcessId(const std::string& key, int32_t targetPid)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    processMap_.erase(key);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count(key)) {
+        return;
+    }
+    processMap_[key].erase(targetPid);
 }
 
 void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["translate"]]);
-    if (reportService) {
-        reportService->SendCurrentLanguage(result);
-    } else {
+    std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("translate") || processMap_["translate"].empty()) {
+        LOGW("SendCurrentLanguage no report proxy");
+        return;
+    }
+    for (const auto& pid : processMap_["translate"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendCurrentLanguage(result);
+        } else {
+            LOGW("Send current language failed, process id:%{public}d", pid);
+        }
     }
 }
 void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isContinued)
@@ -651,11 +677,18 @@ void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isCon
 void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["translate"]]);
-    if (reportService != nullptr) {
-        reportService->SendWebText(nodeId, res);
-    } else {
-        LOGW("report component event failed,process id:%{public}d", processMap_["translate"]);
+    std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("translate") || processMap_["translate"].empty()) {
+        LOGW("SendWebTextToAI no report proxy");
+        return;
+    }
+    for (const auto& pid : processMap_["translate"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendWebText(nodeId, res);
+        } else {
+            LOGW("Send web text to ai failed, process id:%{public}d", pid);
+        }
     }
 }
 
@@ -723,44 +756,68 @@ void UiSessionManagerOhos::SendArkUIImagesById(int32_t windowId,
     MultiImageQueryErrorCode arkUIErrorCode)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["getArkUIImages"]]);
-    if (reportService != nullptr) {
-        reportService->SendArkUIImagesById(windowId, componentImages, arkUIErrorCode);
-    } else {
-        LOGW("send ArkUI images failed,process id:%{public}d", processMap_["getArkUIImages"]);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("getArkUIImages") || processMap_["getArkUIImages"].empty()) {
+        LOGW("SendArkUIImagesById no report proxy");
+        return;
     }
+    for (const auto& pid : processMap_["getArkUIImages"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendArkUIImagesById(windowId, componentImages, arkUIErrorCode);
+        } else {
+            LOGW("Send ArkUI Images By Id failed, process id:%{public}d", pid);
+        }
+    }
+    processMap_["getArkUIImages"].clear();
 }
 
 void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
     std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["getArkWebImages"]]);
-    if (reportService != nullptr) {
-        reportService->SendArkWebImagesById(windowId, webImages, arkWebErrorCode);
-    } else {
-        LOGW("send ArkWeb images failed,process id:%{public}d", processMap_["getArkWebImages"]);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("getArkWebImages") || processMap_["getArkWebImages"].empty()) {
+        LOGW("SendArkWebImagesById no report proxy");
+        return;
     }
+    for (const auto& pid : processMap_["getArkWebImages"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendArkWebImagesById(windowId, webImages, arkWebErrorCode);
+        } else {
+            LOGW("Send ArkWeb Images By Id failed, process id:%{public}d", pid);
+        }
+    }
+    processMap_["getArkWebImages"].clear();
 }
 
 void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps)
 {
     auto currentTranslateManager = GetCurrentTranslateManager();
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
     if (!currentTranslateManager) {
-        LOGW("send pixelMap failed,translateManager is nullptr");
+        LOGW("send pixelMap failed, translateManager is nullptr");
     }
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["pixel"]]);
-    if (reportService != nullptr) {
-        reportService->SendShowingImage(maps);
-        if (currentTranslateManager) {
-            currentTranslateManager->PostToUI([currentTranslateManager]() {
-               currentTranslateManager->ClearMap();
-            });
+    if (!processMap_.count("pixel") || processMap_["pixel"].empty()) {
+        LOGW("SendPixelMap no report proxy");
+        return;
+    }
+    for (const auto& pid : processMap_["pixel"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendShowingImage(maps);
+        } else {
+            LOGW("send pixel maps failed, process id:%{public}d", pid);
         }
-    } else {
-        LOGW("send pixel maps failed,process id:%{public}d", processMap_["pixel"]);
     }
+    if (currentTranslateManager) {
+        currentTranslateManager->PostToUI([currentTranslateManager]() {
+            currentTranslateManager->ClearMap();
+        });
+    }
+    processMap_["pixel"].clear();
 }
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)
@@ -806,7 +863,7 @@ void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
         if (reportService != nullptr) {
             reportService->SendExeAppAIFunctionResult(result);
         } else {
-            LOGW("report send execute application AI function result failed,process id:%{public}d", pair.first);
+            LOGW("report send execute application AI function result failed, process id:%{public}d", pair.first);
         }
     }
 }
@@ -830,13 +887,19 @@ void UiSessionManagerOhos::UnregisterContentChangeCallback()
 void UiSessionManagerOhos::ReportContentChangeEvent(ChangeType type, const std::string& simpleTree)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    if (!processMap_.count("contentChange") || !reportObjectMap_.count(processMap_["contentChange"])) {
+    std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("contentChange") || processMap_["contentChange"].empty()) {
         LOGW("ReportContentChangeEvent no report proxy");
         return;
     }
-
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["contentChange"]]);
-    reportService->SendContentChange(type, simpleTree);
+    for (const auto& pid : processMap_["contentChange"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendContentChange(type, simpleTree);
+        } else {
+            LOGW("Report Content Change Event failed, process id:%{public}d", pid);
+        }
+    }
 }
 
 void UiSessionManagerOhos::SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&& startCallback)
@@ -875,12 +938,20 @@ void UiSessionManagerOhos::SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction
 void UiSessionManagerOhos::ReportGetStateMgmtInfo(std::vector<std::string> results)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["GetStateMgmtInfo"]]);
-    if (reportService != nullptr) {
-        reportService->ReportGetStateMgmtInfo(results);
-    } else {
-        LOGW("report component event failed, process id:%{public}d", processMap_["GetStateMgmtInfo"]);
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("GetStateMgmtInfo") || processMap_["GetStateMgmtInfo"].empty()) {
+        LOGW("ReportGetStateMgmtInfo no report proxy");
+        return;
     }
+    for (const auto& pid : processMap_["GetStateMgmtInfo"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->ReportGetStateMgmtInfo(results);
+        } else {
+            LOGW("Report GetStateMgmtInfo failed, process id:%{public}d", pid);
+        }
+    }
+    processMap_["GetStateMgmtInfo"].clear();
 }
 
 void UiSessionManagerOhos::SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback)
@@ -901,13 +972,19 @@ void UiSessionManagerOhos::SendWebInfoByRequest(uint32_t windowId, int32_t webId
         const std::string& result, WebRequestErrorCode errorCode)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    if (!processMap_.count("GetWebInfoByRequest") || !reportObjectMap_.count(processMap_["GetWebInfoByRequest"])) {
+    std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (!processMap_.count("GetWebInfoByRequest") || processMap_["GetWebInfoByRequest"].empty()) {
         LOGW("SendWebInfoByRequest no report proxy");
         return;
     }
-    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["GetWebInfoByRequest"]]);
-    if (reportService) {
-        reportService->SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
+    for (const auto& pid : processMap_["GetWebInfoByRequest"]) {
+        auto reportService = iface_cast<ReportService>(reportObjectMap_[pid]);
+        if (reportService != nullptr) {
+            reportService->SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
+        } else {
+            LOGW("Send WebInfo By Request failed, process id:%{public}d", pid);
+        }
     }
+    processMap_["GetWebInfoByRequest"].clear();
 }
 } // namespace OHOS::Ace
