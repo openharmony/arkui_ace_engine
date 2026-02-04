@@ -55,7 +55,7 @@ void NavigationManager::OnRouterTransition(const std::string& newTopUrl)
     }
     auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_CONTENT_ETS_TAG, existForceSplitNav_.second);
     CHECK_NULL_VOID(navNode);
-    auto navPattern = navBarNode->GetPattern<NavigationPattern>();
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navPattern);
     auto targetPage = navPattern->GetNavBasePageNode();
     CHECK_NULL_VOID(targetPage);
