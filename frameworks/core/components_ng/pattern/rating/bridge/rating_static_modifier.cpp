@@ -172,7 +172,6 @@ void ContentModifierRatingImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_F64_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
 import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextVerticalAlign, TextChangeReason, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
@@ -2084,7 +2084,7 @@ export class RichEditorGesture_serializer {
             const onClickTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onClickTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onClickTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onClickTmpBuf = (value0: ClickEvent):void => {
+            const onClickTmpBuf_Closure  = (value0: ClickEvent):void => {
                 const onClickTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onClickTmpBuf_BufArgsSerializer.writeInt32(onClickTmpBuf_BufResource.resourceId);
                 onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCall);
@@ -2094,6 +2094,8 @@ export class RichEditorGesture_serializer {
                 onClickTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onClickTmpBuf_Closure, onClickTmpBuf_BufResource)
+            onClickTmpBuf = onClickTmpBuf_Closure
         }
         const onClickTmpResult : ((value0: ClickEvent) => void) | undefined = onClickTmpBuf
         const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2102,7 +2104,7 @@ export class RichEditorGesture_serializer {
             const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onLongPressTmpBuf = (value0: GestureEvent):void => {
+            const onLongPressTmpBuf_Closure  = (value0: GestureEvent):void => {
                 const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
@@ -2112,6 +2114,8 @@ export class RichEditorGesture_serializer {
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onLongPressTmpBuf_Closure, onLongPressTmpBuf_BufResource)
+            onLongPressTmpBuf = onLongPressTmpBuf_Closure
         }
         const onLongPressTmpResult : ((value0: GestureEvent) => void) | undefined = onLongPressTmpBuf
         const onDoubleClickTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2120,7 +2124,7 @@ export class RichEditorGesture_serializer {
             const onDoubleClickTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDoubleClickTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDoubleClickTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDoubleClickTmpBuf = (value0: GestureEvent):void => {
+            const onDoubleClickTmpBuf_Closure  = (value0: GestureEvent):void => {
                 const onDoubleClickTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDoubleClickTmpBuf_BufArgsSerializer.writeInt32(onDoubleClickTmpBuf_BufResource.resourceId);
                 onDoubleClickTmpBuf_BufArgsSerializer.writePointer(onDoubleClickTmpBuf_BufCall);
@@ -2130,6 +2134,8 @@ export class RichEditorGesture_serializer {
                 onDoubleClickTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDoubleClickTmpBuf_Closure, onDoubleClickTmpBuf_BufResource)
+            onDoubleClickTmpBuf = onDoubleClickTmpBuf_Closure
         }
         const onDoubleClickTmpResult : ((value0: GestureEvent) => void) | undefined = onDoubleClickTmpBuf
         let value : RichEditorGesture = ({onClick: onClickTmpResult, onLongPress: onLongPressTmpResult, onDoubleClick: onDoubleClickTmpResult} as RichEditorGesture)
@@ -2740,7 +2746,7 @@ export class SelectionMenuOptions_serializer {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = (start: int32, end: int32):void => {
+            const onAppearTmpBuf_Closure  = (start: int32, end: int32):void => {
                 const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
@@ -2751,6 +2757,8 @@ export class SelectionMenuOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAppearTmpBuf_Closure, onAppearTmpBuf_BufResource)
+            onAppearTmpBuf = onAppearTmpBuf_Closure
         }
         const onAppearTmpResult : MenuOnAppearCallback | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2759,7 +2767,7 @@ export class SelectionMenuOptions_serializer {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
+            const onDisappearTmpBuf_Closure  = ():void => {
                 const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
@@ -2768,6 +2776,8 @@ export class SelectionMenuOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDisappearTmpBuf_Closure, onDisappearTmpBuf_BufResource)
+            onDisappearTmpBuf = onDisappearTmpBuf_Closure
         }
         const onDisappearTmpResult : VoidCallback | undefined = onDisappearTmpBuf
         const menuTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2782,7 +2792,7 @@ export class SelectionMenuOptions_serializer {
             const onMenuShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMenuShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMenuShowTmpBuf = (start: int32, end: int32):void => {
+            const onMenuShowTmpBuf_Closure  = (start: int32, end: int32):void => {
                 const onMenuShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMenuShowTmpBuf_BufArgsSerializer.writeInt32(onMenuShowTmpBuf_BufResource.resourceId);
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCall);
@@ -2793,6 +2803,8 @@ export class SelectionMenuOptions_serializer {
                 onMenuShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onMenuShowTmpBuf_Closure, onMenuShowTmpBuf_BufResource)
+            onMenuShowTmpBuf = onMenuShowTmpBuf_Closure
         }
         const onMenuShowTmpResult : MenuCallback | undefined = onMenuShowTmpBuf
         const onMenuHideTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2801,7 +2813,7 @@ export class SelectionMenuOptions_serializer {
             const onMenuHideTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuHideTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMenuHideTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMenuHideTmpBuf = (start: int32, end: int32):void => {
+            const onMenuHideTmpBuf_Closure  = (start: int32, end: int32):void => {
                 const onMenuHideTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMenuHideTmpBuf_BufArgsSerializer.writeInt32(onMenuHideTmpBuf_BufResource.resourceId);
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCall);
@@ -2812,6 +2824,8 @@ export class SelectionMenuOptions_serializer {
                 onMenuHideTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onMenuHideTmpBuf_Closure, onMenuHideTmpBuf_BufResource)
+            onMenuHideTmpBuf = onMenuHideTmpBuf_Closure
         }
         const onMenuHideTmpResult : MenuCallback | undefined = onMenuHideTmpBuf
         const previewMenuOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -4254,7 +4268,7 @@ export class RichEditorImageSpanOptions_serializer {
             const onHoverTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onHoverTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onHoverTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onHoverTmpBuf = (status: boolean, event: HoverEvent):void => {
+            const onHoverTmpBuf_Closure  = (status: boolean, event: HoverEvent):void => {
                 const onHoverTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onHoverTmpBuf_BufArgsSerializer.writeInt32(onHoverTmpBuf_BufResource.resourceId);
                 onHoverTmpBuf_BufArgsSerializer.writePointer(onHoverTmpBuf_BufCall);
@@ -4265,6 +4279,8 @@ export class RichEditorImageSpanOptions_serializer {
                 onHoverTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onHoverTmpBuf_Closure, onHoverTmpBuf_BufResource)
+            onHoverTmpBuf = onHoverTmpBuf_Closure
         }
         const onHoverTmpResult : OnHoverCallback | undefined = onHoverTmpBuf
         let value : RichEditorImageSpanOptions = ({offset: offsetTmpResult, imageStyle: imageStyleTmpResult, gesture: gestureTmpResult, onHover: onHoverTmpResult} as RichEditorImageSpanOptions)

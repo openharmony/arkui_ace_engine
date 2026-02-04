@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer } from "./../framework/resource"
 import { NestedScrollOptions_serializer, EditModeOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
@@ -1261,7 +1261,7 @@ export class GridLayoutOptions_serializer {
             const onGetIrregularSizeByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetIrregularSizeByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetIrregularSizeByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetIrregularSizeByIndexTmpBuf = (index: int32):[ int32, int32 ] => {
+            const onGetIrregularSizeByIndexTmpBuf_Closure  = (index: int32):[ int32, int32 ] => {
                 const onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetIrregularSizeByIndexTmpBuf_BufResource.resourceId);
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetIrregularSizeByIndexTmpBuf_BufCall);
@@ -1276,6 +1276,8 @@ export class GridLayoutOptions_serializer {
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.release();
                 return (onGetIrregularSizeByIndexTmpBuf_BufContinuationValue as [ int32, int32 ]);
             }
+            resourceFinalizerRegister(onGetIrregularSizeByIndexTmpBuf_Closure, onGetIrregularSizeByIndexTmpBuf_BufResource)
+            onGetIrregularSizeByIndexTmpBuf = onGetIrregularSizeByIndexTmpBuf_Closure
         }
         const onGetIrregularSizeByIndexTmpResult : ((index: int32) => [ int32, int32 ]) | undefined = onGetIrregularSizeByIndexTmpBuf
         const onGetRectByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1284,7 +1286,7 @@ export class GridLayoutOptions_serializer {
             const onGetRectByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetRectByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetRectByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetRectByIndexTmpBuf = (index: int32):[ int32, int32, int32, int32 ] => {
+            const onGetRectByIndexTmpBuf_Closure  = (index: int32):[ int32, int32, int32, int32 ] => {
                 const onGetRectByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetRectByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetRectByIndexTmpBuf_BufResource.resourceId);
                 onGetRectByIndexTmpBuf_BufArgsSerializer.writePointer(onGetRectByIndexTmpBuf_BufCall);
@@ -1299,6 +1301,8 @@ export class GridLayoutOptions_serializer {
                 onGetRectByIndexTmpBuf_BufArgsSerializer.release();
                 return (onGetRectByIndexTmpBuf_BufContinuationValue as [ int32, int32, int32, int32 ]);
             }
+            resourceFinalizerRegister(onGetRectByIndexTmpBuf_Closure, onGetRectByIndexTmpBuf_BufResource)
+            onGetRectByIndexTmpBuf = onGetRectByIndexTmpBuf_Closure
         }
         const onGetRectByIndexTmpResult : ((index: int32) => [ int32, int32, int32, int32 ]) | undefined = onGetRectByIndexTmpBuf
         let value : GridLayoutOptions = ({regularSize: regularSizeTmpResult, irregularIndexes: irregularIndexesTmpResult, onGetIrregularSizeByIndex: onGetIrregularSizeByIndexTmpResult, onGetRectByIndex: onGetRectByIndexTmpResult} as GridLayoutOptions)

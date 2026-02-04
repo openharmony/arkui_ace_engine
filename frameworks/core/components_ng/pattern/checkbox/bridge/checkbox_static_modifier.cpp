@@ -225,7 +225,6 @@ void ContentModifierCheckboxImpl(
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

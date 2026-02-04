@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
@@ -7977,7 +7977,7 @@ export class WebKeyboardOptions_serializer {
             const customKeyboardTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const customKeyboardTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const customKeyboardTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            customKeyboardTmpBuf = ():void => {
+            const customKeyboardTmpBuf_Closure  = ():void => {
                 const customKeyboardTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 customKeyboardTmpBuf_BufArgsSerializer.writeInt32(customKeyboardTmpBuf_BufResource.resourceId);
                 customKeyboardTmpBuf_BufArgsSerializer.writePointer(customKeyboardTmpBuf_BufCall);
@@ -7986,6 +7986,8 @@ export class WebKeyboardOptions_serializer {
                 customKeyboardTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(customKeyboardTmpBuf_Closure, customKeyboardTmpBuf_BufResource)
+            customKeyboardTmpBuf = customKeyboardTmpBuf_Closure
         }
         const customKeyboardTmpResult : CustomBuilder | undefined = customKeyboardTmpBuf
         let value : WebKeyboardOptions = ({useSystemKeyboard: useSystemKeyboardTmpResult, enterKeyType: enterKeyTypeTmpResult, customKeyboard: customKeyboardTmpResult} as WebKeyboardOptions)
@@ -8233,7 +8235,7 @@ export class SelectionMenuOptionsExt_serializer {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
+            const onAppearTmpBuf_Closure  = ():void => {
                 const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
@@ -8242,6 +8244,8 @@ export class SelectionMenuOptionsExt_serializer {
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAppearTmpBuf_Closure, onAppearTmpBuf_BufResource)
+            onAppearTmpBuf = onAppearTmpBuf_Closure
         }
         const onAppearTmpResult : VoidCallback | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -8250,7 +8254,7 @@ export class SelectionMenuOptionsExt_serializer {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
+            const onDisappearTmpBuf_Closure  = ():void => {
                 const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
@@ -8259,6 +8263,8 @@ export class SelectionMenuOptionsExt_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDisappearTmpBuf_Closure, onDisappearTmpBuf_BufResource)
+            onDisappearTmpBuf = onDisappearTmpBuf_Closure
         }
         const onDisappearTmpResult : VoidCallback | undefined = onDisappearTmpBuf
         const previewTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -8267,7 +8273,7 @@ export class SelectionMenuOptionsExt_serializer {
             const previewTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const previewTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const previewTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            previewTmpBuf = ():void => {
+            const previewTmpBuf_Closure  = ():void => {
                 const previewTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 previewTmpBuf_BufArgsSerializer.writeInt32(previewTmpBuf_BufResource.resourceId);
                 previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCall);
@@ -8276,6 +8282,8 @@ export class SelectionMenuOptionsExt_serializer {
                 previewTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(previewTmpBuf_Closure, previewTmpBuf_BufResource)
+            previewTmpBuf = previewTmpBuf_Closure
         }
         const previewTmpResult : CustomBuilder | undefined = previewTmpBuf
         const menuTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -8296,7 +8304,7 @@ export class SelectionMenuOptionsExt_serializer {
             const onMenuShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMenuShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMenuShowTmpBuf = ():void => {
+            const onMenuShowTmpBuf_Closure  = ():void => {
                 const onMenuShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMenuShowTmpBuf_BufArgsSerializer.writeInt32(onMenuShowTmpBuf_BufResource.resourceId);
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCall);
@@ -8305,6 +8313,8 @@ export class SelectionMenuOptionsExt_serializer {
                 onMenuShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onMenuShowTmpBuf_Closure, onMenuShowTmpBuf_BufResource)
+            onMenuShowTmpBuf = onMenuShowTmpBuf_Closure
         }
         const onMenuShowTmpResult : VoidCallback | undefined = onMenuShowTmpBuf
         const onMenuHideTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -8313,7 +8323,7 @@ export class SelectionMenuOptionsExt_serializer {
             const onMenuHideTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuHideTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMenuHideTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMenuHideTmpBuf = ():void => {
+            const onMenuHideTmpBuf_Closure  = ():void => {
                 const onMenuHideTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMenuHideTmpBuf_BufArgsSerializer.writeInt32(onMenuHideTmpBuf_BufResource.resourceId);
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCall);
@@ -8322,6 +8332,8 @@ export class SelectionMenuOptionsExt_serializer {
                 onMenuHideTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onMenuHideTmpBuf_Closure, onMenuHideTmpBuf_BufResource)
+            onMenuHideTmpBuf = onMenuHideTmpBuf_Closure
         }
         const onMenuHideTmpResult : VoidCallback | undefined = onMenuHideTmpBuf
         let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult, onMenuShow: onMenuShowTmpResult, onMenuHide: onMenuHideTmpResult} as SelectionMenuOptionsExt)
