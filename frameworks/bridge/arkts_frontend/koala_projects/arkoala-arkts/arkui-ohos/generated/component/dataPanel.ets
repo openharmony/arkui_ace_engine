@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -197,8 +197,8 @@ export enum DataPanelType {
     Circle = 1
 }
 export interface ColorStop {
-    color: ResourceColor | undefined;
-    offset: Length | undefined;
+    color: ResourceColor;
+    offset: Length;
 }
 export interface DataPanelShadowOptions extends MultiShadowOptions {
     colors?: Array<ResourceColor | LinearGradient>;
@@ -632,48 +632,36 @@ export class ColorStop_serializer {
     public static write(buffer: SerializerBase, value: ColorStop): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForColor  = value.color
-        if (valueHolderForColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
-            } else if (valueHolderForColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
-                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        if (valueHolderForColor instanceof Color) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForColorForIdx0  = valueHolderForColor as Color
+            valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
+        } else if (valueHolderForColor instanceof int32) {
+            valueSerializer.writeInt8((1).toByte())
+            const valueHolderForColorForIdx1  = valueHolderForColor as int32
+            valueSerializer.writeInt32(valueHolderForColorForIdx1)
+        } else if (valueHolderForColor instanceof string) {
+            valueSerializer.writeInt8((2).toByte())
+            const valueHolderForColorForIdx2  = valueHolderForColor as string
+            valueSerializer.writeString(valueHolderForColorForIdx2)
+        } else if (valueHolderForColor instanceof Resource) {
+            valueSerializer.writeInt8((3).toByte())
+            const valueHolderForColorForIdx3  = valueHolderForColor as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
         const valueHolderForOffset  = value.offset
-        if (valueHolderForOffset !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOffsetTmpValue  = valueHolderForOffset!
-            if (valueHolderForOffsetTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForOffsetTmpValueForIdx0  = valueHolderForOffsetTmpValue as string
-                valueSerializer.writeString(valueHolderForOffsetTmpValueForIdx0)
-            } else if (valueHolderForOffsetTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForOffsetTmpValueForIdx1)
-            } else if (valueHolderForOffsetTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForOffsetTmpValueForIdx2  = valueHolderForOffsetTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForOffsetTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        if (valueHolderForOffset instanceof string) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForOffsetForIdx0  = valueHolderForOffset as string
+            valueSerializer.writeString(valueHolderForOffsetForIdx0)
+        } else if (valueHolderForOffset instanceof double) {
+            valueSerializer.writeInt8((1).toByte())
+            const valueHolderForOffsetForIdx1  = valueHolderForOffset as double
+            valueSerializer.writeFloat64(valueHolderForOffsetForIdx1)
+        } else if (valueHolderForOffset instanceof Resource) {
+            valueSerializer.writeInt8((2).toByte())
+            const valueHolderForOffsetForIdx2  = valueHolderForOffset as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForOffsetForIdx2)
         }
     }
     public static read(buffer: DeserializerBase): ColorStop {

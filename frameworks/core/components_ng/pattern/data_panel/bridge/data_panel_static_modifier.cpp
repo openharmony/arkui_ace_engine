@@ -180,7 +180,7 @@ void SetCloseEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        DataPanelModelNG::SetCloseEffect(frameNode, false);
+        DataPanelModelNG::SetCloseEffect(frameNode, true);
         return;
     }
     DataPanelModelNG::SetCloseEffect(frameNode, *convValue);
