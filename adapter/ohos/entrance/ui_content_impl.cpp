@@ -6256,7 +6256,7 @@ int32_t UIContentImpl::RegisterNavigateChangeCallback(
     CHECK_NULL_RETURN(pipeline, -1);
     auto navigationManager = pipeline->GetNavigationManager();
     CHECK_NULL_RETURN(navigationManager, -1);
-    auto callbackWrapper = [innerCallback = std:move(callback)](
+    auto callbackWrapper = [innerCallback = std::move(callback)](
         const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter) {
         if (innerCallback) {
             innerCallback(from, to);
