@@ -67,7 +67,7 @@ void NavigationManager::OnRouterTransition(const std::string& newTopUrl)
     CHECK_NULL_VOID(context);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    cosnt auto& url = pageInfo->GetPageUrl();
+    const auto& url = pageInfo->GetPageUrl();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,"Router transition to url:%{public}s, forceSplit navigation url:%{public}s",
         newTopUrl.c_str(), url.c_str());
     forceSplitMgr->SetNavigationForceSplitEnableInternal(url == newTopUrl);
