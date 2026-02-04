@@ -1063,7 +1063,7 @@ private:
     uint32_t micSymbolId_ = 0;
     Dimension micSize_ = 32.0_vp;
     Dimension micPadding_ = 4.0_vp;
-    Dimension micIconSize_ = 20.0_vp;
+    Dimension micIconSize_ = 20.0_fp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 

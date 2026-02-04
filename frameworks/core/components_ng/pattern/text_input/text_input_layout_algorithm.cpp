@@ -184,14 +184,13 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
 
-    float allResponseAreaWidth = pattern->GetAllResponseAreaWidth();
     UpdateContentPositionParams params = {
         .isRTL = isRTL,
         .offsetBase = offsetBase,
         .size = size,
         .contentSize = contentSize,
         .align = align,
-        .allResponseAreaWidth = allResponseAreaWidth
+        .pattern = pattern
     };
     UpdateContentPosition(params, content);
 
@@ -203,7 +202,6 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .contentSize = contentSize,
         .isRTL = isRTL,
         .contentOffset = content->GetRect().GetOffset(),
-        .allResponseAreaWidth = allResponseAreaWidth
     };
     UpdateTextRect(updateTextRectParams);
 
@@ -225,14 +223,15 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
     OffsetF contentOffset =
         params.offsetBase + Alignment::GetAlignPosition(params.size, params.contentSize, params.align);
     auto offsetBaseX = params.offsetBase.GetX();
-    if (params.isRTL) {
-        offsetBaseX += params.allResponseAreaWidth;
+    if (params.isRTL && params.pattern) {
+        offsetBaseX += params.pattern->GetAllResponseAreaWidth();
     }
     content->SetOffset(OffsetF(offsetBaseX, contentOffset.GetY()));
 }
 
 void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)
 {
+    CHECK_NULL_VOID(params.pattern);
     if (LessOrEqual(textRect_.Width(), params.contentSize.Width())) {
         float textRectOffsetX = 0.0f;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -242,7 +241,7 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
             textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft(border);
         }
         if (params.isRTL) {
-            textRectOffsetX += params.allResponseAreaWidth;
+            textRectOffsetX += params.pattern->GetAllResponseAreaWidth();
             textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
         } else {
             textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));

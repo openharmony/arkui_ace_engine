@@ -230,10 +230,6 @@ protected:
         return true;
     }
     float cancelHoverSize_ = 0.0f;
-    virtual bool isVoiceButton()
-    {
-        return false;
-    }
 
 private:
     bool IsShowClean() const;
@@ -291,6 +287,10 @@ public:
     void SetAccessibilityAction();
     void InitButtonMouseEvent();
     void UpdateVoiceButton(bool activate);
+    float GetVoiceVerticalPadding() const
+    {
+        return micPadding_ * 2.0f;
+    }
 
 protected:
     void LoadingImageProperty() override {}
@@ -305,11 +305,9 @@ protected:
     void OnCleanNodeClicked() override;
     void UpdateNodeProperty(const RefPtr<LayoutProperty>& nodeProp, const RefPtr<TextLayoutProperty>& symbolProperty,
         const RefPtr<TextFieldTheme>& theme) override;
-
-    bool isVoiceButton() override
-    {
-        return true;
-    }
+    float micIconSize_ = 0.0f;
+    float micStackSize_ = 0.0f;
+    float micPadding_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
