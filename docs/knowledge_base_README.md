@@ -7,6 +7,8 @@
 ```
 knowledge_base/
 ├── README.md              # 本文件，知识库索引和说明
+├── cj_frontend/           # CJ Frontend 桥接层知识库
+│   └── CJ_Frontend_Guide.md                   # 综合指南
 └── pattern/               # 组件模式知识库
     ├── counter/
     │   └── Counter_Knowledge_Base.md   # Counter 组件知识库
@@ -27,6 +29,39 @@ knowledge_base/
 ```
 
 ## 现有文档
+
+### CJ Frontend 知识库
+
+**位置**: `cj_frontend/CJ_Frontend_Guide.md`
+
+**综合指南** - Cangjie 语言桥接层的知识库
+
+**文档内容**：
+
+- **概述**: CJ Frontend 定位、与其他 Frontend 对比、适用场景
+- **四层架构**: Frontend、FFI Interface、CppView、Runtime 层详解
+- **FFI 设计模式**: extern "C" 边界、命名规范、数据类型转换
+- **134 个组件**: 完整的 FFI 接口覆盖（布局、基础、高级组件）
+- **双架构支持**: 经典架构 vs NG 架构对比与迁移指南
+- **数据流与生命周期**: 组件创建流程、页面生命周期、数据流向分析
+- **最佳实践**: 内存管理、线程安全、性能优化、常见陷阱与解决方案
+- **调试指南**: 日志系统、DumpInfo、常见问题排查、性能分析工具
+
+**适用场景**：
+
+- 使用 Cangjie 语言开发 ArkUI 应用
+- 理解 CJ Frontend 桥接层架构
+- 查找组件 FFI 接口定义
+- 学习 FFI 设计模式和最佳实践
+- 排查 CJ Frontend 相关问题
+
+**代码规模**：
+
+- 359+ 个源文件
+- 2067+ 个 FFI 导出函数
+- 134 个 ArkUI 组件支持
+
+---
 
 ### Menu Component Knowledge Base
 
@@ -160,17 +195,24 @@ knowledge_base/
 
 ## 文档分类
 
+### 架构设计类
+
+- **CJ Frontend 知识库** (`cj_frontend/CJ_Frontend_Guide.md`) - Cangjie 桥接层完整架构（综合指南）
+  - 四层架构设计（Frontend、FFI、CppView、Runtime）
+  - FFI 设计模式和接口规范
+  - 双架构支持（经典 vs NG）
+  - 组件 FFI 接口参考（134 个组件快速查找）
+  - 数据流与生命周期分析
+  - 最佳实践与调试指南
+- 组件分层设计
+- 框架核心概念
+- 设计模式应用
+
 ### 组件知识类
 
 - 组件深度分析文档
 - 组件对比研究
 - 组件最佳实践
-
-### 架构设计类
-
-- 组件分层设计
-- 框架核心概念
-- 设计模式应用
 
 ### 最佳实践类
 
