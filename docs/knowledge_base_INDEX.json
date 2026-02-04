@@ -781,6 +781,48 @@
         "all": "OpenHarmony/interface/sdk-js/api/arkui/"
       },
       "last_updated": "2026-02-04"
+    },
+    {
+      "name": "Component API",
+      "name_cn": "ArkUI 组件 API 知识库",
+      "category": "sdk",
+      "type": "sdk",
+      "keywords": [
+        "组件API",
+        "Component API",
+        "@internal",
+        "类型定义",
+        "type definition",
+        "接口定义",
+        "interface",
+        "组件类型",
+        "component type",
+        "JSDoc",
+        "版本兼容",
+        "version compatibility",
+        "动态导入",
+        "dynamic import",
+        "内部类型定义",
+        "internal type",
+        "类型声明",
+        "type declaration"
+      ],
+      "aliases": [
+        "组件API",
+        "Component API",
+        "内部接口",
+        "@internal API",
+        "组件类型定义",
+        "类型定义文档"
+      ],
+      "file_path": "sdk/Component_API_Knowledge_Base_CN.md",
+      "source_paths": {
+        "internal": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
+      },
+      "api_paths": {
+        "all": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
+      },
+      "last_updated": "2026-02-09"
     }
   ],
   "categories": {
@@ -857,7 +899,8 @@
       "name": "SDK API",
       "description": "ArkUI SDK API 文档",
       "components": [
-        "ArkUI SDK API"
+        "ArkUI SDK API",
+        "Component API"
       ]
     }
   }
