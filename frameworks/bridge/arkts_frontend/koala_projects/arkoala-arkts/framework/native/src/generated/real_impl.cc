@@ -15350,7 +15350,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void SetExtraConfigImpl(Ark_IMEClient peer,
-                            const Ark_CustomObject* config)
+                            Ark_InputMethodExtraConfig config)
     {
     }
     Ark_Int32 GetNodeIdImpl(Ark_IMEClient peer)

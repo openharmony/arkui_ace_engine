@@ -36178,7 +36178,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     void SetExtraConfigImpl(Ark_IMEClient peer,
-                            const Ark_CustomObject* config)
+                            Ark_InputMethodExtraConfig config)
     {
         if (!needGroupedLog(1))
         {

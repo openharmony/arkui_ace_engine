@@ -608,6 +608,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_CustomValueType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_ResourceColor& src)
 {
     switch (src.selector) {
@@ -4546,6 +4562,7 @@ ASSIGN_OPT(Opt_Map_Float64_SliderStepItemAccessibility)
 ASSIGN_OPT(Opt_Map_Int32_text_RunMetrics)
 ASSIGN_OPT(Opt_Map_SourceTool_Float64)
 ASSIGN_OPT(Opt_Map_String_ComponentContent)
+ASSIGN_OPT(Opt_Map_String_CustomValueType)
 ASSIGN_OPT(Opt_Map_String_Int32)
 ASSIGN_OPT(Opt_Map_String_Number)
 ASSIGN_OPT(Opt_Map_String_Object)
@@ -4742,6 +4759,7 @@ ASSIGN_OPT(Opt_CustomSpanDrawInfo)
 ASSIGN_OPT(Opt_CustomSpanMeasureInfo)
 ASSIGN_OPT(Opt_CustomSpanMetrics)
 ASSIGN_OPT(Opt_CustomTheme)
+ASSIGN_OPT(Opt_CustomValueType)
 ASSIGN_OPT(Opt_DataItem)
 ASSIGN_OPT(Opt_DataPanelConfiguration)
 ASSIGN_OPT(Opt_DataPanelOptions)
@@ -4820,6 +4838,7 @@ ASSIGN_OPT(Opt_ImageData)
 ASSIGN_OPT(Opt_InputCounterOptions)
 ASSIGN_OPT(Opt_IMEClient)
 ASSIGN_OPT(Opt_InnerGestureObserverConfigs)
+ASSIGN_OPT(Opt_InputMethodExtraConfig)
 ASSIGN_OPT(Opt_InsertValue)
 ASSIGN_OPT(Opt_IntelligentTrackingPreventionDetails)
 ASSIGN_OPT(Opt_intl_DateTimeOptions)

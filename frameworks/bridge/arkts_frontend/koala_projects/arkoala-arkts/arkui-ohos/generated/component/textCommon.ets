@@ -16,12 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
-import { default as text } from "@ohos.graphics.text"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
+import { extractors } from "#handwritten"
+import { InputMethodExtraConfig } from "@ohos.inputMethod.ExtraConfig"
+import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
+import { default as text } from "@ohos.graphics.text"
 import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
 import { SelectionOptions_serializer, SelectionOptions, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from "./common"
 import { Resource_serializer } from "./../framework/resource"
@@ -31,10 +33,8 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 import { default as text } from "@ohos.graphics.text"
-import { extractors } from "#handwritten"
 import { LengthMetrics } from "arkui.Graphics"
 import { ArkThemeScopeManager } from "#arktheme"
-import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
         return new ContentTransition(ptr)
@@ -61,7 +61,7 @@ export class ContentTransition implements MaterializedBase {
 }
 export interface IMEClient {
     nodeId: int64
-    setExtraConfig(config: object): void
+    setExtraConfig(config: InputMethodExtraConfig): void
 }
 export class IMEClientInternal implements MaterializedBase,IMEClient {
     peer?: Finalizable | undefined = undefined
@@ -90,8 +90,8 @@ export class IMEClientInternal implements MaterializedBase,IMEClient {
     public static fromPtr(ptr: KPointer): IMEClientInternal {
         return new IMEClientInternal(ptr)
     }
-    public setExtraConfig(config: object): void {
-        const config_casted = config as (object)
+    public setExtraConfig(config: InputMethodExtraConfig): void {
+        const config_casted = config as (InputMethodExtraConfig)
         this.setExtraConfig_serialize(config_casted)
         return
     }
@@ -103,11 +103,8 @@ export class IMEClientInternal implements MaterializedBase,IMEClient {
         this.setNodeId_serialize(nodeId_casted)
         return
     }
-    setExtraConfig_serialize(config: object): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject('object', config)
-        ArkUIGeneratedNativeModule._IMEClient_setExtraConfig(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
+    setExtraConfig_serialize(config: InputMethodExtraConfig): void {
+        ArkUIGeneratedNativeModule._IMEClient_setExtraConfig(this.peer!.ptr, extractors.toInputMethodExtraConfigPtr(config))
     }
     private getNodeId_serialize(): int64 {
         const retval  = ArkUIGeneratedNativeModule._IMEClient_getNodeId(this.peer!.ptr)

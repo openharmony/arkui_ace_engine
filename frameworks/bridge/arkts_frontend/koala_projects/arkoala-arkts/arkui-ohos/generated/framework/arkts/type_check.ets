@@ -168,6 +168,7 @@ import { RenderNode } from "arkui.RenderNode"
 import { GridColColumnOption, GridColOptions } from "./../../component/gridCol"
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo"
 import { Metadata } from "bundleManager.Metadata"
+import { InputMethodExtraConfig, CustomValueType } from "@ohos.inputMethod.ExtraConfig"
 import { default as intl } from "@ohos.intl"
 import { LineOptions, ShapePoint } from "./../../component/line"
 import { MarqueeOptions } from "./../../component/marquee"
@@ -1593,6 +1594,9 @@ export class TypeChecker {
     }
     static isInputCounterOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof InputCounterOptions
+    }
+    static isInputMethodExtraConfig(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof InputMethodExtraConfig
     }
     static isInputType(value: Object | string | number | undefined): boolean {
         return value instanceof InputType
