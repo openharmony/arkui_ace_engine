@@ -70,6 +70,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -1711,6 +1712,10 @@ UIContentErrorCode AceContainer::RunPage(
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
 
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+    // The page fault occurs when an SO is loaded due to componentization.
+    DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad(); // Manually triggered PageFault here.To be modifier
+#endif
     if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter && isStageModel &&
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
