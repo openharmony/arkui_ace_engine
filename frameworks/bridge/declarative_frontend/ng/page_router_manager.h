@@ -274,9 +274,6 @@ public:
     void FireNavigateChangeCallback(const std::string& to);
     void NotifyPageTransitionEnd(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& page);
 
-    virtual void SwitchNavigationForceSplitModeIfNeeded(const RefPtr<FrameNode>& newTopPage) {}
-    virtual void DisableNavigationForceSplitIfNeeded(const RefPtr<PipelineContext>& context) {}
-
 protected:
     class RouterOptScope {
     public:
