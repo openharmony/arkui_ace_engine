@@ -990,11 +990,11 @@ HWTEST_F(MarqueeTestNg, MarqueeTest013, TestSize.Level1)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     auto frameChild1 =
-        FrameNode::GetOrCreateFrameNode("Child1", nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        FrameNode::GetOrCreateFrameNode("Child1", nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     frameChild1->SetLayoutProperty(textLayoutProperty);
     auto frameChild2 =
-        FrameNode::GetOrCreateFrameNode("Child2", nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        FrameNode::GetOrCreateFrameNode("Child2", nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     frameNode->AddChild(frameChild1);
     frameNode->AddChild(frameChild2);
 
@@ -1700,6 +1700,45 @@ HWTEST_F(MarqueeTestNg, MarqueeTest025, TestSize.Level1)
         EXPECT_EQ(iter->second.second, expectedRate);
         EXPECT_TRUE(frameRateManager->isRateChanged_);
     }
+}
+
+/**
+ * @tc.name: MarqueeTest026
+ * @tc.desc: Test marquee set spacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create marquee and set event.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    bool isStart = false;
+    auto onChangeStart = [&isStart]() { isStart = true; };
+    marqueeModel.SetOnStart(onChangeStart);
+    bool isBounce = false;
+    auto onChangeBounce = [&isBounce]() { isBounce = true; };
+    marqueeModel.SetOnBounce(onChangeBounce);
+    bool isFinish = false;
+    auto onChangeFinish = [&isFinish]() { isFinish = true; };
+    marqueeModel.SetOnFinish(onChangeFinish);
+
+    /**
+     * @tc.steps: step2. get marquee frameNode and event.
+     * @tc.expected: step2. function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    std::optional<CalcDimension> spacing;
+    marqueeModel.SetMarqueeSpacing(spacing);
+    spacing = CalcDimension(10, DimensionUnit::VP);
+    MarqueeModelNG::SetMarqueeSpacing(AceType::RawPtr(frameNode), spacing);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->NeedSecondChild());
+    pattern->PlayMarqueeDoubleAnimation(0.0f, 0.0f, -1, true, StartMarqueeAnimationType::BOTH);
 }
 
 /**

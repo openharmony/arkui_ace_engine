@@ -1277,7 +1277,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "当");
     EXPECT_EQ((*it)->interval.first, 4);
     EXPECT_EQ((*it)->interval.second, 5);
-    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(49, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), OHOS::Ace::Dimension(49, OHOS::Ace::DimensionUnit::VP));
     EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::BLUE);
     EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::W300);
@@ -1571,5 +1571,205 @@ HWTEST_F(SpanStringTestNg, SpanString013, TestSize.Level1)
     EXPECT_EQ(secondBackgroundSpan2->GetStartIndex(), 5);
     EXPECT_EQ(secondBackgroundSpan2->GetEndIndex(), 10);
     EXPECT_TRUE(secondBackgroundSpan2->GetBackgroundColor() == textBackgroundStyle);
+}
+
+// Helper structures for variable font weight tests
+struct FontOptions {
+    OHOS::Ace::FontWeight weight;
+    OHOS::Ace::Dimension size;
+    OHOS::Ace::FontStyle style;
+    OHOS::Ace::Color color;
+    int32_t familyCount;
+};
+
+struct VariableFontWeightOptions {
+    std::optional<uint32_t> variableWeight = std::nullopt;
+    std::optional<bool> enableVariable = std::nullopt;
+    std::optional<bool> enableDevice = std::nullopt;
+};
+
+struct SpanVerifyOptions {
+    std::string content;
+    int32_t start;
+    int32_t end;
+    OHOS::Ace::Dimension fontSize;
+    OHOS::Ace::Color color;
+    OHOS::Ace::FontStyle style;
+    OHOS::Ace::FontWeight weight;
+    uint32_t variableWeight = 0;
+    bool enableVariable = false;
+    bool enableDevice = true;
+};
+
+// Helper functions for variable font weight tests
+Font CreateTestFont(const FontOptions& options)
+{
+    Font font;
+    font.fontWeight = options.weight;
+    font.fontSize = options.size;
+    font.fontStyle = options.style;
+    font.fontFamiliesNG = std::vector<std::string>(test_str, test_str + options.familyCount);
+    font.fontColor = options.color;
+    return font;
+}
+
+Font CreateTestFontWithVariableWeight(const FontOptions& options,
+    const VariableFontWeightOptions& variableOptions = VariableFontWeightOptions())
+{
+    Font font = CreateTestFont(options);
+    if (variableOptions.variableWeight.has_value()) {
+        font.variableFontWeight = variableOptions.variableWeight.value();
+    }
+    if (variableOptions.enableVariable.has_value()) {
+        font.enableVariableFontWeight = variableOptions.enableVariable.value();
+    }
+    if (variableOptions.enableDevice.has_value()) {
+        font.enableDeviceFontWeightCategory = variableOptions.enableDevice.value();
+    }
+    return font;
+}
+
+void VerifySpanContentAndInterval(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
+    const std::string& expectedContent, int32_t expectedStart, int32_t expectedEnd)
+{
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), expectedContent);
+    EXPECT_EQ((*it)->interval.first, expectedStart);
+    EXPECT_EQ((*it)->interval.second, expectedEnd);
+}
+
+void VerifySpanWithVariableWeight(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
+    const std::string& content, int32_t start, int32_t end, const VariableFontWeightOptions& options)
+{
+    VerifySpanContentAndInterval(it, content, start, end);
+    auto actualWeight = (*it)->fontStyle->GetVariableFontWeight().value_or(0);
+    EXPECT_EQ(actualWeight, options.variableWeight.value_or(0));
+    auto actualEnable = (*it)->fontStyle->GetEnableVariableFontWeight().value_or(false);
+    EXPECT_EQ(actualEnable, options.enableVariable.value_or(false));
+    auto actualDevice = (*it)->fontStyle->GetEnableDeviceFontWeightCategory().value_or(true);
+    EXPECT_EQ(actualDevice, options.enableDevice.value_or(true));
+}
+
+void VerifyFullSpan(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
+    const SpanVerifyOptions& options)
+{
+    VerifySpanContentAndInterval(it, options.content, options.start, options.end);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), options.fontSize);
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), options.color);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), options.style);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), options.weight);
+    auto actualWeight = (*it)->fontStyle->GetVariableFontWeight().value_or(0);
+    EXPECT_EQ(actualWeight, options.variableWeight);
+    auto actualEnable = (*it)->fontStyle->GetEnableVariableFontWeight().value_or(false);
+    EXPECT_EQ(actualEnable, options.enableVariable);
+    auto actualDevice = (*it)->fontStyle->GetEnableDeviceFontWeightCategory().value_or(true);
+    EXPECT_EQ(actualDevice, options.enableDevice);
+}
+
+/**
+ * @tc.name: MutableSpanString020
+ * @tc.desc: Test serialization and unserialization of SpanString with VariableFontWeight TLV - all properties set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString020, TestSize.Level1)
+{
+    std::vector<uint8_t> buff;
+
+    // Create fonts and build span string
+    Font font1 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::BOLD, OHOS::Ace::Dimension(29.0, OHOS::Ace::DimensionUnit::PX),
+        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 10 }, { 266, true, true });
+    Font font2 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::W300, OHOS::Ace::Dimension(49.0, OHOS::Ace::DimensionUnit::VP),
+        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::BLUE, 5 }, { 333, false, false });
+    Font font3 = CreateTestFont(
+        { OHOS::Ace::FontWeight::W500, OHOS::Ace::Dimension(35.0, OHOS::Ace::DimensionUnit::FP),
+        OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::GREEN, 3 });
+
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"TestVariableFontWeight");
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font1, 0, 3));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font2, 5, 8));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font3, 10, 12));
+
+    spanStr->EncodeTlv(buff);
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
+
+    EXPECT_EQ(spans.size(), 6);
+    auto it = spans.begin();
+
+    // Verify all spans
+    SpanVerifyOptions verifyOpts1 { "Tes", 0, 3, OHOS::Ace::Dimension(29, OHOS::Ace::DimensionUnit::PX),
+        OHOS::Ace::Color::RED, OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::FontWeight::BOLD, 266, true, true };
+    VerifyFullSpan(it, verifyOpts1);
+    ++it;
+    VerifySpanContentAndInterval(it, "tV", 3, 5);
+    ++it;
+    SpanVerifyOptions verifyOpts2 { "ari", 5, 8, OHOS::Ace::Dimension(49, OHOS::Ace::DimensionUnit::VP),
+        OHOS::Ace::Color::BLUE, OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::FontWeight::W300, 333, false, false };
+    VerifyFullSpan(it, verifyOpts2);
+    ++it;
+    VerifySpanContentAndInterval(it, "ab", 8, 10);
+    ++it;
+    SpanVerifyOptions verifyOpts3 { "le", 10, 12, OHOS::Ace::Dimension(35, OHOS::Ace::DimensionUnit::FP),
+        OHOS::Ace::Color::GREEN, OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontWeight::W500, 0, false, true };
+    VerifyFullSpan(it, verifyOpts3);
+    ++it;
+    VerifySpanContentAndInterval(it, "FontWeight", 12, 22);
+}
+
+/**
+ * @tc.name: MutableSpanString021
+ * @tc.desc: Test serialization with partial properties combinations of variableFontWeight TLVs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString021, TestSize.Level1)
+{
+    std::vector<uint8_t> buff;
+
+    // Create fonts with different property combinations
+    Font font1 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::BOLD, OHOS::Ace::Dimension(29.0, OHOS::Ace::DimensionUnit::PX),
+        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 10 }, { 266, true, std::nullopt });
+    Font font2 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::W300, OHOS::Ace::Dimension(49.0, OHOS::Ace::DimensionUnit::VP),
+        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::BLUE, 5 }, { std::nullopt, std::nullopt, false });
+    Font font3 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::W500, OHOS::Ace::Dimension(35.0, OHOS::Ace::DimensionUnit::FP),
+        OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::GREEN, 3 }, { 400, std::nullopt, std::nullopt });
+    Font font4 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::BOLD, OHOS::Ace::Dimension(25.0, OHOS::Ace::DimensionUnit::PX),
+        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 7 }, { std::nullopt, true, std::nullopt });
+    Font font5 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::W400, OHOS::Ace::Dimension(30.0, OHOS::Ace::DimensionUnit::VP),
+        OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::BLUE, 4 }, { 500, std::nullopt, false });
+    Font font6 = CreateTestFontWithVariableWeight(
+        { OHOS::Ace::FontWeight::W600, OHOS::Ace::Dimension(32.0, OHOS::Ace::DimensionUnit::FP),
+        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::GREEN, 6 }, { std::nullopt, true, false });
+
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"123456789012345678");
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font1, 0, 3));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font2, 3, 6));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font3, 6, 9));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font4, 9, 12));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font5, 12, 15));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font6, 15, 18));
+
+    spanStr->EncodeTlv(buff);
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
+    EXPECT_EQ(spans.size(), 6);
+    auto it = spans.begin();
+    // Verify each span: content, interval, (variableWeight, enableVariable, enableDevice)
+    VerifySpanWithVariableWeight(it, "123", 0, 3, { 266, true, true });
+    ++it;
+    VerifySpanWithVariableWeight(it, "456", 3, 6, { 0, false, false });
+    ++it;
+    VerifySpanWithVariableWeight(it, "789", 6, 9, { 400, false, true });
+    ++it;
+    VerifySpanWithVariableWeight(it, "012", 9, 12, { 0, true, true });
+    ++it;
+    VerifySpanWithVariableWeight(it, "345", 12, 15, { 500, false, false });
+    ++it;
+    VerifySpanWithVariableWeight(it, "678", 15, 18, { 0, true, false });
 }
 } // namespace OHOS::Ace::NG

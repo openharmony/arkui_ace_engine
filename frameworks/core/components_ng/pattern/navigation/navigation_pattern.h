@@ -453,8 +453,8 @@ public:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
 
     bool IsLastStdChange();
-    bool ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination);
+    bool ReplaceTransition(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isAnimated = true);
     void TransitionWithDialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     void FollowStdNavdestinationAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -538,6 +538,10 @@ public:
     bool IsForceSplitUseNavBar() const
     {
         return forceSplitUseNavBar_;
+    }
+    bool IsNavBarIsHome() const
+    {
+        return navBarIsHome_;
     }
 
     std::optional<bool> IsHomeNodeTouched() const

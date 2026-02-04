@@ -810,6 +810,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableDeviceFontWeightCategory, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(LineThicknessScale, float, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);

@@ -68,6 +68,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     // Create paragraph.
     pattern->SetAdaptFontSize(std::nullopt);
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    textFieldContentConstraint = BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint, layoutWrapper);
     if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint)) {
         if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
             layoutWrapper)) {
@@ -227,8 +228,10 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.SetWidth(finalWidth);
         frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
     } else {
+        auto voiceArea = pattern->GetVoiceResponseArea();
+        float responseAreaWidth = voiceArea ? voiceArea->GetFrameSize().Width() : 0.0f;
         // The width after MeasureContent is already optimal, but the height needs to be constrained in Measure.
-        finalWidth = contentWidth + pattern->GetHorizontalPaddingAndBorderSum();
+        finalWidth = contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + responseAreaWidth;
         frameSize.SetWidth(finalWidth);
         ConstraintHeight(layoutWrapper, frameSize, contentHeight);
     }
@@ -272,28 +275,36 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto size = geometryNode->GetFrameSize() -
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
-
+    auto voiceArea = pattern->GetVoiceResponseArea();
+    if (pattern->IsShowVoiceButtonMode() && voiceArea) {
+        size = size - SizeF(voiceArea->GetFrameSize().Width(), 0.0f);
+    }
     // Remove counterNode height.
-    auto counterDecorator = pattern->GetCounterDecorator();
-    if (counterDecorator && !pattern->IsNormalInlineState()) {
-        size.SetHeight(size.Height() - counterDecorator->GetDecoratorHeight());
+    if (pattern->GetCounterDecorator() && !pattern->IsNormalInlineState()) {
+        size.SetHeight(size.Height() - pattern->GetCounterDecorator()->GetDecoratorHeight());
     }
 
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto context = layoutWrapper->GetHostNode()->GetContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset(false, true) -
-        context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = frameNode->GetPaintRectOffsetNG(false, true) - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
     auto border = pattern->GetBorderWidthProperty();
     auto offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
         pattern->GetPaddingTop() + pattern->GetBorderTop(border));
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (pattern->IsShowVoiceButtonMode() && voiceArea && isRTL) {
+        offsetBase.SetX(geometryNode->GetFrameSize().Width() - pattern->GetPaddingRight() -
+                        pattern->GetBorderRight(border) - size.Width());
+    }
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -312,12 +323,28 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         content->SetOffset(offsetBase);
     }
 
-    StyledPlaceholderLayout(layoutWrapper, pattern);
+    LayoutCounterAndVoiceButton(layoutWrapper);
+}
 
+void TextAreaLayoutAlgorithm::LayoutCounterAndVoiceButton(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    StyledPlaceholderLayout(layoutWrapper, pattern);
+    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
     // CounterNode Layout.
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
         TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
+    }
+    auto voiceArea = pattern->GetVoiceResponseArea();
+    if (pattern->IsShowVoiceButtonMode() && voiceArea) {
+        auto nodeWidth = 0.0f;
+        int32_t childIndex = frameNode->GetChildIndex(voiceArea->GetFrameNode());
+        voiceArea->Layout(layoutWrapper, childIndex, nodeWidth);
     }
 }
 
@@ -371,5 +398,25 @@ void TextAreaLayoutAlgorithm::CalcMeasureContentWithMinLines(
     if (GreatNotEqual(finalMinHeight, size.value().Height())) {
         size.value().SetHeight(finalMinHeight);
     }
+}
+
+LayoutConstraintF TextAreaLayoutAlgorithm::BuildLayoutConstraintWithoutResponseArea(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, contentConstraint);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, contentConstraint);
+    auto voiceArea = pattern->GetVoiceResponseArea();
+    CHECK_NULL_RETURN(voiceArea, contentConstraint);
+    auto childIndex = frameNode->GetChildIndex(voiceArea->GetFrameNode());
+    auto childWidth = voiceArea->Measure(layoutWrapper, childIndex).Width();
+    auto newLayoutConstraint = contentConstraint;
+    newLayoutConstraint.maxSize.SetWidth(std::max(newLayoutConstraint.maxSize.Width() - childWidth, 0.0f));
+    newLayoutConstraint.minSize.SetWidth(std::max(newLayoutConstraint.minSize.Width() - childWidth, 0.0f));
+    if (newLayoutConstraint.selfIdealSize.Width()) {
+        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
+    }
+    return newLayoutConstraint;
 }
 } // namespace OHOS::Ace::NG

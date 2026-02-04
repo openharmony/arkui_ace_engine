@@ -38,7 +38,7 @@ void CheckBoxModelStatic::SetSelect(FrameNode* frameNode, const std::optional<bo
     if (isSelected.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected.value(), frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, false, frameNode);
     }
 }
 

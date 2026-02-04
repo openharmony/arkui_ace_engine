@@ -601,6 +601,60 @@ export class ContentTransitionEffect implements MaterializedBase {
         return
     }
 }
+export interface DismissContentCoverAction {
+    reason: DismissReason
+    dismiss(): void
+}
+export class DismissContentCoverActionInternal implements MaterializedBase,DismissContentCoverAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, DismissContentCoverActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(DismissContentCoverActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._DismissContentCoverAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissContentCoverAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissContentCoverActionInternal {
+        return new DismissContentCoverActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as (DismissReason)
+        this.setReason_serialize(reason_casted)
+        return
+    }
+    dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissContentCoverAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval  = ArkUIGeneratedNativeModule._DismissContentCoverAction_getReason(this.peer!.ptr)
+        return DismissReason.fromValue(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissContentCoverAction_setReason(this.peer!.ptr, reason.valueOf())
+    }
+}
 export interface DismissPopupAction {
     reason: DismissReason
     dismiss(): void
@@ -653,6 +707,60 @@ export class DismissPopupActionInternal implements MaterializedBase,DismissPopup
     }
     private setReason_serialize(reason: DismissReason): void {
         ArkUIGeneratedNativeModule._DismissPopupAction_setReason(this.peer!.ptr, reason.valueOf())
+    }
+}
+export interface DismissSheetAction {
+    reason: DismissReason
+    dismiss(): void
+}
+export class DismissSheetActionInternal implements MaterializedBase,DismissSheetAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, DismissSheetActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(DismissSheetActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._DismissSheetAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissSheetAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissSheetActionInternal {
+        return new DismissSheetActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as (DismissReason)
+        this.setReason_serialize(reason_casted)
+        return
+    }
+    dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissSheetAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval  = ArkUIGeneratedNativeModule._DismissSheetAction_getReason(this.peer!.ptr)
+        return DismissReason.fromValue(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissSheetAction_setReason(this.peer!.ptr, reason.valueOf())
     }
 }
 export interface DragEvent {
@@ -7424,10 +7532,6 @@ export interface BindOptions {
     onWillAppear?: (() => void);
     onWillDisappear?: (() => void);
 }
-export interface DismissContentCoverAction {
-    dismiss: VoidCallback;
-    reason: DismissReason;
-}
 export interface ContentCoverOptions extends BindOptions {
     modalTransition?: ModalTransition;
     onWillDismiss?: ((value0: DismissContentCoverAction) => void);
@@ -7461,11 +7565,36 @@ export enum SheetKeyboardAvoidMode {
     POPUP_SHEET = 4
 }
 export interface SheetDismiss {
-    dismiss: VoidCallback;
+    dismiss(): void
 }
-export interface DismissSheetAction {
-    dismiss: VoidCallback;
-    reason: DismissReason;
+export class SheetDismissInternal implements MaterializedBase,SheetDismiss {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SheetDismissInternal.getFinalizer())
+    }
+    constructor() {
+        this(SheetDismissInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._SheetDismiss_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SheetDismiss_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): SheetDismissInternal {
+        return new SheetDismissInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._SheetDismiss_dismiss(this.peer!.ptr)
+    }
 }
 export interface SpringBackAction {
     springBack(): void
@@ -14017,6 +14146,17 @@ export class ContentTransitionEffect_serializer {
         return ContentTransitionEffectInternal.fromPtr(ptr)
     }
 }
+export class DismissSheetAction_serializer {
+    public static write(buffer: SerializerBase, value: DismissSheetAction): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): DismissSheetAction {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DismissSheetActionInternal.fromPtr(ptr)
+    }
+}
 export class InvertOptions_serializer {
     public static write(buffer: SerializerBase, value: InvertOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -14132,6 +14272,17 @@ export class ScrollResult_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return ScrollResultInternal.fromPtr(ptr)
+    }
+}
+export class SheetDismiss_serializer {
+    public static write(buffer: SerializerBase, value: SheetDismiss): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): SheetDismiss {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SheetDismissInternal.fromPtr(ptr)
     }
 }
 export class SizeResult_serializer {
@@ -14799,28 +14950,12 @@ export class DateRange_serializer {
 export class DismissContentCoverAction_serializer {
     public static write(buffer: SerializerBase, value: DismissContentCoverAction): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForDismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(valueHolderForDismiss)
-        const valueHolderForReason  = value.reason
-        valueSerializer.writeInt32(valueHolderForReason.valueOf())
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): DismissContentCoverAction {
         let valueDeserializer : DeserializerBase = buffer
-        const dismissTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const dismissTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const dismissTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const dismissTmpResult : VoidCallback = ():void => {
-            const dismissTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            dismissTmpBufBufArgsSerializer.writeInt32(dismissTmpBufBufResource.resourceId);
-            dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCall);
-            dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
-            dismissTmpBufBufArgsSerializer.release();
-            return;
-        }
-        const reasonTmpResult : DismissReason = DismissReason.fromValue(valueDeserializer.readInt32())
-        let value : DismissContentCoverAction = ({dismiss: dismissTmpResult, reason: reasonTmpResult} as DismissContentCoverAction)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DismissContentCoverActionInternal.fromPtr(ptr)
     }
 }
 export class DismissPopupAction_serializer {
@@ -14832,33 +14967,6 @@ export class DismissPopupAction_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return DismissPopupActionInternal.fromPtr(ptr)
-    }
-}
-export class DismissSheetAction_serializer {
-    public static write(buffer: SerializerBase, value: DismissSheetAction): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForDismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(valueHolderForDismiss)
-        const valueHolderForReason  = value.reason
-        valueSerializer.writeInt32(valueHolderForReason.valueOf())
-    }
-    public static read(buffer: DeserializerBase): DismissSheetAction {
-        let valueDeserializer : DeserializerBase = buffer
-        const dismissTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const dismissTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const dismissTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const dismissTmpResult : VoidCallback = ():void => {
-            const dismissTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            dismissTmpBufBufArgsSerializer.writeInt32(dismissTmpBufBufResource.resourceId);
-            dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCall);
-            dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
-            dismissTmpBufBufArgsSerializer.release();
-            return;
-        }
-        const reasonTmpResult : DismissReason = DismissReason.fromValue(valueDeserializer.readInt32())
-        let value : DismissSheetAction = ({dismiss: dismissTmpResult, reason: reasonTmpResult} as DismissSheetAction)
-        return value
     }
 }
 export class DragEvent_serializer {
@@ -16642,30 +16750,6 @@ export class SelectionOptions_serializer {
         }
         const menuPolicyTmpResult : MenuPolicy | undefined = menuPolicyTmpBuf
         let value : SelectionOptions = ({menuPolicy: menuPolicyTmpResult} as SelectionOptions)
-        return value
-    }
-}
-export class SheetDismiss_serializer {
-    public static write(buffer: SerializerBase, value: SheetDismiss): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForDismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(valueHolderForDismiss)
-    }
-    public static read(buffer: DeserializerBase): SheetDismiss {
-        let valueDeserializer : DeserializerBase = buffer
-        const dismissTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const dismissTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const dismissTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const dismissTmpResult : VoidCallback = ():void => {
-            const dismissTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            dismissTmpBufBufArgsSerializer.writeInt32(dismissTmpBufBufResource.resourceId);
-            dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCall);
-            dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, -2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
-            dismissTmpBufBufArgsSerializer.release();
-            return;
-        }
-        let value : SheetDismiss = ({dismiss: dismissTmpResult} as SheetDismiss)
         return value
     }
 }

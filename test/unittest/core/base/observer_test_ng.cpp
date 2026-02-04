@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
 #include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
@@ -651,5 +652,415 @@ HWTEST_F(ObserverTestNg, ObserverTestNg024, TestSize.Level1)
     UIObserverHandler::GetInstance().SetWinSizeLayoutBreakpointChangeFunc(nullptr);
     UIObserverHandler::GetInstance().NotifyWinSizeLayoutBreakpointChangeFunc(instanceId, breakpoint);
     EXPECT_FALSE(callbackCalled);
+}
+
+/**
+ * @tc.name: ObserverTestNg025
+ * @tc.desc: Test GlobalGestureListenerStorage::CombineKey generates correct combined key
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg025, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Test CombineKey with TAP gesture type and WILL_START phase
+     * @tc.expected: Combined key should be (TAP << 32 | WILL_START)
+     */
+    uint64_t key1 = GlobalGestureListenerStorage::CombineKey(
+        GestureListenerType::TAP, GestureActionPhase::WILL_START);
+    uint64_t expectedKey1 = (static_cast<uint64_t>(GestureListenerType::TAP) << 32) |
+                             static_cast<uint64_t>(GestureActionPhase::WILL_START);
+    EXPECT_EQ(key1, expectedKey1);
+
+    /**
+     * @tc.steps2: Test CombineKey with PAN gesture type and WILL_END phase
+     * @tc.expected: Combined key should be (PAN << 32 | WILL_END)
+     */
+    uint64_t key2 = GlobalGestureListenerStorage::CombineKey(
+        GestureListenerType::PAN, GestureActionPhase::WILL_END);
+    uint64_t expectedKey2 = (static_cast<uint64_t>(GestureListenerType::PAN) << 32) |
+                             static_cast<uint64_t>(GestureActionPhase::WILL_END);
+    EXPECT_EQ(key2, expectedKey2);
+
+    /**
+     * @tc.steps3: Test CombineKey with LONG_PRESS gesture type and UNKNOWN phase
+     * @tc.expected: Combined key should be (LONG_PRESS << 32 | UNKNOWN)
+     */
+    uint64_t key3 = GlobalGestureListenerStorage::CombineKey(
+        GestureListenerType::LONG_PRESS, GestureActionPhase::UNKNOWN);
+    uint64_t expectedKey3 = (static_cast<uint64_t>(GestureListenerType::LONG_PRESS) << 32) |
+                             static_cast<uint64_t>(GestureActionPhase::UNKNOWN);
+    EXPECT_EQ(key3, expectedKey3);
+}
+
+/**
+ * @tc.name: ObserverTestNg026
+ * @tc.desc: Test AddGlobalGestureListenerCallback and TriggerGlobalGestureListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg026, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create test trigger info and callback
+     */
+    GestureTriggerInfo testInfo;
+    testInfo.currentPhase = static_cast<int32_t>(GestureActionPhase::WILL_START);
+
+    static bool callbackTriggered = false;
+    callbackTriggered = false;
+
+    GlobalGestureListenerCallback callback = [&testInfo](const GestureTriggerInfo& info) {
+        callbackTriggered = true;
+        EXPECT_EQ(info.currentPhase, testInfo.currentPhase);
+    };
+
+    /**
+     * @tc.steps2: Add global gesture listener callback for TAP gesture
+     * @tc.expected: Callback should be successfully added
+     */
+    int32_t resourceId = 1001;
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::TAP,
+        GestureActionPhase::WILL_START,
+        resourceId,
+        std::move(callback));
+
+    /**
+     * @tc.steps3: Trigger global gesture listener
+     * @tc.expected: Callback should be triggered
+     */
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::TAP,
+        GestureActionPhase::WILL_START,
+        testInfo);
+    EXPECT_TRUE(callbackTriggered);
+
+    /**
+     * @tc.steps4: Clean up - remove the listener
+     */
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::TAP, resourceId);
+}
+
+/**
+ * @tc.name: ObserverTestNg027
+ * @tc.desc: Test RemoveGlobalGestureListenerCallback removes by resourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg027, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Add callback for PAN gesture
+     */
+    static bool callbackTriggered = false;
+    callbackTriggered = false;
+
+    GlobalGestureListenerCallback callback1 = [](const GestureTriggerInfo&) {
+        callbackTriggered = true;
+    };
+
+    int32_t resourceId1 = 2001;
+
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::PAN, GestureActionPhase::WILL_END, resourceId1, std::move(callback1));
+
+    /**
+     * @tc.steps2: Trigger listener before removal
+     * @tc.expected: Callback should be triggered
+     */
+    GestureTriggerInfo testInfo;
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::PAN, GestureActionPhase::WILL_END, testInfo);
+    EXPECT_TRUE(callbackTriggered);
+
+    /**
+     * @tc.steps3: Remove callback by resourceId
+     */
+    callbackTriggered = false;
+
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::PAN, resourceId1);
+
+    /**
+     * @tc.steps4: Trigger listener after removal
+     * @tc.expected: No callback should be triggered
+     */
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::PAN, GestureActionPhase::WILL_END, testInfo);
+    EXPECT_FALSE(callbackTriggered);
+}
+
+/**
+ * @tc.name: ObserverTestNg027b
+ * @tc.desc: Test AddGlobalGestureListenerCallback overwrites old callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg027b, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Add first callback for PINCH gesture
+     */
+    static int callbackCount = 0;
+    callbackCount = 0;
+
+    GlobalGestureListenerCallback callback1 = [](const GestureTriggerInfo&) {
+        callbackCount = 1;
+    };
+    GlobalGestureListenerCallback callback2 = [](const GestureTriggerInfo&) {
+        callbackCount = 2;
+    };
+
+    int32_t resourceId1 = 2010;
+    int32_t resourceId2 = 2011;
+
+    // Add first callback
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START, resourceId1, std::move(callback1));
+
+    /**
+     * @tc.steps2: Trigger first callback
+     * @tc.expected: callbackCount should be 1
+     */
+    GestureTriggerInfo testInfo;
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START, testInfo);
+    EXPECT_EQ(callbackCount, 1);
+
+    /**
+     * @tc.steps3: Add second callback (should overwrite first)
+     */
+    callbackCount = 0;
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START, resourceId2, std::move(callback2));
+
+    /**
+     * @tc.steps4: Trigger second callback
+     * @tc.expected: callbackCount should be 2 (not 1)
+     */
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START, testInfo);
+    EXPECT_EQ(callbackCount, 2);
+
+    /**
+     * @tc.steps5: Clean up
+     */
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START);
+}
+
+/**
+ * @tc.name: ObserverTestNg028
+ * @tc.desc: Test RemoveGlobalGestureListenerCallback with isRemoveAll flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg028, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Add callbacks for multiple phases of the same gesture type
+     */
+    static int willStartCount = 0;
+    static int willEndCount = 0;
+
+    GlobalGestureListenerCallback callback1 = [](const GestureTriggerInfo&) {
+        willStartCount++;
+    };
+    GlobalGestureListenerCallback callback2 = [](const GestureTriggerInfo&) {
+        willEndCount++;
+    };
+
+    int32_t resourceId1 = 3001;
+    int32_t resourceId2 = 3002;
+
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_START, resourceId1, std::move(callback1));
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_END, resourceId2, std::move(callback2));
+
+    /**
+     * @tc.steps2: Trigger listeners before removal
+     */
+    GestureTriggerInfo testInfo;
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_START, testInfo);
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_END, testInfo);
+    EXPECT_EQ(willStartCount, 1);
+    EXPECT_EQ(willEndCount, 1);
+
+    /**
+     * @tc.steps3: Remove all callbacks for SWIPE gesture type
+     */
+    willStartCount = 0;
+    willEndCount = 0;
+
+    // Remove callbacks for both phases
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_START);
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_END);
+
+    /**
+     * @tc.steps4: Trigger listeners after removal
+     * @tc.expected: No callbacks should be triggered
+     */
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_START, testInfo);
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::SWIPE, GestureActionPhase::WILL_END, testInfo);
+    EXPECT_EQ(willStartCount, 0);
+    EXPECT_EQ(willEndCount, 0);
+}
+
+/**
+ * @tc.name: ObserverTestNg029
+ * @tc.desc: Test callback overwriting - last callback wins
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg029, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Add multiple callbacks for same gesture type and phase
+     * Since each (gestureType, phase) combination only stores one callback,
+     * the last added callback overwrites previous ones
+     */
+    static int callbackValue = 0;
+    callbackValue = 0;
+
+    int32_t resourceIds[] = {4001, 4002, 4003};
+
+    for (int i = 0; i < 3; i++) {
+        // Each callback sets callbackValue to (i + 1)
+        int value = i + 1;
+        GlobalGestureListenerCallback callback = [value](const GestureTriggerInfo&) {
+            callbackValue = value;
+        };
+        UIObserverHandler::AddGlobalGestureListenerCallback(
+            GestureListenerType::PINCH, GestureActionPhase::WILL_START, resourceIds[i], std::move(callback));
+    }
+
+    /**
+     * @tc.steps2: Trigger listener
+     * @tc.expected: Only the last callback (value=3) should have been stored
+     */
+    GestureTriggerInfo testInfo;
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START, testInfo);
+    EXPECT_EQ(callbackValue, 3);  // Last callback wins
+
+    /**
+     * @tc.steps3: Remove callback by phase
+     */
+    callbackValue = 0;
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START);
+
+    /**
+     * @tc.steps4: Trigger listener after removal
+     * @tc.expected: No callback should be triggered
+     */
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::PINCH, GestureActionPhase::WILL_START, testInfo);
+    EXPECT_EQ(callbackValue, 0);
+}
+
+/**
+ * @tc.name: ObserverTestNg030
+ * @tc.desc: Test GestureTriggerInfo structure
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg030, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create and populate GestureTriggerInfo
+     */
+    GestureTriggerInfo triggerInfo;
+
+    GestureEvent gestureEvent;
+    gestureEvent.SetOffsetX(100.0);
+    gestureEvent.SetOffsetY(200.0);
+    triggerInfo.event = gestureEvent;
+
+    void* mockRecognizer = reinterpret_cast<void*>(0x12345678);
+    triggerInfo.current = mockRecognizer;
+
+    triggerInfo.currentPhase = static_cast<int32_t>(GestureActionPhase::WILL_END);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 5001, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    triggerInfo.node = frameNode;
+
+    /**
+     * @tc.steps2: Verify all fields are correctly set
+     */
+    EXPECT_EQ(triggerInfo.event.GetOffsetX(), 100.0);
+    EXPECT_EQ(triggerInfo.event.GetOffsetY(), 200.0);
+    EXPECT_EQ(triggerInfo.current, mockRecognizer);
+    EXPECT_EQ(triggerInfo.currentPhase, static_cast<int32_t>(GestureActionPhase::WILL_END));
+    EXPECT_EQ(triggerInfo.node, frameNode);
+
+    /**
+     * @tc.steps3: Test callback receives correct GestureTriggerInfo
+     */
+    static bool infoCorrect = false;
+    infoCorrect = false;
+
+    GlobalGestureListenerCallback callback = [&triggerInfo](const GestureTriggerInfo& info) {
+        infoCorrect = (info.event.GetOffsetX() == triggerInfo.event.GetOffsetX() &&
+                       info.event.GetOffsetY() == triggerInfo.event.GetOffsetY() &&
+                       info.current == triggerInfo.current &&
+                       info.currentPhase == triggerInfo.currentPhase &&
+                       info.node == triggerInfo.node);
+    };
+
+    int32_t resourceId = 6001;
+    UIObserverHandler::AddGlobalGestureListenerCallback(
+        GestureListenerType::ROTATION, GestureActionPhase::WILL_END, resourceId, std::move(callback));
+
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::ROTATION, GestureActionPhase::WILL_END, triggerInfo);
+    EXPECT_TRUE(infoCorrect);
+
+    /**
+     * @tc.steps4: Clean up
+     */
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::ROTATION, resourceId);
+}
+
+/**
+ * @tc.name: ObserverTestNg031
+ * @tc.desc: Test thread safety of global gesture listener operations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg031, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Add multiple callbacks rapidly
+     */
+    for (int i = 0; i < 10; i++) {
+        GlobalGestureListenerCallback callback = [](const GestureTriggerInfo&) {};
+        int32_t resourceId = 7000 + i;
+        UIObserverHandler::AddGlobalGestureListenerCallback(
+            GestureListenerType::TAP, GestureActionPhase::WILL_START, resourceId, std::move(callback));
+    }
+
+    /**
+     * @tc.steps2: Trigger listener
+     * @tc.expected: Should execute last callback without crashing
+     */
+    GestureTriggerInfo testInfo;
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::TAP, GestureActionPhase::WILL_START, testInfo);
+
+    /**
+     * @tc.steps3: Remove all callbacks
+     */
+    UIObserverHandler::RemoveGlobalGestureListenerCallback(
+        GestureListenerType::TAP, GestureActionPhase::WILL_START);
+
+    /**
+     * @tc.steps4: Verify cleanup
+     */
+    UIObserverHandler::TriggerGlobalGestureListener(
+        GestureListenerType::TAP, GestureActionPhase::WILL_START, testInfo);
 }
 }

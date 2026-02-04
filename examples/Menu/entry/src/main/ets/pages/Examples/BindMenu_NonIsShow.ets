@@ -41,7 +41,7 @@ struct BindMenuNonIsShowTest {
             // 展示菜单Menu中具体的item菜单项
             MenuItem({content: '撤销',})
             .width(100)
-            .hight(50)
+            .height(50)
             .onClick(() => {
                 this.result?.undo();
                 this.showMenu = false;

@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
 const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
 const std::string AUTO_FILL_PARAMS_OTHERACCOUNT = "com.autofill.params.otherAccount";
+const std::string VOICE_KBD_KEY = "voiceTextStatus";
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
     if (text.empty()) {
@@ -428,21 +429,25 @@ int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
         OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(privateCommand, textFieldPattern);
     };
     PostTaskToUI(uiTask, "ArkUITextFieldAutoFillReceivePrivateCommand");
-
-    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
     if (privateCommand.empty()) {
-        return ret;
+        return MiscServices::ErrorCode::NO_ERROR;
     }
+    return HandlePrivateCommand(privateCommand);
+}
+
+int32_t OnTextChangedListenerImpl::HandlePrivateCommand(
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
+{
     for (const auto& item : privateCommand) {
-        if (item.first != PRIVATE_DATA_KEY) {
-            continue;
-        }
-        size_t idx = item.second.index();
-        if (idx != static_cast<size_t>(MiscServices::PrivateDataValueType::VALUE_TYPE_STRING)) {
-            continue;
-        }
-        auto stringValue = std::get_if<std::string>(&item.second);
-        if (stringValue != nullptr) {
+        if (item.first == PRIVATE_DATA_KEY) {
+            size_t idx = item.second.index();
+            if (idx != static_cast<size_t>(MiscServices::PrivateDataValueType::VALUE_TYPE_STRING)) {
+                continue;
+            }
+            auto stringValue = std::get_if<std::string>(&item.second);
+            if (stringValue == nullptr) {
+                continue;
+            }
             std::string style = *stringValue;
             auto task = [textFieldPattern = pattern_, style] {
                 ACE_SCOPED_TRACE("ReceivePrivateCommand");
@@ -452,10 +457,31 @@ int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
                 client->ReceivePreviewTextStyle(style);
             };
             PostTaskToUI(task, "ArkUITextFieldReceivePrivateCommand");
-            ret = MiscServices::ErrorCode::NO_ERROR;
+        } else if (item.first == VOICE_KBD_KEY) {
+            size_t idx = item.second.index();
+            if (idx != static_cast<size_t>(MiscServices::PrivateDataValueType::VALUE_TYPE_BOOL)) {
+                continue;
+            }
+            auto boolValue = std::get_if<bool>(&item.second);
+            if (boolValue == nullptr) {
+                continue;
+            }
+            bool voiceKBShown = *boolValue;
+            auto task = [textFieldPattern = pattern_, voiceKBShown] {
+                ACE_SCOPED_TRACE("ReceiveVoiceKBShown");
+                auto client = textFieldPattern.Upgrade();
+                CHECK_NULL_VOID(client);
+                ContainerScope scope(client->GetInstanceId());
+                auto pattern = AceType::DynamicCast<TextFieldPattern>(client);
+                CHECK_NULL_VOID(pattern);
+                TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                    "ReceivePrivateCommand SetVoiceKBShown:%{public}d", voiceKBShown);
+                pattern->SetVoiceKBShown(voiceKBShown);
+            };
+            PostTaskToUI(task, "ArkUITextFieldReceiveVoiceKB");
         }
     }
-    return ret;
+    return MiscServices::ErrorCode::NO_ERROR;
 }
 
 int32_t OnTextChangedListenerImpl::CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range)

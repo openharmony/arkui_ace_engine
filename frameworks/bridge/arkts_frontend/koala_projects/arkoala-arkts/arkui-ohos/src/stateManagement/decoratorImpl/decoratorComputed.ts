@@ -15,7 +15,7 @@
 import { ObserveSingleton } from '../base/observeSingleton';
 import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable, IVariableOwner } from '../decorator';
+import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
 import { FactoryInternal } from '../base/iFactoryInternal';
 
 export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
@@ -23,7 +23,7 @@ export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
     isFreeze(): boolean;
 }
 
-export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<T> {
+export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<T>, IDecoratorBaseRegistry {
     public static readonly MIN_COMPUTED_ID: RenderIdType = 0x10000000;
     public static nextComputedId_: RenderIdType = ComputedDecoratedVariable.MIN_COMPUTED_ID;
     public readonly decorator: string;
@@ -78,6 +78,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
 
     setOwner(owningView: IVariableOwner) {
         this.owningComponent_ = owningView;
+        this.registerToOwningView();
     }
 
     resetOnReuse(): void {
@@ -106,5 +107,9 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
             ObserveSingleton.instance.renderingComponentRef = renderingComponentRefBefore;
         }
         return newValue;
+    }
+
+    public registerToOwningView(): void {
+        this.owningComponent_?.__registerStateVariables__Internal(this);
     }
 }

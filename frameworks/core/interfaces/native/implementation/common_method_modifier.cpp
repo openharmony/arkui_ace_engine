@@ -2166,62 +2166,6 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContex
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id, ctx);
 }
-void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
 
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src, ConvContext *ctx)
 {
@@ -6213,7 +6157,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     Converter::VisitUnion(menuOption->preview,
         [&menuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
@@ -6275,7 +6219,7 @@ void BindContextMenuBoth(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     for (auto& type : responseTypeArray) {
         auto triggerMenuParam = menuParam;
         Converter::VisitUnion(menuOption->preview,

@@ -100,7 +100,7 @@ class AnimatorResultInner implements AnimatorResult {
         let animatorRet = input as AnimatorResultInner;
         if (animatorRet) {
             let addr = animatorRet.animatorResult;
-            let module = ESValue.load("@ohos.animator");
+            let module = ESValue.load("@ohos.animator").getProperty('default');
             let initFunc = module.getProperty("__createTransfer__")
             if (initFunc) {
                 let animatorRet = initFunc.invoke(ESObject.wrap(addr));

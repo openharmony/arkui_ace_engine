@@ -32206,6 +32206,29 @@ void impl_DisappearSymbolEffect_setScope(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getDisappearSymbolEffectAccessor()->setScope(self, static_cast<Opt_EffectScope*>(&scopeValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(DisappearSymbolEffect_setScope, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_DismissContentCoverAction_construct() {
+        return GetAccessors()->getDismissContentCoverActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(DismissContentCoverAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_DismissContentCoverAction_getFinalizer() {
+        return GetAccessors()->getDismissContentCoverActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(DismissContentCoverAction_getFinalizer, Ark_NativePointer)
+void impl_DismissContentCoverAction_dismiss(Ark_NativePointer thisPtr) {
+        Ark_DismissContentCoverAction self = reinterpret_cast<Ark_DismissContentCoverAction>(thisPtr);
+        GetAccessors()->getDismissContentCoverActionAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(DismissContentCoverAction_dismiss, Ark_NativePointer)
+Ark_Int32 impl_DismissContentCoverAction_getReason(Ark_NativePointer thisPtr) {
+        Ark_DismissContentCoverAction self = reinterpret_cast<Ark_DismissContentCoverAction>(thisPtr);
+        return GetAccessors()->getDismissContentCoverActionAccessor()->getReason(self);
+}
+KOALA_INTEROP_DIRECT_1(DismissContentCoverAction_getReason, Ark_Int32, Ark_NativePointer)
+void impl_DismissContentCoverAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reason) {
+        Ark_DismissContentCoverAction self = reinterpret_cast<Ark_DismissContentCoverAction>(thisPtr);
+        GetAccessors()->getDismissContentCoverActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
+}
+KOALA_INTEROP_DIRECT_V2(DismissContentCoverAction_setReason, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_DismissDialogAction_construct() {
         return GetAccessors()->getDismissDialogActionAccessor()->construct();
 }
@@ -32252,6 +32275,29 @@ void impl_DismissPopupAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reas
         GetAccessors()->getDismissPopupActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
 }
 KOALA_INTEROP_DIRECT_V2(DismissPopupAction_setReason, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_DismissSheetAction_construct() {
+        return GetAccessors()->getDismissSheetActionAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(DismissSheetAction_construct, Ark_NativePointer)
+Ark_NativePointer impl_DismissSheetAction_getFinalizer() {
+        return GetAccessors()->getDismissSheetActionAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(DismissSheetAction_getFinalizer, Ark_NativePointer)
+void impl_DismissSheetAction_dismiss(Ark_NativePointer thisPtr) {
+        Ark_DismissSheetAction self = reinterpret_cast<Ark_DismissSheetAction>(thisPtr);
+        GetAccessors()->getDismissSheetActionAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(DismissSheetAction_dismiss, Ark_NativePointer)
+Ark_Int32 impl_DismissSheetAction_getReason(Ark_NativePointer thisPtr) {
+        Ark_DismissSheetAction self = reinterpret_cast<Ark_DismissSheetAction>(thisPtr);
+        return GetAccessors()->getDismissSheetActionAccessor()->getReason(self);
+}
+KOALA_INTEROP_DIRECT_1(DismissSheetAction_getReason, Ark_Int32, Ark_NativePointer)
+void impl_DismissSheetAction_setReason(Ark_NativePointer thisPtr, Ark_Int32 reason) {
+        Ark_DismissSheetAction self = reinterpret_cast<Ark_DismissSheetAction>(thisPtr);
+        GetAccessors()->getDismissSheetActionAccessor()->setReason(self, static_cast<Ark_DismissReason>(reason));
+}
+KOALA_INTEROP_DIRECT_V2(DismissSheetAction_setReason, Ark_NativePointer, Ark_Int32)
 Ark_NativePointer impl_DotIndicator_construct() {
         return GetAccessors()->getDotIndicatorAccessor()->construct();
 }
@@ -40317,6 +40363,20 @@ Ark_NativePointer impl_ShaderStyle_getFinalizer() {
         return GetAccessors()->getShaderStyleAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(ShaderStyle_getFinalizer, Ark_NativePointer)
+
+Ark_NativePointer impl_SheetDismiss_construct() {
+        return GetAccessors()->getSheetDismissAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(SheetDismiss_construct, Ark_NativePointer)
+Ark_NativePointer impl_SheetDismiss_getFinalizer() {
+        return GetAccessors()->getSheetDismissAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(SheetDismiss_getFinalizer, Ark_NativePointer)
+void impl_SheetDismiss_dismiss(Ark_NativePointer thisPtr) {
+        Ark_SheetDismiss self = reinterpret_cast<Ark_SheetDismiss>(thisPtr);
+        GetAccessors()->getSheetDismissAccessor()->dismiss(self);
+}
+KOALA_INTEROP_DIRECT_V1(SheetDismiss_dismiss, Ark_NativePointer)
 Ark_NativePointer impl_SpringMotion_construct(KInteropNumber start, KInteropNumber end, KInteropNumber velocity, Ark_NativePointer prop) {
         return GetAccessors()->getSpringMotionAccessor()->construct((const Ark_Number*) (&start), (const Ark_Number*) (&end), (const Ark_Number*) (&velocity), static_cast<Ark_SpringProp>(prop));
 }
@@ -42844,6 +42904,14 @@ Ark_Int32 impl_UIObserverGestureEventOps_setOnDidTap(Ark_Int32 instanceId, KSeri
         return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnDidTap(instanceId, static_cast<UIObserver_GestureEventListenerCallback*>(&callbackValueTemp));
 }
 KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnDidTap, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_addGlobalGestureListener(Ark_Int32 type, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_InnerGestureObserverConfigs optionValueTemp = InnerGestureObserverConfigs_serializer::read(thisDeserializer);;
+        UIObserver_GestureListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_GestureListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_GestureListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->addGlobalGestureListener(static_cast<Ark_GestureListenerType>(type), static_cast<Ark_InnerGestureObserverConfigs*>(&optionValueTemp), static_cast<UIObserver_GestureListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_addGlobalGestureListener, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_UIScrollableCommonEvent_construct(Ark_NativePointer thisPtr) {
         return GetAccessors()->getUIScrollableCommonEventAccessor()->construct(thisPtr);
 }

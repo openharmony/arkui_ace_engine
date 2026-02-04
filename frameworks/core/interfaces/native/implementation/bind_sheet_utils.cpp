@@ -17,6 +17,9 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/interfaces/native/implementation/spring_back_action_peer.h"
+#include "core/interfaces/native/implementation/sheet_dismiss_peer.h"
+#include "core/interfaces/native/implementation/dismiss_sheet_action_peer.h"
+#include "core/interfaces/native/implementation/dismiss_content_cover_action_peer.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
@@ -38,7 +41,7 @@ std::pair<std::optional<OHOS::Ace::Dimension>, std::optional<OHOS::Ace::Dimensio
 
 void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
 {
-        auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
+    auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
     if (onAppear) {
         callbacks.onAppear = [arkCallback = CallbackHelper(onAppear.value())]() {
             arkCallback.InvokeSync();
@@ -65,9 +68,7 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
     auto shouldDismiss = Converter::OptConvert<Callback_SheetDismiss_Void>(sheetOptions.shouldDismiss);
     if (shouldDismiss) {
         callbacks.shouldDismiss = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
-            Ark_SheetDismiss parameter;
-            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissSheetStatic);
-            parameter.dismiss = keeper.ArkValue();
+            Ark_SheetDismiss parameter = &g_sheetDismissPeer;
             arkCallback.InvokeSync(parameter);
         };
     }
@@ -83,11 +84,10 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
     auto onWillDismiss = Converter::OptConvert<Callback_DismissSheetAction_Void>(sheetOptions.onWillDismiss);
     if (onWillDismiss) {
         callbacks.onWillDismiss = [arkCallback = CallbackHelper(onWillDismiss.value())](const int32_t reason) {
-            Ark_DismissSheetAction parameter;
+            Ark_DismissSheetAction parameter = &g_dismissSheetPeer;
             auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
-            parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissSheetStatic);
-            parameter.dismiss = keeper.ArkValue();
+            parameter->reason = Converter::OptConvert<OHOS::Ace::NG::BindSheetDismissReason>(reasonOpt)
+                .value_or(OHOS::Ace::NG::BindSheetDismissReason::BACK_PRESSED);
             arkCallback.InvokeSync(parameter);
         };
     }
@@ -282,13 +282,11 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
     if (onWillDismissValue) {
         onWillDismissFunc = [arkCallback = CallbackHelper(onWillDismissValue.value()), weakNode](int32_t reason) {
             PipelineContext::SetCallBackNode(weakNode);
-            Ark_DismissContentCoverAction parameter;
+            Ark_DismissContentCoverAction parameter = &g_dismissContentCoverPeer;
             auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
                 static_cast<BindSheetDismissReason>(reason));
-            parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissContentCoverStatic);
-            parameter.dismiss = keeper.ArkValue();
+            parameter->reason = Converter::OptConvert<OHOS::Ace::NG::BindSheetDismissReason>(reasonOpt)
+                .value_or(OHOS::Ace::NG::BindSheetDismissReason::BACK_PRESSED);
             arkCallback.InvokeSync(parameter);
         };
     }

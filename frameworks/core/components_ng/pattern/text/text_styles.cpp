@@ -83,6 +83,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextCase, TextCase);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
 
     if (isSymbol) {
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
@@ -144,6 +145,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
 
         UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, EnableVariableFontWeight, SetEnableVariableFontWeight);
+        UPDATE_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, SetEnableDeviceFontWeightCategory);
 
         if (isSymbol) {
             UPDATE_TEXT_STYLE(fontStyle, SymbolColorList, SetSymbolColorList);

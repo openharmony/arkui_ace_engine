@@ -826,6 +826,11 @@ void PipelineContext::ReloadNodesResource()
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 ResourceParseUtils::SetNeedReload(false);
             }
+        } else if (needReloadNode) {
+            bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
+            ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+            needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
+            ResourceParseUtils::SetNeedReload(false);
         }
     }
     needReloadResource_ = false;
@@ -2147,12 +2152,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 break;
             }
             PostKeyboardAvoidTask();
-            break;
-        }
-        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
-            FlushSafeArea(width, height, safeAvoidArea);
-            SetRootRect(width, height, 0.0);
-            FlushUITasks();
             break;
         }
         case WindowSizeChangeReason::SCENE_WITH_ANIMATION: {

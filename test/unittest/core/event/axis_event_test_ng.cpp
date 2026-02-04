@@ -244,6 +244,28 @@ HWTEST_F(AxisEventTestNg, AxisEventConvertToOffsetTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AxisEventCreateScaleEventTest001
+ * @tc.desc: Test function HasAxis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AxisEventTestNg, AxisEventCreateScaleEventTest001, TestSize.Level1)
+{
+    AxisEvent axisEvent;
+    axisEvent.x = 100.0f;
+    axisEvent.passThrough = true;
+    axisEvent.postEventNodeId = 100;
+    auto axisEventOne = axisEvent.CreateScaleEvent(0.0f);
+    EXPECT_TRUE(NearEqual(axisEventOne.x, 100.0));
+    EXPECT_EQ(axisEventOne.postEventNodeId, 100);
+    axisEvent.passThrough = false;
+    auto axisEventTwo = axisEvent.CreateScaleEvent(10.0f);
+    EXPECT_TRUE(NearEqual(axisEventTwo.x, 10.0));
+    EXPECT_EQ(axisEventTwo.postEventNodeId, 0);
+    auto axisEventThree = axisEvent.CloneWith(0.0f);
+    EXPECT_TRUE(NearZero(axisEventThree.x));
+}
+
+/**
  * @tc.name: AxisEventHasAxisTest001
  * @tc.desc: Test function HasAxis.
  * @tc.type: FUNC
@@ -264,27 +286,5 @@ HWTEST_F(AxisEventTestNg, AxisEventHasAxisTest001, TestSize.Level1)
     EXPECT_TRUE(axisInfo.HasAxis(AxisType::PINCH_AXIS));
     EXPECT_FALSE(axisInfo.HasAxis(static_cast<AxisType>(-1)));
     EXPECT_FALSE(axisInfo.HasAxis(static_cast<AxisType>(3)));
-}
-
-/**
- * @tc.name: AxisEventCreateScaleEventTest001
- * @tc.desc: Test function HasAxis.
- * @tc.type: FUNC
- */
-HWTEST_F(AxisEventTestNg, AxisEventCreateScaleEventTest001, TestSize.Level1)
-{
-    AxisEvent axisEvent;
-    axisEvent.x = 100.0f;
-    axisEvent.passThrough = true;
-    axisEvent.postEventNodeId = 100;
-    auto axisEventOne = axisEvent.CreateScaleEvent(0.0f);
-    EXPECT_TRUE(NearEqual(axisEventOne.x, 100.0));
-    EXPECT_EQ(axisEventOne.postEventNodeId, 100);
-    axisEvent.passThrough = false;
-    auto axisEventTwo = axisEvent.CreateScaleEvent(10.0f);
-    EXPECT_TRUE(NearEqual(axisEventTwo.x, 10.0));
-    EXPECT_EQ(axisEventTwo.postEventNodeId, 0);
-    auto axisEventThree = axisEvent.CloneWith(0.0f);
-    EXPECT_TRUE(NearZero(axisEventThree.x));
 }
 } // namespace OHOS::Ace::NG

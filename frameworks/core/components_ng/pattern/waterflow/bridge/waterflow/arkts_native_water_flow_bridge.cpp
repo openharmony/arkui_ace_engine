@@ -255,6 +255,33 @@ void SetNativeWaterFlowSection(
     ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
 }
 
+void BindSectionChangeCallback(Framework::JSWaterFlowSections* section,
+    RefPtr<WaterFlowSections>& waterFlowSections, NG::FrameNode* frameNode)
+{
+    auto id = Container::CurrentId();
+    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
+                        weakNode = AceType::WeakClaim(frameNode)](size_t start, size_t deleteCount,
+                        std::vector<NG::WaterFlowSections::Section>& newSections,
+                        const std::vector<NG::WaterFlowSections::Section>& allSections) {
+        ContainerScope scope(id);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto context = node->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weakNode, all = allSections]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto nodeSection = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(node.GetRawPtr());
+            nodeSection->ChangeData(start, deleteCount, change);
+            if (nodeSection->GetSectionInfo().size() != all.size()) {
+                nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
+            }
+        });
+        context->RequestFrame();
+    };
+    section->SetOnSectionChangedCallback(frameNode, callback);
+}
+
 void UpdateSections(EcmaVM* vm, const Local<JSValueRef>& sections, RefPtr<WaterFlowSections>& waterFlowSections,
     NG::FrameNode* frameNode)
 {
@@ -280,31 +307,15 @@ void UpdateSections(EcmaVM* vm, const Local<JSValueRef>& sections, RefPtr<WaterF
     Framework::JSWaterFlowSections* section =
         static_cast<Framework::JSWaterFlowSections*>(nativeSectionObj->GetNativePointerField(vm, 0));
     CHECK_NULL_VOID(section);
-    if (section->IsBound(frameNode)) {
+    bool isBound = section->IsBound(frameNode);
+	// Check if C++ sections data was reset (recovery scenario: sections undefined -> has data)
+    bool isSectionsEmpty = waterFlowSections->GetSectionInfo().empty();
+    if (isBound && !isSectionsEmpty) {
         return;
     }
-    auto id = Container::CurrentId();
-    auto callback = [id, weak = AceType::WeakClaim(AceType::RawPtr(waterFlowSections)),
-                        weakNode = AceType::WeakClaim(frameNode)](size_t start, size_t deleteCount,
-                        std::vector<NG::WaterFlowSections::Section>& newSections,
-                        const std::vector<NG::WaterFlowSections::Section>& allSections) {
-        ContainerScope scope(id);
-        auto node = weakNode.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto context = node->GetContext();
-        CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weakNode, all = allSections]() {
-            auto node = weakNode.Upgrade();
-            CHECK_NULL_VOID(node);
-            auto nodeSection = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(node.GetRawPtr());
-            nodeSection->ChangeData(start, deleteCount, change);
-            if (nodeSection->GetSectionInfo().size() != all.size()) {
-                nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
-            }
-        });
-        context->RequestFrame();
-    };
-    section->SetOnSectionChangedCallback(frameNode, callback);
+    if (!isBound) {
+        BindSectionChangeCallback(section, waterFlowSections, frameNode);
+    }
     // Used for makeObserved to listen and refresh status.
     ArkTSUtils::GetProperty(vm, sectionsObject, "changeFlag");
     auto allSections = ArkTSUtils::GetProperty(vm, sectionsObject, "sectionArray");
@@ -478,11 +489,78 @@ void SetWaterFlowFooterOrSection(
         }
     }
 }
+
+void ParseScroller(const EcmaVM* vm, const Local<JSValueRef>& scroller, ArkUINodeHandle nativeNode)
+{
+    CHECK_NULL_VOID(vm);
+    if (!scroller->IsNull() && scroller->IsObject(vm)) {
+        Local<ObjectRef> scrollerObj = scroller->ToObject(vm);
+        auto* jsScroller = static_cast<Framework::JSScroller*>(scrollerObj->GetNativePointerField(vm, 0));
+        CHECK_NULL_VOID(jsScroller);
+        jsScroller->SetInstanceId(Container::CurrentId());
+        auto positionController = GetArkUINodeModifiers()->getWaterFlowModifier()->getScrollController(nativeNode);
+        auto nodePositionController =
+            AceType::Claim(reinterpret_cast<OHOS::Ace::ScrollControllerBase*>(positionController));
+        jsScroller->SetController(nodePositionController);
+
+        // Init scroll bar proxy.
+        auto proxy = jsScroller->GetScrollBarProxy();
+        if (!proxy) {
+            auto* tmp =
+                reinterpret_cast<ScrollProxy*>(GetArkUINodeModifiers()->getWaterFlowModifier()->createScrollBarProxy());
+            proxy = AceType::Claim(tmp);
+            jsScroller->SetScrollBarProxy(proxy);
+        }
+        auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(proxy));
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScroller(nativeNode, positionController, proxyPtr);
+    }
+}
+
+void SetWaterFlowParams(EcmaVM* vm, const Local<ObjectRef>& obj)
+{
+    FrameNode* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ArkUINodeHandle nativeNode = nodePtr(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto scroller = ArkTSUtils::GetProperty(vm, obj, "scroller");
+    ParseScroller(vm, scroller, nativeNode);
+
+    auto sections = ArkTSUtils::GetProperty(vm, obj, "sections");
+    auto footerObject = ArkTSUtils::GetProperty(vm, obj, "footer");
+    if (sections->IsObject(vm)) {
+        UpdateWaterFlowSectionsByFrameNode(frameNode, vm, sections, true);
+    } else {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+
+        if (ArkTSUtils::HasProperty(vm, obj, "footerContent")) {
+            RefPtr<NG::UINode> refPtrUINode = nullptr;
+            auto footerContentObject = ArkTSUtils::GetProperty(vm, obj, "footerContent");
+            if (footerContentObject->IsObject(vm)) {
+                auto footerJsObject = footerContentObject->ToObject(vm);
+                refPtrUINode = SetWaterFlowBuilderNode(vm, footerJsObject);
+            }
+            GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterflowFooterWithFrameNode(
+                nativeNode, refPtrUINode.GetRawPtr());
+            return;
+        }
+        if (!footerObject->IsNull() && footerObject->IsFunction(vm)) {
+            // ignore footer if sections are present
+            panda::Local<panda::FunctionRef> builderFunc = footerObject->ToObject(vm);
+            std::function<void()> footerAction = [vm, func = panda::CopyableGlobal(vm, builderFunc)]() {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            };
+            GetArkUINodeModifiers()->getWaterFlowModifier()->setFooterCallback(nativeNode, &footerAction);
+        }
+    }
+}
 } // namespace
 
 void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     const char* functionNames[] = {
+        "create",
         "resetColumnsTemplate",
         "setColumnsTemplate",
         "resetRowsTemplate",
@@ -532,6 +610,7 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
         "setJSScrollBarColor",
     };
     Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(vm, WaterFlowBridge::CreateWaterFlow),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetColumnsTemplate),
         panda::FunctionRef::New(vm, WaterFlowBridge::SetColumnsTemplate),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetRowsTemplate),
@@ -582,6 +661,38 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
     };
     auto waterflow = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "waterFlow"), waterflow);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::CreateWaterFlow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    GetArkUINodeModifiers()->getWaterFlowModifier()->create();
+
+    if (runtimeCallInfo->GetArgsNumber() == 0) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto arg = runtimeCallInfo->GetCallArgRef(0);
+    if (!arg->IsObject(vm) || arg->IsNull() || arg->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto obj = arg->ToObject(vm);
+
+    // set layout mode first. SetFooter is dependent to it
+    using LayoutMode = NG::WaterFlowLayoutMode;
+    auto mode = LayoutMode::TOP_DOWN;
+    auto jsMode = ArkTSUtils::GetProperty(vm, obj, "layoutMode");
+    if (jsMode->IsNumber()) {
+        mode = static_cast<LayoutMode>(jsMode->ToNumber(vm)->Int32Value(vm));
+        if (mode < LayoutMode::TOP_DOWN || mode > LayoutMode::SLIDING_WINDOW) {
+            mode = LayoutMode::TOP_DOWN;
+        }
+    }
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(nullptr, static_cast<uint32_t>(mode));
+
+    SetWaterFlowParams(vm, obj);
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue WaterFlowBridge::ResetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1141,27 +1252,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowScroller(ArkUIRuntimeCallInf
     bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
     Local<JSValueRef> scrollerArg = runtimeCallInfo->GetCallArgRef(1);
     if (!scrollerArg->IsNull() && scrollerArg->IsObject(vm)) {
-        Local<ObjectRef> obj = scrollerArg->ToObject(vm);
-        Framework::JSScroller* jsScroller = static_cast<Framework::JSScroller*>(obj->GetNativePointerField(vm, 0));
-
-        if (jsScroller) {
-            jsScroller->SetInstanceId(Container::CurrentId());
-            auto positionController = GetArkUINodeModifiers()->getWaterFlowModifier()->getScrollController(nativeNode);
-            auto nodePositionController =
-                AceType::Claim(reinterpret_cast<OHOS::Ace::ScrollControllerBase*>(positionController));
-            jsScroller->SetController(nodePositionController);
-            // Init scroll bar proxy.
-            auto proxy = jsScroller->GetScrollBarProxy();
-            if (!proxy) {
-                auto* tmp = reinterpret_cast<ScrollProxy*>(
-                    GetArkUINodeModifiers()->getWaterFlowModifier()->createScrollBarProxy());
-                proxy = AceType::Claim(tmp);
-                jsScroller->SetScrollBarProxy(proxy);
-            }
-            auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(proxy));
-            GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScroller(
-                nativeNode, positionController, proxyPtr);
-        }
+        ParseScroller(vm, scrollerArg, nativeNode);
     } else if (!isJSView) {
         auto positionController = AceType::MakeRefPtr<ScrollableController>();
         auto controller = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(positionController));
@@ -1183,14 +1274,11 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallI
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, nodeArg, vm), false, panda::JSValueRef::Undefined(vm));
 
-    bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
-    if (isJSView) {
-        GetArkUINodeModifiers()->getWaterFlowModifier()->create();
-    }
     SetWaterFlowScroller(runtimeCallInfo);
 
     if (layoutModeArgs->IsUndefined() || layoutModeArgs->IsNull() || !layoutModeArgs->IsNumber()) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
+        bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
         if (isJSView) {
             SetWaterFlowFooterOrSection(vm, runtimeCallInfo, nativeNode);
             return panda::JSValueRef::Undefined(vm);

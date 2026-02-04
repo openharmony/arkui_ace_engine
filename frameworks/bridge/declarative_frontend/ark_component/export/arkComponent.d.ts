@@ -704,12 +704,12 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
         type: TextDecorationType;
         color?: ResourceColor;
     }): SpanAttribute;
-    font(value: Font): SpanAttribute;
+    font(value: Font, fontConfigs?: FontConfigs): SpanAttribute;
     lineHeight(value: Length): SpanAttribute;
     fontSize(value: Length): SpanAttribute;
     fontColor(value: ResourceColor): SpanAttribute;
     fontStyle(value: FontStyle): SpanAttribute;
-    fontWeight(value: number | FontWeight | string): SpanAttribute;
+    fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SpanAttribute;
     fontFamily(value: string | Resource): SpanAttribute;
     letterSpacing(value: number | string): SpanAttribute;
     textCase(value: TextCase): SpanAttribute;

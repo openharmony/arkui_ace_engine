@@ -45,10 +45,10 @@ class SymbolEffectOptions;
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 142
+#define ARKUI_FULL_API_VERSION 143
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 142
+#define ARKUI_NODE_API_VERSION 143
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -590,6 +590,7 @@ struct ArkUIFontWeightWithOptionsStruct {
     ArkUI_CharPtr weight;
     ArkUI_Int32 variableFontWeight;
     ArkUI_Bool enableVariableFontWeight;
+    ArkUI_Bool enableDeviceFontWeightCategory;
 };
 
 struct ArkUISearchButtonOptionsStruct {
@@ -7316,6 +7317,10 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
     void (*setMarqueeSrcValue)(ArkUINodeHandle node, ArkUI_CharPtr src);
     void (*resetMarqueeSrcValue)(ArkUINodeHandle node);
+    void (*setMarqueeSpacing)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr);
+    void (*resetMarqueeSpacing)(ArkUINodeHandle node);
+    void (*setMarqueeDelay)(ArkUINodeHandle node, ArkUI_Int32 loop);
+    void (*resetMarqueeDelay)(ArkUINodeHandle node);
     void (*setMarqueePlayerStatus)(ArkUINodeHandle node, ArkUI_Bool start);
     void (*resetMarqueePlayerStatus)(ArkUINodeHandle node);
     void (*setMarqueeScrollAmount)(ArkUINodeHandle node, ArkUI_Float64 step);
@@ -7392,6 +7397,14 @@ struct ArkUISpanModifier {
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value, void* resourceRawPtr);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
+    void (*setSpanVariableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 variableFontWeight, void* resRawPtr);
+    void (*resetSpanVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSpanEnableVariableFontWeight)(ArkUINodeHandle node,
+        ArkUI_Bool enableVariableFontWeight, void* resRawPtr);
+    void (*resetSpanEnableVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node,
+        ArkUI_Bool enableDeviceFontWeightCategory, void* resRawPtr);
+    void (*resetSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resourceRawPtr);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);
     void (*setSpanFontStyle)(ArkUINodeHandle node, ArkUI_Int32 fontStyle);

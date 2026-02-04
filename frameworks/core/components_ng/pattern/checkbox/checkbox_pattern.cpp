@@ -182,7 +182,7 @@ void CheckBoxPattern::OnModifyDone()
     Pattern::OnModifyDone();
     FireBuilder();
     UpdateIndicator();
-    if (!IsArkTSStatic()) {
+    if ((!IsArkTSStatic()) || (!isFirstCreated_)) {
         UpdateState();
     }
     auto host = GetHost();

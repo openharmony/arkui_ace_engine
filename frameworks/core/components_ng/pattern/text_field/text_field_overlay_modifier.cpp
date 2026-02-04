@@ -196,10 +196,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     }
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
-    auto responseArea = textFieldPattern->GetResponseArea();
-    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-    auto clearNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
-    responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
+    auto responseAreaWidth = textFieldPattern->GetAllResponseAreaWidth();
     auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     Point leftPoint;

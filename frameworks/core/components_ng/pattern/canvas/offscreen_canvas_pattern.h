@@ -67,7 +67,7 @@ public:
     void SetAntiAlias(bool isEnabled);
     void SetFillRuleForPath(const CanvasFillRule rule);
     void SetFillRuleForPath2D(const CanvasFillRule rule);
-    void SetFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
+    void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern);
     void SetFillGradient(const Ace::Gradient& gradient);
     void SetAlpha(double alpha);
     void SetCompositeType(CompositeOperation operation);
@@ -84,7 +84,7 @@ public:
     void SetSmoothingQuality(const std::string& quality);
     void SetLineDashOffset(double offset);
     void SetShadowColor(const Color& color);
-    void SetStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern);
+    void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern);
     void SetStrokeGradient(const Ace::Gradient& gradient);
     void SetStrokeColor(const Color& color);
     void SetFontWeight(FontWeight weight);

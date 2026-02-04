@@ -58,7 +58,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, GestureSwipeHandler, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Router_BusinessError_Void, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, InnerGestureTriggerInfo_serializer, Event_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, GestureSwipeHandler, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
@@ -434,7 +434,7 @@ export function deserializeAndCallCallback_DeleteValue_Void(thisDeserializer: De
 export function deserializeAndCallCallback_DismissContentCoverAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissContentCoverAction) => void))
-    let value0 : DismissContentCoverAction = DismissContentCoverAction_serializer.read(thisDeserializer)
+    let value0 : DismissContentCoverAction = (DismissContentCoverAction_serializer.read(thisDeserializer) as DismissContentCoverAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DismissDialogAction_Void(thisDeserializer: DeserializerBase): void {
@@ -452,7 +452,7 @@ export function deserializeAndCallCallback_DismissPopupAction_Void(thisDeseriali
 export function deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissSheetAction) => void))
-    let value0 : DismissSheetAction = DismissSheetAction_serializer.read(thisDeserializer)
+    let value0 : DismissSheetAction = (DismissSheetAction_serializer.read(thisDeserializer) as DismissSheetAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeserializer: DeserializerBase): void {
@@ -1645,7 +1645,7 @@ export function deserializeAndCallRouter_BusinessError_Void(thisDeserializer: De
 export function deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((sheetDismiss: SheetDismiss) => void))
-    let sheetDismiss : SheetDismiss = SheetDismiss_serializer.read(thisDeserializer)
+    let sheetDismiss : SheetDismiss = (SheetDismiss_serializer.read(thisDeserializer) as SheetDismiss)
     _call(sheetDismiss)
 }
 export function deserializeAndCallCallback_SheetType_Void(thisDeserializer: DeserializerBase): void {
@@ -3841,6 +3841,18 @@ export function deserializeAndCallUIObserver_GestureEventListenerCallback(thisDe
     let node : FrameNode | undefined = nodeTmpBuf
     _call(event, node)
 }
+export function deserializeAndCallUIObserver_GestureListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void))
+    let info : InnerGestureTriggerInfo = InnerGestureTriggerInfo_serializer.read(thisDeserializer)
+    const frameNodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let frameNodeTmpBuf : FrameNode | undefined = undefined
+    if ((frameNodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        frameNodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let frameNode : FrameNode | undefined = frameNodeTmpBuf
+    _call(info, frameNode)
+}
 export function deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
@@ -4252,6 +4264,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer);
         case CallbackKind.Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallUIObserver_ClickEventListenerCallback(thisDeserializer);
         case CallbackKind.Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallUIObserver_GestureEventListenerCallback(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_GestureListenerCallback: return deserializeAndCallUIObserver_GestureListenerCallback(thisDeserializer);
         case CallbackKind.Kind_UIObserver_PanListenerCallback: return deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer);
         case CallbackKind.Kind_UIStatesChangeHandler: return deserializeAndCallUIStatesChangeHandler(thisDeserializer);
         case CallbackKind.Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);

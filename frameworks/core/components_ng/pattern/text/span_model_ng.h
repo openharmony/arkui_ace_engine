@@ -38,6 +38,12 @@ public:
     void ResetItalicFontStyle() override;
     void SetFontWeight(FontWeight value) override;
     void ResetFontWeight() override;
+    void SetVariableFontWeight(int32_t value) override;
+    void ResetVariableFontWeight() override;
+    void SetEnableVariableFontWeight(bool value) override;
+    void ResetEnableVariableFontWeight() override;
+    void SetEnableDeviceFontWeightCategory(bool value) override;
+    void ResetEnableDeviceFontWeightCategory() override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void ResetFontFamily() override;
     void SetTextDecoration(TextDecoration value) override;
@@ -61,6 +67,12 @@ public:
     static void InitSpan(UINode* uiNode, const std::u16string& content);
     static void SetFontWeight(UINode* uiNode, FontWeight value);
     static void ResetFontWeight(UINode* uiNode);
+    static void SetVariableFontWeight(UINode* uiNode, int32_t value);
+    static void ResetVariableFontWeight(UINode* uiNode);
+    static void SetEnableVariableFontWeight(UINode* uiNode, bool value);
+    static void ResetEnableVariableFontWeight(UINode* uiNode);
+    static void SetEnableDeviceFontWeightCategory(UINode* uiNode, bool value);
+    static void ResetEnableDeviceFontWeightCategory(UINode* uiNode);
     static void SetTextCase(UINode* uiNode, TextCase value);
     static void ResetTextCase(UINode* uiNode);
     static void SetItalicFontStyle(UINode* uiNode, Ace::FontStyle value);

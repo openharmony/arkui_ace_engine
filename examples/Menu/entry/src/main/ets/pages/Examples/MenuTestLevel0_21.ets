@@ -67,19 +67,8 @@ struct MenuTestLevel0_21 {
           .visibility(this.targetVisible)
           .layoutWeight(1)
 
-          // UIExtension中的弹窗
           Column({space: 5}) {
-            UIExtensionComponent(
-              {
-                bundleName: 'com.example.menux',
-                abilityName: 'UIExtensionProvider',
-                moduleName: 'entry',
-                parameters: {
-                  'ability.want.params.uiExtensionType': 'sys/commonUI',
-                }
-              })
-              .width('100%')
-              .height('100%')
+            
           }
           .visibility(this.uecVisible)
           .layoutWeight(1)

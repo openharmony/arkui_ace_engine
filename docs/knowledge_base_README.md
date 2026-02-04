@@ -8,8 +8,14 @@
 knowledge_base/
 ├── README.md              # 本文件，知识库索引和说明
 └── pattern/               # 组件模式知识库
-    └── menu/
-        └── Menu_Knowledge_Base.md  # Menu 组件知识库
+    ├── menu/
+    │   └── Menu_Knowledge_Base.md       # Menu 组件知识库
+    ├── scroll/
+    │   └── Scroll_Knowledge_Base.md     # Scroll 组件知识库
+    ├── gauge/
+    │   └── Gauge_Knowledge_Base.md      # Gauge 组件知识库
+    └── waterflow/
+        └── WaterFlow_Knowledge_Base.md  # WaterFlow 组件知识库
     └── qrcode/
         └── QRCode_Knowledge_Base.md  # QRCode 组件知识库
 ```

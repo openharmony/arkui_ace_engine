@@ -682,8 +682,8 @@ bool GridCustomLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
 void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
 {
     std::list<GridPreloadItem> itemsToPreload;
-    int32_t startIndex = 0;
-    int32_t endIndex = 0;
+    int32_t startIndex = info_.startIndex_;
+    int32_t endIndex = info_.endIndex_;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
         auto itemWrapper = wrapper_->GetChildByIndex(l, true);
@@ -697,6 +697,9 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             itemsToPreload.emplace_back(r);
             endIndex = r;
         }
+    }
+    if (itemsToPreload.empty()) {
+        return;
     }
     int32_t startLine = 0;
     const auto pos = info_.GetItemPos(startIndex);

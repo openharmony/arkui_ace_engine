@@ -47,7 +47,10 @@ Result GridIrregularFiller::FillImpl(const FillParameters& params, float targetL
         if (UpdateLength(len, targetLen, row, posY_, params.mainGap)) {
             return { len, row, idx - 1 };
         }
-        MeasureItem(params, idx, posX_, posY_, false);
+        auto constraint = MeasureItem(params, idx, posX_, posY_, false);
+        if (constraint.first < 0) {
+            return { len, row, idx - 1 };
+        }
     }
 
     if (info_->lineHeightMap_.empty()) {
@@ -82,6 +85,15 @@ Result GridIrregularFiller::FillBackward(const FillParameters& params, float tar
     posX_ = -1;
     posY_ = startingLine;
     int32_t idx = info_->FindEndIdx(startingLine).itemIdx;
+    if (idx == -1) {
+        auto startLine = info_->gridMatrix_.find(startingLine);
+        if (startLine != info_->gridMatrix_.end() && (!startLine->second.empty())) {
+            idx = startLine->second.begin()->second - 1;
+        }
+    }
+    if (startingLine == 0 && info_->currentOffset_ > 0) {
+        idx = -1;
+    }
     return FillImpl(params, targetLen, idx);
 }
 
@@ -228,7 +240,11 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
     auto child = GridLayoutBaseAlgorithm::GetGridItem(wrapper_, itemIdx, !isCache, isCache);
-    CHECK_NULL_RETURN(child, {});
+    if (!child) {
+        TAG_LOGW(
+            ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", itemIdx, info_->GetChildrenCount());
+        return { -1.f, {} };
+    }
 
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     float crossLen = 0.0f;
@@ -361,6 +377,7 @@ void GridIrregularFiller::FillMatrixFromStartIndex(int32_t startLine, int32_t st
         targetIdx = info_->GetChildrenCount() - 1;
     }
     posY_ = startLine;
+    posX_ = -1;
     int32_t idx = startIndex;
     while (idx <= targetIdx) {
         if (!FindNextItem(idx)) {

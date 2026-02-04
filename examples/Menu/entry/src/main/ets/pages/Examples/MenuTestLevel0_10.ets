@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@kit.ArkUI';
-import { MyComponent } from '../common/MyComponent'
+import { MyComponent } from '../../common/MyComponent'
 
 class MenuItemPrivateAttrOptions {
   selected?: boolean | undefined
@@ -353,8 +353,8 @@ struct MenuTestLevel0_10 {
       //设置不同MenuItem入参的组合
       MenuItem({ startIcon: $r('app.media.app_icon')}).menuItemStyle()
       MenuItem({ startIcon: $r('app.media.app_icon'), labelInfo: 'label' }).menuItemStyle()
-      MenuItem({ startIcon: $r('app.media.app_icon'), endIcon: $r('app.media.png_arrow') }).menuItemStyle()
-      MenuItem({ startIcon: $r('app.media.app_icon'), endIcon: $r('app.media.png_arrow'), labelInfo: 'label' })
+      MenuItem({ startIcon: $r('app.media.app_icon'), endIcon: $r('app.media.app_icon') }).menuItemStyle()
+      MenuItem({ startIcon: $r('app.media.app_icon'), endIcon: $r('app.media.app_icon'), labelInfo: 'label' })
         .menuItemStyle()
       MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单' }).menuItemStyle()
       MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单', labelInfo: 'label' })

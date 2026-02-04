@@ -52,6 +52,7 @@ const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
+const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 } // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
@@ -84,6 +85,7 @@ void JSFontSpan::JSBind(BindingTarget globalObj)
     JSClass<JSFontSpan>::CustomProperty("strokeWidth", &JSFontSpan::GetStrokeWidth, &JSFontSpan::SetStrokeWidth);
     JSClass<JSFontSpan>::CustomProperty("strokeColor", &JSFontSpan::GetStrokeColor, &JSFontSpan::SetStrokeColor);
     JSClass<JSFontSpan>::CustomProperty("superscript", &JSFontSpan::GetSuperscript, &JSFontSpan::SetSuperscript);
+    JSClass<JSFontSpan>::CustomProperty("fontConfigs", &JSFontSpan::GetFontConfigs, &JSFontSpan::SetFontConfigs);
     JSClass<JSFontSpan>::Bind(globalObj, JSFontSpan::Constructor, JSFontSpan::Destructor);
 }
 
@@ -124,6 +126,7 @@ RefPtr<FontSpan> JSFontSpan::ParseJsFontSpan(const JSRef<JSObject>& obj)
     ParseJsStrokeWidth(obj, font);
     ParseJsStrokeColor(obj, font);
     ParseJsSuperscript(obj, font);
+    ParseJsFontConfigs(obj, font);
     return AceType::MakeRefPtr<FontSpan>(font);
 }
 
@@ -190,6 +193,9 @@ void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
         }
         if (weight != "") {
             font.fontWeight = ConvertStrToFontWeight(weight);
+            int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+            JSContainerBase::ParseJsInt32(fontWeight, variableFontWeight);
+            font.variableFontWeight = static_cast<uint32_t>(variableFontWeight);
         } else {
             auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
@@ -324,6 +330,47 @@ void JSFontSpan::ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font)
     }
 }
 
+void JSFontSpan::ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, Font& font)
+{
+    if (!fontConfigsObj->HasProperty("fontWeightConfigs")) {
+        return;
+    }
+    auto fontWeightConfigsValue = fontConfigsObj->GetProperty("fontWeightConfigs");
+    if (fontWeightConfigsValue->IsUndefined() || fontWeightConfigsValue->IsNull() ||
+            !fontWeightConfigsValue->IsObject()) {
+        return;
+    }
+    auto fontWeightConfigsObj = JSRef<JSObject>::Cast(fontWeightConfigsValue);
+    if (fontWeightConfigsObj->HasProperty("enableVariableFontWeight")) {
+        auto enableVariableFontWeight = fontWeightConfigsObj->GetProperty("enableVariableFontWeight");
+        if (!enableVariableFontWeight->IsNull() && !enableVariableFontWeight->IsUndefined() &&
+            enableVariableFontWeight->IsBoolean()) {
+            font.enableVariableFontWeight = enableVariableFontWeight->ToBoolean();
+        }
+    }
+    if (fontWeightConfigsObj->HasProperty("enableDeviceFontWeightCategory")) {
+        auto enableDeviceFontWeightCategory =
+            fontWeightConfigsObj->GetProperty("enableDeviceFontWeightCategory");
+        if (!enableDeviceFontWeightCategory->IsNull() && !enableDeviceFontWeightCategory->IsUndefined() &&
+            enableDeviceFontWeightCategory->IsBoolean()) {
+            font.enableDeviceFontWeightCategory = enableDeviceFontWeightCategory->ToBoolean();
+        }
+    }
+}
+
+void JSFontSpan::ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font)
+{
+    if (!obj->HasProperty("fontConfigs")) {
+        return;
+    }
+    auto fontConfigsValue = obj->GetProperty("fontConfigs");
+    if (fontConfigsValue->IsUndefined() || fontConfigsValue->IsNull() || !fontConfigsValue->IsObject()) {
+        return;
+    }
+    auto fontConfigsObj = JSRef<JSObject>::Cast(fontConfigsValue);
+    ParseFontWeightConfigs(fontConfigsObj, font);
+}
+
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -423,6 +470,30 @@ void JSFontSpan::GetSuperscript(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetSuperscript(const JSCallbackInfo& info) {}
+
+void JSFontSpan::GetFontConfigs(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(fontSpan_);
+    const auto& font = fontSpan_->GetFont();
+    if (!font.enableVariableFontWeight.has_value() && !font.enableDeviceFontWeightCategory.has_value()) {
+        return;
+    }
+    auto fontConfigsObj = JSRef<JSObject>::New();
+    auto fontWeightConfigsObj = JSRef<JSObject>::New();
+
+    if (font.enableVariableFontWeight.has_value()) {
+        fontWeightConfigsObj->SetProperty<bool>(
+            "enableVariableFontWeight", font.enableVariableFontWeight.value());
+    }
+    if (font.enableDeviceFontWeightCategory.has_value()) {
+        fontWeightConfigsObj->SetProperty<bool>(
+            "enableDeviceFontWeightCategory", font.enableDeviceFontWeightCategory.value());
+    }
+    fontConfigsObj->SetPropertyObject("fontWeightConfigs", fontWeightConfigsObj);
+    info.SetReturnValue(fontConfigsObj);
+}
+
+void JSFontSpan::SetFontConfigs(const JSCallbackInfo& info) {}
 
 const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
@@ -1390,16 +1461,17 @@ void JSCustomSpan::SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj)
     customSpanObj_ = customSpanObj;
 }
 
-JSRef<JSObject>& JSCustomSpan::GetJsCustomSpanObject()
+JSRef<JSObject> JSCustomSpan::GetJsCustomSpanObject()
 {
-    return customSpanObj_;
+    return customSpanObj_.Lock();
 }
 RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
 {
     if (end - start > 1) {
         return nullptr;
     }
-    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_, GetOnMeasure(), GetOnDraw(), start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_.Lock(),
+        GetOnMeasure(), GetOnDraw(), start, end);
     return spanBase;
 }
 
@@ -1409,9 +1481,13 @@ bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (!customSpan) {
         return false;
     }
-    return (customSpan->customSpanObj_)
-        ->GetLocalHandle()
-        ->IsStrictEquals(customSpanObj_->GetEcmaVM(), customSpanObj_->GetLocalHandle());
+    auto customSpanObj = customSpanObj_.Lock();
+    auto otherSpanObj = customSpan->customSpanObj_.Lock();
+    if (customSpanObj->IsEmpty() || otherSpanObj->IsEmpty()) {
+        return false;
+    }
+    return otherSpanObj->GetLocalHandle()
+        ->IsStrictEquals(customSpanObj->GetEcmaVM(), customSpanObj->GetLocalHandle());
 }
 
 std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(

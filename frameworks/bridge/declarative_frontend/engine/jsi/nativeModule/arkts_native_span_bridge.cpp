@@ -32,6 +32,7 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 const std::string DEFAULT_FONT_WEIGHT = "400";
+constexpr int DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -143,22 +144,41 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::string weight = DEFAULT_FONT_WEIGHT;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     RefPtr<ResourceObject> resObj;
     if (!secondArg->IsNull()) {
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
-        } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
-            (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj)))) {
-            return panda::JSValueRef::Undefined(vm);
+            variableFontWeight = secondArg->Int32Value(vm);
+        } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm))) {
+            if (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj))) {
+                return panda::JSValueRef::Undefined(vm);
+            }
+            variableFontWeight = StringUtils::StringToInt(weight);
         }
     }
-
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
         static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
+        variableFontWeight, AceType::RawPtr(resObj));
+    if (!thirdArg->IsNull() && thirdArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanEnableVariableFontWeight(nativeNode,
+            thirdArg->BooleaValue(vm), AceType::RawPtr(resObj));
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanEnableVariableFontWeight(nativeNode);
+    }
+    if (!fourthArg->IsNull() && fourthArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanEnableDeviceFontWeightCategory(nativeNode,
+            fourthArg->BooleaValue(vm), AceType::RawPtr(resObj));
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanEnableDeviceFontWeightCategory(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

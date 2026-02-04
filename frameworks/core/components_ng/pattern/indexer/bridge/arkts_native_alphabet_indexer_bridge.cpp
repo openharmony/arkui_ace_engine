@@ -1895,28 +1895,34 @@ ArkUINativeModuleValue AlphabetIndexerBridge::CreateIndexer(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(firstArg->IsObject(vm), panda::JSValueRef::Undefined(vm));
     auto firstArgObj = firstArg->ToObject(vm);
     auto arrayProperty = firstArgObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "arrayValue"));
-    CHECK_NULL_RETURN(arrayProperty->IsArray(vm), panda::JSValueRef::Undefined(vm));
     std::vector<std::string> indexerData = {};
-    auto array = panda::Local<panda::ArrayRef>(arrayProperty);
-    uint32_t length = static_cast<uint32_t>(ArkTSUtils::GetArrayLength(vm, array));
-    for (uint32_t i = 0; i < length; ++i) {
-        auto item = array->Get(vm, i);
-        if (item->IsString(vm)) {
-            indexerData.emplace_back(item->ToString(vm)->ToString(vm));
+    uint32_t length = 0;
+    if (!arrayProperty->IsNull() && !arrayProperty->IsUndefined() && arrayProperty->IsArray(vm)) {
+        auto array = panda::Local<panda::ArrayRef>(arrayProperty);
+        length = static_cast<uint32_t>(ArkTSUtils::GetArrayLength(vm, array));
+        for (uint32_t i = 0; i < length; ++i) {
+            auto item = array->Get(vm, i);
+            if (item->IsString(vm)) {
+                indexerData.emplace_back(item->ToString(vm)->ToString(vm));
+            }
         }
     }
     int32_t selected = 0;
     Local<JSValueRef> selectedProperty = firstArgObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selected"));
-    if (selectedProperty->IsNumber()) {
+    bool isSelectedPropertyValid = !selectedProperty->IsNull() && !selectedProperty->IsUndefined();
+    if (isSelectedPropertyValid && selectedProperty->IsNumber()) {
         selected = static_cast<int32_t>(selectedProperty->ToNumber(vm)->Value());
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->create(&indexerData, selected, isArc);
         Framework::JSIndexerTheme::ApplyTheme();
         Local<JSValueRef> changeEventVal = firstArgObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "$selected"));
-        ParseIndexerSelectedObject(vm, changeEventVal);
-    } else if (!isArc && length > 0 && selectedProperty->IsObject(vm)) {
+        if (!changeEventVal.IsEmpty() && !changeEventVal->IsUndefined() && changeEventVal->IsFunction(vm)) {
+            ParseIndexerSelectedObject(vm, changeEventVal);
+        }
+    } else if (!isArc && length > 0 && isSelectedPropertyValid && selectedProperty->IsObject(vm)) {
         auto selectedObj = selectedProperty->ToObject(vm);
         auto selectedValueProperty = selectedObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
-        if (selectedValueProperty->IsNumber()) {
+        if (!selectedValueProperty->IsNull() && !selectedValueProperty->IsUndefined() &&
+            selectedValueProperty->IsNumber()) {
             selected = static_cast<int32_t>(selectedValueProperty->ToNumber(vm)->Value());
         }
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->create(&indexerData, selected, isArc);
