@@ -1056,4 +1056,24 @@ HWTEST_F(FormRenderTest, FormRenderTest_SetUiContentParams_001, TestSize.Level0)
     renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY, true);
     formRenderer->SetUiContentParams(renderWant);
 }
+
+/**
+ * @tc.name: FormRenderTest_UpdateConfiguration_001
+ * @tc.desc: test SetUIContentProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest_UpdateConfiguration_001, TestSize.Level0)
+{
+    auto formRenderer = CreateFormRenderer("FormRenderTest_UpdateConfiguration_001");
+    EXPECT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), UpdateConfiguration(_)).Times(0);
+    formRenderer->UpdateConfiguration(nullptr);
+
+    EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), UpdateConfiguration(_)).Times(Exactly(1));
+    std::shared_ptr<AppExecFwk::Configuration> config = std::make_shared<AppExecFwk::Configuration>();
+    formRenderer->UpdateConfiguration(config);
+}
 } // namespace OHOS::Ace

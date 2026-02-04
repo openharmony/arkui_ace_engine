@@ -38,6 +38,7 @@ class CustomNodeExtPattern : public Pattern, public IAvoidInfoListener {
     DECLARE_ACE_TYPE(CustomNodeExtPattern, Pattern);
 public:
     CustomNodeExtPattern() = default;
+    CustomNodeExtPattern(const RenderContext::ContextParam& param) : contextParam_(param) {}
     ~CustomNodeExtPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -149,6 +150,10 @@ public:
     void OnDetachFromMainTree() override;
     void BeforeCreateLayoutWrapper() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return contextParam_;
+    }
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnAttachToFrameNode() override;
@@ -174,6 +179,8 @@ private:
     bool isNeedRegisterAvoidInfoChangeListener_ = false;
     
     bool isAtomic_ = true;
+
+    std::optional<RenderContext::ContextParam> contextParam_;
 };
 } // OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_NODE_EXT_CUSTOM_NODE_EXT_PATTERN_H

@@ -172,7 +172,7 @@ void NativeRichEditorController::ParseTextStyleResult(
     nativeTextStyle.fontFamily = Utils::MallocCString(textStyle.fontFamily.c_str());
     NativeTextDecorationResult decoration;
     decoration.type = textStyle.decorationType;
-    decoration.color = textStyle.decorationColor.c_str();
+    decoration.color = MallocCString(textStyle.decorationColor);
     nativeTextStyle.decoration = decoration;
 
     auto textShadows = textStyle.textShadows;
@@ -219,7 +219,7 @@ void NativeRichEditorController::ParseTypingStyleResult(
     nativeTextStyle.fontFamily = Utils::MallocCString(V2::ConvertFontFamily(typingStyle.updateFontFamily.value()));
     NativeTextDecorationResult decoration;
     decoration.type = static_cast<int32_t>(typingStyle.updateTextDecoration.value());
-    decoration.color = typingStyle.updateTextDecorationColor.value().ColorToString().c_str();
+    decoration.color = MallocCString(typingStyle.updateTextDecorationColor.value().ColorToString());
     nativeTextStyle.decoration = decoration;
 
     auto textShadows = typingStyle.updateTextShadows.value();
@@ -449,14 +449,14 @@ void NativeRichEditorController::ParseRichEditorAbstractSymbolSpanResult(
 void NativeRichEditorController::ParseRichEditorAbstractTextStyleResult(
     const NG::RichEditorAbstractSpanResult& spanObject, NativeRichEditorTextStyleResult& nativeTextStyle)
 {
-    nativeTextStyle.fontColor = spanObject.GetFontColor().c_str();
+    nativeTextStyle.fontColor = MallocCString(spanObject.GetFontColor());
     nativeTextStyle.fontSize = spanObject.GetFontSize();
     nativeTextStyle.fontStyle = static_cast<int32_t>(spanObject.GetFontStyle());
     nativeTextStyle.fontWeight = spanObject.GetFontWeight();
-    nativeTextStyle.fontFamily = spanObject.GetFontFamily().c_str();
+    nativeTextStyle.fontFamily = MallocCString(spanObject.GetFontFamily());
     NativeTextDecorationResult decoration;
     decoration.type = static_cast<int32_t>(spanObject.GetTextDecoration());
-    decoration.color = spanObject.GetColor().c_str();
+    decoration.color = MallocCString(spanObject.GetColor());
     nativeTextStyle.decoration = decoration;
 }
 
@@ -470,7 +470,7 @@ void NativeRichEditorController::ParseRichEditorAbstractTextStyleResult(
     nativeTextStyle.fontFamily = Utils::MallocCString(spanObject.GetFontFamily().c_str());
     NativeTextDecorationResult decoration;
     decoration.type = static_cast<int32_t>(spanObject.GetTextDecoration());
-    decoration.color = spanObject.GetColor().c_str();
+    decoration.color = MallocCString(spanObject.GetColor());
     nativeTextStyle.decoration = decoration;
 
     auto textShadows = spanObject.GetTextStyle().textShadows;
@@ -1117,6 +1117,11 @@ static void NativeRichEditorSpanResultListFree12(int64_t size, NativeRichEditorS
 {
     if (!src) {
         return;
+    }
+    for (int64_t i = 0; i < size; i++) {
+        if (src[i].textResult.textStyle.decoration.color) {
+            free((void*) src[i].textResult.textStyle.decoration.color);
+        }
     }
     delete[] src;
 }

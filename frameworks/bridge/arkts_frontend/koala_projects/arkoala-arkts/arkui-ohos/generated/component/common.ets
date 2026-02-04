@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, resourceFinalizerRegister, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -451,7 +451,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (keys: Array<string>):boolean => {
+            const buffer_Closure  = (keys: Array<string>):boolean => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -470,6 +470,8 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
                 buffer_BufArgsSerializer.release();
                 return (buffer_BufContinuationValue as boolean);
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : ModifierKeyStateGetter | undefined = buffer
         return returnResult
@@ -1046,7 +1048,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (keys: Array<string>):boolean => {
+            const buffer_Closure  = (keys: Array<string>):boolean => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -1065,6 +1067,8 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
                 buffer_BufArgsSerializer.release();
                 return (buffer_BufContinuationValue as boolean);
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : ModifierKeyStateGetter | undefined = buffer
         return returnResult
@@ -1384,7 +1388,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (keys: Array<string>):boolean => {
+            const buffer_Closure  = (keys: Array<string>):boolean => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -1403,6 +1407,8 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
                 buffer_BufArgsSerializer.release();
                 return (buffer_BufContinuationValue as boolean);
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : ModifierKeyStateGetter | undefined = buffer
         return returnResult
@@ -14552,7 +14558,7 @@ export class Bindable_Array_Arkui_Component_Units_ResourceStr_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: Array<ResourceStr>) => void) = (value0: Array<ResourceStr>):void => {
+        const onChangeTmpBufClosure  = (value0: Array<ResourceStr>):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14574,6 +14580,8 @@ export class Bindable_Array_Arkui_Component_Units_ResourceStr_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: Array<ResourceStr>) => void) = onChangeTmpBufClosure
         let value : Bindable<Array<ResourceStr>> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Array<ResourceStr>>)
         return value
     }
@@ -14601,7 +14609,7 @@ export class Bindable_Array_I32_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: Array<int32>) => void) = (value0: Array<int32>):void => {
+        const onChangeTmpBufClosure  = (value0: Array<int32>):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14615,6 +14623,8 @@ export class Bindable_Array_I32_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: Array<int32>) => void) = onChangeTmpBufClosure
         let value : Bindable<Array<int32>> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Array<int32>>)
         return value
     }
@@ -14633,7 +14643,7 @@ export class Bindable_F64_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: double) => void) = (value0: double):void => {
+        const onChangeTmpBufClosure  = (value0: double):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14643,6 +14653,8 @@ export class Bindable_F64_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: double) => void) = onChangeTmpBufClosure
         let value : Bindable<double> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<double>)
         return value
     }
@@ -14661,7 +14673,7 @@ export class Bindable_Boolean_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: boolean) => void) = (value0: boolean):void => {
+        const onChangeTmpBufClosure  = (value0: boolean):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14671,6 +14683,8 @@ export class Bindable_Boolean_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: boolean) => void) = onChangeTmpBufClosure
         let value : Bindable<boolean> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<boolean>)
         return value
     }
@@ -14689,7 +14703,7 @@ export class Bindable_Date_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: Date) => void) = (value0: Date):void => {
+        const onChangeTmpBufClosure  = (value0: Date):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14699,6 +14713,8 @@ export class Bindable_Date_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: Date) => void) = onChangeTmpBufClosure
         let value : Bindable<Date> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Date>)
         return value
     }
@@ -14717,7 +14733,7 @@ export class Bindable_I32_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: int32) => void) = (value0: int32):void => {
+        const onChangeTmpBufClosure  = (value0: int32):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14727,6 +14743,8 @@ export class Bindable_I32_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: int32) => void) = onChangeTmpBufClosure
         let value : Bindable<int32> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<int32>)
         return value
     }
@@ -14745,7 +14763,7 @@ export class Bindable_Number_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: number) => void) = (value0: number):void => {
+        const onChangeTmpBufClosure  = (value0: number):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14755,6 +14773,8 @@ export class Bindable_Number_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: number) => void) = onChangeTmpBufClosure
         let value : Bindable<number> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<number>)
         return value
     }
@@ -14773,7 +14793,7 @@ export class Bindable_String_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: string) => void) = (value0: string):void => {
+        const onChangeTmpBufClosure  = (value0: string):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -14783,6 +14803,8 @@ export class Bindable_String_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: string) => void) = onChangeTmpBufClosure
         let value : Bindable<string> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<string>)
         return value
     }
@@ -15102,7 +15124,7 @@ export class DragItemInfo_serializer {
             const builderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const builderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const builderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            builderTmpBuf = ():void => {
+            const builderTmpBuf_Closure  = ():void => {
                 const builderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
@@ -15111,6 +15133,8 @@ export class DragItemInfo_serializer {
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(builderTmpBuf_Closure, builderTmpBuf_BufResource)
+            builderTmpBuf = builderTmpBuf_Closure
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const extraInfoTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -15208,7 +15232,7 @@ export class EditModeOptions_serializer {
             const onGetPreviewBadgeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetPreviewBadgeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetPreviewBadgeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetPreviewBadgeTmpBuf = ():boolean | int32 => {
+            const onGetPreviewBadgeTmpBuf_Closure  = ():boolean | int32 => {
                 const onGetPreviewBadgeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetPreviewBadgeTmpBuf_BufArgsSerializer.writeInt32(onGetPreviewBadgeTmpBuf_BufResource.resourceId);
                 onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCall);
@@ -15222,6 +15246,8 @@ export class EditModeOptions_serializer {
                 onGetPreviewBadgeTmpBuf_BufArgsSerializer.release();
                 return (onGetPreviewBadgeTmpBuf_BufContinuationValue as boolean | int32);
             }
+            resourceFinalizerRegister(onGetPreviewBadgeTmpBuf_Closure, onGetPreviewBadgeTmpBuf_BufResource)
+            onGetPreviewBadgeTmpBuf = onGetPreviewBadgeTmpBuf_Closure
         }
         const onGetPreviewBadgeTmpResult : (() => boolean | int32) | undefined = onGetPreviewBadgeTmpBuf
         let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult} as EditModeOptions)
@@ -15529,7 +15555,7 @@ export class ItemDragEventHandler_serializer {
             const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onLongPressTmpBuf = (value0: int32):void => {
+            const onLongPressTmpBuf_Closure  = (value0: int32):void => {
                 const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
@@ -15539,6 +15565,8 @@ export class ItemDragEventHandler_serializer {
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onLongPressTmpBuf_Closure, onLongPressTmpBuf_BufResource)
+            onLongPressTmpBuf = onLongPressTmpBuf_Closure
         }
         const onLongPressTmpResult : ((value0: int32) => void) | undefined = onLongPressTmpBuf
         const onDragStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -15547,7 +15575,7 @@ export class ItemDragEventHandler_serializer {
             const onDragStartTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDragStartTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDragStartTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDragStartTmpBuf = (value0: int32):void => {
+            const onDragStartTmpBuf_Closure  = (value0: int32):void => {
                 const onDragStartTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDragStartTmpBuf_BufArgsSerializer.writeInt32(onDragStartTmpBuf_BufResource.resourceId);
                 onDragStartTmpBuf_BufArgsSerializer.writePointer(onDragStartTmpBuf_BufCall);
@@ -15557,6 +15585,8 @@ export class ItemDragEventHandler_serializer {
                 onDragStartTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDragStartTmpBuf_Closure, onDragStartTmpBuf_BufResource)
+            onDragStartTmpBuf = onDragStartTmpBuf_Closure
         }
         const onDragStartTmpResult : ((value0: int32) => void) | undefined = onDragStartTmpBuf
         const onMoveThroughTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -15565,7 +15595,7 @@ export class ItemDragEventHandler_serializer {
             const onMoveThroughTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMoveThroughTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onMoveThroughTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onMoveThroughTmpBuf = (from: int32, to: int32):void => {
+            const onMoveThroughTmpBuf_Closure  = (from: int32, to: int32):void => {
                 const onMoveThroughTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onMoveThroughTmpBuf_BufArgsSerializer.writeInt32(onMoveThroughTmpBuf_BufResource.resourceId);
                 onMoveThroughTmpBuf_BufArgsSerializer.writePointer(onMoveThroughTmpBuf_BufCall);
@@ -15576,6 +15606,8 @@ export class ItemDragEventHandler_serializer {
                 onMoveThroughTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onMoveThroughTmpBuf_Closure, onMoveThroughTmpBuf_BufResource)
+            onMoveThroughTmpBuf = onMoveThroughTmpBuf_Closure
         }
         const onMoveThroughTmpResult : OnMoveHandler | undefined = onMoveThroughTmpBuf
         const onDropTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -15584,7 +15616,7 @@ export class ItemDragEventHandler_serializer {
             const onDropTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDropTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDropTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDropTmpBuf = (value0: int32):void => {
+            const onDropTmpBuf_Closure  = (value0: int32):void => {
                 const onDropTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDropTmpBuf_BufArgsSerializer.writeInt32(onDropTmpBuf_BufResource.resourceId);
                 onDropTmpBuf_BufArgsSerializer.writePointer(onDropTmpBuf_BufCall);
@@ -15594,6 +15626,8 @@ export class ItemDragEventHandler_serializer {
                 onDropTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDropTmpBuf_Closure, onDropTmpBuf_BufResource)
+            onDropTmpBuf = onDropTmpBuf_Closure
         }
         const onDropTmpResult : ((value0: int32) => void) | undefined = onDropTmpBuf
         let value : ItemDragEventHandler = ({onLongPress: onLongPressTmpResult, onDragStart: onDragStartTmpResult, onMoveThrough: onMoveThroughTmpResult, onDrop: onDropTmpResult} as ItemDragEventHandler)
@@ -15678,7 +15712,7 @@ export class KeyframeState_serializer {
         const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const eventTmpResult : (() => void) = ():void => {
+        const eventTmpBufClosure  = ():void => {
             const eventTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             eventTmpBufBufArgsSerializer.writeInt32(eventTmpBufBufResource.resourceId);
             eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCall);
@@ -15687,6 +15721,8 @@ export class KeyframeState_serializer {
             eventTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(eventTmpBufClosure, eventTmpBufBufResource)
+        const eventTmpResult : (() => void) = eventTmpBufClosure
         let value : KeyframeState = ({duration: durationTmpResult, curve: curveTmpResult, event: eventTmpResult} as KeyframeState)
         return value
     }
@@ -16209,7 +16245,7 @@ export class PopupButton_serializer {
         const actionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const actionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const actionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const actionTmpResult : VoidCallback = ():void => {
+        const actionTmpBufClosure  = ():void => {
             const actionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             actionTmpBufBufArgsSerializer.writeInt32(actionTmpBufBufResource.resourceId);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCall);
@@ -16218,6 +16254,8 @@ export class PopupButton_serializer {
             actionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(actionTmpBufClosure, actionTmpBufBufResource)
+        const actionTmpResult : VoidCallback = actionTmpBufClosure
         let value : PopupButton = ({value: valueTmpResult, action: actionTmpResult} as PopupButton)
         return value
     }
@@ -17361,7 +17399,7 @@ export class AnimateParam_serializer {
             const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onFinishTmpBuf = ():void => {
+            const onFinishTmpBuf_Closure  = ():void => {
                 const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
@@ -17370,6 +17408,8 @@ export class AnimateParam_serializer {
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onFinishTmpBuf_Closure, onFinishTmpBuf_BufResource)
+            onFinishTmpBuf = onFinishTmpBuf_Closure
         }
         const onFinishTmpResult : (() => void) | undefined = onFinishTmpBuf
         const finishCallbackTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -17722,7 +17762,7 @@ export class Bindable_Arkui_Component_Units_ResourceStr_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: ResourceStr) => void) = (value0: ResourceStr):void => {
+        const onChangeTmpBufClosure  = (value0: ResourceStr):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -17740,6 +17780,8 @@ export class Bindable_Arkui_Component_Units_ResourceStr_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: ResourceStr) => void) = onChangeTmpBufClosure
         let value : Bindable<ResourceStr> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<ResourceStr>)
         return value
     }
@@ -17758,7 +17800,7 @@ export class Bindable_Global_Resource_Resource_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: Resource) => void) = (value0: Resource):void => {
+        const onChangeTmpBufClosure  = (value0: Resource):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -17768,6 +17810,8 @@ export class Bindable_Global_Resource_Resource_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: Resource) => void) = onChangeTmpBufClosure
         let value : Bindable<Resource> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Resource>)
         return value
     }
@@ -17891,7 +17935,7 @@ export class ContentCoverOptions_serializer {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
+            const onAppearTmpBuf_Closure  = ():void => {
                 const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
@@ -17900,6 +17944,8 @@ export class ContentCoverOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAppearTmpBuf_Closure, onAppearTmpBuf_BufResource)
+            onAppearTmpBuf = onAppearTmpBuf_Closure
         }
         const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -17908,7 +17954,7 @@ export class ContentCoverOptions_serializer {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
+            const onDisappearTmpBuf_Closure  = ():void => {
                 const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
@@ -17917,6 +17963,8 @@ export class ContentCoverOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDisappearTmpBuf_Closure, onDisappearTmpBuf_BufResource)
+            onDisappearTmpBuf = onDisappearTmpBuf_Closure
         }
         const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -17925,7 +17973,7 @@ export class ContentCoverOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -17934,6 +17982,8 @@ export class ContentCoverOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -17942,7 +17992,7 @@ export class ContentCoverOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -17951,6 +18001,8 @@ export class ContentCoverOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const modalTransitionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -17965,7 +18017,7 @@ export class ContentCoverOptions_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissContentCoverAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissContentCoverAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -17975,6 +18027,8 @@ export class ContentCoverOptions_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissContentCoverAction) => void) | undefined = onWillDismissTmpBuf
         const transitionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -18346,7 +18400,7 @@ export class KeyframeAnimateParam_serializer {
             const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onFinishTmpBuf = ():void => {
+            const onFinishTmpBuf_Closure  = ():void => {
                 const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
@@ -18355,6 +18409,8 @@ export class KeyframeAnimateParam_serializer {
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onFinishTmpBuf_Closure, onFinishTmpBuf_BufResource)
+            onFinishTmpBuf = onFinishTmpBuf_Closure
         }
         const onFinishTmpResult : (() => void) | undefined = onFinishTmpBuf
         const expectedFrameRateRangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -18684,7 +18740,7 @@ export class MenuElement_serializer {
         const actionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const actionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const actionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const actionTmpResult : (() => void) = ():void => {
+        const actionTmpBufClosure  = ():void => {
             const actionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             actionTmpBufBufArgsSerializer.writeInt32(actionTmpBufBufResource.resourceId);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCall);
@@ -18693,6 +18749,8 @@ export class MenuElement_serializer {
             actionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(actionTmpBufClosure, actionTmpBufBufResource)
+        const actionTmpResult : (() => void) = actionTmpBufClosure
         let value : MenuElement = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, enabled: enabledTmpResult, action: actionTmpResult} as MenuElement)
         return value
     }
@@ -19016,7 +19074,7 @@ export class ReuseOptions_serializer {
             const reuseIdTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const reuseIdTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const reuseIdTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            reuseIdTmpBuf = ():string => {
+            const reuseIdTmpBuf_Closure  = ():string => {
                 const reuseIdTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 reuseIdTmpBuf_BufArgsSerializer.writeInt32(reuseIdTmpBuf_BufResource.resourceId);
                 reuseIdTmpBuf_BufArgsSerializer.writePointer(reuseIdTmpBuf_BufCall);
@@ -19030,6 +19088,8 @@ export class ReuseOptions_serializer {
                 reuseIdTmpBuf_BufArgsSerializer.release();
                 return (reuseIdTmpBuf_BufContinuationValue as string);
             }
+            resourceFinalizerRegister(reuseIdTmpBuf_Closure, reuseIdTmpBuf_BufResource)
+            reuseIdTmpBuf = reuseIdTmpBuf_Closure
         }
         const reuseIdTmpResult : ReuseIdCallback | undefined = reuseIdTmpBuf
         let value : ReuseOptions = ({reuseId: reuseIdTmpResult} as ReuseOptions)
@@ -19533,7 +19593,7 @@ export class Bindable_Arkui_Component_Units_Length_serializer {
         const onChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const onChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const onChangeTmpResult : ((value0: Length) => void) = (value0: Length):void => {
+        const onChangeTmpBufClosure  = (value0: Length):void => {
             const onChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
@@ -19555,6 +19615,8 @@ export class Bindable_Arkui_Component_Units_Length_serializer {
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult : ((value0: Length) => void) = onChangeTmpBufClosure
         let value : Bindable<Length> = ({value: valueTmpResult, onChange: onChangeTmpResult} as Bindable<Length>)
         return value
     }
@@ -21383,7 +21445,7 @@ export class ContextMenuOptions_serializer {
                 const previewTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const previewTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const previewTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                previewTmpBuf_ = ():void => {
+                const previewTmpBuf_BufUClosure  = ():void => {
                     const previewTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     previewTmpBuf_BufUBufArgsSerializer.writeInt32(previewTmpBuf_BufUBufResource.resourceId);
                     previewTmpBuf_BufUBufArgsSerializer.writePointer(previewTmpBuf_BufUBufCall);
@@ -21392,6 +21454,8 @@ export class ContextMenuOptions_serializer {
                     previewTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(previewTmpBuf_BufUClosure, previewTmpBuf_BufUBufResource)
+                previewTmpBuf_ = previewTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for previewTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -21460,7 +21524,7 @@ export class ContextMenuOptions_serializer {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
+            const onAppearTmpBuf_Closure  = ():void => {
                 const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
@@ -21469,6 +21533,8 @@ export class ContextMenuOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAppearTmpBuf_Closure, onAppearTmpBuf_BufResource)
+            onAppearTmpBuf = onAppearTmpBuf_Closure
         }
         const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21477,7 +21543,7 @@ export class ContextMenuOptions_serializer {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
+            const onDisappearTmpBuf_Closure  = ():void => {
                 const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
@@ -21486,6 +21552,8 @@ export class ContextMenuOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDisappearTmpBuf_Closure, onDisappearTmpBuf_BufResource)
+            onDisappearTmpBuf = onDisappearTmpBuf_Closure
         }
         const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
         const aboutToAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21494,7 +21562,7 @@ export class ContextMenuOptions_serializer {
             const aboutToAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const aboutToAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const aboutToAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            aboutToAppearTmpBuf = ():void => {
+            const aboutToAppearTmpBuf_Closure  = ():void => {
                 const aboutToAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 aboutToAppearTmpBuf_BufArgsSerializer.writeInt32(aboutToAppearTmpBuf_BufResource.resourceId);
                 aboutToAppearTmpBuf_BufArgsSerializer.writePointer(aboutToAppearTmpBuf_BufCall);
@@ -21503,6 +21571,8 @@ export class ContextMenuOptions_serializer {
                 aboutToAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(aboutToAppearTmpBuf_Closure, aboutToAppearTmpBuf_BufResource)
+            aboutToAppearTmpBuf = aboutToAppearTmpBuf_Closure
         }
         const aboutToAppearTmpResult : (() => void) | undefined = aboutToAppearTmpBuf
         const aboutToDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21511,7 +21581,7 @@ export class ContextMenuOptions_serializer {
             const aboutToDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const aboutToDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const aboutToDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            aboutToDisappearTmpBuf = ():void => {
+            const aboutToDisappearTmpBuf_Closure  = ():void => {
                 const aboutToDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 aboutToDisappearTmpBuf_BufArgsSerializer.writeInt32(aboutToDisappearTmpBuf_BufResource.resourceId);
                 aboutToDisappearTmpBuf_BufArgsSerializer.writePointer(aboutToDisappearTmpBuf_BufCall);
@@ -21520,6 +21590,8 @@ export class ContextMenuOptions_serializer {
                 aboutToDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(aboutToDisappearTmpBuf_Closure, aboutToDisappearTmpBuf_BufResource)
+            aboutToDisappearTmpBuf = aboutToDisappearTmpBuf_Closure
         }
         const aboutToDisappearTmpResult : (() => void) | undefined = aboutToDisappearTmpBuf
         const layoutRegionMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21670,7 +21742,7 @@ export class ContextMenuOptions_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -21679,6 +21751,8 @@ export class ContextMenuOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : VoidCallback | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21687,7 +21761,7 @@ export class ContextMenuOptions_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -21696,6 +21770,8 @@ export class ContextMenuOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : VoidCallback | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21704,7 +21780,7 @@ export class ContextMenuOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -21713,6 +21789,8 @@ export class ContextMenuOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : VoidCallback | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -21721,7 +21799,7 @@ export class ContextMenuOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -21730,6 +21808,8 @@ export class ContextMenuOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : VoidCallback | undefined = onWillDisappearTmpBuf
         const previewScaleModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -22143,7 +22223,7 @@ export class CustomPopupOptions_serializer {
         const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const builderTmpResult : CustomBuilder = ():void => {
+        const builderTmpBufClosure  = ():void => {
             const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
@@ -22152,6 +22232,8 @@ export class CustomPopupOptions_serializer {
             builderTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(builderTmpBufClosure, builderTmpBufBufResource)
+        const builderTmpResult : CustomBuilder = builderTmpBufClosure
         const placementTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let placementTmpBuf : Placement | undefined = undefined
         if ((placementTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -22195,7 +22277,7 @@ export class CustomPopupOptions_serializer {
             const onStateChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onStateChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onStateChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onStateChangeTmpBuf = (event: PopupStateChangeParam):void => {
+            const onStateChangeTmpBuf_Closure  = (event: PopupStateChangeParam):void => {
                 const onStateChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onStateChangeTmpBuf_BufArgsSerializer.writeInt32(onStateChangeTmpBuf_BufResource.resourceId);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
@@ -22205,6 +22287,8 @@ export class CustomPopupOptions_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onStateChangeTmpBuf_Closure, onStateChangeTmpBuf_BufResource)
+            onStateChangeTmpBuf = onStateChangeTmpBuf_Closure
         }
         const onStateChangeTmpResult : PopupStateChangeCallback | undefined = onStateChangeTmpBuf
         const arrowOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -22386,7 +22470,7 @@ export class CustomPopupOptions_serializer {
                 const onWillDismissTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const onWillDismissTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const onWillDismissTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                onWillDismissTmpBuf_ = (value0: DismissPopupAction):void => {
+                const onWillDismissTmpBuf_BufUClosure  = (value0: DismissPopupAction):void => {
                     const onWillDismissTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufUBufResource.resourceId);
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCall);
@@ -22396,6 +22480,8 @@ export class CustomPopupOptions_serializer {
                     onWillDismissTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(onWillDismissTmpBuf_BufUClosure, onWillDismissTmpBuf_BufUBufResource)
+                onWillDismissTmpBuf_ = onWillDismissTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for onWillDismissTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -23034,7 +23120,7 @@ export class MenuOptions_serializer {
                 const previewTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const previewTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const previewTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                previewTmpBuf_ = ():void => {
+                const previewTmpBuf_BufUClosure  = ():void => {
                     const previewTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     previewTmpBuf_BufUBufArgsSerializer.writeInt32(previewTmpBuf_BufUBufResource.resourceId);
                     previewTmpBuf_BufUBufArgsSerializer.writePointer(previewTmpBuf_BufUBufCall);
@@ -23043,6 +23129,8 @@ export class MenuOptions_serializer {
                     previewTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(previewTmpBuf_BufUClosure, previewTmpBuf_BufUBufResource)
+                previewTmpBuf_ = previewTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for previewTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -23111,7 +23199,7 @@ export class MenuOptions_serializer {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
+            const onAppearTmpBuf_Closure  = ():void => {
                 const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
@@ -23120,6 +23208,8 @@ export class MenuOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAppearTmpBuf_Closure, onAppearTmpBuf_BufResource)
+            onAppearTmpBuf = onAppearTmpBuf_Closure
         }
         const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23128,7 +23218,7 @@ export class MenuOptions_serializer {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
+            const onDisappearTmpBuf_Closure  = ():void => {
                 const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
@@ -23137,6 +23227,8 @@ export class MenuOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDisappearTmpBuf_Closure, onDisappearTmpBuf_BufResource)
+            onDisappearTmpBuf = onDisappearTmpBuf_Closure
         }
         const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
         const aboutToAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23145,7 +23237,7 @@ export class MenuOptions_serializer {
             const aboutToAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const aboutToAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const aboutToAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            aboutToAppearTmpBuf = ():void => {
+            const aboutToAppearTmpBuf_Closure  = ():void => {
                 const aboutToAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 aboutToAppearTmpBuf_BufArgsSerializer.writeInt32(aboutToAppearTmpBuf_BufResource.resourceId);
                 aboutToAppearTmpBuf_BufArgsSerializer.writePointer(aboutToAppearTmpBuf_BufCall);
@@ -23154,6 +23246,8 @@ export class MenuOptions_serializer {
                 aboutToAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(aboutToAppearTmpBuf_Closure, aboutToAppearTmpBuf_BufResource)
+            aboutToAppearTmpBuf = aboutToAppearTmpBuf_Closure
         }
         const aboutToAppearTmpResult : (() => void) | undefined = aboutToAppearTmpBuf
         const aboutToDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23162,7 +23256,7 @@ export class MenuOptions_serializer {
             const aboutToDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const aboutToDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const aboutToDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            aboutToDisappearTmpBuf = ():void => {
+            const aboutToDisappearTmpBuf_Closure  = ():void => {
                 const aboutToDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 aboutToDisappearTmpBuf_BufArgsSerializer.writeInt32(aboutToDisappearTmpBuf_BufResource.resourceId);
                 aboutToDisappearTmpBuf_BufArgsSerializer.writePointer(aboutToDisappearTmpBuf_BufCall);
@@ -23171,6 +23265,8 @@ export class MenuOptions_serializer {
                 aboutToDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(aboutToDisappearTmpBuf_Closure, aboutToDisappearTmpBuf_BufResource)
+            aboutToDisappearTmpBuf = aboutToDisappearTmpBuf_Closure
         }
         const aboutToDisappearTmpResult : (() => void) | undefined = aboutToDisappearTmpBuf
         const layoutRegionMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23321,7 +23417,7 @@ export class MenuOptions_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -23330,6 +23426,8 @@ export class MenuOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : VoidCallback | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23338,7 +23436,7 @@ export class MenuOptions_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -23347,6 +23445,8 @@ export class MenuOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : VoidCallback | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23355,7 +23455,7 @@ export class MenuOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -23364,6 +23464,8 @@ export class MenuOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : VoidCallback | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -23372,7 +23474,7 @@ export class MenuOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -23381,6 +23483,8 @@ export class MenuOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : VoidCallback | undefined = onWillDisappearTmpBuf
         const previewScaleModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -24248,7 +24352,7 @@ export class PopupCommonOptions_serializer {
             const onStateChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onStateChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onStateChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onStateChangeTmpBuf = (event: PopupStateChangeParam):void => {
+            const onStateChangeTmpBuf_Closure  = (event: PopupStateChangeParam):void => {
                 const onStateChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onStateChangeTmpBuf_BufArgsSerializer.writeInt32(onStateChangeTmpBuf_BufResource.resourceId);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
@@ -24258,6 +24362,8 @@ export class PopupCommonOptions_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onStateChangeTmpBuf_Closure, onStateChangeTmpBuf_BufResource)
+            onStateChangeTmpBuf = onStateChangeTmpBuf_Closure
         }
         const onStateChangeTmpResult : PopupStateChangeCallback | undefined = onStateChangeTmpBuf
         const arrowOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -24439,7 +24545,7 @@ export class PopupCommonOptions_serializer {
                 const onWillDismissTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const onWillDismissTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const onWillDismissTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                onWillDismissTmpBuf_ = (value0: DismissPopupAction):void => {
+                const onWillDismissTmpBuf_BufUClosure  = (value0: DismissPopupAction):void => {
                     const onWillDismissTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufUBufResource.resourceId);
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCall);
@@ -24449,6 +24555,8 @@ export class PopupCommonOptions_serializer {
                     onWillDismissTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(onWillDismissTmpBuf_BufUClosure, onWillDismissTmpBuf_BufUBufResource)
+                onWillDismissTmpBuf_ = onWillDismissTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for onWillDismissTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -25296,7 +25404,7 @@ export class SheetOptions_serializer {
             const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
+            const onAppearTmpBuf_Closure  = ():void => {
                 const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
@@ -25305,6 +25413,8 @@ export class SheetOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAppearTmpBuf_Closure, onAppearTmpBuf_BufResource)
+            onAppearTmpBuf = onAppearTmpBuf_Closure
         }
         const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
         const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25313,7 +25423,7 @@ export class SheetOptions_serializer {
             const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
+            const onDisappearTmpBuf_Closure  = ():void => {
                 const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
@@ -25322,6 +25432,8 @@ export class SheetOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDisappearTmpBuf_Closure, onDisappearTmpBuf_BufResource)
+            onDisappearTmpBuf = onDisappearTmpBuf_Closure
         }
         const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25330,7 +25442,7 @@ export class SheetOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -25339,6 +25451,8 @@ export class SheetOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25347,7 +25461,7 @@ export class SheetOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -25356,6 +25470,8 @@ export class SheetOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25617,7 +25733,7 @@ export class SheetOptions_serializer {
                 const titleTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const titleTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const titleTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                titleTmpBuf_ = ():void => {
+                const titleTmpBuf_BufUClosure  = ():void => {
                     const titleTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     titleTmpBuf_BufUBufArgsSerializer.writeInt32(titleTmpBuf_BufUBufResource.resourceId);
                     titleTmpBuf_BufUBufArgsSerializer.writePointer(titleTmpBuf_BufUBufCall);
@@ -25626,6 +25742,8 @@ export class SheetOptions_serializer {
                     titleTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(titleTmpBuf_BufUClosure, titleTmpBuf_BufUBufResource)
+                titleTmpBuf_ = titleTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for titleTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -25638,7 +25756,7 @@ export class SheetOptions_serializer {
             const shouldDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const shouldDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const shouldDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            shouldDismissTmpBuf = (sheetDismiss: SheetDismiss):void => {
+            const shouldDismissTmpBuf_Closure  = (sheetDismiss: SheetDismiss):void => {
                 const shouldDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 shouldDismissTmpBuf_BufArgsSerializer.writeInt32(shouldDismissTmpBuf_BufResource.resourceId);
                 shouldDismissTmpBuf_BufArgsSerializer.writePointer(shouldDismissTmpBuf_BufCall);
@@ -25648,6 +25766,8 @@ export class SheetOptions_serializer {
                 shouldDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(shouldDismissTmpBuf_Closure, shouldDismissTmpBuf_BufResource)
+            shouldDismissTmpBuf = shouldDismissTmpBuf_Closure
         }
         const shouldDismissTmpResult : ((sheetDismiss: SheetDismiss) => void) | undefined = shouldDismissTmpBuf
         const onWillDismissTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25656,7 +25776,7 @@ export class SheetOptions_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissSheetAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissSheetAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -25666,6 +25786,8 @@ export class SheetOptions_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissSheetAction) => void) | undefined = onWillDismissTmpBuf
         const onWillSpringBackWhenDismissTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25674,7 +25796,7 @@ export class SheetOptions_serializer {
             const onWillSpringBackWhenDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillSpringBackWhenDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillSpringBackWhenDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillSpringBackWhenDismissTmpBuf = (value0: SpringBackAction):void => {
+            const onWillSpringBackWhenDismissTmpBuf_Closure  = (value0: SpringBackAction):void => {
                 const onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.writeInt32(onWillSpringBackWhenDismissTmpBuf_BufResource.resourceId);
                 onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.writePointer(onWillSpringBackWhenDismissTmpBuf_BufCall);
@@ -25684,6 +25806,8 @@ export class SheetOptions_serializer {
                 onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillSpringBackWhenDismissTmpBuf_Closure, onWillSpringBackWhenDismissTmpBuf_BufResource)
+            onWillSpringBackWhenDismissTmpBuf = onWillSpringBackWhenDismissTmpBuf_Closure
         }
         const onWillSpringBackWhenDismissTmpResult : ((value0: SpringBackAction) => void) | undefined = onWillSpringBackWhenDismissTmpBuf
         const enableOutsideInteractiveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25803,7 +25927,7 @@ export class SheetOptions_serializer {
             const onHeightDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onHeightDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onHeightDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onHeightDidChangeTmpBuf = (value0: int32):void => {
+            const onHeightDidChangeTmpBuf_Closure  = (value0: int32):void => {
                 const onHeightDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writeInt32(onHeightDidChangeTmpBuf_BufResource.resourceId);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCall);
@@ -25813,6 +25937,8 @@ export class SheetOptions_serializer {
                 onHeightDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onHeightDidChangeTmpBuf_Closure, onHeightDidChangeTmpBuf_BufResource)
+            onHeightDidChangeTmpBuf = onHeightDidChangeTmpBuf_Closure
         }
         const onHeightDidChangeTmpResult : ((value0: int32) => void) | undefined = onHeightDidChangeTmpBuf
         const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25833,7 +25959,7 @@ export class SheetOptions_serializer {
             const onDetentsDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDetentsDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDetentsDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDetentsDidChangeTmpBuf = (value0: int32):void => {
+            const onDetentsDidChangeTmpBuf_Closure  = (value0: int32):void => {
                 const onDetentsDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writeInt32(onDetentsDidChangeTmpBuf_BufResource.resourceId);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCall);
@@ -25843,6 +25969,8 @@ export class SheetOptions_serializer {
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDetentsDidChangeTmpBuf_Closure, onDetentsDidChangeTmpBuf_BufResource)
+            onDetentsDidChangeTmpBuf = onDetentsDidChangeTmpBuf_Closure
         }
         const onDetentsDidChangeTmpResult : ((value0: int32) => void) | undefined = onDetentsDidChangeTmpBuf
         const onWidthDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25851,7 +25979,7 @@ export class SheetOptions_serializer {
             const onWidthDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWidthDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWidthDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWidthDidChangeTmpBuf = (value0: int32):void => {
+            const onWidthDidChangeTmpBuf_Closure  = (value0: int32):void => {
                 const onWidthDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writeInt32(onWidthDidChangeTmpBuf_BufResource.resourceId);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCall);
@@ -25861,6 +25989,8 @@ export class SheetOptions_serializer {
                 onWidthDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWidthDidChangeTmpBuf_Closure, onWidthDidChangeTmpBuf_BufResource)
+            onWidthDidChangeTmpBuf = onWidthDidChangeTmpBuf_Closure
         }
         const onWidthDidChangeTmpResult : ((value0: int32) => void) | undefined = onWidthDidChangeTmpBuf
         const onTypeDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -25869,7 +25999,7 @@ export class SheetOptions_serializer {
             const onTypeDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onTypeDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onTypeDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onTypeDidChangeTmpBuf = (value0: SheetType):void => {
+            const onTypeDidChangeTmpBuf_Closure  = (value0: SheetType):void => {
                 const onTypeDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onTypeDidChangeTmpBuf_BufArgsSerializer.writeInt32(onTypeDidChangeTmpBuf_BufResource.resourceId);
                 onTypeDidChangeTmpBuf_BufArgsSerializer.writePointer(onTypeDidChangeTmpBuf_BufCall);
@@ -25879,6 +26009,8 @@ export class SheetOptions_serializer {
                 onTypeDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onTypeDidChangeTmpBuf_Closure, onTypeDidChangeTmpBuf_BufResource)
+            onTypeDidChangeTmpBuf = onTypeDidChangeTmpBuf_Closure
         }
         const onTypeDidChangeTmpResult : ((value0: SheetType) => void) | undefined = onTypeDidChangeTmpBuf
         const uiContextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -26452,7 +26584,7 @@ export class PopupOptions_serializer {
             const onStateChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onStateChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onStateChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onStateChangeTmpBuf = (event: PopupStateChangeParam):void => {
+            const onStateChangeTmpBuf_Closure  = (event: PopupStateChangeParam):void => {
                 const onStateChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onStateChangeTmpBuf_BufArgsSerializer.writeInt32(onStateChangeTmpBuf_BufResource.resourceId);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
@@ -26462,6 +26594,8 @@ export class PopupOptions_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onStateChangeTmpBuf_Closure, onStateChangeTmpBuf_BufResource)
+            onStateChangeTmpBuf = onStateChangeTmpBuf_Closure
         }
         const onStateChangeTmpResult : PopupStateChangeCallback | undefined = onStateChangeTmpBuf
         const arrowOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -26674,7 +26808,7 @@ export class PopupOptions_serializer {
                 const onWillDismissTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const onWillDismissTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const onWillDismissTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                onWillDismissTmpBuf_ = (value0: DismissPopupAction):void => {
+                const onWillDismissTmpBuf_BufUClosure  = (value0: DismissPopupAction):void => {
                     const onWillDismissTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufUBufResource.resourceId);
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCall);
@@ -26684,6 +26818,8 @@ export class PopupOptions_serializer {
                     onWillDismissTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(onWillDismissTmpBuf_BufUClosure, onWillDismissTmpBuf_BufUBufResource)
+                onWillDismissTmpBuf_ = onWillDismissTmpBuf_BufUClosure
             } else {
                 throw new Error("One of the branches for onWillDismissTmpBuf_ has to be chosen through deserialisation.")
             }

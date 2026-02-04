@@ -3396,7 +3396,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 {
     auto context = runtimeContext_.lock();
     CHECK_NULL_RETURN(context, nullptr);
-    if (!isFormRender_ && !bundle.empty() && !module.empty()) {
+    bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    if ((!isFormRender_ || isDynamicUIContent) && !bundle.empty() && !module.empty()) {
         std::string encode = EncodeBundleAndModule(bundle, module);
         if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             RecordResAdapter(encode);
@@ -3410,7 +3411,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
                 TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
         }
     }
-    return isFormRender_ ? nullptr : context->CreateModuleOrPluginContext(bundle, module);
+    return (isFormRender_ && !isDynamicUIContent)
+        ? nullptr : context->CreateModuleOrPluginContext(bundle, module);
 }
 
 void AceContainer::CheckAndSetFontFamily()

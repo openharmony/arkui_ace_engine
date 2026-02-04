@@ -1766,6 +1766,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         // arkTSCard only support "esModule" compile mode
         frontend->SetIsBundle(false);
         container->SetBundleName(bundleName_);
+        container->SetModuleName(moduleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);

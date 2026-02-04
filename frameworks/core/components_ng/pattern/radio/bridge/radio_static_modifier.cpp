@@ -161,7 +161,6 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
             RadioModelNG::SetChangeValue(frameNode, change);
         });
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto radioNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([radioNode](const RefPtr<UINode>& uiNode) mutable {
             radioNode->AddChild(uiNode);

@@ -294,6 +294,11 @@ ArkUINodeHandle CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeByNodeId(tag, nodeId));
 }
 
+ArkUINodeHandle CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeWithParam(tag, param));
+}
+
 ArkUI_Bool IsRightToLeft()
 {
     return AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -2480,6 +2485,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
     .createCustomNodeByNodeId = CreateCustomNodeByNodeId,
+    .createCustomNodeWithParam = CreateCustomNodeWithParam,
 };
 /* clang-format on */
 

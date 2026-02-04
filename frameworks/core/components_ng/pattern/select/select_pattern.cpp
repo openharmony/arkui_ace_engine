@@ -405,6 +405,7 @@ void SelectPattern::RegisterOnClick()
 void SelectPattern::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
 {
     CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(gestrueHub);
     auto weakTarget = AceType::WeakClaim(targetNode);
     auto touchCallback = [weakTarget](const TouchEventInfo& info) {
         auto targetNode = weakTarget.Upgrade();

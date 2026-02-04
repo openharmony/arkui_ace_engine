@@ -781,7 +781,7 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 bool SystemProperties::whiteBlockEnabled_ = false;
-int32_t SystemProperties::previewStatus_ = 0;
+int32_t SystemProperties::previewStatus_ = -1;
 int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPointNumber();
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
@@ -969,7 +969,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
         needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
         compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
-        previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", 0);
+        previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", -1);
         isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
         isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
         isOpenYuvDecode_ = ReadIsOpenYuvDecode();

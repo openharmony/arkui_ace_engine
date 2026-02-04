@@ -25,6 +25,7 @@ ohos_unittest("ui_content_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
@@ -753,6 +754,7 @@ ohos_unittest("node_animate_test") {
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
@@ -1034,6 +1036,7 @@ ohos_unittest("node_model_safely_test") {
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
