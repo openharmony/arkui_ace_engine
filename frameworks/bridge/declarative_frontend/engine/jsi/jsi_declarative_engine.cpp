@@ -405,56 +405,6 @@ std::string BuildOhmUrl(const std::string& bundleName, const std::string& module
     return tempUrl + "@" + harModuleName + "/" + newPagePath;
 }
 
-bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
-    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
-{
-    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
-    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
-    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
-        return false;
-    }
-    bundleName = jsBundleName->ToString(vm)->ToString(vm);
-    moduleName = jsModuleName->ToString(vm)->ToString(vm);
-    pagePath = jsPagePath->ToString(vm)->ToString(vm);
-    bool ohmUrlValid = false;
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
-        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
-        if (jsOhmUrl->IsString(vm)) {
-            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
-            ohmUrlValid = true;
-        } else {
-            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
-        }
-    }
-    if (!ohmUrlValid) {
-        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
-        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
-    }
-
-    std::string integratedHspName = "false";
-    // Integrated hsp adaptation
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
-        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (integratedHsp->IsString(vm)) {
-            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
-        }
-    }
-    if (integratedHspName == "true") {
-        LocalScope scope(vm);
-        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
-    }
-
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
-        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
-        if (pageFullPathInfo->IsString(vm)) {
-            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
-        }
-    }
-
-    return true;
-}
-
 std::string GetRealPagePath(const std::string& pagePath)
 {
     if (pagePath.empty()) {
@@ -2220,6 +2170,57 @@ int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundle
     CHECK_NULL_RETURN(runtime, false);
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     return arkRuntime->LoadDestinationFile(bundleName, moduleName, pageSourceFile, isSingleton);
+}
+
+bool JsiDeclarativeEngine::ParseNamedRouterParams(
+    const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
+    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
+{
+    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
+    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
+        return false;
+    }
+    bundleName = jsBundleName->ToString(vm)->ToString(vm);
+    moduleName = jsModuleName->ToString(vm)->ToString(vm);
+    pagePath = jsPagePath->ToString(vm)->ToString(vm);
+    bool ohmUrlValid = false;
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
+        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
+        if (jsOhmUrl->IsString(vm)) {
+            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
+            ohmUrlValid = true;
+        } else {
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
+        }
+    }
+    if (!ohmUrlValid) {
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
+        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
+    }
+
+    std::string integratedHspName = "false";
+    // Integrated hsp adaptation
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
+        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
+        if (integratedHsp->IsString(vm)) {
+            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
+        }
+    }
+    if (integratedHspName == "true") {
+        LocalScope scope(vm);
+        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
+    }
+
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
+        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
+        if (pageFullPathInfo->IsString(vm)) {
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
+        }
+    }
+
+    return true;
 }
 
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
