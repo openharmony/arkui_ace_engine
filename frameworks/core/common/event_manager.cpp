@@ -2984,6 +2984,7 @@ void EventManager::UnregisterTouchpadInteractionListenerInner(int32_t frameNodeI
 
 void EventManager::NotifyTouchpadInteraction()
 {
+    NG::PointF point(lastMouseEvent_.x, lastMouseEvent_.y);
     auto iter = touchpadInteractionListeners_.begin();
     while (iter != touchpadInteractionListeners_.end()) {
         if (!iter->second.frameNode.Upgrade()) {
@@ -2992,7 +2993,7 @@ void EventManager::NotifyTouchpadInteraction()
         }
 
         if (auto& callback = iter->second.callback) {
-            callback();
+            callback(point);
             ++iter;
         } else {
             iter = touchpadInteractionListeners_.erase(iter);

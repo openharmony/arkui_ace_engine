@@ -1534,7 +1534,7 @@ void WebPattern::HandleCancelFling()
 
 void WebPattern::InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub)
 {
-    auto lightTouchCallback = [weak = WeakClaim(this)]() {
+    auto lightTouchCallback = [weak = WeakClaim(this)](PointF point) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleCancelFling();
