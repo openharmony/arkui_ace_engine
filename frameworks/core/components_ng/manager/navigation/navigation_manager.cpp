@@ -859,7 +859,8 @@ int32_t NavigationManager::RegisterNavigateChangeCallback(TransitionCallback cal
     return id;
 }
 
-void NavigationManager::FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter)
+void NavigationManager::FireNavigateChangeCallback(
+    const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "fire inner navigate callback isSplit(%{public}d) transition callback:"
         " %{public}s -> %{public}s",
