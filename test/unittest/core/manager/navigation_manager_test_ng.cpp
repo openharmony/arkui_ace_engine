@@ -19,7 +19,9 @@
 #include "test/unittest/core/pattern/navigation/mock_navigation_route.h"
 #include "test/unittest/core/pattern/navigation/mock_navigation_stack.h"
 
+#define private public
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
@@ -375,5 +377,66 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
     ASSERT_EQ(managerCurNode, nullptr);
     ASSERT_EQ(managerPreNode, nullptr);
     ASSERT_EQ(isInAnimation, false);
+}
+
+/**
+ * @tc.name: AttachNavigation001
+ * @tc.desc: Test AttachNavigation adds navigation to targetNavigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, AttachNavigation001, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->targetNavigationMap_.clear();
+
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
+
+    navigationManager->AttachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 1);
+}
+
+/**
+ * @tc.name: DetachNavigation001
+ * @tc.desc: Test DetachNavigation removes navigation from targetNavigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, DetachNavigation001, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->targetNavigationMap_.clear();
+
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
+
+    navigationManager->AttachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 1);
+
+    navigationManager->DetachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 0);
+}
+
+/**
+ * @tc.name: DetachNavigation002
+ * @tc.desc: Test DetachNavigation when navigation not in map does not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, DetachNavigation002, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->targetNavigationMap_.clear();
+
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+
+    navigationManager->DetachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

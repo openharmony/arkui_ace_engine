@@ -1200,6 +1200,85 @@ HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttachToManager001
+ * @tc.desc: Test AttachToManager adds navigation to targetNavigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, AttachToManager001, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    ASSERT_NE(mgr, nullptr);
+    mgr->targetNavigationMap_.clear();
+
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 1);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: DetachFromManager001
+ * @tc.desc: Test DetachFromManager removes navigation from targetNavigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, DetachFromManager001, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    ASSERT_NE(mgr, nullptr);
+    mgr->targetNavigationMap_.clear();
+
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 1);
+    navigationPattern->DetachFromManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 0);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: DetachFromManager002
+ * @tc.desc: Branch: node is null (frameNode_ is nullptr), early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, DetachFromManager002, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    ASSERT_NE(mgr, nullptr);
+    mgr->targetNavigationMap_.clear();
+    mgr->AttachNavigation(navigationNode);
+
+    navigationPattern->frameNode_ = nullptr;
+    navigationPattern->DetachFromManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 1);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
  * @tc.name: RefreshFocusToDestination001
  * @tc.desc: Branch: if (!newTopNavPath.has_value()) = false
  *           Branch: if (!navBarFocus->IsCurrentFocus()) = false

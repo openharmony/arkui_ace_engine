@@ -156,4 +156,130 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithSplitScreen001, Te
     manager->UpdateIsInForceSplitMode();
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
 }
+
+/**
+ * @tc.name: IsForceSplitEnable001
+ * @tc.desc: Branch: isRouter=true, returns isForceSplitEnable_ && isRouter_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsForceSplitEnable001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = true;
+    manager->isRouter_ = true;
+    manager->disableNavForceSplitInternal_ = true;
+    EXPECT_TRUE(manager->IsForceSplitEnable(true));
+
+    manager->isForceSplitEnable_ = false;
+    EXPECT_FALSE(manager->IsForceSplitEnable(true));
+}
+
+/**
+ * @tc.name: IsForceSplitEnable002
+ * @tc.desc: Branch: isRouter=false, returns isForceSplitEnable_ && !isRouter_ && !disableNavForceSplitInternal_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsForceSplitEnable002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitEnable_ = true;
+    manager->isRouter_ = false;
+    manager->disableNavForceSplitInternal_ = false;
+    EXPECT_TRUE(manager->IsForceSplitEnable(false));
+
+    manager->disableNavForceSplitInternal_ = true;
+    EXPECT_FALSE(manager->IsForceSplitEnable(false));
+}
+
+/**
+ * @tc.name: GetDisableNavForceSplitInternal001
+ * @tc.desc: Test GetDisableNavForceSplitInternal returns correct value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, GetDisableNavForceSplitInternal001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->disableNavForceSplitInternal_ = false;
+    EXPECT_FALSE(manager->GetDisableNavForceSplitInternal());
+
+    manager->disableNavForceSplitInternal_ = true;
+    EXPECT_TRUE(manager->GetDisableNavForceSplitInternal());
+}
+
+/**
+ * @tc.name: SetNavigationForceSplitEnableInternal001
+ * @tc.desc: Branch: isForceSplitSupported_=false, early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetNavigationForceSplitEnableInternal001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = false;
+    manager->disableNavForceSplitInternal_ = false;
+    manager->SetNavigationForceSplitEnableInternal(true);
+    EXPECT_FALSE(manager->GetDisableNavForceSplitInternal());
+}
+
+/**
+ * @tc.name: SetNavigationForceSplitEnableInternal002
+ * @tc.desc: Branch: isRouter_=true, early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetNavigationForceSplitEnableInternal002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = true;
+    manager->isRouter_ = true;
+    manager->disableNavForceSplitInternal_ = false;
+    manager->SetNavigationForceSplitEnableInternal(true);
+    EXPECT_FALSE(manager->GetDisableNavForceSplitInternal());
+}
+
+/**
+ * @tc.name: SetNavigationForceSplitEnableInternal003
+ * @tc.desc: Branch: disableNavForceSplitInternal_ != enableSplit, early return (no change)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetNavigationForceSplitEnableInternal003, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = true;
+    manager->isRouter_ = false;
+    manager->disableNavForceSplitInternal_ = true;
+    manager->SetNavigationForceSplitEnableInternal(true);
+    EXPECT_TRUE(manager->GetDisableNavForceSplitInternal());
+}
+
+/**
+ * @tc.name: SetNavigationForceSplitEnableInternal004
+ * @tc.desc: Branch: Set enableSplit=false toggles disableNavForceSplitInternal_ to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetNavigationForceSplitEnableInternal004, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->isForceSplitSupported_ = true;
+    manager->isRouter_ = false;
+    manager->disableNavForceSplitInternal_ = false;
+    manager->SetPipelineContext(context);
+
+    manager->SetNavigationForceSplitEnableInternal(false);
+    EXPECT_TRUE(manager->GetDisableNavForceSplitInternal());
+}
 } // namespace OHOS::Ace::NG
