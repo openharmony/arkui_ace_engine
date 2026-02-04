@@ -113,6 +113,7 @@ public:
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
     int32_t GetScrollStep() const;
+    void SetScrollStep(int32_t scrollStep);
     void SetRotateAxisAngle(float angle);
     float GetRotateAxisAngle() const;
     void SetIsRotationEvent(bool rotationFlag);
