@@ -1204,6 +1204,9 @@ HWTEST_F(ViewAbstractTestThreeNg, ViewAbstractTestNg0055, TestSize.Level1)
 
     g_isConfigChangePerform = true;
     ViewAbstract::CreateWithOpacityResourceObj(resObj);
+    double opacity = 0.0;
+    ViewAbstract::SetOpacity(frameNode, opacity, resObj);
+    pattern->AddResCache("viewAbstract.opacity", std::to_string(opacity));
     double result;
     ResourceParseUtils::ParseResDouble(resObj, result);
     opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");

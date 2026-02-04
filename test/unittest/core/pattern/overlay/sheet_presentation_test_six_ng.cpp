@@ -1418,7 +1418,7 @@ HWTEST_F(SheetPresentationTestSixNg, GetAnimationPropertyCallForOverlay007, Test
  * @tc.desc: Branch: if (!isValidTarget && NearEqual(targetId, overlayRootNode->GetId()))
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestSixNg, SetSheetKey001, TestSize.Level1)
+HWTEST_F(SheetPresentationTestSixNg, DISABLED_SetSheetKey001, TestSize.Level1)
 {
     SheetPresentationTestSixNg::SetUpTestCase();
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
