@@ -282,7 +282,8 @@ public:
 
     int32_t RegisterNavigateChangeCallback(TransitionCallback callback);
 
-    void FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter = false);
+    void FireNavigateChangeCallback(
+        const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter = false);
 
 private:
     RefPtr<FrameNode> GetNavigationByInspectorId(const std::string& id) const;
