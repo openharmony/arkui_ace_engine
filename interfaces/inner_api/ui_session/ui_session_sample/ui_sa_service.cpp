@@ -34,7 +34,7 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService:
 const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
 constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
-constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 5;
+constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
@@ -212,8 +212,9 @@ void UiSaService::HandleGetVisibleInspectorTree(sptr<IUiContentService> service,
         }
     };
     if (params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
-        service->GetVisibleInspectorTree(visibleInspectorTreeCallBack,
-            { params[1] == "true", params[2] == "true", params[3] == "true", params[4] == "true" });
+        service->GetVisibleInspectorTree(
+            visibleInspectorTreeCallBack, { params[1] == "true", params[2] == "true", params[3] == "true",
+                                              params[4] == "true", params[5] == "true" });
     } else {
         service->GetVisibleInspectorTree(visibleInspectorTreeCallBack);
     }

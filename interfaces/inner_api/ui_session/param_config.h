@@ -25,6 +25,7 @@ struct ParamConfig {
     bool accessibilityInfo = false;
     bool cacheNodes = true;
     bool withWeb = false;
+    bool withUIExtension = false;
 };
 
 struct InteractionParamConfig {

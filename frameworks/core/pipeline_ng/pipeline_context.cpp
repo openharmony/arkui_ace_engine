@@ -4086,7 +4086,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
         rootNode_->DumpTreeByComponentName(params[1]);
         DumpLog::GetInstance().OutPutDefault();
-    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() == SIMPLIFYTREE_WITH_PARAMCONFIG) {
+    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(
