@@ -293,7 +293,7 @@ private:
 
     //-------force split begin-------
     void TryFindNewTargetNavigation();
-    void OnRouterTransition(cosnt std::string& new)
+    void OnRouterTransition(const std::string& newTopUrl)
     //-------force split end-------
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
