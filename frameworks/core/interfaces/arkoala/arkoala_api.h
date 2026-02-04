@@ -2686,6 +2686,12 @@ struct CalendarPickerDialogOption {
     void* buttonInfos;
 };
 
+struct ArkUIRenderContextParam {
+    ArkUI_Int32 type;
+    ArkUI_CharPtr surfaceName;
+    ArkUI_Bool isSkipCheckInMultiInstance;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -8901,6 +8907,7 @@ struct ArkUIExtendedNodeAPI {
     void (*registerOEMVisualEffect)(ArkUIOEMVisualEffectFuncHandle func);
     void (*setOnNodeDestroyCallback)(ArkUINodeHandle node, void (*onDestroy)(ArkUINodeHandle node));
     ArkUINodeHandle (*createCustomNodeByNodeId)(ArkUI_CharPtr tag, ArkUI_Int32 nodeId);
+    ArkUINodeHandle (*createCustomNodeWithParam)(ArkUI_CharPtr tag, const ArkUIRenderContextParam param);
 };
 
 struct ArkUIStyledStringAPI {
