@@ -996,11 +996,13 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
 
 void MenuPattern::DoCloseSubMenus() const
 {
-    showedSubMenu_ = nullptr;
     for (auto iter = embeddedMenuItems_.begin(); iter != embeddedMenuItems_.end();) {
         auto& menuItem = *iter;
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-        if (menuItemPattern) {
+        if (menuItemPattern && menuItemPattern->HasDetachedFreeRootProxy()) {
+            if (menuItemPattern->GetEmbeddedMenu() == showedSubMenu_) {
+                showedSubMenu_ = nullptr;
+            }
             menuItemPattern->HandleCloseSubMenu();
             iter = embeddedMenuItems_.erase(iter);
         } else {

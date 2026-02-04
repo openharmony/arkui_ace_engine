@@ -684,7 +684,6 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
-    detachedProxy_ = customNode;
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
         if (!frameNode) {
@@ -697,6 +696,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->ContentChangeReport(GetMenuWrapper(), true);
+        SetDetachedFreeRootProxy(customNode);
         return;
     }
 
@@ -729,6 +729,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     }
     ShowSubMenuWithAnimation(subMenu);
     SendSubMenuOpenToAccessibility(subMenu, type);
+    SetDetachedFreeRootProxy(customNode);
 }
 
 void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
@@ -1179,12 +1180,17 @@ void MenuItemPattern::HandleCloseSubMenu()
 
 void MenuItemPattern::DoCloseSubMenu()
 {
+    if (!HasDetachedFreeRootProxy()) {
+        return;
+    }
+
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(embeddedMenu_, true);
+    if (host) {
+        host->RemoveChild(embeddedMenu_, true);
+    }
     embeddedMenu_ = nullptr;
     isExpanded_ = false;
-    this->detachedProxy_ = nullptr;
+    detachedProxy_ = nullptr;
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(rightRow);
     auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());

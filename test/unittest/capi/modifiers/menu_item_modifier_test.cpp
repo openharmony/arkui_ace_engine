@@ -184,6 +184,7 @@ const std::string LABEL_INFO_PROP = "labelInfo";
 const std::string LABEL_INFO = "Label";
 const std::string LABEL_INFO_RES = "labelInfoRes";
 const std::string SELECTED_STR = "selected";
+const std::string SELECT_ICON_STR = "selectIcon";
 
 class MenuItemModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuItemModifier,
     &GENERATED_ArkUINodeModifiers::getMenuItemModifier, GENERATED_ARKUI_MENU_ITEM> {
@@ -487,12 +488,12 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setSelectedTest, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, setSelectIconBoolTest, TestSize.Level1)
 {
-    auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
+    auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "false");
 
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_Boolean>(true);
     modifier_->setSelectIcon(node_, &optIcon);
-    selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
+    selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "true");
 }
 
@@ -503,7 +504,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconBoolTest, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
 {
-    auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
+    auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "false");
 
     auto str = Converter::ArkValue<Ark_String>("path_to_select_icon");
@@ -511,7 +512,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
 
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &optIcon);
-    selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
+    selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "path_to_select_icon");
 }
 
@@ -522,13 +523,13 @@ HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
 {
-    auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
+    auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "false");
     Ark_Resource iconRes = CreateResource(ICON_OK_STR.c_str(), ResourceType::STRING);
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &optIcon);
-    selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
+    selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "path_to_select_icon");
 }
 
