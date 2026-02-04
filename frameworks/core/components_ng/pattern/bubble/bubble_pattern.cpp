@@ -900,7 +900,11 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
     renderContext->UpdateBackBlurStyle(styleOption);
     if (needUpdateShadow) {
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        CHECK_NULL_VOID(shadowTheme);
+        Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
         renderContext->UpdateBackShadow(shadow);
     }
 }
