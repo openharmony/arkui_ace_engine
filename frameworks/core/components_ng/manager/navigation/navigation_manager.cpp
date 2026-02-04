@@ -72,6 +72,7 @@ void NavigationManager::OnRouterTransition(const std::string& newTopUrl)
         newTopUrl.c_str(), url.c_str());
     forceSplitMgr->SetNavigationForceSplitEnableInternal(url == newTopUrl);
 }
+
 void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode)
 {
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
