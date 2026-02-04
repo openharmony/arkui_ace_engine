@@ -29,6 +29,49 @@ constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
 constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
 
+NavigationManager::NavigationManager()
+{
+#ifdef PREVIEW
+    hasCacheNavigationNodeEnable_ = false;
+#else
+    hasCacheNavigationNodeEnable_ = SystemProperties::GetCacheNavigationNodeEnable();
+#endif
+    auto callback = [weakMgr = WeakClaim(this)](
+        const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter) {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_VOID(mgr);
+            if (!isRouter) {
+                return;
+            }
+            mgr->OnRouterTransition(to.name);
+        };
+    RegisterNavigateChangeCallback(callback);
+}
+
+void NavigationManager::OnRouterTransition(const std::string& newTopUrl)
+{
+    if (!existForceSplitNav_.first) {
+        return;
+    }
+    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_CONTENT_ETS_TAG, existForceSplitNav_.second);
+    CHECK_NULL_VOID(navNode);
+    auto navPattern = navBarNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navPattern);
+    auto targetPage = navPattern->GetNavBasePageNode();
+    CHECK_NULL_VOID(targetPage);
+    auto targetPagePattern = targetPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(targetPagePattern);
+    auto pageInfo = targetPagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    cosnt auto& url = pageInfo->GetPageUrl();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,"Router transition to url:%{public}s, forceSplit navigation url:%{public}s",
+        newTopUrl.c_str(), url.c_str());
+    forceSplitMgr->SetNavigationForceSplitEnableInternal(url == newTopUrl);
+}
 void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode)
 {
     auto pattern = navigationNode->GetPattern<NavigationPattern>();
@@ -815,14 +858,14 @@ int32_t NavigationManager::RegisterNavigateChangeCallback(TransitionCallback cal
     return id;
 }
 
-void NavigationManager::FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to)
+void NavigationManager::FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "fire inner navigate callback isSplit(%{public}d) transition callback:"
         " %{public}s -> %{public}s",
         from.isSplit, from.name.c_str(), to.name.c_str());
     // full screen, fire all registered callback
     for (auto callback : changeCallbacks_) {
-        callback.second(from, to);
+        callback.second(from, to, isRouter);
     }
 }
 } // namespace OHOS::Ace::NG

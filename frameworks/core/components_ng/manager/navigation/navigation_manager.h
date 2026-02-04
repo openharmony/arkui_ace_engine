@@ -78,7 +78,7 @@ struct NavdestinationRecoveryInfo {
 
 using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
 
-using TransitionCallback = std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&)>;
+using TransitionCallback = std::function<void(const NavigateChangeInfo&, const NavigateChangeInfo&, bool isRouter)>;
 
 const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
 
@@ -87,14 +87,7 @@ class NavigationManager : public virtual AceType {
 public:
     using DumpLogDepth = int;
     using DumpCallback = std::function<void(DumpLogDepth)>;
-    NavigationManager()
-    {
-#ifdef PREVIEW
-        hasCacheNavigationNodeEnable_ = false;
-#else
-        hasCacheNavigationNodeEnable_ = SystemProperties::GetCacheNavigationNodeEnable();
-#endif
-    }
+    NavigationManager();
     ~NavigationManager() = default;
 
     void SetPipelineContext(const WeakPtr<PipelineContext>& pipeline)
@@ -289,7 +282,7 @@ public:
 
     int32_t RegisterNavigateChangeCallback(TransitionCallback callback);
 
-    void FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to);
+    void FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter = false);
 
 private:
     RefPtr<FrameNode> GetNavigationByInspectorId(const std::string& id) const;
@@ -299,6 +292,7 @@ private:
 
     //-------force split begin-------
     void TryFindNewTargetNavigation();
+    void OnRouterTransition(cosnt std::string& new)
     //-------force split end-------
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;

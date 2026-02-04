@@ -575,9 +575,6 @@ bool PageRouterManager::StartPop()
     pageInfo->ReplacePageParams("");
 
     // do pop page
-    if (!pageRouterStack_.empty()) {
-        SwitchNavigationForceSplitModeIfNeeded(pageRouterStack_.back().Upgrade());
-    }
     if (!OnPopPage(true, true)) {
         pageRouterStack_.emplace_back(preWeakNode);
         pageInfo->ReplacePageParams(params);
@@ -1319,7 +1316,6 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
-            SwitchNavigationForceSplitModeIfNeeded(pageInfo.second);
             NotifyForceFullScreenChangeIfNeeded(info.url, pageInfo.second->GetContextRefPtr());
             // find page in stack, move postion and update params.
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
@@ -1340,7 +1336,6 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         }
     }
 
-    DisableNavigationForceSplitIfNeeded(context);
     auto preStackSize = pageRouterStack_.size();
     LoadPage(GenerateNextPageId(), info, false, false);
     if (pageRouterStack_.size() > preStackSize) {
@@ -1851,9 +1846,6 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     pageRouterStack_.emplace_back(pageNode);
     std::string tempParam = pageInfo->ReplacePageParams(target.params);
     bool tempRecoverable = pageInfo->ReplaceRecoverable(target.recoverable);
-    if (needTransition) {
-        SwitchNavigationForceSplitModeIfNeeded(pageNode);
-    }
     if (!stageManager->MovePageToFront(pageNode, needHideLast, needTransition)) {
         // restore position and param.
         pageRouterStack_.pop_back();
@@ -2102,9 +2094,6 @@ void PageRouterManager::PopPage(
     }
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
-    if (needTransition && !pageRouterStack_.empty()) {
-        SwitchNavigationForceSplitModeIfNeeded(pageRouterStack_.back().Upgrade());
-    }
     if (!needShowNext) {
         if (!OnPopPage(needShowNext, needTransition)) {
             pageRouterStack_.emplace_back(topNode);
@@ -2153,9 +2142,6 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
     auto tempParam = pageInfo->ReplacePageParams(params);
-    if (needTransition) {
-        SwitchNavigationForceSplitModeIfNeeded(nextNode);
-    }
     if (OnPopPageToIndex(index, needShowNext, needTransition)) {
         return;
     }
@@ -2289,7 +2275,6 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move position and update params.
-            SwitchNavigationForceSplitModeIfNeeded(pageInfo.second);
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             LoadCompleteManagerStopCollect();
             if (!pageRouterStack_.empty()) {
@@ -2305,7 +2290,6 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
             return;
         }
     }
-    DisableNavigationForceSplitIfNeeded(context);
     auto preStackSize = pageRouterStack_.size();
     LoadPage(GenerateNextPageId(), info, false, false);
     LoadCompleteManagerStopCollect();
@@ -2406,7 +2390,6 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #if defined(ENABLE_SPLIT_MODE)
             stageManager->SetIsNewPageReplacing(true);
 #endif
-            SwitchNavigationForceSplitModeIfNeeded(pageInfo.second);
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
 #if defined(ENABLE_SPLIT_MODE)
             stageManager->SetIsNewPageReplacing(false);
@@ -2432,7 +2415,6 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #if defined(ENABLE_SPLIT_MODE)
         stageManager->SetIsNewPageReplacing(true);
 #endif
-        DisableNavigationForceSplitIfNeeded(pipelineContext);
         LoadPage(GenerateNextPageId(), info, true, false);
 #if defined(ENABLE_SPLIT_MODE)
         stageManager->SetIsNewPageReplacing(false);
@@ -2803,7 +2785,7 @@ void PageRouterManager::FireNavigateChangeCallback(const std::string& name)
         .name = name,
         .isSplit = stagePattern->GetIsSplit()
     };
-    navigationManager->FireNavigateChangeCallback(from, to);
+    navigationManager->FireNavigateChangeCallback(from, to, true);
 }
 
 void PageRouterManager::LoadCompleteManagerStopCollect()
