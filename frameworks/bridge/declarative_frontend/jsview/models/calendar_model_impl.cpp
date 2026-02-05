@@ -336,7 +336,7 @@ RefPtr<CalendarComponentV2> CalendarModelImpl::GetComponent()
         return nullptr;
     }
     auto component = AceType::DynamicCast<CalendarComponentV2>(stack->GetMainComponent());
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    if (component && AceApplicationInfo::GetInstance().IsRightToLeft()) {
         component->SetTextDirection(TextDirection::RTL);
     }
 
