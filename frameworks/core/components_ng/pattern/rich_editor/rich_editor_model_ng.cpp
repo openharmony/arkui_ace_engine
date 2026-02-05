@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,17 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     ACE_UINODE_TRACE(frameNode);
     InitRichEditorModel(isStyledStringMode, frameNode);
     isStyledStringMode_ = isStyledStringMode;
+}
+
+void RichEditorModelNG::CreateModel(bool isStyledStringMode)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RICH_EDITOR_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
+        [isStyledStringMode]() { return AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode); });
+    stack->Push(frameNode);
+    InitRichEditorModel(isStyledStringMode, frameNode);
 }
  
 RefPtr<FrameNode> RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t nodeId)
@@ -132,9 +143,15 @@ void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& 
     eventHub->SetOnSelect(std::move(func));
 }
 
-void RichEditorModelNG::SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
+void RichEditorModelNG::SetOnSelect(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(callback));
@@ -156,9 +173,14 @@ void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorIn
 }
 
 void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
-    std::function<bool(const RichEditorInsertValue&)>&& callback)
+    std::function<bool(const RichEditorInsertValue&)>&& callback, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToIMEInput(std::move(callback));
@@ -181,17 +203,28 @@ void RichEditorModelNG::SetOnDidIMEInput(std::function<void(const TextRange&)>&&
 }
 
 void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
-    std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
+    std::function<void(const RichEditorAbstractSpanResult&)>&& callback, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(callback));
 }
 
-void RichEditorModelNG::SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback)
+void RichEditorModelNG::SetOnDidIMEInput(
+    FrameNode* frameNode, std::function<void(const TextRange&)>&& callback, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidIMEInput(std::move(callback));
@@ -205,9 +238,15 @@ void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDele
     eventHub->SetAboutToDelete(std::move(func));
 }
 
-void RichEditorModelNG::SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func)
+void RichEditorModelNG::SetAboutToDelete(
+    FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToDelete(std::move(func));
@@ -221,9 +260,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     eventHub->SetOnDeleteComplete(std::move(func));
 }
 
-void RichEditorModelNG::SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback)
+void RichEditorModelNG::SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback,  bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDeleteComplete(std::move(callback));
@@ -336,6 +380,7 @@ void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::
 
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
+    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontStyle);
     if (options.value.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value());
     }
@@ -356,6 +401,7 @@ void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 
 void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options)
 {
+    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontStyle, frameNode);
     if (options.value.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value(), frameNode);
     }
@@ -623,10 +669,15 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
     eventHub->SetOnWillChange(std::move(func));
 }
 
-
-void RichEditorModelNG::SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func)
+void RichEditorModelNG::SetOnWillChange(
+    FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillChange(std::move(func));
@@ -640,9 +691,15 @@ void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChange
     eventHub->SetOnDidChange(std::move(func));
 }
 
-void RichEditorModelNG::SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func)
+void RichEditorModelNG::SetOnDidChange(
+    FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func, bool isJsView)
 {
     CHECK_NULL_VOID(frameNode);
+    if (isJsView) {
+        auto pattern = frameNode->GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(!pattern->GetSpanStringMode());
+    }
     auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidChange(std::move(func));
@@ -680,6 +737,14 @@ void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::T
 
 void RichEditorModelNG::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
 {
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnShare(std::move(func));
+}
+
+void RichEditorModelNG::SetOnShare(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnShare(std::move(func));

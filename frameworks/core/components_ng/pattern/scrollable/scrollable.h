@@ -397,7 +397,7 @@ public:
 
     bool IsSnapStopped() const;
 
-    void StopScrollable();
+    ACE_FORCE_EXPORT void StopScrollable();
 
     bool Available() const
     {

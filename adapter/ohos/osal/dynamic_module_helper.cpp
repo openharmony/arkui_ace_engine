@@ -79,6 +79,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "QRCode", "qrcode" },
         { "Radio", "radio" },
         { "Rating", "rating" },
+        { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
         { "Sidebar", "sidebar" },
         { "Slider", "slider" },

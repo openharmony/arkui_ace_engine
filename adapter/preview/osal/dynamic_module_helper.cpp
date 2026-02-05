@@ -105,6 +105,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
         {"SymbolGlyph", "symbol"},
+        {"Richeditor", "richeditor"},
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

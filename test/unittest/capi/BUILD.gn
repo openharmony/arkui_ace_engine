@@ -155,6 +155,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/ellipse_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/line_layout_algorithm.cpp",

@@ -222,7 +222,7 @@ void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src)
     }
 }
 
-void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
 {
     switch (src) {
         case TextInputAction::GO: dst = ARK_ENTER_KEY_TYPE_GO; break;
@@ -238,7 +238,7 @@ void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
     }
 }
 
-void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src)
 {
     switch (src) {
         case OHOS::Ace::FontStyle::NORMAL: dst = ARK_FONT_STYLE_NORMAL; break;
@@ -860,7 +860,7 @@ void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
             LOGE("Unexpected enum value in TextOverflow: %{public}d", src);
     }
 }
-void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
 {
     switch (src) {
         case VerticalAlign::TOP: dst = ARK_IMAGE_SPAN_ALIGNMENT_TOP; break;
@@ -895,7 +895,7 @@ void AssignArkValue(Ark_TextChangeReason& dst, const TextChangeReason& src)
             LOGE("Unexpected enum value in TextChangeReason: %{public}d", src);
     }
 }
-void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
 {
     switch (src) {
         case ImageFit::CONTAIN: dst = ARK_IMAGE_FIT_CONTAIN; break;
@@ -919,7 +919,7 @@ void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
     }
 }
 
-void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
 {
     switch (src) {
         case OHOS::Ace::TextDecorationStyle::SOLID: dst = ARK_TEXT_DECORATION_STYLE_SOLID; break;
@@ -934,7 +934,7 @@ void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecoratio
     }
 }
 
-void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src)
 {
     switch (src) {
         case OHOS::Ace::TextDecoration::NONE: dst = ARK_TEXT_DECORATION_TYPE_NONE; break;
@@ -988,7 +988,7 @@ void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src)
             break;
     }
 }
-void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src)
 {
     switch (src) {
         case OHOS::Ace::NG::RichEditorDeleteDirection::BACKWARD:
