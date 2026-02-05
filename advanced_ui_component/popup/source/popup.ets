@@ -693,7 +693,8 @@ export struct PopupComponent {
 
   private getTitleTextAlign(): TextAlign {
     let titleAlign = TextAlign.Start;
-    if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+    if ((Configuration.getLocale().dir === 'rtl') && 
+      (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
       titleAlign = TextAlign.End;
     }
     return titleAlign
@@ -773,6 +774,7 @@ export struct PopupComponent {
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
+              .textAlign(this.getTitleTextAlign())
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
                 this.setScrollMaxHeight(undefined);
@@ -880,6 +882,7 @@ export struct PopupComponent {
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
                 .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
+                .textAlign(this.getTitleTextAlign())
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number
                   this.setScrollMaxHeight(undefined);
