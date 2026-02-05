@@ -2313,6 +2313,24 @@ bool ArkTSUtils::HandleCallbackJobs(
     return true;
 }
 
+bool ArkTSUtils::GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm)
+{
+    if (firstArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
+        nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm)
+{
+    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+}
+
 uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     RefPtr<ResourceObject> resObj;
@@ -3125,16 +3143,18 @@ bool ArkTSUtils::ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const Ecm
     if (!secondArg->IsObject(vm) || secondArg->IsUndefined()) {
         return false;
     }
+    auto isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    auto* frameNode =
+ 	    isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, false);
     auto menuOptionsObject = secondArg->ToObject(vm);
     auto jsValueOnCreateMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onCreateMenu"));
-    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback);
+    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback, isJsView);
     auto jsValueOnMenuItemClick = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMenuItemClick"));
-    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback);
+    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback, isJsView);
     auto jsValueOnPrepareMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onPrepareMenu"));
-    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback);
+    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback, isJsView);
     return true;
 }
 
@@ -3208,14 +3228,15 @@ Local<panda::ObjectRef> ArkTSUtils::CreateJsTextMenuId(const EcmaVM* vm, const s
 }
 
 void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& jsValueOnCreateMenu,
-    NG::OnCreateMenuCallback& onCreateMenuCallback)
+    NG::OnCreateMenuCallback& onCreateMenuCallback, bool isJsView)
 {
     if (jsValueOnCreateMenu.IsEmpty() || !jsValueOnCreateMenu->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnCreateMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
@@ -3225,6 +3246,9 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
         auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, menuItems);
+        }
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
@@ -3235,14 +3259,15 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
 }
 
 void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
-    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback)
+    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback, bool isJsView)
 {
     if (jsValueOnPrepareMenu.IsEmpty() || !jsValueOnPrepareMenu->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnPrepareMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
@@ -3252,6 +3277,9 @@ void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
         auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, menuItems);
+        }
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
@@ -3321,15 +3349,16 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
 }
 
 void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
-    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback)
+    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+    bool isJsView)
 {
     if (jsValueOnMenuItemClick.IsEmpty() || !jsValueOnMenuItemClick->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnMenuItemClick->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
-                          const NG::MenuItemParam& menuOptionsParam) -> bool {
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](const NG::MenuItemParam& menuOptionsParam) -> bool {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -3342,6 +3371,9 @@ void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
             panda::ArrayRef::GetValueAt(vm, paramArrayObj, 0), panda::ArrayRef::GetValueAt(vm, paramArrayObj, 1)
         };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
+        }
         if (ret->IsBoolean()) {
             return ret->ToBoolean(vm)->Value();
         }
@@ -5029,4 +5061,14 @@ bool ArkTSUtils::ParseCommonMarginOrPaddingCorner(
     }
     return false;
 }
+
+#ifdef PIXEL_MAP_SUPPORTED
+void ArkTSUtils::ConvertPixmap(const Local<panda::ObjectRef>& obj, const EcmaVM* vm, const RefPtr<PixelMap>& pixelMap)
+{
+    auto jsPixmap = Framework::ConvertPixmap(pixelMap);
+    if (!jsPixmap->IsUndefined()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"), jsPixmap.Get().GetLocalHandle());
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,7 @@ public:
     static void DeleteBackward(FrameNode* frameNode);
     static PreviewTextInfo GetPreviewTextInfo(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
+    static void CreateModel(bool isStyledStringMode = false);
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
@@ -99,20 +100,25 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
-        std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
-    static void SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func);
-    static void SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func);
+        std::function<void(const RichEditorAbstractSpanResult&)>&& callback, bool isJsView = false);
+    static void SetOnWillChange(
+        FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func, bool isJsView = false);
+    static void SetOnDidChange(
+        FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func, bool isJsView = false);
     static void SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options);
-    static void SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func);
-    static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
+    static void SetAboutToDelete(
+        FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func, bool isJsView = false);
+    static void SetOnDidIMEInput(
+        FrameNode* frameNode, std::function<void(const TextRange&)>&& callback, bool isJsView = false);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static Color GetCaretColor(FrameNode* frameNode);
-    static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
+    static void SetOnSelect(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback, bool isJsView = false);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
-    static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback, bool isJsView = false);
     static void SetCustomKeyboard(
         FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     static void SetCustomKeyboardWithNode(
@@ -125,6 +131,7 @@ public:
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
+    static void SetOnShare(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
@@ -141,7 +148,8 @@ public:
     static void SetTypingStyle(FrameNode* frameNode, std::optional<struct UpdateSpanStyle> typingStyle,
             std::optional<TextStyle> textStyle);
     static std::optional<struct UpdateSpanStyle> GetTypingStyle(FrameNode* frameNode);
-    static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
+    static void SetAboutToIMEInput(
+        FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback, bool isJsView = false);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static bool GetRequestKeyboardOnFocus(FrameNode* frameNode);
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);

@@ -151,7 +151,7 @@ std::vector<NG::MenuOptionsParam> ConvertToMenuOptionsParams(const ArkUITextMenu
     return outOptionVec;
 }
 
-NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* optionsParam)
+ACE_FORCE_EXPORT NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* optionsParam)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback =
         [adapterCallback = optionsParam->createAdapterCallback, userCallback = optionsParam->onCreateMenu,
@@ -170,7 +170,7 @@ NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* options
     return onCreateMenuCallback;
 }
 
-NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* optionsParam)
+ACE_FORCE_EXPORT NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* optionsParam)
 {
     NG::OnMenuItemClickCallback onMenuItemClick =
         [adapterCallback = optionsParam->itemClickAdapterCallback, userCallback = optionsParam->onMenuItemClick,
@@ -194,7 +194,7 @@ NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* o
     return onMenuItemClick;
 }
 
-NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optionsParam)
+ACE_FORCE_EXPORT NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optionsParam)
 {
     NG::OnPrepareMenuCallback onPrepareMenuCallback =
         [adapterCallback = optionsParam->prepareAdapterCallback, userCallback = optionsParam->onPrepareMenu,
@@ -213,7 +213,7 @@ NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optio
     return onPrepareMenuCallback;
 }
 
-ArkUITextLineMetrics Convert(const TextLineMetrics& textLineMetrics)
+ACE_FORCE_EXPORT ArkUITextLineMetrics Convert(const TextLineMetrics& textLineMetrics)
 {
     ArkUITextLineMetrics lineMetrics;
     lineMetrics.ascender = textLineMetrics.ascender;

@@ -174,7 +174,7 @@ public:
         return selBackGroundPath_;
     }
 
-    std::shared_ptr<RSPath> GenerateBackgroundPath(float offset, float radiusRatio = 1.0f);
+    ACE_FORCE_EXPORT std::shared_ptr<RSPath> GenerateBackgroundPath(float offset, float radiusRatio = 1.0f);
 
     std::shared_ptr<RSPath> GenerateSelBackgroundPath(float offset);
 

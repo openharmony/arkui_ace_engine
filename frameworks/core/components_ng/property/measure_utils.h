@@ -89,7 +89,7 @@ ACE_FORCE_EXPORT void MinusPaddingToNonNegativeSize(const PaddingPropertyF& padd
 
 ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
+ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
 

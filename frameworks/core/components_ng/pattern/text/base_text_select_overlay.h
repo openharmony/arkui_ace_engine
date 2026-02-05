@@ -41,7 +41,7 @@ struct OverlayRequest {
 
 enum class DragHandleIndex { NONE, FIRST, SECOND };
 
-class BaseTextSelectOverlay : public SelectOverlayHolder, public SelectOverlayCallback {
+class ACE_FORCE_EXPORT BaseTextSelectOverlay : public SelectOverlayHolder, public SelectOverlayCallback {
     DECLARE_ACE_TYPE(BaseTextSelectOverlay, SelectOverlayHolder, SelectOverlayCallback);
 
 public:

@@ -525,6 +525,16 @@ struct ArkUIStringAndFloat {
     ArkUI_CharPtr valueStr;
 };
 
+struct ArkUI_SelectMenuParam {
+    std::function<void(int32_t, int32_t)> onAppear;
+    std::function<void()> onDisappear;
+    std::function<void(int32_t, int32_t)> onMenuShow;
+    std::function<void(int32_t, int32_t)> onMenuHide;
+    bool isValid = true;
+    ArkUI_Uint32 previewMenuOptions;
+};
+
+
 struct ArkUIResourceColorType {
     ArkUI_Uint32 number;
     ArkUI_CharPtr string;
@@ -7731,6 +7741,15 @@ struct ArkUIRichEditorBindMenuParam {
 };
 
 struct ArkUIRichEditorModifier {
+    void (*createModel)(ArkUI_Bool isStyledStringMode, void* controller);
+    void (*setRichEditorPreviewMenuParam)(ArkUINodeHandle node, ArkUI_Uint32 editorType, void* buildFunc,
+        ArkUI_SelectMenuParam* menuParam);
+    void (*setRichEditorBindSelectionMenuJS)(ArkUINodeHandle node, ArkUI_Uint32 editorType, ArkUI_Uint32 responseType,
+        void* buildFunc, ArkUI_SelectMenuParam* menuParam);
+    void (*setRichEditorFocusable)(ArkUINodeHandle node, ArkUI_Bool focusable);
+    void (*setRichEditorOnShare)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorSelectDetectConfig)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Uint32 valuesSize);
+    void (*resetRichEditorSelectDetectConfig)(ArkUINodeHandle node);
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
     bool (*getRichEditorEnableDataDetector)(ArkUINodeHandle node);
@@ -7742,7 +7761,7 @@ struct ArkUIRichEditorModifier {
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
-    void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnIMEInputComplete)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     ArkUI_Int32 (*getRichEditorCopyOptions)(ArkUINodeHandle node);
@@ -7753,17 +7772,17 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getRichEditorCaretColor)(ArkUINodeHandle node);
-    void (*setRichEditorOnSelect)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorOnSelect)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnSelect)(ArkUINodeHandle node);
     void (*setRichEditorOnSubmit)(ArkUINodeHandle node, void* callback);
     void (*setRichEditorNapiOnSubmit)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSubmit)(ArkUINodeHandle node);
-    void (*setRichEditorAboutToIMEInput)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorAboutToIMEInput)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorAboutToIMEInput)(ArkUINodeHandle node);
     void (*setOnReady)(ArkUINodeHandle node, void* callback);
     void (*setRichEditorNapiOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetOnReady)(ArkUINodeHandle node);
-    void (*setOnDeleteComplete)(ArkUINodeHandle node, void* callback);
+    void (*setOnDeleteComplete)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetOnDeleteComplete)(ArkUINodeHandle node);
     void (*setOnEditingChange)(ArkUINodeHandle node, void* callback);
     void (*setRichEditorNapiOnEditingChange)(ArkUINodeHandle node, void* callback);
@@ -7787,13 +7806,13 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node);
     void (*setRichEditorEnablePreviewText)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRichEditorEnablePreviewText)(ArkUINodeHandle node);
-    void (*setRichEditorEditMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
+    void (*setRichEditorEditMenuOptions)(ArkUINodeHandle node, void* onCreateMenuCallback,
+        void* onMenuItemClickCallback, void* onPrepareMenuCallback, bool isJsView);
     void (*setRichEditorNapiEditMenuOptions)(ArkUINodeHandle node, ArkUIEditOptionsParam* optionsParam);
     void (*resetRichEditorEditMenuOptions)(ArkUINodeHandle node);
-    void (*setRichEditorOnWillChange)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorOnWillChange)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);
-    void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
     void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
         const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount,
@@ -7801,7 +7820,7 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorNapiPlaceholder)(ArkUINodeHandle node,
         const struct ArkUIRichEditorPlaceholderOptionsStruct* placeholderOptions);
     void (*resetRichEditorPlaceholder)(ArkUINodeHandle node);
-    void (*setRichEditorAboutToDelete)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorAboutToDelete)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorAboutToDelete)(ArkUINodeHandle node);
     void (*setRichEditorBarState)(ArkUINodeHandle node, ArkUI_Uint32 barStateValue);
     void (*resetRichEditorBarState)(ArkUINodeHandle node);
@@ -7821,8 +7840,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
     ArkUINodeHandle (*getRichEditorCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRichEditorCustomKeyboardOption)(ArkUINodeHandle node);
+    void (*setRichEditorCustomKeyboardFunc)(ArkUINodeHandle node, void* callback, ArkUI_Bool supportAvoidance);
     void (*resetRichEditorCustomKeyboard)(ArkUINodeHandle node);
-    void (*setRichEditorOnDidIMEInput)(ArkUINodeHandle node, void* callback);
+    void (*setRichEditorOnDidIMEInput)(ArkUINodeHandle node, void* callback, bool isJsView);
     void (*resetRichEditorOnDidIMEInput)(ArkUINodeHandle node);
     void (*setRichEditorOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnWillAttachIME)(ArkUINodeHandle node);
@@ -7875,6 +7895,8 @@ struct ArkUIRichEditorModifier {
     ArkUIRichEditorTextStyle (*getRichEditorTypingStyle)(ArkUINodeHandle node);
     void (*setRichEditorBindSelectionMenu)(ArkUINodeHandle node, ArkUIRichEditorBindMenuParam* menuParam);
     void (*resetRichEditorBindSelectionMenu)(ArkUINodeHandle node);
+    void* (*getEventSetHandler)(uint32_t kind);
+    void* (*getEventResetHandler)(uint32_t kind);
 };
 
 struct ArkUIRichEditorControllerModifier {

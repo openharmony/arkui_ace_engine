@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
+class ACE_FORCE_EXPORT OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
     explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern)
     {

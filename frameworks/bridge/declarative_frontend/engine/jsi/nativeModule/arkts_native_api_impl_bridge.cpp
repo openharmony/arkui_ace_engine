@@ -72,7 +72,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h"
@@ -507,6 +506,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
 #endif
         { "Hyperlink" },
         { "SymbolGlyph" },
+        {"Richeditor"},
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -894,173 +894,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterColumnAttributes(object, vm);
 
     RegisterGridRowAttributes(object, vm);
-
-    auto richEditor = panda::ObjectRef::New(vm);
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnterKeyType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnterKeyType));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnterKeyType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnterKeyType));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectedBackgroundColor));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSelectedBackgroundColor));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCaretColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCaretColor));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCaretColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCaretColor));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelectionChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnSelectionChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelectionChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnSelectionChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDataDetector"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableDataDetector));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableDataDetector));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetDataDetectorConfig));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataDetectorConfig"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetDataDetectorConfig));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnIMEInputComplete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnIMEInputComplete));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnIMEInputComplete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnIMEInputComplete));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnWillChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnWillChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDidChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDidChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDidChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetPlaceholder));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetPlaceholder));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAboutToDelete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetAboutToDelete));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAboutToDelete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetAboutToDelete));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSubmit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnSubmit));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSubmit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnSubmit));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAboutToIMEInput"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetAboutToIMEInput));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAboutToIMEInput"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetAboutToIMEInput));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCopyOptions));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCopyOptions));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnSelect));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnSelect));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnReady"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnReady));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnReady"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnReady));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDeleteComplete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDeleteComplete));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDeleteComplete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDeleteComplete));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnEditingChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnEditingChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditingChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnEditingChange));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPaste"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnPaste));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPaste"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnPaste));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCut"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnCut));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCut"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnCut));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnCopy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnCopy));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnCopy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnCopy));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableKeyboardOnFocus"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableKeyboardOnFocus));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableKeyboardOnFocus"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableKeyboardOnFocus));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnablePreviewText"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnablePreviewText));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnablePreviewText));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEditMenuOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEditMenuOptions));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditMenuOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEditMenuOptions));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarState"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetBarState));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetBarState));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLength"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetMaxLength));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLength"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetMaxLength));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetMaxLines));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetMaxLines));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStopBackPress"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetStopBackPress));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStopBackPress"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetStopBackPress));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKeyboardAppearance"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetKeyboardAppearance));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyboardAppearance"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetKeyboardAppearance));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCustomKeyboard"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCustomKeyboard));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCustomKeyboard"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCustomKeyboard));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDidIMEInput"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDidIMEInput));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidIMEInput"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDidIMEInput));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillAttachIME"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnWillAttachIME));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillAttachIME"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnWillAttachIME));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableHapticFeedback));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableHapticFeedback));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoSpacing"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableAutoSpacing));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoSpacing"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableAutoSpacing));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompressLeadingPunctuation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCompressLeadingPunctuation));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompressLeadingPunctuation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCompressLeadingPunctuation));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIncludeFontPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetIncludeFontPadding));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIncludeFontPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetIncludeFontPadding));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFallbackLineSpacing"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetFallbackLineSpacing));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFallbackLineSpacing"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetFallbackLineSpacing));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUndoStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetUndoStyle));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUndoStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetUndoStyle));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetScrollBarColor));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetScrollBarColor));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDragPreviewStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectedDragPreviewStyle));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSelectedDragPreviewStyle));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSingleLine"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSingleLine));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSingleLine"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSingleLine));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
     linearIndicator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIndicatorStyle"),
