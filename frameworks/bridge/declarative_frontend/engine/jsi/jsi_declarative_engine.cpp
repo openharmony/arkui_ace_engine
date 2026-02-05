@@ -766,39 +766,39 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
     g_declarativeRuntime = runtime;
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     PreLoadDynamicModule(arkRuntime);
 #endif
 }
 
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
 void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
-        { "Checkbox", "arkui.components.arkcheckbox" },
-        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
-        { "Gauge", "arkui.components.arkgauge" },
-        { "Rating", "arkui.components.arkrating" },
-        { "TimePicker", "arkui.components.arktimepicker" },
-        { "TimePickerDialog", "arkui.components.arktimepicker" },
-        { "WaterFlow", "arkui.components.arkwaterflow" },
-        { "FlowItem", "arkui.components.arkflowitem" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
-        { "Hyperlink", "arkui.components.arkhyperlink" },
-        { "Marquee", "arkui.components.arkmarquee" },
-        { "Stepper", "arkui.components.arkstepper" },
-        { "StepperItem", "arkui.components.arkstepperitem" },
-        { "Radio", "arkui.components.arkradio" },
-        { "Slider", "arkui.components.arkslider" },
-        { "Indexer", "arkui.components.arkalphabetindexer" },
-        { "Sidebar", "arkui.components.arksidebarcontainer" },
-        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "Checkbox", "arkui.components.arkcheckbox" },
+        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
         { "ColumnSplit", "arkui.components.arkcolumnsplit" },
-        { "RowSplit", "arkui.components.arkrowsplit" },
+        { "FlowItem", "arkui.components.arkflowitem" },
 #ifndef ARKUI_WEARABLE
         { "FolderStack", "arkui.components.arkfolderstack" },
 #endif
+        { "Gauge", "arkui.components.arkgauge" },
+        { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "Indexer", "arkui.components.arkalphabetindexer" },
+        { "Marquee", "arkui.components.arkmarquee" },
+        { "Radio", "arkui.components.arkradio" },
+        { "Rating", "arkui.components.arkrating" },
+        { "RowSplit", "arkui.components.arkrowsplit" },
+        { "Sidebar", "arkui.components.arksidebarcontainer" },
+        { "Slider", "arkui.components.arkslider" },
+        { "Stepper", "arkui.components.arkstepper" },
+        { "StepperItem", "arkui.components.arkstepperitem" },
+        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "TimePicker", "arkui.components.arktimepicker" },
+        { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "WaterFlow", "arkui.components.arkwaterflow" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");

@@ -34,12 +34,31 @@ using DynamicModuleCreateFunc = DynamicModule* (*)();
 
 constexpr const char* COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
 constexpr const char* DYNAMIC_MODULE_CREATE = "OHOS_ACE_DynamicModule_Create_";
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+struct TextSegmentInfo {
+    std::string libraryName_;
+    void* handle_;
+    void* baseAddress_;
+    void* textStart_;
+    void* textEnd_;
+    size_t textSize_;
+    bool findFlag_ = false;
+
+    TextSegmentInfo(std::string libraryName, void* handle)
+        : libraryName_(libraryName), handle_(handle), baseAddress_(nullptr), textStart_(nullptr), textEnd_(nullptr),
+          textSize_(0), findFlag_(false)
+    {}
+};
+#endif
 
 class ACE_FORCE_EXPORT DynamicModuleHelper final {
 public:
     static DynamicModuleHelper& GetInstance();
     std::unique_ptr<ComponentLoader> GetLoaderByName(const char* name);
     DynamicModule* GetDynamicModule(const std::string& name);
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+    void TriggerPageFaultForPreLoad();
+#endif
 
 private:
     DynamicModuleHelper() = default;
@@ -48,6 +67,9 @@ private:
     ComponentLoaderFunc compatibleLoaderFunc_ = nullptr;
     std::unordered_map<std::string, std::unique_ptr<DynamicModule>> moduleMap_;
     std::mutex moduleMapMutex_;
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+    std::unordered_map<std::string, TextSegmentInfo> textInfoMap_;
+#endif
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_MODULE_HELPER_H

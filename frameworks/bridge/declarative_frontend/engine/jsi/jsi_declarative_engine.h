@@ -92,7 +92,7 @@ public:
     static void PreloadAceModuleForCustomRuntime(void* runtime);
     static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     static void PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime);
 #endif
     // crossPlatform Resets the module pre-load flag

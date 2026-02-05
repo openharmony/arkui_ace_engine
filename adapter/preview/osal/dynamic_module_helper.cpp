@@ -142,4 +142,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
     }
 }
 
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+void DynamicModuleHelper::TriggerPageFaultForPreLoad() {}
+#endif
+
 } // namespace OHOS::Ace
