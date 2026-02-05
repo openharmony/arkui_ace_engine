@@ -21,5 +21,6 @@ ace_unittest("calendar_test_ng") {
     "calendar_paint_method_test.cpp",
     "calendar_pattern_test_ng.cpp",
     "calendar_test_ng.cpp",
+    "calendar_utils_test.cpp",
   ]
 }
