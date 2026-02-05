@@ -8759,7 +8759,7 @@ struct ArkUIBasicAPI {
     ArkUI_Int32 (*greatOrEqualTargetAPIVersion)(ArkUI_Int32 version);
     void (*registerNodeAsyncCommonEventReceiver)(EventReceiver eventReceiver);
     void (*unRegisterNodeAsyncCommonEventReceiver)();
-    ArkUI_Int32 (*checkUIContextInvalide)(ArkUI_Int32 instanceId);
+    ArkUI_Int32 (*checkUIContextInvalid)(ArkUI_Int32 instanceId);
 };
 
 struct ArkUIMultiThreadManagerAPI {

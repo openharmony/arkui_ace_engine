@@ -2061,7 +2061,7 @@ void UnRegisterNodeAsyncCommonEventReceiver()
     NodeCommonEvent::globalCommonEventReceiver = nullptr;
 }
 
-ArkUI_Int32 CheckUIContextInvalide(ArkUI_Int32 instanceId)
+ArkUI_Int32 CheckUIContextInvalid(ArkUI_Int32 instanceId)
 {
     auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
     if (pipeline == nullptr) {
@@ -2105,7 +2105,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
-        .checkUIContextInvalide = CheckUIContextInvalide,
+        .checkUIContextInvalid = CheckUIContextInvalid,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
