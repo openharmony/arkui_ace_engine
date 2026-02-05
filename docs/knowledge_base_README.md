@@ -19,14 +19,14 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-04）：
+**统计数据**（截至 2026-02-05）：
 
-- 总知识库文档: 23 个
-- 组件知识库: 21 个
+- 总知识库文档: 24 个
+- 组件知识库: 22 个
 - SDK API 知识库: 1 个
 - CJ Frontend 知识库: 1 个
-- 覆盖组件: 21 个
-- 检索关键词: 200+ 个
+- 覆盖组件: 22 个
+- 检索关键词: 220+ 个
 
 ---
 
@@ -42,6 +42,8 @@ knowledge_base/
 └── pattern/               # 组件模式知识库
     ├── badge/
     │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
+    ├── flex/
+    │   └── Flex_Knowledge_Base.md             # Flex/Row/Column/Wrap 组件知识库
     ├── calendar_picker/
     │   └── Calendar_Picker_Knowledge_Base.md  # CalendarPicker 组件知识库
     ├── container_picker/
@@ -135,6 +137,36 @@ knowledge_base/
 - 测试覆盖和调试指南
 
 **适用场景**：Menu 组件开发、测试、问题排查时参考
+
+### Flex Component Knowledge Base
+
+**位置**: `pattern/flex/Flex_Knowledge_Base.md`
+
+**完整指南** - Flex 弹性布局组件（Row/Column/Wrap）的开发、测试和调试参考文档
+
+**包含内容**：
+
+- Flex 布局架构（Pattern、Algorithm、Model 三层）
+- Flex 弹性容器与 Linear 线性容器（Row/Column）分类体系
+- FlexDirection 方向枚举（Row/Column/RowReverse/ColumnReverse）及 RTL/LTR 支持
+- FlexAlign 对齐方式（Start/Center/End/SpaceBetween/SpaceAround/SpaceEvenly/Baseline/Stretch）
+- FlexItem 属性（flex-grow、flex-shrink、flex-basis、align-self）
+- layoutWeight 权重分配机制（FirstMeasure/SecondMeasure/FinalMeasure）
+- constraintSize 约束尺寸（LayoutConstraintF、minSize、maxSize）
+- 二次布局机制（Two-Pass Measure）详解
+- 主轴和交叉轴空间分配算法
+- Flex Grow/Shrink 机制及默认值差异（Flex vs Linear）
+- Baseline 对齐实现
+- Blank 空白元素特殊处理
+- 显示优先级（Display Priority）机制
+- Measure-Layout 配对验证
+- 完整布局流程 Mermaid 序列图（Measure/Layout/二次测量）
+- Wrap 换行布局（Horizontal/Vertical）
+- 完整的 ArkTS 和 C++ API 清单
+- 性能优化（二次布局影响分析、嵌套布局性能对比）
+- 常见问题和调试工具
+
+**适用场景**：Flex/Row/Column/Wrap 组件开发、弹性布局实现、布局算法优化时参考
 
 ### Refresh Component Knowledge Base
 
