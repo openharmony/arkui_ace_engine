@@ -1463,36 +1463,6 @@ HWTEST_F(UINodeTestNg, TestPostAfterAttachMainTreeTask001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestFrameNodeByInspectorId001
- * @tc.desc: Test basic Add/Remove FrameNodeByInspectorId
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create a uinode
-     */
-    const std::string& existingId = "testNode";
-    const RefPtr<FrameNode> testNode =
-        FrameNode::CreateFrameNode(existingId, 1, AceType::MakeRefPtr<Pattern>(), true);
-
-    /**
-     * @tc.steps: step2. Test Add/Remove FrameNodeByInspectorId
-     */
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(existingId, testNode, testNode->GetId());
-    auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(existingId);
-    EXPECT_NE(retrievedNode, nullptr);
-    EXPECT_EQ(retrievedNode->GetId(), testNode->GetId());
-
-    /**
-     * @tc.steps: step3. Test RemoveFrameNodeByInspectorId
-     */
-    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(existingId, testNode->GetId());
-    auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(existingId);
-    EXPECT_EQ(node, nullptr);
-}
-
-/**
  * @tc.name: TestFrameNodeByInspectorId002
  * @tc.desc: Test adding multiple nodes with same inspector ID
  * @tc.type: FUNC
@@ -1503,22 +1473,22 @@ HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId002, TestSize.Level1)
      * @tc.steps: step1. create multiple nodes with same inspector ID
      */
     const std::string& inspectorId = "multiNodeTest";
-    const RefPtr<FrameNode> node1 =
-        FrameNode::CreateFrameNode(inspectorId, 1, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<FrameNode> node2 =
-        FrameNode::CreateFrameNode(inspectorId, 2, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<FrameNode> node3 =
-        FrameNode::CreateFrameNode(inspectorId, 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node1 = FrameNode::CreateFrameNode("tag1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 = FrameNode::CreateFrameNode("tag2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node3 = FrameNode::CreateFrameNode("tag3", 3, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. Add all nodes with same inspector ID
+     * @tc.steps: step2. Set inspectorId for all nodes and attach to main tree
      */
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node1, node1->GetId());
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node2, node2->GetId());
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node3, node3->GetId());
+    node1->UpdateInspectorId(inspectorId);
+    node2->UpdateInspectorId(inspectorId);
+    node3->UpdateInspectorId(inspectorId);
+    node1->AttachToMainTree();
+    node2->AttachToMainTree();
+    node3->AttachToMainTree();
 
     /**
-     * @tc.steps: step3. Verify all nodes can be retrieved
+     * @tc.steps: step3. Verify nodes can be retrieved by inspectorId
      */
     auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId);
     EXPECT_NE(retrievedNode, nullptr);
@@ -1542,16 +1512,16 @@ HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId003, TestSize.Level1)
      * @tc.steps: step1. create multiple nodes with same inspector ID
      */
     const std::string& inspectorId = "removeTest";
-    const RefPtr<FrameNode> node1 =
-        FrameNode::CreateFrameNode(inspectorId, 1, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<FrameNode> node2 =
-        FrameNode::CreateFrameNode(inspectorId, 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node1 = FrameNode::CreateFrameNode("tag1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 = FrameNode::CreateFrameNode("tag2", 2, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. Add both nodes
+     * @tc.steps: step2. Set inspectorId for both nodes and attach to main tree
      */
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node1, node1->GetId());
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId, node2, node2->GetId());
+    node1->UpdateInspectorId(inspectorId);
+    node2->UpdateInspectorId(inspectorId);
+    node1->AttachToMainTree();
+    node2->AttachToMainTree();
 
     /**
      * @tc.steps: step3. Remove first node, second should still exist
@@ -1579,16 +1549,16 @@ HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId004, TestSize.Level1)
      */
     const std::string& inspectorId1 = "testId1";
     const std::string& inspectorId2 = "testId2";
-    const RefPtr<FrameNode> node1 =
-        FrameNode::CreateFrameNode(inspectorId1, 1, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<FrameNode> node2 =
-        FrameNode::CreateFrameNode(inspectorId2, 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node1 = FrameNode::CreateFrameNode("tag1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 = FrameNode::CreateFrameNode("tag2", 2, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. Add nodes with different inspector IDs
+     * @tc.steps: step2. Set inspectorId for nodes and attach to main tree
      */
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId1, node1, node1->GetId());
-    ElementRegister::GetInstance()->AddFrameNodeByInspectorId(inspectorId2, node2, node2->GetId());
+    node1->UpdateInspectorId(inspectorId1);
+    node2->UpdateInspectorId(inspectorId2);
+    node1->AttachToMainTree();
+    node2->AttachToMainTree();
 
     /**
      * @tc.steps: step3. Verify nodes can be retrieved by their respective inspector IDs
