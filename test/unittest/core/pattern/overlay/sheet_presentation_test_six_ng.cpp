@@ -41,6 +41,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const std::string MESSAGE = "hello world";
 } // namespace
 
 class SheetPresentationTestSixNg : public testing::Test {
