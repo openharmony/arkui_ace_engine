@@ -259,7 +259,7 @@ HWTEST_F(ForceSplitManagerTestNg, SetNavigationForceSplitEnableInternal003, Test
     manager->isRouter_ = false;
     manager->disableNavForceSplitInternal_ = true;
     manager->SetNavigationForceSplitEnableInternal(true);
-    EXPECT_TRUE(manager->GetDisableNavForceSplitInternal());
+    EXPECT_FALSE(manager->GetDisableNavForceSplitInternal());
 }
 
 /**
