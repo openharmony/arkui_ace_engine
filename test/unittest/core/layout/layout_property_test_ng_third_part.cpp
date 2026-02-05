@@ -42,6 +42,8 @@ HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize001, TestSize.Level0)
     auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     ASSERT_NE(calcLayoutConstraint, nullptr);
     auto& selfIdealSize = calcLayoutConstraint->selfIdealSize.value();
+    ASSERT_TRUE(selfIdealSize.Width().has_value());
+    ASSERT_TRUE(selfIdealSize.Height().has_value());
     EXPECT_EQ(selfIdealSize.Width().value(), CalcLength(WIDTH));
     EXPECT_EQ(selfIdealSize.Height().value(), CalcLength(HEIGHT));
 }
@@ -67,6 +69,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize002, TestSize.Level0)
     auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     ASSERT_NE(calcLayoutConstraint, nullptr);
     auto& selfIdealSize = calcLayoutConstraint->selfIdealSize.value();
+    ASSERT_TRUE(selfIdealSize.Width().has_value());
     EXPECT_EQ(selfIdealSize.Width().value(), CalcLength(WIDTH));
     EXPECT_FALSE(selfIdealSize.Height().has_value());
 }
@@ -91,6 +94,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyProperty001, TestSize.Level0)
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     ASSERT_TRUE(layoutPolicy.has_value());
     auto widthPolicy = layoutPolicy.value().GetLayoutPolicy(true);
+    ASSERT_TRUE(widthPolicy.has_value());
     EXPECT_EQ(widthPolicy.value(), LayoutCalPolicy::WRAP_CONTENT);
 }
 
@@ -114,6 +118,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyProperty002, TestSize.Level0)
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     ASSERT_TRUE(layoutPolicy.has_value());
     auto heightPolicy = layoutPolicy.value().GetLayoutPolicy(false);
+    ASSERT_TRUE(heightPolicy.has_value());
     EXPECT_EQ(heightPolicy.value(), LayoutCalPolicy::MATCH_PARENT);
 }
 
@@ -366,6 +371,145 @@ HWTEST_F(LayoutPropertyTestNg, UpdateBias001, TestSize.Level0)
     EXPECT_TRUE(bias.has_value());
     EXPECT_EQ(bias->first, 0.3f);
     EXPECT_EQ(bias->second, 0.7f);
+}
+
+/**
+ * @tc.name: UpdateUserDefinedIdealSize003
+ * @tc.desc: Test UpdateUserDefinedIdealSize with percent size
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Call UpdateUserDefinedIdealSize with percent size.
+     */
+    CalcSize calcSizePercent(
+        CalcLength(Dimension(50.0, DimensionUnit::PERCENT)), CalcLength(Dimension(100.0, DimensionUnit::PERCENT)));
+    layoutProperty->UpdateUserDefinedIdealSize(calcSizePercent);
+
+    auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    auto& selfIdealSize = calcLayoutConstraint->selfIdealSize.value();
+    ASSERT_TRUE(selfIdealSize.Width().has_value());
+    ASSERT_TRUE(selfIdealSize.Height().has_value());
+    EXPECT_EQ(selfIdealSize.Width().value(), CalcLength(Dimension(50.0, DimensionUnit::PERCENT)));
+    EXPECT_EQ(selfIdealSize.Height().value(), CalcLength(Dimension(100.0, DimensionUnit::PERCENT)));
+}
+
+/**
+ * @tc.name: UpdateLayoutConstraintWithPadding001
+ * @tc.desc: Test UpdateLayoutConstraint with padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateLayoutConstraintWithPadding001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Update padding with different values for each edge.
+     */
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0, DimensionUnit::PX);
+    padding.right = CalcLength(20.0, DimensionUnit::PX);
+    padding.top = CalcLength(15.0, DimensionUnit::PX);
+    padding.bottom = CalcLength(25.0, DimensionUnit::PX);
+    layoutProperty->UpdatePadding(padding);
+
+    /**
+     * @tc.expected: Padding should be set correctly.
+     */
+    auto& resultPadding = layoutProperty->GetPaddingProperty();
+    ASSERT_NE(resultPadding, nullptr);
+    ASSERT_TRUE(resultPadding->left.has_value());
+    ASSERT_TRUE(resultPadding->right.has_value());
+    ASSERT_TRUE(resultPadding->top.has_value());
+    ASSERT_TRUE(resultPadding->bottom.has_value());
+    EXPECT_EQ(resultPadding->left.value(), CalcLength(10.0, DimensionUnit::PX));
+    EXPECT_EQ(resultPadding->right.value(), CalcLength(20.0, DimensionUnit::PX));
+    EXPECT_EQ(resultPadding->top.value(), CalcLength(15.0, DimensionUnit::PX));
+    EXPECT_EQ(resultPadding->bottom.value(), CalcLength(25.0, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: UpdateLayoutConstraintWithMargin001
+ * @tc.desc: Test UpdateLayoutConstraint with margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateLayoutConstraintWithMargin001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Update margin with same value for all edges.
+     */
+    MarginProperty margin;
+    margin.left = CalcLength(12.0, DimensionUnit::PX);
+    margin.right = CalcLength(12.0, DimensionUnit::PX);
+    margin.top = CalcLength(12.0, DimensionUnit::PX);
+    margin.bottom = CalcLength(12.0, DimensionUnit::PX);
+    layoutProperty->UpdateMargin(margin);
+
+    /**
+     * @tc.expected: Margin should be set correctly for all edges.
+     */
+    auto& resultMargin = layoutProperty->GetMarginProperty();
+    ASSERT_NE(resultMargin, nullptr);
+    ASSERT_TRUE(resultMargin->left.has_value());
+    ASSERT_TRUE(resultMargin->right.has_value());
+    ASSERT_TRUE(resultMargin->top.has_value());
+    ASSERT_TRUE(resultMargin->bottom.has_value());
+    EXPECT_EQ(resultMargin->left.value(), CalcLength(12.0, DimensionUnit::PX));
+    EXPECT_EQ(resultMargin->right.value(), CalcLength(12.0, DimensionUnit::PX));
+    EXPECT_EQ(resultMargin->top.value(), CalcLength(12.0, DimensionUnit::PX));
+    EXPECT_EQ(resultMargin->bottom.value(), CalcLength(12.0, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: ConstraintSizeCombination001
+ * @tc.desc: Test constraint size with min and max combination
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ConstraintSizeCombination001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set min and max constraint size using UpdateCalcMinSize and UpdateCalcMaxSize.
+     */
+    layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(100.0), CalcLength(200.0)));
+    layoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(500.0), CalcLength(600.0)));
+
+    /**
+     * @tc.expected: Min and max constraints should be set correctly.
+     */
+    auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    const auto& minSize = calcLayoutConstraint->minSize;
+    const auto& maxSize = calcLayoutConstraint->maxSize;
+    ASSERT_TRUE(minSize.has_value());
+    ASSERT_TRUE(maxSize.has_value());
+    ASSERT_TRUE(minSize->Width().has_value());
+    ASSERT_TRUE(minSize->Height().has_value());
+    ASSERT_TRUE(maxSize->Width().has_value());
+    ASSERT_TRUE(maxSize->Height().has_value());
+    EXPECT_EQ(minSize->Width().value(), CalcLength(100.0));
+    EXPECT_EQ(minSize->Height().value(), CalcLength(200.0));
+    EXPECT_EQ(maxSize->Width().value(), CalcLength(500.0));
+    EXPECT_EQ(maxSize->Height().value(), CalcLength(600.0));
 }
 
 } // namespace OHOS::Ace::NG

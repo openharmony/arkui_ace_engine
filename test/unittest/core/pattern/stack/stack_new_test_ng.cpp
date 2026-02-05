@@ -608,7 +608,9 @@ HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level0)
     auto textLayoutProperty = textFrameNode->GetLayoutProperty();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_NE(textLayoutProperty->GetPositionProperty(), nullptr);
-    EXPECT_EQ(textLayoutProperty->GetPositionProperty()->GetLayoutGravity().value(), Alignment::CENTER_RIGHT);
+    auto layoutGravity = textLayoutProperty->GetPositionProperty()->GetLayoutGravity();
+    ASSERT_TRUE(layoutGravity.has_value());
+    EXPECT_EQ(layoutGravity.value(), Alignment::CENTER_RIGHT);
 }
 
 /**
@@ -899,5 +901,135 @@ HWTEST_F(StackNewTestNG, CalculateStackAlignment006, TestSize.Level0)
     auto offset3 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align3);
     EXPECT_EQ(offset3.GetX(), (500.0f - 100.0f) / 2.0f);
     EXPECT_EQ(offset3.GetY(), 500.0f - 100.0f);
+}
+
+/**
+ * @tc.name: StackEmpty001
+ * @tc.desc: Test Stack layout with no children
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackEmpty001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with no children.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+    });
+
+    /**
+     * @tc.expected: Stack should have correct size and no children.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetChildren().size(), 0);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(300.0f, 300.0f));
+    EXPECT_EQ(geometryNode->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: StackMultipleChildren001
+ * @tc.desc: Test Stack layout with multiple children
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackMultipleChildren001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with 5 children.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(500.0f, DimensionUnit::PX));
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER);
+
+        // Create 5 children with different sizes
+        for (int i = 0; i < 5; i++) {
+            CreateText(u"Child", [this, i](TextModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(100.0f + i * 50.0f, DimensionUnit::PX));
+                ViewAbstract::SetHeight(CalcLength(100.0f + i * 50.0f, DimensionUnit::PX));
+            });
+        }
+    });
+
+    /**
+     * @tc.expected: Stack should have 5 children.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetChildren().size(), 5);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(500.0f, 500.0f));
+    EXPECT_EQ(geometryNode->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: StackConstraintSize001
+ * @tc.desc: Test Stack layout with constraint size
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackConstraintSize001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with constraint size.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(600.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(600.0f, DimensionUnit::PX));
+        ViewAbstract::SetMaxWidth(CalcLength(400.0f, DimensionUnit::PX));
+        ViewAbstract::SetMaxHeight(CalcLength(400.0f, DimensionUnit::PX));
+
+        CreateText(u"Large child", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(500.0f, DimensionUnit::PX));
+        });
+    });
+
+    /**
+     * @tc.expected: Stack size should be constrained by maxWidth and maxHeight.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    // Size should be limited by constraint
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(400.0f, 400.0f));
+}
+
+/**
+ * @tc.name: StackExtremeSize001
+ * @tc.desc: Test Stack layout with extreme size values
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackExtremeSize001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with very small size.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PX));
+
+        CreateText(u"Small child", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(10.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(10.0f, DimensionUnit::PX));
+        });
+    });
+
+    /**
+     * @tc.expected: Stack should handle extreme sizes correctly.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(1.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG
