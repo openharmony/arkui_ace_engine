@@ -5246,7 +5246,6 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
 {
     bool enableLockOrientation = enableLockOrientation_;
     enableLockOrientation_ = false;
-    bool windowSizeChanged = windowSizeChangedDuringTransition_;
     windowSizeChangedDuringTransition_ = false;
     if (!IsPageLevelConfigEnabled() || !enableLockOrientation) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't set Orientation");
@@ -5278,7 +5277,7 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
     auto windowMgr = context->GetWindowManager();
     CHECK_NULL_VOID(windowMgr);
     auto targetOrientation = firstVisibleNode->GetOrientation();
-    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this), windowSizeChanged]() {
+    auto restoreTask = [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this)]() {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "restore Navigation RenderContext");
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
         for (auto& weakNode : nodes) {
@@ -5290,9 +5289,6 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ClearPageAndNavigationConfig();
-        if (!windowSizeChanged) {
-            return;
-        }
         auto pageNode = pattern->GetNavBasePageNode();
         CHECK_NULL_VOID(pageNode);
         auto geometryNode = pageNode->GetGeometryNode();
