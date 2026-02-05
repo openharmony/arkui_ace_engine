@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_MINIMIZE_DEFAULT_WIDTH = 125.0_vp;
 constexpr Dimension SHEET_MINIMIZE_DEFAULT_HEIGHT = 125.0_vp;
-constexpr Dimension SHEET_MINIMIZE_MARGIN_TOP = 56.0_vp;
+constexpr Dimension SHEET_MINIMIZE_MARGIN_BOTTOM = 28.0_vp;
 constexpr Dimension SHEET_MINIMIZE_MARGIN_RIGHT = 32.0_vp;
 } // namespace
 
@@ -35,7 +35,7 @@ void SheetPresentationMinimizeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrap
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
     LayoutConstraintF layoutConstraint = parentConstraint.value();
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
-    sheetMaxHeight_ = SHEET_MINIMIZE_DEFAULT_HEIGHT.ConvertToPx();
+    sheetMaxHeight_ = layoutConstraint.maxSize.Height();
     sheetMaxWidth_ = layoutConstraint.maxSize.Width();
     sheetHeight_ = SHEET_MINIMIZE_DEFAULT_HEIGHT.ConvertToPx();
     sheetWidth_ = SHEET_MINIMIZE_DEFAULT_WIDTH.ConvertToPx();
@@ -82,7 +82,7 @@ void SheetPresentationMinimizeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapp
     CHECK_NULL_VOID(scrollNode);
     OffsetF positionOffset;
     positionOffset.SetX(sheetMaxWidth_ - sheetWidth_ - SHEET_MINIMIZE_MARGIN_RIGHT.ConvertToPx());
-    positionOffset.SetY(SHEET_MINIMIZE_MARGIN_TOP.ConvertToPx());
+    positionOffset.SetY(sheetMaxHeight_ - sheetHeight_ - SHEET_MINIMIZE_MARGIN_BOTTOM.ConvertToPx());
     auto geometryNode = layoutWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(positionOffset);
 

@@ -3642,6 +3642,7 @@ test/unittest/core/pattern/overlay/overlay_new_test_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_test_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/overlay_test_update.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/sheet_content_cover_test_ng.cpp @arkuicodepulse
+test/unittest/core/pattern/overlay/sheet_minimize_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_others_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_drag_bar_test_ng.cpp @arkuicodepulse
 test/unittest/core/pattern/overlay/sheet_popup_test_ng.cpp @arkuicodepulse
