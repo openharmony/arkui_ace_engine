@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-struct ArkUI_RichEditorPlaceholderOptions {
+struct ArkUI_TextEditorPlaceholderOptions {
     std::string value;
     uint32_t fontWeight;
     float fontSize;
@@ -31,17 +31,17 @@ struct ArkUI_RichEditorPlaceholderOptions {
     uint32_t fontColor;
 };
 
-struct ArkUI_RichEditorStyledStringController {
+struct ArkUI_TextEditorStyledStringController {
     ArkUI_NodeHandle node;
 };
 
-struct ArkUI_RichEditorParagraphStyle {
+struct ArkUI_TextEditorParagraphStyle {
     ArkUI_TextAlignment textAlign;
     OH_PixelmapNative* leadingMarginPixelMap;
     uint32_t width;
     uint32_t height;
     ArkUI_WordBreak wordBreak;
-    ArkUI_LineBreakStrategy lineBreakStrategy;
+    OH_ArkUI_LineBreakStrategy lineBreakStrategy;
     uint32_t paragraphSpacing;
     ArkUI_TextVerticalAlignment textVerticalAlignment;
     ArkUI_TextDirection textDirection;
@@ -56,7 +56,7 @@ struct ArkUI_ShadowOptions {
     bool isFill;
 };
 
-struct ArkUI_RichEditorTextStyle {
+struct ArkUI_TextEditorTextStyle {
     uint32_t fontColor;
     ArkUI_FontStyle fontStyle;
     float fontSize;

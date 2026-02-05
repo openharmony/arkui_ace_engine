@@ -1426,7 +1426,7 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
         { OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_EMBEDDED_COMPONENT },
         { OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_PICKER },
-        { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RICH_EDITOR },
+        { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR },
     };
 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1481,7 +1481,7 @@ std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
             OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_PICKER), OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG },
-        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_RICH_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
     };
     auto iter = nodeTypeConvertMap.find(static_cast<uint32_t>(nodeType));
     if (iter == nodeTypeConvertMap.end()) {

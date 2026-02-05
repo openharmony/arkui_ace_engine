@@ -6337,17 +6337,17 @@ typedef enum {
     NODE_TEXT_EDITOR_ENABLE_HAPTIC_FEEDBACK,
 
     /**
-     * @brief Defines the copy option attribute, which can be set, reset, and obtained as required through APIs.
+     * @brief Defines the copy options attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: copy option {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_LOCAL_DEVICE</b>.\n
+     * .value[0].i32: copy options {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_LOCAL_DEVICE</b>.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: copy option {@link ArkUI_CopyOptions}. \n
+     * .value[0].i32: copy options {@link ArkUI_CopyOptions}. \n
      *
      * @since 24
      */
-    NODE_TEXT_EDITOR_COPY_OPTION,
+    NODE_TEXT_EDITOR_COPY_OPTIONS,
 
     /**
     * @brief Sets the keyboard style of TextEditor.
@@ -6404,7 +6404,7 @@ typedef enum {
      *
      * @since 24
      */
-    NODE_TEXT_EDITOR_BIND_CUSTOM_KEYBOARD,
+    NODE_TEXT_EDITOR_CUSTOM_KEYBOARD,
   
     /**
      * @brief Binds the selection menu for the TextEditor.
@@ -9712,8 +9712,8 @@ typedef enum {
     NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
     /**
-     * @brief Defines the event triggered when selection area or caret position is changed in
-     * <b>ARKUI_NODE_RICH_EDITOR</b> component.
+     * @brief Defines the event triggered when the selection area or caret position changes in
+     * <b>ARKUI_NODE_TEXT_EDITOR</b> component.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
@@ -9723,10 +9723,10 @@ typedef enum {
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
+    NODE_TEXT_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_EDITOR,
 
     /**
- 	 * @brief Defines the event triggered when the <b>ARKUI_NODE_RICH_EDITOR</b> component is initialized
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_TEXT_EDITOR</b> component is initialized
      * for the first time.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
@@ -9734,38 +9734,35 @@ typedef enum {
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ON_READY,
- 	 
-    /**
-     * @brief Defines the event triggered when the paste button on the pasteboard, which displays when the
-     * <b>ARKUI_NODE_RICH_EDITOR</b> component is long pressed, is clicked.
-     *
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
-     * {@link ArkUI_PreventableEvent}. \n
-     * {@link ArkUI_PreventableEvent} contains one parameter:\n
-     * <b>ArkUI_PreventableEvent.prevent</b>:  Whether intercept component default behavior,
-     * true means intercept component default behavior, false means not intercept component default behavior.
-     *
-     * The default value is false.\n
-     *
-     * @since 24
-     */
-    NODE_RICH_EDITOR_ON_PASTE,
+    NODE_TEXT_EDITOR_ON_READY,
 
     /**
-     * @brief Defines the event triggered when the <b>ARKUI_NODE_RICH_EDITOR</b> component editing state has changed.
+    * @brief Defines the event triggered when the paste button on the pasteboard, which appears
+    * after a long press on the<b>ARKUI_NODE_TEXT_EDITOR</b> component is long pressed, is clicked.
+    *
+    * @return Whether to intercept the component's default behavior. \n
+    * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+    * value.i32 at index 0 in the return value indicates whether to intercept the component's default behavior.
+    * <b>0</b>: not intercept. <b>1</b>: intercept. \n
+    *
+    * @since 24
+    */
+    NODE_TEXT_EDITOR_ON_PASTE,
+
+    /**
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_TEXT_EDITOR</b> component's editing state has changed.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the editing state of component.
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the editing state of the component.
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ON_EDITING_CHANGE,
- 	 
+    NODE_TEXT_EDITOR_ON_EDITING_CHANGE,
+
     /**
-     * @brief Defines the event triggered when the Enter key of the RichEditor method is pressed.
+     * @brief Defines the event triggered when the Enter key of the TextEditor input method is pressed.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
@@ -9774,39 +9771,33 @@ typedef enum {
      * 
      * @since 24
      */
-    NODE_RICH_EDITOR_ON_SUBMIT,
- 	 
+    NODE_TEXT_EDITOR_ON_SUBMIT,
+
     /**
-     * @brief Defines the event triggered when the cut button on the pasteboard, which displays when the
-     * <b>ARKUI_NODE_RICH_EDITOR</b> component is long pressed, is clicked.
+     * @brief Defines the event triggered when the cut button on the pasteboard, which appears
+     * after a long press on the <b>ARKUI_NODE_TEXT_EDITOR</b> component is long pressed, is clicked.
      *
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
-     * {@link ArkUI_PreventableEvent}. \n
-     * {@link ArkUI_PreventableEvent} contains one parameter:\n
-     * <b>ArkUI_PreventableEvent.prevent</b>:  Whether intercept component default behavior,
-     * true means intercept component default behavior, false means not intercept component default behavior.
-     *
-     * The default value is false.\n
+     * @return Whether to intercept the component's default behavior. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.i32 at index 0 in the return value indicates whether to intercept the component's default behavior.
+     * <b>0</b>: not intercept. <b>1</b>: intercept. \n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ON_CUT,
- 	 
+    NODE_TEXT_EDITOR_ON_CUT,
+
     /**
      * @brief Defines the event triggered when the copy button on the pasteboard, which displays when the content of the
-     * <b>ARKUI_NODE_RICH_EDITOR</b> component is selected, is clicked.
+     * <b>ARKUI_NODE_TEXT_EDITOR</b> component is selected, is clicked.
      *
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
-     * {@link ArkUI_PreventableEvent}. \n
-     * {@link ArkUI_PreventableEvent} contains one parameter:\n
-     * <b>ArkUI_PreventableEvent.prevent</b>:  Whether intercept component default behavior,
-     * true means intercept the default behavior of components, false means not intercept the default behavior of components.
-     *
-     * The default value is false.\n
+     * @return Whether to intercept the component's default behavior. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.i32 at index 0 in the return value indicates whether to intercept the component's default behavior.
+     * <b>0</b>: not intercept. <b>1</b>: intercept. \n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ON_COPY,
+    NODE_TEXT_EDITOR_ON_COPY,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
