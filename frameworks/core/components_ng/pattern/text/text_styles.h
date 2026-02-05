@@ -348,15 +348,15 @@ ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontS
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
     TextStyle& textStyle, bool isSymbol = false);
 
-void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    TextStyle& textStyle, bool isSymbol = false);
+ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
+    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle, bool isSymbol = false);
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
-std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
-std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
-std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
+ACE_FORCE_EXPORT std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
+ACE_FORCE_EXPORT std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
+ACE_FORCE_EXPORT std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
 std::string GetFontSizeInJson(const std::optional<Dimension>& value);
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);

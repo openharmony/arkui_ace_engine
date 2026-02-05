@@ -50,7 +50,7 @@ struct FadeoutInfo {
     }
 };
 
-class TextContentModifier : public ContentModifier {
+class ACE_FORCE_EXPORT TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier);
 
 public:

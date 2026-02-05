@@ -29,11 +29,11 @@ class MultipleClickRecognizer : public AceType {
 public:
     MultipleClickRecognizer() = default;
     ~MultipleClickRecognizer() = default;
-    void Start(const GestureEvent& event);
+    ACE_FORCE_EXPORT void Start(const GestureEvent& event);
     void StartCounting(const GestureEvent& event);
     bool IsSingleClick() const;
-    bool IsDoubleClick() const;
-    bool IsTripleClick() const;
+    ACE_FORCE_EXPORT bool IsDoubleClick() const;
+    ACE_FORCE_EXPORT bool IsTripleClick() const;
     bool IsValidClick(const GestureEvent& event) const;
     void Stop()
     {

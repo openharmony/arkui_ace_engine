@@ -264,6 +264,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors);
     static void ParseGradientAngle(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ConvertPixmap(const Local<panda::ObjectRef>& obj, const EcmaVM* vm, const RefPtr<PixelMap>& pixelMap);
     template <class T>
     static bool ParseArray(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
         std::function<T(const EcmaVM *, const Local<JSValueRef> &)> getValue)
@@ -355,6 +356,8 @@ public:
         ArkUI_Float32* values, int32_t* units, uint32_t length);
     static bool HandleCallbackJobs(
         const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
+    static bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm);
+    static bool IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm);
     template<typename T>
     static RefPtr<T> GetTheme()
     {
@@ -417,10 +420,11 @@ public:
     static bool ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm,
         NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
         NG::OnPrepareMenuCallback& onPrepareMenuCallback);
-    static void ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode,
-        const Local<JSValueRef>& jsValueOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& jsValueOnCreateMenu,
+        NG::OnCreateMenuCallback& onCreateMenuCallback, bool isJsView = false);
     static void ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
-        const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
+        const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback,
+        bool isJsView = false);
     static Local<panda::ArrayRef> CreateJsSystemMenuItems(
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
@@ -430,7 +434,8 @@ public:
     static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
         const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
-        const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
+        const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+        bool isJsView = false);
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);

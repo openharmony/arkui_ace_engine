@@ -119,15 +119,15 @@ public:
     MultiTypeRecordImpl() = default;
     ~MultiTypeRecordImpl() = default;
 
-    void SetPlainText(const std::string plainText);
-    void SetUri(const std::string uri);
-    void SetPixelMap(RefPtr<PixelMap> pixelMap);
-    void SetHtmlText(const std::string& htmlText);
+    ACE_FORCE_EXPORT void SetPlainText(const std::string plainText);
+    ACE_FORCE_EXPORT void SetUri(const std::string uri);
+    ACE_FORCE_EXPORT void SetPixelMap(RefPtr<PixelMap> pixelMap);
+    ACE_FORCE_EXPORT void SetHtmlText(const std::string& htmlText);
     const RefPtr<PixelMap> GetPixelMap();
     const std::string GetPlainText();
     const std::string GetUri();
     const std::string GetHtmlText();
-    std::vector<uint8_t>& GetSpanStringBuffer();
+    ACE_FORCE_EXPORT std::vector<uint8_t>& GetSpanStringBuffer();
 
 private:
     RefPtr<PixelMap> pixelMap_;

@@ -1641,10 +1641,197 @@ class RelativeContainerModifier extends ArkRelativeContainerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class RichEditorModifier extends ArkRichEditorComponent {
+class LazyArkRichEditorComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkRichEditorComponent.module === undefined) {
+      LazyArkRichEditorComponent.module = globalThis.requireNapi('arkui.components.arkricheditor');
+    }
+    this.lazyComponent = LazyArkRichEditorComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkRichEditorComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  enableDataDetector(value) {
+    this.lazyComponent.enableDataDetector(value);
+    return this;
+  }
+  dataDetectorConfig(config) {
+    this.lazyComponent.dataDetectorConfig(config);
+    return this;
+  }
+  copyOptions(value) {
+    this.lazyComponent.copyOptions(value);
+    return this;
+  }
+
+  caretColor(value) {
+    this.lazyComponent.caretColor(value);
+    return this;
+  }
+
+  onSelectionChange(callback) {
+    this.lazyComponent.onSelectionChange(callback);
+    return this;
+  }
+
+  selectedBackgroundColor(value) {
+    this.lazyComponent.selectedBackgroundColor(value);
+    return this;
+  }
+
+  enterKeyType(value) {
+    this.lazyComponent.enterKeyType(value);
+    return this;
+  }
+
+  onPaste(callback) {
+    this.lazyComponent.onPaste(callback);
+    return this;
+  }
+  onReady(callback) {
+    this.lazyComponent.onReady(callback);
+    return this;
+  }
+  onSelect(callback) {
+    this.lazyComponent.onSelect(callback);
+    return this;
+  }
+  onSubmit(callback) {
+    this.lazyComponent.onSubmit(callback);
+    return this;
+  }
+  aboutToIMEInput(callback) {
+    this.lazyComponent.aboutToIMEInput(callback);
+    return this;
+  }
+  onIMEInputComplete(callback) {
+    this.lazyComponent.onIMEInputComplete(callback);
+    return this;
+  }
+  onWillChange(callback) {
+    this.lazyComponent.onWillChange(callback);
+    return this;
+  }
+  onDidChange(callback) {
+    this.lazyComponent.onDidChange(callback);
+    return this;
+  }
+  placeholder(value, style) {
+    this.lazyComponent.placeholder(value, style);
+    return this;
+  }
+  aboutToDelete(callback) {
+    this.lazyComponent.aboutToDelete(callback);
+    return this;
+  }
+  onDeleteComplete(callback) {
+    this.lazyComponent.onDeleteComplete(callback);
+    return this;
+  }
+  bindSelectionMenu(spanType, content, responseType, options) {
+    throw new Error('Method not implemented.');
+  }
+  customKeyboard(value, options) {
+    this.lazyComponent.customKeyboard(value, options);
+    return this;
+  }
+  onEditingChange(callback) {
+    this.lazyComponent.onEditingChange(callback);
+    return this;
+  }
+  onCut(callback) {
+    this.lazyComponent.onCut(callback);
+    return this;
+  }
+  onCopy(callback) {
+    this.lazyComponent.onCopy(callback);
+    return this;
+  }
+  enableKeyboardOnFocus(value) {
+    this.lazyComponent.enableKeyboardOnFocus(value);
+    return this;
+  }
+  enablePreviewText(value) {
+    this.lazyComponent.enablePreviewText(value);
+    return this;
+  }
+  editMenuOptions(value) {
+    this.lazyComponent.editMenuOptions(value);
+    return this;
+  }
+  barState(value) {
+    this.lazyComponent.barState(value);
+    return this;
+  }
+  maxLength(value) {
+    this.lazyComponent.maxLength(value);
+    return this;
+  }
+  maxLines(value) {
+    this.lazyComponent.maxLines(value);
+    return this;
+  }
+  stopBackPress(value) {
+    this.lazyComponent.stopBackPress(value);
+    return this;
+  }
+  keyboardAppearance(value) {
+    this.lazyComponent.keyboardAppearance(value);
+    return this;
+  }
+  onDidIMEInput(callback) {
+    this.lazyComponent.onDidIMEInput(callback);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    this.lazyComponent.onWillAttachIME(callback);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    this.lazyComponent.enableHapticFeedback(value);
+    return this;
+  }
+  enableAutoSpacing(enable) {
+    this.lazyComponent.enableAutoSpacing(enable);
+    return this;
+  }
+  compressLeadingPunctuation(enable) {
+    this.lazyComponent.compressLeadingPunctuation(enable);
+    return this;
+  }
+  undoStyle(style) {
+    this.lazyComponent.undoStyle(style);
+    return this;
+  }
+  scrollBarColor(style) {
+    this.lazyComponent.scrollBarColor(style);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    this.lazyComponent.selectedDragPreviewStyle(value);
+    return this;
+  }
+  includeFontPadding(enable) {
+    this.lazyComponent.includeFontPadding(enable);
+    return this;
+  }
+  fallbackLineSpacing(enable) {
+    this.lazyComponent.fallbackLineSpacing(enable);
+    return this;
+  }
+  singleLine(value) {
+    this.lazyComponent.singleLine(value);
+    return this;
+  }
+}
+class RichEditorModifier extends LazyArkRichEditorComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

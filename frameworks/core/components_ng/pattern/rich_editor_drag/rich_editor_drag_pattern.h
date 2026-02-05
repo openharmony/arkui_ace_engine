@@ -40,7 +40,7 @@ public:
     static RefPtr<FrameNode> CreateDragNode(
         const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren);
 
-    static RefPtr<FrameNode> CreateDragNode(
+    ACE_FORCE_EXPORT static RefPtr<FrameNode> CreateDragNode(
         const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const TextDragInfo& info);
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override

@@ -4310,7 +4310,7 @@ void SetMaskColorResObj(Framework::JSRef<Framework::JSVal>& jColor, Color& color
     } else if (parseJsColor) {
         progressMask->SetColor(colorVal);
     } else {
-        auto theme = Framework::JSShapeAbstract::GetTheme<ProgressTheme>();
+        auto theme = Framework::JSViewAbstract::GetTheme<ProgressTheme>();
         progressMask->SetColor(theme->GetMaskColor());
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::ProgressMaskProperty& progressMask) {
@@ -4346,7 +4346,7 @@ void ParseJsMaskProperty(FrameNode* frameNode, const Framework::JSRef<Framework:
         if (Framework::JSViewAbstract::ParseJsColor(jColor, colorVal)) {
             progressMask->SetColor(colorVal);
         } else {
-            auto theme = Framework::JSShapeAbstract::GetTheme<ProgressTheme>();
+            auto theme = Framework::JSViewAbstract::GetTheme<ProgressTheme>();
             progressMask->SetColor(theme->GetMaskColor());
         }
         ViewAbstract::SetProgressMask(frameNode, progressMask);
