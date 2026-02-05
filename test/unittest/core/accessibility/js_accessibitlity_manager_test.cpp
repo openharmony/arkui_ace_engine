@@ -31,6 +31,7 @@
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "js_accessibility_manager_test.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -4340,6 +4341,121 @@ HWTEST_F(JsAccessibilityManagerTest, RegisterScreenReaderObserverCallback, TestS
     EXPECT_EQ(callback0, jsAccessibilityManager->componentScreenReaderCallbackMap_[elementId0]);
     jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId0);
     EXPECT_EQ(0, jsAccessibilityManager->componentScreenReaderCallbackMap_.size());
+}
+
+/**
+ * @tc.name: GetCursorPosition001
+ * @tc.desc: Test GetCursorPosition with null context (CHECK_NULL_VOID_WITH_ACTION macro)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager without context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create mock callback and call GetCursorPosition with null pipeline context
+     * @tc.expected: callback should be called with default value (0) due to CHECK_NULL_VOID_WITH_ACTION
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = 1;
+    const int32_t requestId = 100;
+
+    // Call GetCursorPosition with null pipeline context
+    // Should trigger CHECK_NULL_VOID_WITH_ACTION and call callback with 0
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+
+    // Verify callback was called with default value
+    EXPECT_TRUE(callback->called_);
+    EXPECT_EQ(callback->mockCursorPosition_, 0);
+    EXPECT_EQ(callback->mockRequestId, requestId);
+}
+
+/**
+ * @tc.name: GetCursorPosition002
+ * @tc.desc: Test GetCursorPosition with not UI Extension branch (AddAfterRenderTask executes lambda directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. create mock callback
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = frameNode->GetAccessibilityId(); // UI Extension ID (UI_EXTENSION_OFFSET_MAX + offset)
+    const int32_t requestId = 102;
+
+    /**
+     * @tc.steps: step3. call GetCursorPosition with UI Extension element ID
+     * @tc.expected: AddAfterRenderTask executes lambda directly in test environment,
+     *               callback will be called when nodes are found or with 0 if not found
+     */
+    auto useFlushUITasks = MockPipelineContext::GetCurrent()->UseFlushUITasks();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(false);
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+    EXPECT_TRUE(callback->called_);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(useFlushUITasks);
+    root->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: GetCursorPosition003
+ * @tc.desc: Test GetCursorPosition with UI Extension branch (AddAfterRenderTask executes lambda directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. create mock callback
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = 10000000001; // UI Extension ID (UI_EXTENSION_OFFSET_MIN + 1)
+    const int32_t requestId = 102;
+    frameNode->accessibilityId_ = elementId;
+    /**
+     * @tc.steps: step3. call GetCursorPosition with UI Extension element ID
+     * @tc.expected: AddAfterRenderTask executes lambda directly in test environment,
+     *               callback will be called when nodes are found or with 0 if not found
+     */
+    auto useFlushUITasks = MockPipelineContext::GetCurrent()->UseFlushUITasks();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(false);
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+    EXPECT_TRUE(callback->called_);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(useFlushUITasks);
+    root->RemoveChild(frameNode);
 }
 
 /**
