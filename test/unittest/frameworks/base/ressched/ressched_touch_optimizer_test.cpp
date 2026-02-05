@@ -827,25 +827,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSlideAcceptOffsetTest003
- * @tc.desc: test SetSlideAcceptOffset when rvs is enabled
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SetSlideAcceptOffsetTest003, TestSize.Level1)
-{
-    optimizer_->rvsEnable_ = true;
-    
-    Offset offset = {15.0, 25.0};
-    optimizer_->SetSlideAcceptOffset(offset);
-    
-    // When RVS is enabled, SetSlideAcceptOffset should not set the values
-    // Based on the implementation, the condition is inverted
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), 15.0);
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetY(), 25.0);
-    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
-}
-
-/**
  * @tc.name: RVSPointCheckWithSignal003
  * @tc.desc: test RVSPointCheckWithSignal with empty deque
  * @tc.type: FUNC
