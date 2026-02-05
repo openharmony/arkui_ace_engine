@@ -882,6 +882,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel019, TestSize.Level0)
  */
 HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Get RichEditor node
+     */
     RichEditorModelNG richEditorModel;
     richEditorModel.Create(false);
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -889,8 +892,14 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel020, TestSize.Level0)
     auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->isStyledUndoSupported_, false);
+    /**
+     * @tc.expected: Set SupportStyledUndo True
+     */
     richEditorModel.SetSupportStyledUndo(true);
     EXPECT_EQ(pattern->isStyledUndoSupported_, true);
+    /**
+     * @tc.expected: Set SupportStyledUndo False
+     */
     RichEditorModelNG::SetSupportStyledUndo(richEditorNode, false);
     EXPECT_EQ(pattern->isStyledUndoSupported_, false);
 }
