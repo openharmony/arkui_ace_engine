@@ -391,15 +391,10 @@ export enum SeekMode {
     Accurate = 3
 }
 export enum PlaybackSpeed {
-    SPEED_FORWARD_0_75_X = "'0.75'",
     Speed_Forward_0_75_X = "'0.75'",
-    SPEED_FORWARD_1_00_X = "'1.00'",
     Speed_Forward_1_00_X = "'1.00'",
-    SPEED_FORWARD_1_25_X = "'1.25'",
     Speed_Forward_1_25_X = "'1.25'",
-    SPEED_FORWARD_1_75_X = "'1.75'",
     Speed_Forward_1_75_X = "'1.75'",
-    SPEED_FORWARD_2_00_X = "'2.00'",
     Speed_Forward_2_00_X = "'2.00'",
     SPEED_FORWARD_0_50_X = "'0.50'",
     SPEED_FORWARD_1_50_X = "'1.50'",
