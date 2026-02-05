@@ -8662,7 +8662,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor3, TestSize.Level1)
     ArkUI_NumberValue value[] = {{.u32 = color}};
     ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
     value[0].i32 = ArkUI_CopyOptions::ARKUI_COPY_OPTIONS_LOCAL_DEVICE;
-    nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_COPY_OPTION, &item);
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_COPY_OPTIONS, &item);
     value[0].i32 = ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_KEYBOARD_APPEARANCE, &item);
     value[0].i32 = true;
