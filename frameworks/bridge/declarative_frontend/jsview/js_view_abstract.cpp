@@ -12305,7 +12305,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
 
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
         OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
             unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -12318,8 +12318,8 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap_s(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG, nullptr);
 
         JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
         if (unwrapCanvas) {
@@ -12360,7 +12360,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayC
 
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
         OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
             unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -12373,8 +12373,8 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayC
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap_s(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG, nullptr);
 
         JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
         if (unwrapCanvas) {

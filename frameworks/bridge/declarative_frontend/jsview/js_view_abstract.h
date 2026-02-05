@@ -48,6 +48,11 @@ class CalcDimensionRect;
 
 namespace OHOS::Ace::Framework {
 
+constexpr napi_type_tag ROSEN_JS_CANVAS_TYPE_TAG = {
+    .lower = 0x2710bc10cdee8db3,
+    .upper = 0xc5189f88510eadc1
+};
+
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;

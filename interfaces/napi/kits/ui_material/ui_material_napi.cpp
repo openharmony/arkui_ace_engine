@@ -48,7 +48,8 @@ void UiMaterialNapi::WrapMaterialObject(napi_env env, napi_value jsThis, int32_t
         return ;
     }
     uiMaterial->SetType(materialType);
-    napi_status status = napi_wrap(env, jsThis, uiMaterial, UiMaterialNapi::Destructor, nullptr, nullptr);
+    napi_status status = napi_wrap_s(
+        env, jsThis, uiMaterial, UiMaterialNapi::Destructor, nullptr, &UI_MATERIAL_TYPE_TAG, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_VISUAL_EFFECT, "wrap MaterialObject failed");
         delete uiMaterial;

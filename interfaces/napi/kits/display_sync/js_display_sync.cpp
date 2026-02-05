@@ -90,7 +90,7 @@ DisplaySync* GetDisplaySync(napi_env env, napi_callback_info info)
     DisplaySync* displaySync = nullptr;
     napi_value thisVar = nullptr;
     napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-    napi_unwrap(env, thisVar, reinterpret_cast<void**>(&displaySync));
+    napi_unwrap_s(env, thisVar, &DISPLAY_SYNC_LISTENER_TYPE_TAG, reinterpret_cast<void**>(&displaySync));
     return displaySync;
 }
 
@@ -225,7 +225,7 @@ void DisplaySync::NapiSerializer(napi_env& env, napi_value& jsDisplaySync)
         return;
     }
 
-    napi_wrap(
+    napi_wrap_s(
         env, jsDisplaySync, this,
         [](napi_env env, void* data, void* hint) {
             DisplaySync* displaySync = static_cast<DisplaySync*>(data);
@@ -234,7 +234,7 @@ void DisplaySync::NapiSerializer(napi_env& env, napi_value& jsDisplaySync)
                 delete displaySync;
             }
         },
-        nullptr, nullptr);
+        nullptr, &DISPLAY_SYNC_LISTENER_TYPE_TAG, nullptr);
 }
 
 void DisplaySync::RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef,

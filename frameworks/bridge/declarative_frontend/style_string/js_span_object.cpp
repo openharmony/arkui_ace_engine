@@ -26,11 +26,12 @@
 #include "base/memory/ace_type.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
@@ -42,7 +43,6 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -577,7 +577,7 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackI
         resObj = JSViewAbstract::GetResourceObject(jsObj);
     }
     return AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({type}), colorOption, styleOption, lineThicknessScale, options, resObj);
+        std::vector<TextDecoration>({ type }), colorOption, styleOption, lineThicknessScale, options, resObj);
 }
 
 TextDecorationOptions JSDecorationSpan::ParseJsDecorationOptions(const JSRef<JSObject>& obj)
@@ -593,8 +593,7 @@ TextDecorationOptions JSDecorationSpan::ParseJsDecorationOptions(const JSRef<JSO
 void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(decorationSpan_);
-    auto ret = JSRef<JSVal>::Make(
-        JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationFirst()))));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationFirst()))));
     info.SetReturnValue(ret);
 }
 
@@ -631,8 +630,7 @@ void JSDecorationSpan::GetLineThicknessScale(const JSCallbackInfo& info)
     if (!decorationSpan_->GetLineThicknessScale().has_value()) {
         return;
     }
-    auto ret =
-        JSRef<JSVal>::Make(JSVal(ToJSValue(decorationSpan_->GetLineThicknessScale().value())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(decorationSpan_->GetLineThicknessScale().value())));
     info.SetReturnValue(ret);
 }
 
@@ -1140,8 +1138,8 @@ void JSImageAttachment::ParseJsImageSpanColorFilterAttribute(const JSRef<JSObjec
     SetImageSpanColorFilterAttribute(imageStyle, colorfilter);
 }
 
-void JSImageAttachment::SetImageSpanColorFilterAttribute(ImageSpanAttribute& imageStyle,
-    const std::vector<float>& matrix)
+void JSImageAttachment::SetImageSpanColorFilterAttribute(
+    ImageSpanAttribute& imageStyle, const std::vector<float>& matrix)
 {
     imageStyle.colorFilterMatrix = matrix;
     imageStyle.drawingColorFilter = std::nullopt;
@@ -1470,8 +1468,8 @@ RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
     if (end - start > 1) {
         return nullptr;
     }
-    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_.Lock(),
-        GetOnMeasure(), GetOnDraw(), start, end);
+    RefPtr<SpanBase> spanBase =
+        MakeRefPtr<JSCustomSpan>(customSpanObj_.Lock(), GetOnMeasure(), GetOnDraw(), start, end);
     return spanBase;
 }
 
@@ -1486,8 +1484,7 @@ bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (customSpanObj->IsEmpty() || otherSpanObj->IsEmpty()) {
         return false;
     }
-    return otherSpanObj->GetLocalHandle()
-        ->IsStrictEquals(customSpanObj->GetEcmaVM(), customSpanObj->GetLocalHandle());
+    return otherSpanObj->GetLocalHandle()->IsStrictEquals(customSpanObj->GetEcmaVM(), customSpanObj->GetLocalHandle());
 }
 
 std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(
@@ -1554,7 +1551,7 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         ScopeRAII scope(env);
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
         OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
             unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -1567,7 +1564,9 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap_s(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG,
+            nullptr);
         JSRef<JSObject> customSpanOptionsObj = objectTemplate->NewInstance();
         customSpanOptionsObj->SetProperty<float>("x", customSpanOptions.x);
         customSpanOptionsObj->SetProperty<float>("lineTop", customSpanOptions.lineTop);
@@ -1602,8 +1601,8 @@ void JSNativeLeadingMarginSpan::Destructor(JSNativeLeadingMarginSpan* leadingMar
 void JSNativeLeadingMarginSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNativeLeadingMarginSpan>::Declare("NativeLeadingMarginSpan");
-    JSClass<JSNativeLeadingMarginSpan>::Bind(globalObj, JSNativeLeadingMarginSpan::Constructor,
-        JSNativeLeadingMarginSpan::Destructor);
+    JSClass<JSNativeLeadingMarginSpan>::Bind(
+        globalObj, JSNativeLeadingMarginSpan::Constructor, JSNativeLeadingMarginSpan::Destructor);
 }
 
 void JSLineHeightSpan::JSBind(BindingTarget globalObj)
@@ -1696,8 +1695,8 @@ void JSParagraphStyleSpan::Constructor(const JSCallbackInfo& args)
 
     SpanParagraphStyle paragraphStyle;
     if (args.Length() > 0 && args[0]->IsObject()) {
-        paragraphStyle = JSParagraphStyleSpan::ParseJsParagraphStyleSpan(JSRef<JSObject>::Cast(args[0]),
-            args, paragraphSpan);
+        paragraphStyle =
+            JSParagraphStyleSpan::ParseJsParagraphStyleSpan(JSRef<JSObject>::Cast(args[0]), args, paragraphSpan);
     }
     paragraphSpan->SetParagraphStyle(paragraphStyle);
     args.SetReturnValue(Referenced::RawPtr(paragraphSpan));
@@ -1710,9 +1709,10 @@ void JSParagraphStyleSpan::Destructor(JSParagraphStyleSpan* paragragrahSpan)
     }
 }
 
-JSParagraphStyleSpan::JSParagraphStyleSpan(JSRef<JSObject> leadingMarginSpanObj, SpanParagraphStyle paragraphStyle,
-    int32_t start, int32_t end)
-    : ParagraphStyleSpan(paragraphStyle, start, end), leadingMarginSpanObj_(leadingMarginSpanObj) {}
+JSParagraphStyleSpan::JSParagraphStyleSpan(
+    JSRef<JSObject> leadingMarginSpanObj, SpanParagraphStyle paragraphStyle, int32_t start, int32_t end)
+    : ParagraphStyleSpan(paragraphStyle, start, end), leadingMarginSpanObj_(leadingMarginSpanObj)
+{}
 
 RefPtr<SpanBase> JSParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
 {
@@ -1738,8 +1738,8 @@ bool JSParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) cons
     return thisObj->IsEmpty() && otherObj->IsEmpty();
 }
 
-SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj,
-    const JSCallbackInfo& args, RefPtr<JSParagraphStyleSpan>& paragraphSpan)
+SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(
+    const JSRef<JSObject>& obj, const JSCallbackInfo& args, RefPtr<JSParagraphStyleSpan>& paragraphSpan)
 {
     SpanParagraphStyle paragraphStyle;
     ParseJsTextAlign(obj, paragraphStyle);
@@ -1923,20 +1923,19 @@ void JSParagraphStyleSpan::ParseJsLeadingMarginSpan(const JSRef<JSObject>& obj, 
         return;
     }
     JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginSpan);
-    CHECK_NULL_VOID(leadingMarginObject->HasProperty("onDraw")
-        && leadingMarginObject->HasProperty("getLeadingMargin"));
+    CHECK_NULL_VOID(leadingMarginObject->HasProperty("onDraw") && leadingMarginObject->HasProperty("getLeadingMargin"));
 
     JSRef<JSVal> onDraw = leadingMarginObject->GetProperty("onDraw");
     if (onDraw->IsFunction()) {
-        auto jsDrawFunc
-            = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(leadingMarginObject), JSRef<JSFunc>::Cast(onDraw));
+        auto jsDrawFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(leadingMarginObject), JSRef<JSFunc>::Cast(onDraw));
         auto onDrawFunc = ParseMarginOnDrawFunc(jsDrawFunc, args.GetExecutionContext());
         drawableLeadingMargin->onDraw_ = onDrawFunc;
     }
     JSRef<JSVal> getLeadingMargin = leadingMarginObject->GetProperty("getLeadingMargin");
     if (getLeadingMargin->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(leadingMarginObject),
-            JSRef<JSFunc>::Cast(getLeadingMargin));
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(
+            JSRef<JSObject>(leadingMarginObject), JSRef<JSFunc>::Cast(getLeadingMargin));
         auto getLeadingMarginFunc = ParseGetLeadingMarginFunc(jsFunc, args.GetExecutionContext());
         drawableLeadingMargin->getLeadingMarginFunc_ = getLeadingMarginFunc;
     }
@@ -1947,8 +1946,7 @@ void JSParagraphStyleSpan::ParseJsLeadingMarginSpan(const JSRef<JSObject>& obj, 
 std::function<CalcDimension()> JSParagraphStyleSpan::ParseGetLeadingMarginFunc(
     const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
 {
-    std::function<CalcDimension()> getLeadingMarginCallback =
-        [func = std::move(jsDraw), execCtx]() -> CalcDimension {
+    std::function<CalcDimension()> getLeadingMarginCallback = [func = std::move(jsDraw), execCtx]() -> CalcDimension {
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(1);
@@ -1968,8 +1966,8 @@ std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> JSParagra
     const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
 {
     std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> drawCallback =
-        [func = std::move(jsDraw), execCtx]
-        (NG::DrawingContext& context, NG::LeadingMarginSpanOptions leadingMarginOptions) -> void {
+        [func = std::move(jsDraw), execCtx](
+            NG::DrawingContext& context, NG::LeadingMarginSpanOptions leadingMarginOptions) -> void {
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
 
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
@@ -1992,7 +1990,7 @@ std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> JSParagra
         ScopeRAII scope(env);
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
         OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
             unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -2005,7 +2003,9 @@ std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> JSParagra
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap_s(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG,
+            nullptr);
         JSRef<JSVal> leadingMarginSpanVal = SetLeadingMarginSpanObj(objectTemplate, leadingMarginOptions);
         JSRef<JSVal> params[] = { jsVal, leadingMarginSpanVal };
         func->ExecuteJS(2, params);
@@ -2017,8 +2017,8 @@ std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> JSParagra
     return drawCallback;
 }
 
-JSRef<JSVal> JSParagraphStyleSpan::SetLeadingMarginSpanObj(const JSRef<JSObjTemplate>& objectTemplate,
-    const NG::LeadingMarginSpanOptions& leadingMarginOptions)
+JSRef<JSVal> JSParagraphStyleSpan::SetLeadingMarginSpanObj(
+    const JSRef<JSObjTemplate>& objectTemplate, const NG::LeadingMarginSpanOptions& leadingMarginOptions)
 {
     JSRef<JSObject> leadingMarginSpanObj = objectTemplate->NewInstance();
     leadingMarginSpanObj->SetProperty<float>("x", leadingMarginOptions.x);
@@ -2116,8 +2116,7 @@ void JSParagraphStyleSpan::GetTextAlign(const JSCallbackInfo& info)
     if (!GetParagraphStyle().align.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(
-        JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().align.value()))));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().align.value()))));
     info.SetReturnValue(ret);
 }
 
@@ -2128,8 +2127,8 @@ void JSParagraphStyleSpan::GetTextVerticalAlign(const JSCallbackInfo& info)
     if (!GetParagraphStyle().textVerticalAlign.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(
-        JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().textVerticalAlign.value()))));
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().textVerticalAlign.value()))));
     info.SetReturnValue(ret);
 }
 
@@ -2140,8 +2139,7 @@ void JSParagraphStyleSpan::GetTextIndent(const JSCallbackInfo& info)
     if (!GetParagraphStyle().textIndent.has_value()) {
         return;
     }
-    auto ret =
-        JSRef<JSVal>::Make(JSVal(ToJSValue(GetParagraphStyle().textIndent.value().ConvertToVp())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(GetParagraphStyle().textIndent.value().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -2162,8 +2160,7 @@ void JSParagraphStyleSpan::GetOverflow(const JSCallbackInfo& info)
     if (!GetParagraphStyle().textOverflow.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(
-        JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().textOverflow.value()))));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().textOverflow.value()))));
     info.SetReturnValue(ret);
 }
 void JSParagraphStyleSpan::SetOverflow(const JSCallbackInfo& info) {}
@@ -2173,8 +2170,7 @@ void JSParagraphStyleSpan::GetWordBreak(const JSCallbackInfo& info)
     if (!GetParagraphStyle().wordBreak.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(
-        JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().wordBreak.value()))));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(GetParagraphStyle().wordBreak.value()))));
     info.SetReturnValue(ret);
 }
 void JSParagraphStyleSpan::SetWordBreak(const JSCallbackInfo& info) {}
@@ -2347,8 +2343,7 @@ void JSBackgroundColorSpan::SetBackgroundColorSpan(const RefPtr<BackgroundColorS
 void JSUrlSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUrlSpan>::Declare("UrlStyle");
-    JSClass<JSUrlSpan>::CustomProperty(
-        "url", &JSUrlSpan::GetUrlContext, &JSUrlSpan::SetUrlContext);
+    JSClass<JSUrlSpan>::CustomProperty("url", &JSUrlSpan::GetUrlContext, &JSUrlSpan::SetUrlContext);
     JSClass<JSUrlSpan>::Bind(globalObj, JSUrlSpan::Constructor, JSUrlSpan::Destructor);
 }
 

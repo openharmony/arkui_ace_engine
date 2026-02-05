@@ -108,7 +108,7 @@ ImageSpanOptions SpanStringTestNg::GetColorFilterImageOption(const std::string& 
     margins.SetEdges(CalcLength(NUMBER_TEN));
     PaddingProperty paddings;
     paddings.SetEdges(CalcLength(NUMBER_FIVE));
-    std::vector<float> colorFilterMat {1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0};
+    std::vector<float> colorFilterMat { 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
     ImageSpanAttribute attr { .paddingProp = paddings,
         .marginProp = margins,
         .borderRadius = borderRadius,
@@ -276,9 +276,8 @@ HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     std::optional<TextDecorationOptions> options;
-    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
-            Color::RED, TextDecorationStyle::WAVY, options, 0, 1, nullptr));
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ TextDecoration::OVERLINE }),
+        Color::RED, TextDecorationStyle::WAVY, options, 0, 1, nullptr));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3));
     Shadow textShadow;
@@ -319,9 +318,8 @@ HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     std::optional<TextDecorationOptions> options;
-    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
-            std::vector<TextDecoration>({TextDecoration::OVERLINE}),
-            Color::RED, TextDecorationStyle::WAVY, options, 0, 1, nullptr));
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ TextDecoration::OVERLINE }),
+        Color::RED, TextDecorationStyle::WAVY, options, 0, 1, nullptr));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     Shadow textShadow;
@@ -1225,9 +1223,9 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
 {
     std::vector<uint8_t> buff;
     Font testFont { OHOS::Ace::FontWeight::BOLD, Dimension(29.0, DimensionUnit::PX), OHOS::Ace::FontStyle::ITALIC,
-    std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
+        std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
     Font testFont2 { OHOS::Ace::FontWeight::W300, Dimension(49.0, DimensionUnit::VP), OHOS::Ace::FontStyle::ITALIC,
-    std::vector<std::string>(test_str, test_str + 5), OHOS::Ace::Color::BLUE };
+        std::vector<std::string>(test_str, test_str + 5), OHOS::Ace::Color::BLUE };
     auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd当地经的123456");
     spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
     spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
@@ -1351,9 +1349,8 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     EXPECT_EQ(buffer.find("FontSpan"), 0);
 
     auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
-    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
-        std::vector<TextDecoration>({TextDecoration::OVERLINE}), Color::RED,
-        TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1, nullptr);
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(std::vector<TextDecoration>({ TextDecoration::OVERLINE }),
+        Color::RED, TextDecorationStyle::WAVY, std::optional<TextDecorationOptions>(), 0, 1, nullptr);
     EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan));
     decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     buffer.clear();
@@ -1386,7 +1383,7 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     vector<Shadow> textShadows { textShadow };
     vector<Shadow> textShadows2;
     textShadow.SetColor(Color::RED);
-    vector<Shadow> textShadows3 {textShadow};
+    vector<Shadow> textShadows3 { textShadow };
     auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9);
     auto textShadowSpan2 = AceType::MakeRefPtr<TextShadowSpan>(textShadows2, 7, 9);
     auto textShadowSpan3 = AceType::MakeRefPtr<TextShadowSpan>(textShadows3, 7, 9);
@@ -1467,7 +1464,8 @@ HWTEST_F(SpanStringTestNg, SpanString011, TestSize.Level1)
     borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
     borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
     borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
-    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundColor = Color::RED;
+    ;
     textBackgroundStyle.backgroundRadius = borderRadius;
 
     spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 7, 9));
@@ -1507,7 +1505,8 @@ HWTEST_F(SpanStringTestNg, SpanString012, TestSize.Level1)
     borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
     borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
 
-    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundColor = Color::RED;
+    ;
     textBackgroundStyle.backgroundRadius = borderRadius;
 
     spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 8, 10));
@@ -1540,7 +1539,8 @@ HWTEST_F(SpanStringTestNg, SpanString013, TestSize.Level1)
     borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
     borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
 
-    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundColor = Color::RED;
+    ;
     textBackgroundStyle.backgroundRadius = borderRadius;
 
     spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 8));
@@ -1613,8 +1613,8 @@ Font CreateTestFont(const FontOptions& options)
     return font;
 }
 
-Font CreateTestFontWithVariableWeight(const FontOptions& options,
-    const VariableFontWeightOptions& variableOptions = VariableFontWeightOptions())
+Font CreateTestFontWithVariableWeight(
+    const FontOptions& options, const VariableFontWeightOptions& variableOptions = VariableFontWeightOptions())
 {
     Font font = CreateTestFont(options);
     if (variableOptions.variableWeight.has_value()) {
@@ -1637,8 +1637,8 @@ void VerifySpanContentAndInterval(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::it
     EXPECT_EQ((*it)->interval.second, expectedEnd);
 }
 
-void VerifySpanWithVariableWeight(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
-    const std::string& content, int32_t start, int32_t end, const VariableFontWeightOptions& options)
+void VerifySpanWithVariableWeight(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it, const std::string& content,
+    int32_t start, int32_t end, const VariableFontWeightOptions& options)
 {
     VerifySpanContentAndInterval(it, content, start, end);
     auto actualWeight = (*it)->fontStyle->GetVariableFontWeight().value_or(0);
@@ -1649,8 +1649,7 @@ void VerifySpanWithVariableWeight(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::it
     EXPECT_EQ(actualDevice, options.enableDevice.value_or(true));
 }
 
-void VerifyFullSpan(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
-    const SpanVerifyOptions& options)
+void VerifyFullSpan(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it, const SpanVerifyOptions& options)
 {
     VerifySpanContentAndInterval(it, options.content, options.start, options.end);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), options.fontSize);
@@ -1677,12 +1676,13 @@ HWTEST_F(SpanStringTestNg, MutableSpanString020, TestSize.Level1)
     // Create fonts and build span string
     Font font1 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::BOLD, OHOS::Ace::Dimension(29.0, OHOS::Ace::DimensionUnit::PX),
-        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 10 }, { 266, true, true });
+            OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 10 },
+        { 266, true, true });
     Font font2 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::W300, OHOS::Ace::Dimension(49.0, OHOS::Ace::DimensionUnit::VP),
-        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::BLUE, 5 }, { 333, false, false });
-    Font font3 = CreateTestFont(
-        { OHOS::Ace::FontWeight::W500, OHOS::Ace::Dimension(35.0, OHOS::Ace::DimensionUnit::FP),
+            OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::BLUE, 5 },
+        { 333, false, false });
+    Font font3 = CreateTestFont({ OHOS::Ace::FontWeight::W500, OHOS::Ace::Dimension(35.0, OHOS::Ace::DimensionUnit::FP),
         OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::GREEN, 3 });
 
     auto spanStr = AceType::MakeRefPtr<SpanString>(u"TestVariableFontWeight");
@@ -1729,22 +1729,28 @@ HWTEST_F(SpanStringTestNg, MutableSpanString021, TestSize.Level1)
     // Create fonts with different property combinations
     Font font1 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::BOLD, OHOS::Ace::Dimension(29.0, OHOS::Ace::DimensionUnit::PX),
-        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 10 }, { 266, true, std::nullopt });
+            OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 10 },
+        { 266, true, std::nullopt });
     Font font2 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::W300, OHOS::Ace::Dimension(49.0, OHOS::Ace::DimensionUnit::VP),
-        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::BLUE, 5 }, { std::nullopt, std::nullopt, false });
+            OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::BLUE, 5 },
+        { std::nullopt, std::nullopt, false });
     Font font3 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::W500, OHOS::Ace::Dimension(35.0, OHOS::Ace::DimensionUnit::FP),
-        OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::GREEN, 3 }, { 400, std::nullopt, std::nullopt });
+            OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::GREEN, 3 },
+        { 400, std::nullopt, std::nullopt });
     Font font4 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::BOLD, OHOS::Ace::Dimension(25.0, OHOS::Ace::DimensionUnit::PX),
-        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 7 }, { std::nullopt, true, std::nullopt });
+            OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::RED, 7 },
+        { std::nullopt, true, std::nullopt });
     Font font5 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::W400, OHOS::Ace::Dimension(30.0, OHOS::Ace::DimensionUnit::VP),
-        OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::BLUE, 4 }, { 500, std::nullopt, false });
+            OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::Color::BLUE, 4 },
+        { 500, std::nullopt, false });
     Font font6 = CreateTestFontWithVariableWeight(
         { OHOS::Ace::FontWeight::W600, OHOS::Ace::Dimension(32.0, OHOS::Ace::DimensionUnit::FP),
-        OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::GREEN, 6 }, { std::nullopt, true, false });
+            OHOS::Ace::FontStyle::ITALIC, OHOS::Ace::Color::GREEN, 6 },
+        { std::nullopt, true, false });
 
     auto spanStr = AceType::MakeRefPtr<SpanString>(u"123456789012345678");
     spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(font1, 0, 3));

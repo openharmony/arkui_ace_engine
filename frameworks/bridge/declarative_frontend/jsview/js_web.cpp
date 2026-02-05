@@ -2531,8 +2531,8 @@ napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValu
     if (valueType != napi_object) {
         return undefined;
     }
-    napi_wrap(env, napiValue, nativeValue,
-        [](napi_env env, void *data, void *hint) {}, nullptr, nullptr);
+    napi_wrap_s(env, napiValue, nativeValue,
+        [](napi_env env, void *data, void *hint) {}, nullptr, &WEB_PIXEL_MAP_TYPE_TAG, nullptr);
     return napiValue;
 }
 
