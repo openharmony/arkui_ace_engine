@@ -70,7 +70,10 @@ ace_unittest("repeat_virtual_test_ng") {
 ace_unittest("repeat_virtual_2_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
-  sources = [ "repeat_virtual_2_test_ng.cpp" ]
+  sources = [
+    "repeat_virtual_2_test_ng.cpp",
+    "repeat_virtual_2_syntax_test_ng_advanced.cpp",
+  ]
 }
 
 ace_unittest("syntax_arkoala_test_ng") {
