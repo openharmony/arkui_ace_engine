@@ -4456,6 +4456,64 @@ HWTEST_F(JsAccessibilityManagerTest, NeedChangeToReadableNodeTest001, TestSize.L
 }
 
 /**
+ * @tc.name: AccessibilityOnShowHide001
+ * @tc.desc: Test AccessibilityOnShowHide with isOnShow = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityOnShowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. call AccessibilityOnShowHide with isOnShow = false
+     * @tc.expected: should not call CheckAndReConnectA11ySA, no crash
+     */
+    jsAccessibilityManager->AccessibilityOnShowHide(false, context);
+
+    /**
+     * @tc.steps: step3. verify a11y manager state unchanged
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsRegister());
+}
+
+/**
+ * @tc.name: AccessibilityOnShowHide002
+ * @tc.desc: Test AccessibilityOnShowHide with isOnShow = true, normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityOnShowHide002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. call AccessibilityOnShowHide with isOnShow = true
+     * @tc.expected: should call CheckAndReConnectA11ySA
+     * Note: This test verifies the function can be called without crash.
+     * Actual behavior depends on AccessibilitySystemAbilityClient state.
+     */
+    jsAccessibilityManager->AccessibilityOnShowHide(true, context);
+
+    /**
+     * @tc.steps: step3. verify a11y manager state unchanged
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsRegister());
+}
+
+/**
  * @tc.name: SendEventToAccessibilityWithNodeInnerAfterRender001
  * @tc.desc: SendEventToAccessibilityWithNodeInnerAfterRender
  * @tc.type: FUNC

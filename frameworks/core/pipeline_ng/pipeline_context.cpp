@@ -5108,6 +5108,13 @@ void PipelineContext::UpdateFormLinkInfos()
     }
 }
 
+void PipelineContext::OnShowHideForAccessibility(bool isOnShow)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AccessibilityOnShowHide(isOnShow, WeakClaim(this));
+}
+
 void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
@@ -5117,6 +5124,7 @@ void PipelineContext::OnShow()
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     RequestFrame();
     FlushWindowStateChangedCallback(true);
+    OnShowHideForAccessibility(true);
     AccessibilityEvent event;
     event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
     event.type = AccessibilityEventType::PAGE_CHANGE;
