@@ -251,7 +251,6 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     CHECK_NULL_VOID(nativeEngine);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value renderImage = nullptr;
-    napi_create_object(env, &renderImage);
     auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id_));
     CHECK_NULL_VOID(offscreenCanvasPattern);
     auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
