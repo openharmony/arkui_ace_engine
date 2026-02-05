@@ -66,7 +66,7 @@ function Observed<T extends Constructor>(BaseClass: T): T {
     const error = `'@Observed class ${BaseClass?.name}': invalid use of V2 @Trace decorator inside V1 @Observed class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.error(error);
     // toolchain can check
-    throw new BusinessError(USE_TRACE_IN_OBSERVED, error);
+    throw new Error(error);
   }
 
   return class extends BaseClass {
