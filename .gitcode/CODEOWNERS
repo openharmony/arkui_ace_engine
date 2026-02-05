@@ -1072,6 +1072,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.cpp 
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_stage_utils.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_stage_utils.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/js_object_template.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js @arkuieco3
