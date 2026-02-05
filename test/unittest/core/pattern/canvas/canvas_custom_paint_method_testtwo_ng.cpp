@@ -911,4 +911,28 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo030, Te
     EXPECT_EQ(reporter->totalEventCount_, 1);
     MockPipelineContext::TearDown();
 }
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo031
+ * @tc.desc: Test the function 'UpdateLineDash' of the class 'CustomPaintPaintMethod' when lineDash is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo031, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    // Test case: lineDash is empty - should not set any path effect
+    RSPen pen;
+    LineDashParam lineDashParam;
+    lineDashParam.dashOffset = 0.0;
+    lineDashParam.lineDash = {};
+    paintMethod->state_.strokeState.SetLineDash(lineDashParam);
+
+    // When lineDash is empty, UpdateLineDash should do nothing (no crash, no path effect set)
+    paintMethod->UpdateLineDash(pen);
+
+    // Verify that lineDash size is 0 (empty)
+    EXPECT_EQ(paintMethod->state_.strokeState.GetLineDash().lineDash.size(), 0);
+}
 } // namespace OHOS::Ace::NG
