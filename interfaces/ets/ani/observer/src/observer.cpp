@@ -2225,8 +2225,21 @@ static void onRouterPageUpdateContext([[maybe_unused]] ani_env* env, ani_object 
 
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&env]() {
-        auto routerPageInfoChangeCallback = [env](
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in onRouterPageUpdateContext, status:%{public}d", static_cast<int32_t>(status));
+            return;
+        }
+        auto routerPageInfoChangeCallback = [vm](
             NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in onRouterPageUpdateContext, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
             UiObserver::HandleRouterPageStateChange(env, context, info);
         };
         NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
@@ -2830,16 +2843,33 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
     };
     NG::UIObserverHandler::GetInstance().SetHandleTabChangeFuncForAni(tabChangeCallback);
 
-    auto routerPageInfoChangeCallback = [observer, env](
+    do {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get ani vm in CreateObserver, status:%{public}d", static_cast<int32_t>(status));
+            break;
+        }
+        auto routerPageInfoChangeCallback = [observer, vm](
                                             NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
-        observer->HandleRouterPageStateChange(env, context, info);
-    };
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in CreateObserver, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
+            observer->HandleRouterPageStateChange(env, context, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
+    } while (false);
+
     auto windowSizeBreakpointChangeCallback = [observer, env](
         int32_t instanceId, const WindowSizeBreakpoint& breakpoint) {
         observer->HandleWindowSizeBreakpointChange(env, instanceId, breakpoint);
     };
     NG::UIObserverHandler::GetInstance().SetWinSizeLayoutBreakpointChangeFuncAni(windowSizeBreakpointChangeCallback);
-    NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
+
     do {
         ani_vm* vm = nullptr;
         ani_status status;

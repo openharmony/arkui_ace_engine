@@ -228,6 +228,26 @@ void TabContentModelStatic::SetTabBar(FrameNode* node, const std::optional<std::
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void TabContentModelStatic::SetTabBarWithContent(FrameNode* node, FrameNode* tabBarNode)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    if (tabBarNode) {
+        frameNodePattern->SetTabBarWithContent(AceType::Claim(tabBarNode));
+    } else {
+        frameNodePattern->SetTabBarWithContent(nullptr);
+    }
+}
+
+void TabContentModelStatic::SetCustomStyleNode(FrameNode* node, const RefPtr<FrameNode>& customStyleNode)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomStyleNode(customStyleNode);
+}
+
 void TabContentModelStatic::SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode)
 {
     CHECK_NULL_VOID(node);
