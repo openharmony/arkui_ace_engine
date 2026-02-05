@@ -171,7 +171,6 @@ import { Metadata } from "bundleManager.Metadata"
 import { InputMethodExtraConfig, CustomValueType } from "@ohos.inputMethod.ExtraConfig"
 import { default as intl } from "@ohos.intl"
 import { LineOptions, ShapePoint } from "./../../component/line"
-import { MarqueeOptions } from "./../../component/marquee"
 import { PathOptions } from "./../../component/path"
 import { PolygonOptions } from "./../../component/polygon"
 import { PolylineOptions } from "./../../component/polyline"
@@ -185,6 +184,7 @@ import { ViewportRect } from "./../../component/shape"
 import { default as Want } from "@ohos.app.ability.Want"
 import { FlexSpaceOptions, FlexOptions } from "./../../component/flex"
 import { ImageFrameInfo } from "./../../component/imageAnimator"
+import { MarqueeOptions } from "./../../component/marquee"
 import { MeasureOptions } from "@ohos.measure"
 import { MenuItemGroupOptions } from "./../../component/menuItemGroup"
 import { MenuItemOptions } from "./../../component/menuItem"
@@ -1883,7 +1883,7 @@ export class TypeChecker {
     static isMarkStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof MarkStyle
     }
-    static isMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof MarqueeOptions
     }
     static isMarqueeStartPolicy(value: Object | string | number | undefined): boolean {
