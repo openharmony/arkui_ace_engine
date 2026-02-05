@@ -53,9 +53,9 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
             ? propScrollBarProperty_->propScrollBarMargin.value_or(ScrollBarMargin()).ToString().c_str()
             : ScrollBarMargin().ToString().c_str(),
         filter);
-    json->PutExtAttr("fadingEdge",
-        propFadingEdgeProperty_ ? propFadingEdgeProperty_->propFadingEdge.value_or(false) : false, filter);
-    json->PutExtAttr("defaultFadingEdge", false, filter);
+    bool defaultFadingEdge = GetDefaultFadingEdge().value_or(false);
+    json->PutExtAttr("fadingEdge", GetFadingEdge().value_or(defaultFadingEdge), filter);
+    json->PutExtAttr("defaultFadingEdge", defaultFadingEdge, filter);
     auto fadingEdgeOption = JsonUtil::Create(true);
     fadingEdgeOption->Put("fadingEdgeLength",
         propFadingEdgeProperty_
