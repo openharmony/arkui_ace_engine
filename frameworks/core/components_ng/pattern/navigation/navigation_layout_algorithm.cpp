@@ -491,15 +491,22 @@ void NavigationLayoutAlgorithm::RangeCalculation(
     }
     maxNavBarWidthValue_ = Dimension(Dimension(std::max(maxNavBarWidth, minNavBarWidth)).ConvertToVp(),
         DimensionUnit::VP);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
+    if (navigationPattern->GetIsNavBarWidthChange()) {
+        auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
+        auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+        realNavBarWidth_ = navBarWidth;
+        navigationPattern->SetRealNavBarWidthValue(realNavBarWidth_);
+        navigationPattern->SetIsNavBarWidthChange(false);
+    }
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
         auto maxNavBarWidth = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
         realNavBarWidth_ = std::max(realNavBarWidth_, static_cast<float>(minNavBarWidth));
         realNavBarWidth_ = std::min(realNavBarWidth_, static_cast<float>(maxNavBarWidth));
     }
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
-    CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetMinNavBarWidthValue(minNavBarWidthValue_);
     navigationPattern->SetMaxNavBarWidthValue(maxNavBarWidthValue_);
     navigationPattern->SetMinContentWidthValue(minContentWidthValue_);

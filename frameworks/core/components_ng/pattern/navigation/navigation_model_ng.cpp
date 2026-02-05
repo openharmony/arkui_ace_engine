@@ -1528,6 +1528,7 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value, bool isDoubleBind
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
+        navigationPattern->SetIsNavBarWidthChange(true);
     }
 }
 
@@ -2182,6 +2183,7 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& va
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
+        navigationPattern->SetIsNavBarWidthChange(true);
     }
 }
 
