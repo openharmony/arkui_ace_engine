@@ -1485,7 +1485,7 @@ std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
             OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_PICKER), OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG },
-        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR ), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CUSTOM), OHOS::Ace::V2::CUSTOM_ETS_TAG },
     };
     auto iter = nodeTypeConvertMap.find(static_cast<uint32_t>(nodeType));
