@@ -664,10 +664,14 @@ void WindowPattern::CreateStartingWindow()
     std::shared_ptr<Media::PixelMap> preloadPixelMap = nullptr;
     std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
     session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
-    bool isDark = Rosen::SceneSessionManager::GetInstance().IsStartWindowDark(session_->GetSessionInfo());
+    bool darkMode = Rosen::SceneSessionManager::GetInstance().IsStartWindowDark(session_->GetSessionInfo()) ?
+        "dark" : "light";
+    std::string saveStartWindowKey = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName + '_' +
+        sessionInfo.abilityName_ + '_' + darkMode;
     std::string startWindowPersistencePath =
-        Rosen::SceneSessionManager::GetInstance().GetStartWindowPersistencePath(sessionInfo.bundleName_, isDark);
-    if (!startWindowPersistencePath.empty()) {
+        Rosen::SceneSessionManager::GetInstance().GetStartWindowPersistencePath(sessionInfo.bundleName_,
+            saveStartWindowKey);
+    if (session_->GetShowRecent() && !startWindowPersistencePath.empty()) {
         sourceInfo = ImageSourceInfo("file://" + startWindowPersistencePath,
             sessionInfo.bundleName_, sessionInfo.moduleName_);
         session_->ResetPreloadStartingWindow();
