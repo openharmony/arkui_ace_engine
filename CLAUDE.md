@@ -29,12 +29,310 @@ The `docs/` directory contains organized knowledge base documentation covering:
 
 **Knowledge Base Index**: See [docs/knowledge_base_README.md](docs/knowledge_base_README.md) for the complete catalog of available knowledge base documents.
 
+**Metadata Index**: See [docs/knowledge_base_INDEX.json](docs/knowledge_base_INDEX.json) for structured metadata including keywords, aliases, categories, and path mappings for all knowledge bases.
+
 **Usage**: When answering questions or providing guidance:
 
 1. **Check for relevant knowledge base documents** in `docs/` before diving into code analysis
 2. **Search the knowledge base** using Grep tools to find component-specific information
 3. **Reference knowledge base content** to provide comprehensive, context-aware answers
 4. **Cross-reference with actual code** using the file paths and line numbers cited in knowledge base documents
+
+### Knowledge Base Creation Standards
+
+When creating new knowledge base documents, the following standards **MUST** be followed:
+
+#### 1. File Naming Convention
+
+**Pattern**: `XXX_Knowledge_Base[_CN].md`
+
+- Use clear English names (e.g., `Text_Knowledge_Base_CN.md`, `Menu_Knowledge_Base.md`)
+- Add `_CN` suffix for Chinese-language documents
+- Place in appropriate subdirectory under `docs/`:
+  - `docs/pattern/<component>/` - Component-specific knowledge bases
+  - `docs/sdk/` - SDK and API documentation
+  - `docs/architecture/` - Architecture and design documentation
+
+#### 2. Metadata Requirements
+
+All knowledge bases **MUST** include metadata in [docs/knowledge_base_INDEX.json](docs/knowledge_base_INDEX.json):
+
+```json
+{
+  "name": "ComponentName",
+  "name_cn": "组件中文名",
+  "category": "basic/container/selector/shape/media/data_display/rich_text/advanced/sdk",
+  "type": "component/feature/sdk",
+  "keywords": [
+    "功能关键词1",
+    "功能关键词2",
+    "功能关键词3",
+    "... (5-15 keywords)"
+  ],
+  "aliases": [
+    "别名1",
+    "别名2",
+    "... (2-5 aliases)"
+  ],
+  "file_path": "path/to/doc.md",
+  "source_paths": {
+    "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/...",
+    "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/...",
+    "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/..."
+  },
+  "api_paths": {
+    "static": "OpenHarmony/interface/sdk-js/api/arkui/component/...",
+    "modifier": "OpenHarmony/interface/sdk-js/api/arkui/...Modifier.d.ts"
+  },
+  "last_updated": "YYYY-MM-DD"
+}
+```
+
+**Metadata Requirements**:
+
+- **name**: Component English name (required)
+- **name_cn**: Component Chinese name (required)
+- **category**: Must match one of the predefined categories (required)
+- **type**: component/feature/sdk (required)
+- **keywords**: 5-15 terms covering functionality, use cases, related concepts (required)
+- **aliases**: 2-5 alternative names users might search for (required)
+- **file_path**: Relative path from docs/ (required)
+- **source_paths**: Source code path mappings (optional, recommended)
+- **api_paths**: SDK API path mappings (optional, recommended)
+- **last_updated**: Last update date in YYYY-MM-DD format (required)
+
+#### 3. Document Structure
+
+Every knowledge base document **MUST** include:
+
+```markdown
+# Component Name 组件完整知识库
+
+> **文档版本**: v1.0
+> **更新时间**: YYYY-MM-DD
+> **源码版本**: OpenHarmony ace_engine (master 分支)
+
+---
+
+## 📚 目录
+
+1. [概述](#概述)
+2. [目录结构](#目录结构)
+3. [核心类继承关系](#核心类继承关系)
+4. [Pattern层详解](#pattern层详解)
+5. [Model层详解](#model层详解)
+6. [完整API清单](#完整api清单)
+7. [关键实现细节](#关键实现细节)
+8. [使用示例](#使用示例)
+9. [调试指南](#调试指南)
+10. [常见问题](#常见问题)
+
+---
+
+## 概述
+
+### 组件定位
+
+**ComponentName** 组件是...
+
+### 技术架构
+
+...
+
+### 代码规模
+
+...
+```
+
+**Required Sections**:
+
+1. **概述** (Overview) - Component positioning and purpose
+2. **目录结构** (Directory Structure) - Source file organization
+3. **核心类** (Core Classes) - Inheritance relationships
+4. **Pattern层** (Pattern Layer) - Business logic details
+5. **Model层** (Model Layer) - Data model details
+6. **API清单** (API List) - Complete API listing
+7. **实现细节** (Implementation Details) - Key implementation points
+8. **使用示例** (Usage Examples) - Practical examples
+9. **调试指南** (Debugging Guide) - Debugging techniques
+10. **常见问题** (FAQ) - Common issues and solutions
+
+#### 4. Path Reference Standards
+
+All code references in knowledge bases **MUST** follow these path formats:
+
+- **Source code paths**: Use `OpenHarmony/` prefix
+  - ✅ `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp:123`
+  - ❌ `/home/user/OpenHarmony/...` (local absolute paths)
+  - ❌ `frameworks/core/components_ng/...` (relative paths)
+
+- **Knowledge base links**: Use relative paths within same repository
+  - ✅ `../pattern/menu/Menu_Knowledge_Base.md`
+  - ❌ `OpenHarmony/foundation/arkui/ace_engine/docs/pattern/menu/...`
+
+- **SDK API paths**: Use `OpenHarmony/` prefix
+  - ✅ `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets`
+  - ❌ `interface/sdk-js/api/arkui/...` (relative paths)
+
+#### 5. Content Verification Rules
+
+Before finalizing any knowledge base:
+
+1. **Verify all source paths exist**
+
+   ```bash
+   ls -la OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/<component>/<component>_pattern.cpp
+   ```
+
+2. **Verify all API paths exist**
+
+   ```bash
+   ls -la OpenHarmony/interface/sdk-js/api/arkui/component/<component>.static.d.ets
+   ```
+
+3. **Verify line numbers in code references**
+   - Read the actual file at the specified line
+   - Ensure the code hasn't moved due to refactoring
+
+4. **Verify technical accuracy**
+   - Cross-reference multiple source files
+   - Test code examples when applicable
+   - Consult actual implementation, not assumptions
+
+#### 6. Index Maintenance
+
+When adding or updating knowledge bases:
+
+1. **Update knowledge_base_INDEX.json**
+   - Add new component entry with complete metadata
+   - Update `last_updated` for modified entries
+   - Verify all paths are valid
+   - Ensure valid JSON format (use JSON linter or validator)
+
+2. **Update docs/knowledge_base_README.md**
+   - Add component to directory structure
+   - Update statistics (total count, category counts)
+   - Add component description if not already present
+
+3. **Verify metadata consistency**
+
+   ```bash
+   # Count knowledge base files
+   find docs -name "*_Knowledge_Base*.md" -type f | wc -l
+
+   # Validate JSON format
+   python3 -m json.tool docs/knowledge_base_INDEX.json > /dev/null && echo "Valid JSON"
+
+   # Count indexed components
+   python3 -c "import json; data=json.load(open('docs/knowledge_base_INDEX.json')); print(f'Total components: {len(data[\"knowledge_bases\"])}')"
+
+   # Search by keyword (requires jq or python)
+   python3 -c "import json; data=json.load(open('docs/knowledge_base_INDEX.json')); print([kb['name'] for kb in data['knowledge_bases'] if '文本' in ' '.join(kb['keywords'])])"
+   ```
+
+#### 7. Code Verification Principles (Critical)
+
+**When writing knowledge bases, NEVER**:
+
+- ❌ Guess or fabricate code implementations
+- ❌ Assume functionality without reading source code
+- ❌ Copy code from other sources (documentation, blogs, etc.)
+- ❌ Write hypothetical examples as actual code
+
+**ALWAYS**:
+
+- ✅ Use Read/Grep tools to locate and read actual source code
+- ✅ Reference complete file paths with line numbers
+- ✅ Verify code behavior by reading implementation
+- ✅ Provide source location for all code snippets
+- ✅ Mark uncertain content as "推测" (speculation)
+
+**Example of proper code reference**:
+
+```markdown
+### Text Pattern Initialization
+
+Source: `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp:123-145`
+
+```cpp
+void TextPattern::OnModifyDone()
+{
+    // Actual implementation from source
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_PATTERN_RENDER_CONTEXT);
+    }
+}
+```
+```
+
+#### 8. Quality Checklist
+
+Before submitting a knowledge base, verify:
+
+- [ ] File follows naming convention (`XXX_Knowledge_Base[_CN].md`)
+- [ ] Metadata added to `knowledge_base_INDEX.json`
+- [ ] JSON format is valid (use JSON validator)
+- [ ] All required fields present (name, name_cn, category, type, keywords, aliases, file_path, last_updated)
+- [ ] Keywords count between 5-15
+- [ ] Aliases count between 2-5
+- [ ] All source paths verified to exist
+- [ ] All API paths verified to exist
+- [ ] All line numbers verified against actual code
+- [ ] Document includes all 10 required sections
+- [ ] Code examples are from actual source (not fabricated)
+- [ ] Path references use correct format (`OpenHarmony/` prefix for code, relative for KB links)
+- [ ] `knowledge_base_README.md` updated
+- [ ] Statistics updated correctly
+
+#### 9. Maintenance and Updates
+
+**Regular Maintenance Tasks**:
+
+1. **Monthly verification**
+   - Check all source paths still exist
+   - Verify line numbers are still accurate
+   - Update for any code refactoring
+
+2. **When code changes**
+   - Update affected knowledge bases immediately
+   - Update `last_updated` in metadata
+   - Document the change in the knowledge base
+
+3. **When errors are found**
+   - Document the error and correction
+   - Identify root cause
+   - Add preventive measures to knowledge base
+   - Share learnings across all relevant knowledge bases
+
+**Example update entry**:
+```markdown
+## Learned Lessons
+
+### Error: Incorrect API Method Name
+**Date**: 2026-02-04
+**Issue**: Knowledge base referenced `SetText()` which was renamed to `UpdateText()`
+**Root Cause**: Code refactoring not reflected in documentation
+**Correction**: Updated all references to use `UpdateText()`
+**Prevention**: Added note to check for API changes during monthly verification
+**Reference**: text_pattern.cpp:234-256
+```
+
+#### 10. Knowledge Base Categories
+
+Knowledge bases must be categorized as follows:
+
+| Category | Description | Examples |
+| :--- | :--- | :--- |
+| **basic** | Basic UI components | Text, Button, Image, TextInput |
+| **container** | Layout containers | Column, Row, Grid, List, Scroll, Stack |
+| **selector** | Data selection components | DatePicker, TimePicker, Slider, Checkbox |
+| **shape** | Shape drawing components | Rect, Circle, Path, Polygon |
+| **media** | Media components | Video, Canvas, ImageAnimator |
+| **data_display** | Data presentation | Badge, Gauge, Progress, TextTimer |
+| **rich_text** | Rich text components | TextSpan, TextArea |
+| **advanced** | Complex interactive components | Menu, Dialog, Navigation, Refresh |
+| **sdk** | SDK and API documentation | ArkUI SDK API, FrameNode, BuilderNode |
 
 ## Core Working Principles
 
