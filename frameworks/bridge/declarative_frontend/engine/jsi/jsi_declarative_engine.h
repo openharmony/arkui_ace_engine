@@ -30,11 +30,15 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
-#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+
+struct OH_NativeXComponent;
+namespace OHOS::Ace {
+class NativeXComponentImpl;
+}
 
 namespace OHOS::Ace::Framework {
 
@@ -294,8 +298,8 @@ private:
 class JsiDeclarativeEngine : public JsEngine {
     DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine);
 public:
-    JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
-    explicit JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}
+    JsiDeclarativeEngine(int32_t instanceId, void* runtime);
+    explicit JsiDeclarativeEngine(int32_t instanceId);
     ~JsiDeclarativeEngine() override;
 
     bool Initialize(const RefPtr<FrontendDelegate>& delegate) override;

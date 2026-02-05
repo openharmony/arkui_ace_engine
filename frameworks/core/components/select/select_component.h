@@ -21,11 +21,14 @@
 #include "base/geometry/dimension.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/select/select_theme.h"
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/pipeline/base/sole_child_component.h"
+
+namespace OHOS::Ace {
+class SelectTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace {
 
@@ -342,15 +345,8 @@ public:
         return nodeId_;
     }
 
-    const TextStyle& GetSelectStyle() const
-    {
-        return theme_->GetTitleStyle();
-    }
-
-    void SetSelectStyle(const TextStyle& style)
-    {
-        theme_->SetTitleStyle(style);
-    }
+    const TextStyle& GetSelectStyle() const;
+    void SetSelectStyle(const TextStyle& style);
 
     void SetTheme(const RefPtr<SelectTheme>& theme)
     {

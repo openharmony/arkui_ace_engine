@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/layout_break_point.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -49,6 +50,8 @@
 #include "bridge/declarative_frontend/jsview/js_accessibility.h"
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
+#include "interfaces/native/native_type.h"
+
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {

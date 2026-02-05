@@ -20,7 +20,10 @@
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components/select/select_theme.h"
+
+namespace OHOS::Ace {
+class SelectTheme;
+}
 
 namespace OHOS::Ace::NG {
 class MenuItemConfiguration : public CommonConfiguration {

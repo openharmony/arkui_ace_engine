@@ -18,10 +18,11 @@
 #include <vector>
 
 #include "base/error/error_code.h"
-#include "core/common/builder_util.h"
-#include "core/common/color_inverter.h"
 #include "base/utils/utils.h"
 #include "base/utils/multi_thread.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "core/common/builder_util.h"
+#include "core/common/color_inverter.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
@@ -30,7 +31,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/frame_node_modifier_multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "bridge/common/utils/engine_helper.h"
+#include "interfaces/native/native_type.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {

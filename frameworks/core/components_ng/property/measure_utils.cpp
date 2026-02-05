@@ -15,6 +15,7 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
+#include "base/utils/layout_break_point.h"
 #include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
 

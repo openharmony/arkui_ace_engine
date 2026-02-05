@@ -15,6 +15,8 @@
 
 #include "base/utils/system_properties.h"
 
+#include "base/utils/layout_break_point.h"
+
 #include <regex>
 #include <unistd.h>
 
@@ -1494,5 +1496,64 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 int32_t SystemProperties::GetPreviewStatus()
 {
     return previewStatus_;
+}
+
+void SystemProperties::SetDeviceType(DeviceType deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+void SystemProperties::SetDevicePhysicalWidth(int32_t devicePhysicalWidth)
+{
+    devicePhysicalWidth_ = devicePhysicalWidth;
+}
+
+void SystemProperties::SetDevicePhysicalHeight(int32_t devicePhysicalHeight)
+{
+    devicePhysicalHeight_ = devicePhysicalHeight;
+}
+
+void SystemProperties::SetFontWeightScale(const float fontWeightScale)
+{
+    if (fontWeightScale_ != fontWeightScale) {
+        fontWeightScale_ = fontWeightScale;
+    }
+}
+
+void SystemProperties::SetFontScale(const float fontScale)
+{
+    if (fontScale != fontScale_) {
+        fontScale_ = fontScale;
+    }
+}
+
+void SystemProperties::SetResolution(double resolution)
+{
+    resolution_ = resolution;
+}
+
+void SystemProperties::SetDeviceAccess(bool isDeviceAccess)
+{
+    isDeviceAccess_ = isDeviceAccess;
+}
+
+void SystemProperties::SetUnZipHap(bool unZipHap)
+{
+    unZipHap_.store(unZipHap);
+}
+
+void SystemProperties::SetExtSurfaceEnabled(bool extSurfaceEnabled)
+{
+    extSurfaceEnabled_ = extSurfaceEnabled;
+}
+
+void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
+{
+    stateManagerEnable_.store(stateManagerEnable);
+}
+
+void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
+{
+    faultInjectEnabled_ = faultInjectEnable;
 }
 } // namespace OHOS::Ace

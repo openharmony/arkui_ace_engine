@@ -33,6 +33,10 @@ class RSUIDirector;
 
 namespace OHOS::Ace {
 
+// Forward declarations
+struct WidthLayoutBreakPoint;
+struct HeightLayoutBreakPoint;
+
 namespace NG {
 class FrameNode;
 } // namespace NG
