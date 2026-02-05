@@ -5900,6 +5900,9 @@ bool WebPattern::HandleAutoFillEvent()
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
         return UpdateAutoFillPopup();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+        if (autoFillMenuType_ != WebMenuType::TYPE_UNKNOWN_MENU) {
+            return UpdateAutoFillPopup();
+        }
         return CloseAutoFillPopup();
     }
 
@@ -5933,6 +5936,9 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
+    if (triggerType == AceAutoFillTriggerType::AUTO_REQUEST) {
+        autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
