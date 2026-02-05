@@ -547,6 +547,7 @@
       "OHOS::Ace::NG::TextPattern::TextPattern()";
       OHOS::Ace::NG::TextPattern::UpdateFontColor*;
       OHOS::Ace::NG::ViewAbstractModelStatic::*;
+      OHOS::Ace::NG::LuminanceSamplingHelper::*;
       OHOS::Ace::FlexElement::*;
       OHOS::Ace::FocusGroup::*;
       OHOS::Ace::ImageComponent::*;
@@ -1018,6 +1019,7 @@
       "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::ElementRegister::GetNodeById(int)";
       "OHOS::Ace::ElementRegister::GetUINodeById(int)";
+      "OHOS::Ace::ElementRegister::GetAttachedFrameNodeById(const std::string&, bool, int32_t)";
       "OHOS::Ace::Singleton<OHOS::Ace::PluginManager>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::ColorInverter>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::DumpLog>::GetInstance()";

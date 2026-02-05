@@ -67,6 +67,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
+#include "core/components_ng/render/adapter/sampler_manager.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
@@ -5109,6 +5110,33 @@ RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode
             return childFrameNode;
         }
         auto childFindResult = FindChildByName(childFrameNode, nodeName);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+    return nullptr;
+}
+
+void FrameNode::SetSamplerManager(const RefPtr<SamplerManager>& manager)
+{
+    samplerManager_ = manager;
+}
+
+RefPtr<SamplerManager> FrameNode::GetSamplerManager()
+{
+    return samplerManager_;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByNameUINode(const RefPtr<UINode>& parentNode, const std::string& nodeName)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    if (parentFrameNode && parentFrameNode->GetInspectorId().value_or("") == nodeName) {
+        return parentFrameNode;
+    }
+    const auto& children = parentNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFindResult = FindChildByNameUINode(child, nodeName);
         if (childFindResult) {
             return childFindResult;
         }
