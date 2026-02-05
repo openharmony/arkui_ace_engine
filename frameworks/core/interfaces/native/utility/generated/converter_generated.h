@@ -1336,6 +1336,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_NavPathInfo_NavBar& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_NestedScrollOptions_NestedScrollOptionsExt& src)
 {
     switch (src.selector) {
@@ -1458,12 +1473,13 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_I32_String_SwiperAutoFill& src)
+                   const Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -4489,6 +4505,7 @@ ASSIGN_OPT(Opt_Callback_RichEditorRange_Void)
 ASSIGN_OPT(Opt_Callback_RichEditorSelection_Void)
 ASSIGN_OPT(Opt_Callback_RichEditorTextSpanResult_Void)
 ASSIGN_OPT(Opt_Callback_RouterCallbackInfo_Void)
+ASSIGN_OPT(Opt_Callback_ScrollState_Void)
 ASSIGN_OPT(Opt_Callback_SheetDismiss_Void)
 ASSIGN_OPT(Opt_Callback_SheetType_Void)
 ASSIGN_OPT(Opt_Callback_Size_Void)
@@ -4554,6 +4571,7 @@ ASSIGN_OPT(Opt_ImageCompleteCallback)
 ASSIGN_OPT(Opt_ImageErrorCallback)
 ASSIGN_OPT(Opt_ImageOnCompleteCallback)
 ASSIGN_OPT(Opt_Initializer)
+ASSIGN_OPT(Opt_InterceptionCallback)
 ASSIGN_OPT(Opt_InterceptionModeCallback)
 ASSIGN_OPT(Opt_InterceptionShowCallback)
 ASSIGN_OPT(Opt_LoadingProgressModifierBuilder)
@@ -4574,7 +4592,6 @@ ASSIGN_OPT(Opt_MenuOnAppearCallback)
 ASSIGN_OPT(Opt_ModifierKeyStateGetter)
 ASSIGN_OPT(Opt_MouseInfoCallback)
 ASSIGN_OPT(Opt_NavDestinationTransitionDelegate)
-ASSIGN_OPT(Opt_NavExtender_CreateNavDestination)
 ASSIGN_OPT(Opt_NavExtender_OnUpdateStack)
 ASSIGN_OPT(Opt_NavExtender_PageMapNodeBuilder)
 ASSIGN_OPT(Opt_OnAdsBlockedCallback)
@@ -4828,6 +4845,7 @@ ASSIGN_OPT(Opt_GridRowColumnOption)
 ASSIGN_OPT(Opt_HapModuleInfo)
 ASSIGN_OPT(Opt_Header)
 ASSIGN_OPT(Opt_HierarchicalSymbolEffect)
+ASSIGN_OPT(Opt_HomePathInfo)
 ASSIGN_OPT(Opt_HorizontalAlignParam)
 ASSIGN_OPT(Opt_HoverEventParam)
 ASSIGN_OPT(Opt_ImageAIOptions)
@@ -5061,7 +5079,7 @@ ASSIGN_OPT(Opt_Union_I32_Bindable)
 ASSIGN_OPT(Opt_Union_I32_CacheCountInfo)
 ASSIGN_OPT(Opt_Union_I32_FontWeight_String_Resource)
 ASSIGN_OPT(Opt_Union_I32_Resource)
-ASSIGN_OPT(Opt_Union_I32_String_SwiperAutoFill)
+ASSIGN_OPT(Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy)
 ASSIGN_OPT(Opt_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource)
 ASSIGN_OPT(Opt_Union_ImageBitmap_PixelMap)
 ASSIGN_OPT(Opt_Union_LengthMetrics_F64)

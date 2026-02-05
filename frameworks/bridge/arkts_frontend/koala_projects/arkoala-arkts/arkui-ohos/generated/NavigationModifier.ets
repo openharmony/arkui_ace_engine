@@ -80,6 +80,8 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     _enableDragBar_0_0value?: boolean | undefined
     _enableModeChangeAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableModeChangeAnimation_0_0value?: boolean | undefined
+    _enableVisibilityLifecycleWithContentCover_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableVisibilityLifecycleWithContentCover_0_0value?: boolean | undefined
     _backButtonIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _backButtonIcon_0_0value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
     _backButtonIcon_0_1value?: ResourceStr | undefined
@@ -444,6 +446,24 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 default: {
                     this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setEnableModeChangeAnimationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableVisibilityLifecycleWithContentCover_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableVisibilityLifecycleWithContentCover_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableVisibilityLifecycleWithContentCoverAttribute((this._enableVisibilityLifecycleWithContentCover_0_0value as boolean | undefined));
+                    this._enableVisibilityLifecycleWithContentCover_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableVisibilityLifecycleWithContentCover_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableVisibilityLifecycleWithContentCover_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableVisibilityLifecycleWithContentCoverAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -824,6 +844,19 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
             }
         }
+        if (modifier._enableVisibilityLifecycleWithContentCover_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableVisibilityLifecycleWithContentCover_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableVisibilityLifecycleWithContentCover(modifier._enableVisibilityLifecycleWithContentCover_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableVisibilityLifecycleWithContentCover((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._backButtonIcon_0_flag) {
@@ -1141,6 +1174,17 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         } else
         {
             this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
+        if (((this._enableVisibilityLifecycleWithContentCover_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableVisibilityLifecycleWithContentCover_0_0value) !== (value)))
+        {
+            this._enableVisibilityLifecycleWithContentCover_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableVisibilityLifecycleWithContentCover_0_0value = value
+        } else
+        {
+            this._enableVisibilityLifecycleWithContentCover_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

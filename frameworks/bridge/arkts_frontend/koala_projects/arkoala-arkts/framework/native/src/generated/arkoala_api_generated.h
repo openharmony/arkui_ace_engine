@@ -1520,6 +1520,8 @@ typedef struct Callback_RichEditorTextSpanResult_Void Callback_RichEditorTextSpa
 typedef struct Opt_Callback_RichEditorTextSpanResult_Void Opt_Callback_RichEditorTextSpanResult_Void;
 typedef struct Callback_RouterCallbackInfo_Void Callback_RouterCallbackInfo_Void;
 typedef struct Opt_Callback_RouterCallbackInfo_Void Opt_Callback_RouterCallbackInfo_Void;
+typedef struct Callback_ScrollState_Void Callback_ScrollState_Void;
+typedef struct Opt_Callback_ScrollState_Void Opt_Callback_ScrollState_Void;
 typedef struct Callback_SheetDismiss_Void Callback_SheetDismiss_Void;
 typedef struct Opt_Callback_SheetDismiss_Void Opt_Callback_SheetDismiss_Void;
 typedef struct Callback_SheetType_Void Callback_SheetType_Void;
@@ -1654,6 +1656,8 @@ typedef struct ImageOnCompleteCallback ImageOnCompleteCallback;
 typedef struct Opt_ImageOnCompleteCallback Opt_ImageOnCompleteCallback;
 typedef struct Initializer Initializer;
 typedef struct Opt_Initializer Opt_Initializer;
+typedef struct InterceptionCallback InterceptionCallback;
+typedef struct Opt_InterceptionCallback Opt_InterceptionCallback;
 typedef struct InterceptionModeCallback InterceptionModeCallback;
 typedef struct Opt_InterceptionModeCallback Opt_InterceptionModeCallback;
 typedef struct InterceptionShowCallback InterceptionShowCallback;
@@ -1694,8 +1698,6 @@ typedef struct MouseInfoCallback MouseInfoCallback;
 typedef struct Opt_MouseInfoCallback Opt_MouseInfoCallback;
 typedef struct NavDestinationTransitionDelegate NavDestinationTransitionDelegate;
 typedef struct Opt_NavDestinationTransitionDelegate Opt_NavDestinationTransitionDelegate;
-typedef struct NavExtender_CreateNavDestination NavExtender_CreateNavDestination;
-typedef struct Opt_NavExtender_CreateNavDestination Opt_NavExtender_CreateNavDestination;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
 typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
@@ -2239,6 +2241,8 @@ typedef struct Opt_Header Opt_Header;
 typedef struct HierarchicalSymbolEffectPeer HierarchicalSymbolEffectPeer;
 typedef struct HierarchicalSymbolEffectPeer* Ark_HierarchicalSymbolEffect;
 typedef struct Opt_HierarchicalSymbolEffect Opt_HierarchicalSymbolEffect;
+typedef struct Ark_HomePathInfo Ark_HomePathInfo;
+typedef struct Opt_HomePathInfo Opt_HomePathInfo;
 typedef struct Ark_HorizontalAlignParam Ark_HorizontalAlignParam;
 typedef struct Opt_HorizontalAlignParam Opt_HorizontalAlignParam;
 typedef struct Ark_HoverEventParam Ark_HoverEventParam;
@@ -2741,8 +2745,8 @@ typedef struct Ark_Union_I32_FontWeight_String_Resource Ark_Union_I32_FontWeight
 typedef struct Opt_Union_I32_FontWeight_String_Resource Opt_Union_I32_FontWeight_String_Resource;
 typedef struct Ark_Union_I32_Resource Ark_Union_I32_Resource;
 typedef struct Opt_Union_I32_Resource Opt_Union_I32_Resource;
-typedef struct Ark_Union_I32_String_SwiperAutoFill Ark_Union_I32_String_SwiperAutoFill;
-typedef struct Opt_Union_I32_String_SwiperAutoFill Opt_Union_I32_String_SwiperAutoFill;
+typedef struct Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy;
+typedef struct Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy;
 typedef struct Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 typedef struct Opt_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource Opt_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 typedef struct Ark_Union_ImageBitmap_PixelMap Ark_Union_ImageBitmap_PixelMap;
@@ -2753,6 +2757,8 @@ typedef struct Ark_Union_LengthMetrics_String Ark_Union_LengthMetrics_String;
 typedef struct Opt_Union_LengthMetrics_String Opt_Union_LengthMetrics_String;
 typedef struct Ark_Union_MenuPreviewMode_CustomBuilder Ark_Union_MenuPreviewMode_CustomBuilder;
 typedef struct Opt_Union_MenuPreviewMode_CustomBuilder Opt_Union_MenuPreviewMode_CustomBuilder;
+typedef struct Ark_Union_NavPathInfo_NavBar Ark_Union_NavPathInfo_NavBar;
+typedef struct Opt_Union_NavPathInfo_NavBar Opt_Union_NavPathInfo_NavBar;
 typedef struct Ark_Union_NestedScrollOptions_NestedScrollOptionsExt Ark_Union_NestedScrollOptions_NestedScrollOptionsExt;
 typedef struct Opt_Union_NestedScrollOptions_NestedScrollOptionsExt Opt_Union_NestedScrollOptions_NestedScrollOptionsExt;
 typedef struct Ark_Union_Number_Bindable Ark_Union_Number_Bindable;
@@ -12487,6 +12493,16 @@ typedef struct Opt_Callback_RouterCallbackInfo_Void {
     Ark_Tag tag;
     Callback_RouterCallbackInfo_Void value;
 } Opt_Callback_RouterCallbackInfo_Void;
+typedef struct Callback_ScrollState_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_ScrollState value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_ScrollState value0);
+} Callback_ScrollState_Void;
+typedef struct Opt_Callback_ScrollState_Void {
+    Ark_Tag tag;
+    Callback_ScrollState_Void value;
+} Opt_Callback_ScrollState_Void;
 typedef struct Callback_SheetDismiss_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13147,6 +13163,16 @@ typedef struct Opt_Initializer {
     Ark_Tag tag;
     Initializer value;
 } Opt_Initializer;
+typedef struct InterceptionCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Union_NavPathInfo_NavBar from, const Ark_Union_NavPathInfo_NavBar to, const Ark_NavPathStack pathStack, Ark_NavigationOperation operation, const Ark_Boolean isAnimated);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_NavPathInfo_NavBar from, const Ark_Union_NavPathInfo_NavBar to, const Ark_NavPathStack pathStack, Ark_NavigationOperation operation, const Ark_Boolean isAnimated);
+} InterceptionCallback;
+typedef struct Opt_InterceptionCallback {
+    Ark_Tag tag;
+    InterceptionCallback value;
+} Opt_InterceptionCallback;
 typedef struct InterceptionModeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13347,16 +13373,6 @@ typedef struct Opt_NavDestinationTransitionDelegate {
     Ark_Tag tag;
     NavDestinationTransitionDelegate value;
 } Opt_NavDestinationTransitionDelegate;
-typedef struct NavExtender_CreateNavDestination {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
-} NavExtender_CreateNavDestination;
-typedef struct Opt_NavExtender_CreateNavDestination {
-    Ark_Tag tag;
-    NavExtender_CreateNavDestination value;
-} Opt_NavExtender_CreateNavDestination;
 typedef struct NavExtender_OnUpdateStack {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15869,6 +15885,15 @@ typedef struct Opt_HierarchicalSymbolEffect {
     Ark_Tag tag;
     Ark_HierarchicalSymbolEffect value;
 } Opt_HierarchicalSymbolEffect;
+typedef struct Ark_HomePathInfo {
+    /* kind: Interface */
+    Ark_String name;
+    Opt_Object param;
+} Ark_HomePathInfo;
+typedef struct Opt_HomePathInfo {
+    Ark_Tag tag;
+    Ark_HomePathInfo value;
+} Opt_HomePathInfo;
 typedef struct Ark_HorizontalAlignParam {
     /* kind: Interface */
     Ark_String anchor;
@@ -16418,6 +16443,7 @@ typedef struct Ark_NavigationInterception {
     Opt_InterceptionShowCallback willShow;
     Opt_InterceptionShowCallback didShow;
     Opt_InterceptionModeCallback modeChange;
+    Opt_InterceptionCallback interception;
 } Ark_NavigationInterception;
 typedef struct Opt_NavigationInterception {
     Ark_Tag tag;
@@ -18201,19 +18227,20 @@ typedef struct Opt_Union_I32_Resource {
     Ark_Tag tag;
     Ark_Union_I32_Resource value;
 } Opt_Union_I32_Resource;
-typedef struct Ark_Union_I32_String_SwiperAutoFill {
+typedef struct Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy {
     /* kind: UnionType */
     Ark_Int32 selector;
     union {
         Ark_Int32 value0;
         Ark_String value1;
         Ark_SwiperAutoFill value2;
+        Ark_ItemFillPolicy value3;
     };
-} Ark_Union_I32_String_SwiperAutoFill;
-typedef struct Opt_Union_I32_String_SwiperAutoFill {
+} Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy;
+typedef struct Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy {
     Ark_Tag tag;
-    Ark_Union_I32_String_SwiperAutoFill value;
-} Opt_Union_I32_String_SwiperAutoFill;
+    Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy value;
+} Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy;
 typedef struct Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18276,6 +18303,18 @@ typedef struct Opt_Union_MenuPreviewMode_CustomBuilder {
     Ark_Tag tag;
     Ark_Union_MenuPreviewMode_CustomBuilder value;
 } Opt_Union_MenuPreviewMode_CustomBuilder;
+typedef struct Ark_Union_NavPathInfo_NavBar {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_NavPathInfo value0;
+        Ark_String value1;
+    };
+} Ark_Union_NavPathInfo_NavBar;
+typedef struct Opt_Union_NavPathInfo_NavBar {
+    Ark_Tag tag;
+    Ark_Union_NavPathInfo_NavBar value;
+} Opt_Union_NavPathInfo_NavBar;
 typedef struct Ark_Union_NestedScrollOptions_NestedScrollOptionsExt {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -25581,9 +25620,13 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
 typedef struct GENERATED_ArkUINavigationModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setNavigationOptions)(Ark_NativePointer node,
-                                 const Opt_NavPathStack* pathInfos,
-                                 const Opt_NavigationModuleInfo* moduleInfo);
+    void (*setNavigationOptions0)(Ark_NativePointer node,
+                                  const Opt_NavPathStack* pathInfos,
+                                  const Opt_NavigationModuleInfo* moduleInfo);
+    void (*setNavigationOptions1)(Ark_NativePointer node,
+                                  const Opt_NavPathStack* pathInfos,
+                                  const Opt_HomePathInfo* homeDestination,
+                                  const Opt_NavigationModuleInfo* moduleInfo);
     void (*setNavBarWidth)(Ark_NativePointer node,
                            const Opt_Union_Length_Bindable* value);
     void (*setNavBarPosition)(Ark_NativePointer node,
@@ -25624,6 +25667,8 @@ typedef struct GENERATED_ArkUINavigationModifier {
                        const Opt_NavigationDividerStyle* style);
     void (*setEnableModeChangeAnimation)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
+    void (*setEnableVisibilityLifecycleWithContentCover)(Ark_NativePointer node,
+                                                         const Opt_Boolean* value);
     void (*setBackButtonIcon)(Ark_NativePointer node,
                                const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
                                const Opt_ResourceStr* accessibilityText);
@@ -26643,6 +26688,8 @@ typedef struct GENERATED_ArkUISwiperModifier {
                           const Opt_Callback_I32_Void* value);
     void (*setOnUnselected)(Ark_NativePointer node,
                             const Opt_Callback_I32_Void* value);
+    void (*setOnScrollStateChanged)(Ark_NativePointer node,
+                                    const Opt_Callback_ScrollState_Void* value);
     void (*setOnAnimationStart)(Ark_NativePointer node,
                                 const Opt_OnSwiperAnimationStartCallback* value);
     void (*setOnAnimationEnd)(Ark_NativePointer node,
@@ -26661,6 +26708,8 @@ typedef struct GENERATED_ArkUISwiperModifier {
                             const Opt_PageFlipMode* value);
     void (*setOnContentWillScroll)(Ark_NativePointer node,
                                    const Opt_ContentWillScrollCallback* value);
+    void (*setMaintainVisibleContentPosition)(Ark_NativePointer node,
+                                              const Opt_Boolean* value);
     void (*setAutoPlay1)(Ark_NativePointer node,
                          const Opt_Boolean* autoPlay,
                          const Opt_AutoPlayOptions* options);
@@ -26671,7 +26720,7 @@ typedef struct GENERATED_ArkUISwiperModifier {
                             const Opt_Int32* count,
                             const Opt_Boolean* isShown);
     void (*setDisplayCount)(Ark_NativePointer node,
-                            const Opt_Union_I32_String_SwiperAutoFill* value,
+                            const Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy* value,
                             const Opt_Boolean* swipeByGroup);
     void (*setPrevMargin)(Ark_NativePointer node,
                           const Opt_Length* value,
@@ -30011,6 +30060,9 @@ typedef struct GENERATED_ArkUINavDestinationContextAccessor {
     Opt_String (*getNavDestinationId)(Ark_NavDestinationContext peer);
     void (*setNavDestinationId)(Ark_NavDestinationContext peer,
                                 const Opt_String* navDestinationId);
+    Opt_NavDestinationMode (*getMode)(Ark_NavDestinationContext peer);
+    void (*setMode)(Ark_NavDestinationContext peer,
+                    const Opt_NavDestinationMode* mode);
 } GENERATED_ArkUINavDestinationContextAccessor;
 
 typedef struct GENERATED_ArkUINavExtenderAccessor {
@@ -30041,9 +30093,11 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
     Ark_Int32 (*popToName)(Ark_NavPathStack pathStack,
                             const Ark_String* name,
                             Ark_Boolean animated);
-    void (*setCreateNavDestinationCallback)(Ark_NavPathStack peer,
-                                            const NavExtender_CreateNavDestination* callback);
+    void (*setNavDestinationRouterMapBuilderCallback)(Ark_NativePointer navigation,
+                                                      const NavExtender_PageMapNodeBuilder* callback);
     Array_String (*getRouteMapInConfig)(Ark_NativePointer context);
+    void (*setSplitPlaceholder)(Ark_NativePointer navigation,
+                                Ark_NativePointer placeholderNode);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {

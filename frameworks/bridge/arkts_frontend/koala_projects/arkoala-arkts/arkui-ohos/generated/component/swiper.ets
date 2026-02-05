@@ -32,6 +32,7 @@ import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { default as curves } from "@ohos.curves"
 import { extractors, AttributeModifier, hookSwiperAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
+import { ScrollState } from "./list"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -766,6 +767,18 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnUnselected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnScrollStateChangedAttribute(value: ((value0: ScrollState) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SwiperAttribute_setOnScrollStateChanged(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnAnimationStartAttribute(value: OnSwiperAnimationStartCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -874,6 +887,18 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnContentWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setMaintainVisibleContentPositionAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SwiperAttribute_setMaintainVisibleContentPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setAutoPlay1Attribute(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (autoPlay !== undefined) {
@@ -956,6 +981,10 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as SwiperAutoFill
                 SwiperAutoFill_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof ItemFillPolicy) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as ItemFillPolicy
+                ItemFillPolicy_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1119,6 +1148,9 @@ export interface SwiperAttribute extends CommonMethod {
     onUnselected(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onUnselected")
     }
+    onScrollStateChanged(value: ((value0: ScrollState) => void) | undefined): this {
+        throw new Error("Unimplemented method onScrollStateChanged")
+    }
     onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
         throw new Error("Unimplemented method onAnimationStart")
     }
@@ -1145,6 +1177,9 @@ export interface SwiperAttribute extends CommonMethod {
     }
     onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
         throw new Error("Unimplemented method onContentWillScroll")
+    }
+    maintainVisibleContentPosition(value: boolean | undefined): this {
+        throw new Error("Unimplemented method maintainVisibleContentPosition")
     }
     autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
         throw new Error("Unimplemented method autoPlay")
@@ -1185,6 +1220,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     onChange_value?: ((value0: int32) => void) | undefined
     onSelected_value?: ((value0: int32) => void) | undefined
     onUnselected_value?: ((value0: int32) => void) | undefined
+    onScrollStateChanged_value?: ((value0: ScrollState) => void) | undefined
     onAnimationStart_value?: OnSwiperAnimationStartCallback | undefined
     onAnimationEnd_value?: OnSwiperAnimationEndCallback | undefined
     onGestureSwipe_value?: OnSwiperGestureSwipeCallback | undefined
@@ -1194,6 +1230,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
+    maintainVisibleContentPosition_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined
     setSwiperOptions(controller?: SwiperController): this {
         return this
@@ -1246,6 +1283,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     onUnselected(value: ((value0: int32) => void) | undefined): this {
         return this
     }
+    onScrollStateChanged(value: ((value0: ScrollState) => void) | undefined): this {
+        return this
+    }
     onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
         return this
     }
@@ -1271,6 +1311,9 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
         return this
     }
     onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
+        return this
+    }
+    maintainVisibleContentPosition(value: boolean | undefined): this {
         return this
     }
     autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
@@ -1451,6 +1494,14 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
+    public onScrollStateChanged(value: ((value0: ScrollState) => void) | undefined): this {
+        if (this.checkPriority("onScrollStateChanged")) {
+            const value_casted = value as (((value0: ScrollState) => void) | undefined)
+            this.getPeer()?.setOnScrollStateChangedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
         if (this.checkPriority("onAnimationStart")) {
             const value_casted = value as (OnSwiperAnimationStartCallback | undefined)
@@ -1519,6 +1570,14 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         if (this.checkPriority("onContentWillScroll")) {
             const value_casted = value as (ContentWillScrollCallback | undefined)
             this.getPeer()?.setOnContentWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public maintainVisibleContentPosition(value: boolean | undefined): this {
+        if (this.checkPriority("maintainVisibleContentPosition")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setMaintainVisibleContentPositionAttribute(value_casted)
             return this
         }
         return this

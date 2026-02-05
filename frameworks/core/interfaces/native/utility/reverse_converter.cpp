@@ -1108,6 +1108,13 @@ void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier
     dst = peer;
 }
 
+void AssignArkValue(Ark_NavPathStack& dst, const RefPtr<GeneratedModifier::NavigationContext::NavigationStack>& src)
+{
+    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
+    peer->SetNavigationStack(src);
+    dst = peer;
+}
+
 void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& src)
 {
     dst.status = Converter::ArkValue<Ark_NativeEmbedParamStatus>(src.status);

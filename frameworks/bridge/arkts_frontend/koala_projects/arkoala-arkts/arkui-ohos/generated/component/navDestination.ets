@@ -55,6 +55,7 @@ export interface NavDestinationContext {
     pathInfo: NavPathInfo
     pathStack: NavPathStack
     navDestinationId?: string | undefined
+    mode?: NavDestinationMode | undefined
     getConfigInRouteMap(): RouteMapConfig | undefined
 }
 export class NavDestinationContextInternal implements MaterializedBase,NavDestinationContext {
@@ -80,6 +81,13 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     set navDestinationId(navDestinationId: string | undefined) {
         const navDestinationId_NonNull  = (navDestinationId as string)
         this.setNavDestinationId(navDestinationId_NonNull)
+    }
+    get mode(): NavDestinationMode | undefined {
+        return this.getMode()
+    }
+    set mode(mode: NavDestinationMode | undefined) {
+        const mode_NonNull  = (mode as NavDestinationMode)
+        this.setMode(mode_NonNull)
     }
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, NavDestinationContextInternal.getFinalizer())
@@ -122,6 +130,14 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     private setNavDestinationId(navDestinationId: string | undefined): void {
         const navDestinationId_casted = navDestinationId as (string | undefined)
         this.setNavDestinationId_serialize(navDestinationId_casted)
+        return
+    }
+    private getMode(): NavDestinationMode | undefined {
+        return this.getMode_serialize()
+    }
+    private setMode(mode: NavDestinationMode | undefined): void {
+        const mode_casted = mode as (NavDestinationMode | undefined)
+        this.setMode_serialize(mode_casted)
         return
     }
     getConfigInRouteMap_serialize(): RouteMapConfig | undefined {
@@ -172,6 +188,29 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavDestinationContext_setNavDestinationId(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getMode_serialize(): NavDestinationMode | undefined {
+        const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_getMode(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : NavDestinationMode | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = NavDestinationMode.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : NavDestinationMode | undefined = buffer
+        return returnResult
+    }
+    private setMode_serialize(mode: NavDestinationMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (mode !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const modeTmpValue  = (mode as NavDestinationMode)
+            thisSerializer.writeInt32(modeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavDestinationContext_setMode(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
-using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
+using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill, Ark_ItemFillPolicy>;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 const static int32_t DEFAULT_CACHED_COUNT = 1;
@@ -97,6 +97,12 @@ DisplayCountVariantType Convert(const Ark_String& src)
 
 template<>
 DisplayCountVariantType Convert(const Ark_SwiperAutoFill& src)
+{
+    return src;
+}
+
+template<>
+DisplayCountVariantType Convert(const Ark_ItemFillPolicy& src)
 {
     return src;
 }
@@ -512,6 +518,27 @@ void SetOnUnselectedImpl(Ark_NativePointer node,
     };
     SwiperModelStatic::SetOnUnselected(frameNode, onUnselected);
 }
+void SetOnScrollStateChangedImpl(Ark_NativePointer node,
+                                 const Opt_Callback_ScrollState_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SwiperModelStatic::SetOnScrollStateChanged(frameNode, nullptr);
+        return;
+    }
+    auto scrollStateChangeCallback = [arkCallback = CallbackHelper(*optValue)] (const BaseEventInfo* info) {
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "scrollStateInfo invalid, OnScrollStateChanged failed.");
+            return;
+        }
+        arkCallback.InvokeSync(static_cast<Ark_ScrollState>(scrollStateInfo->GetIndex()));
+    };
+    SwiperModelStatic::SetOnScrollStateChanged(frameNode, std::move(scrollStateChangeCallback));
+}
 void SetOnAnimationStartImpl(Ark_NativePointer node,
                              const Opt_OnSwiperAnimationStartCallback* value)
 {
@@ -673,10 +700,24 @@ void SetOnContentWillScrollImpl(Ark_NativePointer node,
     };
     SwiperModelStatic::SetOnContentWillScroll(frameNode, std::move(onEvent));
 }
+void SetMaintainVisibleContentPositionImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::OptConvertPtr<bool>(value);
+    if (!optValue) {
+        SwiperModelStatic::SetMaintainVisibleContentPosition(frameNode, false);
+    } else {
+        SwiperModelStatic::SetMaintainVisibleContentPosition(frameNode, *optValue);
+    }
+}
 void SetAutoPlay1Impl(Ark_NativePointer node,
                      const Opt_Boolean* autoPlay,
                      const Opt_AutoPlayOptions* options)
 {
+    LOGI("sxy:: enter autoPlay1 impl");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto autoPlayConv = Converter::OptConvertPtr<bool>(autoPlay);
@@ -739,7 +780,7 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     SwiperModelStatic::SetCachedIsShown(frameNode, *convIsShown);
 }
 void SetDisplayCountImpl(Ark_NativePointer node,
-                         const Opt_Union_I32_String_SwiperAutoFill* value,
+                         const Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy* value,
                          const Opt_Boolean* swipeByGroup)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -774,6 +815,12 @@ void SetDisplayCountImpl(Ark_NativePointer node,
         if (auto minsizeOpt = Converter::OptConvert<Dimension>(autofillPtr->minSize); minsizeOpt) {
             SwiperModelStatic::SetMinSize(frameNode, *minsizeOpt);
         }
+    } else if (auto fillPolicyPtr = std::get_if<Ark_ItemFillPolicy>(&(*optDispCount)); fillPolicyPtr) {
+        int32_t fillTypeValue = 0;
+        if (fillPolicyPtr->fillType.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            fillTypeValue = static_cast<int32_t>(fillPolicyPtr->fillType.value);
+        }
+        SwiperModelStatic::SetFillType(frameNode, fillTypeValue);
     } else {
         SwiperModelStatic::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
     }
@@ -822,6 +869,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::SetOnChangeImpl,
         SwiperAttributeModifier::SetOnSelectedImpl,
         SwiperAttributeModifier::SetOnUnselectedImpl,
+        SwiperAttributeModifier::SetOnScrollStateChangedImpl,
         SwiperAttributeModifier::SetOnAnimationStartImpl,
         SwiperAttributeModifier::SetOnAnimationEndImpl,
         SwiperAttributeModifier::SetOnGestureSwipeImpl,
@@ -831,6 +879,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::SetIndicatorInteractiveImpl,
         SwiperAttributeModifier::SetPageFlipModeImpl,
         SwiperAttributeModifier::SetOnContentWillScrollImpl,
+        SwiperAttributeModifier::SetMaintainVisibleContentPositionImpl,
         SwiperAttributeModifier::SetAutoPlay1Impl,
         SwiperAttributeModifier::SetDisplayArrowImpl,
         SwiperAttributeModifier::SetCachedCount1Impl,

@@ -713,22 +713,22 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestNumber, TestSize.Level1)
     auto checkInitial = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkInitial, defaultValue);
 
-    auto numberInt = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_Int32>(123456);
+    auto numberInt = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_Int32>(123456);
     modifier_->setDisplayCount(node_, &numberInt, nullptr);
     auto checkVal2 = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkVal2, 123456);
 
-    auto numberFlt = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_Int32>(1);
+    auto numberFlt = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_Int32>(1);
     modifier_->setDisplayCount(node_, &numberFlt, nullptr);
     auto checkVal3 = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkVal3, 1);
 
-    auto numberIntNeg = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_Int32>(-111);
+    auto numberIntNeg = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_Int32>(-111);
     modifier_->setDisplayCount(node_, &numberIntNeg, nullptr);
     auto checkVal4 = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkVal4, defaultValue);
 
-    auto numberFltNeg = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_Int32>(-1);
+    auto numberFltNeg = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_Int32>(-1);
     modifier_->setDisplayCount(node_, &numberFltNeg, nullptr);
 
     auto checkVal5 = GetAttrValue<int>(node_, propName);
@@ -747,21 +747,21 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestString, TestSize.Level1)
     auto checkInitial = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkInitial, DEFAULT_SWIPER_DISPLAY_COUNT);
 
-    auto regularVal = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_String>("1234");
+    auto regularVal = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_String>("1234");
     modifier_->setDisplayCount(node_, &regularVal, nullptr);
     auto checkVal2 = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkVal2, DEFAULT_SWIPER_DISPLAY_COUNT);
 
     auto arkValue0 = ArkValue<Opt_SwiperDisplayMode>(ARK_SWIPER_DISPLAY_MODE_STRETCH);
     modifier_->setDisplayMode(node_, &arkValue0);
-    auto autoVal = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_String>("auto");
+    auto autoVal = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_String>("auto");
     modifier_->setDisplayCount(node_, &autoVal, nullptr);
     auto checkVal3 = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkVal3, DEFAULT_SWIPER_DISPLAY_COUNT);
     auto checkValDispMode= GetAttrValue<std::string>(node_, "displayMode");
     EXPECT_EQ(checkValDispMode, "SwiperDisplayMode.AutoLinear");
 
-    auto negVal = ArkUnion<Opt_Union_I32_String_SwiperAutoFill, Ark_String>("-1234");
+    auto negVal = ArkUnion<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy, Ark_String>("-1234");
     modifier_->setDisplayCount(node_, &negVal, nullptr);
     auto checkVal4 = GetAttrValue<int>(node_, propName);
     EXPECT_EQ(checkVal4, DEFAULT_SWIPER_DISPLAY_COUNT);
@@ -774,7 +774,7 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestString, TestSize.Level1)
  */
 HWTEST_F(SwiperModifierTest, DISABLED_setDisplayCountTestObj, TestSize.Level1)
 {
-    typedef Opt_Union_I32_String_SwiperAutoFill displayCountArgT;
+    typedef Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy displayCountArgT;
     typedef Ark_SwiperAutoFill checkT;
     constexpr auto propName = "minSize";
     const std::string &defaultValue(EXPECTED_VP_ZERO);
@@ -835,7 +835,7 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestByGroup, TestSize.Level1)
     const std::string defaultValue(EXPECTED_FALSE);
     ASSERT_NE(modifier_->setDisplayCount, nullptr);
 
-    Opt_Union_I32_String_SwiperAutoFill aceFakeArg0;
+    Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy aceFakeArg0;
 
     auto checkInitial = GetAttrValue<std::string>(node_, propName);
     EXPECT_EQ(checkInitial, defaultValue);

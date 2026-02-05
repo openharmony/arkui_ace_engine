@@ -11685,7 +11685,7 @@ Ark_NativePointer impl_Navigation_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getNavigationModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(Navigation_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_NavigationInterface_setNavigationOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_NavigationInterface_setNavigationOptions0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto pathInfosValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -11702,9 +11702,36 @@ void impl_NavigationInterface_setNavigationOptions(Ark_NativePointer thisPtr, KS
             moduleInfoValueTempTmpBuf.value = NavigationModuleInfo_serializer::read(thisDeserializer);
         }
         Opt_NavigationModuleInfo moduleInfoValueTemp = moduleInfoValueTempTmpBuf;;
-        GetNodeModifiers()->getNavigationModifier()->setNavigationOptions(self, static_cast<Opt_NavPathStack*>(&pathInfosValueTemp), static_cast<Opt_NavigationModuleInfo*>(&moduleInfoValueTemp));
+        GetNodeModifiers()->getNavigationModifier()->setNavigationOptions0(self, static_cast<Opt_NavPathStack*>(&pathInfosValueTemp), static_cast<Opt_NavigationModuleInfo*>(&moduleInfoValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationInterface_setNavigationOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(NavigationInterface_setNavigationOptions0, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NavigationInterface_setNavigationOptions1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto pathInfosValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_NavPathStack pathInfosValueTempTmpBuf = {};
+        pathInfosValueTempTmpBuf.tag = pathInfosValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((pathInfosValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            pathInfosValueTempTmpBuf.value = static_cast<Ark_NavPathStack>(NavPathStack_serializer::read(thisDeserializer));
+        }
+        Opt_NavPathStack pathInfosValueTemp = pathInfosValueTempTmpBuf;;
+        const auto homeDestinationValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_HomePathInfo homeDestinationValueTempTmpBuf = {};
+        homeDestinationValueTempTmpBuf.tag = homeDestinationValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((homeDestinationValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            homeDestinationValueTempTmpBuf.value = HomePathInfo_serializer::read(thisDeserializer);
+        }
+        Opt_HomePathInfo homeDestinationValueTemp = homeDestinationValueTempTmpBuf;;
+        const auto moduleInfoValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_NavigationModuleInfo moduleInfoValueTempTmpBuf = {};
+        moduleInfoValueTempTmpBuf.tag = moduleInfoValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((moduleInfoValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            moduleInfoValueTempTmpBuf.value = NavigationModuleInfo_serializer::read(thisDeserializer);
+        }
+        Opt_NavigationModuleInfo moduleInfoValueTemp = moduleInfoValueTempTmpBuf;;
+        GetNodeModifiers()->getNavigationModifier()->setNavigationOptions1(self, static_cast<Opt_NavPathStack*>(&pathInfosValueTemp), static_cast<Opt_HomePathInfo*>(&homeDestinationValueTemp), static_cast<Opt_NavigationModuleInfo*>(&moduleInfoValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(NavigationInterface_setNavigationOptions1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setNavBarWidth(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -12046,6 +12073,19 @@ void impl_NavigationAttribute_setEnableModeChangeAnimation(Ark_NativePointer thi
         GetNodeModifiers()->getNavigationModifier()->setEnableModeChangeAnimation(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setEnableModeChangeAnimation, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NavigationAttribute_setEnableVisibilityLifecycleWithContentCover(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getNavigationModifier()->setEnableVisibilityLifecycleWithContentCover(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setEnableVisibilityLifecycleWithContentCover, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setBackButtonIcon(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -19475,6 +19515,19 @@ void impl_SwiperAttribute_setOnUnselected(Ark_NativePointer thisPtr, KSerializer
         GetNodeModifiers()->getSwiperModifier()->setOnUnselected(self, static_cast<Opt_Callback_I32_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setOnUnselected, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SwiperAttribute_setOnScrollStateChanged(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_ScrollState_Void valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_ScrollState value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_ScrollState_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_ScrollState value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_ScrollState_Void))))};
+        }
+        Opt_Callback_ScrollState_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSwiperModifier()->setOnScrollStateChanged(self, static_cast<Opt_Callback_ScrollState_Void*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setOnScrollStateChanged, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_setOnAnimationStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -19592,6 +19645,19 @@ void impl_SwiperAttribute_setOnContentWillScroll(Ark_NativePointer thisPtr, KSer
         GetNodeModifiers()->getSwiperModifier()->setOnContentWillScroll(self, static_cast<Opt_ContentWillScrollCallback*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setOnContentWillScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_SwiperAttribute_setMaintainVisibleContentPosition(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getSwiperModifier()->setMaintainVisibleContentPosition(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setMaintainVisibleContentPosition, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_setAutoPlay1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -19668,11 +19734,11 @@ void impl_SwiperAttribute_setDisplayCount(Ark_NativePointer thisPtr, KSerializer
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_I32_String_SwiperAutoFill valueValueTempTmpBuf = {};
+        Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
             const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
-            Ark_Union_I32_String_SwiperAutoFill valueValueTempTmpBuf_ = {};
+            Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy valueValueTempTmpBuf_ = {};
             valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
             if (valueValueTempTmpBuf_UnionSelector == 0) {
                 valueValueTempTmpBuf_.selector = 0;
@@ -19683,12 +19749,15 @@ void impl_SwiperAttribute_setDisplayCount(Ark_NativePointer thisPtr, KSerializer
             } else if (valueValueTempTmpBuf_UnionSelector == 2) {
                 valueValueTempTmpBuf_.selector = 2;
                 valueValueTempTmpBuf_.value2 = SwiperAutoFill_serializer::read(thisDeserializer);
+            } else if (valueValueTempTmpBuf_UnionSelector == 3) {
+                valueValueTempTmpBuf_.selector = 3;
+                valueValueTempTmpBuf_.value3 = ItemFillPolicy_serializer::read(thisDeserializer);
             } else {
                 INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
             }
-            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_String_SwiperAutoFill>(valueValueTempTmpBuf_);
+            valueValueTempTmpBuf.value = static_cast<Ark_Union_I32_String_SwiperAutoFill_ItemFillPolicy>(valueValueTempTmpBuf_);
         }
-        Opt_Union_I32_String_SwiperAutoFill valueValueTemp = valueValueTempTmpBuf;;
+        Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy valueValueTemp = valueValueTempTmpBuf;;
         const auto swipeByGroupValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Boolean swipeByGroupValueTempTmpBuf = {};
         swipeByGroupValueTempTmpBuf.tag = swipeByGroupValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -19696,7 +19765,7 @@ void impl_SwiperAttribute_setDisplayCount(Ark_NativePointer thisPtr, KSerializer
             swipeByGroupValueTempTmpBuf.value = thisDeserializer.readBoolean();
         }
         Opt_Boolean swipeByGroupValueTemp = swipeByGroupValueTempTmpBuf;;
-        GetNodeModifiers()->getSwiperModifier()->setDisplayCount(self, static_cast<Opt_Union_I32_String_SwiperAutoFill*>(&valueValueTemp), static_cast<Opt_Boolean*>(&swipeByGroupValueTemp));
+        GetNodeModifiers()->getSwiperModifier()->setDisplayCount(self, static_cast<Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy*>(&valueValueTemp), static_cast<Opt_Boolean*>(&swipeByGroupValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(SwiperAttribute_setDisplayCount, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_SwiperAttribute_setPrevMargin(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -36679,6 +36748,32 @@ void impl_NavDestinationContext_setNavDestinationId(Ark_NativePointer thisPtr, K
         GetAccessors()->getNavDestinationContextAccessor()->setNavDestinationId(self, static_cast<Opt_String*>(&navDestinationIdValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavDestinationContext_setNavDestinationId, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_NavDestinationContext_getMode(Ark_NativePointer thisPtr) {
+        Ark_NavDestinationContext self = reinterpret_cast<Ark_NavDestinationContext>(thisPtr);
+        const auto &retValue = GetAccessors()->getNavDestinationContextAccessor()->getMode(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(static_cast<Ark_NavDestinationMode>(retValueTmpValue));
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(NavDestinationContext_getMode, KInteropReturnBuffer, Ark_NativePointer)
+void impl_NavDestinationContext_setMode(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NavDestinationContext self = reinterpret_cast<Ark_NavDestinationContext>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto modeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_NavDestinationMode modeValueTempTmpBuf = {};
+        modeValueTempTmpBuf.tag = modeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((modeValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            modeValueTempTmpBuf.value = static_cast<Ark_NavDestinationMode>(thisDeserializer.readInt32());
+        }
+        Opt_NavDestinationMode modeValueTemp = modeValueTempTmpBuf;;
+        GetAccessors()->getNavDestinationContextAccessor()->setMode(self, static_cast<Opt_NavDestinationMode*>(&modeValueTemp));
+}
 void impl_NavExtender_setNavigationOptions(Ark_NativePointer ptr, Ark_NativePointer pathStack) {
         GetAccessors()->getNavExtenderAccessor()->setNavigationOptions(ptr, static_cast<Ark_NavPathStack>(pathStack));
 }
@@ -36738,12 +36833,12 @@ Ark_Int32 impl_NavExtender_popToName(Ark_NativePointer pathStack, const KStringP
         return GetAccessors()->getNavExtenderAccessor()->popToName(static_cast<Ark_NavPathStack>(pathStack), (const Ark_String*) (&name), animated);
 }
 KOALA_INTEROP_3(NavExtender_popToName, KInteropNumber, Ark_NativePointer, KStringPtr, Ark_Boolean)
-void impl_NavExtender_setCreateNavDestinationCallback(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_NavExtender_setNavDestinationRouterMapBuilderCallback(Ark_NativePointer navigation, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        NavExtender_CreateNavDestination callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_CreateNavDestination)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_CreateNavDestination))))};;
-        GetAccessors()->getNavExtenderAccessor()->setCreateNavDestinationCallback(static_cast<Ark_NavPathStack>(peer), static_cast<NavExtender_CreateNavDestination*>(&callbackValueTemp));
+        NavExtender_PageMapNodeBuilder callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String url, const Opt_Object params, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_PageMapNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String url, const Opt_Object params, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_PageMapNodeBuilder))))};;
+        GetAccessors()->getNavExtenderAccessor()->setNavDestinationRouterMapBuilderCallback(navigation, static_cast<NavExtender_PageMapNodeBuilder*>(&callbackValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavExtender_setCreateNavDestinationCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(NavExtender_setNavDestinationRouterMapBuilderCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_NavExtender_getRouteMapInConfig(Ark_NativePointer context) {
         const auto &retValue = GetAccessors()->getNavExtenderAccessor()->getRouteMapInConfig(context);
         SerializerBase _retSerializer {};
@@ -36755,6 +36850,10 @@ KInteropReturnBuffer impl_NavExtender_getRouteMapInConfig(Ark_NativePointer cont
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(NavExtender_getRouteMapInConfig, KInteropReturnBuffer, Ark_NativePointer)
+void impl_NavExtender_setSplitPlaceholder(Ark_NativePointer navigation, Ark_NativePointer placeholderNode) {
+        GetAccessors()->getNavExtenderAccessor()->setSplitPlaceholder(navigation, placeholderNode);
+}
+KOALA_INTEROP_DIRECT_V2(NavExtender_setSplitPlaceholder, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_NavigationTransitionProxy_construct() {
         return GetAccessors()->getNavigationTransitionProxyAccessor()->construct();
 }

@@ -32,6 +32,7 @@ using NavigationTransitionEvent = std::function<NG::NavigationTransition(
 class ACE_EXPORT NavigationModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetUseHomeDestination(FrameNode* frameNode, bool useHomeDestination);
     static void SetNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
@@ -71,10 +72,12 @@ public:
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
     static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
+    static void SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable);
     static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
     static void UpdateDefineColor(FrameNode* frameNode, bool isDefined);
     static void UpdateDividerColor(FrameNode* frameNode, const Color& color);
+    static void SetSplitPlaceholder(FrameNode* frameNode, const RefPtr<UINode>& splitPlaceholder);
 
 private:
     static bool navBarWidthDoubleBind_;

@@ -28,6 +28,7 @@ import { IndicatorComponentController } from "./component/indicatorcomponent"
 import { EdgeEffect, PageFlipMode } from "./component/enums"
 import { default as curves } from "@ohos.curves"
 import { Length, ItemFillPolicy } from "./component/units"
+import { ScrollState } from "./component/list"
 import { Resource } from "global.resource"
 export class SwiperModifier extends CommonMethodModifier implements SwiperAttribute,AttributeModifier<SwiperAttribute> {
     _instanceId: number = -1;
@@ -73,6 +74,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _onSelected_0_0value?: ((value0: int32) => void) | undefined
     _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUnselected_0_0value?: ((value0: int32) => void) | undefined
+    _onScrollStateChanged_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onScrollStateChanged_0_0value?: ((value0: ScrollState) => void) | undefined
     _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAnimationStart_0_0value?: OnSwiperAnimationStartCallback | undefined
     _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -91,6 +94,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _pageFlipMode_0_0value?: PageFlipMode | undefined
     _onContentWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onContentWillScroll_0_0value?: ContentWillScrollCallback | undefined
+    _maintainVisibleContentPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maintainVisibleContentPosition_0_0value?: boolean | undefined
     _autoPlay_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _autoPlay_1_0value?: boolean | undefined
     _autoPlay_1_1value?: AutoPlayOptions | undefined
@@ -401,6 +406,24 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
             }
         }
+        if (this._onScrollStateChanged_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onScrollStateChanged_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnScrollStateChangedAttribute((this._onScrollStateChanged_0_0value as ((value0: ScrollState) => void) | undefined));
+                    this._onScrollStateChanged_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onScrollStateChanged_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onScrollStateChanged_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnScrollStateChangedAttribute((undefined as ((value0: ScrollState) => void) | undefined));
+                }
+            }
+        }
         if (this._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onAnimationStart_0_flag) {
@@ -560,6 +583,24 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 default: {
                     this._onContentWillScroll_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnContentWillScrollAttribute((undefined as ContentWillScrollCallback | undefined));
+                }
+            }
+        }
+        if (this._maintainVisibleContentPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maintainVisibleContentPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaintainVisibleContentPositionAttribute((this._maintainVisibleContentPosition_0_0value as boolean | undefined));
+                    this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaintainVisibleContentPositionAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -883,6 +924,19 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
             }
         }
+        if (modifier._onScrollStateChanged_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onScrollStateChanged_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onScrollStateChanged(modifier._onScrollStateChanged_0_0value);
+                    break;
+                }
+                default: {
+                    this.onScrollStateChanged((undefined as ((value0: ScrollState) => void) | undefined));
+                }
+            }
+        }
         if (modifier._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onAnimationStart_0_flag) {
@@ -997,6 +1051,19 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this.onContentWillScroll((undefined as ContentWillScrollCallback | undefined));
+                }
+            }
+        }
+        if (modifier._maintainVisibleContentPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maintainVisibleContentPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maintainVisibleContentPosition(modifier._maintainVisibleContentPosition_0_0value);
+                    break;
+                }
+                default: {
+                    this.maintainVisibleContentPosition((undefined as boolean | undefined));
                 }
             }
         }
@@ -1271,6 +1338,18 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
+    onScrollStateChanged(value: ((value0: ScrollState) => void) | undefined): this {
+        if (((this._onScrollStateChanged_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onScrollStateChanged_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onScrollStateChanged_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._onScrollStateChanged_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
         if (((this._onAnimationStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1376,6 +1455,18 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         } else
         {
             this._onContentWillScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    maintainVisibleContentPosition(value: boolean | undefined): this {
+        if (((this._maintainVisibleContentPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maintainVisibleContentPosition_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
