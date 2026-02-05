@@ -3284,7 +3284,7 @@ ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstra
 * @param Constraint Indicates the pointer to the size constraint.
 * @since 12
 */
-void* OH_ArkUI_LayoutConstraint_Destroy(ArkUI_LayoutConstraint* Constraint);
+void* OH_ArkUI_LayoutConstraint_Dispose(ArkUI_LayoutConstraint* Constraint);
 
 /**
 * @brief Obtains the maximum width for a size constraint, in px.
