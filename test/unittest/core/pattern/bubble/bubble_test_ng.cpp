@@ -1371,4 +1371,52 @@ HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level1)
     auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
 }
+
+/**
+ * @tc.name: BubblePatternTest022
+ * @tc.desc: Test OnDetachFromFrameNodeImpl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble node with target node.
+     * @tc.expected: Check the frameNode and targetNode were created successfully.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up test conditions - hasOnAreaChange_ = false, popupParam_ exists.
+     */
+    pattern->hasOnAreaChange_ = false;
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetOnWillDismiss([](int32_t reason) {});
+    popupParam->SetOnStateChange([](const std::string& state) {});
+    pattern->SetPopupParam(popupParam);
+    pattern->halfFoldHoverCallbackId_ = 100;
+
+    /**
+     * @tc.steps: step3. Call OnDetachFromFrameNodeImpl.
+     * @tc.expected: Method should execute without crash.
+     */
+    pattern->OnDetachFromFrameNodeImpl(AceType::RawPtr(frameNode));
+
+    /**
+     * @tc.steps: step4. Verify JS callbacks are cleared to prevent memory leaks.
+     * @tc.expected: popupParam callbacks should be nullptr.
+     */
+    auto updatedPopupParam = pattern->GetPopupParam();
+    ASSERT_NE(updatedPopupParam, nullptr);
+    EXPECT_EQ(updatedPopupParam->GetOnWillDismiss(), nullptr);
+    EXPECT_EQ(updatedPopupParam->GetOnStateChange(), nullptr);
+}
 } // namespace OHOS::Ace::NG

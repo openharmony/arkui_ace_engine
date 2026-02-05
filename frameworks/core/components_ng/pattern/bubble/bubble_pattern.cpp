@@ -166,6 +166,12 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
         pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
     }
     pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_);
+
+    // Clear JS callbacks to prevent memory leaks
+    if (popupParam_) {
+        popupParam_->SetOnWillDismiss(nullptr);
+        popupParam_->SetOnStateChange(nullptr);
+    }
 }
 
 void BubblePattern::OnAttachToMainTree()
