@@ -6837,7 +6837,20 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
         }
         JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
         auto param = params->GetValueAt(0);
-        result = resourceWrapper->GetColorByName(param->ToString());
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(param->ToString());
+            return Color::ParseColorString(value, result);
+        }
+        if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = resourceWrapper->GetIntByName(param->ToString());
+            result = Color(ColorAlphaAdapt(value));
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+            result = resourceWrapper->GetColorByName(param->ToString());
+            result.SetResourceId(static_cast<uint32_t>(UNKNOWN_RESOURCE_ID));
+            return true;
+        }
         return true;
     }
 
@@ -7234,6 +7247,10 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
             ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
+        } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
+            result = std::to_string(resourceWrapper->GetDouble(static_cast<uint32_t>(resIdNum)));
+        } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            result = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
         } else {
             return false;
         }
