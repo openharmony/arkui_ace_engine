@@ -3487,4 +3487,341 @@ HWTEST_F(ImagePatternTestNg, OnWindowHide003, TestSize.Level0)
     EXPECT_NE(imagePattern->loadingCtx_, nullptr);
     EXPECT_TRUE(imagePattern->isRecycledImage_);
 }
+
+/**
+ * @tc.name: OnDetachFromMainTree001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnDetachFromMainTree001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isNeedReset_ = false;
+
+    imagePattern->OnDetachFromMainTree();
+    EXPECT_FALSE(imagePattern->isNeedReset_);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnDetachFromMainTree002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    frameNode->isInDestroying_ = true;
+    imagePattern->isNeedReset_ = true;
+    imagePattern->ResetImageAndAlt();
+    EXPECT_TRUE(imagePattern->isNeedReset_);
+    imagePattern->OnDetachFromMainTree();
+    EXPECT_FALSE(imagePattern->isNeedReset_);
+}
+
+/**
+ * @tc.name: OnDpiConfigurationUpdate001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnDpiConfigurationUpdate001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isFullyInitializedFromTheme_ = true;
+    EXPECT_TRUE(imagePattern->isFullyInitializedFromTheme_);
+    imagePattern->OnDpiConfigurationUpdate();
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+}
+
+/**
+ * @tc.name: OnDpiConfigurationUpdate002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnDpiConfigurationUpdate002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->loadingCtx_, nullptr);
+
+    imagePattern->isFullyInitializedFromTheme_ = true;
+    EXPECT_TRUE(imagePattern->isFullyInitializedFromTheme_);
+    imagePattern->OnDpiConfigurationUpdate();
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnColorConfigurationUpdate001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isFullyInitializedFromTheme_ = true;
+    EXPECT_TRUE(imagePattern->isFullyInitializedFromTheme_);
+
+    imagePattern->OnColorConfigurationUpdate();
+    EXPECT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+}
+
+/**
+ * @tc.name: GetImageRepeatStr001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, GetImageRepeatStr001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageRepeat value = static_cast<ImageRepeat>(100);
+    std::string result = imagePattern->GetImageRepeatStr(value);
+    EXPECT_EQ(result, "NO_REPEAT");
+
+    value = ImageRepeat::NO_REPEAT;
+    result = imagePattern->GetImageRepeatStr(value);
+    EXPECT_EQ(result, "NO_REPEAT");
+
+    value = ImageRepeat::REPEAT;
+    result = imagePattern->GetImageRepeatStr(value);
+    EXPECT_EQ(result, "REPEAT_XY");
+
+    value = ImageRepeat::REPEAT_X;
+    result = imagePattern->GetImageRepeatStr(value);
+    EXPECT_EQ(result, "REPEAT_X");
+
+    value = ImageRepeat::REPEAT_Y;
+    result = imagePattern->GetImageRepeatStr(value);
+    EXPECT_EQ(result, "REPEAT_Y");
+}
+
+/**
+ * @tc.name: UpdateAnalyzerOverlay001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateAnalyzerOverlay001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->imageAnalyzerManager_ = nullptr;
+    imagePattern->UpdateAnalyzerOverlay();
+    EXPECT_EQ(imagePattern->imageAnalyzerManager_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateAnalyzerOverlay002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateAnalyzerOverlay002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern->imageAnalyzerManager_, nullptr);
+    imagePattern->isEnableAnalyzer_ = false;
+    imagePattern->UpdateAnalyzerOverlay();
+    EXPECT_FALSE(imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: UpdateAnalyzerOverlay003
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateAnalyzerOverlay003, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern->imageAnalyzerManager_, nullptr);
+    imagePattern->image_ = nullptr;
+    imagePattern->UpdateAnalyzerOverlay();
+    EXPECT_FALSE(imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: UpdateAnalyzerOverlay004
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateAnalyzerOverlay004, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->EnableAnalyzer(true);
+    ASSERT_NE(imagePattern->imageAnalyzerManager_, nullptr);
+    imagePattern->loadingCtx_ = nullptr;
+    imagePattern->UpdateAnalyzerOverlay();
+    EXPECT_FALSE(imagePattern->IsSupportImageAnalyzerFeature());
+}
+
+/**
+ * @tc.name: AddPixelMapToUiManager001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, AddPixelMapToUiManager001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = nullptr;
+    imagePattern->AddPixelMapToUiManager();
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: AddPixelMapToUiManager002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, AddPixelMapToUiManager002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ASSERT_NE(imagePattern->image_, nullptr);
+    imagePattern->AddPixelMapToUiManager();
+    EXPECT_NE(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ResetAltImageError001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ResetAltImageError001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->altErrorImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+
+    ASSERT_NE(imagePattern->altErrorImage_, nullptr);
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+    imagePattern->ResetAltImageError();
+    EXPECT_EQ(imagePattern->altErrorImage_, nullptr);
+    EXPECT_EQ(imagePattern->altErrorCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ResetAltImageError002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ResetAltImageError002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = nullptr;
+    imagePattern->altErrorImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+
+    imagePattern->ResetAltImageError();
+    EXPECT_EQ(imagePattern->altErrorImage_, nullptr);
+    EXPECT_EQ(imagePattern->altErrorCtx_, nullptr);
+    EXPECT_EQ(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ResetAltImageError003
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ResetAltImageError003, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altErrorImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+
+    ASSERT_NE(imagePattern->image_, nullptr);
+    ASSERT_NE(imagePattern->altErrorImage_, nullptr);
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+    imagePattern->ResetAltImageError();
+    EXPECT_EQ(imagePattern->altErrorImage_, nullptr);
+    EXPECT_EQ(imagePattern->altErrorCtx_, nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+}
+
+/**
+ * @tc.name: ResetAltImageError004
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ResetAltImageError004, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    imagePattern->altErrorImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+
+    ASSERT_NE(imagePattern->loadingCtx_, nullptr);
+    ASSERT_NE(imagePattern->altErrorImage_, nullptr);
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+    imagePattern->ResetAltImageError();
+    EXPECT_EQ(imagePattern->altErrorImage_, nullptr);
+    EXPECT_EQ(imagePattern->altErrorCtx_, nullptr);
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
 } // namespace OHOS::Ace::NG
