@@ -98,7 +98,7 @@ class ModifierUtils {
     modifier._changed;
     let myMap = modifier._modifiersWithKeys;
     if (modifier._classType === ModifierType.STATE) {
-      const nativePtrValid = !modifier._weakPtr.invalid();
+      const nativePtrValid = modifier._weakPtr && (!modifier._weakPtr.invalid());
       const hostInstanceId = nativePtrValid ? getUINativeModule().frameNode.getNodeInstanceId(modifier.nativePtr) : -1;
       myMap.setOnChange((key, value) => {
         this.putDirtyModifier(modifier, value, hostInstanceId);
@@ -111,7 +111,7 @@ class ModifierUtils {
   }
   static putDirtyModifier(arkModifier, attributeModifierWithKey, hostInstanceId) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
-    if (!arkModifier._weakPtr.invalid()) {
+    if (arkModifier._weakPtr && (!arkModifier._weakPtr.invalid())) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
@@ -133,7 +133,7 @@ class ModifierUtils {
         clearTimeout(this.timeoutId);
       }
       this.dirtyComponentSet.forEach((item) => {
-        const nativePtrValid = !item._weakPtr.invalid();
+        const nativePtrValid = item._weakPtr && (!item._weakPtr.invalid());
         if (item._nativePtrChanged && nativePtrValid) {
           item._modifiersWithKeys.forEach((value, key) => {
             value.applyPeer(item.nativePtr,
