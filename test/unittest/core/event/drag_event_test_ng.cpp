@@ -2007,6 +2007,23 @@ HWTEST_F(DragEventTestNg, DragEventTextPixelMapNullTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetDragNodeNeedClean
+ * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    overlayManager->SetDragNodeNeedClean();
+    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
+}
+
+/**
  * @tc.name: DragEventSetDragDampStartPointInfoTest001
  * @tc.desc: Test SetDragDampStartPointInfo resets drag positions and sets correct start point and pointer ID.
  * @tc.type: FUNC
@@ -2050,23 +2067,6 @@ HWTEST_F(DragEventTestNg, DragEventSetDragDampStartPointInfoTest001, TestSize.Le
     EXPECT_EQ(dragDropManager->dragDampStartPoint_.GetX(), testPoint.GetX());
     EXPECT_EQ(dragDropManager->dragDampStartPoint_.GetY(), testPoint.GetY());
     EXPECT_EQ(dragDropManager->currentPointerId_, testPointerId);
-}
-
-/**
- * @tc.name: SetDragNodeNeedClean
- * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->overlayManager_;
-    ASSERT_NE(overlayManager, nullptr);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    ASSERT_NE(dragDropManager, nullptr);
-    overlayManager->SetDragNodeNeedClean();
-    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
 }
 
 /**
