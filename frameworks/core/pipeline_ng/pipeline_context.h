@@ -1156,9 +1156,8 @@ public:
     bool IsTagInOverlay(const std::string& tag) const;
 
     void GetComponentOverlayInspector(
-        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const override;
-
-    void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const override;
+        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+        ParamConfig config, bool isInSubWindow) const;
 
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
 
@@ -1452,8 +1451,18 @@ private:
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
-    void DumpSimplifyTreeJsonFromTopNavNode(std::shared_ptr<JsonValue>& root,
-        std::list<RefPtr<NG::FrameNode>> navNodeList, const ParamConfig& config) const;
+    void DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode, std::shared_ptr<JsonValue>& root,
+        std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const;
+
+    bool ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
+        std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
+        bool isInSubWindow, ParamConfig config) const;
+
+    void GetOverlayInspector(
+        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+
+    void DumpSimplifyTreeJsonEntrance(
+        std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
