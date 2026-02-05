@@ -635,10 +635,15 @@ void UIExtensionManager::RegisterListenerIfNeeded()
 
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(avoidInfoMgr);
     auto containerModalListener =
-        [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
+        [weakMgr = WeakClaim(this), weakAvoidMgr = WeakClaim(RawPtr(avoidInfoMgr))](const RectF&, const RectF&) {
             auto mgr = weakMgr.Upgrade();
             CHECK_NULL_VOID(mgr);
+            auto avoidMgr = weakAvoidMgr.Upgrade();
+            CHECK_NULL_VOID(avoidMgr);
+            avoidMgr->SetIsUpdateButtonRect(true);
             mgr->NotifyUECProviderIfNeedded();
         };
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtensionManager register listener");
@@ -686,6 +691,10 @@ void UIExtensionManager::NotifyUECProviderIfNeedded()
     for (const auto& it : aliveUIExtensions_) {
         auto uecPattern = it.second.Upgrade();
         CHECK_NULL_CONTINUE(uecPattern);
+        if (!uecPattern->IsUpdateDisplayArea() && !avoidInfoMgr->IsUpdateButtonRect()) {
+            continue;
+        }
+        uecPattern->SetIsUpdateDisplayArea(false);
         const auto& preAvoidInfo = uecPattern->GetAvoidInfo();
         auto uecNode = AceType::DynamicCast<FrameNode>(uecPattern->GetHost());
         CHECK_NULL_CONTINUE(uecNode);
@@ -702,5 +711,42 @@ void UIExtensionManager::NotifyUECProviderIfNeedded()
                 std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
         }
     }
+    avoidInfoMgr->SetIsUpdateButtonRect(false);
+}
+
+void UIExtensionManager::NotifyNestedUECProvidersIfNeeded()
+{
+    if (aliveUIExtensions_.empty()) {
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(avoidInfoMgr);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uecPattern = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uecPattern);
+        if (!uecPattern->IsUpdateDisplayArea() && !avoidInfoMgr->IsUpdateButtonRect()) {
+            continue;
+        }
+        uecPattern->SetIsUpdateDisplayArea(false);
+        const auto& preAvoidInfo = uecPattern->GetAvoidInfo();
+        auto uecNode = AceType::DynamicCast<FrameNode>(uecPattern->GetHost());
+        CHECK_NULL_CONTINUE(uecNode);
+        ContainerModalAvoidInfo newAvoidInfo;
+        avoidInfoMgr->GetNewAvoidInfoForUEC(uecNode, newAvoidInfo);
+        bool needNotify = AvoidInfoManager::CheckIfNeedNotifyAvoidInfoChange(preAvoidInfo, newAvoidInfo);
+        uecPattern->SetAvoidInfo(newAvoidInfo);
+        if (needNotify) {
+            AAFwk::Want avoidInfoWant;
+            avoidInfoMgr->BuildAvoidInfo(newAvoidInfo, avoidInfoWant);
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UECManager send AvoidInfo: %{public}s",
+                newAvoidInfo.ToString().c_str());
+            uecPattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
+                std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
+        }
+    }
+    avoidInfoMgr->SetIsUpdateButtonRect(false);
 }
 } // namespace OHOS::Ace::NG

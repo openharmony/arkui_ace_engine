@@ -189,6 +189,7 @@ public:
         pipeline_ = pipeline;
     }
     void NotifyUECProviderIfNeedded();
+    void NotifyNestedUECProvidersIfNeeded();
 
 private:
     void RegisterListenerIfNeeded();

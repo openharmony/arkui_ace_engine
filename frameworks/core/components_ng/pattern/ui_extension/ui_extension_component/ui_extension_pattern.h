@@ -107,6 +107,7 @@ struct DelayTaskRecord {
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
+class UIExtensionAvoidListener;
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
@@ -310,6 +311,15 @@ public:
 
     void UpdateSessionViewportConfigFromContext();
 
+    bool IsUpdateDisplayArea() const
+    {
+        return isUpdateDisplayArea_;
+    }
+    void SetIsUpdateDisplayArea(bool isUpdate)
+    {
+        isUpdateDisplayArea_ = isUpdate;
+    }
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -411,6 +421,8 @@ private:
     void RegisterEventProxyFlagCallback();
 
     void RegisterGetAvoidInfoCallback();
+    void RegisterAvoidInfoChangeListener(int32_t instanceId);
+    void UnRegisterAvoidInfoChangeListener();
 
     void SendPageModeToProvider();
     void RegisterReceivePageModeRequestCallback();
@@ -498,6 +510,8 @@ private:
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;
+    RefPtr<UIExtensionAvoidListener> avoidListener_;
+    bool isUpdateDisplayArea_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
