@@ -2,6 +2,34 @@
 
 此目录用于存放 ArkUI ACE Engine 开发过程中的各种知识库文档。
 
+## 📌 知识库检索索引
+
+**元数据索引文件**: [`knowledge_base_INDEX.json`](./knowledge_base_INDEX.json)
+
+此文件包含所有知识库的结构化元数据，便于 Claude 快速检索：
+
+- **组件关键词** - 通过功能关键词快速定位相关组件
+- **别名映射** - 通过别名/同义词查找组件
+- **分类索引** - 按组件类型（基础/容器/选择器等）分类浏览
+- **路径映射** - 快速定位源码和 SDK API 文件路径
+
+**使用示例**：
+
+- 用户询问"下拉刷新" → 搜索关键词 → 定位到 `Refresh_Knowledge_Base.md`
+- 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
+- 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
+
+**统计数据**（截至 2026-02-04）：
+
+- 总知识库文档: 23 个
+- 组件知识库: 21 个
+- SDK API 知识库: 1 个
+- CJ Frontend 知识库: 1 个
+- 覆盖组件: 21 个
+- 检索关键词: 200+ 个
+
+---
+
 ## 目录结构
 
 ```
@@ -9,25 +37,51 @@ knowledge_base/
 ├── README.md              # 本文件，知识库索引和说明
 ├── cj_frontend/           # CJ Frontend 桥接层知识库
 │   └── CJ_Frontend_Guide.md                   # 综合指南
+├── sdk/                   # SDK 相关知识库
+│   └── ArkUI_SDK_API_Knowledge_Base.md  # ArkUI SDK API 完整分析
 └── pattern/               # 组件模式知识库
+    ├── badge/
+    │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
+    ├── calendar_picker/
+    │   └── Calendar_Picker_Knowledge_Base.md  # CalendarPicker 组件知识库
+    ├── container_picker/
+    │   └── Container_Picker_Knowledge_Base.md # ContainerPicker 组件知识库
     ├── counter/
-    │   └── Counter_Knowledge_Base.md   # Counter 组件知识库
+    │   └── Counter_Knowledge_Base.md        # Counter 组件知识库
     ├── gauge/
-    │   └── Gauge_Knowledge_Base.md      # Gauge 组件知识库
+    │   └── Gauge_Knowledge_Base.md           # Gauge 组件知识库
+    ├── image/
+    │   └── Image_Knowledge_Base.md           # Image 组件知识库
+    ├── image_animator/
+    │   └── Image_Animator_Knowledge_Base.md  # ImageAnimator 组件知识库
     ├── marquee/
-    │   └── Marquee_Knowledge_Base.md    # Marquee 组件知识库
+    │   └── Marquee_Knowledge_Base.md         # Marquee 组件知识库
     ├── menu/
-    │   └── Menu_Knowledge_Base.md       # Menu 组件知识库
+    │   └── Menu_Knowledge_Base.md            # Menu 组件知识库
+    ├── picker/
+    │   └── Date_Picker_Knowledge_Base.md     # DatePicker 组件知识库
     ├── refresh/
-    │   └── Refresh_Knowledge_Base.md    # Refresh 组件知识库
+    │   └── Refresh_Knowledge_Base.md         # Refresh 组件知识库
     ├── scroll/
-    │   └── Scroll_Knowledge_Base.md     # Scroll 组件知识库
+    │   └── Scroll_Knowledge_Base.md          # Scroll 组件知识库
+    ├── search/
+    │   └── Search_Knowledge_Base_CN.md       # Search 组件知识库
     ├── lazy_layout/
-    │   └── LazyGrid_Knowledge_Base.md   # LazyGrid 组件知识库
+    │   └── LazyGrid_Knowledge_Base.md       # LazyGrid 组件知识库
+    ├── text/
+    │   └── Text_Knowledge_Base_CN.md          # Text 组件知识库
+    ├── text_clock/
+    │   └── TextClock_Knowledge_Base_CN.md     # TextClock 组件知识库
+    ├── text_picker/
+    │   └── Text_Picker_Knowledge_Base.md      # TextPicker 组件知识库
+    ├── texttimer/
+    │   └── TextTimer_Knowledge_Base_CN.md      # TextTimer 组件知识库
+    ├── time_picker/
+    │   └── Time_Picker_Knowledge_Base.md      # TimePicker 组件知识库
     └── waterflow/
-        └── WaterFlow_Knowledge_Base.md  # WaterFlow 组件知识库
+        └── WaterFlow_Knowledge_Base.md       # WaterFlow 组件知识库
     └── qrcode/
-        └── QRCode_Knowledge_Base.md  # QRCode 组件知识库
+        └── QRCode_Knowledge_Base.md          # QRCode 组件知识库
 ```
 
 ## 现有文档
@@ -213,6 +267,52 @@ knowledge_base/
 - 测试覆盖和常见问题
 
 **适用场景**：QRCode 组件开发、测试、问题排查时参考
+
+---
+
+### ArkUI SDK API Knowledge Base
+
+**位置**: `sdk/ArkUI_SDK_API_Knowledge_Base.md`
+
+**完整指南** - OpenHarmony ArkUI SDK API 对外接口的完整分析文档
+
+**包含内容**：
+
+- **目录结构概览**: 298 个 API 定义文件的完整分类
+- **核心 Node API**: FrameNode、BuilderNode、RenderNode 的详细说明和实现位置
+- **图形类型系统**: Graphics.d.ts 中的所有绘图类型（Size、Position、Matrix4 等）
+- **组件 API 分类**: 96 个组件按功能分类（基础、容器、选择器、形状、媒体等）
+- **Static vs Dynamic API**: 声明式 vs 命令式 API 的对比和使用场景
+- **状态管理**: @State、@Prop、@Link 等装饰器和存储系统详解
+- **与 ace_engine 的对应关系**: SDK API 到实现层的完整映射（含文件路径对照表）
+- **组件知识库索引**: 20 个组件的知识库快速跳转链接
+
+**统计数据**：
+- 总 API 定义文件: 298 个
+- Modifier 类: 76 个
+- Component 接口: 129 个
+- 基础组件: 15 个（3 个有知识库）
+- 容器组件: 27 个（4 个有知识库）
+- 选择器组件: 9 个（6 个有知识库）
+- 形状组件: 7 个
+- 媒体组件: 4 个（2 个有知识库）
+- 数据展示组件: 7 个（4 个有知识库）
+- 富文本组件: 4 个
+- 高级组件: 19+ 个（2 个有知识库）
+
+**适用场景**：
+- 理解 ArkUI SDK 的对外 API 结构和分类体系
+- 查找组件对应的 ace_engine 实现位置和源码
+- 学习 Static API 和 Dynamic API 的使用方法和区别
+- 掌握 SDK API 到实现层的完整映射关系
+- 快速跳转到组件知识库进行深入学习
+- ace_engine 开发者理解 SDK API 设计和组件开发指导
+
+**相关资源**：
+- SDK API 目录: `OpenHarmony/interface/sdk-js/api/arkui/`
+- ace_engine 实现层: `OpenHarmony/foundation/arkui/ace_engine/`
+
+---
 
 ## 文档分类
 
