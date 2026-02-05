@@ -19,14 +19,14 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-04）：
+**统计数据**（截至 2026-02-05）：
 
-- 总知识库文档: 23 个
-- 组件知识库: 21 个
+- 总知识库文档: 24 个
+- 组件知识库: 22 个
 - SDK API 知识库: 1 个
 - CJ Frontend 知识库: 1 个
-- 覆盖组件: 21 个
-- 检索关键词: 200+ 个
+- 覆盖组件: 22 个
+- 检索关键词: 220+ 个
 
 ---
 
@@ -62,6 +62,8 @@ knowledge_base/
     │   └── Date_Picker_Knowledge_Base.md     # DatePicker 组件知识库
     ├── refresh/
     │   └── Refresh_Knowledge_Base.md         # Refresh 组件知识库
+    ├── sheet/
+    │   └── Sheet_Knowledge_Base_CN.md        # Sheet 组件知识库
     ├── scroll/
     │   └── Scroll_Knowledge_Base.md          # Scroll 组件知识库
     ├── search/
@@ -154,6 +156,26 @@ knowledge_base/
 - 6 个实用使用示例和调试指南
 
 **适用场景**：Refresh 组件开发、下拉刷新功能实现、嵌套滚动问题排查时参考
+
+### Sheet Component Knowledge Base
+
+**位置**: `pattern/sheet/Sheet_Knowledge_Base_CN.md`
+
+**完整指南** - Sheet 半模态组件的开发、测试和调试参考文档
+
+**包含内容**：
+
+- 9 种半模态类型（底部、居中、侧边、气泡、内容覆盖等）
+- 状态模式 + 桥接模式架构设计
+- 自动类型选择（根据屏幕尺寸和方向）
+- 拖拽交互和弹簧动画
+- 多档位高度（Detents）支持
+- 嵌套滚动协调机制
+- 键盘避让策略（5 种模式）
+- 完整的生命周期回调
+- 6 个实用使用示例和调试指南
+
+**适用场景**：Sheet 组件开发、半模态面板实现、表单输入场景、键盘避让问题排查时参考
 
 ### Counter Component Knowledge Base
 
@@ -285,7 +307,7 @@ knowledge_base/
 - **Static vs Dynamic API**: 声明式 vs 命令式 API 的对比和使用场景
 - **状态管理**: @State、@Prop、@Link 等装饰器和存储系统详解
 - **与 ace_engine 的对应关系**: SDK API 到实现层的完整映射（含文件路径对照表）
-- **组件知识库索引**: 20 个组件的知识库快速跳转链接
+- **组件知识库索引**: 22 个组件的知识库快速跳转链接
 
 **统计数据**：
 - 总 API 定义文件: 298 个
@@ -298,7 +320,7 @@ knowledge_base/
 - 媒体组件: 4 个（2 个有知识库）
 - 数据展示组件: 7 个（4 个有知识库）
 - 富文本组件: 4 个
-- 高级组件: 19+ 个（2 个有知识库）
+- 高级组件: 19+ 个（3 个有知识库）
 
 **适用场景**：
 - 理解 ArkUI SDK 的对外 API 结构和分类体系
