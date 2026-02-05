@@ -1225,9 +1225,15 @@ void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow v
 
 TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
 {
-    TextOverflow value = TextOverflow::DEFAULT;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextOverflow, value, frameNode, value);
-    return value;
+    TextOverflow defaultValue = TextOverflow::NONE;
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, defaultValue);
+    auto isTextArea = pattern->IsTextArea();
+    defaultValue = isTextArea ? TextOverflow::CLIP : TextOverflow::NONE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, TextOverflow, defaultValue, frameNode, defaultValue);
+    return defaultValue;
 }
 
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)

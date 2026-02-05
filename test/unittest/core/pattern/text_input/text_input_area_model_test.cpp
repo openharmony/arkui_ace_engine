@@ -2236,6 +2236,38 @@ HWTEST_F(TextInputAreaTest, GetTextOverflow002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTextOverflow003
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow003, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::NONE);
+}
+
+/**
+ * @tc.name: GetTextOverflow004
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow004, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::CLIP);
+}
+
+/**
  * @tc.name: GetEllipsisMode001
  * @tc.desc: Test GetEllipsisMode by frameNode..
  * @tc.type: FUNC

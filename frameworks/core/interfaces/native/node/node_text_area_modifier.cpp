@@ -1336,7 +1336,7 @@ void ResetTextAreaTextOverflow(ArkUINodeHandle node)
 
 int32_t GetTextAreaTextOverflow(ArkUINodeHandle node)
 {
-    int defaultTextOverflow = static_cast<int32_t>(TextOverflow::DEFAULT);
+    int32_t defaultTextOverflow = static_cast<int32_t>(TextOverflow::CLIP);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, defaultTextOverflow);
     return static_cast<int32_t>(TextFieldModelNG::GetTextOverflow(frameNode));
