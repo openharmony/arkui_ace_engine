@@ -568,6 +568,7 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
 bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
 {
     auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
     if (!isOverride && !isLastChild) {
         navigationPattern->RemoveNavDestination();
         return true;
@@ -577,7 +578,7 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 
     auto mode = navigationPattern->GetNavigationMode();
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    if (isLastChild && (mode == NavigationMode::SPLIT ||
+    if (isLastChild && !navigationPattern->IsForceSplitSuccess() && (mode == NavigationMode::SPLIT ||
                            (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false)))) {
         return false;
     }
