@@ -4302,8 +4302,8 @@ void GetBorderRadiusByLengthMetrics(
     }
 }
 
-void GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object, CalcDimension& radius,
-    RefPtr<ResourceObject>& resObj)
+void ArkTSUtils::GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object,
+    CalcDimension& radius, RefPtr<ResourceObject>& resObj)
 {
     auto property = object->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
     ArkTSUtils::ParseJsDimensionVp(vm, property, radius, resObj);
@@ -4446,9 +4446,9 @@ void RegisterRadiusesResObj(
     borderRadius.AddResource(key, resObj, std::move(updateFunc));
 }
 
-void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
-    const RefPtr<ResourceObject>& topRightResObj, const RefPtr<ResourceObject>& bottomLeftResObj,
-    const RefPtr<ResourceObject>& bottomRightResObj)
+void ArkTSUtils::ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
+    const RefPtr<ResourceObject>& topLeftResObj, const RefPtr<ResourceObject>& topRightResObj,
+    const RefPtr<ResourceObject>& bottomLeftResObj, const RefPtr<ResourceObject>& bottomRightResObj)
 {
     if (!SystemProperties::ConfigChangePerform()) {
         return;

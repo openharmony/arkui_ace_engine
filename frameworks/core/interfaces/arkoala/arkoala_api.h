@@ -7898,6 +7898,13 @@ struct ArkUIDataPanelModifier {
         const struct ArkUIDatePanelTrackShadow* trackShadow, const struct ArkUIShadowOptionsResource* shadowRes);
     void (*setNullTrackShadow)(ArkUINodeHandle node);
     void (*resetTrackShadow)(ArkUINodeHandle node);
+    void (*setValueColorsNew)(ArkUINodeHandle node, void* colorRawPtr, ArkUI_Int32 length, ArkUI_Bool isSetByUser);
+    void (*setTrackShadowNew)(ArkUINodeHandle node, ArkUI_Int32 length,
+        const struct ArkUIDatePanelTrackShadow* trackShadow, const struct ArkUIShadowOptionsResource* shadowRes);
+    void (*setDataPanelTrackBackgroundColorNew)(
+        ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr, ArkUI_Bool isSetByUser);
+    void (*setDataPanelStrokeWidthNew)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* strokeWidthResObj, ArkUI_Bool isSetByUser);
     ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
