@@ -39,6 +39,10 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 } // namespace
 
 DeviceType SystemProperties::deviceType_ = DeviceType::PHONE;
+std::string SystemProperties::paramDeviceType_ = "phone";
+std::string SystemProperties::apiVersion_;
+std::string SystemProperties::brand_;
+bool SystemProperties::isRound_;
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
