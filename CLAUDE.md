@@ -2,6 +2,48 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Reference
+
+### Build Commands
+
+```bash
+# Full build (from OpenHarmony root)
+./build.sh --product-name rk3568 --build-target ace_engine
+
+# Incremental build (after code changes)
+./build.sh --product-name rk3568 --build-target ace_engine
+
+# Build SDK
+./build.sh --product-name ohos-sdk --build-target ace_engine
+
+# Build specific component (using gn target)
+./build.sh --product-name rk3568 --build-target //arkui/ace_engine/frameworks/core/components_ng/pattern/text:text_pattern
+```
+
+### Test Commands
+
+```bash
+# Build unit tests
+./build.sh --product-name rk3568 --build-target unittest
+
+# Build benchmarks
+./build.sh --product-name rk3568 --build-target benchmark_linux
+
+# Run specific test executable
+./out/rk3568/tests/ace_engine/unittest/components_ng/text/text_pattern_test
+
+# Example: Run specific component test
+./out/rk3568/tests/ace_engine/unittest/components_ng/button/button_pattern_test
+```
+
+### Build Output Locations
+
+- **Engine Libraries**: `out/rk3568/arkui/ace_engine/`
+- **Tests**: `out/rk3568/tests/ace_engine/`
+- **Build Logs**: `out/rk3568/build.log` (full build), `out/rk3568/arkui/ace_engine/build.log` (component build)
+
+---
+
 ## Knowledge Base
 
 This project maintains a comprehensive knowledge base system for in-depth component analysis and development guidance.
@@ -492,7 +534,7 @@ ACE Engine provides flexible frontend support:
 | Frontend | Language | Use Case |
 |----------|----------|----------|
 | **Declarative Frontend** | ArkTS/TypeScript | Recommended - Modern declarative UI |
-| **ArkTS Frontend** | ArkTS staic verison | Incremental engine based frontend |
+| **ArkTS Frontend** | ArkTS static version | Incremental engine based frontend |
 | **JavaScript Frontend** | JavaScript | Legacy web-style development |
 
 ### State Management Framework
@@ -578,14 +620,26 @@ Bytecode files compiled from ArkTS source code, dynamically loaded at runtime:
 # Build benchmarks
 ./build.sh --product-name rk3568 --build-target benchmark_linux
 
-# Run specific test target (from build output directory)
-# Tests are located in out/rk3568/tests/ace_engine/
+# Run specific test executable
+./out/rk3568/tests/ace_engine/unittest/components_ng/text/text_pattern_test
+
+# Run withgtest_filter for specific test cases
+./out/rk3568/tests/ace_engine/unittest/components_ng/text/text_pattern_test --gtest_filter=TextPatternTest.OnModifyDone
+
+# Run performance benchmarks
+./out/rk3568/tests/ace_engine/benchmark/text/text_benchmark --benchmark_filter=TextRender
 ```
 
-Test locations:
+**Test locations**:
 - Unit tests: `test/unittest/`
 - Benchmarks: `test/benchmark/`
 - Component tests: `examples/*/test/`
+
+**Common test patterns**:
+- Pattern tests: `[component]_pattern_test.cpp`
+- Layout algorithm tests: `[component]_layout_algorithm_test.cpp`
+- Property tests: `[component]_property_test.cpp`
+- Render tests: `[component]_render_test.cpp`
 
 ## Architecture
 
