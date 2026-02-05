@@ -8175,4 +8175,20 @@ void FrameNode::ReportSelectedText(bool isRegister)
     CHECK_NULL_VOID(pattern);
     pattern->ReportSelectedText(isRegister);
 }
+
+void FrameNode::ReplacePattern(const RefPtr<Pattern>& newPattern)
+{
+    CHECK_NULL_VOID(newPattern);
+    pattern_ = newPattern;
+    layoutProperty_ = pattern_->CreateLayoutProperty();
+    if (layoutProperty_) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        layoutProperty_->SetHost(WeakClaim(this));
+    }
+    paintProperty_ = pattern_->CreatePaintProperty();
+    if (paintProperty_) {
+        paintProperty_->SetHost(WeakClaim(this));
+    }
+    InitializePatternAndContext();
+}
 } // namespace OHOS::Ace::NG

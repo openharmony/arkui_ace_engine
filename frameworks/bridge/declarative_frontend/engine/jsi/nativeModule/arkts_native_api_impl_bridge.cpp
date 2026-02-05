@@ -479,6 +479,7 @@ using RegisterModuleFunc = void (*)(Local<panda::ObjectRef>, EcmaVM*);
 ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     static const std::unordered_set<std::string> loadModuleName = {
+        {"DynamicLayout"},
         {"Counter"},
         {"Gauge" },
         {"PatternLock"},
