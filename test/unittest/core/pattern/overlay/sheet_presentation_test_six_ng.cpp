@@ -1418,18 +1418,38 @@ HWTEST_F(SheetPresentationTestSixNg, GetAnimationPropertyCallForOverlay007, Test
  * @tc.desc: Branch: if (!isValidTarget && NearEqual(targetId, overlayRootNode->GetId()))
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestSixNg, DISABLED_SetSheetKey001, TestSize.Level1)
+HWTEST_F(SheetPresentationTestSixNg, SetSheetKey001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
     SheetPresentationTestSixNg::SetUpTestCase();
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
     SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set style.isTitleBuilder = true、 sheetTitle and sheetSubtitle.
+     * @tc.expected: create titleColumn and titleColumn.GetChildren().size() equal 3.
+     */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetSheetStyle()->isTitleBuilder);
+    auto operationColumn = sheetPattern->GetTitleBuilderNode();
+    ASSERT_NE(operationColumn, nullptr);
+    EXPECT_EQ(operationColumn->GetChildren().size(), 1);
+    auto titleColumn = operationColumn->GetLastChild();
+    ASSERT_NE(titleColumn, nullptr);
+    EXPECT_EQ(titleColumn->GetChildren().size(), 3);
+
     auto overlayManager = sheetPattern->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     auto overlayRootNode = overlayManager->GetRootNode().Upgrade();
