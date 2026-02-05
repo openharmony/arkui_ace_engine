@@ -687,22 +687,6 @@ HWTEST_F(MediaQueryerTest, MediaQueryerMatchConditionTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: MediaQueryerMatchConditionTest026
- * @tc.desc: Test MediaQueryer MatchCondition with device-brand
- * @tc.type: FUNC
- */
-HWTEST_F(MediaQueryerTest, MediaQueryerMatchConditionTest026, TestSize.Level1)
-{
-    Framework::MediaQueryer queryer;
-    auto json = JsonUtil::Create(true);
-    json->Put("width", 100);
-    json->Put("height", 200);
-    json->Put("device-brand", "HUAWEI");
-    EXPECT_TRUE(queryer.MatchCondition("(device-brand:HUAWEI)", json));
-    EXPECT_FALSE(queryer.MatchCondition("(device-brand:OTHER)", json));
-}
-
-/**
  * @tc.name: MediaQueryerMatchConditionTest027
  * @tc.desc: Test MediaQueryer MatchCondition with CSS Level 4 left syntax
  * @tc.type: FUNC
@@ -1052,11 +1036,11 @@ HWTEST_F(MediaQueryerTest, MediaQueryerMatchConditionTest054, TestSize.Level1)
 }
 
 /**
-* @tc.name: MediaQueryerMatchConditionTest056
+* @tc.name: MediaQueryerMatchConditionTest026
 * @tc.desc: Test MediaQueryer MatchCondition all and conditions true
 * @tc.type: FUNC
 */
-HWTEST_F(MediaQueryerTest, MediaQueryerMatchConditionTest056, TestSize.Level1)
+HWTEST_F(MediaQueryerTest, MediaQueryerMatchConditionTest026, TestSize.Level1)
 {
     Framework::MediaQueryer queryer;
     auto json = JsonUtil::Create(true);
