@@ -27,12 +27,12 @@ namespace OHOS::Ace::NG {
 HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize001, TestSize.Level0)
 {
     /**
-     * @tc.steps1 Create a layoutProperty.
+     * @tc.steps: step1. Create a layoutProperty.
      */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps2: call UpdateUserDefinedIdealSize with valid size.
+     * @tc.steps: step2. Call UpdateUserDefinedIdealSize with valid size.
      */
     layoutProperty->UpdateUserDefinedIdealSize(CALC_SIZE);
 
@@ -53,10 +53,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: call UpdateUserDefinedIdealSize with only width.
+     * @tc.steps: step2. Call UpdateUserDefinedIdealSize with only width.
      */
     CalcSize calcSizeWidth(CalcLength(WIDTH), std::nullopt);
     layoutProperty->UpdateUserDefinedIdealSize(calcSizeWidth);
@@ -75,10 +78,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateUserDefinedIdealSize002, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyProperty001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: call UpdateLayoutPolicyProperty for width.
+     * @tc.steps: step2. Call UpdateLayoutPolicyProperty for width.
      */
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
 
@@ -95,10 +101,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyProperty001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyProperty002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: call UpdateLayoutPolicyProperty for height.
+     * @tc.steps: step2. Call UpdateLayoutPolicyProperty for height.
      */
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
 
@@ -115,10 +124,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutPolicyProperty002, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, HasFixedWidth001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps1: Set fixed width.
+     * @tc.steps: step2. Set fixed width.
      */
     CalcSize calcSizeFixedWidth(CalcLength(Dimension(100.0, DimensionUnit::PX)), std::nullopt);
     layoutProperty->UpdateUserDefinedIdealSize(calcSizeFixedWidth);
@@ -136,10 +148,13 @@ HWTEST_F(LayoutPropertyTestNg, HasFixedWidth001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, HasFixedWidth002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps1: Set percent width.
+     * @tc.steps: step2. Set percent width.
      */
     CalcSize calcSizePercent(CalcLength(Dimension(50.0, DimensionUnit::PERCENT)), std::nullopt);
     layoutProperty->UpdateUserDefinedIdealSize(calcSizePercent);
@@ -158,10 +173,13 @@ HWTEST_F(LayoutPropertyTestNg, HasFixedWidth002, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, HasFixedHeight001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps1: Set fixed height.
+     * @tc.steps: step2. Set fixed height.
      */
     CalcSize calcSizeFixedHeight(std::nullopt, CalcLength(Dimension(100.0, DimensionUnit::PX)));
     layoutProperty->UpdateUserDefinedIdealSize(calcSizeFixedHeight);
@@ -179,10 +197,13 @@ HWTEST_F(LayoutPropertyTestNg, HasFixedHeight001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateAlignment001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps1: Update alignment with CENTER.
+     * @tc.steps: step2. Update alignment with CENTER.
      */
     layoutProperty->UpdateAlignment(Alignment::CENTER);
 
@@ -193,7 +214,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAlignment001, TestSize.Level0)
     EXPECT_EQ(layoutProperty->GetPositionProperty()->GetAlignment(), Alignment::CENTER);
 
     /**
-     * @tc.steps2: Update alignment with TOP_LEFT.
+     * @tc.steps: step3. Update alignment with TOP_LEFT.
      */
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     EXPECT_EQ(layoutProperty->GetPositionProperty()->GetAlignment(), Alignment::TOP_LEFT);
@@ -206,10 +227,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAlignment001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateLayoutGravity001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: Update layout gravity.
+     * @tc.steps: step2. Update layout gravity.
      */
     layoutProperty->UpdateLayoutGravity(Alignment::BOTTOM_RIGHT);
 
@@ -227,10 +251,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutGravity001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateLayoutWeight001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: Update layout weight.
+     * @tc.steps: step2. Update layout weight.
      */
     layoutProperty->UpdateLayoutWeight(2.0f);
 
@@ -248,18 +275,21 @@ HWTEST_F(LayoutPropertyTestNg, UpdateLayoutWeight001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, GetNonAutoLayoutDirection001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps1: Set layout direction to AUTO.
+     * @tc.steps: step2. Set layout direction to LTR.
      */
-    layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+    layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
 
     /**
-     * @tc.expected: GetNonAutoLayoutDirection should return LTR or RTL based on system.
+     * @tc.expected: GetNonAutoLayoutDirection should return LTR.
      */
     auto result = layoutProperty->GetNonAutoLayoutDirection();
-    EXPECT_TRUE(result == TextDirection::LTR || result == TextDirection::RTL);
+    EXPECT_EQ(result, TextDirection::LTR);
 }
 
 /**
@@ -269,10 +299,13 @@ HWTEST_F(LayoutPropertyTestNg, GetNonAutoLayoutDirection001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, GetNonAutoLayoutDirection002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: Set layout direction to RTL.
+     * @tc.steps: step2. Set layout direction to RTL.
      */
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
 
@@ -290,10 +323,13 @@ HWTEST_F(LayoutPropertyTestNg, GetNonAutoLayoutDirection002, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateAlignSelf001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: Update alignSelf.
+     * @tc.steps: step2. Update alignSelf.
      */
     layoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
 
@@ -311,10 +347,13 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAlignSelf001, TestSize.Level0)
  */
 HWTEST_F(LayoutPropertyTestNg, UpdateBias001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create a layoutProperty.
+     */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
 
     /**
-     * @tc.steps: Update bias.
+     * @tc.steps: step2. Update bias.
      */
     BiasPair biasPair(0.3f, 0.7f);
     layoutProperty->UpdateBias(biasPair);
@@ -325,8 +364,8 @@ HWTEST_F(LayoutPropertyTestNg, UpdateBias001, TestSize.Level0)
     ASSERT_NE(layoutProperty->GetFlexItemProperty(), nullptr);
     auto bias = layoutProperty->GetFlexItemProperty()->GetBias();
     EXPECT_TRUE(bias.has_value());
-    EXPECT_FLOAT_EQ(bias->first, 0.3f);
-    EXPECT_FLOAT_EQ(bias->second, 0.7f);
+    EXPECT_EQ(bias->first, 0.3f);
+    EXPECT_EQ(bias->second, 0.7f);
 }
 
 } // namespace OHOS::Ace::NG

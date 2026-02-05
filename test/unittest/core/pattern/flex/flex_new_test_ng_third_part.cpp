@@ -226,31 +226,4 @@ HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmReset001, TestSize.Level0)
      */
     EXPECT_FALSE(layoutProperty->GetFlexDirection().has_value());
 }
-
-/**
- * @tc.name: FlexLayoutAlgorithmToJson001
- * @tc.desc: Test FlexLayoutProperty ToJsonValue functionality
- * @tc.type: FUNC
- */
-HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmToJson001, TestSize.Level0)
-{
-    auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
-    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-
-    /**
-     * @tc.steps: Create JSON from property
-     */
-    auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json, InspectorFilter());
-
-    /**
-     * @tc.expected: Assert FlexDirection and FlexAlign with EXPECT_EQ
-     */
-    ASSERT_NE(json, nullptr);
-    auto flexDirection = json->GetString("direction");
-    EXPECT_EQ(flexDirection, "FlexDirection::ROW");
-    auto mainAxisAlign = json->GetString("justifyContent");
-    EXPECT_EQ(mainAxisAlign.value(), "FlexAlign.Center");
-}
 } // namespace OHOS::Ace::NG

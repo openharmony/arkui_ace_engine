@@ -45,7 +45,7 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator001, TestSize.Level0)
     EXPECT_EQ(flexLayoutProperty->GetCrossSpaceValue({}).Value() == wrapProperty.crossSpace.Value(), true);
 
     /**
-     * @tc.steps: step1. Call CreateFlexGrow.
+     * @tc.steps: step1. Call CreateFlexRow.
      * @tc.expected: created successfully
      */
     FlexModelNG instance;
@@ -73,7 +73,7 @@ HWTEST_F(FlexTestNg, FlexRowFrameNodeCreator001, TestSize.Level0)
     UpdateFlexProperties(flexLayoutProperty, flexProperty);
 
     /**
-     * @tc.steps: step1. Call CreateFlexGrow.
+     * @tc.steps: step1. Call CreateFlexRow.
      * @tc.expected: created successfully
      */
     FlexModelNG instance;
