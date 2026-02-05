@@ -74,6 +74,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -211,6 +212,11 @@ public:
     {
         auto frameNode = AceType::DynamicCast<FrameNode>(UiNode);
         if (frameNode) {
+            auto customNode = AceType::DynamicCast<CustomMeasureLayoutNode>(UiNode);
+            if (customNode) {
+                customNode->Render();
+            }
+
             allFrameNodeChildren.emplace_back(frameNode);
             partFrameNodeChildren[count++] = frameNode;
             return;
@@ -234,6 +240,11 @@ public:
         for (const auto& child : UiNode->GetChildren()) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             if (frameNode) {
+                auto customNode = AceType::DynamicCast<CustomMeasureLayoutNode>(frameNode);
+                if (customNode) {
+                    customNode->Render();
+                }
+
                 allFrameNodeChildren.emplace_back(frameNode);
                 partFrameNodeChildren[count++] = frameNode;
                 continue;
