@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_layout_property.h"
 

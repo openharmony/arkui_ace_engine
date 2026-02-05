@@ -2847,4 +2847,17 @@ void SelectPattern::OnDpiConfigurationUpdate()
         SetOptionWidth(selectLayoutProperty->GetOptionWidthValue(Dimension()));
     }
 }
+
+FocusPattern SelectPattern::GetFocusPattern() const
+{
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, focusPattern);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, focusPattern);
+    auto focusStyleType =
+        static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetSelectFocusStyleType_()));
+    focusPattern.SetStyleType(focusStyleType);
+    return focusPattern;
+}
 } // namespace OHOS::Ace::NG

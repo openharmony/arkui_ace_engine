@@ -28,7 +28,8 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-
+struct WidthLayoutBreakPoint;
+struct HeightLayoutBreakPoint;
 enum class ResolutionType : int32_t {
     RESOLUTION_NONE = -2,
     RESOLUTION_ANY = -1,
@@ -82,55 +83,6 @@ union DebugFlags {
     } bits_;
 };
 
-struct WidthLayoutBreakPoint {
-    double widthVPXS_ = 320.0;
-    double widthVPSM_ = 600.0;
-    double widthVPMD_ = 840.0;
-    double widthVPLG_ = 1440.0;
-    double widthVPXL_ = -1.0;  // 默认不生效
-    WidthLayoutBreakPoint() = default;
-    WidthLayoutBreakPoint(
-        double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG, double widthVPXL = -1.0)
-        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG),
-          widthVPXL_(widthVPXL)
-    {}
-    WidthLayoutBreakPoint(std::vector<double> breakPoints)
-        : widthVPXS_(breakPoints.size() > 0 ? breakPoints[0] : -1.0), // XS与SM临界值
-          widthVPSM_(breakPoints.size() > 1 ? breakPoints[1] : -1.0), // SM与MD临界值
-          widthVPMD_(breakPoints.size() > 2 ? breakPoints[2] : -1.0), // MD与LG临界值
-          widthVPLG_(breakPoints.size() > 3 ? breakPoints[3] : -1.0), // LG与XL临界值
-          widthVPXL_(breakPoints.size() > 4 ? breakPoints[4] : -1.0) // XL与XXL临界值
-    {}
-    bool operator==(WidthLayoutBreakPoint &v)
-    {
-        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
-               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
-    }
-    bool operator==(const WidthLayoutBreakPoint &v)
-    {
-        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
-               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
-    }
-    bool operator!=(WidthLayoutBreakPoint &v)
-    {
-        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
-               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
-    }
-    bool operator!=(const WidthLayoutBreakPoint &v)
-    {
-        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
-               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
-    }
-};
-
-struct HeightLayoutBreakPoint {
-    double heightVPRATIOSM_ = 0.8;
-    double heightVPRATIOMD_ = 1.2;
-    HeightLayoutBreakPoint() = default;
-    HeightLayoutBreakPoint(double heightVPRATIOSM, double heightVPRATIOMD)
-        : heightVPRATIOSM_(heightVPRATIOSM), heightVPRATIOMD_(heightVPRATIOMD) {}
-};
-
 class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
@@ -177,10 +129,7 @@ public:
      * Set type of current device.
      * @param deviceType
      */
-    static void SetDeviceType(DeviceType deviceType)
-    {
-        deviceType_ = deviceType;
-    }
+    static void SetDeviceType(DeviceType deviceType);
 
     /*
      * Get current orientation of device.
@@ -209,18 +158,12 @@ public:
     /*
      * Set physical width of device.
      */
-    static void SetDevicePhysicalWidth(int32_t devicePhysicalWidth)
-    {
-        devicePhysicalWidth_ = devicePhysicalWidth;
-    }
+    static void SetDevicePhysicalWidth(int32_t devicePhysicalWidth);
 
     /*
      * Set physical height of device.
      */
-    static void SetDevicePhysicalHeight(int32_t devicePhysicalHeight)
-    {
-        devicePhysicalHeight_ = devicePhysicalHeight;
-    }
+    static void SetDevicePhysicalHeight(int32_t devicePhysicalHeight);
 
     /*
      * Get physical width of device.
@@ -243,24 +186,14 @@ public:
      */
     static float GetFontWeightScale();
 
-    static void SetFontWeightScale(const float fontWeightScale)
-    {
-        if (fontWeightScale_ != fontWeightScale) {
-            fontWeightScale_ = fontWeightScale;
-        }
-    }
+    static void SetFontWeightScale(const float fontWeightScale);
 
     /*
      * Get size scale of device.
      */
     static float GetFontScale();
 
-    static void SetFontScale(const float fontScale)
-    {
-        if (fontScale != fontScale_) {
-            fontScale_ = fontScale;
-        }
-    }
+    static void SetFontScale(const float fontScale);
 
     /*
      * Get density of default display.
@@ -273,10 +206,7 @@ public:
     /*
      * Set resolution of device.
      */
-    static void SetResolution(double resolution)
-    {
-        resolution_ = resolution;
-    }
+    static void SetResolution(double resolution);
 
     static bool GetIsScreenRound()
     {
@@ -431,15 +361,9 @@ public:
         return stateManagerEnable_.load();
     }
 
-    static void SetStateManagerEnabled(bool stateManagerEnable)
-    {
-        stateManagerEnable_.store(stateManagerEnable);
-    }
+    static void SetStateManagerEnabled(bool stateManagerEnable);
 
-    static void SetFaultInjectEnabled(bool faultInjectEnable)
-    {
-        faultInjectEnabled_ = faultInjectEnable;
-    }
+    static void SetFaultInjectEnabled(bool faultInjectEnable);
 
     static bool GetFaultInjectEnabled()
     {
@@ -549,10 +473,7 @@ public:
         return mnc_;
     }
 
-    static void SetDeviceAccess(bool isDeviceAccess)
-    {
-        isDeviceAccess_ = isDeviceAccess;
-    }
+    static void SetDeviceAccess(bool isDeviceAccess);
 
     static bool GetDeviceAccess()
     {
@@ -582,10 +503,7 @@ public:
 
     static size_t GetLongPauseTime();
 
-    static void SetUnZipHap(bool unZipHap = true)
-    {
-        unZipHap_.store(unZipHap);
-    }
+    static void SetUnZipHap(bool unZipHap = true);
 
     static bool GetUnZipHap()
     {
@@ -630,10 +548,7 @@ public:
         return imageFileCacheConvertAstcThreshold_;
     }
 
-    static void SetExtSurfaceEnabled(bool extSurfaceEnabled)
-    {
-        extSurfaceEnabled_ = extSurfaceEnabled;
-    }
+    static void SetExtSurfaceEnabled(bool extSurfaceEnabled);
 
     static bool GetExtSurfaceEnabled()
     {
@@ -813,12 +728,12 @@ public:
     static int32_t GetWhiteBlockIndexValue();
     static int32_t GetWhiteBlockCacheCountValue();
 
-    static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
+    static const WidthLayoutBreakPoint& GetWidthLayoutBreakpoints()
     {
         return widthLayoutBreakpoints_;
     }
 
-    static HeightLayoutBreakPoint GetHeightLayoutBreakpoints()
+    static const HeightLayoutBreakPoint& GetHeightLayoutBreakpoints()
     {
         return heightLayoutBreakpoints_;
     }

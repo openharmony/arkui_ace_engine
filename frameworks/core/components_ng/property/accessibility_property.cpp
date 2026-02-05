@@ -16,11 +16,12 @@
 #include "accessibility_property.h"
 
 #include "base/json/json_util.h"
+#include "base/utils/multi_thread.h"
 #include "core/accessibility/accessibility_constants.h"
+#include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/utils/multi_thread.h"
-#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "interfaces/native/native_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {

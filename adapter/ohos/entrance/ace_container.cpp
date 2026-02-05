@@ -27,6 +27,7 @@
 #include "wm_common.h"
 #include "form_ashmem.h"
 
+#include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"

@@ -358,6 +358,7 @@ frameworks/base/thread/ @arkui_framework_xnode
 frameworks/base/utils/ @arkui_framework_xnode
 frameworks/base/utils/utf_helper.cpp @huawei_g_five
 frameworks/base/utils/utf_helper.h @huawei_g_five
+frameworks/base/utils/layout_break_point.h @arkuilayout1
 frameworks/base/view_data/ @huawei_g_five
 frameworks/base/want/want_wrap.h @arkui_navigation
 frameworks/base/window/drag_window.h @ArkUI_Event

@@ -1496,6 +1496,12 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
+JsiDeclarativeEngine::JsiDeclarativeEngine(int32_t instanceId, void* runtime)
+    : instanceId_(instanceId), runtime_(runtime) {}
+
+JsiDeclarativeEngine::JsiDeclarativeEngine(int32_t instanceId)
+    : instanceId_(instanceId) {}
+
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
