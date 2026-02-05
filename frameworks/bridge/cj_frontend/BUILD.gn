@@ -233,7 +233,14 @@ template("cj_frontend") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
     ]
-
+    external_deps += [
+      "window_manager:libdm",
+      "window_manager:libwm",
+      "window_manager:scene_session",
+      "napi:ace_napi",
+      "ability_runtime:abilitykit_native",
+      "ability_base:want",
+    ]
     external_deps += [ "graphic_2d:2d_graphics" ]
 
     deps += [

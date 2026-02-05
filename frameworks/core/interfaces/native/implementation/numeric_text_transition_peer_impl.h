@@ -20,10 +20,10 @@
 
 struct NumericTextTransitionPeer final : ContentTransitionPeer {
 protected:
-    NumericTextTransitionPeer(
-        OHOS::Ace::TextFlipDirection flipDirection = OHOS::Ace::TextFlipDirection::DOWN,
-        bool enableBlur = false)
-        : ContentTransitionPeer(flipDirection, enableBlur) {}
+    explicit NumericTextTransitionPeer(
+        OHOS::Ace::TextFlipDirection flipDirection,
+        bool enableBlur
+    ) : ContentTransitionPeer(flipDirection, enableBlur) {}
     ~NumericTextTransitionPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };

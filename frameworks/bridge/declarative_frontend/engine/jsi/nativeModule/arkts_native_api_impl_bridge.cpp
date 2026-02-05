@@ -69,7 +69,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
@@ -500,13 +499,14 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Slider" },
         { "TimePicker" },
         { "TimePickerDialog" },
-        { "CalendarPicker" },
-        { "CalendarPickerDialog" },
         { "DataPanel" },
 #ifndef ARKUI_WEARABLE
         { "FolderStack" },
+        { "CalendarPicker" },
+        { "CalendarPickerDialog" },
 #endif
         { "Hyperlink" },
+        { "SymbolGlyph" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1934,8 +1934,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetVelocityField));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "particle"), particle);
 
-    RegisterSymbolGlyphAttributes(object, vm);
-
     RegisterSymbolSpanAttributes(object, vm);
 
 #ifdef MODEL_COMPONENT_SUPPORTED
@@ -2238,6 +2236,10 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMinKeyboardAvoidDistance));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinKeyboardAvoidDistance"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMinKeyboardAvoidDistance));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuSystemMaterial"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuSystemMaterial));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuSystemMaterial"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuSystemMaterial));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 
@@ -5455,6 +5457,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModuleForm(ArkUIRuntimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     auto object = panda::ObjectRef::New(vm);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadNativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadNativeModule));
     return object;
 }
 
@@ -5477,7 +5481,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormLite(Local<panda::ObjectRef
     RegisterImageAttributes(object, vm);
     RegisterButtonAttributes(object, vm);
     RegisterSpanAttributes(object, vm);
-    RegisterSymbolGlyphAttributes(object, vm);
 }
 
 void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
@@ -5526,6 +5529,18 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTypedFrameNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTypedFrameNodeFormFullSet));
 }
+
+ArkUINativeModuleValue ArkUINativeModule::GetPageRootNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto instanceId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getPageRootNode(instanceId);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return panda::NativePointerRef::New(vm, nodePtr);
+}
+
 void ArkUINativeModule::RegisterGlobalMethods(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeById"),
@@ -5552,6 +5567,8 @@ void ArkUINativeModule::RegisterGlobalMethods(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetMarqueeFrameRateRange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadNativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadNativeModule));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPageRootNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetPageRootNode));
 }
 
 void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -6864,56 +6881,6 @@ void ArkUINativeModule::RegisterGridRowAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetOnBreakpointChange));
 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridRow"), gridRow);
-}
-
-void ArkUINativeModule::RegisterSymbolGlyphAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto symbolGlyph = panda::ObjectRef::New(vm);
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetFontColor));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetFontColor));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetFontSize));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetFontSize));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetFontWeight));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetFontWeight));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderingStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetRenderingStrategy));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderingStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetRenderingStrategy));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEffectStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetEffectStrategy));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEffectStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetEffectStrategy));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSymbolEffectOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetSymbolEffect));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSymbolEffectOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetSymbolEffect));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSymbolGlyphInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetSymbolGlyphInitialize));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSymbolGlyphInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetSymbolGlyphInitialize));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontScale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetMinFontScale));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontScale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetMinFontScale));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontScale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetMaxFontScale));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontScale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetMaxFontScale));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSymbolShadow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetSymbolShadow));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSymbolShadow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetSymbolShadow));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShaderStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::SetShaderStyle));
-    symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShaderStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetShaderStyle));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolGlyph"), symbolGlyph);
 }
 
 void ArkUINativeModule::RegisterSymbolSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

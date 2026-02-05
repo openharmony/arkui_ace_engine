@@ -890,6 +890,11 @@ private:
         const std::map<std::string, std::string>& actionArguments,
         RefPtr<NG::AccessibilityProperty> accessibilityProperty, const RefPtr<NG::FrameNode>& frameNode);
 
+    void ClearAccessibilityFocusState();
+
+    // Check if current pipeline context is form render
+    bool IsFormRender();
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;

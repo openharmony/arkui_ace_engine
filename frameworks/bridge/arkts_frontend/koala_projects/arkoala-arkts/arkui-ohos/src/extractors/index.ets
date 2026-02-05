@@ -83,6 +83,7 @@ import { toPeerPtr } from '@koalaui/interop';
 import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 import { ComponentContent } from 'arkui.ComponentContent';
+import { InputMethodExtraConfig } from "@ohos.inputMethod.ExtraConfig"
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -90,6 +91,10 @@ export namespace extractors {
   }
   export function fromImagePixelMapPtr(ptr: KPointer): image.PixelMap {
     return ArkUIAniModule._Extractors_FromImagePixelMapPtr(ptr);
+  }
+
+  export function toInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer {
+    return ArkUIAniModule._Extractors_ToInputMethodExtraConfigPtr(config);
   }
 
   export function toColorMetricsPtr(value: ColorMetrics): KPointer {

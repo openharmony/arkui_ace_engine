@@ -1754,7 +1754,7 @@ struct CJUITextAreaModifier {
     void (*setTextAreaEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextAreaEnableAutoFill)(ArkUINodeHandle node);
     void (*setTextAreaBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, void* colorRawPtr);
     void (*resetTextAreaBorder)(ArkUINodeHandle node);
     void (*setTextAreaBorderWidth)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -2537,7 +2537,7 @@ struct CJUIGaugeModifier {
     void (*resetGaugeEndAngle)(ArkUINodeHandle node);
     void (*setGaugeStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setGaugeStrokeWidthPtr)(
-        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* strokeWidthRawPtr);
+        ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* strokeWidthRawPtr);
     void (*resetGaugeStrokeWidth)(ArkUINodeHandle node);
     void (*setShadowOptions)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY,
         ArkUI_Bool isShadowVisible);
@@ -2795,6 +2795,7 @@ struct CJUICalendarPickerModifier {
 struct CJUICalendarPickerDialogModifier {
     void (*jsRemoveResObj)(ArkUI_CharPtr key);
     void (*show)(const CalendarPickerDialogOption* option);
+    ArkUI_Bool (*checkOrientationChange)();
 };
 struct CJUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);
@@ -3125,6 +3126,14 @@ struct CJUISpanModifier {
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value, void* resourceRawPtr);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
+    void (*setSpanVariableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 variableFontWeight, void* resRawPtr);
+    void (*resetSpanVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSpanEnableVariableFontWeight)(ArkUINodeHandle node,
+        ArkUI_Bool enableVariableFontWeight, void* resRawPtr);
+    void (*resetSpanEnableVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node,
+        ArkUI_Bool enableDeviceFontWeightCategory, void* resRawPtr);
+    void (*resetSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resourceRawPtr);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);
     void (*setSpanFontStyle)(ArkUINodeHandle node, ArkUI_Int32 fontStyle);

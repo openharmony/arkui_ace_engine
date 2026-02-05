@@ -30,6 +30,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_mgr.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -1036,11 +1037,22 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest024, TestSize.Level1)
     /**
      * @tc.steps: step3. call SetXComponentType and GetXComponentType
      *            case: type == XComponentType::TEXTURE
-     * @tc.expected: resultType == XComponentType::TEXTURE
+     * @tc.expected: resultType == XComponentType::TEXTURE and call sendEvent
      */
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    PipelineContext* context = frameNode->GetContext();
+    context->statisticEventReporter_ = reporter;
+    frameNode->onMainTree_ = true;
     XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
     auto resultType = XComponentModelNG::GetXComponentType(Referenced::RawPtr(frameNode));
     EXPECT_EQ(resultType, XCOMPONENT_TEXTURE_TYPE_VALUE);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    frameNode->onMainTree_ = false;
+    XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_EQ(pattern->statisticEventTypes_.size(), 1);
 }
 
 /**

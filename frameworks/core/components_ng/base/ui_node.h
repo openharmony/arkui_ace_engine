@@ -1134,6 +1134,8 @@ public:
         return forceDarkAllowedbyUser_;
     }
 
+    virtual void OnAllowForceDarkUpdate(uint32_t colorMode) {};
+
     bool IsArkTsRenderNode() const
     {
         return isArkTsRenderNode_;
@@ -1145,7 +1147,7 @@ public:
     }
 
     void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
-    virtual bool CheckVisibleAndActive()
+    virtual bool IsVisibleAndActive() const
     {
         return true;
     }
@@ -1221,7 +1223,7 @@ public:
 
     void ExecuteAfterAttachMainTreeTasks();
 
-    void FindTopNavDestination(RefPtr<FrameNode>& result);
+    void FindTopNavDestination(std::list<RefPtr<FrameNode>>& result);
 
     bool SubtreeWithIgnoreChild() const
     {

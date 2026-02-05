@@ -24,6 +24,12 @@
 #include "frameworks/base/geometry/size.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
 
+namespace OHOS::Ace {
+// Forward declarations
+struct WidthLayoutBreakPoint;
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::V2 {
 inline constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 

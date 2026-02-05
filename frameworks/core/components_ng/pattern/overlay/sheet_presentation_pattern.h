@@ -1127,6 +1127,7 @@ protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
+    void OnAttachToMainTree() override;
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
@@ -1172,6 +1173,7 @@ private:
     float GetBottomSafeArea();
     void StopModifySheetTransition();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
+    bool IsDoubleAvoid(bool forceAvoid);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     void UpdateSheetWhenSheetTypeChanged();
     void RecoverAvoidKeyboardStatus();

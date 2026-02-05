@@ -22,15 +22,15 @@ import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkCirclePeer, CircleAttribute } from "./component/circle"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class CircleModifier extends CommonMethodModifier implements CircleAttribute,AttributeModifier<CircleAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

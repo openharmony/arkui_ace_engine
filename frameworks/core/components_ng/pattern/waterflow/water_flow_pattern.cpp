@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -301,6 +302,7 @@ void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart, const 
     auto host = GetHost();
     CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
     FireObserverOnReachStart();
+    ReportOnItemWaterFlowEvent("onReachStart");
     CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
     if (onReachStart) {
@@ -318,6 +320,7 @@ void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnRe
     CHECK_NULL_VOID(host);
     if (layoutInfo_->ReachEnd(prevOffset_, false) && layoutInfo_->repeatDifference_ == 0) {
         FireObserverOnReachEnd();
+        ReportOnItemWaterFlowEvent("onReachEnd");
         CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
         if (onReachEnd) {
@@ -336,6 +339,7 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
 {
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
+    ReportOnItemWaterFlowScrollEvent("onScrollIndex", layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
     CHECK_NULL_VOID(onScrollIndex);
     int32_t endIndex = layoutInfo_->endIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
@@ -955,6 +959,17 @@ void WaterFlowPattern::DumpInfoAddSections()
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
 }
 
+void WaterFlowPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    json->Put("isScrollable",
+        IsScrollable() ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                       : "false");
+    json->Put("scrollDirection", (layoutProperty->GetAxis() == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 SizeF WaterFlowPattern::GetChildrenExpandedSize()
 {
     auto viewSize = GetViewSizeMinusPadding();
@@ -1012,5 +1027,64 @@ bool WaterFlowPattern::IsAtSectionBoundary() const
     // Calculate section start index and check if we're at boundary
     int32_t sectionStart = layoutInfo_->segmentTails_[segmentIdx - 1] + 1;
     return startIdx == sectionStart;
+}
+
+void WaterFlowPattern::ReportOnItemWaterFlowEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto waterFlowEvent = std::string("WaterFlow.") + event;
+    params->Put("name", waterFlowEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+void WaterFlowPattern::ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string value = std::string("WaterFlow.") + event;
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("First", startindex);
+    params->Put("Last", endindex);
+
+    auto eventData = JsonUtil::Create();
+    CHECK_NULL_VOID(eventData);
+    eventData->Put("name", value.c_str());
+    eventData->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", host->GetId());
+    json->Put("event", eventData);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t WaterFlowPattern::OnInjectionEvent(const std::string& command)
+{
+    return OnInjectionEventByRatio(command);
 }
 } // namespace OHOS::Ace::NG

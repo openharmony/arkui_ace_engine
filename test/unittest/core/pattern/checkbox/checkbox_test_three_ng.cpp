@@ -1110,4 +1110,36 @@ HWTEST_F(CheckBoxThreeTestNG, UpdatePaintPropertyBySettingData, TestSize.Level1)
     EXPECT_EQ(Color::BLUE, checkBoxPaintProperty->GetCheckBoxUnSelectedColor());
     EXPECT_EQ(Color::BLUE, checkBoxPaintProperty->GetCheckBoxCheckMarkColor());
 }
+
+/**
+ * @tc.name: CreateCheckbox
+ * @tc.desc: Test CheckBoxModelNG CreateCheckbox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxThreeTestNG, CreateCheckbox, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node and check name, groupName
+     * @tc.expected: step1. name  equal NAME, groupName equal GROUP_NAME.
+     */
+    CheckBoxModelNG::CreateCheckbox(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto name = CheckBoxModelNG::GetCheckboxName(AceType::RawPtr(frameNode));
+    auto groupName = CheckBoxModelNG::GetCheckboxGroup(AceType::RawPtr(frameNode));
+    EXPECT_EQ(name, NAME);
+    EXPECT_EQ(groupName, GROUP_NAME);
+
+    /**
+     * @tc.steps: step2. Init CheckBox node and check name, groupName
+     * @tc.expected: step2. name  equal "", groupName equal "".
+     */
+    CheckBoxModelNG::CreateCheckbox(std::nullopt, std::nullopt, TAG);
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    name = CheckBoxModelNG::GetCheckboxName(AceType::RawPtr(frameNode));
+    groupName = CheckBoxModelNG::GetCheckboxGroup(AceType::RawPtr(frameNode));
+    EXPECT_EQ(name, "");
+    EXPECT_EQ(groupName, "");
+}
 } // namespace OHOS::Ace::NG

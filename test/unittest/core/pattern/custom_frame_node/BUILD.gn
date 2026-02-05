@@ -20,6 +20,7 @@ ace_unittest("custom_frame_node_test") {
     "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
     "custom_frame_node_test.cpp"
   ]
 }

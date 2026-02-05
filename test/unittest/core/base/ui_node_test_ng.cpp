@@ -45,6 +45,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t TEST_ID_THREE = 23;
+constexpr int32_t TEST_ID_FOUR = 24;
+constexpr int32_t TEST_ID_FIVE = 25;
+constexpr int32_t INITIAL_THEME_SCOPE_ID = 100;
+constexpr int32_t NEW_THEME_SCOPE_ID = 200;
+constexpr int32_t NON_EXISTENT_ID = 99999;
+}
 
 class UINodeTestNg : public testing::Test {
 public:
@@ -1452,5 +1460,575 @@ HWTEST_F(UINodeTestNg, TestPostAfterAttachMainTreeTask001, TestSize.Level1)
     testNode->SetIsFree(false);
     testNode->PostAfterAttachMainTreeTask([]() { return; });
     EXPECT_EQ(testNode->afterAttachMainTreeTasks_.size(), 0);
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId002
+ * @tc.desc: Test adding multiple nodes with same inspector ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create multiple nodes with same inspector ID
+     */
+    const std::string& inspectorId = "multiNodeTest";
+    const RefPtr<FrameNode> node1 = FrameNode::CreateFrameNode("tag1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 = FrameNode::CreateFrameNode("tag2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node3 = FrameNode::CreateFrameNode("tag3", 3, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Set inspectorId for all nodes and attach to main tree
+     */
+    node1->UpdateInspectorId(inspectorId);
+    node2->UpdateInspectorId(inspectorId);
+    node3->UpdateInspectorId(inspectorId);
+    node1->AttachToMainTree();
+    node2->AttachToMainTree();
+    node3->AttachToMainTree();
+
+    /**
+     * @tc.steps: step3. Verify nodes can be retrieved by inspectorId
+     */
+    auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId);
+    EXPECT_NE(retrievedNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Clean up
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node1->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node2->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node3->GetId());
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId003
+ * @tc.desc: Test removing specific node from multiple nodes with same inspector ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create multiple nodes with same inspector ID
+     */
+    const std::string& inspectorId = "removeTest";
+    const RefPtr<FrameNode> node1 = FrameNode::CreateFrameNode("tag1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 = FrameNode::CreateFrameNode("tag2", 2, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Set inspectorId for both nodes and attach to main tree
+     */
+    node1->UpdateInspectorId(inspectorId);
+    node2->UpdateInspectorId(inspectorId);
+    node1->AttachToMainTree();
+    node2->AttachToMainTree();
+
+    /**
+     * @tc.steps: step3. Remove first node, second should still exist
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node1->GetId());
+    auto retrievedNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId);
+    EXPECT_NE(retrievedNode, nullptr);
+    EXPECT_EQ(retrievedNode->GetId(), node2->GetId());
+
+    /**
+     * @tc.steps: step4. Clean up
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId, node2->GetId());
+}
+
+/**
+ * @tc.name: TestFrameNodeByInspectorId004
+ * @tc.desc: Test nodes with different inspector IDs
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, TestFrameNodeByInspectorId004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create nodes with different inspector IDs
+     */
+    const std::string& inspectorId1 = "testId1";
+    const std::string& inspectorId2 = "testId2";
+    const RefPtr<FrameNode> node1 = FrameNode::CreateFrameNode("tag1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> node2 = FrameNode::CreateFrameNode("tag2", 2, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. Set inspectorId for nodes and attach to main tree
+     */
+    node1->UpdateInspectorId(inspectorId1);
+    node2->UpdateInspectorId(inspectorId2);
+    node1->AttachToMainTree();
+    node2->AttachToMainTree();
+
+    /**
+     * @tc.steps: step3. Verify nodes can be retrieved by their respective inspector IDs
+     */
+    auto retrievedNode1 = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId1);
+    auto retrievedNode2 = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorId2);
+    EXPECT_NE(retrievedNode1, nullptr);
+    EXPECT_NE(retrievedNode2, nullptr);
+    EXPECT_EQ(retrievedNode1->GetId(), node1->GetId());
+    EXPECT_EQ(retrievedNode2->GetId(), node2->GetId());
+
+    /**
+     * @tc.steps: step4. Clean up
+     */
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId1, node1->GetId());
+    ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(inspectorId2, node2->GetId());
+}
+
+/**
+ * @tc.name: UINodeTestAddChildAfter001
+ * @tc.desc: Test AddChildAfter with valid sibling node
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestAddChildAfter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto child2 = TestNode::CreateTestNode(TEST_ID_THREE);
+    auto newChild = TestNode::CreateTestNode(TEST_ID_FOUR);
+
+    /**
+     * @tc.steps: step2. add child1 and child2 to parent
+     */
+    parent->AddChild(child1, 0, false);
+    parent->AddChild(child2, 1, false);
+    EXPECT_EQ(parent->children_.size(), 2);
+
+    /**
+     * @tc.steps: step3. add newChild after child1 using AddChildAfter
+     */
+    parent->AddChildAfter(newChild, child1);
+
+    /**
+     * @tc.expected: newChild should be at index 1 (between child1 and child2)
+     */
+    EXPECT_EQ(parent->children_.size(), 3);
+    auto childAt0 = parent->GetChildAtIndex(0);
+    auto childAt1 = parent->GetChildAtIndex(1);
+    auto childAt2 = parent->GetChildAtIndex(2);
+    EXPECT_EQ(childAt0, child1);
+    EXPECT_EQ(childAt1, newChild);
+    EXPECT_EQ(childAt2, child2);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestAddChildAfter002
+ * @tc.desc: Test AddChildAfter with invalid sibling node
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestAddChildAfter002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto newChild = TestNode::CreateTestNode(TEST_ID_THREE);
+    auto invalidSibling = TestNode::CreateTestNode(TEST_ID_FIVE);
+
+    /**
+     * @tc.steps: step2. add child1 to parent
+     */
+    parent->AddChild(child1, 0, false);
+
+    /**
+     * @tc.steps: step3. add newChild after invalidSibling (not in parent)
+     */
+    parent->AddChildAfter(newChild, invalidSibling);
+
+    /**
+     * @tc.expected: newChild should be added at end before last
+     */
+    EXPECT_EQ(parent->children_.size(), 2);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestAddChildBefore001
+ * @tc.desc: Test AddChildBefore with valid sibling node
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestAddChildBefore001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto child2 = TestNode::CreateTestNode(TEST_ID_THREE);
+    auto newChild = TestNode::CreateTestNode(TEST_ID_FOUR);
+
+    /**
+     * @tc.steps: step2. add child1 and child2 to parent
+     */
+    parent->AddChild(child1, 0, false);
+    parent->AddChild(child2, 1, false);
+    EXPECT_EQ(parent->children_.size(), 2);
+
+    /**
+     * @tc.steps: step3. add newChild before child2 using AddChildBefore
+     */
+    parent->AddChildBefore(newChild, child2);
+
+    /**
+     * @tc.expected: newChild should be at index 1 (between child1 and child2)
+     */
+    EXPECT_EQ(parent->children_.size(), 3);
+    auto childAt0 = parent->GetChildAtIndex(0);
+    auto childAt1 = parent->GetChildAtIndex(1);
+    auto childAt2 = parent->GetChildAtIndex(2);
+    EXPECT_EQ(childAt0, child1);
+    EXPECT_EQ(childAt1, newChild);
+    EXPECT_EQ(childAt2, child2);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestMovePositionAlreadyInPlace
+ * @tc.desc: Test MovePosition when node is already at target position
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestMovePositionAlreadyInPlace, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto child2 = TestNode::CreateTestNode(TEST_ID_THREE);
+    auto child3 = TestNode::CreateTestNode(TEST_ID_FOUR);
+
+    /**
+     * @tc.steps: step2. add children to parent
+     */
+    parent->AddChild(child1, 0, false);
+    parent->AddChild(child2, 1, false);
+    parent->AddChild(child3, 2, false);
+
+    /**
+     * @tc.steps: step3. move child2 to position 1 (where it already is)
+     */
+    auto initialSize = parent->children_.size();
+    child2->MovePosition(1);
+
+    /**
+     * @tc.expected: children size should remain the same, order unchanged
+     */
+    EXPECT_EQ(parent->children_.size(), initialSize);
+    auto childAt0 = parent->GetChildAtIndex(0);
+    auto childAt1 = parent->GetChildAtIndex(1);
+    auto childAt2 = parent->GetChildAtIndex(2);
+    EXPECT_EQ(childAt0, child1);
+    EXPECT_EQ(childAt1, child2);
+    EXPECT_EQ(childAt2, child3);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestUpdateThemeScopeIdNoChange
+ * @tc.desc: Test UpdateThemeScopeId when themeScopeId is the same
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestUpdateThemeScopeIdNoChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+
+    /**
+     * @tc.steps: step2. add child to parent and set initial themeScopeId
+     */
+    parent->AddChild(child, 0, false);
+    parent->UpdateThemeScopeId(INITIAL_THEME_SCOPE_ID);
+
+    /**
+     * @tc.steps: step3. update with the same themeScopeId
+     */
+    parent->UpdateThemeScopeId(INITIAL_THEME_SCOPE_ID);
+
+    /**
+     * @tc.expected: themeScopeId should remain unchanged
+     */
+    EXPECT_EQ(parent->GetThemeScopeId(), INITIAL_THEME_SCOPE_ID);
+    EXPECT_EQ(child->GetThemeScopeId(), INITIAL_THEME_SCOPE_ID);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestUpdateThemeScopeIdWithChange
+ * @tc.desc: Test UpdateThemeScopeId with different themeScopeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestUpdateThemeScopeIdWithChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+
+    /**
+     * @tc.steps: step2. add child to parent and set initial themeScopeId
+     */
+    parent->AddChild(child, 0, false);
+    parent->UpdateThemeScopeId(INITIAL_THEME_SCOPE_ID);
+
+    /**
+     * @tc.steps: step3. update with a different themeScopeId
+     */
+    parent->UpdateThemeScopeId(NEW_THEME_SCOPE_ID);
+
+    /**
+     * @tc.expected: themeScopeId should be updated for both parent and child
+     */
+    EXPECT_EQ(parent->GetThemeScopeId(), NEW_THEME_SCOPE_ID);
+    EXPECT_EQ(child->GetThemeScopeId(), NEW_THEME_SCOPE_ID);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestGetChildFlatIndexWithNullNode
+ * @tc.desc: Test GetChildFlatIndex when node is not found in registry
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetChildFlatIndexWithNullNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent node
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+
+    /**
+     * @tc.steps: step2. call GetChildFlatIndex with non-existent id
+     */
+    auto result = parent->GetChildFlatIndex(NON_EXISTENT_ID);
+
+    /**
+     * @tc.expected: should return {false, 0} when node not found
+     */
+    EXPECT_FALSE(result.first);
+    EXPECT_EQ(result.second, 0);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestAddDisappearingChildWithLoop
+ * @tc.desc: Test AddDisappearingChild with potential loop detection
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestAddDisappearingChildWithLoop, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+
+    /**
+     * @tc.steps: step2. add child to parent to establish hierarchy
+     */
+    parent->AddChild(child, 0, false);
+
+    /**
+     * @tc.steps: step3. attempt to add parent as disappearing child of child (would create loop)
+     */
+    auto initialDisappearingSize = child->disappearingChildren_.size();
+    child->AddDisappearingChild(parent, 0);
+
+    /**
+     * @tc.expected: loop should be detected and child not added
+     */
+    EXPECT_EQ(child->disappearingChildren_.size(), initialDisappearingSize);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestOnRemoveFromParentWithTransition
+ * @tc.desc: Test OnRemoveFromParent with transition allowed
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestOnRemoveFromParentWithTransition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+
+    /**
+     * @tc.steps: step2. add child to parent and attach to main tree
+     */
+    parent->AddChild(child, 0, false);
+    child->onMainTree_ = true;
+
+    /**
+     * @tc.steps: step3. call OnRemoveFromParent with allowTransition=true
+     */
+    auto result = child->OnRemoveFromParent(true);
+
+    /**
+     * @tc.expected: should return true and detach from main tree
+     */
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(child->onMainTree_);
+    EXPECT_EQ(child->parent_.Upgrade(), nullptr);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestAddChildWithAdoptedNode
+ * @tc.desc: Test AddChild with already adopted node
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestAddChildWithAdoptedNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+
+    /**
+     * @tc.steps: step2. mark child as adopted
+     */
+    child->SetIsAdopted(true);
+
+    /**
+     * @tc.steps: step3. attempt to add adopted child to parent
+     */
+    auto initialSize = parent->children_.size();
+    parent->AddChild(child, 0, false);
+
+    /**
+     * @tc.expected: child should not be added (already adopted)
+     */
+    EXPECT_EQ(parent->children_.size(), initialSize);
+    child->SetIsAdopted(false);
+    parent->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestRemoveChildSilently
+ * @tc.desc: Test RemoveChildSilently method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestRemoveChildSilently, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+
+    /**
+     * @tc.steps: step2. add child to parent
+     */
+    parent->AddChild(child, 0, false);
+    EXPECT_EQ(parent->children_.size(), 1);
+
+    /**
+     * @tc.steps: step3. remove child silently
+     */
+    auto result = parent->RemoveChildSilently(child);
+
+    /**
+     * @tc.expected: should return true and child should be removed
+     */
+    EXPECT_TRUE(result);
+    EXPECT_EQ(parent->children_.size(), 0);
+}
+
+/**
+ * @tc.name: UINodeTestRemoveChildSilentlyWithNull
+ * @tc.desc: Test RemoveChildSilently with null child
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestRemoveChildSilentlyWithNull, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent node
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+
+    /**
+     * @tc.steps: step2. attempt to remove null child silently
+     */
+    auto result = parent->RemoveChildSilently(nullptr);
+
+    /**
+     * @tc.expected: should return false
+     */
+    EXPECT_FALSE(result);
+}
+
+
+/**
+ * @tc.name: UINodeTestGetParentFrameNode
+ * @tc.desc: Test GetParentFrameNode method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetParentFrameNode, TestSize.Level1)
+{
+    /**
++     * @tc.steps: step1. create test node and frame node hierarchy
++     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto frameNode = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
+    auto grandFrameNode = FrameNode::CreateFrameNode("grandparent", 3, AceType::MakeRefPtr<Pattern>());
+
+    /**
++     * @tc.steps: step2. build hierarchy: testNode -> frameNode -> grandFrameNode
++     */
+    frameNode->parent_ = grandFrameNode;
+    testNode->parent_ = frameNode;
+
+    /**
++     * @tc.steps: step3. call GetParentFrameNode on testNode
++     */
+    auto parentFrame = testNode->GetParentFrameNode();
+
+    /**
++     * @tc.expected: should return frameNode (first FrameNode ancestor)
++     */
+    EXPECT_EQ(parentFrame, frameNode);
+}
+
+/**
+ * @tc.name: UINodeTestGetParentCustomNode
+ * @tc.desc: Test GetParentCustomNode method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetParentCustomNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create test node and custom node hierarchy
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto customNode = CustomNode::CreateCustomNode(2, "custom");
+    auto grandCustomNode = CustomNode::CreateCustomNode(3, "grandCustom");
+
+    /**
+     * @tc.steps: step2. build hierarchy: testNode -> customNode -> grandCustomNode
+     */
+    customNode->parent_ = grandCustomNode;
+    testNode->parent_ = customNode;
+
+    /**
+     * @tc.steps: step3. call GetParentCustomNode on testNode
+     */
+    auto parentCustom = testNode->GetParentCustomNode();
+
+    /**
+     * @tc.expected: should return customNode (first CustomNode ancestor)
+     */
+    EXPECT_EQ(parentCustom, customNode);
 }
 } // namespace OHOS::Ace::NG

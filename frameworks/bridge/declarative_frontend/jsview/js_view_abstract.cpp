@@ -59,6 +59,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -1635,9 +1636,23 @@ void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
 }
 } // namespace
 
+RefPtr<ResourceObject> JSViewAbstract::GetResourceObjectWithId(const JSRef<JSObject>& jsObj, bool hasGetterOnId)
+{
+    return GetResourceObjectInternal(jsObj, hasGetterOnId);
+}
+
 RefPtr<ResourceObject> JSViewAbstract::GetResourceObject(const JSRef<JSObject>& jsObj)
 {
-    auto id = jsObj->GetProperty("id")->ToNumber<int32_t>();
+    bool hasGetterOnId = false;
+    return GetResourceObjectInternal(jsObj, hasGetterOnId);
+}
+
+RefPtr<ResourceObject> JSViewAbstract::GetResourceObjectInternal(const JSRef<JSObject>& jsObj, bool hasGetterOnId)
+{
+    int32_t id = UNKNOWN_RESOURCE_ID;
+    if (!hasGetterOnId) {
+        id = jsObj->GetProperty("id")->ToNumber<int32_t>();
+    }
     auto type = jsObj->GetProperty("type")->ToNumber<int32_t>();
     auto args = jsObj->GetProperty("params");
 
@@ -6167,21 +6182,23 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
     std::string moduleName;
     int32_t resId = -1;
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
+    JSRef<JSVal> resIdJsValue;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
 }
 
-void JSViewAbstract::CompleteResourceObjectWithBundleName(
-    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
+void JSViewAbstract::CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
+    std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue)
 {
     int32_t resType = UNKNOWN_RESOURCE_TYPE;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
 }
 
 void JSViewAbstract::CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType)
 {
     std::string bundleName;
     std::string moduleName;
-    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType);
+    JSRef<JSVal> resIdJsValue;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId, resType, resIdJsValue);
 }
 
 void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue)
@@ -6195,27 +6212,33 @@ void JSViewAbstract::GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<J
 }
 
 void JSViewAbstract::CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName,
-    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue)
+    std::string& moduleName, int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
-    JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
     ResourceType resType = ResourceType::UNKNOWN;
 
     std::string targetModule;
     std::string resName;
     JSRef<JSVal> type;
-    if (resId->IsString()) {
+    if (jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID))) {
+        resIdValue = UNKNOWN_RESOURCE_ID;
         GetResourceObjectType(jsObj, type, resTypeValue);
-        if (!ParseDollarResource(resId, targetModule, resType, resName, resTypeValue == UNKNOWN_RESOURCE_TYPE)) {
-            return;
-        }
-        CompleteResourceObjectFromId(type, jsObj, resType, resName);
-    } else if (resId->IsNumber()) {
-        GetResourceObjectType(jsObj, type, resTypeValue);
-        resIdValue = resId->ToNumber<int32_t>();
-        if (resIdValue == -1 || resTypeValue == UNKNOWN_RESOURCE_TYPE) {
-            CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
+        CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
+    } else {
+        resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
+        if (resId->IsString()) {
+            GetResourceObjectType(jsObj, type, resTypeValue);
+            if (!ParseDollarResource(resId, targetModule, resType, resName, resTypeValue == UNKNOWN_RESOURCE_TYPE)) {
+                return;
+            }
+            CompleteResourceObjectFromId(type, jsObj, resType, resName);
+        } else if (resId->IsNumber()) {
+            GetResourceObjectType(jsObj, type, resTypeValue);
+            resIdValue = resId->ToNumber<int32_t>();
+            if (resIdValue == -1 || resTypeValue == UNKNOWN_RESOURCE_TYPE) {
+                CompleteResourceObjectFromParams(resIdValue, resTypeValue, jsObj, targetModule, resType, resName);
+            }
         }
     }
 
@@ -7291,8 +7314,12 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
         return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObject(jsObj);
-    return ParseJSMediaInternal(jsObj, result, resObj);
+    JSRef<JSVal> resIdJsValue;
+    std::string bundleName;
+    std::string moduleName;
+    int32_t resId = UNKNOWN_RESOURCE_ID;
+    CompleteResourceObjectWithBundleName(jsObj, bundleName, moduleName, resId, resIdJsValue);
+    return ParseJSMediaInternal(jsObj, result, resObj, resIdJsValue);
 }
 
 bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result)
@@ -7320,8 +7347,9 @@ bool JSViewAbstract::ParseJsMediaWithBundleName(
         return JSViewAbstract::GetJsMediaBundleInfo(jsValue, bundleName, moduleName);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithBundleName(jsObj, bundleName, moduleName, resId);
-    return ParseJSMediaInternal(jsObj, result, resObj);
+    JSRef<JSVal> resIdJsValue;
+    CompleteResourceObjectWithBundleName(jsObj, bundleName, moduleName, resId, resIdJsValue);
+    return ParseJSMediaInternal(jsObj, result, resObj, resIdJsValue);
 }
 
 bool JSViewAbstract::ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
@@ -7341,20 +7369,28 @@ bool JSViewAbstract::ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::
 }
 
 bool JSViewAbstract::ParseJSMediaInternal(const JSRef<JSObject>& jsObj, std::string& result,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, JSRef<JSVal>& resId)
 {
     int32_t type = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
-    JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
-    if (!resId->IsNull() && type != UNKNOWN_RESOURCE_TYPE && resId->IsNumber()) {
-        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+
+    // Check if 'id' is a getter to avoid performance degradation
+    // When id is a getter, we will use the name-based resource path (resIdNum = -1)
+    bool hasGetterOnId = jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID));
+    if (!hasGetterOnId) {
+        resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
+    }
+    if (hasGetterOnId || (!resId->IsNull() && type != UNKNOWN_RESOURCE_TYPE && resId->IsNumber())) {
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetterOnId) :
             GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         CHECK_NULL_RETURN(resourceWrapper, false);
         if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
             return JSViewAbstract::ParseJSMediaWithRawFile(jsObj, result, resourceWrapper);
         }
-        auto resIdNum = resId->ToNumber<int32_t>();
+        // When id has getter, treat it as resIdNum = -1 and use name-based resource resolution
+        int32_t resIdNum = hasGetterOnId ? UNKNOWN_RESOURCE_ID : resId->ToNumber<int32_t>();
         if (resIdNum == -1) {
+            // Name-based resource resolution (when id is getter or id == -1)
             if (!IsGetResourceByName(jsObj)) {
                 return false;
             }
@@ -7670,10 +7706,13 @@ bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std:
 
 bool JSViewAbstract::IsGetResourceByName(const JSRef<JSObject>& jsObj)
 {
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber() || resId->ToNumber<int32_t>() != -1) {
-        return false;
+    if (!jsObj->HasGetter(static_cast<int32_t>(ArkUIIndex::ID))) {
+        JSRef<JSVal> resId = jsObj->GetProperty("id");
+        if (!resId->IsNumber() || resId->ToNumber<int32_t>() != -1) {
+            return false;
+        }
     }
+
     JSRef<JSVal> args = jsObj->GetProperty("params");
     if (!args->IsArray()) {
         return false;
@@ -9005,6 +9044,128 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void ParseKeyIdentifier(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    if (jsObj->HasProperty("type")) {
+        auto type = jsObj->GetProperty("type");
+        if (type->IsNumber()) {
+            keyEvent.action = static_cast<OHOS::Ace::KeyAction>(type->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("keyCode")) {
+        auto keyCode = jsObj->GetProperty("keyCode");
+        if (keyCode->IsNumber()) {
+            keyEvent.code = static_cast<OHOS::Ace::KeyCode>(keyCode->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("keyText")) {
+        auto jsValue = jsObj->GetProperty("keyText");
+        if (jsValue->IsString()) {
+            keyEvent.key.assign(jsValue->ToString());
+        }
+    }
+
+    if (jsObj->HasProperty("keySource")) {
+        auto keySource = jsObj->GetProperty("keySource");
+        if (keySource->IsNumber()) {
+            keyEvent.sourceType = static_cast<OHOS::Ace::SourceType>(keySource->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("deviceId")) {
+        auto deviceId = jsObj->GetProperty("deviceId");
+        if (deviceId->IsNumber()) {
+            keyEvent.deviceId = deviceId->ToNumber<int32_t>();
+        }
+    }
+}
+
+void ParseKeyModifiers(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    if (jsObj->HasProperty("metaKey")) {
+        auto metaKey = jsObj->GetProperty("metaKey");
+        if (metaKey->IsNumber()) {
+            keyEvent.metaKey = metaKey->ToNumber<int32_t>();
+        }
+    }
+
+    if (jsObj->HasProperty("unicode")) {
+        auto unicode = jsObj->GetProperty("unicode");
+        if (unicode->IsNumber()) {
+            keyEvent.unicode = unicode->ToNumber<int32_t>();
+        }
+    }
+
+    if (jsObj->HasProperty("timestamp")) {
+        auto jsValue = jsObj->GetProperty("timestamp");
+        if (jsValue->IsNumber()) {
+            auto timeStamp = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
+            keyEvent.timeStamp = TimeStamp(std::chrono::milliseconds(timeStamp));
+        }
+    }
+
+    if (jsObj->HasProperty("intentionCode")) {
+        auto intentionCode = jsObj->GetProperty("intentionCode");
+        if (intentionCode->IsNumber()) {
+            keyEvent.keyIntention = static_cast<KeyIntention>(intentionCode->ToNumber<int32_t>());
+        }
+    }
+}
+
+void ParsePressedCodes(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    auto jsValue = jsObj->GetProperty("pressedCodes");
+    if (!jsValue->IsArray()) {
+        return;
+    }
+
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < jsArray->Length(); ++i) {
+        auto element = jsArray->GetValueAt(i);
+        if (element->IsNumber()) {
+            keyEvent.pressedCodes.push_back(
+                static_cast<OHOS::Ace::KeyCode>(element->ToNumber<int32_t>()));
+        }
+    }
+}
+
+void ParseKeyLockStates(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    if (jsObj->HasProperty("numLock")) {
+        auto jsValue = jsObj->GetProperty("numLock");
+        if (jsValue->IsBoolean()) {
+            keyEvent.numLock = jsValue->ToBoolean();
+        }
+    }
+
+    if (jsObj->HasProperty("scrollLock")) {
+        auto jsValue = jsObj->GetProperty("scrollLock");
+        if (jsValue->IsBoolean()) {
+            keyEvent.scrollLock = jsValue->ToBoolean();
+        }
+    }
+
+    if (jsObj->HasProperty("enableCapsLock") || jsObj->HasProperty("capsLock")) {
+        auto jsValue = jsObj->GetProperty("enableCapsLock");
+        if (jsValue->IsUndefined()) {
+            jsValue = jsObj->GetProperty("capsLock");
+        }
+        if (jsValue->IsBoolean()) {
+            keyEvent.enableCapsLock = jsValue->ToBoolean();
+        }
+    }
+}
+
+void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    ParseKeyIdentifier(jsObj, keyEvent);
+    ParseKeyModifiers(jsObj, keyEvent);
+    ParsePressedCodes(jsObj, keyEvent);
+    ParseKeyLockStates(jsObj, keyEvent);
+}
+
 void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -9031,13 +9192,16 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     }
     JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
-    CHECK_NULL_VOID(eventInfoPtr);
     KeyEvent keyEvent;
-    eventInfoPtr->ParseKeyEvent(keyEvent);
+    if (!eventInfoPtr) {
+        ParseJsKeyEvent(jsObject, keyEvent);
+    } else {
+        eventInfoPtr->ParseKeyEvent(keyEvent);
+    }
+
     auto result = focusHub->HandleEvent(keyEvent);
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
-
 void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -10941,22 +11105,33 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined() && IsDisableEventVersion()) {
         ViewAbstractModel::GetInstance()->DisableOnMouse();
         return;
     }
-    if (!info[0]->IsFunction()) {
+    if (!arg->IsFunction()) {
         return;
     }
-
-    RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onMouse = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc), node = targetNode](
-                       MouseInfo& mouseInfo) {
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnMouseFunc = JSRef<JSFunc>::Cast(arg);
+    if (jsOnMouseFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnMouseFuncLocalHandle = jsOnMouseFunc->GetLocalHandle();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onMouse = [vm, execCtx = info.GetExecutionContext(),
+                    func = panda::CopyableGlobal(vm, jsOnMouseFuncLocalHandle),
+                    node = frameNode](MouseInfo& mouseInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onMouse");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(mouseInfo);
+        auto infoPtr = std::make_shared<MouseInfo>(mouseInfo);
+        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr, node);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+        mouseInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     ViewAbstractModel::GetInstance()->SetOnMouse(std::move(onMouse));
 }
@@ -10985,10 +11160,12 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAxis");
         PipelineContext::SetCallBackNode(node);
-        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, info);
+        auto infoPtr = std::make_shared<AxisInfo>(info);
+        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
 }

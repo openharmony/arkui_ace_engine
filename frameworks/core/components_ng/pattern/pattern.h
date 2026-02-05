@@ -54,6 +54,8 @@ struct UiMaterialParam;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
+class FocusPattern;
+struct ScopeFocusAlgorithm;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -489,15 +491,9 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
-    virtual FocusPattern GetFocusPattern() const
-    {
-        return { FocusType::DISABLE, false, FocusStyleType::NONE };
-    }
+    virtual FocusPattern GetFocusPattern() const;
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
-    {
-        return ScopeFocusAlgorithm();
-    }
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm();
 
     virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     {
@@ -784,6 +780,18 @@ public:
         return RET_SUCCESS;
     };
 
+    bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd,
+        std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+    {
+        json = JsonUtil::ParseJsonString(command);
+        CHECK_NULL_RETURN(json && !json->IsNull(), false);
+        cmd = json->GetString("cmd");
+        CHECK_NULL_RETURN(!cmd.empty(), false);
+        params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), false);
+        return true;
+    }
+
     virtual bool BorderUnoccupied() const
     {
         return false;
@@ -889,6 +897,10 @@ public:
     virtual void OnAttachToMainRenderTree() {}
     virtual void OnOffscreenProcessResource() {}
     virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
+    virtual void OnBackgroundColorReset() {}
+    virtual void OnBorderWidthReset() {}
+    virtual void OnBorderColorReset() {}
+    virtual void OnBackShadowReset() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

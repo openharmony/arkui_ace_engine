@@ -194,6 +194,7 @@ std::unordered_map<int32_t, bool> SPAN_ATTRIBUTES_MAP = {
     { static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW), true },
     { static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE), true },
     { static_cast<int32_t>(NODE_SPAN_BASELINE_OFFSET), true },
+    { static_cast<int32_t>(NODE_ALLOW_FORCE_DARK), true },
 };
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
@@ -5573,11 +5574,10 @@ int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_Attri
  
     ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string typesString;
-    for (size_t i = 0; i < item->size; i++) {
+    for (auto i = 0; i < item->size; i++) {
         ArkUI_TextDataDetectorType value = dataDetectorConfig->types[i];
-        auto index = static_cast<size_t>(value);;
-        CHECK_NULL_RETURN(index >= 0 && index < static_cast<int32_t>(TEXT_DETECT_TYPES.size()),
-            ERROR_CODE_PARAM_INVALID);
+        auto index = static_cast<size_t>(value);
+        CHECK_NULL_RETURN(index >= 0 && index < TEXT_DETECT_TYPES.size(), ERROR_CODE_PARAM_INVALID);
         if (i != 0) {
             typesString.append(",");
         }

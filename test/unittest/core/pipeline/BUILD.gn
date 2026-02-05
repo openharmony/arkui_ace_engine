@@ -42,6 +42,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
+    "$ace_root/test/mock/adapter/mock_statistic_event_adapter.cpp",
     "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
@@ -64,7 +65,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
-    "$ace_root/test/mock/base/mock_statistic_event_reporter.cpp",
     "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/accessibility/accessibility_manager_ng.cpp",
@@ -87,6 +87,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
     "$ace_root/test/mock/core/common/mock_reporter.cpp",
     "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
+    "$ace_root/test/mock/core/common/mock_screen_lock_manager_ohos.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
     "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
@@ -134,6 +135,7 @@ ace_unittest("pipeline_context_test_ng") {
     "pipeline_context_test_ng_two.cpp",
     "resample_and_velocity_test_ng.cpp",
     "velocity_tracker_test.cpp",
+    "$ace_root/test/mock/core/render/mock_path_painter.cpp",
   ]
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]

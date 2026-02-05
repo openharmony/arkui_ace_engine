@@ -102,7 +102,6 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
 void DataPanelModelNG::SetTrackBackground(const Color& trackBackgroundColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor);
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true);
 }
 
 void DataPanelModelNG::ResetTrackBackground()
@@ -154,7 +153,6 @@ void DataPanelModelNG::SetCloseEffect(FrameNode* frameNode, bool isClose)
 void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true, frameNode);
 }
 
 void DataPanelModelNG::ResetTrackBackground(FrameNode* frameNode)
@@ -327,6 +325,41 @@ void DataPanelModelNG::CreateDataPanelModelNG(const std::vector<double>& values,
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, false);
+    }
+}
+
+void DataPanelModelNG::SetTrackBackgroundSetByUser(bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value);
+    }
+}
+
+void DataPanelModelNG::SetStrokeWidthSetByUser(bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, value);
+    }
+}
+
+void DataPanelModelNG::SetValueColorsSetByUser(FrameNode* frameNode, bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, value, frameNode);
+    }
+}
+
+void DataPanelModelNG::SetTrackBackgroundSetByUser(FrameNode* frameNode, bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value, frameNode);
+    }
+}
+
+void DataPanelModelNG::SetStrokeWidthSetByUser(FrameNode* frameNode, bool value)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, value, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

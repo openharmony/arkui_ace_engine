@@ -414,7 +414,7 @@ public:
 
     bool IsFullPageNavigation() const
     {
-        return isFullPageNavigation_.value_or(false);
+        return isFullPageNavigation_;
     }
 
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
@@ -453,8 +453,8 @@ public:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
 
     bool IsLastStdChange();
-    bool ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination);
+    bool ReplaceTransition(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isAnimated = true);
     void TransitionWithDialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     void FollowStdNavdestinationAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -539,6 +539,10 @@ public:
     {
         return forceSplitUseNavBar_;
     }
+    bool IsNavBarIsHome() const
+    {
+        return navBarIsHome_;
+    }
 
     std::optional<bool> IsHomeNodeTouched() const
     {
@@ -620,8 +624,6 @@ public:
     }
 
     void FireNavigateChangeCallback();
-
-    void FireChangeCallbackAfterLayout();
 
     //-------for force split------- begin------
     bool CreateRelatedDestination(
@@ -861,7 +863,7 @@ private:
     RectF dragRect_;
     RectF dragBarRect_;
     WeakPtr<FrameNode> pageNode_;
-    std::optional<bool> isFullPageNavigation_;
+    bool isFullPageNavigation_ = false;
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;

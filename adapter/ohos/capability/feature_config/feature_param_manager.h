@@ -58,8 +58,8 @@ private:
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
-    std::shared_ptr<ConfigParserBase> featureParser_;
-    std::shared_ptr<ConfigParserBase> uiCorrectionParser_;
+    std::shared_ptr<ConfigParserBase> featureParser_ = nullptr;
+    std::shared_ptr<ConfigParserBase> uiCorrectionParser_ = nullptr;
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;

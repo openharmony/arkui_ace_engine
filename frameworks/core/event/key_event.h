@@ -664,6 +664,51 @@ public:
         metaKey_ = metaKey;
     }
 
+    void SetKeyType(KeyAction keyType)
+    {
+        keyType_ = keyType;
+    }
+
+    void SetKeyCode(KeyCode keyCode)
+    {
+        keyCode_ = keyCode;
+    }
+
+    void SetKeyText(const std::string& keyText)
+    {
+        keyText_ = keyText;
+    }
+
+    void SetKeySource(SourceType keySource)
+    {
+        keySource_ = keySource;
+    }
+
+    void SetKeyIntention(KeyIntention keyIntention)
+    {
+        keyIntention_ = keyIntention;
+    }
+
+    void SetUnicode(uint32_t unicode)
+    {
+        unicode_ = unicode;
+    }
+
+    void SetNumLock(bool numLock)
+    {
+        numLock_ = numLock;
+    }
+
+    void SetCapsLock(bool capsLock)
+    {
+        capsLock_ = capsLock;
+    }
+
+    void SetScrollLock(bool scrollLock)
+    {
+        scrollLock_ = scrollLock;
+    }
+
     uint32_t GetUnicode() const
     {
         return unicode_;

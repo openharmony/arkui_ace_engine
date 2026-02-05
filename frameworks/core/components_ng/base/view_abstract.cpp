@@ -45,6 +45,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -635,6 +636,7 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     }
 
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
+    ACE_UPDATE_RENDER_CONTEXT(PreBackgroundColor, updateColor);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true);
 }
 
@@ -675,6 +677,7 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
             pipeline->CheckNeedUpdateBackgroundColor(backgroundColor);
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
 }
@@ -686,6 +689,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("backgroundColor");
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
@@ -704,9 +708,11 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
         Color backgroundColor;
         ResourceParseUtils::ParseResColor(resObj, backgroundColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
@@ -1585,6 +1591,7 @@ void ViewAbstract::SetBorderColor(const Color& value)
     BorderColorProperty borderColor;
     borderColor.SetColor(value);
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, borderColor);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderColor, borderColor);
 }
 
 void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
@@ -1608,6 +1615,7 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColor, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
             pattern->UpdateBorderResource();
@@ -1616,6 +1624,7 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
         pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderColor, value);
 }
 
 void ViewAbstract::SetBorderColor(const RefPtr<ResourceObject>& resObj)
@@ -1643,6 +1652,7 @@ void ViewAbstract::SetBorderColor(const RefPtr<ResourceObject>& resObj)
         BorderColorProperty borderColorProperty;
         borderColorProperty.SetColor(borderColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColorProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -1662,6 +1672,7 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, borderWidth);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderWidth, borderWidth);
 }
 
 void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
@@ -1686,6 +1697,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
             CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
             pattern->UpdateBorderResource();
@@ -1695,6 +1707,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderWidth, value);
 }
 
 void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
@@ -1727,6 +1740,7 @@ void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidthProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -1761,6 +1775,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObj
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidthProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -3813,8 +3828,59 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
+        auto outlineGradient = param->GetOutlineLinearGradient();
+        UpdatePopupBorderColorResource(outlineGradient, frameNode, true);
+        auto innerGradient = param->GetInnerBorderLinearGradient();
+        UpdatePopupBorderColorResource(innerGradient, frameNode, false);
     }
 #endif
+}
+
+void ViewAbstract::UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    int32_t index = 0;
+    for (const auto& objParam : gradientProperties.gradientColors) {
+        RefPtr<ResourceObject> resValueObj = objParam.gradientColorObj;
+        std::string keyValue = "popupborderColor" + std::to_string(index);
+        if (isOutlineGradient) {
+            keyValue = "popupOutlineColor" + std::to_string(index);
+        } else {
+            keyValue = "popupInnerlineColor" + std::to_string(index);
+        }
+        AddResObjWithCallBack(keyValue, resValueObj, index, frameNode, isOutlineGradient);
+        index++;
+    }
+}
+
+void ViewAbstract::AddResObjWithCallBack(
+    std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [index, key, isOutlineGradient, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(resObj);
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::FromString(color);
+        }
+        pattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
@@ -4792,10 +4858,12 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
+    ACE_UPDATE_RENDER_CONTEXT(PreBackShadow, shadow);
 }
 
 void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
@@ -4811,10 +4879,12 @@ void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, frameNode);
 }
 
 void ViewAbstract::SetBlendMode(BlendMode blendMode)
@@ -5669,9 +5739,65 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
         ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    }
+    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
+}
+
+void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto preMaterial = renderContext->GetSystemMaterial();
+    if (!preMaterial) {
+        return;
+    } else {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RemoveResObj("viewAbstract.uiMaterial");
+        auto preBackgroundColor = renderContext->GetPreBackgroundColor();
+        auto preBorderWidth = renderContext->GetPreBorderWidth();
+        auto preBorderColor = renderContext->GetPreBorderColor();
+        auto preBackShadow = renderContext->GetPreBackShadow();
+
+        if (preBackgroundColor.has_value()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+        } else {
+            renderContext->ResetBackgroundColor();
+            renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+            pattern->OnBackgroundColorReset();
+        }
+
+        if (preBorderWidth.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, preBorderWidth.value(), frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, preBorderWidth.value(), frameNode);
+        } else {
+            BorderWidthProperty borderWidth;
+            borderWidth.SetBorderWidth(Dimension(0));
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            pattern->OnBorderWidthReset();
+        }
+
+        if (preBorderColor.has_value()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, preBorderColor.value(), frameNode);
+        } else {
+            BorderColorProperty borderColor;
+            borderColor.SetColor(Color::BLACK);
+            renderContext->ResetBorderColor();
+            renderContext->OnBorderColorUpdate(borderColor);
+            pattern->OnBorderColorReset();
+        }
+
+        if (preBackShadow.has_value()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, preBackShadow.value(), frameNode);
+        } else {
+            Shadow shadow;
+            renderContext->ResetBackShadow();
+            renderContext->OnBackShadowUpdate(shadow);
+            pattern->OnBackShadowReset();
+        }
     }
 }
 
@@ -5707,15 +5833,17 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         updateFunc(nullptr);
-        if (materialType != MaterialType::NONE) {
-            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-            pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
-        } else {
-            pattern->RemoveResObj("viewAbstract.uiMaterial");
-        }
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
         return;
     }
-    updateFunc(nullptr);
+
+    if (material != nullptr) {
+        updateFunc(nullptr);
+    } else {
+        ResetSystemMaterialEffect(frameNode);
+    }
+    // This function cannot save uiMaterial to renderContext.
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -6275,12 +6403,14 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthPropert
             CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, value, frameNode);
 }
 
 void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
@@ -6294,6 +6424,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
 }
 
 void ViewAbstract::SetBorderWidth(NG::FrameNode* frameNode, const std::optional<Dimension>& left,
@@ -6326,11 +6457,13 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorPropert
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColor, frameNode);
             frameNode->MarkModifyDone();
         };
         pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, value, frameNode);
 }
 
 void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
@@ -6338,6 +6471,7 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
     BorderColorProperty borderColor;
     borderColor.SetColor(value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColor, frameNode);
 }
 
 void ViewAbstract::SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -6361,6 +6495,7 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObj
         BorderColorProperty borderColorProperty;
         borderColorProperty.SetColor(borderColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColorProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -8006,7 +8141,7 @@ ChainInfo ViewAbstract::GetChainStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, chainInfo);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), chainInfo);
-    layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
+    chainInfo = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
     if (chainInfo.direction.has_value()) {
         return chainInfo;
     }

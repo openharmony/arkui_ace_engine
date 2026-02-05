@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/popup/popup_theme.h"
@@ -223,8 +224,16 @@ void ParseGradientColor(const JSRef<JSArray>& colorArray, PopupGradientColor& gr
 {
     Color gradientColorItem;
     auto colorVal = colorArray->GetValueAt(0);
-    if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
-        gradientColor.gradientColor = gradientColorItem;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = nullptr;
+        if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem, resObj)) {
+            gradientColor.gradientColor = gradientColorItem;
+            gradientColor.gradientColorObj = resObj;
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
+            gradientColor.gradientColor = gradientColorItem;
+        }
     }
     if (colorArray->GetValueAt(1)->IsNumber()) {
         gradientColor.gradientNumber = colorArray->GetValueAt(1)->ToNumber<double>();
@@ -599,7 +608,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     Shadow shadow;
     auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
-        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow, false, true);
         if (!ret) {
             if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
@@ -1346,6 +1355,15 @@ void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::Men
     }
 }
 
+void JSViewPopups::ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto systemMaterialValue = menuOptions->GetProperty("systemMaterial");
+    if (systemMaterialValue->IsObject()) {
+        auto systemUiMaterial = static_cast<UiMaterial*>(UnwrapNapiValue(systemMaterialValue));
+        menuParam.systemMaterial = systemUiMaterial ? systemUiMaterial->Copy() : nullptr;
+    }
+}
+
 void JSViewPopups::ParseMenuAboutToAppearLifeCycleParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1602,6 +1620,7 @@ void JSViewPopups::ParseMenuParam(
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");
     JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
+    JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
 }

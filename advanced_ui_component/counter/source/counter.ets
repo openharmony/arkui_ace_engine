@@ -259,8 +259,6 @@ export struct CounterComponent {
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
   private initFlag: boolean = true;
-  private increaseStrCache: string | undefined = undefined;
-  private reduceStrCache: string | undefined = undefined;
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -1251,17 +1249,11 @@ export struct CounterComponent {
   }
 
   private getIncreaseStr(): string {
-    if (this.increaseStrCache === undefined) {
-      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
-    }
-    return this.increaseStrCache;
+    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
   }
 
   private getReduceStr(): string {
-    if (this.reduceStrCache === undefined) {
-      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
-    }
-    return this.reduceStrCache;
+    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
   }
 
   build() {

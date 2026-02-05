@@ -62,6 +62,10 @@ public:
      */
     FillResult Fill(const FillParameters& params, float targetLen, int32_t startingLine);
 
+    FillResult FillFromStartIndex(const FillParameters& params, float targetLen);
+
+    FillResult FillBackward(const FillParameters& params, float targetLen, int32_t startingLine);
+
     /**
      * @brief Fills the grid with items in the forward direction until targetIdx is measured.
      *
@@ -80,6 +84,24 @@ public:
      * @return Line index in which Item [targetIdx] resides.
      */
     int32_t FillMatrixOnly(int32_t targetIdx);
+
+    void FillMatrixFromStartIndex(int32_t startLine, int32_t startIndex, int32_t targetIdx);
+
+    /**
+     * @brief Fills gridMatrix and measures items in one pass, returning target line and height.
+     *
+     * Unlike FillMatrixFromStartIndex which only fills the matrix without measuring,
+     * this method fills the matrix AND measures items, then calculates the total height
+     * of the rows occupied by the target item (handling multi-row items like 2x2).
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param startLine The starting line index.
+     * @param startIndex The starting item index.
+     * @param targetIdx The target item index to fill and measure up to.
+     * @return FillWithMeasureResult containing the target line accumulated height.
+     */
+    float FillMatrixFromStartIndexWithMeasure(
+        const FillParameters& params, int32_t startLine, int32_t startIndex, int32_t targetIdx);
 
     /**
      * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled.
@@ -138,6 +160,15 @@ public:
     std::pair<float, LayoutConstraintF> MeasureItem(
         const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
 
+    /**
+     * @brief Measures the current row, fills the matrix and measures all items in the row.
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param itemIdx The index of the target GridItem.
+     * @return The total height of the startIndex item.
+     */
+    float MeasureCurrentRow(const FillParameters& params, int32_t itemIdx);
+
 private:
     /**
      * @brief Fills one GridItem into the Grid.
@@ -145,6 +176,16 @@ private:
      * @param idx Item index to fill in the matrix.
      */
     void FillOne(int32_t idx);
+
+    /**
+     * @brief Common implementation for Fill, FillFromStartIndex and FillBackward methods.
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param targetLen The target length of the main axis (total row height to fill).
+     * @param idx The starting item index.
+     * @return FillResult The result of the fill operation.
+     */
+    FillResult FillImpl(const FillParameters& params, float targetLen, int32_t idx);
 
     /**
      * @brief Updates the length of the main axis. Add heights in range [row, rowBound).

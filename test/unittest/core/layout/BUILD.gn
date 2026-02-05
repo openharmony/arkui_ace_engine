@@ -19,6 +19,7 @@ ace_unittest("layout_property_test_ng") {
   sources = [
     "layout_property_test_ng_first_part.cpp",
     "layout_property_test_ng_second_part.cpp",
+    "layout_property_test_ng_third_part.cpp",
     "layout_property_test_ng_two_first_part.cpp",
     "layout_property_test_ng_two_second_part.cpp",
   ]

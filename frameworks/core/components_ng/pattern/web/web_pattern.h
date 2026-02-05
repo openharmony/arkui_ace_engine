@@ -1218,6 +1218,7 @@ private:
     void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleFlingMove(const GestureEvent& event);
+    void HandleCancelFling();
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(int32_t x, int32_t y);
@@ -1251,13 +1252,18 @@ private:
     void HandleScaleGestureEnd(const GestureEvent& event);
     void HandleScaleGestureCancel(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
+    void InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDropPlainText(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropHTML(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropSpanString(RefPtr<UnifiedData> aceData);
     void HandleOnDragDropFile(RefPtr<UnifiedData> aceData);
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
+    void HandleMouseEventOnDrag(int32_t x, int32_t y);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
     void ResetDragStateValue();
@@ -1467,6 +1473,7 @@ private:
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
     bool isDragStartFromWeb_ = false;
+    bool isNeedMouseMoveOnDragEnd_ = false;
     RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     bool isNewDragStyle_ = false;

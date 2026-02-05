@@ -27,6 +27,7 @@ namespace OHOS::Ace {
 using RenderNodeAnimationCallback = std::function<void()>;
 
 class Animator;
+class PipelineBase;
 
 enum class AnimatorStatus {
     IDLE,    // when animation not start or been cancel.
@@ -54,19 +55,10 @@ public:
     explicit AnimatableDimension(const CalcDimension& dimension, const AnimationOption& option = AnimationOption());
 
     AnimatableDimension(const AnimatableDimension& other);
-    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
-    {
-        context_ = context;
-        animationCallback_ = callback;
-    }
+    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback);
 
     void SetContextAndCallbackAfterFirstAssign(
-        const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
-    {
-        context_ = context;
-        animationCallback_ = callback;
-        isFirstAssign_ = false;
-    }
+        const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback);
 
     const AnimationOption& GetAnimationOption() const
     {

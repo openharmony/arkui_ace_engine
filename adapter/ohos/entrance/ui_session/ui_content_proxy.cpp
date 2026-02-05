@@ -19,7 +19,6 @@
 
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
-#include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
@@ -118,8 +117,6 @@ int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
         return FAILED;
     }
     report_ = new (std::nothrow) UiReportStub();
-    processId_ = IPCSkeleton::GetCallingRealPid();
-    isConnected = true;
     if (report_ == nullptr) {
         LOGW("connect failed,create reportStub failed");
         return FAILED;
@@ -129,15 +126,12 @@ int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
         LOGW("write reportStub failed");
         return FAILED;
     }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("write processId failed");
-        return FAILED;
-    }
     int32_t sendRequestErrorCode = Remote()->SendRequest(UI_CONTENT_CONNECT, data, reply, option);
     if (sendRequestErrorCode != ERR_NONE) {
         LOGW("connect send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return REPLY_ERROR;
     }
+    isConnected_ = true;
     return NO_ERROR;
 }
 
@@ -665,7 +659,7 @@ int32_t UIContentServiceProxy::UnregisterSelectTextEventCallback()
 
 bool UIContentServiceProxy::IsConnect()
 {
-    return isConnected;
+    return isConnected_;
 }
 
 int32_t UIContentServiceProxy::GetWebViewTranslateText(
@@ -746,13 +740,9 @@ int32_t UIContentServiceProxy::GetWebViewCurrentLanguage(const EventCallback& ev
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetWebViewCurrentLanguage write interface token failed");
-        return FAILED;
-    }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("write processId failed");
         return FAILED;
     }
     if (report_ == nullptr) {
@@ -772,13 +762,9 @@ int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetCurrentPageName write interface token failed");
-        return FAILED;
-    }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("write processId failed");
         return FAILED;
     }
     if (report_ == nullptr) {
@@ -799,7 +785,7 @@ int32_t UIContentServiceProxy::StartWebViewTranslate(
 {
     MessageParcel value;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!value.WriteInterfaceToken(GetDescriptor())) {
         LOGW("StartWebViewTranslate write interface token failed");
         return FAILED;
@@ -811,10 +797,6 @@ int32_t UIContentServiceProxy::StartWebViewTranslate(
     }
     if (!value.WriteString(data)) {
         LOGW("StartWebViewTranslate write interface token failed");
-        return FAILED;
-    }
-    if (!value.WriteInt32(processId_)) {
-        LOGW("write processId failed");
         return FAILED;
     }
     report_->RegisterGetTranslateTextCallback(eventCallback);
@@ -907,13 +889,9 @@ int32_t UIContentServiceProxy::GetCurrentImagesShowing(
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetCurrentImagesShowing write interface token failed");
-        return FAILED;
-    }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("write processId failed");
         return FAILED;
     }
     if (report_ == nullptr) {
@@ -939,13 +917,9 @@ int32_t UIContentServiceProxy::GetImagesById(
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetImagesById write interface token failed");
-        return FAILED;
-    }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("GetImagesById write processId failed");
         return FAILED;
     }
     if (!data.WriteInt32Vector(arkUIIds)) {
@@ -1017,17 +991,12 @@ int32_t UIContentServiceProxy::RegisterContentChangeCallback(const ContentChange
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("RegisterContentChangeCallback write interface token failed");
         return FAILED;
     }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("RegisterContentChangeCallback write processId failed");
-        return FAILED;
-    }
-
     ContentChangeConfigImpl configImpl(config);
     if (!data.WriteParcelable(&configImpl)) {
         LOGW("RegisterContentChangeCallback write config failed");
@@ -1052,7 +1021,7 @@ int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("UnregisterContentChangeCallback write interface token failed");
         return FAILED;
@@ -1075,13 +1044,9 @@ int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName
 {
     MessageParcel value;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!value.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetStateMgmtInfo write interface token failed");
-        return FAILED;
-    }
-    if (!value.WriteInt32(processId_)) {
-        LOGW("GetStateMgmtInfo write interface processId failed");
         return FAILED;
     }
     if (!value.WriteString(componentName)) {
@@ -1121,30 +1086,17 @@ int32_t UIContentServiceProxy::GetWebInfoByRequest(
     report_->RegisterGetWebInfoByRequestCallback(finishCallback);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetWebInfoByRequest write interface token failed");
-        return FAILED;
-    }
-    if (!data.WriteInt32(processId_)) {
-        LOGW("GetWebInfoByRequest write interface processId failed");
         return FAILED;
     }
     if (!data.WriteInt32(webId)) {
         LOGW("GetWebInfoByRequest write interface token failed");
         return FAILED;
     }
-    sptr<LargeStringAshmem> largeStringAshmem = new (std::nothrow) LargeStringAshmem();
-    if (largeStringAshmem == nullptr) {
-        LOGW("GetWebInfoByRequest alloc shmem failed");
-        return FAILED;
-    }
-    if (!largeStringAshmem->WriteToAshmem(std::to_string(GET_WEBINFO_BY_REQUEST), request, request.length())) {
-        LOGW("GetWebInfoByRequest write to shmem failed");
-        return FAILED;
-    }
-    if (!data.WriteParcelable(largeStringAshmem)) {
-        LOGW("GetWebInfoByRequest write request failed");
+    if (!data.WriteString(request)) {
+        LOGW("GetWebInfoByRequest write componentName failed");
         return FAILED;
     }
     int32_t sendRequestErrorCode = Remote()->SendRequest(GET_WEBINFO_BY_REQUEST, data, reply, option);

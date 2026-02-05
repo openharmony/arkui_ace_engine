@@ -15,6 +15,9 @@
 
 #include "text_based_modifier_module.h"
 
+#ifdef ENABLE_STANDARD_INPUT
+#include "extra_config_ani.h"
+#endif
 #include "core/pipeline/pipeline_base.h"
 #include "load.h"
 #include "log/log.h"
@@ -136,4 +139,29 @@ ani_long ExtractorsToTextModifierPtr(ani_env* env, [[maybe_unused]] ani_object o
         reinterpret_cast<void*>(textModifierAni));
     return reinterpret_cast<ani_long>(textModifierPeer);
 }
+
+ani_long ExtractorsToInputMethodExtraConfigPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object extraConfigObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        HILOGE("GetNodeAniModifier is null.");
+        return 0;
+    }
+#ifdef ENABLE_STANDARD_INPUT
+    auto shareConfigPtr = std::make_shared<OHOS::MiscServices::ExtraConfig>();
+    CHECK_NULL_RETURN(shareConfigPtr, 0);
+    auto status = OHOS::MiscServices::AniExtraConfig::GetExtraConfig(env, extraConfigObj, *shareConfigPtr);
+    if (!status) {
+        HILOGE("GetExtraConfig failed, size: %{public}u", shareConfigPtr->customSettings.size());
+        return 0;
+    }
+    auto extraConfigPtr = reinterpret_cast<void*>(&shareConfigPtr);
+    auto imeExtraConfigPeer = modifier->getTextBasedAniModifier()->toIMEExtraCfgPeer(extraConfigPtr);
+    return reinterpret_cast<ani_long>(imeExtraConfigPeer);
+#else
+    HILOGE("IME extra config not supported.");
+    return 0;
+#endif
+}
+
 } // namespace OHOS::Ace::Ani

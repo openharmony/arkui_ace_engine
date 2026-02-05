@@ -104,6 +104,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"CalendarPickerDialog", "calendarpicker"},
         {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
+        {"SymbolGlyph", "symbol"},
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
@@ -140,5 +141,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         return module;
     }
 }
+
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+void DynamicModuleHelper::TriggerPageFaultForPreLoad() {}
+#endif
 
 } // namespace OHOS::Ace

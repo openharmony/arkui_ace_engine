@@ -52,10 +52,7 @@ public:
         return false;
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
     {

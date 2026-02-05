@@ -714,6 +714,35 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level0)
 }
 
 /**
+ * @tc.name: IsInterceptInput001
+ * @tc.desc: test IsInterceptInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsInterceptInput001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = false;
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(false, OperationType::IME));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(false, OperationType::STYLUS));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::DEFAULT));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::DRAG));
+    EXPECT_TRUE(richEditorPattern->IsInterceptInput(true, OperationType::IME));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::FINISH_PREVIEW));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::PASTE));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::ACCESSIBILITY));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::AI_WRITE));
+    EXPECT_TRUE(richEditorPattern->IsInterceptInput(true, OperationType::STYLUS));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::SAFE_PASTE));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::AUTO_FILL));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::UNDO));
+    richEditorPattern->isEditing_ = true;
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::IME));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::STYLUS));
+}
+
+/**
  * @tc.name: RichEditorModel016
  * @tc.desc: test paragraph style linebreakstrategy attribute
  * @tc.type: FUNC
@@ -752,6 +781,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level0)
  */
 HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Create RichEditor node
+     */
     RichEditorModelNG richEditorModel;
     richEditorModel.Create(true);
     auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -759,6 +791,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
     auto richEditorController = richEditorModel.GetRichEditorController();
     EXPECT_NE(richEditorController, nullptr);
 
+    /**
+     * @tc.steps: Test SetCustomKeyboard function
+     */
     auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
     auto func = []() {};
@@ -766,6 +801,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
     richEditorModel.SetCustomKeyboard(func, true);
     EXPECT_EQ(richEditorNode->GetPattern<RichEditorPattern>(), nullptr);
 
+    /**
+     * @tc.steps: Test BindSelectionMenu function
+     */
     std::function<void()> buildFunc = []() {};
     auto textSpanType = TextSpanType::TEXT;
     auto textResponseType = TextResponseType::LONG_PRESS;
@@ -1184,5 +1222,61 @@ HWTEST_F(RichEditorBaseTestNg, SetBarState002, TestSize.Level0)
     auto barState = richEditorLayoutProperty->GetDisplayModeValue(DisplayMode::ON);
     EXPECT_EQ(barState, DisplayMode::ON);
 }
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test RichEditorPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create richEditor node
+     */
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get RichEditorPattern
+     */
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"setSearchText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"addText", "params":{"value":""}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"addText", "params":{"value":"test"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"setText", "params":{"value":"test"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"addText", "params":{"value":"test", "offset":3}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{"start":2, "end":3}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{"start":-1, "end":3}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"deleteText", "params":{"start":2, "end":-1}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
+
 
 } // namespace OHOS::Ace::NG

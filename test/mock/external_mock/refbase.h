@@ -22,6 +22,10 @@ class sptr {
 private:
     T* ptr;
 public:
+    sptr()
+    {
+        ptr = nullptr;
+    }
     sptr(T* p) : ptr(p) {}
     ~sptr()
     {

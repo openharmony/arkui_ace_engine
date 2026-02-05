@@ -35,12 +35,12 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CheckboxGroupModifier } from "./../CheckboxGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export interface CheckBoxGroupConfiguration {
+export interface CheckBoxGroupConfiguration extends CommonConfiguration<CheckBoxGroupConfiguration> {
     name: string
     status: SelectStatus
     triggerChange(isSelect: boolean): void
 }
-export class CheckBoxGroupConfigurationInternal implements MaterializedBase,CommonConfiguration<CheckBoxGroupConfiguration>,CheckBoxGroupConfiguration {
+export class CheckBoxGroupConfigurationInternal implements MaterializedBase,CheckBoxGroupConfiguration {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
@@ -193,7 +193,7 @@ export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)

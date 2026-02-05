@@ -2916,6 +2916,14 @@
         "name": "OH_ArkUI_NotifyDragResult"
     },
     {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NotifySuggestedDropOperation"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NotifyDisableDefaultDropAnimation"
+    },
+    {
         "first_introduced": "19",
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
@@ -4982,6 +4990,10 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
+    },
+    {
+        "first_introduced": "24",
+ 	    "name": "OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext"
     },
     {
         "first_introduced": "24",

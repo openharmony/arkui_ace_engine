@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
+
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -24,13 +26,13 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class CheckBoxContentModifierHelperAccessor : public StaticAccessorTest<GENERATED_ArkUIContentModifierHelperAccessor,
                                 &GENERATED_ArkUIAccessors::getContentModifierHelperAccessor> {
 public:
     void FireBuilder(CheckBoxPattern* pattern)
     {
-        pattern->FireBuilder();
+        // This is workaround to call FireBuilder function, since it is private
+        pattern->SetToggleBuilderFunc(nullptr);
     }
 };
 
@@ -63,6 +65,7 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
         std::optional<bool> enabled;
         std::optional<std::string> name;
         std::optional<bool> selected;
+        Callback_Boolean_Void trigger;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
@@ -80,6 +83,7 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
                 .enabled = Converter::OptConvert<bool>(config.enabled),
                 .name = Converter::OptConvert<std::string>(config.name),
                 .selected = Converter::OptConvert<bool>(config.selected),
+                .trigger = config.triggerChange,
             };
     };
 
@@ -90,12 +94,15 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
     accessor_->contentModifierCheckBox(nodePtr, &obj, &builder);
 
     FireBuilder(pattern.GetRawPtr());
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
     EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
     EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);
     EXPECT_THAT(checkEvent->enabled, Optional(TEST_DEFAULT_ENABLED));
     EXPECT_EQ(checkEvent->name, TEST_DEFAULT_NAME);
     EXPECT_THAT(checkEvent->selected, Optional(TEST_DEFAULT_SELECTED));
+    EXPECT_NE(checkEvent->trigger.resource.resourceId, 0);
+    EXPECT_NE(checkEvent->trigger.call, nullptr);
 }
 
 }

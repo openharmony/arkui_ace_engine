@@ -48,7 +48,16 @@ const ArkUIInnerTabsModifier* GetTabsInnerModifier()
     }
     return cachedModifier;
 }
+
+void TrySetInitialIndex(const RefPtr<AceType>& tabController, int32_t index)
+{
+    CHECK_NULL_VOID(tabController);
+    CHECK_EQUAL_VOID(Container::IsCurrentUseNewPipeline(), true);
+    auto modifier = GetTabsInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setInitialIndex(tabController, index);
 }
+} // namespace
 #endif
 
 std::unique_ptr<TabsModel> TabsModel::instance_ = nullptr;
@@ -371,9 +380,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 tabController = JSTabsController::CreateController();
             }
 #ifndef NG_BUILD
-            if (auto modifier = GetTabsInnerModifier()) {
-                modifier->setInitialIndex(tabController, index);
-            }
+            TrySetInitialIndex(tabController, index);
 #endif
             changeEventVal = obj->GetProperty("$index");
         } else if (indexVal->IsObject()) {

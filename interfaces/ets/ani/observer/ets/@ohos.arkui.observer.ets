@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
-HeightBreakpoint, WidthBreakpoint } from "@ohos.arkui.component"
+HeightBreakpoint, WidthBreakpoint, Axis } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
@@ -42,6 +42,12 @@ import { Size } from '@ohos.arkui.node'
         options: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationInfo>
     ): void;
+
+    export native function onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+    export native function offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+    export native function onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+    export native function offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
     export native function onNavDestinationSwitch(
         context: UIAbilityContext | UIContext,
         callback: Callback<NavDestinationSwitchInfo>
@@ -473,26 +479,19 @@ import { Size } from '@ohos.arkui.node'
       SCROLL_STOP = 1
     }
 
-    export enum Axis {
-        VERTICAL = 0,
-        Vertical = 0,
-        HORIZONTAL = 1,
-        Horizontal = 1
-    }
-
     export interface ScrollEventInfo {
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         scrollEvent: ScrollEventType;
-        offset: number;
+        offset: double;
         axis: Axis;
     }
 
     export class ScrollEventInfoImpl implements ScrollEventInfo{
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         scrollEvent: ScrollEventType;
-        offset: number;
+        offset: double;
         axis: Axis;
 
         static castToScrollEventType(value: number): ScrollEventType {
@@ -530,7 +529,7 @@ import { Size } from '@ohos.arkui.node'
             if (!uniqueId.isNumber()) {
                 throw Error("uniqueId in ScrollEventInfo type Error");
             }
-            staticValue.uniqueId = uniqueId.toNumber();
+            staticValue.uniqueId = Double.toInt(uniqueId.toNumber());
 
             let scrollEvent = dynamicValue.getProperty("scrollEvent");
             if (!scrollEvent.isNumber()) {

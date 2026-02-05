@@ -38,7 +38,7 @@ class ACE_EXPORT InputEventHub : public virtual AceType {
     DECLARE_ACE_TYPE(InputEventHub, AceType);
 public:
     explicit InputEventHub(const WeakPtr<EventHub>& eventHub);
-    ~InputEventHub() override;
+    ~InputEventHub() override = default;
 
     // Set by user define, which will replace old one.
     void SetMouseEvent(OnMouseEventFunc&& onMouseEventFunc)
@@ -149,7 +149,7 @@ public:
         }
         hoverMoveEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverMoveEventFunc));
     }
-    
+
     void AddOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
     {
         if (!hoverEventActuator_) {

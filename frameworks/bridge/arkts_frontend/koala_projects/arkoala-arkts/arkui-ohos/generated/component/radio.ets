@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -64,7 +64,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -270,7 +270,7 @@ export class RadioConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: boolean) => void) = (value0: boolean):void => {
+        const triggerChangeTmpBufClosure  = (value0: boolean):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
@@ -280,6 +280,8 @@ export class RadioConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : ((value0: boolean) => void) = triggerChangeTmpBufClosure
         let value : RadioConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, checked: checkedTmpResult, triggerChange: triggerChangeTmpResult} as RadioConfiguration)
         return value
     }
@@ -324,7 +326,7 @@ export class RadioOptions_serializer {
             const indicatorBuilderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const indicatorBuilderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const indicatorBuilderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            indicatorBuilderTmpBuf = ():void => {
+            const indicatorBuilderTmpBuf_Closure  = ():void => {
                 const indicatorBuilderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 indicatorBuilderTmpBuf_BufArgsSerializer.writeInt32(indicatorBuilderTmpBuf_BufResource.resourceId);
                 indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCall);
@@ -333,6 +335,8 @@ export class RadioOptions_serializer {
                 indicatorBuilderTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(indicatorBuilderTmpBuf_Closure, indicatorBuilderTmpBuf_BufResource)
+            indicatorBuilderTmpBuf = indicatorBuilderTmpBuf_Closure
         }
         const indicatorBuilderTmpResult : CustomBuilder | undefined = indicatorBuilderTmpBuf
         let value : RadioOptions = ({group: groupTmpResult, value: valueTmpResult, indicatorType: indicatorTypeTmpResult, indicatorBuilder: indicatorBuilderTmpResult} as RadioOptions)

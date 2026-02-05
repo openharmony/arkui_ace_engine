@@ -1772,4 +1772,23 @@ HWTEST_F(ScrollLayoutTestNg, ScrollExpandSafeArea, TestSize.Level1)
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->GetAdjustOffset(), Offset(10.0f, 10.0f));
 }
+
+/**
+ * @tc.name: RTLwithContentOffset001
+ * @tc.desc: Test horizontal scroll in RTL Layout with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, RTLwithContentOffset001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateContent(WIDTH);
+    CreateScrollDone(frameNode_);
+
+    RectF childRect = GetChildRect(frameNode_, 0);
+    EXPECT_EQ(childRect.x_, -CONTENT_START_OFFSET);
+}
 } // namespace OHOS::Ace::NG

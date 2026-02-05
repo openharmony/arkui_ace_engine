@@ -101,8 +101,7 @@ public:
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;
-    int32_t processId_;
-    bool isConnected = false;
+    bool isConnected_ = false;
 };
 
 class ACE_FORCE_EXPORT UiContentProxyRecipient : public IRemoteObject::DeathRecipient {

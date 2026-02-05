@@ -28,7 +28,7 @@ const std::unordered_set<std::string> OVERFLOW_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::COLUMN_ETS_TAG,
     OHOS::Ace::V2::FLEX_ETS_TAG,
     OHOS::Ace::V2::STACK_ETS_TAG,
-    "Custom"
+    OHOS::Ace::V2::CUSTOM_ETS_TAG
 };
 }
 
@@ -223,7 +223,7 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 
 void LayoutAlgorithm::HandleStackContentOverflow(LayoutWrapper* layoutWrapper)
 {
-    if (!FeatureParam::IsRnOverflowEnable()) {
+    if (!FeatureParam::IsPageOverflowEnabled()) {
         return;
     }
     CHECK_NULL_VOID(layoutWrapper);

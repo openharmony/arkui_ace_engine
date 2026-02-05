@@ -373,6 +373,7 @@ public:
     void GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     const SizeF& GetViewSize() const
     {
@@ -447,6 +448,8 @@ private:
     std::string GetScrollSnapPagination() const;
     void OnColorModeChange(uint32_t colorMode) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+    void ReportOnItemScrollEvent(const std::string& event);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     double currentOffset_ = 0.0;
     double lastOffset_ = 0.0;

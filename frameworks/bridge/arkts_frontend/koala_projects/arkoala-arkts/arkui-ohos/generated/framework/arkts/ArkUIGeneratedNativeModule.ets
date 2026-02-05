@@ -2053,6 +2053,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SelectAttribute_setMinKeyboardAvoidDistance(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SelectAttribute_setMenuSystemMaterial(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SelectAttribute_setMenuAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Shape_construct(id: KInt, flags: KInt): KPointer
@@ -3812,6 +3814,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasPath_quadraticCurveTo(ptr: KPointer, cpx: KDouble, cpy: KDouble, x: KDouble, y: KDouble): void
     @ani.unsafe.Quick
     native static _CanvasPath_rect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_roundRect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasPattern_construct(): KPointer
     @ani.unsafe.Direct
@@ -3849,7 +3853,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CanvasRenderer_createConicGradient(ptr: KPointer, startAngle: KDouble, x: KDouble, y: KDouble): KPointer
     @ani.unsafe.Quick
-    native static _CanvasRenderer_getPixelMap(ptr: KPointer, sx: KDouble, sy: KDouble, sw: KDouble, sh: KDouble): KPointer
+    native static _CanvasRenderer_getPixelMap(ptr: KPointer, sx: KDouble, sy: KDouble, sw: KDouble, sh: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _CanvasRenderer_getLineDash(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -4330,6 +4334,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DisappearSymbolEffect_setScope(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _DismissContentCoverAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissContentCoverAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
     native static _DismissDialogAction_construct(): KPointer
     @ani.unsafe.Direct
     native static _DismissDialogAction_getFinalizer(): KPointer
@@ -4349,6 +4363,16 @@ export class ArkUIGeneratedNativeModule {
     native static _DismissPopupAction_getReason(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissSheetAction_setReason(ptr: KPointer, reason: KInt): void
     @ani.unsafe.Direct
     native static _DotIndicator_construct(): KPointer
     @ani.unsafe.Direct
@@ -4980,7 +5004,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IMEClient_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _IMEClient_setExtraConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _IMEClient_setExtraConfig(ptr: KPointer, config: KPointer): void
     @ani.unsafe.Direct
     native static _IMEClient_getNodeId(ptr: KPointer): int64
     @ani.unsafe.Direct
@@ -6194,6 +6218,12 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ShaderStyle_getFinalizer(): KPointer
     @ani.unsafe.Direct
+    native static _SheetDismiss_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _SheetDismiss_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _SheetDismiss_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _SpringMotion_construct(start: number, end: number, velocity: number, prop: KPointer): KPointer
     @ani.unsafe.Direct
     native static _SpringMotion_getFinalizer(): KPointer
@@ -6738,6 +6768,8 @@ export class ArkUIGeneratedNativeModule {
     native static _UIObserverGestureEventOps_setOnWillTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnDidTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_addGlobalGestureListener(type: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
     native static _UIScrollableCommonEvent_construct(ptr: KPointer): KPointer
     @ani.unsafe.Direct

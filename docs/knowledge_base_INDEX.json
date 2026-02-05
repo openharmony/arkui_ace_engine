@@ -1,0 +1,737 @@
+{
+  "knowledge_bases": [
+    {
+      "name": "Text",
+      "name_cn": "文本组件",
+      "category": "basic",
+      "type": "component",
+      "keywords": [
+        "文本显示",
+        "文字",
+        "font",
+        "span",
+        "文本样式",
+        "字体大小",
+        "文本选择",
+        "跑马灯",
+        "AI实体识别",
+        "文本拖拽",
+        "typography"
+      ],
+      "aliases": [
+        "Text组件",
+        "文本",
+        "文字组件"
+      ],
+      "file_path": "pattern/text/Text_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
+        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_layout_algorithm.h",
+        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_property.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Menu",
+      "name_cn": "菜单组件",
+      "category": "advanced",
+      "type": "component",
+      "keywords": [
+        "菜单",
+        "dropdown",
+        "context menu",
+        "子菜单",
+        "submenu",
+        "下拉菜单",
+        "右键菜单",
+        "弹出菜单",
+        "menu item",
+        "preview",
+        "hover menu"
+      ],
+      "aliases": [
+        "Menu组件",
+        "下拉菜单",
+        "上下文菜单"
+      ],
+      "file_path": "pattern/menu/Menu_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_model_ng.cpp",
+        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/menu.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/MenuModifier.d.ts"
+      },
+      "last_updated": "2026-01-26"
+    },
+    {
+      "name": "Refresh",
+      "name_cn": "下拉刷新组件",
+      "category": "advanced",
+      "type": "component",
+      "keywords": [
+        "下拉刷新",
+        "pull to refresh",
+        "refresh",
+        "loading",
+        "加载中",
+        "刷新状态",
+        "自定义刷新UI",
+        "nested scroll",
+        "嵌套滚动",
+        "spring animation",
+        "弹簧动画"
+      ],
+      "aliases": [
+        "Refresh组件",
+        "下拉刷新",
+        "刷新组件"
+      ],
+      "file_path": "pattern/refresh/Refresh_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
+        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_property.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/RefreshModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Scroll",
+      "name_cn": "滚动容器组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "滚动",
+        "scroll",
+        "滚动容器",
+        "scrollable",
+        "scroll bar",
+        "滚动条",
+        "edge effect",
+        "边缘效果",
+        "nested scroll",
+        "嵌套滚动",
+        "scroll position",
+        "滚动位置",
+        "scroll to",
+        "scrollby"
+      ],
+      "aliases": [
+        "Scroll组件",
+        "滚动组件",
+        "滚动容器"
+      ],
+      "file_path": "pattern/scroll/Scroll_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
+        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ScrollModifier.d.ts"
+      },
+      "last_updated": "2026-01-30"
+    },
+    {
+      "name": "LazyGrid",
+      "name_cn": "懒加载网格组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "懒加载",
+        "网格",
+        "grid",
+        "lazy load",
+        "性能优化",
+        "虚拟列表",
+        "lazy foreach",
+        "grid layout",
+        "lanes",
+        "位置缓存",
+        "预测渲染"
+      ],
+      "aliases": [
+        "LazyGrid组件",
+        "懒加载网格",
+        "LazyForEach"
+      ],
+      "file_path": "pattern/lazy_layout/LazyGrid_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_model_ng.cpp",
+        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/lazy_grid/lazy_grid_layout_algorithm.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/lazyGrid.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/LazyGridModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Badge",
+      "name_cn": "徽标组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "徽标",
+        "badge",
+        "标记",
+        "数字标记",
+        "红点",
+        "角标",
+        "notification",
+        "通知标记"
+      ],
+      "aliases": [
+        "Badge组件",
+        "徽标",
+        "标记组件"
+      ],
+      "file_path": "pattern/badge/Badge_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/badge.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/BadgeModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Image",
+      "name_cn": "图片组件",
+      "category": "media",
+      "type": "component",
+      "keywords": [
+        "图片",
+        "image",
+        "图片加载",
+        "image sync",
+        "alt",
+        "占位图",
+        "loading",
+        "图片缓存",
+        "SVG",
+        "bitmap"
+      ],
+      "aliases": [
+        "Image组件",
+        "图片"
+      ],
+      "file_path": "pattern/image/Image_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/image.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ImageModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "ImageAnimator",
+      "name_cn": "图片动画组件",
+      "category": "media",
+      "type": "component",
+      "keywords": [
+        "图片动画",
+        "帧动画",
+        "image animator",
+        "frame animation",
+        "图片序列",
+        "animation"
+      ],
+      "aliases": [
+        "ImageAnimator组件",
+        "图片动画",
+        "帧动画"
+      ],
+      "file_path": "pattern/image_animator/Image_Animator_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/imageAnimator.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ImageAnimatorModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Marquee",
+      "name_cn": "跑马灯组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "跑马灯",
+        "marquee",
+        "滚动文本",
+        "文本滚动",
+        "跑马灯动画",
+        "scrolling text"
+      ],
+      "aliases": [
+        "Marquee组件",
+        "跑马灯",
+        "滚动文本"
+      ],
+      "file_path": "pattern/marquee/Marquee_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/marquee.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/MarqueeModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Search",
+      "name_cn": "搜索框组件",
+      "category": "basic",
+      "type": "component",
+      "keywords": [
+        "搜索框",
+        "search",
+        "搜索",
+        "输入框",
+        "search box",
+        "filter",
+        "search icon",
+        "清除按钮"
+      ],
+      "aliases": [
+        "Search组件",
+        "搜索框",
+        "搜索组件"
+      ],
+      "file_path": "pattern/search/Search_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/search.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/SearchModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "TextClock",
+      "name_cn": "文本时钟组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "时钟",
+        "text clock",
+        "时间显示",
+        "数字时钟",
+        "timezone",
+        "时区",
+        "时间格式"
+      ],
+      "aliases": [
+        "TextClock组件",
+        "时钟",
+        "文本时钟"
+      ],
+      "file_path": "pattern/text_clock/TextClock_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/textClock.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextClockModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "TextTimer",
+      "name_cn": "文本计时器组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "计时器",
+        "text timer",
+        "倒计时",
+        "定时器",
+        "stopwatch",
+        "计时",
+        "elapsed time"
+      ],
+      "aliases": [
+        "TextTimer组件",
+        "计时器",
+        "文本计时器"
+      ],
+      "file_path": "pattern/texttimer/TextTimer_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextTimerModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "WaterFlow",
+      "name_cn": "瀑布流组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "瀑布流",
+        "waterflow",
+        "不规则网格",
+        "pinterest grid",
+        "columns",
+        "列布局",
+        "lazy load"
+      ],
+      "aliases": [
+        "WaterFlow组件",
+        "瀑布流",
+        "不规则网格"
+      ],
+      "file_path": "pattern/waterflow/WaterFlow_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp",
+        "layout": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_layout_algorithm.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/waterFlow.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/WaterFlowModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "CalendarPicker",
+      "name_cn": "日历选择器组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "日历",
+        "calendar",
+        "日历选择器",
+        "date range",
+        "日期范围",
+        "月份选择"
+      ],
+      "aliases": [
+        "CalendarPicker组件",
+        "日历选择器",
+        "日历"
+      ],
+      "file_path": "pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/calendarPicker.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/CalendarPickerModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "ContainerPicker",
+      "name_cn": "容器选择器组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "容器选择器",
+        "container picker",
+        "弹出选择",
+        "popup picker"
+      ],
+      "aliases": [
+        "ContainerPicker组件",
+        "容器选择器"
+      ],
+      "file_path": "pattern/container_picker/Container_Picker_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/containerPicker.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/ContainerPickerModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Counter",
+      "name_cn": "计数器组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "计数器",
+        "counter",
+        "加减",
+        "数字选择",
+        "步进器",
+        "stepper"
+      ],
+      "aliases": [
+        "Counter组件",
+        "计数器",
+        "步进器"
+      ],
+      "file_path": "pattern/counter/Counter_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/counter.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/CounterModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "Gauge",
+      "name_cn": "仪表盘组件",
+      "category": "data_display",
+      "type": "component",
+      "keywords": [
+        "仪表盘",
+        "gauge",
+        "数据可视化",
+        "进度环",
+        "value gauge",
+        "gradient gauge",
+        "data gauge"
+      ],
+      "aliases": [
+        "Gauge组件",
+        "仪表盘",
+        "仪表盘组件"
+      ],
+      "file_path": "pattern/gauge/Gauge_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/gauge.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/GaugeModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "DatePicker",
+      "name_cn": "日期选择器组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "日期选择器",
+        "date picker",
+        "date",
+        "日期",
+        "年月日"
+      ],
+      "aliases": [
+        "DatePicker组件",
+        "日期选择器"
+      ],
+      "file_path": "pattern/picker/Date_Picker_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/datePicker.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/DatePickerModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "TimePicker",
+      "name_cn": "时间选择器组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "时间选择器",
+        "time picker",
+        "time",
+        "时间",
+        "时分秒"
+      ],
+      "aliases": [
+        "TimePicker组件",
+        "时间选择器"
+      ],
+      "file_path": "pattern/time_picker/Time_Picker_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/timePicker.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TimePickerModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "TextPicker",
+      "name_cn": "文本选择器组件",
+      "category": "selector",
+      "type": "component",
+      "keywords": [
+        "文本选择器",
+        "text picker",
+        "picker",
+        "选择器",
+        "滚动选择"
+      ],
+      "aliases": [
+        "TextPicker组件",
+        "文本选择器"
+      ],
+      "file_path": "pattern/text_picker/Text_Picker_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/textPicker.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/TextPickerModifier.d.ts"
+      },
+      "last_updated": "2026-02-03"
+    },
+    {
+      "name": "ArkUI SDK API",
+      "name_cn": "ArkUI SDK API知识库",
+      "category": "sdk",
+      "type": "sdk",
+      "keywords": [
+        "SDK",
+        "API",
+        "FrameNode",
+        "BuilderNode",
+        "RenderNode",
+        "Modifier",
+        "Static API",
+        "Dynamic API",
+        "状态管理",
+        "@State",
+        "@Prop",
+        "@Link",
+        "AppStorage",
+        "component API",
+        "组件接口",
+        "SDK API",
+        "ArkUI SDK",
+        "API文档",
+        "接口文档"
+      ],
+      "aliases": [
+        "SDK API",
+        "ArkUI SDK",
+        "API文档",
+        "接口文档"
+      ],
+      "file_path": "sdk/ArkUI_SDK_API_Knowledge_Base.md",
+      "source_paths": {
+        "sdk": "OpenHarmony/interface/sdk-js/api/arkui/"
+      },
+      "api_paths": {
+        "all": "OpenHarmony/interface/sdk-js/api/arkui/"
+      },
+      "last_updated": "2026-02-04"
+    }
+  ],
+  "categories": {
+    "basic": {
+      "name": "基础组件",
+      "description": "常用的基础UI组件",
+      "components": [
+        "Text",
+        "Search"
+      ]
+    },
+    "container": {
+      "name": "容器组件",
+      "description": "用于组织和布局其他组件的容器",
+      "components": [
+        "Scroll",
+        "LazyGrid",
+        "WaterFlow"
+      ]
+    },
+    "selector": {
+      "name": "选择器组件",
+      "description": "用于数据选择的组件",
+      "components": [
+        "CalendarPicker",
+        "ContainerPicker",
+        "Counter",
+        "DatePicker",
+        "TimePicker",
+        "TextPicker"
+      ]
+    },
+    "shape": {
+      "name": "形状组件",
+      "description": "用于绘制基本形状的组件",
+      "components": []
+    },
+    "media": {
+      "name": "媒体组件",
+      "description": "用于媒体内容展示的组件",
+      "components": [
+        "Image",
+        "ImageAnimator"
+      ]
+    },
+    "data_display": {
+      "name": "数据展示组件",
+      "description": "用于数据展示的组件",
+      "components": [
+        "Badge",
+        "Gauge",
+        "Marquee",
+        "TextClock",
+        "TextTimer"
+      ]
+    },
+    "rich_text": {
+      "name": "富文本组件",
+      "description": "用于富文本展示的组件",
+      "components": []
+    },
+    "advanced": {
+      "name": "高级组件",
+      "description": "提供复杂交互功能的高级组件",
+      "components": [
+        "Menu",
+        "Refresh"
+      ]
+    },
+    "sdk": {
+      "name": "SDK API",
+      "description": "ArkUI SDK API 文档",
+      "components": [
+        "ArkUI SDK API"
+      ]
+    }
+  }
+}

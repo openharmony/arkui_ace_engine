@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,11 @@ import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonSha
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookLineAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { ModifierStateManager } from "./../CommonModifier"
 import { LineModifier } from "./../LineModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
@@ -143,8 +143,8 @@ export type ShapePoint = [
     Length
 ]
 export interface LineOptions {
-    width?: string | double;
-    height?: string | double;
+    width?: Length;
+    height?: Length;
 }
 export interface LineAttribute extends CommonShapeMethod {
     setLineOptions(options?: LineOptions): this {
@@ -212,7 +212,7 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
     }
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookLineAttributeModifier(this, value);
+            hookLineAttributeModifier(this, value);
         })
         return this
     }
@@ -255,6 +255,10 @@ export class LineOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -271,6 +275,10 @@ export class LineOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -279,35 +287,39 @@ export class LineOptions_serializer {
     public static read(buffer: DeserializerBase): LineOptions {
         let valueDeserializer : DeserializerBase = buffer
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : string | double | undefined = undefined
+        let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+            let widthTmpBuf_ : string | double | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toByte()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (widthTmpBuf_UnionSelector == (1).toByte()) {
                 widthTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (widthTmpBuf_UnionSelector == (2).toByte()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
-        const widthTmpResult : string | double | undefined = widthTmpBuf
+        const widthTmpResult : Length | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : string | double | undefined = undefined
+        let heightTmpBuf : Length | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+            let heightTmpBuf_ : string | double | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toByte()) {
                 heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (heightTmpBuf_UnionSelector == (1).toByte()) {
                 heightTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (heightTmpBuf_UnionSelector == (2).toByte()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double)
+            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
         }
-        const heightTmpResult : string | double | undefined = heightTmpBuf
+        const heightTmpResult : Length | undefined = heightTmpBuf
         let value : LineOptions = ({width: widthTmpResult, height: heightTmpResult} as LineOptions)
         return value
     }

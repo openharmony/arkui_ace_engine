@@ -15,6 +15,7 @@
 
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
+#include "base/utils/layout_break_point.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"

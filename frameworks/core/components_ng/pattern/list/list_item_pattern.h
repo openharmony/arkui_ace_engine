@@ -20,6 +20,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/list/list_item_theme.h"
+#include "core/components_ng/event/focus_type.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
@@ -87,20 +88,7 @@ public:
 
     bool RenderCustomChild(int64_t deadline) override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        if (listItemStyle_ == V2::ListItemStyle::CARD) {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-            auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
-            CHECK_NULL_RETURN(listItemTheme, FocusPattern());
-            FocusPaintParam paintParam;
-            paintParam.SetPaintColor(listItemTheme->GetItemFocusBorderColor());
-            paintParam.SetPaintWidth(listItemTheme->GetItemFocusBorderWidth());
-            return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER, paintParam };
-        }
-        return { FocusType::SCOPE, true };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {

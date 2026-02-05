@@ -19,6 +19,7 @@
 #include "ani.h"
 
 namespace OHOS::Ace::Ani {
+constexpr int32_t SPECIFIED_CAPACITY = 16;
 class NativeCustomComponent {
 public:
     static ani_status BindNativeCustomComponent(ani_env *env);

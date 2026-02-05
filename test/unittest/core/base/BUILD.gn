@@ -74,6 +74,7 @@ ace_unittest("ui_node_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
   sources = [
+    "ui_node_multi_thread_test.cpp",
     "ui_node_test_ng.cpp",
     "ui_node_test_ng_two.cpp",
   ]
@@ -180,6 +181,12 @@ ace_unittest("transparent_node_detector_test_ng") {
   ]
 }
 
+ace_unittest("modifier_test_ng") {
+  module_name = "basic"
+  type = "new"
+  sources = [ "modifier_test_ng.cpp" ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
@@ -205,6 +212,7 @@ group("core_base_unittest") {
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
+    ":modifier_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode) {

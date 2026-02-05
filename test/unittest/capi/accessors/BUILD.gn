@@ -40,7 +40,7 @@ ace_unittest("capi_all_accessors_test") {
     "canvas_renderer_accessor_test2.cpp",
 
     # "canvas_rendering_context2d_accessor_test.cpp",
-    # "checkbox_content_modifier_accessor_test.cpp",
+    "checkbox_content_modifier_accessor_test.cpp",
     #"canvas_rendering_context2d_accessor_test.cpp",
     # "children_main_size_accessor_test.cpp",
     #"click_event_accessor_test.cpp",

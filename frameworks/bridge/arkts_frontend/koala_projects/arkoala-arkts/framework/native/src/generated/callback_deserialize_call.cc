@@ -734,7 +734,8 @@ void deserializeAndCallCallback_DismissContentCoverAction_Void(KSerializerBuffer
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DismissContentCoverAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DismissContentCoverAction_Void))));
     thisDeserializer.readPointer();
-    Ark_DismissContentCoverAction value0 = DismissContentCoverAction_serializer::read(thisDeserializer);
+    Ark_DismissContentCoverAction value0 = static_cast<Ark_DismissContentCoverAction>(
+        DismissContentCoverAction_serializer::read(thisDeserializer));
     _call(_resourceId, value0);
 }
 void deserializeAndCallSyncCallback_DismissContentCoverAction_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -743,7 +744,8 @@ void deserializeAndCallSyncCallback_DismissContentCoverAction_Void(Ark_VMContext
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DismissContentCoverAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DismissContentCoverAction_Void))));
-    Ark_DismissContentCoverAction value0 = DismissContentCoverAction_serializer::read(thisDeserializer);
+    Ark_DismissContentCoverAction value0 = static_cast<Ark_DismissContentCoverAction>(
+        DismissContentCoverAction_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_DismissDialogAction_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -788,7 +790,8 @@ void deserializeAndCallCallback_DismissSheetAction_Void(KSerializerBuffer thisAr
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DismissSheetAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DismissSheetAction_Void))));
     thisDeserializer.readPointer();
-    Ark_DismissSheetAction value0 = DismissSheetAction_serializer::read(thisDeserializer);
+    Ark_DismissSheetAction value0 = static_cast<Ark_DismissSheetAction>(
+        DismissSheetAction_serializer::read(thisDeserializer));
     _call(_resourceId, value0);
 }
 void deserializeAndCallSyncCallback_DismissSheetAction_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -797,7 +800,8 @@ void deserializeAndCallSyncCallback_DismissSheetAction_Void(Ark_VMContext vmCont
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DismissSheetAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DismissSheetAction_Void))));
-    Ark_DismissSheetAction value0 = DismissSheetAction_serializer::read(thisDeserializer);
+    Ark_DismissSheetAction value0 = static_cast<Ark_DismissSheetAction>(
+        DismissSheetAction_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_DragEvent_Opt_String_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3330,7 +3334,7 @@ void deserializeAndCallCallback_SheetDismiss_Void(KSerializerBuffer thisArray, A
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_SheetDismiss sheetDismiss)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SheetDismiss_Void))));
     thisDeserializer.readPointer();
-    Ark_SheetDismiss sheetDismiss = SheetDismiss_serializer::read(thisDeserializer);
+    Ark_SheetDismiss sheetDismiss = static_cast<Ark_SheetDismiss>(SheetDismiss_serializer::read(thisDeserializer));
     _call(_resourceId, sheetDismiss);
 }
 void deserializeAndCallSyncCallback_SheetDismiss_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3339,7 +3343,7 @@ void deserializeAndCallSyncCallback_SheetDismiss_Void(Ark_VMContext vmContext, K
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SheetDismiss sheetDismiss)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SheetDismiss_Void))));
-    Ark_SheetDismiss sheetDismiss = SheetDismiss_serializer::read(thisDeserializer);
+    Ark_SheetDismiss sheetDismiss = static_cast<Ark_SheetDismiss>(SheetDismiss_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, sheetDismiss);
 }
 void deserializeAndCallCallback_SheetType_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -7729,6 +7733,38 @@ void deserializeAndCallSyncUIObserver_GestureEventListenerCallback(Ark_VMContext
     Opt_FrameNode node = nodeTmpBuf;
     callSyncMethod(vmContext, resourceId, event, node);
 }
+void deserializeAndCallUIObserver_GestureListenerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_GestureListenerCallback))));
+    thisDeserializer.readPointer();
+    Ark_InnerGestureTriggerInfo info = InnerGestureTriggerInfo_serializer::read(thisDeserializer);
+    const auto frameNodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode frameNodeTmpBuf = {};
+    frameNodeTmpBuf.tag = frameNodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((frameNodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        frameNodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode frameNode = frameNodeTmpBuf;
+    _call(_resourceId, info, frameNode);
+}
+void deserializeAndCallSyncUIObserver_GestureListenerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_GestureListenerCallback))));
+    Ark_InnerGestureTriggerInfo info = InnerGestureTriggerInfo_serializer::read(thisDeserializer);
+    const auto frameNodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode frameNodeTmpBuf = {};
+    frameNodeTmpBuf.tag = frameNodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((frameNodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        frameNodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode frameNode = frameNodeTmpBuf;
+    callSyncMethod(vmContext, resourceId, info, frameNode);
+}
 void deserializeAndCallUIObserver_PanListenerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -8222,6 +8258,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisArray, thisLength);
         case Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallUIObserver_ClickEventListenerCallback(thisArray, thisLength);
         case Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallUIObserver_GestureEventListenerCallback(thisArray, thisLength);
+        case Kind_UIObserver_GestureListenerCallback: return deserializeAndCallUIObserver_GestureListenerCallback(thisArray, thisLength);
         case Kind_UIObserver_PanListenerCallback: return deserializeAndCallUIObserver_PanListenerCallback(thisArray, thisLength);
         case Kind_UIStatesChangeHandler: return deserializeAndCallUIStatesChangeHandler(thisArray, thisLength);
         case Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisArray, thisLength);
@@ -8580,6 +8617,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallSyncType_WebAttribute_onInterceptRequest(vmContext, thisArray, thisLength);
         case Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallSyncUIObserver_ClickEventListenerCallback(vmContext, thisArray, thisLength);
         case Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallSyncUIObserver_GestureEventListenerCallback(vmContext, thisArray, thisLength);
+        case Kind_UIObserver_GestureListenerCallback: return deserializeAndCallSyncUIObserver_GestureListenerCallback(vmContext, thisArray, thisLength);
         case Kind_UIObserver_PanListenerCallback: return deserializeAndCallSyncUIObserver_PanListenerCallback(vmContext, thisArray, thisLength);
         case Kind_UIStatesChangeHandler: return deserializeAndCallSyncUIStatesChangeHandler(vmContext, thisArray, thisLength);
         case Kind_UpdateTransitionCallback: return deserializeAndCallSyncUpdateTransitionCallback(vmContext, thisArray, thisLength);

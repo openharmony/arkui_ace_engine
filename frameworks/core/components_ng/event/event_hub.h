@@ -19,24 +19,44 @@
 #include <list>
 #include <utility>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/event/input_event_hub.h"
-#include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/event/focus_type.h"
 #include "core/components_ng/event/visible_ratio_callback.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/event/ace_events.h"
+#include "core/gestures/drag_constants.h"
+#include "ui/base/geometry/point.h"
+
+namespace OHOS::Ace {
+class DragEvent;
+class DragSpringLoadingContext;
+struct EventTarget;
+}
 
 namespace OHOS::Ace::NG {
 
 class FrameNode;
 class InspectorFilter;
+class PipelineContext;
+class FocusPaintParam;
+class FocusPattern;
+class FocusHub;
+class GestureEventHub;
+class InputEventHub;
+class StateStyleManager;
+struct DragDropInfo;
+using UIState = uint64_t;
 
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 using OnPreDragFunc = std::function<void(const PreDragStatus)>;
 using OnSizeChangedFunc = std::function<void(const RectF& oldRect, const RectF& rect)>;
+using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
+using OnDragDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
 
 struct KeyboardShortcut {
     std::string value;
@@ -121,18 +141,12 @@ class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType);
 
 public:
-    EventHub() = default;
-    ~EventHub() override
-    {
-        keyboardShortcut_.clear();
-    };
+    EventHub();
+    ~EventHub() override;
 
     const RefPtr<GestureEventHub>& GetOrCreateGestureEventHub();
 
-    virtual RefPtr<GestureEventHub> CreateGestureEventHub()
-    {
-        return MakeRefPtr<GestureEventHub>(WeakClaim(this));
-    }
+    virtual RefPtr<GestureEventHub> CreateGestureEventHub();
 
     const RefPtr<GestureEventHub>& GetGestureEventHub() const;
     void SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub);

@@ -206,6 +206,10 @@ public:
 
     void CancelAnimationFrame(const std::string& callbackId) override;
 
+    void SetMonitorForCrownEvents(const std::string& callbackId) override;
+
+    void ClearMonitorForCrownEvents() override;
+
     SingleTaskExecutor GetAnimationJsTask() override;
 
     SingleTaskExecutor GetUiTask() override;

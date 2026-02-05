@@ -100,6 +100,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToImagePixelMapPtr)
         },
         ani_native_function {
+            "_Extractors_ToInputMethodExtraConfigPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToInputMethodExtraConfigPtr)
+        },
+        ani_native_function {
             "_Image_ResizableOptions",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)
@@ -1707,6 +1712,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveTapListenerCallback)
         },
         ani_native_function {
+            "_GestureEventUIObserver_AddGlobalGestureListener",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AddGlobalGestureListener)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemoveGlobalGestureListener",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveGlobalGestureListener)
+        },
+        ani_native_function {
             "_SetCustomCallbackWithCheck",
             "lC{arkui.FrameNode.FrameNode}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
@@ -1735,12 +1750,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ResolveUIContext",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ResolveUIContext)
-       },
-       ani_native_function {
+        },
+        ani_native_function {
             "_DetachedFreeRoot_Construct",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructDetachedFreeRoot)
-       }
+        },
+        ani_native_function {
+            "_GetPageRootNode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetPageRootNode)
+        }
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

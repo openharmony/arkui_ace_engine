@@ -97,7 +97,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
-    auto container = Container::CurrentSafely();
+    auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
@@ -1153,17 +1153,32 @@ bool ResourceAdapterImplV2::ExistDarkResById(const std::string& resourceId)
     if (resId == UINT32_MAX) {
         return false;
     }
+
     auto colorMode = GetResourceColorMode();
-    bool colorChanged = false;
-    if (colorMode == ColorMode::LIGHT) {
-        UpdateColorMode(ColorMode::DARK);
-        colorChanged = true;
-    }
     std::shared_ptr<Global::Resource::ResConfig> appResCfg(Global::Resource::CreateResConfig());
-    auto state = manager->GetResConfigById(resId, *appResCfg);
-    if (colorChanged) {
-        UpdateColorMode(ColorMode::LIGHT);
+    Global::Resource::RState state;
+
+    // If already in dark mode, query directly
+    if (colorMode == ColorMode::DARK) {
+        state = manager->GetResConfigById(resId, *appResCfg);
+    } else {
+        // Use override adapter to avoid global config switching
+        ResourceConfiguration darkConfig;
+        darkConfig.SetColorMode(ColorMode::DARK);
+        ConfigurationChange configChange { .colorModeUpdate = true };
+
+        auto darkAdapter = GetOverrideResourceAdapter(darkConfig, configChange);
+        CHECK_NULL_RETURN(darkAdapter, false);
+
+        auto darkAdapterV2 = AceType::DynamicCast<ResourceAdapterImplV2>(darkAdapter);
+        CHECK_NULL_RETURN(darkAdapterV2, false);
+
+        auto darkManager = darkAdapterV2->GetResourceManager();
+        CHECK_NULL_RETURN(darkManager, false);
+
+        state = darkManager->GetResConfigById(resId, *appResCfg);
     }
+
     return (state == Global::Resource::SUCCESS) &&
         (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
 }
@@ -1180,17 +1195,32 @@ bool ResourceAdapterImplV2::ExistDarkResByName(const std::string& resourceName, 
         return false;
     }
     auto type = static_cast<OHOS::Global::Resource::ResType>(resType);
+
     auto colorMode = GetResourceColorMode();
-    bool colorChanged = false;
-    if (colorMode == ColorMode::LIGHT) {
-        UpdateColorMode(ColorMode::DARK);
-        colorChanged = true;
-    }
     std::shared_ptr<Global::Resource::ResConfig> appResCfg(Global::Resource::CreateResConfig());
-    auto state = manager->GetResConfigByName(resourceName, type, *appResCfg);
-    if (colorChanged) {
-        UpdateColorMode(ColorMode::LIGHT);
+    Global::Resource::RState state;
+
+    // If already in dark mode, query directly
+    if (colorMode == ColorMode::DARK) {
+        state = manager->GetResConfigByName(resourceName, type, *appResCfg);
+    } else {
+        // Use override adapter to avoid global config switching
+        ResourceConfiguration darkConfig;
+        darkConfig.SetColorMode(ColorMode::DARK);
+        ConfigurationChange configChange { .colorModeUpdate = true };
+
+        auto darkAdapter = GetOverrideResourceAdapter(darkConfig, configChange);
+        CHECK_NULL_RETURN(darkAdapter, false);
+
+        auto darkAdapterV2 = AceType::DynamicCast<ResourceAdapterImplV2>(darkAdapter);
+        CHECK_NULL_RETURN(darkAdapterV2, false);
+
+        auto darkManager = darkAdapterV2->GetResourceManager();
+        CHECK_NULL_RETURN(darkManager, false);
+
+        state = darkManager->GetResConfigByName(resourceName, type, *appResCfg);
     }
+
     return (state == Global::Resource::SUCCESS) &&
         (appResCfg->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK);
 }

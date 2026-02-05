@@ -862,13 +862,13 @@ void Inspector::AddOffscreenNode(RefPtr<FrameNode> node)
     auto pipeline = node->GetContextRefPtr();
     if (!pipeline) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get pipeline in node %{public}s",
-            node->GetInspectorId().value_or("").c_str());
+            node->GetTag().c_str());
         return;
     }
     auto offscreenNodesMgr = pipeline->GetInspectorOffscreenNodesMgr();
     if (!offscreenNodesMgr) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get offscreenNodesMgr in node %{public}s",
-            node->GetInspectorId().value_or("").c_str());
+            node->GetTag().c_str());
         return;
     }
     offscreenNodesMgr->AddOffscreenNode(node);
@@ -880,13 +880,13 @@ void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
     auto pipeline = node->GetContextRefPtr();
     if (!pipeline) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get pipeline in node %{public}s",
-            node->GetInspectorId().value_or("").c_str());
+            node->GetTag().c_str());
         return;
     }
     auto offscreenNodesMgr = pipeline->GetInspectorOffscreenNodesMgr();
     if (!offscreenNodesMgr) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get offscreenNodesMgr in node %{public}s",
-            node->GetInspectorId().value_or("").c_str());
+            node->GetTag().c_str());
         return;
     }
     offscreenNodesMgr->RemoveOffscreenNode(node);

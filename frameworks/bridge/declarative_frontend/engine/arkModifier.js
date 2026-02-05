@@ -98,7 +98,7 @@ class ModifierUtils {
     modifier._changed;
     let myMap = modifier._modifiersWithKeys;
     if (modifier._classType === ModifierType.STATE) {
-      const nativePtrValid = !modifier._weakPtr.invalid();
+      const nativePtrValid = modifier._weakPtr && (!modifier._weakPtr.invalid());
       const hostInstanceId = nativePtrValid ? getUINativeModule().frameNode.getNodeInstanceId(modifier.nativePtr) : -1;
       myMap.setOnChange((key, value) => {
         this.putDirtyModifier(modifier, value, hostInstanceId);
@@ -111,7 +111,7 @@ class ModifierUtils {
   }
   static putDirtyModifier(arkModifier, attributeModifierWithKey, hostInstanceId) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
-    if (!arkModifier._weakPtr.invalid()) {
+    if (arkModifier._weakPtr && (!arkModifier._weakPtr.invalid())) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
@@ -133,7 +133,7 @@ class ModifierUtils {
         clearTimeout(this.timeoutId);
       }
       this.dirtyComponentSet.forEach((item) => {
-        const nativePtrValid = !item._weakPtr.invalid();
+        const nativePtrValid = item._weakPtr && (!item._weakPtr.invalid());
         if (item._nativePtrChanged && nativePtrValid) {
           item._modifiersWithKeys.forEach((value, key) => {
             value.applyPeer(item.nativePtr,
@@ -1741,7 +1741,6 @@ class LazyArkSideBarContainerComponent extends ArkComponent {
       LazyArkSideBarContainerComponent.module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
     }
     this.lazyComponent = LazyArkSideBarContainerComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkSideBarContainerComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -1751,43 +1750,43 @@ class LazyArkSideBarContainerComponent extends ArkComponent {
     return this;
   }
   autoHide(value) {
-    this.lazyComponent.autoHide(callback);
+    this.lazyComponent.autoHide(value);
     return this;
   }
   showSideBar(value) {
-    this.lazyComponent.showSideBar(callback);
+    this.lazyComponent.showSideBar(value);
     return this;
   }
   maxSideBarWidth(value) {
-    this.lazyComponent.maxSideBarWidth(callback);
+    this.lazyComponent.maxSideBarWidth(value);
     return this;
   }
   minSideBarWidth(value) {
-    this.lazyComponent.minSideBarWidth(callback);
+    this.lazyComponent.minSideBarWidth(value);
     return this;
   }
   minContentWidth(value) {
-    this.lazyComponent.minContentWidth(callback);
+    this.lazyComponent.minContentWidth(value);
     return this;
   }
   controlButton(value) {
-    this.lazyComponent.controlButton(callback);
+    this.lazyComponent.controlButton(value);
     return this;
   }
   divider(value) {
-    this.lazyComponent.divider(callback);
+    this.lazyComponent.divider(value);
     return this;
   }
   sideBarPosition(value) {
-    this.lazyComponent.sideBarPosition(callback);
+    this.lazyComponent.sideBarPosition(value);
     return this;
   }
   sideBarWidth(value) {
-    this.lazyComponent.sideBarWidth(callback);
+    this.lazyComponent.sideBarWidth(value);
     return this;
   }
   showControlButton(value) {
-    this.lazyComponent.showControlButton(callback);
+    this.lazyComponent.showControlButton(value);
     return this;
   }
 }
@@ -1966,19 +1965,21 @@ class LazyArkStepperItemComponent extends ArkComponent {
       LazyArkStepperItemComponent.module = globalThis.requireNapi('arkui.components.arkstepperitem');
     }
     this.lazyComponent = LazyArkStepperItemComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkStepperItemComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
   prevLabel(value) {
     this.lazyComponent.prevLabel(value);
+    return this;
   }
   nextLabel(value) {
     this.lazyComponent.nextLabel(value);
+    return this;
   }
   status(value) {
     this.lazyComponent.status(value);
+    return this;
   }
 }
 class StepperItemModifier extends LazyArkStepperItemComponent {
@@ -2097,33 +2098,43 @@ class LazyArkTimePickerComponent extends ArkComponent {
   }
   loop(value) {
     this.lazyComponent.loop(value);
+    return this;
   }
   digitalCrownSensitivity(value) {
     this.lazyComponent.digitalCrownSensitivity(value);
+    return this;
   }
   useMilitaryTime(value) {
     this.lazyComponent.useMilitaryTime(value);
+    return this;
   }
   disappearTextStyle(value) {
     this.lazyComponent.disappearTextStyle(value);
+    return this;
   }
   textStyle(value) {
     this.lazyComponent.textStyle(value);
+    return this;
   }
   selectedTextStyle(value) {
     this.lazyComponent.selectedTextStyle(value);
+    return this;
   }
   enableCascade(value) {
     this.lazyComponent.enableCascade(value);
+    return this;
   }
-  onChange(callback) {
+  onChange(value) {
     this.lazyComponent.onChange(value);
+    return this;
   }
   dateTimeOptions(value) {
     this.lazyComponent.dateTimeOptions(value);
+    return this;
   }
   enableHapticFeedback(value) {
     this.lazyComponent.enableHapticFeedback(value);
+    return this;
   }
 }
 
@@ -2359,11 +2370,68 @@ class MediaCachedImageModifier extends ArkMediaCachedImageComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-
-class SymbolGlyphModifier extends ArkSymbolGlyphComponent {
+class LazyArkSymbolGlyphComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkSymbolGlyphComponent.module === undefined) {
+      LazyArkSymbolGlyphComponent.module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+    }
+    this.lazyComponent = LazyArkSymbolGlyphComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  fontSize(value) {
+    this.lazyComponent.fontSize(value);
+    return this;
+  }
+  fontWeight(value) {
+    this.lazyComponent.fontWeight(value);
+    return this;
+  }
+  renderingStrategy(value) {
+    this.lazyComponent.renderingStrategy(value);
+    return this;
+  }
+  effectStrategy(value) {
+    this.lazyComponent.effectStrategy(value);
+    return this;
+  }
+  symbolEffect(effect, action) {
+    this.lazyComponent.symbolEffect(effect, action);
+    return this;
+  }
+  shaderStyle(value) {
+    this.lazyComponent.shaderStyle(value);
+    return this;
+  }
+  symbolShadow(value) {
+    this.lazyComponent.symbolShadow(value);
+    return this;
+  }
+  minFontScale(value) {
+    this.lazyComponent.minFontScale(value);
+    return this;
+  }
+  maxFontScale(value) {
+    this.lazyComponent.maxFontScale(value);
+    return this;
+  }
+}
+class SymbolGlyphModifier extends LazyArkSymbolGlyphComponent {
   constructor(src, nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
     if (src !== undefined) {
       this.initialize([src]);
     }
@@ -2440,7 +2508,6 @@ class LazyArkStepperComponent extends ArkComponent {
       LazyArkStepperComponent.module = globalThis.requireNapi('arkui.components.arkstepper');
     }
     this.lazyComponent = LazyArkStepperComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkStepperComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;

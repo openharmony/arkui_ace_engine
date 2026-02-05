@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
@@ -46,6 +47,15 @@ XComponentType ConvertToXComponentType(const std::string& type)
         return XComponentType::NODE;
     }
     return XComponentType::SURFACE;
+}
+
+void SendStatisticEvent(StatisticEventType type)
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
 }
 } // namespace
 
@@ -265,9 +275,20 @@ void JSXComponent::ExtractInfoToXComponentOptions(
         options.xcomponentController = GetXComponentController(controllerObj, options.id, info.GetExecutionContext());
     }
     if (type->IsString()) {
+        SendStatisticEvent(StatisticEventType::XCOMPONENT_TYPE_USE_STRING);
         options.xcomponentType = ConvertToXComponentType(type->ToString());
     } else if (type->IsNumber()) {
         options.xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
+        switch (options.xcomponentType) {
+            case XComponentType::COMPONENT:
+                SendStatisticEvent(StatisticEventType::XCOMPONENT_TYPE_COMPONENT);
+                break;
+            case XComponentType::NODE:
+                SendStatisticEvent(StatisticEventType::XCOMPONENT_TYPE_NODE);
+                break;
+            default:
+                break;
+        }
     }
     if (screenIdValue->IsNumber()) {
         options.screenId = screenIdValue->ToNumber<uint64_t>();

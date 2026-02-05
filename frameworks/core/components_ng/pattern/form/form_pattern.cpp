@@ -391,28 +391,29 @@ void FormPattern::HandleEnableForm(const bool enable)
 
 void FormPattern::ProcessCheckForm()
 {
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm formManagerBridge_ is null");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessCheckForm isSnapshot_:%{public}d", isSnapshot_);
+    auto checker = std::make_shared<FormSnapshotCheck>(formManagerBridge_);
     if (isSnapshot_) {
         auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
         if (!pixelMap) {
             TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm pixelMap_ is null");
             return;
         }
-        if (!formManagerBridge_) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "ProcessCheckForm formManagerBridge_ is null");
-            return;
-        }
-        int32_t ratio = FormSnapshotUtil::GetNonTransparentRatio(pixelMap);
-        formManagerBridge_->SendNonTransparencyRatio(ratio);
+        checker->OnSurfaceCapture(pixelMap);
         return;
     }
 
     ContainerScope scope(scopeId_);
     PostUITask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), checker] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             CHECK_NULL_VOID(pattern->formManagerBridge_);
-            pattern->SnapshotSurfaceNode(std::make_shared<FormSnapshotCheck>(pattern->formManagerBridge_));
+            pattern->SnapshotSurfaceNode(checker);
         },
         "ArkUIFormSnapshotSurfaceNodeForChecking");
 }
@@ -2112,7 +2113,7 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
-    formManagerBridge_->OnActionEvent(action);
+    formManagerBridge_->OnActionEvent(action, isManuallyClick_);
 }
 
 bool FormPattern::ISAllowUpdate() const

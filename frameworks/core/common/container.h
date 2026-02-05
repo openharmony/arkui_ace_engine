@@ -724,6 +724,11 @@ public:
         return false;
     }
 
+    virtual bool IsFloatingWindowStatus() const
+    {
+        return false;
+    }
+
     void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
     {
         containerHandler_ = containerHandler;

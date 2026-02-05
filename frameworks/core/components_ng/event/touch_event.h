@@ -40,6 +40,7 @@ class TouchEventImpl : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventImpl, AceType);
 public:
     explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
+    TouchEventImpl(const TouchEventFunc& callback) : callback_(callback) {}
     ~TouchEventImpl() override = default;
 
     const TouchEventFunc& GetTouchEventCallback() const

@@ -711,4 +711,56 @@ HWTEST_F(GridIrregularFillerTest, FillToTarget001, TestSize.Level1)
     EXPECT_NE(iter, info.gridMatrix_.end());
     EXPECT_EQ(iter->first, 0);
 }
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixFromStartIndex001
+ * @tc.desc: Test GridIrregularFiller::FillMatrixFromStartIndex with targetIdx out of bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndex001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo5());
+    CreateFixedItems(11);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 11;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.FillMatrixFromStartIndex(0, 0, 20);
+
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
+    EXPECT_EQ(filler.posY_, 11);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixFromStartIndex002
+ * @tc.desc: Test GridIrregularFiller::FillMatrixFromStartIndex with partially filled matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndex002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo8());
+    CreateFixedItems(7);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 7;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 1 } } },
+    };
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.FillMatrixFromStartIndex(0, 1, 6);
+
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
+    EXPECT_EQ(filler.posY_, 4);
+}
 } // namespace OHOS::Ace::NG

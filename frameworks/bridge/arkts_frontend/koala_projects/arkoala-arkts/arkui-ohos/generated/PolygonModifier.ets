@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,16 +22,16 @@ import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPolygonPeer, PolygonAttribute } from "./component/polygon"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ShapePoint } from "./component/line"
 export class PolygonModifier extends CommonMethodModifier implements PolygonAttribute,AttributeModifier<PolygonAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

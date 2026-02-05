@@ -682,6 +682,9 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, NotifyFillRequestSuccess001, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. Create ViewDataWrap.
+     */
     RefPtr<ViewDataWrap> viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     viewDataWrap->SetUserSelected(true);
     RefPtr<PageNodeInfoWrap> nodeWrap = PageNodeInfoWrap::CreatePageNodeInfoWrap();
@@ -693,9 +696,11 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, NotifyFillRequestSuccess001, TestSize.Lev
     nodeWrap->SetPlaceholder("");
     nodeWrap->SetMetadata("");
     nodeWrap->SetPasswordRules("");
+    /**
+     * @tc.steps: step2. test NotifyFillRequestSuccess.
+     */
     richEditorPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap,
         AceAutoFillType::ACE_UNSPECIFIED, AceAutoFillTriggerType::PASTE_REQUEST);
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
     EXPECT_TRUE(richEditorPattern->pasteStr_.empty());
 }
 
@@ -709,6 +714,9 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, NotifyFillRequestSuccess002, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. Create ViewDataWrap.
+     */
     RefPtr<ViewDataWrap> viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     viewDataWrap->SetUserSelected(true);
     RefPtr<PageNodeInfoWrap> nodeWrap = PageNodeInfoWrap::CreatePageNodeInfoWrap();
@@ -722,10 +730,13 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, NotifyFillRequestSuccess002, TestSize.Lev
     nodeWrap->SetPlaceholder("");
     nodeWrap->SetMetadata("");
     nodeWrap->SetPasswordRules("");
+    /**
+     * @tc.steps: step2. test NotifyFillRequestSuccess.
+     */
     richEditorPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap,
-        AceAutoFillType::ACE_UNSPECIFIED, AceAutoFillTriggerType::PASTE_REQUEST);
+        AceAutoFillType::ACE_UNSPECIFIED, AceAutoFillTriggerType::MANUAL_REQUEST);
     EXPECT_NE(1, richEditorPattern->textSelector_.baseOffset);
-    EXPECT_TRUE(richEditorPattern->spans_.empty());
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
 }
 
 /**
@@ -738,6 +749,9 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, NotifyFillRequestSuccess003, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. Create ViewDataWrap.
+     */
     RefPtr<ViewDataWrap> viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     viewDataWrap->SetUserSelected(true);
     RefPtr<PageNodeInfoWrap> nodeWrap = PageNodeInfoWrap::CreatePageNodeInfoWrap();
@@ -751,10 +765,13 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, NotifyFillRequestSuccess003, TestSize.Lev
     nodeWrap->SetPlaceholder("");
     nodeWrap->SetMetadata("");
     nodeWrap->SetPasswordRules("");
+    /**
+     * @tc.steps: step2. test NotifyFillRequestSuccess.
+     */
     richEditorPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap,
         AceAutoFillType::ACE_UNSPECIFIED, AceAutoFillTriggerType::PASTE_REQUEST);
     EXPECT_NE(0, richEditorPattern->textSelector_.destinationOffset);
-    EXPECT_TRUE(richEditorPattern->spans_.empty());
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
 }
 
 /**

@@ -91,6 +91,8 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
+#include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+
 namespace OHOS::Ace::NG::ViewModel {
 
 ArkUIAPICallbackMethod* callbacks = nullptr;
@@ -105,10 +107,9 @@ void* createTextNode(ArkUI_Int32 nodeId)
 
 void* createSymbolNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetSymbolGlyphCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createSpanNode(ArkUI_Int32 nodeId)
@@ -684,6 +685,20 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
 void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
 {
     auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag), nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param)
+{
+    RenderContext::ContextParam contextParam;
+    contextParam.type = static_cast<RenderContext::ContextType>(param.type);
+    if (param.surfaceName) {
+        contextParam.surfaceName = std::string(param.surfaceName);
+    }
+    contextParam.isSkipCheckInMultiInstance = param.isSkipCheckInMultiInstance;
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNodeWithParam(std::string(tag), contextParam);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

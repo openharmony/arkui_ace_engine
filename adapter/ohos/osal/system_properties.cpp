@@ -15,6 +15,8 @@
 
 #include "base/utils/system_properties.h"
 
+#include "base/utils/layout_break_point.h"
+
 #include <regex>
 #include <unistd.h>
 
@@ -111,7 +113,7 @@ bool IsDownloadByNetworkDisabled()
 
 bool IsRecycleImageEnabled()
 {
-    return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
+    return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
 }
 
 bool IsSvgTraceEnabled()
@@ -781,7 +783,7 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 bool SystemProperties::whiteBlockEnabled_ = false;
-int32_t SystemProperties::previewStatus_ = 0;
+int32_t SystemProperties::previewStatus_ = -1;
 int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPointNumber();
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
@@ -969,7 +971,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
         needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
         compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
-        previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", 0);
+        previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", -1);
         isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
         isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
         isOpenYuvDecode_ = ReadIsOpenYuvDecode();
@@ -1494,5 +1496,64 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 int32_t SystemProperties::GetPreviewStatus()
 {
     return previewStatus_;
+}
+
+void SystemProperties::SetDeviceType(DeviceType deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+void SystemProperties::SetDevicePhysicalWidth(int32_t devicePhysicalWidth)
+{
+    devicePhysicalWidth_ = devicePhysicalWidth;
+}
+
+void SystemProperties::SetDevicePhysicalHeight(int32_t devicePhysicalHeight)
+{
+    devicePhysicalHeight_ = devicePhysicalHeight;
+}
+
+void SystemProperties::SetFontWeightScale(const float fontWeightScale)
+{
+    if (fontWeightScale_ != fontWeightScale) {
+        fontWeightScale_ = fontWeightScale;
+    }
+}
+
+void SystemProperties::SetFontScale(const float fontScale)
+{
+    if (fontScale != fontScale_) {
+        fontScale_ = fontScale;
+    }
+}
+
+void SystemProperties::SetResolution(double resolution)
+{
+    resolution_ = resolution;
+}
+
+void SystemProperties::SetDeviceAccess(bool isDeviceAccess)
+{
+    isDeviceAccess_ = isDeviceAccess;
+}
+
+void SystemProperties::SetUnZipHap(bool unZipHap)
+{
+    unZipHap_.store(unZipHap);
+}
+
+void SystemProperties::SetExtSurfaceEnabled(bool extSurfaceEnabled)
+{
+    extSurfaceEnabled_ = extSurfaceEnabled;
+}
+
+void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
+{
+    stateManagerEnable_.store(stateManagerEnable);
+}
+
+void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
+{
+    faultInjectEnabled_ = faultInjectEnable;
 }
 } // namespace OHOS::Ace

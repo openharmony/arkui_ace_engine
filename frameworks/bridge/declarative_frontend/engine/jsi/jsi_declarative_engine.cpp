@@ -59,6 +59,7 @@
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -402,56 +403,6 @@ std::string BuildOhmUrl(const std::string& bundleName, const std::string& module
     }
     newPagePath = newPagePath.substr(pos);
     return tempUrl + "@" + harModuleName + "/" + newPagePath;
-}
-
-bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
-    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
-{
-    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
-    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
-    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
-        return false;
-    }
-    bundleName = jsBundleName->ToString(vm)->ToString(vm);
-    moduleName = jsModuleName->ToString(vm)->ToString(vm);
-    pagePath = jsPagePath->ToString(vm)->ToString(vm);
-    bool ohmUrlValid = false;
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
-        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
-        if (jsOhmUrl->IsString(vm)) {
-            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
-            ohmUrlValid = true;
-        } else {
-            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
-        }
-    }
-    if (!ohmUrlValid) {
-        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
-        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
-    }
-
-    std::string integratedHspName = "false";
-    // Integrated hsp adaptation
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
-        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (integratedHsp->IsString(vm)) {
-            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
-        }
-    }
-    if (integratedHspName == "true") {
-        LocalScope scope(vm);
-        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
-    }
-
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
-        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
-        if (pageFullPathInfo->IsString(vm)) {
-            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
-        }
-    }
-
-    return true;
 }
 
 std::string GetRealPagePath(const std::string& pagePath)
@@ -815,32 +766,52 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
     g_declarativeRuntime = runtime;
-    PreLoadArkuiModule(arkRuntime);
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+    PreLoadDynamicModule(arkRuntime);
+#endif
 }
 
-void JsiDeclarativeEngineInstance::PreLoadArkuiModule(const shared_ptr<JsRuntime>& runtime)
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
-    static const std::unordered_map<std::string_view, std::string_view> soMap = {
-        { "Gauge", "gauge" },
-        { "TimePicker", "timepicker" },
-        { "TimePickerDialog", "timepicker" },
-        { "WaterFlow", "waterflow" },
-        { "FlowItem", "flowitem" },
-        { "CalendarPicker", "calendarpicker" },
-        { "CalendarPickerDialog", "calendarpicker" },
-        { "Hyperlink", "hyperlink" },
+    static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "CalendarPicker", "arkui.components.arkcalendarpicker" },
+        { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
+        { "Checkbox", "arkui.components.arkcheckbox" },
+        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
+        { "ColumnSplit", "arkui.components.arkcolumnsplit" },
+        { "FlowItem", "arkui.components.arkflowitem" },
+#ifndef ARKUI_WEARABLE
+        { "FolderStack", "arkui.components.arkfolderstack" },
+#endif
+        { "Gauge", "arkui.components.arkgauge" },
+        { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "Indexer", "arkui.components.arkalphabetindexer" },
+        { "Marquee", "arkui.components.arkmarquee" },
+        { "Radio", "arkui.components.arkradio" },
+        { "Rating", "arkui.components.arkrating" },
+        { "RowSplit", "arkui.components.arkrowsplit" },
+        { "Sidebar", "arkui.components.arksidebarcontainer" },
+        { "Slider", "arkui.components.arkslider" },
+        { "Stepper", "arkui.components.arkstepper" },
+        { "StepperItem", "arkui.components.arkstepperitem" },
+        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "TimePicker", "arkui.components.arktimepicker" },
+        { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "WaterFlow", "arkui.components.arkwaterflow" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
-    shared_ptr<JsValue> func = global->GetProperty(runtime, "_ArkUIPreload_");
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
     if (!func || !func->IsFunction(runtime)) {
         return;
     }
-    for (const auto& pair : soMap) {
-        std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::string(pair.first)),
-            runtime->NewString(std::string(pair.second)) };
+    for (const auto& pair : componentToAbcName) {
+        std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(pair.first),
+            runtime->NewString(pair.second) };
         func->Call(runtime, global, argv, argv.size());
     }
 }
+#endif
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
 {
@@ -936,6 +907,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
 {
     validCustomRuntime_.erase(env);
+    IFunctionBinding::functions.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -1524,6 +1496,12 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
+JsiDeclarativeEngine::JsiDeclarativeEngine(int32_t instanceId, void* runtime)
+    : instanceId_(instanceId), runtime_(runtime) {}
+
+JsiDeclarativeEngine::JsiDeclarativeEngine(int32_t instanceId)
+    : instanceId_(instanceId) {}
+
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
@@ -2198,6 +2176,57 @@ int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundle
     CHECK_NULL_RETURN(runtime, false);
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     return arkRuntime->LoadDestinationFile(bundleName, moduleName, pageSourceFile, isSingleton);
+}
+
+bool JsiDeclarativeEngine::ParseNamedRouterParams(
+    const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
+    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
+{
+    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
+    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
+        return false;
+    }
+    bundleName = jsBundleName->ToString(vm)->ToString(vm);
+    moduleName = jsModuleName->ToString(vm)->ToString(vm);
+    pagePath = jsPagePath->ToString(vm)->ToString(vm);
+    bool ohmUrlValid = false;
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
+        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
+        if (jsOhmUrl->IsString(vm)) {
+            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
+            ohmUrlValid = true;
+        } else {
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
+        }
+    }
+    if (!ohmUrlValid) {
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
+        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
+    }
+
+    std::string integratedHspName = "false";
+    // Integrated hsp adaptation
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
+        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
+        if (integratedHsp->IsString(vm)) {
+            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
+        }
+    }
+    if (integratedHspName == "true") {
+        LocalScope scope(vm);
+        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
+    }
+
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
+        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
+        if (pageFullPathInfo->IsString(vm)) {
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
+        }
+    }
+
+    return true;
 }
 
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
@@ -2982,6 +3011,11 @@ void JsiDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, con
 
 void JsiDeclarativeEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) {}
 
+bool JsiDeclarativeEngine::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    return false;
+}
+
 void JsiDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args) {}
 
 void JsiDeclarativeEngine::RunGarbageCollection()
@@ -3613,6 +3647,12 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
         return;
     }
     LocalScope scope(vm);
+    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
+        PreloadUIContent(localRuntime_);
+        PreloadArkComponent(localRuntime_);
+        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
+        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
+    }
     switch (mode) {
         case FormJsXNodeLoadMode::NONE:
             return;
@@ -3624,11 +3664,6 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
             break;
         default:
             return;
-    }
-    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
-        PreloadUIContent(localRuntime_);
-        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
-        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
     }
     currentMode_ = mode;
 }

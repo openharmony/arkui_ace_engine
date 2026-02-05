@@ -849,7 +849,7 @@ void ToggleModelNG::CreateWithCheckBoxResourceObj(FrameNode* node, const ToggleC
             SetSelectedColor(AceType::RawPtr(frameNode), result);
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        } else {
+        } else if (toggleColorType == ToggleColorType::BACKGROUND_COLOR) {
             SetBackgroundColor(AceType::RawPtr(frameNode), result);
         }
     };

@@ -1013,7 +1013,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
     return (
         /** @memo */
         (...args: FixedArray<Any>) => {
-            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length];
+            let argsESValue: FixedArray<ESValueOrUndefined> = new FixedArray<ESValueOrUndefined>(args.length);
             for (let i = 0; i < args.length; i++) {
                 if (args[i] instanceof ESValue) {
                     argsESValue[i] = args[i] as ESValue;

@@ -74,8 +74,8 @@ public:
 Opt_LineOptions BuildLineOptions(double width, double height)
 {
     Ark_LineOptions options;
-    options.width = Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(width);
-    options.height = Converter::ArkUnion<Opt_Union_String_F64, Ark_Float64>(height);
+    options.width = Converter::ArkValue<Opt_Length>(width);
+    options.height = Converter::ArkValue<Opt_Length>(height);
     return Converter::ArkValue<Opt_LineOptions>(options);
 }
 

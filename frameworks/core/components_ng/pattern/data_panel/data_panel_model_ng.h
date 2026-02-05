@@ -56,6 +56,8 @@ public:
     void SetShadowOption(const DataPanelShadow& shadowOption) override;
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetValueColorsSetByUser(bool value) override;
+    void SetTrackBackgroundSetByUser(bool value) override;
+    void SetStrokeWidthSetByUser(bool value) override;
 
     static void CreateDataPanelModelNG(const std::vector<double>& values, double max, int32_t dataPanelType);
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
@@ -66,8 +68,11 @@ public:
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
     static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
     static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);
-    static void CreateWithResourceObj(FrameNode* frameNode, DataPanelResourceType colorType,
-        const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj);
+    static void SetValueColorsSetByUser(FrameNode* frameNode, bool value);
+    static void SetTrackBackgroundSetByUser(FrameNode* frameNode, bool value);
+    static void SetStrokeWidthSetByUser(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 

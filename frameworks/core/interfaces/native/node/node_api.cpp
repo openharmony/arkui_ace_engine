@@ -294,6 +294,11 @@ ArkUINodeHandle CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeByNodeId(tag, nodeId));
 }
 
+ArkUINodeHandle CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeWithParam(tag, param));
+}
+
 ArkUI_Bool IsRightToLeft()
 {
     return AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -2056,6 +2061,16 @@ void UnRegisterNodeAsyncCommonEventReceiver()
     NodeCommonEvent::globalCommonEventReceiver = nullptr;
 }
 
+ArkUI_Int32 CheckUIContextInvalide(ArkUI_Int32 instanceId)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID %{public}d", instanceId);
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2090,6 +2105,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
+        .checkUIContextInvalide = CheckUIContextInvalide,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2480,6 +2496,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
     .createCustomNodeByNodeId = CreateCustomNodeByNodeId,
+    .createCustomNodeWithParam = CreateCustomNodeWithParam,
 };
 /* clang-format on */
 
@@ -2723,7 +2740,7 @@ const ArkUIExtendedNodeAPI* GetExtendedAPI()
 ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
-    return new ArkUI_StyledString_Descriptor;
+    return new ArkUI_StyledString_Descriptor();
 }
 
 void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)

@@ -2046,6 +2046,80 @@ void UIExtensionPattern::DumpOthers()
     }
 }
 
+void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    CHECK_EQUAL_VOID(config.withUIExtension, false);
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params;
+    params.push_back("-allInfoWithParamConfigTotal");
+    params.push_back("1");
+    params.push_back(config.interactionInfo ? "1" : "0");
+    params.push_back(config.accessibilityInfo ? "1" : "0");
+    params.push_back(config.cacheNodes ? "1" : "0");
+    params.push_back(config.withWeb ? "1" : "0");
+    params.push_back(config.withUIExtension ? "1" : "0");
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+
+    ExecuteDumpTask(json, params, host);
+}
+
+void UIExtensionPattern::ExecuteDumpTask(
+    std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params, const RefPtr<FrameNode>& host)
+{
+    const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 900;
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostSyncTaskTimeout(
+        [json, params, weakThis = WeakClaim(this)]() {
+            auto pattern = weakThis.Upgrade();
+            if (!pattern || !pattern->sessionWrapper_) {
+                return;
+            }
+            std::vector<std::string> dumpInfo;
+            pattern->sessionWrapper_->NotifyUieDump(params, dumpInfo);
+
+            for (size_t i = 0; i < dumpInfo.size(); i++) {
+                std::string dumpStr = dumpInfo[i];
+                size_t pos = dumpStr.find("UINodeCount:");
+                if (pos == std::string::npos) {
+                    continue;
+                }
+                size_t start = dumpStr.find("\n", pos);
+                if (start == std::string::npos) {
+                    continue;
+                }
+                start++;
+                std::string filteredData = dumpStr.substr(start);
+                filteredData.erase(filteredData.find_last_not_of("\n") + 1);
+                auto childJson = JsonUtil::ParseJsonString(filteredData);
+                if (childJson) {
+                    json->Put("$child-uec", childJson);
+                }
+                break;
+            }
+        },
+        TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
+}
+
 void UIExtensionPattern::RegisterEventProxyFlagCallback()
 {
     RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,

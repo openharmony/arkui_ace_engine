@@ -6620,7 +6620,9 @@ if (globalThis.Blank !== undefined) {
 }
 
 globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
-  let component = new ArkSymbolGlyphComponent(nodePtr);
+  getUINativeModule().loadNativeModule('SymbolGlyph');
+  let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+  let component = module.createComponent(nodePtr);
   applyUIAttributes(modifier, nodePtr, component);
   component.applyModifierPatch();
 };
@@ -10709,7 +10711,7 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   bindSelectionMenu(spanType, content, responseType, options) {
-    throw new Error('Method not implemented.');
+     throw new BusinessError(100201, 'bindSelectionMenu function not supported in RichEditorModifier class');
   }
   customKeyboard(value, options) {
     let arkValue = new ArkCustomKeyboard();
@@ -12135,7 +12137,7 @@ class ArkSearchComponent extends ArkComponent {
     return this;
   }
   showUnit(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'showUnit function not supported in attributeModifier scenario.');
   }
   onContentScroll(callback) {
     modifierWithKey(this._modifiersWithKeys, SearchOnContentScrollModifier.identity,
@@ -12702,9 +12704,11 @@ class SpanFontWeightModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().span.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().span.setFontWeight(node, this.value);
+    } else {
+      getUINativeModule().span.setFontWeight(node, this.value.value,
+        this.value?.enableVariableFontWeight,
+        this.value?.enableDeviceFontWeightCategory
+      );
     }
   }
 }
@@ -12819,106 +12823,106 @@ class ArkSpanComponent {
     }
   }
   onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onGestureJudgeBegin function not supported in attributeModifier scenario.');
   }
   outline(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outline function not supported in attributeModifier scenario.');
   }
   outlineColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineColor function not supported in attributeModifier scenario.');
   }
   outlineRadius(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineRadius function not supported in attributeModifier scenario.');
   }
   outlineStyle(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineStyle function not supported in attributeModifier scenario.');
   }
   outlineWidth(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineWidth function not supported in attributeModifier scenario.');
   }
   width(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'width function not supported in attributeModifier scenario.');
   }
   height(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'height function not supported in attributeModifier scenario.');
   }
   expandSafeArea(types, edges) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'expandSafeArea function not supported in attributeModifier scenario.');
   }
   responseRegionList(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'responseRegionList function not supported in attributeModifier scenario.');
   }
   responseRegion(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'responseRegion function not supported in attributeModifier scenario.');
   }
   mouseResponseRegion(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'mouseResponseRegion function not supported in attributeModifier scenario.');
   }
   size(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'size function not supported in attributeModifier scenario.');
   }
   constraintSize(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'constraintSize function not supported in attributeModifier scenario.');
   }
   touchable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'touchable function not supported in attributeModifier scenario.');
   }
   hitTestBehavior(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'hitTestBehavior function not supported in attributeModifier scenario.');
   }
   layoutWeight(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'layoutWeight function not supported in attributeModifier scenario.');
   }
   padding(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'padding function not supported in attributeModifier scenario.');
   }
   margin(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'margin function not supported in attributeModifier scenario.');
   }
   background(builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'background function not supported in attributeModifier scenario.');
   }
   backgroundColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundColor function not supported in attributeModifier scenario.');
   }
   backgroundImage(src, repeat) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundImage function not supported in attributeModifier scenario.');
   }
   backgroundImageSize(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundImageSize function not supported in attributeModifier scenario.');
   }
   backgroundImagePosition(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundImagePosition function not supported in attributeModifier scenario.');
   }
   backgroundBlurStyle(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundBlurStyle function not supported in attributeModifier scenario.');
   }
   foregroundBlurStyle(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'foregroundBlurStyle function not supported in attributeModifier scenario.');
   }
   opacity(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'opacity function not supported in attributeModifier scenario.');
   }
   border(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'border function not supported in attributeModifier scenario.');
   }
   borderStyle(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderStyle function not supported in attributeModifier scenario.');
   }
   borderWidth(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderWidth function not supported in attributeModifier scenario.');
   }
   borderColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderColor function not supported in attributeModifier scenario.');
   }
   borderRadius(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderRadius function not supported in attributeModifier scenario.');
   }
   borderImage(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderImage function not supported in attributeModifier scenario.');
   }
   foregroundColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'foregroundColor function not supported in attributeModifier scenario.');
   }
   onClick(event) {
     modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
@@ -12929,289 +12933,289 @@ class ArkSpanComponent {
     return this;
   }
   hoverEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'hoverEffect function not supported in attributeModifier scenario.');
   }
   onMouse(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onMouse function not supported in attributeModifier scenario.');
   }
   onTouch(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onTouch function not supported in attributeModifier scenario.');
   }
   onKeyEvent(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onKeyEvent function not supported in attributeModifier scenario.');
   }
   focusable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'focusable function not supported in attributeModifier scenario.');
   }
   onFocus(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onFocus function not supported in attributeModifier scenario.');
   }
   onBlur(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onBlur function not supported in attributeModifier scenario.');
   }
   tabIndex(index) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'tabIndex function not supported in attributeModifier scenario.');
   }
   defaultFocus(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'defaultFocus function not supported in attributeModifier scenario.');
   }
   groupDefaultFocus(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'groupDefaultFocus function not supported in attributeModifier scenario.');
   }
   focusOnTouch(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'focusOnTouch function not supported in attributeModifier scenario.');
   }
   animation(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'animation function not supported in attributeModifier scenario.');
   }
   transition(value, callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'transition function not supported in attributeModifier scenario.');
   }
   gesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture function not supported in attributeModifier scenario.');
   }
   priorityGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture function not supported in attributeModifier scenario.');
   }
   parallelGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'parallelGesture function not supported in attributeModifier scenario.');
   }
   blur(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'blur function not supported in attributeModifier scenario.');
   }
   linearGradientBlur(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'linearGradientBlur function not supported in attributeModifier scenario.');
   }
   brightness(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'brightness function not supported in attributeModifier scenario.');
   }
   contrast(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'contrast function not supported in attributeModifier scenario.');
   }
   grayscale(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'grayscale function not supported in attributeModifier scenario.');
   }
   colorBlend(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'colorBlend function not supported in attributeModifier scenario.');
   }
   saturate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'saturate function not supported in attributeModifier scenario.');
   }
   sepia(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sepia function not supported in attributeModifier scenario.');
   }
   invert(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'invert function not supported in attributeModifier scenario.');
   }
   hueRotate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'hueRotate function not supported in attributeModifier scenario.');
   }
   useEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useEffect function not supported in attributeModifier scenario.');
   }
   backdropBlur(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backdropBlur function not supported in attributeModifier scenario.');
   }
   renderGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'renderGroup function not supported in attributeModifier scenario.');
   }
   translate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'translate function not supported in attributeModifier scenario.');
   }
   scale(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'scale function not supported in attributeModifier scenario.');
   }
   gridSpan(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gridSpan function not supported in attributeModifier scenario.');
   }
   gridOffset(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gridOffset function not supported in attributeModifier scenario.');
   }
   rotate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'rotate function not supported in attributeModifier scenario.');
   }
   transform(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'transform function not supported in attributeModifier scenario.');
   }
   transform3D(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'transform3D function not supported in attributeModifier scenario.');
   }
   onAppear(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAppear function not supported in attributeModifier scenario.');
   }
   onDisAppear(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDisAppear function not supported in attributeModifier scenario.');
   }
   onAttach(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAttach function not supported in attributeModifier scenario.');
   }
   onDetach(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
   onAreaChange(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
   visibility(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'visibility function not supported in attributeModifier scenario.');
   }
   flexGrow(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexGrow function not supported in attributeModifier scenario.');
   }
   flexShrink(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexShrink function not supported in attributeModifier scenario.');
   }
   flexBasis(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexBasis function not supported in attributeModifier scenario.');
   }
   alignSelf(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'alignSelf function not supported in attributeModifier scenario.');
   }
   displayPriority(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'displayPriority function not supported in attributeModifier scenario.');
   }
   zIndex(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'zIndex function not supported in attributeModifier scenario.');
   }
   sharedTransition(id, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sharedTransition function not supported in attributeModifier scenario.');
   }
   direction(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'direction function not supported in attributeModifier scenario.');
   }
   align(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'align function not supported in attributeModifier scenario.');
   }
   position(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'position function not supported in attributeModifier scenario.');
   }
   markAnchor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'markAnchor function not supported in attributeModifier scenario.');
   }
   offset(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'offset function not supported in attributeModifier scenario.');
   }
   enabled(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'enabled function not supported in attributeModifier scenario.');
   }
   useSizeType(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useSizeType function not supported in attributeModifier scenario.');
   }
   alignRules(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'alignRules function not supported in attributeModifier scenario.');
   }
   aspectRatio(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'aspectRatio function not supported in attributeModifier scenario.');
   }
   clickEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'clickEffect function not supported in attributeModifier scenario.');
   }
   enableClickSoundEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'enableClickSoundEffect function not supported in attributeModifier scenario.');
   }
   onDragStart(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragStart function not supported in attributeModifier scenario.');
   }
   onDragEnter(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragEnter function not supported in attributeModifier scenario.');
   }
   onDragSpringLoading(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragSpringLoading function not supported in attributeModifier scenario.');
   }
   onDragMove(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragMove function not supported in attributeModifier scenario.');
   }
   onDragLeave(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragLeave function not supported in attributeModifier scenario.');
   }
   onDrop(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDrop function not supported in attributeModifier scenario.');
   }
   onDragEnd(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragEnd function not supported in attributeModifier scenario.');
   }
   allowDrop(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'allowDrop function not supported in attributeModifier scenario.');
   }
   draggable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'draggable function not supported in attributeModifier scenario.');
   }
   overlay(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'overlay function not supported in attributeModifier scenario.');
   }
   linearGradient(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'linearGradient function not supported in attributeModifier scenario.');
   }
   sweepGradient(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sweepGradient function not supported in attributeModifier scenario.');
   }
   radialGradient(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'radialGradient function not supported in attributeModifier scenario.');
   }
   motionPath(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'motionPath function not supported in attributeModifier scenario.');
   }
   motionBlur(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'motionBlur function not supported in attributeModifier scenario.');
   }
   shadow(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'shadow function not supported in attributeModifier scenario.');
   }
   mask(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'mask function not supported in attributeModifier scenario.');
   }
   key(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'key function not supported in attributeModifier scenario.');
   }
   id(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'id function not supported in attributeModifier scenario.');
   }
   geometryTransition(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'geometryTransition function not supported in attributeModifier scenario.');
   }
   bindPopup(show, popup) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindPopup function not supported in attributeModifier scenario.');
   }
   bindMenu(content, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindMenu function not supported in attributeModifier scenario.');
   }
   bindContextMenu(content, responseType, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu function not supported in attributeModifier scenario.');
   }
   bindContentCover(isShow, builder, type) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContentCover function not supported in attributeModifier scenario.');
   }
   blendMode(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'blendMode function not supported in attributeModifier scenario.');
   }
   clip(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'clip function not supported in attributeModifier scenario.');
   }
   bindSheet(isShow, builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindSheet function not supported in attributeModifier scenario.');
   }
   stateStyles(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles function not supported in attributeModifier scenario.');
   }
   restoreId(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'restoreId function not supported in attributeModifier scenario.');
   }
   onVisibleAreaChange(ratios, event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onVisibleAreaChange function not supported in attributeModifier scenario.');
   }
   sphericalEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sphericalEffect function not supported in attributeModifier scenario.');
   }
   lightUpEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'lightUpEffect function not supported in attributeModifier scenario.');
   }
   pixelStretchEffect(options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'pixelStretchEffect function not supported in attributeModifier scenario.');
   }
   keyboardShortcut(value, keys, action) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'keyboardShortcut function not supported in attributeModifier scenario.');
   }
   accessibilityGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'accessibilityGroup function not supported in attributeModifier scenario.');
   }
   accessibilityText(value) {
     if (typeof value === 'string') {
@@ -13241,22 +13245,22 @@ class ArkSpanComponent {
     return this;
   }
   obscured(reasons) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'obscured function not supported in attributeModifier scenario.');
   }
   reuseId(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'reuseId function not supported in attributeModifier scenario.');
   }
   renderFit(fitMode) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'renderFit function not supported in attributeModifier scenario.');
   }
   systemMaterial(material) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'systemMaterial function not supported in attributeModifier scenario.');
   }
   materialFilter(filter) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'materialFilter function not supported in attributeModifier scenario.');
   }
   useUnionEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useUnionEffect function not supported in attributeModifier scenario.');
   }
   attributeModifier(modifier) {
     return this;
@@ -13265,11 +13269,15 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
-  font(value) {
+  font(value, fontConfigs) {
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
+    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
       value === null || value === void 0 ? void 0 : value.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
-      value === null || value === void 0 ? void 0 : value.weight);
+      arkFontWeight);
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier,
       value === null || value === void 0 ? void 0 : value.family);
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier,
@@ -13292,8 +13300,12 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value);
+  fontWeight(value, fontWeightConfigs) {
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = value;
+    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
   fontFamily(value) {
@@ -18758,7 +18770,7 @@ class ArkTextInputComponent extends ArkComponent {
     return this;
   }
   showUnit(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'showUnit function not supported in attributeModifier scenario.');
   }
   showUnderline(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputShowUnderlineModifier.identity, TextInputShowUnderlineModifier, value);
@@ -20858,12 +20870,14 @@ class ArkFontWeight {
   constructor() {
     this.value = undefined;
     this.enableVariableFontWeight = undefined;
+    this.enableDeviceFontWeightCategory = undefined;
   }
 
   isEqual(another) {
     return (
       this.value === another.value &&
-      this.enableVariableFontWeight === another.enableVariableFontWeight
+      this.enableVariableFontWeight === another.enableVariableFontWeight &&
+      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory
     );
   }
 
@@ -23136,6 +23150,11 @@ class ArkSelectComponent extends ArkComponent {
       this._modifiersWithKeys, MinKeyboardAvoidDistanceModifier.identity, MinKeyboardAvoidDistanceModifier, distance);
     return this;
   }
+  menuSystemMaterial(menuSystemMaterial) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuSystemMaterialModifier.identity, MenuSystemMaterialModifier, menuSystemMaterial);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -23758,6 +23777,23 @@ class MinKeyboardAvoidDistanceModifier extends ModifierWithKey {
   }
 }
 MinKeyboardAvoidDistanceModifier.identity = Symbol('minKeyboardAvoidDistance');
+class MenuSystemMaterialModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMenuSystemMaterial(node);
+    } else {
+      getUINativeModule().select.setMenuSystemMaterial(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuSystemMaterialModifier.identity = Symbol('menuSystemMaterial');
 class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -26528,7 +26564,8 @@ if (globalThis.Menu === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmenu');
       module.exportView();
       getUINativeModule().menu.create();
-    }
+    },
+    name: 'JSMenu'
   }
 }
 
@@ -26540,7 +26577,8 @@ if (globalThis.MenuItem === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmenuitem');
       module.exportView();
       getUINativeModule().menuitem.create(params);
-    }
+    },
+    name: 'JSMenuItem'
   }
 }
 
@@ -26551,7 +26589,8 @@ if (globalThis.MenuItemGroup === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
       module.exportView();
       getUINativeModule().menuitemgroup.createMenuItemGroup(params);
-    }
+    },
+    name: 'JSMenuItemGroup'
   }
 }
 
@@ -34237,14 +34276,7 @@ if (globalThis.WaterFlow === undefined) {
       getUINativeModule().loadNativeModule('WaterFlow');
       let module = globalThis.requireNapi('arkui.components.arkwaterflow');
       module.exportView();
-      getUINativeModule().waterFlow.create();
-      getUINativeModule().waterFlow.setWaterFlowInitialize(true,
-        params === null || params === void 0 ? void 0 : params.scroller,
-        params === null || params === void 0 ? void 0 : params.sections,
-        params === null || params === void 0 ? void 0 : params.layoutMode,
-        params === null || params === void 0 ? void 0 : params.footerContent,
-        params === null || params === void 0 ? void 0 : params.footer,
-        (params !== null && typeof params === 'object') ? 'footerContent' in params : false);
+      getUINativeModule().waterFlow.create(params);
     }
   }
 }
@@ -35638,237 +35670,18 @@ if (globalThis.MediaCachedImage !== undefined) {
     });
   };
 }
-
-class SymbolFontColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontColor(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+// @ts-ignore
+if (globalThis.SymbolGlyph === undefined) {
+  globalThis.SymbolGlyph = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('SymbolGlyph');
+      let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+      module.exportView();
+      getUINativeModule().symbolGlyph.create(params);
+    },
+    name: 'JSSymbolGlyph'
   }
 }
-SymbolFontColorModifier.identity = Symbol('symbolGlyphFontColor');
-
-class SymbolFontSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontSize(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontSize(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolFontSizeModifier.identity = Symbol('symbolGlyphFontSize');
-
-class SymbolFontWeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
-    }
-  }
-}
-SymbolFontWeightModifier.identity = Symbol('symbolGlyphFontWeight');
-
-class RenderingStrategyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetRenderingStrategy(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setRenderingStrategy(node, this.value);
-    }
-  }
-}
-RenderingStrategyModifier.identity = Symbol('symbolGlyphRenderingStrategy');
-
-class EffectStrategyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetEffectStrategy(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setEffectStrategy(node, this.value);
-    }
-  }
-}
-EffectStrategyModifier.identity = Symbol('symbolGlyphEffectStrategy');
-
-class SymbolContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetSymbolGlyphInitialize(node);
-    } else {
-      getUINativeModule().symbolGlyph.setSymbolGlyphInitialize(node, this.value);
-    }
-  }
-}
-SymbolContentModifier.identity = Symbol('symbolContent');
-
-class SymbolEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetSymbolEffectOptions(node);
-    } else {
-      getUINativeModule().symbolGlyph.setSymbolEffectOptions(node, this.value.symbolEffect, this.value.action);
-    }
-  }
-}
-SymbolEffectModifier.identity = Symbol('symbolEffect');
-
-class SymbolShadowModifier extends ModifierWithKey {
-    constructor(value) {
-      super(value);
-    }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
-      } else {
-        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
-      }
-    }
-  }
-  SymbolShadowModifier.identity = Symbol('symbolShadow');
-
-  class ShaderStyleModifier extends ModifierWithKey {
-    constructor(value) {
-      super(value);
-    }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().symbolGlyph.resetShaderStyle(node);
-      } else {
-        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
-      }
-    }
-  }
-  ShaderStyleModifier.identity = Symbol('shaderStyle');
-
-class SymbolMinFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetMinFontScale(node);
-    } else {
-      getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolMinFontScaleModifier.identity = Symbol('symbolGlyphMinFontScale');
-
-class SymbolMaxFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetMaxFontScale(node);
-    } else {
-      getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolMaxFontScaleModifier.identity = Symbol('symbolGlyphMaxFontScale');
-
-/// <reference path='./import.ts' />
-class ArkSymbolGlyphComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  initialize(value) {
-    if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, undefined);
-    }
-    return this;
-  }
-  fontColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
-    return this;
-  }
-  fontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontSizeModifier.identity, SymbolFontSizeModifier, value);
-    return this;
-  }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontWeightModifier.identity, SymbolFontWeightModifier, value);
-    return this;
-  }
-  renderingStrategy(value) {
-    modifierWithKey(this._modifiersWithKeys, RenderingStrategyModifier.identity, RenderingStrategyModifier, value);
-    return this;
-  }
-  effectStrategy(value) {
-    modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
-    return this;
-  }
-  symbolEffect(effect, action) {
-    let symbolEffect = new ArkSymbolEffect();
-    symbolEffect.symbolEffect = effect;
-    symbolEffect.action = action;
-    modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
-    return this;
-  }
-  shaderStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
-    return this;
-  }
-  symbolShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
-    return this;
-  }
-  minFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolMinFontScaleModifier.identity, SymbolMinFontScaleModifier, value);
-    return this;
-  }
-  maxFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolMaxFontScaleModifier.identity, SymbolMaxFontScaleModifier, value);
-    return this;
-  }
-}
-
 class SystemBarEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -35878,17 +35691,6 @@ class SystemBarEffectModifier extends ModifierWithKey {
   }
 }
 SystemBarEffectModifier.identity = Symbol('systemBarEffect');
-
-// @ts-ignore
-if (globalThis.SymbolGlyph !== undefined) {
-  globalThis.SymbolGlyph.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkSymbolGlyphComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.SymbolGlyphModifier(undefined, nativePtr, classType);
-    });
-  };
-}
 
 class SymbolSpanFontColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -36354,6 +36156,12 @@ if (globalThis.UIPickerComponent !== undefined) {
   };
 }
 
+function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
+    getUINativeModule().loadNativeModule(componentName);
+    let module = globalThis.requireNapi(abcName);
+    module.exportView();
+}
+
 // @ts-ignore
 if (globalThis.Hyperlink === undefined) {
   globalThis.Hyperlink = {
@@ -36361,11 +36169,7 @@ if (globalThis.Hyperlink === undefined) {
       getUINativeModule().loadNativeModule("Hyperlink");
       let module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
-      if (address !== undefined) {
-        getUINativeModule().hyperlink.create(address, content);
-      } else {
-        getUINativeModule().hyperlink.create('', '');
-      }
+      getUINativeModule().hyperlink.create(address, content);
     }
   }
 }
@@ -36378,7 +36182,8 @@ if (globalThis.CalendarPicker === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
       module.exportView();
       getUINativeModule().calendarPicker.create(params);
-    }
+    },
+    name: 'JSCalendarPicker'
   }
 }
 
@@ -36390,7 +36195,8 @@ if (globalThis.CalendarPickerDialog === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
       module.exportDialogView();
       getUINativeModule().calendarPickerDialog.show(params);
-    }
+    },
+    name: 'JSCalendarPickerDialog'
   }
 }
 
@@ -36401,12 +36207,9 @@ if (globalThis.Gauge === undefined) {
       getUINativeModule().loadNativeModule('Gauge');
       let module = globalThis.requireNapi('arkui.components.arkgauge');
       module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
-      } else {
-        getUINativeModule().gauge.create(0, 0, 100);
-      }
-    }
+      getUINativeModule().gauge.create(params);
+    },
+    name: 'JSGauge'
   }
 }
 
@@ -36434,7 +36237,8 @@ if (globalThis.AlphabetIndexer === undefined) {
         getUINativeModule().alphabetIndexer.create(undefined, true);
       }
       return this;
-    }
+    },
+    name: 'JSAlphabetIndexer'
   }
 }
 
@@ -36446,7 +36250,8 @@ if (globalThis.Checkbox === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcheckbox');
       module.exportView();
       getUINativeModule().checkbox.create(params);
-    }
+    },
+    name: 'JSCheckbox'
   };
 }
 
@@ -36458,7 +36263,8 @@ if (globalThis.CheckboxGroup === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
       module.exportView();
       getUINativeModule().checkboxgroup.create(params);
-    }
+    },
+    name: 'JSCheckboxGroup'
   };
 }
 
@@ -36469,12 +36275,9 @@ if (globalThis.Rating === undefined) {
       getUINativeModule().loadNativeModule('Rating');
       const module = globalThis.requireNapi('arkui.components.arkrating');
       module.exportView();
-      if (params !== undefined && params !== null) {
-        getUINativeModule().rating.create(true, params);
-      } else {
-        getUINativeModule().rating.create(0, false);
-      }
-    }
+      getUINativeModule().rating.create(params);
+    },
+    name: 'JSRating'
   };
 }
 
@@ -36498,7 +36301,8 @@ if (globalThis.RowSplit === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkrowsplit');
       module.exportView();
       getUINativeModule().rowSplit.create();
-    }
+    },
+    name: 'JSRowSplit'
   };
 }
 
@@ -36510,7 +36314,8 @@ if (globalThis.ColumnSplit === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
       module.exportView();
       getUINativeModule().columnSplit.create();
-    }
+    },
+    name: 'JSColumnSplit'
   };
 }
 // @ts-ignore
@@ -36521,7 +36326,8 @@ if (globalThis.Stepper === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkstepper');
       module.exportView();
       getUINativeModule().stepper.create(params);
-    }
+    },
+    name: 'JSStepper'
   };
 }
 
@@ -36533,7 +36339,8 @@ if (globalThis.StepperItem === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkstepperitem');
       module.exportView();
       getUINativeModule().stepperItem.create(params);
-    }
+    },
+    name: 'JSStepperItem'
   };
 }
 
@@ -36557,7 +36364,8 @@ if (globalThis.Radio === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkradio');
       module.exportView();
       getUINativeModule().radio.create(params);
-    }
+    },
+    name: 'JSRadio'
   }
 }
 
@@ -36569,7 +36377,8 @@ if (globalThis.Slider === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkslider');
       module.exportView();
       getUINativeModule().slider.create(params);
-    }
+    },
+    name: 'JSSlider'
   }
 }
 
@@ -36593,7 +36402,8 @@ if (globalThis.FolderStack === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkfolderstack');
       module.exportView();
       getUINativeModule().folderStack.create(params);
-    }
+    },
+    name: 'JSFolderStack'
   };
 }
 
@@ -36601,11 +36411,12 @@ if (globalThis.FolderStack === undefined) {
 if (globalThis.TimePicker === undefined) {
   globalThis.TimePicker = {
     create: function(params) {
-      getUINativeModule().loadNativeModule("TimePicker");
+      getUINativeModule().loadNativeModule('TimePicker');
       const module = globalThis.requireNapi('arkui.components.arktimepicker');
       module.exportView();
       getUINativeModule().timePicker.create(params);
-    }
+    },
+ 	  name: 'JSTimePicker'
   }
 }
 
@@ -36613,11 +36424,12 @@ if (globalThis.TimePicker === undefined) {
 if (globalThis.TimePickerDialog === undefined) {
   globalThis.TimePickerDialog = {
     show: function(params) {
-      getUINativeModule().loadNativeModule("TimePickerDialog");
+      getUINativeModule().loadNativeModule('TimePickerDialog');
       const module = globalThis.requireNapi('arkui.components.arktimepicker');
       module.exportViewDialog();
       getUINativeModule().timePickerDialog.show(params);
-    }
+    },
+ 	  name: 'JSTimePickerDialog'
   }
 }
 
@@ -36628,11 +36440,7 @@ if (globalThis.DataPanel === undefined) {
       getUINativeModule().loadNativeModule('DataPanel');
       let module = globalThis.requireNapi('arkui.components.arkdatapanel');
       module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().dataPanel.create(params.values ?? 0, params.max ?? 100, params.type ?? 0);
-      } else {
-        getUINativeModule().dataPanel.create(0, 100, 0);
-      }
+      getUINativeModule().dataPanel.create(params);
     },
     name: 'JSDataPanel'
   }

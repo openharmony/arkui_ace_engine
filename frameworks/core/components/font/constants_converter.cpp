@@ -561,7 +561,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
             ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
-        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+        if (textStyle.GetEnableDeviceFontWeightCategory()) {
+            fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+        }
     }
     if (textStyle.GetEnableVariableFontWeight()) {
         fontWeightValue = textStyle.GetVariableFontWeight();

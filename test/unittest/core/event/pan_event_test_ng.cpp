@@ -238,4 +238,124 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest003, TestSize.Level1)
     EXPECT_NE(panEventActuatorEx, nullptr);
     EXPECT_EQ(panEventActuatorEx->fingers_, DEFAULT_PAN_FINGER);
 }
+
+/**
+ * @tc.name: PanEventConstructorTest001
+ * @tc.desc: Test PanEventActuator constructor with negative distance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventConstructorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator with negative distance
+     * @tc.expected: distance_ should be set to default value
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    // Test with negative distance - should be set to default
+    constexpr float NEGATIVE_DISTANCE = -5.0f;
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)),
+        PAN_EVENT_DIRECTION, FINGERS_NUMBER_GREATER_THAN_DEFAULT, NEGATIVE_DISTANCE);
+    EXPECT_NE(panEventActuator, nullptr);
+    EXPECT_FLOAT_EQ(panEventActuator->distance_, DEFAULT_PAN_DISTANCE.ConvertToPx());
+}
+
+/**
+ * @tc.name: PanEventOnCollectTouchTargetTest004
+ * @tc.desc: Test OnCollectTouchTarget with isExcludedAxis_ and AXIS event type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator and set isExcludedAxis_ to true
+     * @tc.expected: result should not be modified when inputEventType is AXIS
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)),
+        PAN_EVENT_DIRECTION, FINGERS_NUMBER_GREATER_THAN_DEFAULT, DISTANCE_GREATER_THAN_DEFAULT);
+    EXPECT_NE(panEventActuator, nullptr);
+
+    // Set isExcludedAxis_ to true
+    panEventActuator->SetExcludedAxis(true);
+
+    // Add a pan event to avoid early return
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](
+                                       GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    auto panEvent = AceType::MakeRefPtr<PanEvent>(std::move(actionStart), nullptr, nullptr, nullptr);
+    panEventActuator->AddPanEvent(panEvent);
+
+    // Create TouchRestrict with AXIS input type
+    TouchRestrict axisTouchRestrict = { TouchRestrict::NONE };
+    axisTouchRestrict.inputEventType = InputEventType::AXIS;
+
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+    size_t initialSize = result.size();
+
+    panEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, axisTouchRestrict, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
+
+    // Result should not be modified when isExcludedAxis_ is true and inputEventType is AXIS
+    EXPECT_EQ(result.size(), initialSize);
+}
+
+/**
+ * @tc.name: PanEventSetPanEventTypeTest001
+ * @tc.desc: Test SetPanEventType when panEvents_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventSetPanEventTypeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator and call SetPanEventType when panEvents_ is empty
+     * @tc.expected: Should return early without modifying gestureInfo
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)),
+        PAN_EVENT_DIRECTION, FINGERS_NUMBER_GREATER_THAN_DEFAULT, DISTANCE_GREATER_THAN_DEFAULT);
+    EXPECT_NE(panEventActuator, nullptr);
+
+    // Call SetPanEventType when panEvents_ is empty
+    panEventActuator->SetPanEventType(GestureTypeName::PAN_GESTURE);
+
+    // Should not crash and gestureInfo should not be created
+    auto gestureInfo = panEventActuator->panRecognizer_->GetGestureInfo();
+    bool isGestureInfoNull = (gestureInfo == nullptr);
+    EXPECT_TRUE(isGestureInfoNull);
+}
+
+/**
+ * @tc.name: PanEventDumpVelocityInfoTest001
+ * @tc.desc: Test DumpVelocityInfo with valid panRecognizer_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventDumpVelocityInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanEventActuator and call DumpVelocityInfo
+     * @tc.expected: Should execute without crashing
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)),
+        PAN_EVENT_DIRECTION, FINGERS_NUMBER_GREATER_THAN_DEFAULT, DISTANCE_GREATER_THAN_DEFAULT);
+
+    // This should work without crashing
+    panEventActuator->DumpVelocityInfo(1);
+
+    EXPECT_NE(panEventActuator, nullptr);
+}
 } // namespace OHOS::Ace::NG

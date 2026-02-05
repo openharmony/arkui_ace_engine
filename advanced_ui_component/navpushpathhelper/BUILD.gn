@@ -64,6 +64,7 @@ ohos_shared_library("navpushpathhelper") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

@@ -74,6 +74,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -94,7 +95,7 @@ class SpanString;
 
 namespace OHOS::Ace::NG {
 
-enum class FocuseIndex { TEXT = 0, CANCEL, UNIT };
+enum class FocuseIndex { TEXT = 0, CANCEL, UNIT, VOICE };
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -176,7 +177,8 @@ enum class RequestFocusReason {
     SYSTEM,
     DRAG_ENTER,
     DRAG_SELECT,
-    SWITCH_EDITABLE
+    SWITCH_EDITABLE,
+    VOICE_NODE
 };
 
 // reason for needToRequestKeyboardInner_ change
@@ -197,7 +199,8 @@ enum class InputReason {
     DRAG,
     AUTO_FILL,
     AI_WRITE,
-    CANCEL_BUTTON
+    CANCEL_BUTTON,
+    COMMAND_INJECTION
 };
 
 struct PreviewTextInfo {
@@ -418,6 +421,7 @@ public:
     void HandleOnPageUp() override;
     void HandleOnPageDown() override;
     void CreateHandles() override;
+    void OnUiMaterialParamUpdate(const UiMaterialParam& params) override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
 
     int32_t SetPreviewText(const std::u16string& previewValue, const PreviewRange range) override;
@@ -752,6 +756,7 @@ public:
     void HandleSetSelectionMultiThread(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     void HandleSelectExtend(CaretMoveIntent direction) override
     {
@@ -907,6 +912,8 @@ public:
     void PlayScrollBarAppearAnimation();
 
     void ScheduleDisappearDelayTask();
+
+    void UpdateTextFieldScrollBarRegion(bool needUpdateOffset);
 
     bool IsAtTop() const override
     {
@@ -1096,7 +1103,11 @@ public:
     bool IsShowTranslate();
     bool IsShowSearch();
     bool IsShowAutoFill();
+    void HandleOnTextMethodInput(
+        int32_t type, const std::string& typeName, const std::function<void()>& successCallback);
     void HandleOnCameraInput();
+    void HandleOnVoiceInput();
+    void AttachAndStartInputType(int32_t type);
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
     bool IsShowAIWrite();
@@ -1353,11 +1364,24 @@ public:
         return placeholderResponseArea_;
     }
 
+    const RefPtr<TextInputResponseArea>& GetVoiceResponseArea()
+    {
+        return voiceResponseArea_;
+    }
+
+    // do not change the order.
+    std::vector<RefPtr<TextInputResponseArea>> GetAllResponseArea() const
+    {
+        return { responseArea_, voiceResponseArea_, cleanNodeResponseArea_ };
+    }
+    float GetAllResponseAreaWidth() const;
+
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
     bool IsShowCancelButtonMode() const;
+    bool IsShowVoiceButtonMode() const;
     void CheckPasswordAreaState();
 
     bool GetShowSelect() const
@@ -1371,9 +1395,11 @@ public:
     }
 
     void FocusForwardStopTwinkling();
+    bool HandleSwithFocus(FocuseIndex index);
     bool UpdateFocusForward();
-
+    bool HandleFocusForward(FocuseIndex index);
     bool UpdateFocusBackward();
+    bool HandleFocusBackward(FocuseIndex index);
 
     bool HandleSpaceEvent();
 
@@ -1727,20 +1753,7 @@ public:
         isFocusedBeforeClick_ = isFocusedBeforeClick;
     }
 
-    void UpdateFoucsOffsetIfNeed(RoundRect& paintRect)
-    {
-        auto textFieldTheme = GetTheme();
-        auto focusPaintPadding = textFieldTheme->GetIconFocusPadding().ConvertToPx();
-        RectF rect = paintRect.GetRect();
-        auto x = rect.GetX();
-        auto y = rect.GetY();
-        auto width = rect.Width();
-        auto height = rect.Height();
-        paintRect.SetRect({x - focusPaintPadding, y - focusPaintPadding,
-            width + 2 * focusPaintPadding, height + 2 * focusPaintPadding});
-        float cornerRadius = width / 2 + focusPaintPadding;
-        paintRect.SetCornerRadius(cornerRadius);
-    }
+    void UpdateFocusOffsetIfNeed(RoundRect& paintRect);
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
@@ -1800,6 +1813,18 @@ public:
         auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
         auto isCancelMode = IsShowCancelButtonMode() && !(cleanNodeStyle == CleanNodeStyle::INVISIBLE);
         return IsUnderlineMode() && (isCancelMode || IsInPasswordMode());
+    }
+
+    void SetVoiceKBShown(bool voiceKbShown);
+
+    bool GetVoiceKBShown() const
+    {
+        return voiceKbShown_;
+    }
+
+    RefPtr<TextFieldOverlayModifier>& GetTextFieldOverlayModifier()
+    {
+        return textFieldOverlayModifier_;
     }
 
     void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
@@ -1930,6 +1955,8 @@ protected:
     bool selectDetectEnabled_ = true;
 
 private:
+    bool ParseCommand(const std::string& command);
+    void HandleDeleteTextCommand(const std::unique_ptr<JsonValue>& params);
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1951,8 +1978,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleCancelButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea);
-    void HandleCancelButtonTouchUp();
+    void HandleResponseButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea);
+    void HandleResponseButtonTouchUp();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
@@ -2078,6 +2105,7 @@ private:
     bool IsOnUnitByPosition(const Offset& globalOffset);
     bool IsOnPasswordByPosition(const Offset& globalOffset);
     bool IsOnCleanNodeByPosition(const Offset& globalOffset);
+    bool IsPositionInResponseNode(const Offset& point, const RefPtr<TextInputResponseArea>& responseArea);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();
@@ -2090,9 +2118,10 @@ private:
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void GetTextInputFocusPaintRect(RoundRect& paintRect);
+    void PaintFocusAreaRect();
     void PaintResponseAreaRect();
     void PaintCancelRect();
-    void PaintUnitRect();
+    void PaintVoiceRect();
     void PaintPasswordRect();
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     bool CancelNodeIsShow()
@@ -2116,6 +2145,7 @@ private:
 #endif
     void NotifyOnEditChanged(bool isChanged);
     void ProcessCancelButton();
+    void ProcessVoiceButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill(bool ignoreFillType = false,
@@ -2205,6 +2235,7 @@ private:
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
     void ProcessAutoFillOnPaste();
     void HandleOnPasteCommon(const std::string& data);
+    void HandleOnAutoFillSecurePaste(const std::string& data);
     void RemoveFillContentMap();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
@@ -2238,12 +2269,14 @@ private:
     void PaintCancelRectForTV();
     void PaintPasswordRectForTV();
     void SetThemeBorderAttrForTV();
+    void PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea);
 
     RectF frameRect_;
     RectF textRect_;
     float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
+    bool voiceKbShown_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -2384,8 +2417,11 @@ private:
     bool isSupportCameraInput_ = false;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
+    friend class VoiceNodeResponseArea;
+    RefPtr<TextInputResponseArea> voiceResponseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     RefPtr<TextInputResponseArea> placeholderResponseArea_;
+    std::optional<Rect> baseScrollBarRect_;
     std::string lastAutoFillTextValue_;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;

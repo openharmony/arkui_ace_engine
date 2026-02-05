@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
@@ -294,7 +295,10 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(menuLayoutProperty);
     if (menuLayoutProperty->GetBorderRadius().has_value()) {
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
-        UpdateBorderRadius(host, borderRadius);
+        if (!borderRadius.HasPercentUnit()) {
+            // Percentage unit border radius must be set after layout. See OnDirtyLayoutWrapperSwap.
+            UpdateBorderRadius(host, borderRadius);
+        }
     }
 
     SetAccessibilityAction();
@@ -993,11 +997,13 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
 
 void MenuPattern::DoCloseSubMenus() const
 {
-    showedSubMenu_ = nullptr;
     for (auto iter = embeddedMenuItems_.begin(); iter != embeddedMenuItems_.end();) {
         auto& menuItem = *iter;
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-        if (menuItemPattern) {
+        if (menuItemPattern && menuItemPattern->HasDetachedFreeRootProxy()) {
+            if (menuItemPattern->GetEmbeddedMenu() == showedSubMenu_) {
+                showedSubMenu_ = nullptr;
+            }
             menuItemPattern->HandleCloseSubMenu();
             iter = embeddedMenuItems_.erase(iter);
         } else {

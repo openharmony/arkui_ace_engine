@@ -234,7 +234,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     ClipSheetNode();
 
     sheetObject_->AvoidKeyboardInDirtyLayoutProcess();
-    
+    SetNeedDoubleAvoidAfterLayout(false);
     if (sheetType_ == SheetType::SHEET_POPUP) {
         MarkSheetPageNeedRender();
     }
@@ -315,6 +315,25 @@ bool SheetPresentationPattern::IsScrollable() const
     return Positive(scrollPattern->GetScrollableDistance());
 }
 
+void SheetPresentationPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto targetNodeContext = targetNode->GetContext();
+    CHECK_NULL_VOID(targetNodeContext);
+    if (IsShowInSubWindow()) {
+        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
+        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
+    } else {
+        auto currentPipeline = host->GetContext();
+        CHECK_NULL_VOID(currentPipeline);
+        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
+        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
+    }
+}
+
 void SheetPresentationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -330,15 +349,6 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
-    if (IsShowInSubWindow()) {
-        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
-        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
-    } else {
-        auto currentPipeline = host->GetContext();
-        CHECK_NULL_VOID(currentPipeline);
-        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
-        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
-    }
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -981,7 +991,6 @@ float SheetPresentationPattern::GetSheetHeightChange()
         inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
-    SetNeedDoubleAvoidAfterLayout(false);
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -3162,6 +3171,16 @@ void SheetPresentationPattern::StopModifySheetTransition()
     }
 }
 
+bool SheetPresentationPattern::IsDoubleAvoid(bool forceAvoid)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    return forceAvoid && (manager->GetKeyboardInset().Length() != 0);
+}
+
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE ||
@@ -3174,7 +3193,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !forceAvoid) {
+    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !IsDoubleAvoid(forceAvoid)) {
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();

@@ -34,6 +34,7 @@
 #include "compatible/components/canvas/canvas_modifier_compatible.h"
 #include "core/common/container_scope.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 
 namespace OHOS::Ace {
@@ -111,47 +112,61 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
         "width", &JSRenderingContext::JsGetWidth, &JSRenderingContext::JsSetWidth);
     JSClass<JSRenderingContext>::CustomProperty(
         "height", &JSRenderingContext::JsGetHeight, &JSRenderingContext::JsSetHeight);
+    JSClass<JSRenderingContext>::CustomProperty("filter",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_FILTER_GETTER>, &JSCanvasRenderer::JsSetFilter);
+    JSClass<JSRenderingContext>::CustomProperty("direction",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_DIRECTION_GETTER>, &JSCanvasRenderer::JsSetDirection);
+    JSClass<JSRenderingContext>::CustomProperty("fillStyle",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_FILL_STYLE_GETTER>, &JSCanvasRenderer::JsSetFillStyle);
+    JSClass<JSRenderingContext>::CustomProperty("strokeStyle",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_STROKE_STYLE_GETTER>,
+        &JSCanvasRenderer::JsSetStrokeStyle);
+    JSClass<JSRenderingContext>::CustomProperty("lineCap",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LINE_CAP_GETTER>, &JSCanvasRenderer::JsSetLineCap);
+    JSClass<JSRenderingContext>::CustomProperty("lineJoin",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LINE_JOIN_GETTER>, &JSCanvasRenderer::JsSetLineJoin);
+    JSClass<JSRenderingContext>::CustomProperty("miterLimit",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_MITER_LIMIT_GETTER>,
+        &JSCanvasRenderer::JsSetMiterLimit);
+    JSClass<JSRenderingContext>::CustomProperty("lineWidth",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LINE_WIDTH_GETTER>, &JSCanvasRenderer::JsSetLineWidth);
     JSClass<JSRenderingContext>::CustomProperty(
-        "filter", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetFilter);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "direction", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetDirection);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "fillStyle", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetFillStyle);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "strokeStyle", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetStrokeStyle);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineCap", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineCap);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineJoin", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineJoin);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "miterLimit", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetMiterLimit);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineWidth", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineWidth);
-    JSClass<JSRenderingContext>::CustomProperty("font", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetFont);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "textAlign", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetTextAlign);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "textBaseline", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetTextBaseline);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "globalAlpha", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetGlobalAlpha);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "globalCompositeOperation", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetGlobalCompositeOperation);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineDashOffset", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineDashOffset);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowBlur", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowBlur);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowColor", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowColor);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowOffsetX", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowOffsetX);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowOffsetY", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowOffsetY);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "imageSmoothingEnabled", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingEnabled);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "imageSmoothingQuality", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingQuality);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "letterSpacing", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLetterSpacing);
+        "font", &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_FONT_GETTER>, &JSCanvasRenderer::JsSetFont);
+    JSClass<JSRenderingContext>::CustomProperty("textAlign",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_TEXT_ALIGN_GETTER>, &JSCanvasRenderer::JsSetTextAlign);
+    JSClass<JSRenderingContext>::CustomProperty("textBaseline",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_TEXT_BASELINE_GETTER>,
+        &JSCanvasRenderer::JsSetTextBaseline);
+    JSClass<JSRenderingContext>::CustomProperty("globalAlpha",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_GLOBAL_ALPHA_GETTER>,
+        &JSCanvasRenderer::JsSetGlobalAlpha);
+    JSClass<JSRenderingContext>::CustomProperty("globalCompositeOperation",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_GLOBAL_COMPOSITE_OPERATION_GETTER>,
+        &JSCanvasRenderer::JsSetGlobalCompositeOperation);
+    JSClass<JSRenderingContext>::CustomProperty("lineDashOffset",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LINE_DASH_OFFSET_GETTER>,
+        &JSCanvasRenderer::JsSetLineDashOffset);
+    JSClass<JSRenderingContext>::CustomProperty("shadowBlur",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_SHADOW_BLUR_GETTER>,
+        &JSCanvasRenderer::JsSetShadowBlur);
+    JSClass<JSRenderingContext>::CustomProperty("shadowColor",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_SHADOW_COLOR_GETTER>,
+        &JSCanvasRenderer::JsSetShadowColor);
+    JSClass<JSRenderingContext>::CustomProperty("shadowOffsetX",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_SHADOW_OFFSET_X_GETTER>,
+        &JSCanvasRenderer::JsSetShadowOffsetX);
+    JSClass<JSRenderingContext>::CustomProperty("shadowOffsetY",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_SHADOW_OFFSET_Y_GETTER>,
+        &JSCanvasRenderer::JsSetShadowOffsetY);
+    JSClass<JSRenderingContext>::CustomProperty("imageSmoothingEnabled",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_IMAGE_SMOOTHING_ENABLE_GETTER>,
+        &JSCanvasRenderer::JsSetImageSmoothingEnabled);
+    JSClass<JSRenderingContext>::CustomProperty("imageSmoothingQuality",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_IMAGE_SMOOTHING_QUALITY_GETTER>,
+        &JSCanvasRenderer::JsSetImageSmoothingQuality);
+    JSClass<JSRenderingContext>::CustomProperty("letterSpacing",
+        &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LETTER_SPACING_GETTER>,
+        &JSCanvasRenderer::JsSetLetterSpacing);
 
     // Define all methods of the "CanvasRenderingContext2D"
     JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);
@@ -551,13 +566,15 @@ void JSRenderingContext::JsOn(const JSCallbackInfo& info)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter error.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_CANVAS, "Add %{public}s callback to Canvas.",
-        type == CanvasCallbackType::ON_ATTACH ? "onAttach" : "onDetach");
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     std::function<void()> onFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = instanceId_,
                                        callbackType = type]() {
-        TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas is executing %{public}s callback.",
-            callbackType == CanvasCallbackType::ON_ATTACH ? "onAttach" : "onDetach");
+        auto pipeline = NG::PipelineContext::GetContextByContainerId(id);
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        if (!taskExecutor || !taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            return;
+        }
         ContainerScope scope(id);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();

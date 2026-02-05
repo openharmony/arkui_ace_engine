@@ -26,6 +26,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
@@ -1273,7 +1274,7 @@ void UINode::DumpMoreBasicInfo()
     DumpLog::GetInstance().AddDesc("IsBuildByJS: " + std::to_string(isBuildByJS_));
     DumpLog::GetInstance().AddDesc("IsStaticNode: " + std::to_string(isStaticNode_));
     DumpLog::GetInstance().AddDesc("IsGcEnable: " + std::to_string(uiNodeGcEnable_));
-    DumpLog::GetInstance().AddDesc("VisibleAndActive: " + std::to_string(CheckVisibleAndActive()));
+    DumpLog::GetInstance().AddDesc("VisibleAndActive: " + std::to_string(IsVisibleAndActive()));
     DumpLog::GetInstance().AddDesc("IsFrameNode: " + std::to_string(InstanceOf<FrameNode>(this)));
 }
 
@@ -1323,7 +1324,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson, const std::string& desc)
             DumpLog::GetInstance().Append(depth, name, static_cast<int32_t>(GetChildren().size()));
         }
     }
-    if (!CheckVisibleAndActive() && !DumpLog::GetInstance().IsDumpAllNodes()) {
+    if (!IsVisibleAndActive() && !DumpLog::GetInstance().IsDumpAllNodes()) {
         return;
     }
     if (DumpLog::GetInstance().IsDumpAllNodes() && desc == "BrokenChildren") {
@@ -1436,7 +1437,7 @@ void UINode::DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr
     auto [needDump, justDumpSubTree] = dumpChecker(Claim(this));
     CHECK_EQUAL_VOID(needDump, false);
 
-    if (onlyNeedVisible && !CheckVisibleAndActive()) {
+    if (onlyNeedVisible && !IsVisibleAndActive()) {
         return;
     }
 
@@ -1503,7 +1504,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current
     DumpSimplifyTreeBase(current);
     auto nodeChildren = GetChildren();
     DumpSimplifyInfo(current);
-    if (!CheckVisibleAndActive()) {
+    if (!IsVisibleAndActive()) {
         return;
     }
     bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
@@ -2672,23 +2673,33 @@ void UINode::SetAncestor(const WeakPtr<UINode>& parent)
     ancestor_ = parent;
 }
 
-void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
+void UINode::FindTopNavDestination(std::list<RefPtr<FrameNode>>& result)
 {
     auto currentNode = AceType::DynamicCast<FrameNode>(this);
     if (currentNode) {
-        if (!currentNode->CheckVisibleAndActive()) {
+        if (!currentNode->IsVisibleAndActive()) {
             return;
         } else if (currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
             auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
             CHECK_NULL_VOID(navigationGroupNode);
-            result = navigationGroupNode->GetTopDestination();
+            auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(navigationPattern);
+            auto navigationStack = navigationPattern->GetNavigationStack();
+            CHECK_NULL_VOID(navigationStack);
+            auto lastStandardIndex = navigationGroupNode->GetLastStandardIndex();
+            int32_t startIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
+            int32_t endIndex = navigationStack->Size();
+            for (int32_t i = startIndex; i < endIndex; ++i) {
+                result.emplace_back(AceType::DynamicCast<FrameNode>(
+                    NavigationGroupNode::GetNavDestinationNode(navigationStack->Get(i))));
+            }
             return;
         }
     }
     
     for (const auto& item : GetChildren()) {
         item->FindTopNavDestination(result);
-        if (result) {
+        if (!result.empty()) {
             return;
         }
     }

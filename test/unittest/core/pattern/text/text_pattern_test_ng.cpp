@@ -171,6 +171,12 @@ HWTEST_F(TextPatternTestNg, GetSpansInfo003, TestSize.Level1)
     GetSpansMethod method = GetSpansMethod::GETSPANS;
     textPattern->GetSpansInfo(start, end, method);
     EXPECT_EQ(realEnd, 0);
+
+    /*
+        step3: get spans info
+    */
+    textPattern->GetSpansInfo(start, end, method);
+    EXPECT_EQ(realEnd, 0);
 }
 
 /**

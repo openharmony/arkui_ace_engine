@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
+#ifdef ENABLE_STANDARD_INPUT
+#include "extra_config.h"
+#endif
+#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/ime_client_peer.h"
+#ifdef ENABLE_STANDARD_INPUT
+#include "core/interfaces/native/implementation/ime_extra_config_peer.h"
+#endif
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IMEClientAccessor {
@@ -32,8 +39,15 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetExtraConfigImpl(Ark_IMEClient peer,
-                        const Ark_CustomObject* config)
+                        Ark_InputMethodExtraConfig config)
 {
+    CHECK_NULL_VOID(config && peer);
+#ifdef ENABLE_STANDARD_INPUT
+    RefPtr<IMEExtraInfo> imeExtraConfig = AceType::MakeRefPtr<IMEExtraInfo>(
+        config->extraInfo.get(), [configPtr = config->extraInfo]() mutable { configPtr.reset(); });
+    peer->extraInfo = imeExtraConfig;
+    PeerUtils::DestroyPeer(config);
+#endif
 }
 Ark_Int64 GetNodeIdImpl(Ark_IMEClient peer)
 {
@@ -43,8 +57,7 @@ Ark_Int64 GetNodeIdImpl(Ark_IMEClient peer)
 void SetNodeIdImpl(Ark_IMEClient peer,
                    Ark_Int64 nodeId)
 {
-    CHECK_NULL_VOID(peer);
-    peer->nodeId = nodeId;
+    /* Don't support SetNodeId */
 }
 } // IMEClientAccessor
 const GENERATED_ArkUIIMEClientAccessor* GetIMEClientAccessor()

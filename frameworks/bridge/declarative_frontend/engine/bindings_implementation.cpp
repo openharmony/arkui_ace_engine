@@ -17,6 +17,7 @@
 
 namespace OHOS::Ace::Framework {
 
-    thread_local std::vector<std::unique_ptr<IFunctionBinding>> IFunctionBinding::functions;
+    thread_local std::unordered_map<void*, std::vector<std::unique_ptr<IFunctionBinding>>> IFunctionBinding::functions;
+    thread_local void* IFunctionBinding::runtime = nullptr;
 
 }; // namespace OHOS::Ace::Framework

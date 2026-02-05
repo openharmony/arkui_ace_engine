@@ -20,7 +20,10 @@
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components/select/select_theme.h"
+
+namespace OHOS::Ace {
+class SelectTheme;
+}
 
 namespace OHOS::Ace::NG {
 class MenuItemConfiguration : public CommonConfiguration {
@@ -116,6 +119,7 @@ public:
     void SetMenuOutline(const MenuParam& menuParam) override;
     void SetKeyboardAvoidMode(const std::optional<MenuKeyboardAvoidMode>& mode) override;
     void SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance) override;
+    void SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -176,6 +180,7 @@ public:
     static void ResetBackgroundColor(FrameNode* frameNode);
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<MenuKeyboardAvoidMode>& mode);
     static void SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std::optional<Dimension>& distance);
+    static void SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiMaterial>& menuSystemMaterial);
 
 private:
     void AddResObjWithCallBack(

@@ -32,6 +32,6 @@ export class InteropWatchFunc extends WatchFunc {
         if (!this.checkThread()) {
             throw new Error('prohibited to modify a state which binds to UI when not in UI thread');
         }
-        this.func_(propertyName);
+        this.func_?.(propertyName);
     }
 }

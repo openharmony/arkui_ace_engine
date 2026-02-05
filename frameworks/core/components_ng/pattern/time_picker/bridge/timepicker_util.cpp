@@ -22,7 +22,6 @@
 
 #include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
@@ -31,7 +30,10 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 namespace OHOS::Ace::NG::TimePickerUtil {
 namespace {
+#define MODIFIER_COUNTS 1
 const std::string COLON = ":";
+const Dimension& FONT_SIZE_LIMIT = 0.0_vp;
+const bool IS_USER_SET_FONT_SIZE = false;
 } // namespace
 std::string GetShowTimePickerText(const RefPtr<FrameNode>& frameNode)
 {
@@ -226,6 +228,88 @@ void CreateTimePickerColumnPattern(ElementIdType nodeId, RefPtr<FrameNode>& colu
         COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
 }
 
+const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
+{
+    if (isUserSetFont == false) {
+        return fontSizeValue;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+    }
+    Dimension fontSizeValueResult = fontSizeValue;
+    if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
+        if (!NearZero(fontScale)) {
+            fontSizeValueResult = fontSizeLimit / fontScale;
+        }
+    }
+    return fontSizeValueResult;
+}
+
+bool NeedAdaptForAging()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+        (follow && (GreatOrEqual(maxAppFontScale, pickerTheme->GetMaxOneFontScale())))) {
+        return true;
+    }
+    return false;
+}
+
+const Dimension ConvertFontScaleValue(
+    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
+    float fontSizeScale = pipeline->GetFontScale();
+    Dimension fontSizeValueResult = fontSizeValue;
+    Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+
+    if (fontSizeValue.Unit() == DimensionUnit::VP) {
+        return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
+    }
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
+    }
+    if (NeedAdaptForAging()) {
+        if (isUserSetFont) {
+            if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale, fontSizeLimit.ConvertToPx()) &&
+                (fontSizeScale != 0.0f)) {
+                fontSizeValueResult = fontSizeLimit / fontSizeScale;
+            } else {
+                fontSizeValueResult = fontSizeValue;
+            }
+        } else {
+            if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxThirdFontScale())) {
+                fontSizeScale = pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale();
+                fontSizeValueResult = fontSizeValue * fontSizeScale;
+            }
+        }
+    } else {
+        if (isUserSetFont) {
+            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
+        } else {
+            if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
+                (!NearZero(fontSizeScale))) {
+                fontSizeValueResult = fontSizeValueResult / fontSizeScale;
+            }
+        }
+    }
+    return fontSizeValueResult;
+}
+
 void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties,
     Dimension disappearTextStyleFont, Dimension normalTextStyleFont, Dimension selectedTextStyleFont)
 {
@@ -240,11 +324,11 @@ void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextP
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
     if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateDisappearFontSize(DatePickerDialogView::ConvertFontScaleValue(
-            properties.disappearTextStyle_.fontSize.value(), disappearTextStyleFont, true));
+        pickerProperty->UpdateDisappearFontSize(
+            ConvertFontScaleValue(properties.disappearTextStyle_.fontSize.value(), disappearTextStyleFont, true));
     } else {
         pickerProperty->UpdateDisappearFontSize(
-            DatePickerDialogView::ConvertFontScaleValue(disappearStyle.GetFontSize()));
+            ConvertFontScaleValue(disappearStyle.GetFontSize(), FONT_SIZE_LIMIT, IS_USER_SET_FONT_SIZE));
     }
     pickerProperty->UpdateDisappearColor(
         properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
@@ -252,32 +336,35 @@ void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextP
         properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
 
     if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateFontSize(DatePickerDialogView::ConvertFontScaleValue(
-            properties.normalTextStyle_.fontSize.value(), normalTextStyleFont, true));
+        pickerProperty->UpdateFontSize(
+            ConvertFontScaleValue(properties.normalTextStyle_.fontSize.value(), normalTextStyleFont, true));
     } else {
-        pickerProperty->UpdateFontSize(DatePickerDialogView::ConvertFontScaleValue(normalStyle.GetFontSize()));
+        pickerProperty->UpdateFontSize(
+            ConvertFontScaleValue(normalStyle.GetFontSize(), FONT_SIZE_LIMIT, IS_USER_SET_FONT_SIZE));
     }
     pickerProperty->UpdateColor(properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     pickerProperty->UpdateWeight(properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
 
     if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
-        pickerProperty->UpdateSelectedFontSize(DatePickerDialogView::ConvertFontScaleValue(
-            properties.selectedTextStyle_.fontSize.value(), selectedTextStyleFont, true));
+        pickerProperty->UpdateSelectedFontSize(
+            ConvertFontScaleValue(properties.selectedTextStyle_.fontSize.value(), selectedTextStyleFont, true));
     } else {
         pickerProperty->UpdateSelectedFontSize(
-            DatePickerDialogView::ConvertFontScaleValue(selectedStyle.GetFontSize()));
+            ConvertFontScaleValue(selectedStyle.GetFontSize(), FONT_SIZE_LIMIT, IS_USER_SET_FONT_SIZE));
     }
     pickerProperty->UpdateSelectedColor(properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     pickerProperty->UpdateSelectedWeight(
         properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 
+#ifndef ARKUI_WEARABLE
 void SetTimePickerDialogViewShow(TimePickerDialogInfo& info, std::map<std::string, PickerTime> timePickerProperty,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     info.timePickerNode = TimePickerDialogView::Show(info.dialogProperties, info.settingData, info.buttonInfos,
         std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
 }
+#endif
 
 const TimepickerCustomModifier* GetTimePickerCustomModifier()
 {
@@ -297,9 +384,13 @@ const TimepickerCustomModifier* GetTimePickerCustomModifier()
         .setHour24 = SetHour24,
         .createTimePickerColumnPattern = CreateTimePickerColumnPattern,
         .setTimeTextProperties = SetTimeTextProperties,
+#ifndef ARKUI_WEARABLE
         .setTimePickerDialogViewShow = SetTimePickerDialogViewShow,
+#else
+        .setTimePickerDialogViewShow = nullptr,
+#endif
     };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifier, MODIFIER_COUNTS, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace OHOS::Ace::NG::TimePickerUtil

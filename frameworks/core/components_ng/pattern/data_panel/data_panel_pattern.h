@@ -45,10 +45,7 @@ public:
         return MakeRefPtr<DataPanelLayoutAlgorithm>();
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void OnModifyDone() override;
 

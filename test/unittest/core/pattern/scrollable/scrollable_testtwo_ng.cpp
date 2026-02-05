@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_static.h"
@@ -760,5 +761,356 @@ HWTEST_F(ScrollableTestNg, ScrollableModelStatic_SetEdgeEffect001, TestSize.Leve
     ScrollableModelStatic::SetEdgeEffect(AceType::RawPtr(frameNodeOther), std::nullopt, false, EffectEdge::ALL);
     auto scrollEffect = ScrollableModelNG::GetEdgeEffect(AceType::RawPtr(frameNodeOther));
     EXPECT_EQ(scrollEffect, 2);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone001
+ * @tc.desc: Test ScrollableLayoutProperty Clone with all properties set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set all properties
+     * @tc.expected: Properties are set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(10.5f);
+    layoutProperty->UpdateContentEndOffset(20.5f);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful with valid object creation
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify all cloned properties match original values
+     * @tc.expected: All cloned properties maintain correct values
+     */
+    EXPECT_TRUE(clonedProperty->HasContentStartOffset());
+    EXPECT_TRUE(clonedProperty->HasContentEndOffset());
+    EXPECT_TRUE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+    EXPECT_EQ(clonedProperty->GetContentStartOffsetValue(), 10.5f);
+    EXPECT_EQ(clonedProperty->GetContentEndOffsetValue(), 20.5f);
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), true);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone002
+ * @tc.desc: Test ScrollableLayoutProperty Clone with partial properties set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set partial properties
+     * @tc.expected: Properties are set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(15.0f);
+    // ContentEndOffset not set
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(false);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful with valid object creation
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify cloned properties match original values
+     * @tc.expected: Set properties are cloned, unset properties remain unset
+     */
+    EXPECT_TRUE(clonedProperty->HasContentStartOffset());
+    EXPECT_FALSE(clonedProperty->HasContentEndOffset());
+    EXPECT_TRUE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+    EXPECT_EQ(clonedProperty->GetContentStartOffsetValue(), 15.0f);
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), false);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone003
+ * @tc.desc: Test ScrollableLayoutProperty Clone with no properties set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty without setting any properties
+     * @tc.expected: Object created successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful with valid object creation
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify all cloned properties are unset
+     * @tc.expected: No properties should have values
+     */
+    EXPECT_FALSE(clonedProperty->HasContentStartOffset());
+    EXPECT_FALSE(clonedProperty->HasContentEndOffset());
+    EXPECT_FALSE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone004
+ * @tc.desc: Test ScrollableLayoutProperty Clone independence
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone004, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set properties
+     * @tc.expected: Properties are set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(30.0f);
+    layoutProperty->UpdateContentEndOffset(40.0f);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Modify original properties after cloning
+     * @tc.expected: Original values are preserved in clone
+     */
+    EXPECT_EQ(clonedProperty->GetContentStartOffsetValue(), 30.0f);
+    EXPECT_EQ(clonedProperty->GetContentEndOffsetValue(), 40.0f);
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), true);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone005
+ * @tc.desc: Test ScrollableLayoutProperty Clone with edge values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone005, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set edge values
+     * @tc.expected: Properties are set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(0.0f);
+    layoutProperty->UpdateContentEndOffset(-10.5f);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(false);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful with edge values preserved
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify edge values are correctly cloned
+     * @tc.expected: Edge values match exactly
+     */
+    EXPECT_EQ(clonedProperty->GetContentStartOffsetValue(), 0.0f);
+    EXPECT_EQ(clonedProperty->GetContentEndOffsetValue(), -10.5f);
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), false);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone006
+ * @tc.desc: Test ScrollableLayoutProperty Clone with large values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set large float values
+     * @tc.expected: Properties are set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(999999.99f);
+    layoutProperty->UpdateContentEndOffset(-999999.99f);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful with large values preserved
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify large values are correctly cloned
+     * @tc.expected: Large values match exactly
+     */
+    EXPECT_FLOAT_EQ(clonedProperty->GetContentStartOffsetValue(), 999999.99f);
+    EXPECT_FLOAT_EQ(clonedProperty->GetContentEndOffsetValue(), -999999.99f);
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), true);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone007
+ * @tc.desc: Test ScrollableLayoutProperty Clone only ContentStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone007, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set only ContentStartOffset
+     * @tc.expected: Property is set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(25.5f);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify only ContentStartOffset is set in clone
+     * @tc.expected: Only ContentStartOffset has value
+     */
+    EXPECT_TRUE(clonedProperty->HasContentStartOffset());
+    EXPECT_FALSE(clonedProperty->HasContentEndOffset());
+    EXPECT_FALSE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+    EXPECT_EQ(clonedProperty->GetContentStartOffsetValue(), 25.5f);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone008
+ * @tc.desc: Test ScrollableLayoutProperty Clone only ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone008, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set only ContentEndOffset
+     * @tc.expected: Property is set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentEndOffset(35.75f);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify only ContentEndOffset is set in clone
+     * @tc.expected: Only ContentEndOffset has value
+     */
+    EXPECT_FALSE(clonedProperty->HasContentStartOffset());
+    EXPECT_TRUE(clonedProperty->HasContentEndOffset());
+    EXPECT_FALSE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+    EXPECT_EQ(clonedProperty->GetContentEndOffsetValue(), 35.75f);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone009
+ * @tc.desc: Test ScrollableLayoutProperty Clone only SupportLazyLoadingEmptyBranch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone009, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set only SupportLazyLoadingEmptyBranch
+     * @tc.expected: Property is set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Verify only SupportLazyLoadingEmptyBranch is set in clone
+     * @tc.expected: Only SupportLazyLoadingEmptyBranch has value
+     */
+    EXPECT_FALSE(clonedProperty->HasContentStartOffset());
+    EXPECT_FALSE(clonedProperty->HasContentEndOffset());
+    EXPECT_TRUE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), true);
+}
+
+/**
+ * @tc.name: ScrollableLayoutPropertyClone010
+ * @tc.desc: Test ScrollableLayoutProperty Clone with Reset and Update
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableLayoutPropertyClone010, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. Create ScrollableLayoutProperty and set properties
+     * @tc.expected: Properties are set successfully
+     */
+    auto layoutProperty = AceType::MakeRefPtr<ScrollableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateContentStartOffset(100.0f);
+    layoutProperty->UpdateContentEndOffset(200.0f);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    /**
+     * @tc.step: step2. Clone the layout property
+     * @tc.expected: Clone successful
+     */
+    auto clonedProperty = AceType::DynamicCast<ScrollableLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.step: step3. Reset original property and verify clone is unaffected
+     * @tc.expected: Clone maintains its values
+     */
+    layoutProperty->Reset();
+
+    EXPECT_TRUE(clonedProperty->HasContentStartOffset());
+    EXPECT_TRUE(clonedProperty->HasContentEndOffset());
+    EXPECT_TRUE(clonedProperty->HasSupportLazyLoadingEmptyBranch());
+    EXPECT_EQ(clonedProperty->GetContentStartOffsetValue(), 100.0f);
+    EXPECT_EQ(clonedProperty->GetContentEndOffsetValue(), 200.0f);
+    EXPECT_EQ(clonedProperty->GetSupportLazyLoadingEmptyBranchValue(), true);
+
+    /**
+     * @tc.step: step4. Verify original property is reset
+     * @tc.expected: Original property has no values
+     */
+    EXPECT_FALSE(layoutProperty->HasContentStartOffset());
+    EXPECT_FALSE(layoutProperty->HasContentEndOffset());
+    EXPECT_FALSE(layoutProperty->HasSupportLazyLoadingEmptyBranch());
 }
 } // namespace OHOS::Ace::NG

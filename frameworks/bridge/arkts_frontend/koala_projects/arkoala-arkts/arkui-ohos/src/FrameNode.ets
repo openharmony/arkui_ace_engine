@@ -103,9 +103,9 @@ import { DividerAttribute, ArkDividerPeer } from './component/divider'
 import { BlankAttribute, ArkBlankPeer } from './component/blank'
 import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
 import { SwiperController, SwiperAttribute, ArkSwiperPeer } from './component/swiper'
-import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
-import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
-import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
+import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer, TextAreaController } from './component/textArea'
+import { TextInputOptions, TextInputAttribute, ArkTextInputPeer, TextInputController } from './component/textInput'
+import { TextOptions, TextAttribute, ArkTextPeer, TextController } from './component/text'
 import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
 import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
@@ -1702,7 +1702,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getListEvent(node: FrameNode): UIListEvent | undefined {
-        if (node.getType() !== 'List') {
+        if (node.getNodeType() !== 'List') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -1799,7 +1799,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getScrollEvent(node: FrameNode): UIScrollEvent | undefined {
-        if (node.getType() !== 'Scroll') {
+        if (node.getNodeType() !== 'Scroll') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -1850,7 +1850,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getGridEvent(node: FrameNode): UIGridEvent | undefined {
-        if (node.getType() !== 'Grid') {
+        if (node.getNodeType() !== 'Grid') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -1926,7 +1926,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getWaterFlowEvent(node: FrameNode): UIWaterFlowEvent | undefined {
-        if (node.getType() !== 'WaterFlow') {
+        if (node.getNodeType() !== 'WaterFlow') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -2009,6 +2009,33 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getTextAreaAttribute(node: FrameNode): TextAreaAttribute | undefined {
+        if (node.getType() !== 'TextArea') {
+            return undefined
+        }
+        let textAreaNode = node as TextAreaFrameNode
+        if (textAreaNode !== undefined) {
+            return textAreaNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindTextAreaController(node: FrameNode, controller: TextAreaController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextArea') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let textAreaNode = node as TextAreaFrameNode
+        if (!textAreaNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        textAreaNode.initialize({controller: controller})
+        return
+    }
+
+    // @ts-ignore
     function createTextInputNode(context: UIContext): TextInputFrameNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
@@ -2020,6 +2047,33 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getTextInputAttribute(node: FrameNode): TextInputAttribute | undefined {
+        if (node.getType() !== 'TextInput') {
+            return undefined
+        }
+        let textInputNode = node as TextInputFrameNode
+        if (textInputNode !== undefined) {
+            return textInputNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindTextInputController(node: FrameNode, controller: TextInputController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextInput') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let textInputNode = node as TextInputFrameNode
+        if (!textInputNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        textInputNode.initialize({controller: controller})
+        return
+    }
+
+    // @ts-ignore
     function createTextNode(context: UIContext): TextFrameNode {
         return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
             let arknode = new ArkTextNode();
@@ -2028,6 +2082,34 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+
+    // @ts-ignore
+    export function getTextAttribute(node: FrameNode): TextAttribute | undefined {
+        if (node.getType() !== 'Text') {
+            return undefined
+        }
+        let textNode = node as TextFrameNode
+        if (textNode !== undefined) {
+            return textNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindTextController(node: FrameNode, controller: TextController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Text') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let textNode = node as TextFrameNode
+        if (!textNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        textNode.initialize(undefined, {controller: controller})
+        return
     }
 
     class ArkMarqueePeerCustom extends ArkMarqueePeer {

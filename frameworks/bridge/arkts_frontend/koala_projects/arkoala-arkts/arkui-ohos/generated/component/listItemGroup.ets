@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ListDividerOptions_serializer, ListDividerOptions } from "./list"
 import { ChildrenMainSize_serializer, ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -263,7 +263,7 @@ export class ListItemGroupOptions_serializer {
             const headerTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const headerTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const headerTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            headerTmpBuf = ():void => {
+            const headerTmpBuf_Closure  = ():void => {
                 const headerTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 headerTmpBuf_BufArgsSerializer.writeInt32(headerTmpBuf_BufResource.resourceId);
                 headerTmpBuf_BufArgsSerializer.writePointer(headerTmpBuf_BufCall);
@@ -272,6 +272,8 @@ export class ListItemGroupOptions_serializer {
                 headerTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(headerTmpBuf_Closure, headerTmpBuf_BufResource)
+            headerTmpBuf = headerTmpBuf_Closure
         }
         const headerTmpResult : CustomBuilder | undefined = headerTmpBuf
         const headerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -286,7 +288,7 @@ export class ListItemGroupOptions_serializer {
             const footerTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const footerTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const footerTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            footerTmpBuf = ():void => {
+            const footerTmpBuf_Closure  = ():void => {
                 const footerTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 footerTmpBuf_BufArgsSerializer.writeInt32(footerTmpBuf_BufResource.resourceId);
                 footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCall);
@@ -295,6 +297,8 @@ export class ListItemGroupOptions_serializer {
                 footerTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(footerTmpBuf_Closure, footerTmpBuf_BufResource)
+            footerTmpBuf = footerTmpBuf_Closure
         }
         const footerTmpResult : CustomBuilder | undefined = footerTmpBuf
         const footerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

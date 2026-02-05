@@ -25,7 +25,16 @@
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
+#include "core/interfaces/native/implementation/tap_recognizer_peer.h"
+#include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
+#include "core/interfaces/native/implementation/pan_recognizer_peer.h"
+#include "core/interfaces/native/implementation/pinch_recognizer_peer.h"
+#include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
+#include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
@@ -139,6 +148,93 @@ void AssignArkValue(
     dst = peer;
 }
 
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+
+// Two-parameter versions for gesture recognizers (required by template adapter)
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 {
     auto data = JsonUtil::ParseJsonString(src);
@@ -214,7 +310,7 @@ void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
 
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
-    dst.radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
+    dst.radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
     dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
         src.GetColor().ColorToString(), ctx);
@@ -1028,5 +1124,66 @@ void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
     dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
     dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
     dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
+}
+
+// Helper function to create Ark_GestureRecognizer from NG::NGGestureRecognizer
+// This function performs dynamic type casting to create the specific peer type
+static Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    Ark_GestureRecognizer peer = nullptr;
+    auto tapRecognizer = AceType::DynamicCast<NG::ClickRecognizer>(recognizer);
+    if (tapRecognizer) {
+        peer = Converter::ArkValue<Ark_TapRecognizer>(tapRecognizer);
+        return peer;
+    }
+    auto longPressRecognizer = AceType::DynamicCast<NG::LongPressRecognizer>(recognizer);
+    if (longPressRecognizer) {
+        peer = Converter::ArkValue<Ark_LongPressRecognizer>(longPressRecognizer);
+        return peer;
+    }
+    auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(recognizer);
+    if (panRecognizer) {
+        peer = Converter::ArkValue<Ark_PanRecognizer>(panRecognizer);
+        return peer;
+    }
+    auto pinchRecognizer = AceType::DynamicCast<NG::PinchRecognizer>(recognizer);
+    if (pinchRecognizer) {
+        peer = Converter::ArkValue<Ark_PinchRecognizer>(pinchRecognizer);
+        return peer;
+    }
+    auto swipeRecognizer = AceType::DynamicCast<NG::SwipeRecognizer>(recognizer);
+    if (swipeRecognizer) {
+        peer = Converter::ArkValue<Ark_SwipeRecognizer>(swipeRecognizer);
+        return peer;
+    }
+    auto rotationRecognizer = AceType::DynamicCast<NG::RotationRecognizer>(recognizer);
+    if (rotationRecognizer) {
+        peer = Converter::ArkValue<Ark_RotationRecognizer>(rotationRecognizer);
+        return peer;
+    }
+    // Fallback to generic GestureRecognizer
+    peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
+    return peer;
+}
+
+void AssignArkValue(Ark_InnerGestureTriggerInfo& dst, const GestureTriggerInfo& src)
+{
+    // Convert GestureEvent to Ark_GestureEvent using SyncEvent
+    GestureEvent eventInfo = src.event;
+    const auto event = Converter::SyncEvent<Ark_GestureEvent>(eventInfo);
+    dst.event = event.ArkValue();
+
+    // Convert void* current to RefPtr<NG::NGGestureRecognizer> and then to Ark_GestureRecognizer
+    // The current pointer was set using AceType::RawPtr() in observer_handler.cpp
+    if (src.current != nullptr) {
+        auto recognizer = AceType::Claim(reinterpret_cast<NG::NGGestureRecognizer*>(src.current));
+        if (recognizer) {
+            // Use CreateArkGestureRecognizer to create the appropriate peer type
+            dst.current = CreateArkGestureRecognizer(recognizer);
+        }
+    }
+
+    // Set gesture action phase (enum value, not optional)
+    dst.currentPhase = static_cast<Ark_GestureActionPhase>(src.currentPhase);
 }
 } // namespace OHOS::Ace::NG::Converter

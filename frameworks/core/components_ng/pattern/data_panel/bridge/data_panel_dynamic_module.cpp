@@ -22,7 +22,7 @@
 
 #include "base/log/ace_scoring_log.h"
 
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
 #include "core/components_ng/pattern/data_panel/data_panel_model_static.h"
 #endif
 
@@ -36,8 +36,10 @@ namespace OHOS::Ace {
 namespace NG {
 const ArkUIDataPanelModifier* GetDataPanelDynamicModifier();
 const CJUIDataPanelModifier* GetCJUIDataPanelModifier();
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
+constexpr const char* CONTENT_MODIFIER = "contentModifier";
+constexpr const char* DATAPANEL_EXTENDER_ACCESSOR = "dataPanelExtenderAccessor";
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelStaticModifier();
 const GENERATED_ArkUIDataPanelContentModifier* GetDataPanelStaticContentModifier();
 const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor();
@@ -57,7 +59,7 @@ const void* DataPanelDynamicModule::GetDynamicModifier()
 
 const void* DataPanelDynamicModule::GetStaticModifier()
 {
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
     return NG::GeneratedModifier::GetDataPanelStaticModifier();
 #else
     return nullptr;
@@ -75,4 +77,16 @@ void* DataPanelDynamicModule::GetModel()
     return &model;
 }
 
+const void* DataPanelDynamicModule::GetCustomModifier(const std::string& name)
+{
+#ifdef INCLUDE_GENERATED_SOURCES
+    if (name == NG::GeneratedModifier::CONTENT_MODIFIER) {
+        return NG::GeneratedModifier::GetDataPanelStaticContentModifier();
+    }
+    if (name == NG::GeneratedModifier::DATAPANEL_EXTENDER_ACCESSOR) {
+        return NG::GeneratedModifier::GetDataPanelExtenderAccessor();
+    }
+#endif
+    return nullptr;
+}
 } // namespace OHOS::Ace

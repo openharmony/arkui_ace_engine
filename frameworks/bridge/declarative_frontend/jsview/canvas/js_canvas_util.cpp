@@ -14,8 +14,33 @@
  */
 
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_util.h"
+#include "core/common/statistic_event_reporter.h"
 
 namespace OHOS::Ace::Framework {
+void SendStatisticEvent(StatisticEventType type)
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
+}
+
+bool GetDoubleArg(const JSCallbackInfo& info, size_t index, double& value, bool isJudgeSpecialValue)
+{
+    auto JsiRuntimeCallInfo = info.GetJsiRuntimeCallInfo();
+    CHECK_NULL_RETURN(JsiRuntimeCallInfo, false);
+    auto arg = JsiRuntimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!arg.IsEmpty(), false);
+    bool ret = false;
+    value = arg->GetValueDouble(ret);
+    if (std::isnan(value) || std::isinf(value)) {
+        SendStatisticEvent(StatisticEventType::CANVAS_NAN_INFINITY_PARAM);
+        return !isJudgeSpecialValue && ret;
+    }
+    return ret;
+}
+
 bool ExtractInfoToRadii(const JSRef<JSVal> value, std::vector<double>& radii)
 {
     if (value->IsNull() || value->IsUndefined()) {
@@ -62,10 +87,10 @@ bool ParseRoundRect(
     double y = 0.0;
     double width = 0.0;
     double height = 0.0;
-    if (!((info.GetDoubleArg(0, x, isJudgeSpecialValue) || info[0]->IsNull()) &&         // 0: the 1st arg.
-            (info.GetDoubleArg(1, y, isJudgeSpecialValue) || info[1]->IsNull()) &&       // 1: the 2nd arg.
-            (info.GetDoubleArg(2, width, isJudgeSpecialValue) || info[2]->IsNull()) &&   // 2: the 3rd arg.
-            (info.GetDoubleArg(3, height, isJudgeSpecialValue) || info[3]->IsNull()))) { // 3: the 4th arg.
+    if (!((GetDoubleArg(info, 0, x, isJudgeSpecialValue) || info[0]->IsNull()) &&         // 0: the 1st arg.
+            (GetDoubleArg(info, 1, y, isJudgeSpecialValue) || info[1]->IsNull()) &&       // 1: the 2nd arg.
+            (GetDoubleArg(info, 2, width, isJudgeSpecialValue) || info[2]->IsNull()) &&   // 2: the 3rd arg.
+            (GetDoubleArg(info, 3, height, isJudgeSpecialValue) || info[3]->IsNull()))) { // 3: the 4th arg.
         return false;
     }
     rect.SetRect(x, y, width, height);

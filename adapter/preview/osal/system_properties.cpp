@@ -15,6 +15,8 @@
 
 #include "base/utils/system_properties.h"
 
+#include "base/utils/layout_break_point.h"
+
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
@@ -120,6 +122,8 @@ float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
 uint32_t SystemProperties::safeRefactorMode_ = 0;
+float SystemProperties::fontScale_ = 1.0;
+float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
@@ -537,5 +541,95 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 int32_t SystemProperties::GetPreviewStatus()
 {
     return -1;
+}
+
+// Missing setter implementations
+void SystemProperties::SetDeviceType(DeviceType deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+void SystemProperties::SetDevicePhysicalWidth(int32_t devicePhysicalWidth)
+{
+    devicePhysicalWidth_ = devicePhysicalWidth;
+}
+
+void SystemProperties::SetDevicePhysicalHeight(int32_t devicePhysicalHeight)
+{
+    devicePhysicalHeight_ = devicePhysicalHeight;
+}
+
+void SystemProperties::SetFontWeightScale(const float fontWeightScale)
+{
+    if (fontWeightScale_ != fontWeightScale) {
+        fontWeightScale_ = fontWeightScale;
+    }
+}
+
+void SystemProperties::SetFontScale(const float fontScale)
+{
+    if (fontScale != fontScale_) {
+        fontScale_ = fontScale;
+    }
+}
+
+void SystemProperties::SetResolution(double resolution)
+{
+    resolution_ = resolution;
+}
+
+void SystemProperties::SetDeviceAccess(bool isDeviceAccess)
+{
+    isDeviceAccess_ = isDeviceAccess;
+}
+
+void SystemProperties::SetUnZipHap(bool unZipHap)
+{
+    unZipHap_.store(unZipHap);
+}
+
+void SystemProperties::SetExtSurfaceEnabled(bool extSurfaceEnabled)
+{
+    extSurfaceEnabled_ = extSurfaceEnabled;
+}
+
+void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
+{
+    stateManagerEnable_.store(stateManagerEnable);
+}
+
+void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
+{
+    faultInjectEnabled_ = faultInjectEnable;
+}
+
+void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
+{
+    layoutTraceEnable_.store(layoutTraceEnable);
+}
+
+void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
+{
+    traceInputEventEnable_.store(inputEventTraceEnable);
+}
+
+void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
+{
+    layoutTraceEnable_.store(layoutTraceEnable);
+}
+
+void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
+{
+    debugBoundaryEnabled_.store(debugBoundaryEnabled);
+}
+
+void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
+{
+    acePerformanceMonitorEnable_.store(performanceMonitorEnable);
+}
+
+void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
+{
+    focusCanBeActive_.store(focusCanBeActive);
 }
 } // namespace OHOS::Ace

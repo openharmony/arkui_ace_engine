@@ -194,8 +194,7 @@ public:
         return PreBuildByIndex(preBuildingIndex_, cache, deadline, itemConstraint, canRunLongPredictTask);
     }
 
-    bool PreBuild(std::list<RefPtr<UINode>>& removingNodes, int64_t deadline,
-        const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask);
+    bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask);
 
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes);
@@ -314,8 +313,7 @@ public:
 
     std::string DumpHashKey();
     void DumpInfo();
-    void RemovingExpiringItem(std::list<RefPtr<UINode>>& removingNodes, int64_t deadline,
-        std::unordered_map<std::string, LazyForEachCacheChild>& cache);
+    
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;

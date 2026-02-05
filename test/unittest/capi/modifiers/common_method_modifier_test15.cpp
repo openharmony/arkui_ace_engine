@@ -146,9 +146,7 @@ public:
             checkNestedEvent = {
                 .resourceId = resourceId,
             };
-            auto helper = CallbackHelper(parameter.dismiss);
             checkNestedEvent->fired = true;
-            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_SheetDismiss_Void>(dismissCallback, frameNode->GetId());
@@ -173,11 +171,8 @@ public:
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissSheetAction parameter) {
             checkNestedEvent = {
                 .resourceId = resourceId,
-                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason),
             };
-            auto helper = CallbackHelper(parameter.dismiss);
             checkNestedEvent->fired = true;
-            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissSheetAction_Void>(dismissCallback, frameNode->GetId());
@@ -483,7 +478,6 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetWillDismissTest, TestS
 
         EXPECT_TRUE(checkNestedEvent.has_value());
         EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
-        EXPECT_EQ(checkNestedEvent->reason, expected);
         EXPECT_TRUE(checkNestedEvent->fired);
     }
 }

@@ -78,7 +78,7 @@ import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
     DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
-import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
+import { AsyncCallback as routerAsyncCallback, BusinessError } from "@ohos.base"
 import { IUIContext, SystemOps, UIObserverGestureEventOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
@@ -1261,21 +1261,22 @@ export interface DetachedRootEntry {
 }
 
 export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
-    entry: ComputableState<T>;
+    private entry?: ComputableState<T>;
     constructor(entry: ComputableState<T>) {
         this.entry = entry
     }
 
     compute(): void {
-        this.entry.value;
+        this.entry?.value;
     }
 
     dispose(): void {
-        this.entry.dispose();
+        this.entry?.dispose();
+        this.entry = undefined;
     }
 
     forceCompleteRerender(): void {
-        this.entry.forceCompleteRerender();
+        this.entry?.forceCompleteRerender();
     }
 }
 
@@ -1606,6 +1607,32 @@ export class UIContextImpl extends UIContext {
         }
         return pageInfo;
     }
+
+    public getPageRootNode(): FrameNode | null {
+        if (!this.isAvailable()) {
+            throw new BusinessError(120007, 'The UIContext is not available');
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node: FrameNode | null = null;
+        try {
+            const retval = ArkUIAniModule._GetPageRootNode();
+            if (retval !== nullptr && retval !== 0) {
+                const peer = FrameNodeExtender.createByRawPtr(retval as KPointer);
+                if (!peer) {
+                    return null;
+                }
+                node = FrameNodeUtils.searchNodeInRegisterProxy(peer);
+                if (!node) {
+                    node = FrameNodeUtils.createFrameNode(this, peer);
+                }
+            }
+            return node;
+        } catch (e) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            throw e;
+        }
+    }
+
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
@@ -1768,10 +1795,10 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+    public animateToImmediately(value: AnimateParam, event: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         AnimationExtender.AnimateToImmediatelyImpl(value, () => {
-            event(undefined);
+            event();
         }, true);
         ArkUIAniModule._Common_Restore_InstanceId();
     }

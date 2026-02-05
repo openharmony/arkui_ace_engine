@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -366,7 +366,7 @@ export class RefreshOptions_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForRefreshingForIdx0  = valueHolderForRefreshing as boolean
             valueSerializer.writeBoolean(valueHolderForRefreshingForIdx0)
-        } else if (valueHolderForRefreshing instanceof Bindable<boolean>) {
+        } else if (valueHolderForRefreshing instanceof Bindable) {
             valueSerializer.writeInt8((1).toByte())
             const valueHolderForRefreshingForIdx1  = valueHolderForRefreshing as Bindable<boolean>
             Bindable_Boolean_serializer.write(valueSerializer, valueHolderForRefreshingForIdx1)
@@ -437,7 +437,7 @@ export class RefreshOptions_serializer {
             const builderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const builderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const builderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            builderTmpBuf = ():void => {
+            const builderTmpBuf_Closure  = ():void => {
                 const builderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
@@ -446,6 +446,8 @@ export class RefreshOptions_serializer {
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(builderTmpBuf_Closure, builderTmpBuf_BufResource)
+            builderTmpBuf = builderTmpBuf_Closure
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const refreshingContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

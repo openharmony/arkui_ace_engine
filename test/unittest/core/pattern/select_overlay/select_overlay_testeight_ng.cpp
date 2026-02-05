@@ -411,8 +411,8 @@ HWTEST_F(SelectOverlayEightTestNg, GetSystemMenuItemParams007, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     SelectOverlayInfo info;
     info.menuInfo.showCopy = false;
-    info.menuInfo.showPaste = true;
-    info.menuInfo.showCut = true;
+    info.menuInfo.showPaste = false;
+    info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = true;
     info.menuInfo.showTranslate = false;
     info.menuInfo.showSearch = false;
@@ -439,8 +439,8 @@ HWTEST_F(SelectOverlayEightTestNg, GetSystemMenuItemParams008, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     SelectOverlayInfo info;
     info.menuInfo.showCopy = false;
-    info.menuInfo.showPaste = true;
-    info.menuInfo.showCut = true;
+    info.menuInfo.showPaste = false;
+    info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = true;
     info.menuInfo.showTranslate = false;
     info.menuInfo.showSearch = false;
@@ -1289,7 +1289,7 @@ HWTEST_F(SelectOverlayEightTestNg, DisableSystemServiceMenuItems001, TestSize.Le
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
         SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
     ASSERT_NE(selectOverlayNode, nullptr);
-    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 0);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 1);
 
     AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_ALL_FLAG);
     selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(

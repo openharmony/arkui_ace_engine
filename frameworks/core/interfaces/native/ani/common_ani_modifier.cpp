@@ -330,14 +330,12 @@ ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRun
         &nativeContext, FrontendType::ARK_TS);
     CHECK_NULL_RETURN(container, -1);
     int32_t instanceId = container->GetInstanceId();
-    ContainerScope::Add(instanceId);
     return instanceId;
 }
 
 void DestroyWindowFreeContainer(ani_int id)
 {
     Platform::WindowFreeContainer::DestroyWindowFreeContainer();
-    ContainerScope::RemoveAndCheck(static_cast<int32_t>(id));
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
@@ -1071,6 +1069,18 @@ void ResolveUIContext(std::vector<int32_t>& instnace)
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }
 
+ani_long GetPageRootNodeInStatic()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context) {
+        auto node = context->GetPageRootNode();
+        if (node) {
+            return reinterpret_cast<ani_long>(node.GetRawPtr());
+        }
+    }
+    return 0;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -1156,6 +1166,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getLastForegroundUIContext = OHOS::Ace::NG::GetLastForegroundUIContext,
         .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
+        .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
     };
     return &impl;
 }

@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -368,7 +368,7 @@ export class ToggleConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: boolean) => void) = (value0: boolean):void => {
+        const triggerChangeTmpBufClosure  = (value0: boolean):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
@@ -378,6 +378,8 @@ export class ToggleConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : ((value0: boolean) => void) = triggerChangeTmpBufClosure
         let value : ToggleConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, isOn: isOnTmpResult, toggleEnabled: toggleEnabledTmpResult, triggerChange: triggerChangeTmpResult} as ToggleConfiguration)
         return value
     }
@@ -553,7 +555,7 @@ export class ToggleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIsOnTmpValueForIdx0  = valueHolderForIsOnTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForIsOnTmpValueForIdx0)
-            } else if (valueHolderForIsOnTmpValue instanceof Bindable<boolean>) {
+            } else if (valueHolderForIsOnTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIsOnTmpValueForIdx1  = valueHolderForIsOnTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(valueSerializer, valueHolderForIsOnTmpValueForIdx1)

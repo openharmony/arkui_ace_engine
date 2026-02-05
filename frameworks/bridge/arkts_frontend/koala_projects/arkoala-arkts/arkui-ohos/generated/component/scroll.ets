@@ -341,7 +341,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<double>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(thisSerializer, valueTmpValueForIdx1)

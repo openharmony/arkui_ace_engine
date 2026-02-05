@@ -320,12 +320,11 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    UnRegisterResource("placeholderColor");
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     Color color = theme->GetPlaceholderColor();
     RefPtr<ResourceObject> resourceObject;
-    UnRegisterResource("placeholderColor");
     if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor", resourceObject)) {
         TextFieldModel::GetInstance()->ResetPlaceholderColor();
         return;
@@ -735,8 +734,8 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resourceObject;
+    UnRegisterResource("fontColor");
     if (!ParseJsColor(info[0], textColor, resourceObject)) {
-        UnRegisterResource("fontColor");
         TextFieldModel::GetInstance()->ResetTextColor();
         return;
     }
@@ -801,6 +800,7 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnRegisterResource("fontFamily");
     std::vector<std::string> fontFamilies;
     RefPtr<ResourceObject> resourceObject;
     if (!ParseJsFontFamilies(info[0], fontFamilies, resourceObject)) {
@@ -808,8 +808,6 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<std::vector<std::string>>("fontFamily", resourceObject, fontFamilies);
-    } else {
-        UnRegisterResource("fontFamily");
     }
     TextFieldModel::GetInstance()->SetFontFamily(fontFamilies);
 }
@@ -1930,6 +1928,24 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     SetCancelIconColorAndIconSrc(iconParam);
 }
 
+void JSTextField::SetVoiceButton(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(arg);
+    auto enableProp = param->GetProperty("enabled");
+    if (enableProp->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetIsShowVoiceButton(enableProp->ToBoolean());
+    } else {
+        TextFieldModel::GetInstance()->SetIsShowVoiceButton(false);
+    }
+}
+
 void JSTextField::SetCancelDefaultIcon()
 {
     auto theme = GetTheme<TextFieldTheme>();
@@ -2489,9 +2505,14 @@ void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
         return;
     }
     Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("strokeColor");
+    if (!ParseJsColor(info[0], strokeColor, resObj)) {
         TextFieldModel::GetInstance()->ResetStrokeColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<Color>("strokeColor", resObj, strokeColor);
     }
     TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
 }

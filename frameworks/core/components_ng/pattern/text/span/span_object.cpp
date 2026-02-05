@@ -109,6 +109,18 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
     if (font_.superscript.has_value()) {
         spanItem->fontStyle->UpdateSuperscript(font_.superscript.value());
     }
+
+    if (font_.variableFontWeight.has_value()) {
+        spanItem->fontStyle->UpdateVariableFontWeight(font_.variableFontWeight.value());
+    }
+
+    if (font_.enableVariableFontWeight.has_value()) {
+        spanItem->fontStyle->UpdateEnableVariableFontWeight(font_.enableVariableFontWeight.value());
+    }
+
+    if (font_.enableDeviceFontWeightCategory.has_value()) {
+        spanItem->fontStyle->UpdateEnableDeviceFontWeightCategory(font_.enableDeviceFontWeightCategory.value());
+    }
 }
 
 void FontSpan::AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const
@@ -160,6 +172,9 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetStrokeWidth();
     spanItem->fontStyle->ResetStrokeColor();
     spanItem->fontStyle->ResetSuperscript();
+    spanItem->fontStyle->ResetVariableFontWeight();
+    spanItem->fontStyle->ResetEnableVariableFontWeight();
+    spanItem->fontStyle->ResetEnableDeviceFontWeightCategory();
 }
 
 Font FontSpan::GetFont() const
@@ -206,6 +221,15 @@ std::string FontSpan::ToString() const
     }
     if (font_.superscript.has_value()) {
         ss << " superscript:" << static_cast<int32_t>(font_.superscript.value());
+    }
+    if (font_.variableFontWeight.has_value()) {
+        ss << " variableFontWeight:" << static_cast<int32_t>(font_.variableFontWeight.value());
+    }
+    if (font_.enableVariableFontWeight.has_value()) {
+        ss << " enableVariableFontWeight:" << (font_.enableVariableFontWeight.value() ? "true" : "false");
+    }
+    if (font_.enableDeviceFontWeightCategory.has_value()) {
+        ss << " enableDeviceFontWeightCategory:" << (font_.enableDeviceFontWeightCategory.value() ? "true" : "false");
     }
     std::string output = ss.str();
     return output;

@@ -652,20 +652,22 @@ void SetBarModeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto mode = Converter::OptConvertPtr<TabBarMode>(value);
     if (mode && *mode == TabBarMode::SCROLLABLE) {
-        ScrollableBarModeOptions barModeOptions;
-        auto defaultMargin = barModeOptions.margin;
         auto optionsOpt = Converter::OptConvertPtr<Ark_ScrollableBarModeOptions>(options);
         if (optionsOpt) {
+            ScrollableBarModeOptions barModeOptions;
+            auto defaultMargin = barModeOptions.margin;
             auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
             Validator::ValidateNonNegative(marginOpt);
             Validator::ValidateNonPercent(marginOpt);
             auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
             barModeOptions.margin = marginOpt.value_or(defaultMargin);
             barModeOptions.nonScrollableLayoutStyle = styleOpt;
+            TabsModelStatic::SetScrollableBarModeOptions(frameNode, barModeOptions);
+        } else {
+            TabsModelStatic::ResetScrollableBarModeOptions(frameNode);
         }
-        TabsModelStatic::SetScrollableBarModeOptions(frameNode, barModeOptions);
     }
-    TabsModelStatic::SetTabBarMode(frameNode, mode);
+    TabsModelStatic::SetTabBarMode(frameNode, mode.value_or(TabBarMode::FIXED));
 }
 void SetBarHeight1Impl(Ark_NativePointer node, const Opt_Length* height, const Opt_Boolean* noMinHeightLimit)
 {

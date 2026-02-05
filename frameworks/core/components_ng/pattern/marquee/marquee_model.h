@@ -45,6 +45,8 @@ public:
     virtual void SetOnBounce(std::function<void()>&& onChange) = 0;
     virtual void SetOnFinish(std::function<void()>&& onChange) = 0;
     virtual void SetMarqueeUpdateStrategy(const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy) {};
+    virtual void SetMarqueeSpacing(const std::optional<CalcDimension>& spacing) {};
+    virtual void SetMarqueeDelay(const std::optional<int32_t>& delay) {};
 
 private:
     static std::unique_ptr<MarqueeModel> instance_;

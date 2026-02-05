@@ -29,7 +29,7 @@ import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWith
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, LocalizedBarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
-import { ArcDirectionInner, ArcSwiperControllerHelper, BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionF64Inner, RotateResult, ScaleResult, SizeF64Inner, TranslateResult, Vector2F64, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, EdgeF64, EdgeI32, ErrorEvent, Event, FieldRegionInner, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ArcDotIndicatorInner, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, RippleFieldOptionsInner, VelocityFieldOptionsInner, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../../component/idlize"
+import { ArcDirectionInner, ArcSwiperControllerHelper, BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionF64Inner, RotateResult, ScaleResult, SizeF64Inner, TranslateResult, Vector2F64, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, EdgeF64, EdgeI32, ErrorEvent, Event, FieldRegionInner, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ArcDotIndicatorInner, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, RippleFieldOptionsInner, VelocityFieldOptionsInner, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner, InnerGestureObserverConfigs, InnerGestureTriggerInfo } from "./../../component/idlize"
 import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, CacheCountInfo, DirectionalEdgesT, ItemFillPolicy, VP, DividerStyleOptions, LengthConstrain, Offset, ScrollBarMargin, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
@@ -54,7 +54,7 @@ import { dragController } from "@ohos.arkui.dragController"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { StyledString, GestureStyle, GestureStyleInterface, LeadingMarginSpan, LeadingMarginSpanDrawInfo, LetterSpacingStyle, LineHeightStyle, StyleOptions, MutableStyledString, ImageAttachment, CustomSpan, SpanStyle, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, AttachmentType, ImageAttachmentInterface, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
-import { UIContext, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
+import { UIContext, GestureActionPhase, GestureListenerType, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
 import { BuildOptions } from "arkui.BuilderNode"
 import { default as ConfigurationConstant } from "@ohos.app.ability.ConfigurationConstant"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, TextInputController, TextInputStyle, PasswordIcon, UnderlineColor, TextInputOptions } from "./../../component/textInput"
@@ -94,7 +94,7 @@ import { IndicatorComponentController } from "./../../component/indicatorcompone
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { ItemState } from "./../../component/stepperItem"
 import { default as text } from "@ohos.graphics.text"
-import { LayoutMode, SelectedMode, TabBarSymbol, TabBarIconStyle, TabBarOptions, BoardStyle, SubTabBarIndicatorStyle, TabBarLabelStyle, BottomTabBarStyle, SubTabBarStyle } from "./../../component/tabContent"
+import { LayoutMode, SelectedMode, TabBarSymbol, TabBarIconStyle, TabBarOptions, BoardStyle, DrawableTabBarIndicator, SubTabBarIndicatorStyle, TabBarLabelStyle, BottomTabBarStyle, SubTabBarStyle } from "./../../component/tabContent"
 import { LinearIndicatorController, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../../component/linearindicator"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../../component/listItemGroup"
 import { ListItemStyle, ListItemSwipeActionDirection, ListItemSwipeActionManager, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../../component/listItem"
@@ -168,9 +168,9 @@ import { RenderNode } from "arkui.RenderNode"
 import { GridColColumnOption, GridColOptions } from "./../../component/gridCol"
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo"
 import { Metadata } from "bundleManager.Metadata"
+import { InputMethodExtraConfig, CustomValueType } from "@ohos.inputMethod.ExtraConfig"
 import { default as intl } from "@ohos.intl"
 import { LineOptions, ShapePoint } from "./../../component/line"
-import { MarqueeOptions } from "./../../component/marquee"
 import { PathOptions } from "./../../component/path"
 import { PolygonOptions } from "./../../component/polygon"
 import { PolylineOptions } from "./../../component/polyline"
@@ -184,6 +184,7 @@ import { ViewportRect } from "./../../component/shape"
 import { default as Want } from "@ohos.app.ability.Want"
 import { FlexSpaceOptions, FlexOptions } from "./../../component/flex"
 import { ImageFrameInfo } from "./../../component/imageAnimator"
+import { MarqueeOptions } from "./../../component/marquee"
 import { MeasureOptions } from "@ohos.measure"
 import { MenuItemGroupOptions } from "./../../component/menuItemGroup"
 import { MenuItemOptions } from "./../../component/menuItem"
@@ -937,7 +938,7 @@ export class TypeChecker {
     static isDisappearSymbolEffect(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DisappearSymbolEffect
     }
-    static isDismissContentCoverAction(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isDismissContentCoverAction(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DismissContentCoverAction
     }
     static isDismissDialogAction(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -949,7 +950,7 @@ export class TypeChecker {
     static isDismissReason(value: Object | string | number | undefined): boolean {
         return value instanceof DismissReason
     }
-    static isDismissSheetAction(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isDismissSheetAction(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DismissSheetAction
     }
     static isDistributionType(value: Object | string | number | undefined): boolean {
@@ -1020,6 +1021,9 @@ export class TypeChecker {
     }
     static isDrawableDescriptor(value: Object | string | number | undefined): boolean {
         return value instanceof DrawableDescriptor
+    }
+    static isDrawableTabBarIndicator(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof DrawableTabBarIndicator
     }
     static isDrawContext(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof DrawContext
@@ -1345,6 +1349,9 @@ export class TypeChecker {
     static isGeometryTransitionOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof GeometryTransitionOptions
     }
+    static isGestureActionPhase(value: Object | string | number | undefined): boolean {
+        return value instanceof GestureActionPhase
+    }
     static isGesture(value: Object | string | number | undefined): boolean {
         return value instanceof Gesture
     }
@@ -1365,6 +1372,9 @@ export class TypeChecker {
     }
     static isGestureJudgeResult(value: Object | string | number | undefined): boolean {
         return value instanceof GestureJudgeResult
+    }
+    static isGestureListenerType(value: Object | string | number | undefined): boolean {
+        return value instanceof GestureListenerType
     }
     static isGestureMask(value: Object | string | number | undefined): boolean {
         return value instanceof GestureMask
@@ -1576,8 +1586,17 @@ export class TypeChecker {
     static isIndicatorComponentController(value: Object | string | number | undefined): boolean {
         return value instanceof IndicatorComponentController
     }
+    static isInnerGestureObserverConfigs(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof InnerGestureObserverConfigs
+    }
+    static isInnerGestureTriggerInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof InnerGestureTriggerInfo
+    }
     static isInputCounterOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof InputCounterOptions
+    }
+    static isInputMethodExtraConfig(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof InputMethodExtraConfig
     }
     static isInputType(value: Object | string | number | undefined): boolean {
         return value instanceof InputType
@@ -1864,7 +1883,7 @@ export class TypeChecker {
     static isMarkStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof MarkStyle
     }
-    static isMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof MarqueeOptions
     }
     static isMarqueeStartPolicy(value: Object | string | number | undefined): boolean {
@@ -3007,7 +3026,7 @@ export class TypeChecker {
     static issharedTransitionOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof sharedTransitionOptions
     }
-    static isSheetDismiss(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isSheetDismiss(value: Object | string | number | undefined): boolean {
         return value instanceof SheetDismiss
     }
     static isSheetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
@@ -4618,6 +4637,12 @@ export class TypeChecker {
     static FunctionKey_FromNumeric(ordinal: int32): FunctionKey {
         return FunctionKey.fromValue(ordinal)
     }
+    static GestureActionPhase_ToNumeric(value: GestureActionPhase): int32 {
+        return value.valueOf()
+    }
+    static GestureActionPhase_FromNumeric(ordinal: int32): GestureActionPhase {
+        return GestureActionPhase.fromValue(ordinal)
+    }
     static GestureControl_GestureType_ToNumeric(value: GestureControl.GestureType): int32 {
         return value.valueOf()
     }
@@ -4635,6 +4660,12 @@ export class TypeChecker {
     }
     static GestureJudgeResult_FromNumeric(ordinal: int32): GestureJudgeResult {
         return GestureJudgeResult.fromValue(ordinal)
+    }
+    static GestureListenerType_ToNumeric(value: GestureListenerType): int32 {
+        return value.valueOf()
+    }
+    static GestureListenerType_FromNumeric(ordinal: int32): GestureListenerType {
+        return GestureListenerType.fromValue(ordinal)
     }
     static GestureMask_ToNumeric(value: GestureMask): int32 {
         return value.valueOf()
@@ -5285,10 +5316,10 @@ export class TypeChecker {
         return Placement.fromValue(ordinal)
     }
     static PlaybackSpeed_ToNumeric(value: PlaybackSpeed): int32 {
-        return value.valueOf()
+        return value.getOrdinal()
     }
     static PlaybackSpeed_FromNumeric(ordinal: int32): PlaybackSpeed {
-        return PlaybackSpeed.fromValue(ordinal)
+        return PlaybackSpeed.values()[ordinal]
     }
     static PlayMode_ToNumeric(value: PlayMode): int32 {
         return value.valueOf()
@@ -6628,6 +6659,9 @@ export class TypeChecker {
         }
         return false
     }
+    static isArray_GestureActionPhase(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_FractionStop(value: Object | string | number | undefined): boolean {
         if (Array.isArray(value)) {
             const array = value as Array<Object>
@@ -7041,7 +7075,7 @@ export class TypeChecker {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<double>
+            return e instanceof ParticlePropertyAnimation
         }
         return false
     }
@@ -7050,7 +7084,7 @@ export class TypeChecker {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<ResourceColor>
+            return e instanceof ParticlePropertyAnimation
         }
         return false
     }

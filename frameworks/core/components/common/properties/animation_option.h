@@ -22,7 +22,6 @@
 
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
-#include "core/components_ng/manager/display_sync/ui_display_sync.h"
 #include "ui/animation/animation_option.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATION_OPTION_H

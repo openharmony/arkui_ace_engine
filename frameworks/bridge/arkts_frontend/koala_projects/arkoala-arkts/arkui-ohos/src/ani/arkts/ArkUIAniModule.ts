@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
@@ -48,6 +48,7 @@ import { JavaScriptProxy } from '#generated';
 import { ErrorCallback } from '@ohos.base';
 import { int32 } from '@koalaui/compat';
 import { SaveButtonCallback, PasteButtonCallback } from '#generated';
+import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 
 export class ArkUIAniModule {
     static {
@@ -58,6 +59,7 @@ export class ArkUIAniModule {
     native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
+    native static _Extractors_ToInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
     native static _Extractors_FromRectShapePtr(ptr: KPointer): RectShape;
     native static _Extractors_ToCircleShapePtr(value: CircleShape): KPointer;
@@ -81,7 +83,7 @@ export class ArkUIAniModule {
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
-    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: KInt): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
     native static _Image_SetOnErrorCallback(ptr: KPointer, value: ImageErrorCallback | undefined): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
@@ -339,11 +341,15 @@ export class ArkUIAniModule {
     // for UIContext without window
     native static _CreateWindowFreeContainer(context: common.Context): KInt
     native static _DestroyWindowFreeContainer(instanceId: KInt): void
+
+    // for UIContext
     native static _GetCallingScopeUIContext(): KInt
     native static _GetLastFocusedUIContext(): KInt
     native static _GetLastForegroundUIContext(): KInt
     native static _GetAllUIContexts(): Array<KInt>
     native static _ResolveUIContext(): Array<KInt>
+    native static _GetPageRootNode(): KPointer
+
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
@@ -472,4 +478,6 @@ export class ArkUIAniModule {
     native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void
     native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
+    native static _GestureEventUIObserver_AddGlobalGestureListener(resourceId: KInt, type: KInt, callback: GestureListenerCallback): void
+    native static _GestureEventUIObserver_RemoveGlobalGestureListener(type: KInt, callback?: GestureListenerCallback): void
 }

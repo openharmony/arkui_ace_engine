@@ -155,23 +155,6 @@ HWTEST_F(TabsModelTestNg, SetTabBarIndex005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetNestedScrollTest001
- * @tc.desc: Verify TabsModelNG::SetNestedScroll
- * @tc.type: FUNC
- */
-HWTEST_F(TabsModelTestNg, SetNestedScroll001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents();
-    CreateTabsDone(model);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
-    model.SetNestedScroll(frameNode, NUMBER_ONE);
-    EXPECT_FALSE(swiperPattern_->isNestedInterrupt_);
-}
-
-/**
  * @tc.name: SetBarBackgroundEffect001
  * @tc.desc: Test TabsModelNG SetBarBackgroundEffect
  * @tc.type: FUNC
@@ -299,6 +282,21 @@ HWTEST_F(TabsModelTestNg, SetOnContentDidScroll002, TestSize.Level1)
     ASSERT_NE(tabsPattern, nullptr);
     EXPECT_EQ(*tabsPattern->onContentDidScroll_, nullptr);
     CreateDone();
+}
+
+/**
+ * @tc.name: SetNestedScrollTest001
+ * @tc.desc: Verify TabsModelNG::SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, SetNestedScroll001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    model.SetNestedScroll(frameNode, NUMBER_ONE);
+    EXPECT_FALSE(swiperPattern_->isNestedInterrupt_);
 }
 
 /**

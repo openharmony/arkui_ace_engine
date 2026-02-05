@@ -48,9 +48,9 @@ public:
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
-    void HasData(const std::function<void(bool hasData)>& callback) override;
-    void HasDataType(
-        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
+    void HasData(const std::function<void(bool hasData, bool isAutoFill)>& callback) override;
+    void HasDataType(const std::function<void(bool hasData, bool isAutoFill)>& callback,
+        const std::vector<std::string>& mimeTypes) override;
     void Clear() override;
     void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,

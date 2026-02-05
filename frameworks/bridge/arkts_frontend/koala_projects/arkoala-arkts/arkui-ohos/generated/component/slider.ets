@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, Finalizable, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { LinearGradient_serializer, LinearGradient } from "./dataPanel"
 import { SizeOptions_serializer, ResourceColor, Length, Dimension, SizeOptions, ResourceStr } from "./units"
@@ -1135,7 +1135,7 @@ export class SliderConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : SliderTriggerChangeCallback = (value: double, mode: SliderChangeMode):void => {
+        const triggerChangeTmpBufClosure  = (value: double, mode: SliderChangeMode):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
@@ -1146,6 +1146,8 @@ export class SliderConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : SliderTriggerChangeCallback = triggerChangeTmpBufClosure
         let value : SliderConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, min: minTmpResult, max: maxTmpResult, step: stepTmpResult, triggerChange: triggerChangeTmpResult} as SliderConfiguration)
         return value
     }
@@ -1286,7 +1288,7 @@ export class SliderOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForValueTmpValueForIdx0)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<double>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)

@@ -31,6 +31,10 @@ void SetTapListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_int instanceId, ani_int resourceId, ani_string tag, ani_fn_object fnObj);
 void RemoveTapListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_int instanceId, ani_string tag, ani_fn_object fnObj);
+void AddGlobalGestureListener(ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_int resourceId, ani_int type, ani_fn_object fnObj);
+void RemoveGlobalGestureListener(ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_int type, ani_fn_object fnObj);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_GESTURE_EVENT_UIOBSERVER_MODULE_H

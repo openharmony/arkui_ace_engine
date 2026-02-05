@@ -311,7 +311,8 @@ bool TextPattern::CanAIEntityDrag()
 
 bool TextPattern::CheckAIPreviewMenuEnable()
 {
-    return GetDataDetectorAdapter() && dataDetectorAdapter_->enablePreviewMenu_
+    return SystemProperties::GetPreviewStatus() != -1
+        && GetDataDetectorAdapter() && dataDetectorAdapter_->enablePreviewMenu_
         && NeedShowAIDetect()
         && IsShowHandle();
 }
@@ -632,7 +633,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     ResetAISelected(AIResetSelectionReason::LONG_PRESS);
     gestureHub->SetIsTextDraggable(false);
     InitSelectionOnLongPress(localOffset);
-    ReportSelectedText();
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
@@ -2745,8 +2745,10 @@ void TextPattern::ContentChangeByDetaching(PipelineContext* context)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto rect = host->GetTransformRectRelativeToWindow();
-    contentChangeManager->OnTextChangeEnd(rect);
+    auto rect = host->GetTransformRectRelativeToWindowOnlyVisible();
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    contentChangeManager->OnTextChangeEnd(rect, rootNode->GetRectWithRender());
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -5164,6 +5166,13 @@ void TextPattern::DumpInfo()
     if (!IsSetObscured() && !IsSensitiveEnable()) {
         dumpLog.AddDesc(std::string("Content: ").append(
             UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "))));
+        auto host = GetHost();
+        if (host && host->GetTag() == V2::SYMBOL_ETS_TAG) {
+            auto symbolSourceInfo = textLayoutProp->GetSymbolSourceInfo();
+            if (symbolSourceInfo) {
+                dumpLog.AddDesc(std::string("SymbolUnicode: ").append(std::to_string(symbolSourceInfo->GetUnicode())));
+            }
+        }
     }
     dumpLog.AddDesc(
         std::string("isSpanStringMode: ")
@@ -7223,6 +7232,7 @@ void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInf
         oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
         ShowSelectOverlay({ .animation = true });
     }
+    ReportSelectedText();
 }
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)

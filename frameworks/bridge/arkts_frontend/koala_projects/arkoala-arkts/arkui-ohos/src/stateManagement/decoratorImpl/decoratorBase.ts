@@ -27,6 +27,7 @@ import { StateMgmtTool } from '#stateMgmtTool';
 import { WatchFunc } from './decoratorWatch';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ObserveSingleton } from '../base/observeSingleton';
+import { IDecoratorBaseRegistry } from '../../stateManagement/decorator';
 
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
@@ -49,8 +50,8 @@ V2:
 /**
  * Base class of all decorated variable classes
  */
-export class DecoratedVariableBase {
-    protected readonly owningComponent_: IVariableOwner | undefined;
+export class DecoratedVariableBase implements IDecoratorBaseRegistry {
+    protected owningComponent_: IVariableOwner | undefined;
     // can be read publically
     public _varName: string;
     public decorator: string;
@@ -65,6 +66,7 @@ export class DecoratedVariableBase {
         this.decorator = decorator;
         this.owningComponent_ = owningComponent;
         this._varName = varName;
+        this.registerToOwningView();
     }
 
     public getTraceInfo(): string {
@@ -81,6 +83,14 @@ export class DecoratedVariableBase {
 
     public shouldAddRef(): boolean {
         return OBSERVE.renderingComponent > 0;
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // base function, overwrite by derived class
+    }
+
+    public registerToOwningView(): void {
+        this.owningComponent_?.__registerStateVariables__Internal(this);
     }
 }
 
@@ -109,6 +119,17 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
             this._watchFuncs.set(w.id(), w);
         }
         this.onObservedObjectChangeExecWatchFuncs_ = new WatchFunc(this.execWatchFuncs);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        this.owningComponent_ = undefined;
+        this._watchFuncs.forEach((watch, id) => {
+            WatchFunc.watchId2WatchFunc.delete(id);
+            watch.aboutToBeDeleted();
+        });
+        this._watchFuncs.clear();
+        WatchFunc.watchId2WatchFunc.delete(this.onObservedObjectChangeExecWatchFuncs_.id());
+        this.onObservedObjectChangeExecWatchFuncs_.aboutToBeDeleted();
     }
 
     public info(): string {

@@ -180,6 +180,7 @@ public:
     void UpdateWidth(const CalcDimension& dimension);
     void UpdateRadius(const CalcDimension& dimension);
     void UpdateShadow();
+    void UpdateBubbleGradient(const int32_t index, const Color& result, bool isOutlineGradient);
 
     void SetMessageColor(bool isSetMessageColor)
     {
@@ -409,6 +410,11 @@ public:
         return isShadowStyle_;
     }
 
+    void SetShadow(const std::optional<Shadow>& shadow)
+    {
+        shadow_ = shadow;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -503,6 +509,7 @@ private:
     RefPtr<FrameNode> messageNode_;
     bool IsTipsAppearing_ = false;
     bool isShadowStyle_ = false;
+    std::optional<Shadow> shadow_;
 
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;

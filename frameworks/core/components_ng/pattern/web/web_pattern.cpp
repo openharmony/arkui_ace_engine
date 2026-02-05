@@ -1501,6 +1501,7 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     InitHoverEvent(inputHub);
+    InitLightTouchEvent(inputHub);
 
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1523,6 +1524,22 @@ void WebPattern::InitFeatureParam()
     isVisibleActiveEnable_ = system::GetBoolParameter(VISIBLE_ACTIVE_ENABLE, true);
     isMemoryLevelEnable_ = system::GetBoolParameter(MEMORY_LEVEL_ENABEL, true);
     isOfflineWebEvictFrameBuffersEnable_ = system::GetBoolParameter(OFFLINE_WEB_EVICT_FRAME_BUFFERS_ENABLE, true);
+}
+
+void WebPattern::HandleCancelFling()
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->WebHandleCancelFlingEvent();
+}
+
+void WebPattern::InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    auto lightTouchCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleCancelFling();
+    };
+    inputHub->AddTouchpadInteractionListenerInner(lightTouchCallback);
 }
 
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2985,6 +3002,49 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     WebRequestFocus();
 }
 
+void WebPattern::HandleOnDragDropPlainText(RefPtr<UnifiedData> aceData)
+{
+    CHECK_NULL_VOID(aceData);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(delegate_->dragData_);
+    std::string plain = UdmfClient::GetInstance()->GetPlainTextEntry(aceData);
+    if (!plain.empty()) {
+        delegate_->dragData_->SetFragmentText(plain);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
+    }
+}
+
+void WebPattern::HandleOnDragDropHTML(RefPtr<UnifiedData> aceData)
+{
+    CHECK_NULL_VOID(aceData);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(delegate_->dragData_);
+    std::string htmlContent;
+    std::string plainContent;
+    UdmfClient::GetInstance()->GetHtmlEntry(aceData, htmlContent, plainContent);
+    if (!htmlContent.empty()) {
+        delegate_->dragData_->SetFragmentHtml(htmlContent);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
+    }
+}
+
+void WebPattern::HandleOnDragDropSpanString(RefPtr<UnifiedData> aceData)
+{
+    CHECK_NULL_VOID(aceData);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(delegate_->dragData_);
+    std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringEntry(aceData);
+    if (!spanString.empty()) {
+        std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(spanString);
+        delegate_->dragData_->SetFragmentHtml(htmlStr);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, spanstring to html success, html size:%{public}zu",
+            htmlStr.size());
+    }
+}
+
 void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
 {
     CHECK_NULL_VOID(aceData);
@@ -3054,6 +3114,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     if (snapshotImageNodeId_.has_value()) {
         return;
     }
+    bool isDragStartFromWeb = isDragStartFromWeb_;
     ResetDragStateValue();
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
@@ -3072,30 +3133,11 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             "DragDrop event WebEventHub onDragDropId, size:%{public}" PRId64 "", aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
-        std::string plain = UdmfClient::GetInstance()->GetPlainTextEntry(aceData);
-        if (!plain.empty()) {
-            delegate_->dragData_->SetFragmentText(plain);
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
-        }
+        HandleOnDragDropPlainText(aceData);
         // html
-        std::string htmlContent;
-        std::string plainContent;
-        UdmfClient::GetInstance()->GetHtmlEntry(aceData, htmlContent, plainContent);
-        if (!htmlContent.empty()) {
-            delegate_->dragData_->SetFragmentHtml(htmlContent);
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
-        }
+        HandleOnDragDropHTML(aceData);
         // spanstring
-        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringEntry(aceData);
-        if (!spanString.empty()) {
-            std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(spanString);
-            delegate_->dragData_->SetFragmentHtml(htmlStr);
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "DragDrop event WebEventHub onDragDropId, spanstring to html success, html size:%{public}zu",
-                htmlStr.size());
-        }
+        HandleOnDragDropSpanString(aceData);
         // link
         HandleOnDragDropLink(aceData);
         // file
@@ -3106,6 +3148,23 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_DROP);
     delegate_->RegisterWebWindowFocusChangedListener();
+    if (isDragStartFromWeb) {
+        isNeedMouseMoveOnDragEnd_ = isDragStartFromWeb;
+    } else {
+        HandleMouseEventOnDrag(localX, localY);
+    }
+}
+
+void WebPattern::HandleMouseEventOnDrag(int32_t x, int32_t y)
+{
+    CHECK_NULL_VOID(delegate_);
+    OnCursorChange(OHOS::NWeb::CursorType::CT_DRAG, nullptr);
+
+    TAG_LOGI(AceLogTag::ACE_WEB, "Send mousemove when drag end");
+    std::shared_ptr<NWebMouseEventImpl> mouseMoveEvent =
+        std::make_shared<NWebMouseEventImpl>(x, y, 0, 0, static_cast<int32_t>(MouseButton::NONE_BUTTON),
+            static_cast<int32_t>(MouseAction::MOVE), 1, std::vector<int32_t> {});
+    delegate_->WebOnMouseEvent(mouseMoveEvent);
 }
 
 void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
@@ -3144,6 +3203,8 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     isDragStartFromWeb_ = false;
+    bool isNeedMouseMoveOnDragEnd = isNeedMouseMoveOnDragEnd_;
+    isNeedMouseMoveOnDragEnd_ = false;
     ClearDragData();
 
     auto host = GetHost();
@@ -3158,6 +3219,9 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_END);
     } else {
         delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    }
+    if (isNeedMouseMoveOnDragEnd) {
+        HandleMouseEventOnDrag(localX, localY);
     }
     if (isSetMouseDragMonitorState) {
         auto eventHub = host->GetEventHub<WebEventHub>();
@@ -5836,6 +5900,9 @@ bool WebPattern::HandleAutoFillEvent()
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
         return UpdateAutoFillPopup();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+        if (autoFillMenuType_ != WebMenuType::TYPE_UNKNOWN_MENU) {
+            return UpdateAutoFillPopup();
+        }
         return CloseAutoFillPopup();
     }
 
@@ -5869,6 +5936,9 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
+    if (triggerType == AceAutoFillTriggerType::AUTO_REQUEST) {
+        autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
@@ -6207,6 +6277,10 @@ bool WebPattern::OnCursorChange(
     CHECK_NULL_RETURN(pipeline, false);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        windowId = pipeline->GetFocusWindowId();
+    }
     int32_t curPointerStyle = 0;
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
@@ -6235,22 +6309,33 @@ CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
 {
     auto type = cursorType;
     auto info = cursorInfo;
-    if (type == OHOS::NWeb::CursorType::CT_LOCK) {
-        type = OHOS::NWeb::CursorType::CT_NONE;
-        isMouseLocked_ = true;
-    } else if (type == OHOS::NWeb::CursorType::CT_UNLOCK) {
-        type = cursorType_;
-        info = nweb_cursorInfo_;
-        isMouseLocked_ = false;
-    } else {
-        if (cursorType_ != type) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
-            cursorType_ = type;
-        }
-        nweb_cursorInfo_.reset();
-        if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
-            nweb_cursorInfo_ = info;
-        }
+    switch (type) {
+        case OHOS::NWeb::CursorType::CT_LOCK:
+            type = OHOS::NWeb::CursorType::CT_NONE;
+            isMouseLocked_ = true;
+            break;
+        case OHOS::NWeb::CursorType::CT_UNLOCK:
+            type = cursorType_;
+            info = nweb_cursorInfo_;
+            isMouseLocked_ = false;
+            break;
+        case OHOS::NWeb::CursorType::CT_DRAG:
+            type = cursorType_;
+            if (cursorType_ == OHOS::NWeb::CursorType::CT_CUSTOM) {
+                info = nweb_cursorInfo_;
+            }
+            break;
+        default:
+            if (cursorType_ != type) {
+                TAG_LOGI(
+                    AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
+                cursorType_ = type;
+            }
+            nweb_cursorInfo_.reset();
+            if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
+                nweb_cursorInfo_ = info;
+            }
+            break;
     }
     return std::make_tuple(type, info);
 }
@@ -9344,6 +9429,20 @@ void WebPattern::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std
     void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>& finishCallback)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "GetWebInfoByRequest WebId:%{public}d, request:%{public}s", webId, request.c_str());
+    if (request == WEB_INTERFACE_REQUEST_DOM_TREE) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTree");
+        delegate_->RequestWebDomJsonString(
+            [weak = AceType::WeakClaim(this), windowId, webId, request, finishCallback](std::string result){
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTree callback");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+                pattern->webDomDocument_->UpdateOffset(offset);
+                auto jsonValue = pattern->webDomDocument_->CreateTempFromJsonString(result);
+                finishCallback(windowId, webId, request, jsonValue->ToString(), WebRequestErrorCode::OK);
+            });
+        return;
+    }
     return;
 }
 

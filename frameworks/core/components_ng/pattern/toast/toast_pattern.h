@@ -190,6 +190,7 @@ private:
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
+    void AdjustOffsetInSubwindow(OffsetT<Dimension>& offset, RefPtr<PipelineContext> context);
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

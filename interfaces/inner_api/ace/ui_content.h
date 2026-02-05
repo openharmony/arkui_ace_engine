@@ -19,6 +19,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <refbase.h>
 #include <string>
 #include <unordered_set>
@@ -134,6 +135,8 @@ public:
     static std::string GetCurrentUIStackInfo();
     static std::unique_ptr<UIContent> CreateWithAniEnv(OHOS::AbilityRuntime::Context* context, ani_env* env);
     static int32_t GetUIContentWindowID(int32_t instanceId);
+    static bool SetXComponentCompensationAngle(const std::string& configStr);
+    static const std::string& GetXComponentCompensationAngle();
     virtual ~UIContent() = default;
 
     // UI content life-cycles
@@ -644,6 +647,21 @@ public:
     }
 
     virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {};
+
+    // get PointerEvent ptr from ts
+    virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event)
+    {
+        return nullptr;
+    }
+    virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event)
+    {
+        return nullptr;
+    }
+
+private:
+    static std::atomic<bool> successFlag_;
+    static std::mutex mtx_;
+    static std::string angleConfigJson_;
 };
 
 } // namespace OHOS::Ace

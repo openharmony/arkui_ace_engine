@@ -1907,19 +1907,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus002, T
 }
 
 /**
- * @tc.name: UpdateDragDropInitiatingStatus_MovingStatus
- * @tc.desc: Verify that MOVING status updates currentDragNode_
- * @tc.type: FUNC
- */
-HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus003, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
-}
-
-/**
  * @tc.name: GetDragDropManagerForDragAnimation001
  * @tc.desc: Test GetDragDropManagerForDragAnimation context equals nodeContext
  * @tc.type: FUNC
@@ -1945,5 +1932,67 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetDragDropManagerForDragAnimation00
     manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
         pipelineContext, pipelineContext, subwindow);
     ASSERT_EQ(dragDropManager, manager);
+}
+
+/**
+ * @tc.name: UpdateDragDropInitiatingStatus_MovingStatus
+ * @tc.desc: Verify that MOVING status updates currentDragNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
+}
+
+/**
+ * @tc.name: Test NotifySuggestedDropOperation
+ * @tc.desc: Test NotifySuggestedDropOperation func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifySuggestedDropOperation, TestSize.Level1)
+{
+    int32_t requestId = 1;
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    int32_t ret =
+        DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, static_cast<int32_t>(DragBehavior::COPY));
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().suggestedDropOperation_, DragBehavior::UNKNOWN);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    ret = DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, static_cast<int32_t>(DragBehavior::COPY));
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().suggestedDropOperation_, DragBehavior::UNKNOWN);
+    DragDropGlobalController::GetInstance().requestId_ = requestId;
+    ret = DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, static_cast<int32_t>(DragBehavior::COPY));
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().suggestedDropOperation_, DragBehavior::COPY);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+}
+
+/**
+ * @tc.name: Test NotifyDisableDropAnimation
+ * @tc.desc: Test NotifyDisableDropAnimation func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDisableDropAnimation, TestSize.Level1)
+{
+    int32_t requestId = 1;
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    int32_t ret = DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, true);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, false);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    ret = DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, true);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, false);
+    DragDropGlobalController::GetInstance().requestId_ = requestId;
+    ret = DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, true);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().disableDropAnimation_, true);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
 }
 } // namespace OHOS::Ace::NG

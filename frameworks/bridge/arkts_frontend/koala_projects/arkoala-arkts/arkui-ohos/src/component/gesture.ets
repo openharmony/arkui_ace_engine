@@ -862,7 +862,7 @@ export class ScrollableTargetInfoTransfer {
             return new Object();
         }
         let retValue = wrapFunc.invoke(objectInternal.getId(), nativePointer);
-        return retValue;
+        return retValue.unwrap();
     }
 }
 
@@ -894,6 +894,6 @@ export class EventTargetInfoTransfer {
             return new Object();
         }
         let retValue = wrapFunc.invoke(objectInternal.getId());
-        return retValue;
+        return retValue.unwrap();
     }
 }

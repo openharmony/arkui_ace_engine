@@ -207,7 +207,8 @@ public:
         bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
-    static bool ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
+    static bool ParseJsMedia(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result, bool isJsView = false);
     static bool ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
     static bool ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
@@ -384,6 +385,8 @@ public:
         const std::optional<Color>& valueColor, std::vector<uint32_t> &options);
     static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
+    static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+        int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
     static void SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> style, Color color,

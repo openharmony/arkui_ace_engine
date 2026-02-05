@@ -5088,6 +5088,14 @@ let ScrollSnapAnimationSpeed;
   ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.SLOW = 1] = 'SLOW';
 })(ScrollSnapAnimationSpeed || (ScrollSnapAnimationSpeed = {}));
 
+let NavigationPolicy;
+(function (NavigationPolicy) {
+  NavigationPolicy[NavigationPolicy.NEW_POPUP = 0] = 'NEW_POPUP';
+  NavigationPolicy[NavigationPolicy.NEW_WINDOW = 1] = 'NEW_WINDOW';
+  NavigationPolicy[NavigationPolicy.NEW_BACKGROUND_TAB = 2] = 'NEW_BACKGROUND_TAB';
+  NavigationPolicy[NavigationPolicy.NEW_FOREGROUND_TAB = 3] = 'NEW_FOREGROUND_TAB';
+})(NavigationPolicy || (NavigationPolicy = {}));
+
 let NativeEmbedParamStatus;
 (function (NativeEmbedParamStatus) {
   NativeEmbedParamStatus.ADD = 0;
@@ -5178,3 +5186,17 @@ let DialogDisplayMode;
   DialogDisplayMode[DialogDisplayMode.SCREEN_BASED = 0] = 'SCREEN_BASED';
   DialogDisplayMode[DialogDisplayMode.WINDOW_BASED = 1] = 'WINDOW_BASED';
 })(DialogDisplayMode || (DialogDisplayMode = {}));
+
+let CameraCaptureState;
+(function (CameraCaptureState) {
+  CameraCaptureState[CameraCaptureState.NONE = 0] = 'NONE';
+  CameraCaptureState[CameraCaptureState.PAUSED = 1] = 'PAUSED';
+  CameraCaptureState[CameraCaptureState.ACTIVE = 2] = 'ACTIVE';
+})(CameraCaptureState || (CameraCaptureState = {}));
+
+let MicrophoneCaptureState;
+(function (MicrophoneCaptureState) {
+  MicrophoneCaptureState[MicrophoneCaptureState.NONE = 0] = 'NONE';
+  MicrophoneCaptureState[MicrophoneCaptureState.PAUSED = 1] = 'PAUSED';
+  MicrophoneCaptureState[MicrophoneCaptureState.ACTIVE = 2] = 'ACTIVE';
+})(MicrophoneCaptureState || (MicrophoneCaptureState = {}));

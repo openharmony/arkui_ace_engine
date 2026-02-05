@@ -14,7 +14,8 @@
  */
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
-import { KPointer, nullptr, pointer, int32 } from '@koalaui/interop';
+import { KPointer, nullptr, pointer } from '@koalaui/interop';
+import { int32 } from '@koalaui/common';
 import { IncrementalNode, GlobalStateManager } from '@koalaui/runtime';
 import { PeerNode } from "./PeerNode"
 import { ArkUIAniModule } from "arkui.ani"
@@ -91,6 +92,11 @@ export class FreeRootNode extends PeerNode {
             const root = roots!.get(this.ptr);
             root!.compute();
         }
+    }
+    dispose(): void {
+        this.componentRoot = undefined;
+        this.context = undefined;
+        super.dispose();
     }
 }
 

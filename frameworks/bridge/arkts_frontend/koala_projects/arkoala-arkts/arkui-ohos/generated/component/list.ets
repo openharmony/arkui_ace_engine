@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, resourceFinalizerRegister } from "@koalaui/interop"
 import { ChildrenMainSize_serializer, EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
 import { LengthConstrain_serializer, LengthConstrain, Dimension, Length, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, CacheCountInfo_serializer, CacheCountInfo } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -1174,7 +1174,7 @@ export class CloseSwipeActionOptions_serializer {
             const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onFinishTmpBuf = ():void => {
+            const onFinishTmpBuf_Closure  = ():void => {
                 const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
@@ -1183,6 +1183,8 @@ export class CloseSwipeActionOptions_serializer {
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onFinishTmpBuf_Closure, onFinishTmpBuf_BufResource)
+            onFinishTmpBuf = onFinishTmpBuf_Closure
         }
         const onFinishTmpResult : (() => void) | undefined = onFinishTmpBuf
         let value : CloseSwipeActionOptions = ({onFinish: onFinishTmpResult} as CloseSwipeActionOptions)

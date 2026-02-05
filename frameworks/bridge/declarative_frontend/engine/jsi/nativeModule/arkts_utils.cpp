@@ -1553,10 +1553,10 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     return true;
 }
 
-bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
+bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result, bool isJsView)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsMedia(vm, jsValue, result, resourceObject);
+    return ParseJsMedia(vm, jsValue, result, resourceObject, isJsView);
 }
 
 bool ArkTSUtils::ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
@@ -1623,6 +1623,9 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueR
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
             if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString(vm));
+                return true;
+            } else if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING) && isJsView) {
+                result = resourceWrapper->GetString(resId->Uint32Value(vm));
                 return true;
             }
             return false;
@@ -2616,6 +2619,43 @@ void ArkTSUtils::ParseOuterBorderColor(
     }
     Color bottom;
     if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+
+    PushOuterBorderColorVector(leftColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+}
+
+void ArkTSUtils::ParseOuterBorderColor(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex,
+    std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left, resObjs, nodeInfo)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right, resObjs, nodeInfo)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top, resObjs, nodeInfo)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom, resObjs, nodeInfo)) {
         bottomColor = bottom;
     }
 
@@ -3625,7 +3665,8 @@ bool ArkTSUtils::ConvertFromJSValueNG(
     } else if constexpr (std::is_same_v<T, NG::CalcLength>) {
         return ParseJsLengthVpNG(vm, jsValue, result, resObj);
     } else if constexpr (std::is_same_v<T, Color>) {
-        return ParseJsColor(vm, jsValue, result, resObj);
+        NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+        return ParseJsSymbolColorAlpha(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
 }
@@ -3661,7 +3702,7 @@ bool ArkTSUtils::ConvertFromJSValue(
         return ParseJsDimensionVp(vm, jsValue, result, resObj);
     } else if constexpr (std::is_same_v<T, Color>) {
         NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
-        return ParseJsColor(vm, jsValue, result, resObj, nodeInfo);
+        return ParseJsSymbolColorAlpha(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
 }
@@ -3671,10 +3712,14 @@ void ArkTSUtils::ParseStepOptionsMap(
 {
     Local<panda::MapRef> StepMapRef(optionsArg);
     int32_t StepMapSize = StepMapRef->GetSize(vm);
+    std::string src;
     for (int32_t i = 0; i < StepMapSize; i++) {
         auto number = StepMapRef->GetKey(vm, i)->ToNumber(vm)->Value();
-        auto itemAccessibility = StepMapRef->GetValue(vm, i)->ToString(vm)->ToString(vm);
-        optionsMap[static_cast<int32_t>(number)] = itemAccessibility;
+        auto itemAccessibility = StepMapRef->GetValue(vm, i);
+        auto itemAccessibilityText =
+            itemAccessibility->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "text"));
+        ArkTSUtils::ParseJsString(vm, itemAccessibilityText, src);
+        optionsMap[static_cast<int32_t>(number)] = src.c_str();
     }
 }
 
@@ -3949,12 +3994,18 @@ void ArkTSUtils::ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef>& jsBl
 {
     auto blurOptionProperty = GetProperty(vm, jsBlurOption, "grayscale");
     if (blurOptionProperty->IsArray(vm)) {
-        Local<panda::ArrayRef> params = blurOptionProperty->ToObject(vm);
-        auto grey1 = panda::ArrayRef::GetValueAt(vm, params, 0)->ToNumber(vm)->Int32Value(vm);
-        auto grey2 = panda::ArrayRef::GetValueAt(vm, params, 1)->ToNumber(vm)->Int32Value(vm);
-        std::vector<float> greyVec(2); // 2 number
-        greyVec[0] = grey1;
-        greyVec[1] = grey2;
+        std::vector<float> greyVec(NUM_2);
+        Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(blurOptionProperty);
+        Local<JSValueRef> valueGrey1 = valueArray->GetValueAt(vm, blurOptionProperty, 0);
+        if (valueGrey1->IsNumber()) {
+            auto grey1 = valueGrey1->Int32Value(vm);
+            greyVec[0] = grey1;
+        }
+        Local<JSValueRef> valueGrey2 = valueArray->GetValueAt(vm, blurOptionProperty, 1);
+        if (valueGrey2->IsNumber()) {
+            auto grey2 = valueGrey2->Int32Value(vm);
+            greyVec[1] = grey2;
+        }
         blurOption.grayscale = greyVec;
     }
 }
@@ -4022,7 +4073,7 @@ void ArkTSUtils::ParseBlurStyleOption(const EcmaVM* vm, const Local<JSValueRef>&
     }
 
     if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
-        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToObject(vm);
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions");
         BlurOption blurOption;
         ParseBlurOption(vm, jsBlurOption, blurOption);
         styleOption.blurOption = blurOption;
@@ -4155,7 +4206,7 @@ void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& js
 
     BlurOption blurOption;
     if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
-        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToString(vm);
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions");
         ParseBlurOption(vm, jsBlurOption, blurOption);
         effectOption.blurOption = blurOption;
     }

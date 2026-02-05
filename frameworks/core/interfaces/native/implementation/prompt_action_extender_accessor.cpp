@@ -231,7 +231,10 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(menuOptions.transition);
     menuParam.transition = transitionOpt.value_or(menuParam.transition);
     menuParam.hasTransitionEffect = transitionOpt.has_value();
-    menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
+    auto enableArrow = OptConvert<bool>(menuOptions.enableArrow);
+    if (enableArrow.has_value()) {
+        menuParam.enableArrow = enableArrow;
+    }
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
     menuParam.placement = OptConvert<Placement>(menuOptions.placement);
     if (!menuParam.placement.has_value()) {
@@ -333,6 +336,9 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     auto convValue = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
     Validator::ValidateNonNegative(convValue);
     menuParam.minKeyboardAvoidDistance = convValue;
+    auto material =
+        OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(AceType::RawPtr(menuParam.systemMaterial));
+    menuParam.systemMaterial = material ? material->Copy() : nullptr;
     g_parsePreviewAnimationOptions(menuOptions, menuParam);
 };
 

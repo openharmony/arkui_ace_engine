@@ -353,25 +353,12 @@ void TabsModelStatic::SetScrollableBarModeOptions(FrameNode* frameNode, const Sc
     tabBarLayoutProperty->UpdateScrollableBarModeOptions(option);
 }
 
-void TabsModelStatic::SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt)
+void TabsModelStatic::SetTabBarMode(FrameNode* frameNode, const TabBarMode& tabBarMode)
 {
-    if (tabBarModeOpt) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarModeOpt.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarMode, frameNode);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (tabBarModeOpt) {
-        tabBarLayoutProperty->UpdateTabBarMode(tabBarModeOpt.value());
-    } else {
-        tabBarLayoutProperty->ResetTabBarMode();
-    }
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    tabBarNode->MarkModifyDone();
+    tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);
 }
 
 void TabsModelStatic::SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidthOpt)
@@ -891,5 +878,13 @@ void TabsModelStatic::ApplyAttributesFinish(FrameNode* frameNode)
 
     swiperNode->MarkModifyDone();
     swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TabsModelStatic::ResetScrollableBarModeOptions(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->ResetScrollableBarModeOptions();
 }
 } // namespace OHOS::Ace::NG

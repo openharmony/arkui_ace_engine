@@ -12568,6 +12568,21 @@ int32_t OH_ArkUI_Swiper_ShowPrevious(ArkUI_NodeHandle node);
  */
 int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
 
+/**
+ * @brief Get the root node handle of the corresponding page of the Context.
+ *
+ * @param context A UIContext pointer to a page.
+ * @param rootNode The handle of target root node handle.
+ * @return Error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is
+ * successful. Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter
+ * error occurs. Returns {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI
+ * init error. Returns {@link ARKUI_ERROR_CODE_UI_CONTEXT_INVALID} if the
+ * uiContext is invalid.
+ * @since 24
+ */
+int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle context, ArkUI_NodeHandle* rootNode);
+
 #ifdef __cplusplus
 }
 #endif

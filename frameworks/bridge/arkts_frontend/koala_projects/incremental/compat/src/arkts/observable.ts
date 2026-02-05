@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ export class ObservableHandler implements Observable {
     private static handlers: WeakMap<Object, ObservableHandler> | undefined = undefined
 
     private parents = new Set<ObservableHandler>()
-    private children = new Map<ObservableHandler, number>()
+    private children = new Map<ObservableHandler, int>()
 
     private readonly observables = new Set<Observable>()
     private _modified = false
@@ -178,7 +178,7 @@ export class ObservableHandler implements Observable {
         if (guards.has(this)) return guards // already collected
         guards.add(this) // handler is already guarded
         this.parents.forEach((handler: ObservableHandler) => { handler.collect(all, guards) })
-        if (all) this.children.forEach((_count: number, handler: ObservableHandler) => { handler.collect(all, guards) })
+        if (all) this.children.forEach((_count: int, handler: ObservableHandler) => { handler.collect(all, guards) })
         return guards
     }
 
@@ -368,7 +368,7 @@ class ObservableArray<T> extends Array<T> {
         return result
     }
 
-    override sort(comparator?: (a: T, b: T) => number): this {
+    override sort(comparator?: (a: T, b: T) => int): this {
         this.handler?.onModify()
         super.sort(comparator)
         return this
@@ -414,7 +414,7 @@ class ObservableArray<T> extends Array<T> {
         return super.flat<U>(depth)
     }
 
-    override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
+    override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
         this.handler?.onAccess()
         return super.flatMap<U>(fn)
     }
@@ -521,7 +521,7 @@ class ObservableArray<T> extends Array<T> {
         return super.toSorted()
     }
 
-    override toSorted(comparator: (a: T, b: T) => number): Array<T> {
+    override toSorted(comparator: (a: T, b: T) => int): Array<T> {
         this.handler?.onAccess()
         return super.toSorted(comparator)
     }

@@ -53,6 +53,7 @@ ohos_shared_library("arkoala_native_ani") {
   }
 
   sources = [
+    "//foundation/arkui/ace_engine/frameworks/base/utils/string_utils.cpp",
     "UINode/uinode_module_methods.cpp",
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",
@@ -123,7 +124,9 @@ ohos_shared_library("arkoala_native_ani") {
   if (defined(model_component_support) && model_component_support) {
     external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
   }
-
+  if (defined(enable_standard_input) && enable_standard_input) {
+    external_deps += [ "imf:extra_config_ani" ]
+  }
   configs = [ "$ace_root:ace_config" ]
   defines = []
   if (pixel_map_support) {

@@ -71,7 +71,7 @@ class VariableUtilV2 {
         const error = `Use initParam/updateParm/resetParam(${attrName}) only to init/update/reset @Param. Internal error!`;
         stateMgmtConsole.error(error);
         // toolchain can check
-        throw new BusinessError(INVALID_INPUT_IN_COMPONENTV2, error);
+        throw new Error(error);
       }
     }
     // only used for reusableV2. called in resetStateVarsOnReuse, including reset @Param @Once variable
@@ -330,7 +330,7 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
     const error = `'@ObservedV2 class ${BaseClass?.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Trace.`;
     stateMgmtConsole.applicationError(error);
     // toolchain can check
-    throw new BusinessError(USE_TRACK_IN_OBSERVEDV2, error);
+    throw new Error(error);
   }
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {

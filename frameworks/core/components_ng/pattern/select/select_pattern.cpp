@@ -32,6 +32,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -197,7 +199,10 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(selectPaintProperty);
-    if (selectPaintProperty->HasBackgroundColor()) {
+    auto material = renderContext->GetSystemMaterial();
+    if (selectPaintProperty->HasBackgroundColor() ||
+        (material && material->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+            material->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX))) {
         return;
     }
     auto context = host->GetContextRefPtr();
@@ -302,10 +307,14 @@ void SelectPattern::ConfigMenuParam()
     CHECK_NULL_VOID(selectLayoutProps);
     auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    auto menuparam = wrapperPattern->GetMenuParam();
-    menuparam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
-    menuparam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
-    wrapperPattern->SetMenuParam(menuparam);
+    auto menuParam = wrapperPattern->GetMenuParam();
+    menuParam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
+    menuParam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
+    menuParam.systemMaterial = GetMenuSystemMaterial();
+    auto menuNode = GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+    wrapperPattern->SetMenuParam(menuParam);
 }
 
 void SelectPattern::ShowSelectMenuInSubWindow()
@@ -396,6 +405,7 @@ void SelectPattern::RegisterOnClick()
 void SelectPattern::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
 {
     CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(gestrueHub);
     auto weakTarget = AceType::WeakClaim(targetNode);
     auto touchCallback = [weakTarget](const TouchEventInfo& info) {
         auto targetNode = weakTarget.Upgrade();
@@ -2836,5 +2846,18 @@ void SelectPattern::OnDpiConfigurationUpdate()
     if (selectLayoutProperty->HasOptionWidth() && !isFitTrigger_) {
         SetOptionWidth(selectLayoutProperty->GetOptionWidthValue(Dimension()));
     }
+}
+
+FocusPattern SelectPattern::GetFocusPattern() const
+{
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, focusPattern);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, focusPattern);
+    auto focusStyleType =
+        static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetSelectFocusStyleType_()));
+    focusPattern.SetStyleType(focusStyleType);
+    return focusPattern;
 }
 } // namespace OHOS::Ace::NG

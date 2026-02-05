@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,20 +17,20 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethod, CommonShapeMethod } from "./component/common"
-import { ResourceColor, Length } from "./component/units"
+import { ResourceColor, Length, ResourceStr } from "./component/units"
 import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
 import { Resource } from "global.resource"
 import { CommonShapeMethodModifier } from "./CommonShapeMethodModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkPathPeer, PathAttribute } from "./component/path"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 export class PathModifier extends CommonMethodModifier implements PathAttribute,AttributeModifier<PathAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -41,7 +41,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
     applyDisabledAttribute(instance: PathAttribute): void { }
     applySelectedAttribute(instance: PathAttribute): void { }
     _commands_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _commands_0_0value?: string | undefined
+    _commands_0_0value?: ResourceStr | undefined
     _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stroke_0_0value?: ResourceColor | undefined
     _fill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -72,7 +72,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
         {
             switch (this._commands_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCommandsAttribute((this._commands_0_0value as string | undefined));
+                    peer.setCommandsAttribute((this._commands_0_0value as ResourceStr | undefined));
                     this._commands_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -82,7 +82,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
                 }
                 default: {
                     this._commands_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCommandsAttribute((undefined as string | undefined));
+                    peer.setCommandsAttribute((undefined as ResourceStr | undefined));
                 }
             }
         }
@@ -297,7 +297,7 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
                     break;
                 }
                 default: {
-                    this.commands((undefined as string | undefined));
+                    this.commands((undefined as ResourceStr | undefined));
                 }
             }
         }
@@ -445,8 +445,8 @@ export class PathModifier extends CommonMethodModifier implements PathAttribute,
             }
         }
     }
-    commands(value: string | undefined): this {
-        if (((this._commands_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._commands_0_0value) !== (value)))
+    commands(value: ResourceStr | undefined): this {
+        if (((this._commands_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._commands_0_flag = AttributeUpdaterFlag.UPDATE
             this._commands_0_0value = value

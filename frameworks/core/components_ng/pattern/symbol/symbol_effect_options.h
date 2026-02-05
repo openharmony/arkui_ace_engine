@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,159 +23,58 @@
 #include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::NG {
-class SymbolEffectOptions {
+class ACE_FORCE_EXPORT SymbolEffectOptions {
 public:
     explicit SymbolEffectOptions(SymbolEffectType effectType);
 
-    SymbolEffectOptions(SymbolEffectType effectType, Ace::ScopeType scopeType)
-        : effectType_(effectType), scopeType_(scopeType)
-    {}
+    SymbolEffectOptions(SymbolEffectType effectType, Ace::ScopeType scopeType);
 
-    SymbolEffectOptions(SymbolEffectType effectType, Ace::ScopeType scopeType, CommonSubType commonSubType)
-        : effectType_(effectType), scopeType_(scopeType), commonSubType_(commonSubType)
-    {}
+    SymbolEffectOptions(SymbolEffectType effectType, Ace::ScopeType scopeType, CommonSubType commonSubType);
 
-    SymbolEffectOptions(SymbolEffectType effectType, FillStyle fillStyle)
-        : effectType_(effectType), fillStyle_(fillStyle)
-    {}
+    SymbolEffectOptions(SymbolEffectType effectType, FillStyle fillStyle);
 
-    SymbolEffectOptions() = default;
-    ~SymbolEffectOptions() = default;
+    SymbolEffectOptions();
+    ~SymbolEffectOptions();
 
-    void SetEffectType(SymbolEffectType effectType)
-    {
-        effectType_ = effectType;
-    }
+    void SetEffectType(SymbolEffectType effectType);
 
-    void SetScopeType(Ace::ScopeType scopeType)
-    {
-        scopeType_ = scopeType;
-    }
+    void SetScopeType(Ace::ScopeType scopeType);
 
-    void SetCommonSubType(CommonSubType commonSubType)
-    {
-        commonSubType_ = commonSubType;
-    }
+    void SetCommonSubType(CommonSubType commonSubType);
 
-    void SetFillStyle(FillStyle fillStyle)
-    {
-        fillStyle_ = fillStyle;
-    }
+    void SetFillStyle(FillStyle fillStyle);
 
-    void SetRepeatCount(int32_t repeatCount)
-    {
-        repeatCount_ = repeatCount;
-    }
+    void SetRepeatCount(int32_t repeatCount);
 
-    void SetIsActive(std::optional<bool> isActive)
-    {
-        isActive_ = isActive;
-    }
+    void SetIsActive(std::optional<bool> isActive);
 
-    void Reset()
-    {
-        if (isTxtActiveSource_ == 1) {
-            isTxtActive_ = false;
-        }
-    }
+    void Reset();
 
-    void SetTriggerNum(int32_t triggerNum)
-    {
-        triggerNum_ = triggerNum;
-    }
+    void SetTriggerNum(int32_t triggerNum);
 
-    void UpdateFlags(const SymbolEffectOptions& lastOptions)
-    {
-        bool isCurTriggerSetted = triggerNum_.has_value();
-        bool isTriggerHasSetted = lastOptions.GetTriggerNum().has_value();
-        bool isCurActiveSetted = isActive_.has_value();
+    void UpdateFlags(const SymbolEffectOptions& lastOptions);
 
-        if (isCurTriggerSetted) {
-            // 本次设置了triggerValue, 比较两次的TriggerNum值
-            isTxtActiveSource_ = 1;
-            if (!isTriggerHasSetted) {
-                // 上次无值
-                if (triggerNum_ == -1) {
-                    isTxtActive_ = false;
-                } else {
-                    isTxtActive_ = true;
-                }
-            } else {
-                // 上次有值
-                int32_t lastTriggerNum = lastOptions.GetTriggerNum().value();
-                int32_t curTriggerNum = triggerNum_.value();
-                isTxtActive_ = curTriggerNum != lastTriggerNum;
-            }
-        } else if (isTriggerHasSetted) {
-            // 历史设置过triggerValue,本次没设置triggerValue（两个接口混用,isActive写在下面场景）
-            isTxtActiveSource_ = 1;
-            isTxtActive_ = lastOptions.GetIsTxtActive();
-            triggerNum_ = lastOptions.GetTriggerNum().value();
-        } else if (isCurActiveSetted) {
-            // 只设isActive => isActive
-            isTxtActiveSource_ = 0;
-            isTxtActive_ = isActive_.value();
-        } else {
-            // isActive && triggerValue都未设置 => false
-            isTxtActiveSource_ = -1;
-            isTxtActive_ = false;
-        }
-    }
+    void SetIsTxtActive(bool isTxtActive);
 
-    void SetIsTxtActive(bool isTxtActive)
-    {
-        isTxtActive_ = isTxtActive;
-    }
+    void SetIsTxtActiveSource(int16_t isTxtActiveSource);
 
-    void SetIsTxtActiveSource(int16_t isTxtActiveSource)
-    {
-        isTxtActiveSource_ = isTxtActiveSource;
-    }
+    const SymbolEffectType& GetEffectType() const;
 
-    const SymbolEffectType& GetEffectType() const
-    {
-        return effectType_;
-    }
+    const std::optional<Ace::ScopeType>& GetScopeType() const;
 
-    const std::optional<Ace::ScopeType>& GetScopeType() const
-    {
-        return scopeType_;
-    }
+    const std::optional<CommonSubType>& GetCommonSubType() const;
 
-    const std::optional<CommonSubType>& GetCommonSubType() const
-    {
-        return commonSubType_;
-    }
+    const std::optional<FillStyle>& GetFillStyle() const;
 
-    const std::optional<FillStyle>& GetFillStyle() const
-    {
-        return fillStyle_;
-    }
+    int32_t GetRepeatCount() const;
 
-    int32_t GetRepeatCount() const
-    {
-        return repeatCount_;
-    }
+    const std::optional<bool>& GetIsActive() const;
 
-    const std::optional<bool>& GetIsActive() const
-    {
-        return isActive_;
-    }
+    bool GetIsTxtActive() const;
 
-    bool GetIsTxtActive() const
-    {
-        return isTxtActive_;
-    }
+    const std::optional<bool>& IsTriggerChanged() const;
 
-    const std::optional<bool>& IsTriggerChanged() const
-    {
-        return isTriggerNumChanged_;
-    }
-
-    const std::optional<int32_t>& GetTriggerNum() const
-    {
-        return triggerNum_;
-    }
+    const std::optional<int32_t>& GetTriggerNum() const;
 
     bool operator==(const SymbolEffectOptions& info) const;
     bool operator!=(const SymbolEffectOptions& info) const;

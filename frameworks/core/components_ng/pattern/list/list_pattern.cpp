@@ -3439,6 +3439,19 @@ void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("IsAtBottom", IsAtBottom());
 }
 
+void ListPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    json->Put("isScrollable",
+        isScrollable_ ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                      : "false");
+    json->Put("scrollDirection", (axis == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 SizeF ListPattern::GetChildrenExpandedSize()
 {
     auto viewSize = GetViewSizeMinusPadding();
@@ -4477,14 +4490,6 @@ void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t 
 
 int32_t ListPattern::OnInjectionEvent(const std::string& command)
 {
-    std::string ret = ScrollablePattern::ParseCommand(command);
-    if (ret == "scrollForward") {
-        ScrollPage(true);
-    } else if (ret == "scrollBackward") {
-        ScrollPage(false);
-    } else {
-        return RET_FAILED;
-    }
-    return RET_SUCCESS;
+    return OnInjectionEventByRatio(command);
 }
 } // namespace OHOS::Ace::NG

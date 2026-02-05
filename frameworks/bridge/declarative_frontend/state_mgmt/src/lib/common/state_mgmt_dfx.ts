@@ -357,12 +357,11 @@ function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath
 }
 
 function findViewById(id: number): PUV2ViewBase | undefined {
-  const v1 = SubscriberManager.Find(id);
-  if (v1 instanceof ViewPU) {
-    return v1;
+  const view = SubscriberManager.Find(id);
+  if (view instanceof ViewPU || view instanceof ViewV2) {
+    return view;
   }
-  const v2 = ObserveV2.getObserve().id2ViewV2_[id]?.deref();
-  return v2 instanceof ViewV2 ? v2 : undefined;
+  return undefined;
 }
 
 class aceDebugTrace {

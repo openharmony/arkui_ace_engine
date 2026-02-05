@@ -73,7 +73,7 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
 void SetCommandsImpl(Ark_NativePointer node,
-                     const Opt_String* value)
+                     const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

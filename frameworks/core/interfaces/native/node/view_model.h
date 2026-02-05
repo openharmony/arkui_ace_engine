@@ -71,5 +71,7 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag);
 
 void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId);
 
+void* CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param);
+
 } // namespace OHOS::Ace::NG::ViewModel
 #endif

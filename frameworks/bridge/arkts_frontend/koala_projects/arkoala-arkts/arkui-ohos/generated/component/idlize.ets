@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, resourceFinalizerRegister, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ActionSheetOptions_serializer, ActionSheetOptions, DismissDialogAction, DismissDialogAction_serializer } from "./actionSheet"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -56,7 +56,7 @@ import { FrameNode, UIStatesChangeHandler, LayoutConstraint, InteractionEventBin
 import { Size, Frame, LengthMetrics, ColorMetrics, Vector2, Vector3, Matrix4, Circle, RoundRect, CommandPath } from "arkui.Graphics"
 import { RenderNode } from "arkui.RenderNode"
 import { default as common2D } from "@ohos.graphics.common2D"
-import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, GestureRecognizer, GestureRecognizerInternal } from "./gesture"
+import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, GestureRecognizer, GestureRecognizerInternal, GestureEvent_serializer, GestureRecognizer_serializer } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
 import { font_UIFontConfig_serializer } from "./../framework/ohos.font.custom"
@@ -69,7 +69,7 @@ import { Scroller, ScrollerInternal } from "./scroll"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
-import { TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
+import { TargetInfo, CustomKeyboardContinueFeature, GestureListenerType, GestureActionPhase } from "@ohos.arkui.UIContext"
 import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
 import { default as uiObserver } from "@ohos.arkui.observer"
 import { ComponentBase } from "./../ComponentBase"
@@ -334,7 +334,7 @@ export class ArcAlphabetIndexerExtender {
             thisSerializer.writeInt8((0).toByte())
             const selectedForIdx0  = selected as int32
             thisSerializer.writeInt32(selectedForIdx0)
-        } else if (selected instanceof Bindable<int32>) {
+        } else if (selected instanceof Bindable) {
             thisSerializer.writeInt8((1).toByte())
             const selectedForIdx1  = selected as Bindable<int32>
             Bindable_I32_serializer.write(thisSerializer, selectedForIdx1)
@@ -471,7 +471,7 @@ export class ArcAlphabetIndexerExtender {
                 thisSerializer.writeInt8((0).toByte())
                 const indexTmpValueForIdx0  = indexTmpValue as int32
                 thisSerializer.writeInt32(indexTmpValueForIdx0)
-            } else if (indexTmpValue instanceof Bindable<int32>) {
+            } else if (indexTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const indexTmpValueForIdx1  = indexTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, indexTmpValueForIdx1)
@@ -4930,7 +4930,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (code: number):void => {
+            const buffer_Closure  = (code: number):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -4940,6 +4940,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onexit_Callback | undefined = buffer
         return returnResult
@@ -4965,7 +4967,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (ev: ErrorEvent):void => {
+            const buffer_Closure  = (ev: ErrorEvent):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -4975,6 +4977,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onerror_Callback | undefined = buffer
         return returnResult
@@ -5000,7 +5004,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (event: MessageEvents):void => {
+            const buffer_Closure  = (event: MessageEvents):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -5010,6 +5014,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
         return returnResult
@@ -5035,7 +5041,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (event: MessageEvents):void => {
+            const buffer_Closure  = (event: MessageEvents):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -5045,6 +5051,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
         return returnResult
@@ -5973,6 +5981,14 @@ export class UIObserverGestureEventOps {
         thisSerializer.release()
         return retval
     }
+    static addGlobalGestureListener_serialize(type: GestureListenerType, option: InnerGestureObserverConfigs, callback: ((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        InnerGestureObserverConfigs_serializer.write(thisSerializer, option)
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_addGlobalGestureListener(type.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
     public static setOnBeforePanStart(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
         const instanceId_casted = instanceId as (int32)
         const callback_casted = callback as (((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
@@ -6012,6 +6028,12 @@ export class UIObserverGestureEventOps {
         const instanceId_casted = instanceId as (int32)
         const callback_casted = callback as (((event: GestureEvent,node?: FrameNode) => void))
         return UIObserverGestureEventOps.setOnDidTap_serialize(instanceId_casted, callback_casted)
+    }
+    public static addGlobalGestureListener(type: GestureListenerType, option: InnerGestureObserverConfigs, callback: ((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void)): int32 {
+        const type_casted = type as (GestureListenerType)
+        const option_casted = option as (InnerGestureObserverConfigs)
+        const callback_casted = callback as (((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void))
+        return UIObserverGestureEventOps.addGlobalGestureListener_serialize(type_casted, option_casted, callback_casted)
     }
 }
 export class ArkRootPeer extends PeerNode {
@@ -6335,6 +6357,14 @@ export interface IndicatorStyle {
     bottom?: Length;
     size?: Length;
     mask?: boolean;
+}
+export interface InnerGestureTriggerInfo {
+    event: GestureEvent;
+    current: GestureRecognizer;
+    currentPhase: GestureActionPhase;
+}
+export interface InnerGestureObserverConfigs {
+    actionPhases: Array<GestureActionPhase>;
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type CustomBuilderT_Arkui_Component_Enums_ResponseType = (t: ResponseType, parentNode: KPointer) => KPointer;
@@ -7180,7 +7210,7 @@ export class DoubleAnimationParam_serializer {
             const onProgressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onProgressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onProgressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onProgressTmpBuf = (value: float):void => {
+            const onProgressTmpBuf_Closure  = (value: float):void => {
                 const onProgressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onProgressTmpBuf_BufArgsSerializer.writeInt32(onProgressTmpBuf_BufResource.resourceId);
                 onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCall);
@@ -7190,6 +7220,8 @@ export class DoubleAnimationParam_serializer {
                 onProgressTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onProgressTmpBuf_Closure, onProgressTmpBuf_BufResource)
+            onProgressTmpBuf = onProgressTmpBuf_Closure
         }
         const onProgressTmpResult : Callback_Extender_OnProgress | undefined = onProgressTmpBuf
         const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -7198,7 +7230,7 @@ export class DoubleAnimationParam_serializer {
             const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onFinishTmpBuf = ():void => {
+            const onFinishTmpBuf_Closure  = ():void => {
                 const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
@@ -7207,6 +7239,8 @@ export class DoubleAnimationParam_serializer {
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onFinishTmpBuf_Closure, onFinishTmpBuf_BufResource)
+            onFinishTmpBuf = onFinishTmpBuf_Closure
         }
         const onFinishTmpResult : Callback_Extender_OnFinish | undefined = onFinishTmpBuf
         let value : DoubleAnimationParam = ({propertyName: propertyNameTmpResult, startValue: startValueTmpResult, endValue: endValueTmpResult, duration: durationTmpResult, delay: delayTmpResult, curve: curveTmpResult, onProgress: onProgressTmpResult, onFinish: onFinishTmpResult} as DoubleAnimationParam)
@@ -7356,6 +7390,28 @@ export class FieldRegionInner_serializer {
         return value
     }
 }
+export class InnerGestureObserverConfigs_serializer {
+    public static write(buffer: SerializerBase, value: InnerGestureObserverConfigs): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForActionPhases  = value.actionPhases
+        valueSerializer.writeInt32((valueHolderForActionPhases.length).toInt())
+        for (let valueHolderForActionPhasesCounterI = 0; valueHolderForActionPhasesCounterI < valueHolderForActionPhases.length; valueHolderForActionPhasesCounterI++) {
+            const valueHolderForActionPhasesTmpElement : GestureActionPhase = valueHolderForActionPhases[valueHolderForActionPhasesCounterI]
+            valueSerializer.writeInt32(valueHolderForActionPhasesTmpElement.valueOf())
+        }
+    }
+    public static read(buffer: DeserializerBase): InnerGestureObserverConfigs {
+        let valueDeserializer : DeserializerBase = buffer
+        const actionPhasesTmpBufLength : int32 = valueDeserializer.readInt32()
+        let actionPhasesTmpBuf : Array<GestureActionPhase> = new Array<GestureActionPhase>(actionPhasesTmpBufLength)
+        for (let actionPhasesTmpBufBufCounterI = 0; actionPhasesTmpBufBufCounterI < actionPhasesTmpBufLength; actionPhasesTmpBufBufCounterI++) {
+            actionPhasesTmpBuf[actionPhasesTmpBufBufCounterI] = GestureActionPhase.fromValue(valueDeserializer.readInt32())
+        }
+        const actionPhasesTmpResult : Array<GestureActionPhase> = actionPhasesTmpBuf
+        let value : InnerGestureObserverConfigs = ({actionPhases: actionPhasesTmpResult} as InnerGestureObserverConfigs)
+        return value
+    }
+}
 export class LengthMetricsCustom_serializer {
     public static write(buffer: SerializerBase, value: LengthMetricsCustom): void {
         let valueSerializer : SerializerBase = buffer
@@ -7369,6 +7425,25 @@ export class LengthMetricsCustom_serializer {
         const unitTmpResult : number = (valueDeserializer.readNumber() as number)
         const valueTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : LengthMetricsCustom = ({unit: unitTmpResult, value: valueTmpResult} as LengthMetricsCustom)
+        return value
+    }
+}
+export class InnerGestureTriggerInfo_serializer {
+    public static write(buffer: SerializerBase, value: InnerGestureTriggerInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEvent  = value.event
+        GestureEvent_serializer.write(valueSerializer, valueHolderForEvent)
+        const valueHolderForCurrent  = value.current
+        GestureRecognizer_serializer.write(valueSerializer, valueHolderForCurrent)
+        const valueHolderForCurrentPhase  = value.currentPhase
+        valueSerializer.writeInt32(valueHolderForCurrentPhase.valueOf())
+    }
+    public static read(buffer: DeserializerBase): InnerGestureTriggerInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const eventTmpResult : GestureEvent = (GestureEvent_serializer.read(valueDeserializer) as GestureEvent)
+        const currentTmpResult : GestureRecognizer = (GestureRecognizer_serializer.read(valueDeserializer) as GestureRecognizer)
+        const currentPhaseTmpResult : GestureActionPhase = GestureActionPhase.fromValue(valueDeserializer.readInt32())
+        let value : InnerGestureTriggerInfo = ({event: eventTmpResult, current: currentTmpResult, currentPhase: currentPhaseTmpResult} as InnerGestureTriggerInfo)
         return value
     }
 }
@@ -9134,7 +9209,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
         const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const builderTmpResult : CustomBuilder = ():void => {
+        const builderTmpBufClosure  = ():void => {
             const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
@@ -9143,13 +9218,15 @@ export class CustomDialogControllerOptionsExtender_serializer {
             builderTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(builderTmpBufClosure, builderTmpBufBufResource)
+        const builderTmpResult : CustomBuilder = builderTmpBufClosure
         const cancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cancelTmpBuf : (() => void) | undefined = undefined
         if ((cancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const cancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const cancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const cancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            cancelTmpBuf = ():void => {
+            const cancelTmpBuf_Closure  = ():void => {
                 const cancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
@@ -9158,6 +9235,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 cancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(cancelTmpBuf_Closure, cancelTmpBuf_BufResource)
+            cancelTmpBuf = cancelTmpBuf_Closure
         }
         const cancelTmpResult : (() => void) | undefined = cancelTmpBuf
         const autoCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9290,7 +9369,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissDialogAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissDialogAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -9300,6 +9379,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissDialogAction) => void) | undefined = onWillDismissTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9462,7 +9543,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -9471,6 +9552,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9479,7 +9562,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -9488,6 +9571,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9496,7 +9581,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -9505,6 +9590,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9513,7 +9600,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -9522,6 +9609,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const keyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

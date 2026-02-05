@@ -105,6 +105,11 @@ void SetTextAreaOptionsImpl(Ark_NativePointer node,
     auto controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
     if (peerPtr) {
         peerPtr->SetController(controller);
+        auto styledStringCache = peerPtr->GetStyledStringCache();
+        if (styledStringCache) {
+            peerPtr->controller_->SetPlaceholderStyledString(styledStringCache);
+            peerPtr->SetStyledStringCache(nullptr);
+        }
     }
 }
 } // TextAreaInterfaceModifier
@@ -877,19 +882,15 @@ void SetOnWillAttachIMEImpl(Ark_NativePointer node,
         TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
         return;
     }
-    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](const IMEClient& value) {
+    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](IMEClient& value) {
         Converter::ConvContext ctx;
         auto imeClientPeer = PeerUtils::CreatePeer<IMEClientPeer>();
-        if (imeClientPeer != nullptr) {
-            imeClientPeer->nodeId = value.nodeId;
-            imeClientPeer->extraInfo = reinterpret_cast<void*>(
-                const_cast<RefPtr<IMEExtraInfo>&>(value.extraInfo).GetRawPtr());
-        }
+        CHECK_NULL_VOID(imeClientPeer);
+        imeClientPeer->nodeId = value.nodeId;
         Ark_IMEClient arkIMEClient = reinterpret_cast<Ark_IMEClient>(imeClientPeer);
         callback.InvokeSync(arkIMEClient);
-        if (imeClientPeer) {
-            PeerUtils::DestroyPeer(imeClientPeer);
-        }
+        value.extraInfo = imeClientPeer->extraInfo;
+        PeerUtils::DestroyPeer(imeClientPeer);
     };
     TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(onWillAttachIME));
 }

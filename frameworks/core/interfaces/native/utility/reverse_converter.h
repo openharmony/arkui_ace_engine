@@ -30,7 +30,6 @@
 #include "base/geometry/ng/rect_t.h" // Using type
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/property/border_property.h" // Using type
-#include "frameworks/core/components_ng/pattern/text/span/span_object.h" // Using type DrawableLeadingMargin
 #include "interfaces/native/ui_input_event.h" // Unscoped enum types
 
 #include "arkoala_api_generated.h"
@@ -53,6 +52,7 @@ class RichEditorAbstractSpanResult;
 class SelectionInfo;
 class SpanBase;
 class TouchLocationInfo;
+class BaseEventInfo;
 enum class AccessibilityActionInterceptResult : uint32_t;
 enum class AccessibilityHoverAction;
 enum class AccessibilityInterfaceAction : uint32_t;
@@ -109,6 +109,7 @@ enum class TextAlign;
 enum class TextDecoration;
 enum class TextDecorationStyle;
 enum class TextDeleteDirection;
+enum class TextFlipDirection;
 enum class TextInputAction;
 enum class TextOverflow;
 enum class TouchType : size_t;
@@ -119,6 +120,7 @@ enum class WordBreak;
 struct ChangeValueInfo;
 struct CustomSpanMetrics;
 struct EmbedInfo;
+struct EventTarget;
 struct EventLocationInfo;
 struct FingerInfo;
 struct FontMetrics;
@@ -137,6 +139,13 @@ struct TextStyleResult;
 namespace NG {
 class NavDestinationContext;
 class NavigationTransitionProxy;
+class PanRecognizer;
+class PinchRecognizer;
+class SwipeRecognizer;
+class RotationRecognizer;
+class ClickRecognizer;
+class LongPressRecognizer;
+class NGGestureRecognizer;
 enum class DialogDismissReason;
 enum class NavigationMode;
 enum class NavigationOperation;
@@ -148,6 +157,9 @@ struct KeyboardOptions;
 struct LeadingMargin;
 struct LeadingMarginSpanOptions;
 struct MenuItemParam;
+
+// Forward declaration for GestureTriggerInfo (defined in gesture_trigger_info_peer.h)
+struct GestureTriggerInfo;
 
 namespace Converter {
 enum class ConsoleMessageSource;
@@ -322,6 +334,7 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const Dimension& src);
     void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const double& src);
+    void AssignArkValue(Ark_InnerGestureTriggerInfo& dst, const GestureTriggerInfo& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
@@ -390,6 +403,20 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx);
+    // Two-parameter versions for gesture recognizers
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src);
+    void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src);
+    void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src);
+    void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src);
+    void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src);
+    void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
@@ -398,7 +425,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
-    void AssignArkValue(Ark_ResourceColor& dst, const Color& src, ConvContext *ctx);
     void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);

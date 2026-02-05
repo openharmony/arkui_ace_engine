@@ -31,6 +31,7 @@ import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { ArkUINativeModule } from '#components';
 import { FreeRootNode } from '../CallbackTransformer';
+import { CustomNodeBuilder } from '#generated';
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -60,6 +61,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     private component?: IExtendableComponent;
     private childPeerPtr: KPointer = nullptr;
     private buildFunc?: () => Long;
+    private customNodeBuilder: CustomNodeBuilder | undefined = undefined;
     private freezeRoot: Set<FreeRootNode>;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags, RootPeerType)
@@ -121,7 +123,19 @@ export class ArkCustomComponentRootPeer extends PeerNode {
             this.childPeerPtr = nullptr;
         }
         this.component?.__removeChildWhenDispose__IExtendableComponent_Internal();
+        this.freezeRoot.clear();
+        this.component = undefined;
+        this.buildFunc = undefined;
+        this.customNodeBuilder = undefined;
         super.dispose();
+    }
+
+    setCustomNodeBuilder(func: CustomNodeBuilder): void {
+        this.customNodeBuilder = func;
+    }
+
+    callCustomNodeBuilder(ptr: KPointer): KPointer {
+        return this.customNodeBuilder!(ptr);
     }
 
     setBuildFunction(buildFunc: () => Long): void {

@@ -1036,11 +1036,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnChange(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo* info)> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
             TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onChange callback execute failed.");
@@ -1079,11 +1079,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnSelected(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo* info)> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
             TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onSelected callback execute failed.");
@@ -1123,11 +1123,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationStart(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(int32_t, int32_t, const AnimationCallbackInfo&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
         int32_t index, int32_t targetIndex, const AnimationCallbackInfo& extraInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> targetIndexParam = panda::NumberRef::New(vm, targetIndex);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
@@ -1169,11 +1169,12 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationEnd(ArkUIRuntimeCallInf
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, const AnimationCallbackInfo&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](int32_t index, const AnimationCallbackInfo& extraInfo) {
+    std::function<void(int32_t, const AnimationCallbackInfo&)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        int32_t index, const AnimationCallbackInfo& extraInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value()),
@@ -1214,11 +1215,12 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnGestureSwipe(ArkUIRuntimeCallInf
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, const AnimationCallbackInfo&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](int32_t index, const AnimationCallbackInfo& extraInfo) {
+    std::function<void(int32_t, const AnimationCallbackInfo&)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        int32_t index, const AnimationCallbackInfo& extraInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value()),
@@ -1259,10 +1261,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnUnselected(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
             TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper OnUnselected callback execute failed.");
@@ -1356,12 +1359,12 @@ ArkUINativeModuleValue SwiperBridge::SetOnContentDidScroll(ArkUIRuntimeCallInfo*
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(int32_t, int32_t, float_t, float_t)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](int32_t selectedIndex, int32_t index,
-        float position, float mainAxisLength) {
+    std::function<void(int32_t, int32_t, float_t, float_t)> callback =
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         panda::Local<panda::NumberRef> selectedIndexParam = panda::NumberRef::New(vm, selectedIndex);
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> positionParam = panda::NumberRef::New(vm, position);
@@ -1430,10 +1433,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnContentWillScroll(ArkUIRuntimeCa
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<bool(const SwiperContentWillScrollResult&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const SwiperContentWillScrollResult& result) -> bool {
+        [vm, frameWeakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
+        const SwiperContentWillScrollResult& result) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const char* keys[] = { "currentIndex", "comingIndex", "offset" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, result.currentIndex),
             panda::NumberRef::New(vm, result.comingIndex), panda::NumberRef::New(vm, result.offset) };
@@ -1503,11 +1507,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnScrollStateChanged(ArkUIRuntimeC
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo* info)> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!scrollStateInfo) {
             TAG_LOGW(AceLogTag::ACE_SWIPER, "scrollStateInfo invalid, OnScrollStateChanged failed.");

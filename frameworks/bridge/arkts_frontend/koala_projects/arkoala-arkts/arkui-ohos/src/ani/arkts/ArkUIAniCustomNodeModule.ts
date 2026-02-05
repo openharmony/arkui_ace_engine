@@ -42,10 +42,10 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
     uniqueId?: int32 | undefined;
     measureResult: MeasureResult = {width: 0, height: 0};
 
-    public override measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
+    public override measure(constraint: ConstraintSizeOptions | undefined ): MeasureResult | undefined {
         return this.measureInner(constraint);
     }
-    public override layout(position: Position) {
+    public override layout(position: Position | undefined ) {
         this.layoutInner(position)
     }
     public override getMargin(): DirectionalEdgesT<number> | undefined {
@@ -58,8 +58,8 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
         return this.getBorderWidthInner()
     }
     
-    public native layoutInner(position: Position): void;
-    public native measureInner(constraint: ConstraintSizeOptions): MeasureResult | undefined;
+    public native layoutInner(position: Position | undefined ): void;
+    public native measureInner(constraint: ConstraintSizeOptions | undefined ): MeasureResult | undefined;
     public native getMarginInner(): DirectionalEdgesT<double> | undefined;
     public native getPaddingInner(): DirectionalEdgesT<double> | undefined;
     public native getBorderWidthInner(): DirectionalEdgesT<double> | undefined;

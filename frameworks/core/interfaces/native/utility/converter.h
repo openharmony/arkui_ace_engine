@@ -28,7 +28,6 @@
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
-#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 
@@ -68,6 +67,8 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
+enum class KeyboardFluidLightMode;
+enum class KeyboardGradientMode;
 enum class LaunchMode;
 enum class NavDestinationMode;
 enum class NavToolbarItemStatus;
@@ -611,7 +612,7 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
     template<> ACE_FORCE_EXPORT ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_Float64& src);
-    template<> CalcDimension Convert(const Ark_LengthMetrics& src);
+    template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
     template<> CalcDimension Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_Float64& src);
@@ -979,7 +980,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
     template<> void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState& src);
     template<> void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& src);
-    template<> void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
     template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
     template<> void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src);

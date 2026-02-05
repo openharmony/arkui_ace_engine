@@ -865,7 +865,7 @@ void NavigationPattern::TryRestoreSystemBarStyle(const RefPtr<WindowManager>& wi
 
 void NavigationPattern::UpdateSystemBarStyleOnPageVisibilityChange(bool show)
 {
-    if (!isFullPageNavigation_.value_or(false)) {
+    if (!isFullPageNavigation_) {
         return;
     }
 
@@ -2000,20 +2000,24 @@ void NavigationPattern::ProcessPageShowEvent()
     }
 }
 
-bool NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-    const RefPtr<NavDestinationGroupNode>& newTopNavDestination)
+bool NavigationPattern::ReplaceTransition(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isAnimated)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navigationNode, false);
     auto navBarOrHomeDestNode =
         AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarOrHomeDestinationNode());
     CHECK_NULL_RETURN(navBarOrHomeDestNode, false);
-    bool preUseCustomTransition = TriggerNavDestinationTransition(
-        (preTopNavDestination ? preTopNavDestination :
-        AceType::DynamicCast<NavDestinationGroupNode>(navBarOrHomeDestNode)),
-        NavigationOperation::REPLACE, false) != INVALID_ANIMATION_ID;
-    bool newUseCustomTransition = TriggerNavDestinationTransition(
-        newTopNavDestination, NavigationOperation::REPLACE, true) != INVALID_ANIMATION_ID;
+    bool preUseCustomTransition = false;
+    bool newUseCustomTransition = false;
+    if (isAnimated) {
+        preUseCustomTransition = TriggerNavDestinationTransition(
+            (preTopNavDestination ? preTopNavDestination :
+            AceType::DynamicCast<NavDestinationGroupNode>(navBarOrHomeDestNode)),
+            NavigationOperation::REPLACE, false) != INVALID_ANIMATION_ID;
+        newUseCustomTransition = TriggerNavDestinationTransition(
+            newTopNavDestination, NavigationOperation::REPLACE, true) != INVALID_ANIMATION_ID;
+    }
     if (newTopNavDestination && preTopNavDestination && !preUseCustomTransition) {
         navigationNode->DealNavigationExit(preTopNavDestination, false, false);
     } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
@@ -2050,7 +2054,7 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
     // replace
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
-        ReplaceAnimation(preTopNavDestination, newTopNavDestination);
+        ReplaceTransition(preTopNavDestination, newTopNavDestination, false);
         return;
     }
 
@@ -2325,11 +2329,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
-    bool hasFullPage = isFullPageNavigation_.has_value();
     UpdateIsFullPageNavigation(hostNode);
-    if (!hasFullPage) {
-        FireChangeCallbackAfterLayout();
-    }
     if (navigationModeChange_) {
         if (NavigationMode::STACK == navigationMode_) {
             // Set focus on navDestination when mode changes to STACK
@@ -4562,7 +4562,7 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
     }
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
-        if (!ReplaceAnimation(preTopNavDestination, newTopNavDestination)) {
+        if (!ReplaceTransition(preTopNavDestination, newTopNavDestination)) {
             ContentChangeReport(newTopNavDestination);
         }
         return;
@@ -4804,7 +4804,7 @@ void NavigationPattern::SetMouseStyle(MouseFormat format)
 
 void NavigationPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
 {
-    if (!isFullPageNavigation_.value_or(false)) {
+    if (!isFullPageNavigation_) {
         return;
     }
     MarkAllNavDestinationDirtyIfNeeded(GetHost(), true);
@@ -5157,7 +5157,7 @@ bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
     if (!IsRealStackDisplay()) {
         return false;
     }
-    if (considerSize && !isFullPageNavigation_.value_or(false)) {
+    if (considerSize && !isFullPageNavigation_) {
         return false;
     }
     if (pageNode_.Upgrade() == nullptr) {
@@ -5302,8 +5302,9 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
          * Therefore, if the window size changes during the transition, the page size needs to be forcibly
          * refreshed upon the completion of the transition.
          */
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Reset Page Constraint");
         geometryNode->ResetParentLayoutConstraint();
+        pageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
         restoreTask();
@@ -5326,7 +5327,7 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChanged()
         return;
     }
     if (runningTransitionCount_ > 0) {
-        if (isFullPageNavigation_.value_or(false)) {
+        if (isFullPageNavigation_) {
             return;
         }
         // full page -> partial page
@@ -5365,7 +5366,7 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChangedWhenNoAnimation()
     auto statusBarConfig = lastNode->GetStatusBarConfig();
     std::optional<bool> enableStatusBar;
     std::optional<bool> statusBarAnimated;
-    if (isFullPageNavigation_.value_or(false) && statusBarConfig.has_value()) {
+    if (isFullPageNavigation_ && statusBarConfig.has_value()) {
         enableStatusBar = statusBarConfig.value().first;
         statusBarAnimated = statusBarConfig.value().second;
     }
@@ -5373,7 +5374,7 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChangedWhenNoAnimation()
 
     auto navIndicatorConfig = lastNode->GetNavigationIndicatorConfig();
     std::optional<bool> enableNavIndicator;
-    if (isFullPageNavigation_.value_or(false) && navIndicatorConfig.has_value()) {
+    if (isFullPageNavigation_ && navIndicatorConfig.has_value()) {
         enableNavIndicator = navIndicatorConfig.value();
     }
     mgr->SetWindowSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enableNavIndicator, std::nullopt);
@@ -6326,7 +6327,7 @@ void NavigationPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
 void NavigationPattern::FireNavigateChangeCallback()
 {
     // only fire full page navigation
-    if (!isFullPageNavigation_.value_or(false)) {
+    if (!isFullPageNavigation_) {
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
@@ -6349,33 +6350,6 @@ void NavigationPattern::FireNavigateChangeCallback()
         }
     }
     NavigateChangeInfo from = ConvertNavDestinationContext(fromContext);
-    NavigateChangeInfo to;
-    to.isSplit = GetNavigationMode() == NavigationMode::SPLIT;
-    if (names.size() == 0) {
-        // get default navigate info
-        to = ConvertNavDestinationContext(nullptr);
-    } else {
-        to.name = names.back();
-    }
-    navigationManager->FireNavigateChangeCallback(from, to);
-}
-
-void NavigationPattern::FireChangeCallbackAfterLayout()
-{
-    // only fire full page navigation
-    if (!isFullPageNavigation_.value_or(false)) {
-        return;
-    }
-    CHECK_NULL_VOID(navigationStack_);
-    auto names = navigationStack_->GetAllPathName();
-    if (names.size() == 0 && !preContext_) {
-        return;
-    }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto navigationManager = context->GetNavigationManager();
-    CHECK_NULL_VOID(navigationManager);
-    NavigateChangeInfo from = ConvertNavDestinationContext(preContext_);
     NavigateChangeInfo to;
     to.isSplit = GetNavigationMode() == NavigationMode::SPLIT;
     if (names.size() == 0) {

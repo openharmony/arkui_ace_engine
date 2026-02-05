@@ -17,10 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { VoidCallback, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
+import { VoidCallback, ItemFillPolicy_serializer, ItemFillPolicy, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Bindable_I32_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { IndicatorComponentController_serializer, IndicatorComponentController } from "./indicatorcomponent"
@@ -539,7 +539,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<int32>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -939,7 +939,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setCachedCount1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDisplayCountAttribute(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): void {
+    setDisplayCountAttribute(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1155,7 +1155,7 @@ export interface SwiperAttribute extends CommonMethod {
     cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
-    displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+    displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
         throw new Error("Unimplemented method displayCount")
     }
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
@@ -1282,7 +1282,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
         return this
     }
-    displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+    displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
         return this
     }
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
@@ -1550,9 +1550,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+    public displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
         if (this.checkPriority("displayCount")) {
-            const value_casted = value as (int32 | string | SwiperAutoFill | undefined)
+            const value_casted = value as (int32 | string | SwiperAutoFill | ItemFillPolicy | undefined)
             const swipeByGroup_casted = swipeByGroup as (boolean | undefined)
             this.getPeer()?.setDisplayCountAttribute(value_casted, swipeByGroup_casted)
             return this
@@ -1771,7 +1771,7 @@ export class SwiperContentAnimatedTransition_serializer {
         const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const transitionTmpResult : ((value0: SwiperContentTransitionProxy) => void) = (value0: SwiperContentTransitionProxy):void => {
+        const transitionTmpBufClosure  = (value0: SwiperContentTransitionProxy):void => {
             const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
@@ -1781,6 +1781,8 @@ export class SwiperContentAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(transitionTmpBufClosure, transitionTmpBufBufResource)
+        const transitionTmpResult : ((value0: SwiperContentTransitionProxy) => void) = transitionTmpBufClosure
         let value : SwiperContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as SwiperContentAnimatedTransition)
         return value
     }

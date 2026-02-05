@@ -60,6 +60,7 @@ const std::string RATING_SECONDARY_URL = "common/img3.png";
 const std::string RATING_SVG_URL = "common/img4.svg";
 constexpr double DEFAULT_RATING_SCORE = 0.0;
 constexpr double DEFAULT_STEP_SIZE = 0.5;
+constexpr double RATING_STEP_SIZE = 0.7;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -472,5 +473,55 @@ HWTEST_F(RatingThreeTestNg, OnColorModeChange, TestSize.Level1)
     EXPECT_TRUE(pattern->isBackgroundImageInfoFromTheme_);
 
     g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: SetRatingScoreStaticTest001
+ * @tc.desc: Test setting rating ratingScore(drawScore) and stepSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, SetRatingScoreStaticTest001, TestSize.Level1)
+{
+    RatingModelNG::CreateRating();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    RatingModelNG::SetStepSize(frameNode, RATING_STEP_SIZE);
+    RatingModelNG::SetRatingScoreStatic(RATING_SCORE);
+    RatingModelNG::SetIndicatorStatic(RATING_INDICATOR);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+
+    // Test ratingScore and stepSize value.
+    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.0), RATING_STEP_SIZE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), RATING_SCORE);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: RatingOnChangeEventStaticTest001
+ * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingThreeTestNg, RatingOnChangeEventStaticTest001, TestSize.Level1)
+{
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ratingTheme->starNum_ = DEFAULT_STAR_NUM;
+    ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
+    ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
+
+    RatingModelNG::CreateRating();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    
+    RatingModelNG::SetBackgroundSrc(frameNode, RATING_BACKGROUND_URL, false);
+    RatingModelNG::SetForegroundSrc(frameNode, "", true);
+    RatingModelNG::SetSecondarySrc(frameNode, RATING_SVG_URL, false);
+    auto onChange = [](const std::string& ratingScore) { EXPECT_EQ(ratingScore, "1"); };
+    RatingModelNG::SetOnChangeEvent(frameNode, onChange);
+
+    auto ratingEventHub = frameNode->GetEventHub<NG::RatingEventHub>();
+    ASSERT_NE(ratingEventHub, nullptr);
+    ratingEventHub->SetOnChangeEvent(onChange);
+    ratingEventHub->FireChangeEvent("1");
 }
 } // namespace OHOS::Ace::NG

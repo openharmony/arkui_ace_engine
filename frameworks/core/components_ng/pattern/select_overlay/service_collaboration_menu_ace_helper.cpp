@@ -63,6 +63,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TOAST_DURATION = 2000;
 const std::string END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
+const std::string IMAGE_PROPERTY_ORIENTATION = "Orientation";
 } // namespace
 
 void ServiceCollaborationMenuAceHelper::CreateText(
@@ -907,6 +908,35 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     return 0;
 }
 
+void ServiceCollaborationAceCallback::AdjustImageOrientation(
+    std::shared_ptr<Media::PixelMap> pixelMap, const std::string &currentOrientation)
+{
+    static const std::unordered_map<std::string, OrientationAction> ORIENTATION_TRANS_PARAM_MAP = {
+        {"Top-right", {true, false, 0}},
+        {"Bottom-right", {false, false, 180}},
+        {"Bottom-left", {false, true, 0}},
+        {"Left-top", {true, false, 270}},
+        {"Right-top", {false, false, 90}},
+        {"Right-bottom", {true, false, 90}},
+        {"Left-bottom", {false, false, 270}}
+    };
+    CHECK_NULL_VOID(pixelMap);
+    TAG_LOGI(AceLogTag::ACE_MENU, "currentOrientation: %{public}s", currentOrientation.c_str());
+ 
+    auto it = ORIENTATION_TRANS_PARAM_MAP.find(currentOrientation);
+    if (it == ORIENTATION_TRANS_PARAM_MAP.end()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "Unsupported orientation: %{public}s", currentOrientation.c_str());
+        return;
+    }
+    const OrientationAction &action = it->second;
+    if (action.flipHorizontal || action.flipVertical) {
+        pixelMap->flip(action.flipHorizontal, action.flipVertical);
+    }
+    if (action.rotateAngle != 0) {
+        pixelMap->rotate(action.rotateAngle);
+    }
+}
+
 RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, uint32_t code, uint32_t dataLength)
 {
     Media::SourceOptions opts;
@@ -917,6 +947,8 @@ RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, u
         return nullptr;
     }
     CHECK_NULL_RETURN(imageSource, nullptr);
+    std::string currentOrientation;
+    imageSource->GetImagePropertyString(0, IMAGE_PROPERTY_ORIENTATION, currentOrientation);
     Media::DecodeOptions decodeOpts;
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {
@@ -924,7 +956,8 @@ RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, u
         return nullptr;
     }
     CHECK_NULL_RETURN(pixelMap, nullptr);
-    auto imagePix = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+    AdjustImageOrientation(pixelMap, currentOrientation);
+    auto imagePix = PixelMap::CreatePixelMap(reinterpret_cast<void *>(&pixelMap));
     return imagePix;
 }
 

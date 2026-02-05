@@ -1623,6 +1623,40 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo005, TestSize.Lev
 }
 
 /**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo006
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+        model.SetContentType(TextContentType::VISIBLE_PASSWORD);
+    });
+    frameNode_->MarkModifyDone();
+
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, true);
+}
+
+/**
  * @tc.name: SetPlaceholderColorInfo001
  * @tc.desc: Verify OnUpdateMenuInfo
  * @tc.type: FUNC

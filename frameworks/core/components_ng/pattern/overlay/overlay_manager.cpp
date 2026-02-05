@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "dm/display_manager.h"
 #include "want.h"
 #endif
 
@@ -4162,6 +4163,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         CloseDialogAnimation(dialogNode);
     }
     dialogCount_--;
+    dialogPattern->setMaskNodeId(overlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
     overlayManager->RemoveMaskFromMap(dialogNode);
     // set close button enable
     if (dialogCount_ == 0) {
@@ -5978,9 +5980,6 @@ void OverlayManager::UpdateSheetRender(
     }
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
-    }
-    if (sheetStyle.radiusRenderStrategy.has_value()) {
-        sheetRenderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
     }
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
@@ -9169,9 +9168,21 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode,
     }
 
     rect = container->GetDisplayAvailableRect();
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto displayId = container->GetCurrentDisplayId();
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    auto displayInfo = defaultDisplay->GetDisplayInfo();
+    CHECK_NULL_RETURN(displayInfo, rect);
+    auto sourceMode = displayInfo->GetDisplaySourceMode();
+    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND ||
+        sourceMode == Rosen::DisplaySourceMode::EXTEND) {
+        return rect;
+    }
+#else
     if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
         return rect;
     }
+#endif
 
     auto parentContainer = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
     CHECK_NULL_RETURN(parentContainer, rect);

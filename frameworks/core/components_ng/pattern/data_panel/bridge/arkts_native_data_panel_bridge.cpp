@@ -32,12 +32,13 @@ namespace {
 const char* DATA_PANEL_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
 namespace OHOS::Ace::NG {
+uint32_t DataPanelBridge::dataPanelType_ = 0;
 namespace {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
 constexpr size_t MAX_COUNT = 9;
-constexpr double DEFAULT_DATAPANEL_MAX = 100;
+constexpr int32_t DEFAULT_TYPE = 4;
 constexpr uint32_t TYPE_CYCLE = 0;
 
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
@@ -198,8 +199,8 @@ void DataPanelBridge::RegisterDataPanelAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetDataPanelTrackBackgroundColor),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelStrokeWidth),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetDataPanelStrokeWidth),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelBorderRadius),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetContentModifierBuilder),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelBorderRadius),
 
     };
 
@@ -212,47 +213,51 @@ ArkUINativeModuleValue DataPanelBridge::CreateDataPanel(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    float datapanelMax = DEFAULT_DATAPANEL_MAX;
-    datapanelMax = static_cast<float>(secondArg->ToNumber(vm)->Value());
-    auto jsValue = panda::Local<panda::ArrayRef>(firstArg);
-    if (!jsValue->IsArray(vm)) {
+    if (!firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::vector<double> dateValues;
+    auto paramObject = firstArg->ToObject(vm);
+    auto maxArg = paramObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "max"));
+    double max = maxArg->IsNumber() ? maxArg->ToNumber(vm)->Value() : 100.0;
+    auto valuesArg = paramObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "values"));
+    if (!valuesArg->IsArray(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto jsArray = panda::Local<panda::ArrayRef>(valuesArg);
+    size_t length = ArkTSUtils::GetArrayLength(vm, jsArray);
+    std::vector<double> dataValues;
     double dataSum = 0.0;
-    size_t length = ArkTSUtils::GetArrayLength(vm, jsValue);
     size_t count = std::min(length, MAX_COUNT);
-    auto nodeModifiers = GetArkUINodeModifiers();
     for (size_t i = 0; i < count; ++i) {
-        Local<JSValueRef> item = panda::ArrayRef::GetValueAt(vm, jsValue, static_cast<uint32_t>(i));
+        auto item = jsArray->GetValueAt(vm, jsArray, i);
         if (!item->IsNumber()) {
             continue;
         }
-        double value = static_cast<double>(item->ToNumber(vm)->Value());
+        double value = item->ToNumber(vm)->Value();
         if (LessOrEqual(value, 0.0)) {
             value = 0.0;
         }
-        if (GreatOrEqual(dataSum+value, datapanelMax) && GreatNotEqual(datapanelMax, 0)) {
-            dateValues.emplace_back(datapanelMax - dataSum);
+        // if the sum of values exceeds the maximum value, only fill in to the maximum value
+        if (GreatOrEqual(dataSum + value, max) && GreatNotEqual(max, 0)) {
+            dataValues.emplace_back(max - dataSum);
             break;
         }
         dataSum += value;
-        dateValues.emplace_back(value);
+        dataValues.emplace_back(value);
     }
-    if (LessOrEqual(datapanelMax, 0.0)) {
-        datapanelMax = dataSum;
+    if (LessOrEqual(max, 0.0)) {
+        max = dataSum;
     }
     size_t dataPanelType = 0;
-    int32_t type = static_cast<int32_t>(ChartType::RAINBOW);
-    if (thirdArg->IsNumber()) {
-        type = static_cast<int32_t>(thirdArg->ToNumber(vm)->Value());
-    }
+    auto jsType = paramObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    int32_t type = jsType->IsNumber() ? jsType->ToNumber(vm)->Value() : DEFAULT_TYPE ;
     if (type == static_cast<int32_t>(ChartType::LINE)) {
         dataPanelType = 1;
     }
-    nodeModifiers->getDataPanelModifier()->createModel(dateValues, datapanelMax, dataPanelType);
+    dataPanelType_ = dataPanelType;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->createModel(dataValues, max, dataPanelType);
     Framework::JSDataPanelTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
@@ -579,8 +584,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelBorderRadius(ArkUIRuntimeCal
     if (!CheckJSCallbackInfo("SetDataPanelBorderRadius", secondArg, checkList, vm)) {
         RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
         CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-        int32_t dataPanelType = 0;
-        if (dataPanelType != TYPE_CYCLE) {
+        if (dataPanelType_ != TYPE_CYCLE) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(theme->GetDefaultBorderRadius());
         } else {
             ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});

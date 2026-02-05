@@ -23,7 +23,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -40,6 +39,13 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class MenuItemPattern;
+}
+
+namespace OHOS::Ace {
+class SelectTheme;
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -166,18 +172,7 @@ public:
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
-    FocusPattern GetFocusPattern() const override
-    {
-        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, focusPattern);
-        auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
-        CHECK_NULL_RETURN(selectTheme, focusPattern);
-        auto focusStyleType =
-            static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetSelectFocusStyleType_()));
-        focusPattern.SetStyleType(focusStyleType);
-        return focusPattern;
-    }
+    FocusPattern GetFocusPattern() const override;
 
     // update selected option props
     void UpdateSelectedProps(int32_t index);
@@ -205,6 +200,16 @@ public:
     bool IsHover() const
     {
         return isHover_;
+    }
+
+    void SetMenuSystemMaterial(RefPtr<UiMaterial> menuSystemMaterial)
+    {
+        menuSystemMaterial_ = menuSystemMaterial;
+    }
+
+    RefPtr<UiMaterial> GetMenuSystemMaterial() const
+    {
+        return menuSystemMaterial_;
     }
 
     void SetShowInSubWindow(bool isShowInSubWindow);
@@ -400,6 +405,7 @@ private:
     OptionFont optionFont_;
     std::optional<Color> optionBgColor_;
     std::optional<Color> fontColor_;
+    RefPtr<UiMaterial> menuSystemMaterial_ = nullptr;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

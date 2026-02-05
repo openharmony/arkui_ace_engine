@@ -517,6 +517,49 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     }
 }
 
+void JSProgress::ParseGradientColor(
+    NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, Color& color, int32_t& indx)
+{
+    CompleteResourceObjectFromColor(colorResObj, color, true);
+    auto&& updateFunc = [indx](const RefPtr<ResourceObject>& colorResObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t index = 0; index < colorLength; index++) {
+            NG::GradientColor gradColor = colorVector[index];
+            if (index == indx) {
+                Color color;
+                ResourceParseUtils::ParseResColor(colorResObj, color);
+                gradColor.SetLinearColor(LinearColor(color));
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "LinearGradient.gradient.color" + std::to_string(indx);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
+}
+
+void JSProgress::ParseGradientOffset(NG::Gradient& gradient, RefPtr<ResourceObject>& offsetResObj, int32_t& indx)
+{
+    CHECK_NULL_VOID(offsetResObj);
+    auto&& updateFunc = [indx](const RefPtr<ResourceObject>& offsetResObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t index = 0; index < colorLength; index++) {
+            NG::GradientColor gradColor = colorVector[index];
+            if (index == indx) {
+                CalcDimension offset;
+                ResourceParseUtils::ParseResDimensionVp(offsetResObj, offset);
+                gradColor.SetDimension(offset);
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "LinearGradient.gradient.offset" + std::to_string(indx);
+    gradient.AddResource(key, offsetResObj, std::move(updateFunc));
+}
+
 bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
 {
     if (param->IsNull() || param->IsUndefined() || !param->IsObject()) {
@@ -537,24 +580,37 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
     if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }
+    auto jsGradient = jsLinearGradient->GetGradient();
+    auto jsGradientResObj = jsLinearGradient->GetGradientResObj();
 
-    size_t size = jsLinearGradient->GetGradient().size();
-    if (size == 1) {
-        // If there is only one color, then this color is used for both the begin and end side.
+    size_t size = jsGradient.size();
+    for (size_t i = 0; i < size; i++) {
         NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().front().first));
-        gradientColor.SetDimension(jsLinearGradient->GetGradient().front().second);
-        gradient.AddColor(gradientColor);
-        gradient.AddColor(gradientColor);
-        return true;
-    }
+        Color color = jsGradient.at(i).first;
+        CalcDimension offset = jsGradient.at(i).second;
+        if (SystemProperties::ConfigChangePerform()) {
+            int32_t indx = static_cast<int32_t>(i);
+            if (jsGradientResObj.at(i).first) {
+                ResourceParseUtils::ParseResColor(jsGradientResObj.at(i).first, color);
+            }
+            ParseGradientColor(gradient, jsGradientResObj.at(i).first, color, indx);
+            if (jsGradientResObj.at(i).second) {
+                ResourceParseUtils::ParseResDimensionVp(jsGradientResObj.at(i).second, offset);
+                ParseGradientOffset(gradient, jsGradientResObj.at(i).second, indx);
+            }
+        }
+        if (Negative(offset.ConvertToVp())) {
+            offset = Dimension(0.0, DimensionUnit::VP);
+        }
 
-    for (size_t colorIndex = 0; colorIndex < size; colorIndex++) {
-        NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
-        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        if (GreatNotEqual(offset.ConvertToVp(), 1.0)) {
+            offset = Dimension(1.0, DimensionUnit::VP);
+        }
+        gradientColor.SetLinearColor(LinearColor(color));
+        gradientColor.SetDimension(offset);
         gradient.AddColor(gradientColor);
     }
+    ProgressModel::GetInstance()->SetGradientColorResObj(gradient);
     return true;
 }
 

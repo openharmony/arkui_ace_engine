@@ -93,10 +93,10 @@ class ArkSliderComponent extends ArkComponent {
     return this;
   }
   minLabel(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'minLabel not supported in attributeModifier scenario.');
   }
   maxLabel(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'maxLabel not supported in attributeModifier scenario.');
   }
   showSteps(value, options) {
     let stepOptions = new ArkSliderStepOptions(value, options);
@@ -616,24 +616,6 @@ class SliderEnableHapticFeedbackModifier extends ModifierWithKey {
 SliderEnableHapticFeedbackModifier.identity = Symbol('sliderEnableHapticFeedback');
 
 SliderContentModifier.identity = Symbol('sliderContentModifier');
-// @ts-ignore
-if (globalThis.Slider !== undefined) {
-  globalThis.Slider.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkSliderComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.SliderModifier(nativePtr, classType);
-    });
-  };
-  globalThis.Slider.contentModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkSliderComponent(nativeNode);
-    });
-    component.setContentModifier(modifier);
-  };
-}
 
 class JSSlider extends JSViewAbstract {
   static create(params) {

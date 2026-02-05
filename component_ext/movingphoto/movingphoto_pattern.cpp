@@ -2156,6 +2156,11 @@ void MovingPhotoPattern::RepeatPlay(bool isRepeatPlay)
     }
 }
 
+FocusPattern MovingPhotoPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, false };
+}
+
 void MovingPhotoPattern::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlayPeriod: [%{public}lld, %{public}lld].",

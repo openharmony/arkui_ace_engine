@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,6 +182,15 @@ export class CanvasPath implements MaterializedBase {
         this.rect_serialize(x_casted, y_casted, w_casted, h_casted)
         return
     }
+    public roundRect(x: double, y: double, w: double, h: double, radii?: double | Array<double>): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const w_casted = w as (double)
+        const h_casted = h as (double)
+        const radii_casted = radii as (double | Array<double> | undefined)
+        this.roundRect_serialize(x_casted, y_casted, w_casted, h_casted, radii_casted)
+        return
+    }
     arc_serialize(x: double, y: double, radius: double, startAngle: double, endAngle: double, counterclockwise?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (counterclockwise !== undefined) {
@@ -226,6 +235,30 @@ export class CanvasPath implements MaterializedBase {
     }
     rect_serialize(x: double, y: double, w: double, h: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_rect(this.peer!.ptr, x, y, w, h)
+    }
+    roundRect_serialize(x: double, y: double, w: double, h: double, radii?: double | Array<double>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (radii !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const radiiTmpValue  = radii!
+            if (radiiTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const radiiTmpValueForIdx0  = radiiTmpValue as double
+                thisSerializer.writeFloat64(radiiTmpValueForIdx0)
+            } else if (TypeChecker.isArray_Float64(radiiTmpValue)) {
+                thisSerializer.writeInt8((1).toByte())
+                const radiiTmpValueForIdx1  = radiiTmpValue as Array<double>
+                thisSerializer.writeInt32((radiiTmpValueForIdx1.length).toInt())
+                for (let radiiTmpValueForIdx1CounterI = 0; radiiTmpValueForIdx1CounterI < radiiTmpValueForIdx1.length; radiiTmpValueForIdx1CounterI++) {
+                    const radiiTmpValueForIdx1TmpElement : double = radiiTmpValueForIdx1[radiiTmpValueForIdx1CounterI]
+                    thisSerializer.writeFloat64(radiiTmpValueForIdx1TmpElement)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CanvasPath_roundRect(this.peer!.ptr, x, y, w, h, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export interface CanvasPattern {
@@ -1327,7 +1360,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     public getImageData(sx: double, sy: double, sw: double, sh: double): ImageData {
         return hookGetImageData(this, sx, sy, sw, sh)
     }
-    public getPixelMap(sx: double, sy: double, sw: double, sh: double): image.PixelMap {
+    public getPixelMap(sx: double, sy: double, sw: double, sh: double): image.PixelMap | undefined {
         const sx_casted = sx as (double)
         const sy_casted = sy as (double)
         const sw_casted = sw as (double)
@@ -1779,10 +1812,16 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
         return obj
     }
-    getPixelMap_serialize(sx: double, sy: double, sw: double, sh: double): image.PixelMap {
+    getPixelMap_serialize(sx: double, sy: double, sw: double, sh: double): image.PixelMap | undefined {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getPixelMap(this.peer!.ptr, sx, sy, sw, sh)
-        const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : image.PixelMap | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (image_PixelMap_serializer.read(retvalDeserializer) as image.PixelMap)
+        }
+        const returnResult : image.PixelMap | undefined = buffer
+        return returnResult
     }
     getLineDash_serialize(): Array<double> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
@@ -2250,7 +2289,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     set width(width: double) {
         this.setWidth(width)
     }
-    get canvas(): FrameNode {
+    get canvas(): FrameNode | null {
         return this.getCanvas()
     }
     set canvas(canvas: FrameNode) {
@@ -2358,7 +2397,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.setWidth_serialize(width_casted)
         return
     }
-    private getCanvas(): FrameNode {
+    private getCanvas(): FrameNode | null {
         return hookGetCanvas(this)
     }
     private setCanvas(canvas: FrameNode): void {

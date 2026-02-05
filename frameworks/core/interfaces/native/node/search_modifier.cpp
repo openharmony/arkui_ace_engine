@@ -1321,11 +1321,21 @@ void ResetSearchStrokeWidth(ArkUINodeHandle node)
     SearchModelNG::SetStrokeWidth(frameNode, 0.0_px);
 }
 
-void SetSearchStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 value)
+void SetSearchStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetStrokeColor(frameNode, Color(value));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("strokeColor", resObj, Color(value));
+        } else {
+            pattern->UnRegisterResource("strokeColor");
+        }
+    }
 }
 
 void ResetSearchStrokeColor(ArkUINodeHandle node)
@@ -1333,6 +1343,11 @@ void ResetSearchStrokeColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::ResetStrokeColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("strokeColor");
+    }
 }
 
 void SetEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing)

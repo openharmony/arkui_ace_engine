@@ -47,7 +47,7 @@ public:
     static ArkUINativeModuleValue SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarqueeFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
+    static ArkUINativeModuleValue GetPageRootNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     // ArkTSCard start
     static ArkUINativeModuleValue GetArkUINativeModuleForm(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void RegisterArkUINativeModuleFormLite(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -125,7 +125,6 @@ private:
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridColAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterSymbolGlyphAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSymbolSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     // ArkTSCard start

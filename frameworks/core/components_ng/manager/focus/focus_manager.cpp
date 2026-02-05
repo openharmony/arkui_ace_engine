@@ -531,6 +531,7 @@ void FocusManager::WindowFocus(bool isFocus)
         rootFocusHub->RequestFocusImmediatelyInner(FocusReason::WINDOW_FOCUS);
         rootFocusHub->SetFocusDependence(focusDepend);
     }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "WindowFocus RequestFrame");
     pipeline->RequestFrame();
 }
 

@@ -776,7 +776,7 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     CHECK_NULL_VOID(host);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     config.pageId = host->GetPageId();
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());

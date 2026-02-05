@@ -276,7 +276,7 @@ private:
     void FillTextShadow(Ark_StyledStringValue& styledValue)
     {
         const Ark_ShadowOptions shadowOptions = {
-            .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_RADIUS),
+            .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_RADIUS),
             .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
             .color= Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
                 std::get<1>(TEST_TEXT_SHADOW_COLOR)),

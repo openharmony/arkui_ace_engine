@@ -608,20 +608,20 @@ void UiReportProxy::SendWebInfoRequestResult(
         LOGW("SendWebInfoRequestResult write webId failed");
         return;
     }
+    if (!data.WriteString(request)) {
+        LOGW("SendWebInfoRequestResult write request failed");
+        return;
+    }
     sptr<LargeStringAshmem> largeStringAshmem = new (std::nothrow) LargeStringAshmem();
     if (largeStringAshmem == nullptr) {
         LOGW("SendWebInfoRequestResult alloc shmem failed");
         return;
     }
-    if (!largeStringAshmem->WriteToAshmem(std::to_string(SEND_WEB_INFO_BY_REQUEST), request, request.length())) {
+    if (!largeStringAshmem->WriteToAshmem(std::to_string(SEND_WEB_INFO_BY_REQUEST), result, result.length())) {
         LOGW("SendWebInfoRequestResult write to shmem failed");
         return;
     }
     if (!data.WriteParcelable(largeStringAshmem)) {
-        LOGW("SendWebInfoRequestResult write request failed");
-        return;
-    }
-    if (!data.WriteString(result)) {
         LOGW("SendWebInfoRequestResult write result failed");
         return;
     }

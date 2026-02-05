@@ -33,6 +33,11 @@ enum ServiceCollaborationCode {
 
 class FrameNode;
 struct SelectOverlayInfo;
+struct OrientationAction {
+    bool flipHorizontal = false;
+    bool flipVertical = false;
+    int rotateAngle = 0;
+};
 class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceType {
     DECLARE_ACE_TYPE(ServiceCollaborationMenuAceHelper, AceType);
 public:
@@ -115,6 +120,7 @@ public:
     RefPtr<PixelMap> CreatePixelMap(void *buffer, uint32_t code, uint32_t dataLength);
     void AddMouseEventToEndIcon(const RefPtr<FrameNode>& iconNode);
     uint32_t GetSymbolId(const std::string& abilityType);
+    void AdjustImageOrientation(std::shared_ptr<Media::PixelMap> pixelMap, const std::string &currentOrientation);
     void SetMenuHelper(RefPtr<ServiceCollaborationMenuAceHelper> menuHelper)
     {
         menuHelper_ = menuHelper;

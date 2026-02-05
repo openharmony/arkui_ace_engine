@@ -2221,10 +2221,13 @@ ArkUINativeModuleValue SearchBridge::SetStrokeColor(ArkUIRuntimeCallInfo *runtim
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchStrokeColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchStrokeColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchStrokeColor(nativeNode, color.GetValue(),
+            AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }

@@ -468,8 +468,6 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
 export function ImageAnimatorImpl(
     @memo
     style: ((attributes: ImageAnimatorAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkImageAnimatorComponent>((): ArkImageAnimatorComponent => {
         return new ArkImageAnimatorComponent()
@@ -478,7 +476,6 @@ export function ImageAnimatorImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

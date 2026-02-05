@@ -170,6 +170,9 @@ void SheetObject::ClipSheetNode()
     if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
         renderContext->UpdateOuterBorderRadius(borderRadius);
     }
+    if (sheetStyle.radiusRenderStrategy.has_value() && sheetType != SheetType::SHEET_POPUP) {
+        renderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
+    }
     if (sheetType == SheetType::SHEET_POPUP && pattern->GetSheetPopupInfo().showArrow) {
         std::string clipPath = pattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
         auto path = AceType::MakeRefPtr<Path>();

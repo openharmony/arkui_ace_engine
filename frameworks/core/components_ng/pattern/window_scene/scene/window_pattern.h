@@ -104,7 +104,7 @@ protected:
     virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnRemoveBlank() {}
-    virtual void OnAddSnapshot() {}
+    virtual void OnAddSnapshot(std::function<void()>&& callback = nullptr) {}
     virtual void OnRemoveSnapshot() {}
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}

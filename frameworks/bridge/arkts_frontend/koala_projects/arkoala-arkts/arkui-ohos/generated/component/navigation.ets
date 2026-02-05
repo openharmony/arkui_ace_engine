@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { VoidCallback, Length, Dimension, ResourceStr, ResourceColor } from "./units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -216,7 +216,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = ():void => {
+            const buffer_Closure  = ():void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -225,6 +225,8 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : VoidCallback | undefined = buffer
         return returnResult
@@ -250,7 +252,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (progress: double):void => {
+            const buffer_Closure  = (progress: double):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -260,6 +262,8 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : UpdateTransitionCallback | undefined = buffer
         return returnResult
@@ -443,7 +447,7 @@ export class NavPathInfo implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (value0: PopInfo):void => {
+            const buffer_Closure  = (value0: PopInfo):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -453,6 +457,8 @@ export class NavPathInfo implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : ((value0: PopInfo) => void) | undefined = buffer
         return returnResult
@@ -1185,7 +1191,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            } else if (valueTmpValue instanceof Bindable<Length>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<Length>
                 Bindable_Arkui_Component_Units_Length_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -2424,7 +2430,7 @@ export class NavigationAnimatedTransition_serializer {
             const onTransitionEndTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onTransitionEndTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onTransitionEndTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onTransitionEndTmpBuf = (isVisible: boolean):void => {
+            const onTransitionEndTmpBuf_Closure  = (isVisible: boolean):void => {
                 const onTransitionEndTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onTransitionEndTmpBuf_BufArgsSerializer.writeInt32(onTransitionEndTmpBuf_BufResource.resourceId);
                 onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCall);
@@ -2434,6 +2440,8 @@ export class NavigationAnimatedTransition_serializer {
                 onTransitionEndTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onTransitionEndTmpBuf_Closure, onTransitionEndTmpBuf_BufResource)
+            onTransitionEndTmpBuf = onTransitionEndTmpBuf_Closure
         }
         const onTransitionEndTmpResult : ((isVisible: boolean) => void) | undefined = onTransitionEndTmpBuf
         const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2451,7 +2459,7 @@ export class NavigationAnimatedTransition_serializer {
         const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const transitionTmpResult : ((transitionProxy: NavigationTransitionProxy) => void) = (transitionProxy: NavigationTransitionProxy):void => {
+        const transitionTmpBufClosure  = (transitionProxy: NavigationTransitionProxy):void => {
             const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
@@ -2461,6 +2469,8 @@ export class NavigationAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(transitionTmpBufClosure, transitionTmpBufBufResource)
+        const transitionTmpResult : ((transitionProxy: NavigationTransitionProxy) => void) = transitionTmpBufClosure
         let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEndTmpResult, timeout: timeoutTmpResult, isInteractive: isInteractiveTmpResult, transition: transitionTmpResult} as NavigationAnimatedTransition)
         return value
     }
@@ -2501,7 +2511,7 @@ export class NavigationInterception_serializer {
             const willShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const willShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const willShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            willShowTmpBuf = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
+            const willShowTmpBuf_Closure  = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
                 const willShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 willShowTmpBuf_BufArgsSerializer.writeInt32(willShowTmpBuf_BufResource.resourceId);
                 willShowTmpBuf_BufArgsSerializer.writePointer(willShowTmpBuf_BufCall);
@@ -2530,6 +2540,8 @@ export class NavigationInterception_serializer {
                 willShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(willShowTmpBuf_Closure, willShowTmpBuf_BufResource)
+            willShowTmpBuf = willShowTmpBuf_Closure
         }
         const willShowTmpResult : InterceptionShowCallback | undefined = willShowTmpBuf
         const didShowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2538,7 +2550,7 @@ export class NavigationInterception_serializer {
             const didShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const didShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const didShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            didShowTmpBuf = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
+            const didShowTmpBuf_Closure  = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
                 const didShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 didShowTmpBuf_BufArgsSerializer.writeInt32(didShowTmpBuf_BufResource.resourceId);
                 didShowTmpBuf_BufArgsSerializer.writePointer(didShowTmpBuf_BufCall);
@@ -2567,6 +2579,8 @@ export class NavigationInterception_serializer {
                 didShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(didShowTmpBuf_Closure, didShowTmpBuf_BufResource)
+            didShowTmpBuf = didShowTmpBuf_Closure
         }
         const didShowTmpResult : InterceptionShowCallback | undefined = didShowTmpBuf
         const modeChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2575,7 +2589,7 @@ export class NavigationInterception_serializer {
             const modeChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const modeChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const modeChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            modeChangeTmpBuf = (mode: NavigationMode):void => {
+            const modeChangeTmpBuf_Closure  = (mode: NavigationMode):void => {
                 const modeChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 modeChangeTmpBuf_BufArgsSerializer.writeInt32(modeChangeTmpBuf_BufResource.resourceId);
                 modeChangeTmpBuf_BufArgsSerializer.writePointer(modeChangeTmpBuf_BufCall);
@@ -2585,6 +2599,8 @@ export class NavigationInterception_serializer {
                 modeChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(modeChangeTmpBuf_Closure, modeChangeTmpBuf_BufResource)
+            modeChangeTmpBuf = modeChangeTmpBuf_Closure
         }
         const modeChangeTmpResult : InterceptionModeCallback | undefined = modeChangeTmpBuf
         let value : NavigationInterception = ({willShow: willShowTmpResult, didShow: didShowTmpResult, modeChange: modeChangeTmpResult} as NavigationInterception)
@@ -2984,7 +3000,7 @@ export class NavigationMenuItem_serializer {
             const actionTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const actionTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const actionTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            actionTmpBuf = ():void => {
+            const actionTmpBuf_Closure  = ():void => {
                 const actionTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 actionTmpBuf_BufArgsSerializer.writeInt32(actionTmpBuf_BufResource.resourceId);
                 actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCall);
@@ -2993,6 +3009,8 @@ export class NavigationMenuItem_serializer {
                 actionTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(actionTmpBuf_Closure, actionTmpBuf_BufResource)
+            actionTmpBuf = actionTmpBuf_Closure
         }
         const actionTmpResult : (() => void) | undefined = actionTmpBuf
         let value : NavigationMenuItem = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, isEnabled: isEnabledTmpResult, action: actionTmpResult} as NavigationMenuItem)
@@ -3138,7 +3156,7 @@ export class ToolbarItem_serializer {
             const actionTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const actionTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const actionTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            actionTmpBuf = ():void => {
+            const actionTmpBuf_Closure  = ():void => {
                 const actionTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 actionTmpBuf_BufArgsSerializer.writeInt32(actionTmpBuf_BufResource.resourceId);
                 actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCall);
@@ -3147,6 +3165,8 @@ export class ToolbarItem_serializer {
                 actionTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(actionTmpBuf_Closure, actionTmpBuf_BufResource)
+            actionTmpBuf = actionTmpBuf_Closure
         }
         const actionTmpResult : (() => void) | undefined = actionTmpBuf
         const statusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3265,7 +3285,7 @@ export class NavigationCustomTitle_serializer {
         const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const builderTmpResult : CustomBuilder = ():void => {
+        const builderTmpBufClosure  = ():void => {
             const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
@@ -3274,6 +3294,8 @@ export class NavigationCustomTitle_serializer {
             builderTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(builderTmpBufClosure, builderTmpBufBufResource)
+        const builderTmpResult : CustomBuilder = builderTmpBufClosure
         const heightTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let heightTmpBuf : TitleHeight | Length | undefined
         if (heightTmpBufUnionSelector == (0).toChar()) {

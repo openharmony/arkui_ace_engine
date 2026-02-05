@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
@@ -727,8 +727,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
 export function TextPickerImpl(
     @memo
     style: ((attributes: TextPickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextPickerComponent>((): ArkTextPickerComponent => {
         return new ArkTextPickerComponent()
@@ -737,7 +735,6 @@ export function TextPickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -1179,7 +1176,7 @@ export class TextPickerOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<Array<ResourceStr>>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForValueTmpValueForIdx3  = valueHolderForValueTmpValue as Bindable<Array<ResourceStr>>
                 Bindable_Array_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx3)
@@ -1207,7 +1204,7 @@ export class TextPickerOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<int32>>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<int32>>
                 Bindable_Array_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
@@ -1678,7 +1675,7 @@ export class TextPickerDialogOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<Array<ResourceStr>>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForValueTmpValueForIdx3  = valueHolderForValueTmpValue as Bindable<Array<ResourceStr>>
                 Bindable_Array_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx3)
@@ -1706,7 +1703,7 @@ export class TextPickerDialogOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<int32>>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<int32>>
                 Bindable_Array_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
@@ -2180,7 +2177,7 @@ export class TextPickerDialogOptions_serializer {
             const onAcceptTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAcceptTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAcceptTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAcceptTmpBuf = (value: TextPickerResult):void => {
+            const onAcceptTmpBuf_Closure  = (value: TextPickerResult):void => {
                 const onAcceptTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAcceptTmpBuf_BufArgsSerializer.writeInt32(onAcceptTmpBuf_BufResource.resourceId);
                 onAcceptTmpBuf_BufArgsSerializer.writePointer(onAcceptTmpBuf_BufCall);
@@ -2190,6 +2187,8 @@ export class TextPickerDialogOptions_serializer {
                 onAcceptTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAcceptTmpBuf_Closure, onAcceptTmpBuf_BufResource)
+            onAcceptTmpBuf = onAcceptTmpBuf_Closure
         }
         const onAcceptTmpResult : ((value: TextPickerResult) => void) | undefined = onAcceptTmpBuf
         const onCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2198,7 +2197,7 @@ export class TextPickerDialogOptions_serializer {
             const onCancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onCancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onCancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onCancelTmpBuf = ():void => {
+            const onCancelTmpBuf_Closure  = ():void => {
                 const onCancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onCancelTmpBuf_BufArgsSerializer.writeInt32(onCancelTmpBuf_BufResource.resourceId);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCall);
@@ -2207,6 +2206,8 @@ export class TextPickerDialogOptions_serializer {
                 onCancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onCancelTmpBuf_Closure, onCancelTmpBuf_BufResource)
+            onCancelTmpBuf = onCancelTmpBuf_Closure
         }
         const onCancelTmpResult : (() => void) | undefined = onCancelTmpBuf
         const onChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2215,7 +2216,7 @@ export class TextPickerDialogOptions_serializer {
             const onChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onChangeTmpBuf = (value: TextPickerResult):void => {
+            const onChangeTmpBuf_Closure  = (value: TextPickerResult):void => {
                 const onChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onChangeTmpBuf_BufArgsSerializer.writeInt32(onChangeTmpBuf_BufResource.resourceId);
                 onChangeTmpBuf_BufArgsSerializer.writePointer(onChangeTmpBuf_BufCall);
@@ -2225,6 +2226,8 @@ export class TextPickerDialogOptions_serializer {
                 onChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onChangeTmpBuf_Closure, onChangeTmpBuf_BufResource)
+            onChangeTmpBuf = onChangeTmpBuf_Closure
         }
         const onChangeTmpResult : ((value: TextPickerResult) => void) | undefined = onChangeTmpBuf
         const onScrollStopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2233,7 +2236,7 @@ export class TextPickerDialogOptions_serializer {
             const onScrollStopTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onScrollStopTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onScrollStopTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onScrollStopTmpBuf = (value: TextPickerResult):void => {
+            const onScrollStopTmpBuf_Closure  = (value: TextPickerResult):void => {
                 const onScrollStopTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onScrollStopTmpBuf_BufArgsSerializer.writeInt32(onScrollStopTmpBuf_BufResource.resourceId);
                 onScrollStopTmpBuf_BufArgsSerializer.writePointer(onScrollStopTmpBuf_BufCall);
@@ -2243,6 +2246,8 @@ export class TextPickerDialogOptions_serializer {
                 onScrollStopTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onScrollStopTmpBuf_Closure, onScrollStopTmpBuf_BufResource)
+            onScrollStopTmpBuf = onScrollStopTmpBuf_Closure
         }
         const onScrollStopTmpResult : ((value: TextPickerResult) => void) | undefined = onScrollStopTmpBuf
         const onEnterSelectedAreaTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2251,7 +2256,7 @@ export class TextPickerDialogOptions_serializer {
             const onEnterSelectedAreaTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onEnterSelectedAreaTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onEnterSelectedAreaTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onEnterSelectedAreaTmpBuf = (value: TextPickerResult):void => {
+            const onEnterSelectedAreaTmpBuf_Closure  = (value: TextPickerResult):void => {
                 const onEnterSelectedAreaTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onEnterSelectedAreaTmpBuf_BufArgsSerializer.writeInt32(onEnterSelectedAreaTmpBuf_BufResource.resourceId);
                 onEnterSelectedAreaTmpBuf_BufArgsSerializer.writePointer(onEnterSelectedAreaTmpBuf_BufCall);
@@ -2261,6 +2266,8 @@ export class TextPickerDialogOptions_serializer {
                 onEnterSelectedAreaTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onEnterSelectedAreaTmpBuf_Closure, onEnterSelectedAreaTmpBuf_BufResource)
+            onEnterSelectedAreaTmpBuf = onEnterSelectedAreaTmpBuf_Closure
         }
         const onEnterSelectedAreaTmpResult : ((value: TextPickerResult) => void) | undefined = onEnterSelectedAreaTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2324,7 +2331,7 @@ export class TextPickerDialogOptions_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -2333,6 +2340,8 @@ export class TextPickerDialogOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2341,7 +2350,7 @@ export class TextPickerDialogOptions_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -2350,6 +2359,8 @@ export class TextPickerDialogOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2358,7 +2369,7 @@ export class TextPickerDialogOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -2367,6 +2378,8 @@ export class TextPickerDialogOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2375,7 +2388,7 @@ export class TextPickerDialogOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -2384,6 +2397,8 @@ export class TextPickerDialogOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2500,11 +2515,11 @@ export class TextPickerDialogOptionsExt_serializer {
                         Resource_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1TmpElementForIdx1)
                     }
                 }
-            } else if (valueHolderForValueTmpValue instanceof Bindable<ResourceStr>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForValueTmpValueForIdx2  = valueHolderForValueTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx2)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<Array<ResourceStr>>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForValueTmpValueForIdx3  = valueHolderForValueTmpValue as Bindable<Array<ResourceStr>>
                 Bindable_Array_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx3)
@@ -2532,7 +2547,7 @@ export class TextPickerDialogOptionsExt_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedTmpValueForIdx2  = valueHolderForSelectedTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx2)
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Array<int32>>) {
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForSelectedTmpValueForIdx3  = valueHolderForSelectedTmpValue as Bindable<Array<int32>>
                 Bindable_Array_I32_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx3)
@@ -3031,7 +3046,7 @@ export class TextPickerDialogOptionsExt_serializer {
             const onCancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onCancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onCancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onCancelTmpBuf = ():void => {
+            const onCancelTmpBuf_Closure  = ():void => {
                 const onCancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onCancelTmpBuf_BufArgsSerializer.writeInt32(onCancelTmpBuf_BufResource.resourceId);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCall);
@@ -3040,6 +3055,8 @@ export class TextPickerDialogOptionsExt_serializer {
                 onCancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onCancelTmpBuf_Closure, onCancelTmpBuf_BufResource)
+            onCancelTmpBuf = onCancelTmpBuf_Closure
         }
         const onCancelTmpResult : VoidCallback | undefined = onCancelTmpBuf
         const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3106,7 +3123,7 @@ export class TextPickerDialogOptionsExt_serializer {
             const onScrollStopTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onScrollStopTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onScrollStopTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onScrollStopTmpBuf = (value: TextPickerResult):void => {
+            const onScrollStopTmpBuf_Closure  = (value: TextPickerResult):void => {
                 const onScrollStopTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onScrollStopTmpBuf_BufArgsSerializer.writeInt32(onScrollStopTmpBuf_BufResource.resourceId);
                 onScrollStopTmpBuf_BufArgsSerializer.writePointer(onScrollStopTmpBuf_BufCall);
@@ -3116,6 +3133,8 @@ export class TextPickerDialogOptionsExt_serializer {
                 onScrollStopTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onScrollStopTmpBuf_Closure, onScrollStopTmpBuf_BufResource)
+            onScrollStopTmpBuf = onScrollStopTmpBuf_Closure
         }
         const onScrollStopTmpResult : ((value: TextPickerResult) => void) | undefined = onScrollStopTmpBuf
         const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3149,7 +3168,7 @@ export class TextPickerDialogOptionsExt_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -3158,6 +3177,8 @@ export class TextPickerDialogOptionsExt_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : VoidCallback | undefined = onDidDisappearTmpBuf
         const selectedBackgroundStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

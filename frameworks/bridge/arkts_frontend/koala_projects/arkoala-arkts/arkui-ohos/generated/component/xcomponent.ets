@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
 import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
 import { default as drawing } from "@ohos.graphics.drawing"
@@ -705,7 +705,7 @@ export class XComponentParameters_serializer {
         const nativeXComponentHandlerTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const nativeXComponentHandlerTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const nativeXComponentHandlerTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const nativeXComponentHandlerTmpResult : ((value0: NativeXComponentPointer) => void) = (value0: NativeXComponentPointer):void => {
+        const nativeXComponentHandlerTmpBufClosure  = (value0: NativeXComponentPointer):void => {
             const nativeXComponentHandlerTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt32(nativeXComponentHandlerTmpBufBufResource.resourceId);
             nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCall);
@@ -715,6 +715,8 @@ export class XComponentParameters_serializer {
             nativeXComponentHandlerTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(nativeXComponentHandlerTmpBufClosure, nativeXComponentHandlerTmpBufBufResource)
+        const nativeXComponentHandlerTmpResult : ((value0: NativeXComponentPointer) => void) = nativeXComponentHandlerTmpBufClosure
         const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controllerTmpBuf : XComponentController | undefined = undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

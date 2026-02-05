@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { MarkStyle_serializer, ResourceColor, MarkStyle } from "./units"
@@ -70,7 +70,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -378,7 +378,7 @@ export class CheckBoxConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: boolean) => void) = (value0: boolean):void => {
+        const triggerChangeTmpBufClosure  = (value0: boolean):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
@@ -388,6 +388,8 @@ export class CheckBoxConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : ((value0: boolean) => void) = triggerChangeTmpBufClosure
         let value : CheckBoxConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, name: nameTmpResult, selected: selectedTmpResult, triggerChange: triggerChangeTmpResult} as CheckBoxConfiguration)
         return value
     }
@@ -440,7 +442,7 @@ export class CheckboxOptions_serializer {
             const indicatorBuilderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const indicatorBuilderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const indicatorBuilderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            indicatorBuilderTmpBuf = ():void => {
+            const indicatorBuilderTmpBuf_Closure  = ():void => {
                 const indicatorBuilderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 indicatorBuilderTmpBuf_BufArgsSerializer.writeInt32(indicatorBuilderTmpBuf_BufResource.resourceId);
                 indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCall);
@@ -449,6 +451,8 @@ export class CheckboxOptions_serializer {
                 indicatorBuilderTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(indicatorBuilderTmpBuf_Closure, indicatorBuilderTmpBuf_BufResource)
+            indicatorBuilderTmpBuf = indicatorBuilderTmpBuf_Closure
         }
         const indicatorBuilderTmpResult : CustomBuilder | undefined = indicatorBuilderTmpBuf
         let value : CheckboxOptions = ({name: nameTmpResult, group: groupTmpResult, indicatorBuilder: indicatorBuilderTmpResult} as CheckboxOptions)

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_MANAGER_H
 #include "test/mock/core/animation/mock_implicit_animation.h"
 
+#include <set>
 #include "core/components_ng/base/modifier.h"
 #include "frameworks/base/utils/singleton.h"
 namespace OHOS::Ace::NG {

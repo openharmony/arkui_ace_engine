@@ -20,18 +20,10 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/gestures/gesture_event.h"
+#include "core/gestures/drag_constants.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
-
-enum class DragEventType {
-    ENTER,
-    LEAVE,
-    MOVE,
-    DROP,
-    START,
-    PULL_CANCEL,
-};
 
 enum class DragType {
     COMMON,

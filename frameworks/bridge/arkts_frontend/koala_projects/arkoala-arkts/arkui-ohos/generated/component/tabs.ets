@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TranslateOptions_serializer, TranslateOptions, DividerStyle_serializer, BackgroundEffectOptions_serializer, BackgroundBlurStyleOptions_serializer, ArkCommonMethodPeer, CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, BlurStyleOptions, BlurStyleActivePolicy, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_I32_serializer } from "./common"
@@ -1363,7 +1363,7 @@ export class TabContentAnimatedTransition_serializer {
         const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const transitionTmpResult : ((value0: TabContentTransitionProxy) => void) = (value0: TabContentTransitionProxy):void => {
+        const transitionTmpBufClosure  = (value0: TabContentTransitionProxy):void => {
             const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
@@ -1373,6 +1373,8 @@ export class TabContentAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(transitionTmpBufClosure, transitionTmpBufBufResource)
+        const transitionTmpResult : ((value0: TabContentTransitionProxy) => void) = transitionTmpBufClosure
         let value : TabContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as TabContentAnimatedTransition)
         return value
     }
@@ -1396,7 +1398,7 @@ export class TabsOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIndexTmpValueForIdx0  = valueHolderForIndexTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForIndexTmpValueForIdx0)
-            } else if (valueHolderForIndexTmpValue instanceof Bindable<int32>) {
+            } else if (valueHolderForIndexTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIndexTmpValueForIdx1  = valueHolderForIndexTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(valueSerializer, valueHolderForIndexTmpValueForIdx1)

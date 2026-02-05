@@ -165,7 +165,7 @@ export class KeyEventTransfer {
         retValue.setProperty('unicode', objectInternal.unicode);
         retValue.setProperty('timestamp', objectInternal.timestamp);
         retValue.setProperty('intentionCode', TypeChecker.IntentionCode_ToNumeric(objectInternal.intentionCode));
-        return retValue;
+        return retValue.unwrap();
     }
 }
 
@@ -215,7 +215,7 @@ export class TouchTestInfoTransfer {
         rect.setProperty('height', touchTestInfo.rect.height);
         retValue.setProperty('rect', rect);
         retValue.setProperty('id', touchTestInfo.id);
-        return retValue
+        return retValue.unwrap();
     }
 }
 
@@ -248,7 +248,7 @@ export class DragEventTransfer {
             return new Object();
         }
         let result = wrapFunc.invoke(nativePointer)
-        return result
+        return result.unwrap();
     }
 }
 
@@ -379,7 +379,7 @@ export class ClickEventTransfer {
         retValue.setProperty('x', clickEvent.x);
         retValue.setProperty('y', clickEvent.y);
         retValue.setProperty('hand', TypeChecker.InteractionHand_ToNumeric(clickEvent.hand as InteractionHand));
-        return retValue;
+        return retValue.unwrap();
     }
 }
 export class HoverEventTransfer {
@@ -506,7 +506,7 @@ export class HoverEventTransfer {
         retValue.setProperty('windowY', hoverEvent.windowY);
         retValue.setProperty('x', hoverEvent.x);
         retValue.setProperty('y', hoverEvent.y);
-        return retValue;
+        return retValue.unwrap();
     }
 }
 
@@ -660,7 +660,7 @@ export class MouseEventTransfer {
             retValue.setProperty('pressedButtons', pressedButtonsValue);
         }
 
-        return retValue;
+        return retValue.unwrap();
     }
 }
 
@@ -859,7 +859,7 @@ export class TouchEventTransfer {
             changedTouchesValue.setProperty(index, touchItemValue);
         }
         retValue.setProperty('changedTouches', changedTouchesValue);
-        return retValue;
+        return retValue.unwrap();
     }
 }
 
@@ -993,7 +993,7 @@ export class AxisEventTransfer {
         retValue.setProperty('x', axisEvent.x);
         retValue.setProperty('y', axisEvent.y);
         retValue.setProperty('scrollStep', axisEvent.scrollStep);
-        return retValue;
+        return retValue.unwrap();
     }
 }
 

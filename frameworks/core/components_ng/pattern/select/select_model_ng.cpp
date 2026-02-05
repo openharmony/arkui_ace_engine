@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_layout_property.h"
 
@@ -1352,6 +1353,23 @@ void SelectModelNG::SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std:
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SelectLayoutProperty, MinKeyboardAvoidDistance, distance.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(SelectLayoutProperty, MinKeyboardAvoidDistance, frameNode);
+    }
+}
+
+void SelectModelNG::SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMenuSystemMaterial(frameNode, menuSystemMaterial);
+}
+
+void SelectModelNG::SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiMaterial>& menuSystemMaterial)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (menuSystemMaterial) {
+        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+        CHECK_NULL_VOID(pattern);
+        pattern->SetMenuSystemMaterial(menuSystemMaterial);
     }
 }
 

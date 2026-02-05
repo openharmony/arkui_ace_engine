@@ -101,6 +101,7 @@ public:
     static void SetMenuHoverScaleStatus(int32_t targetId, MenuHoverScaleStatus status);
     static void RemoveMenuHoverScaleStatus(int32_t targetId);
     static MenuHoverScaleStatus GetMenuHoverScaleStatus(int32_t targetId);
+    static void SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
 private:
     static void UpdateMenuPaintProperty(

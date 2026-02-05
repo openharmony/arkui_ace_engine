@@ -30,6 +30,8 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
 import promptAction from '@ohos/promptAction'
 import { Theme } from '@ohos/arkui/theme';
+import { DecoratedVariableBase } from '../stateManagement/decoratorImpl/decoratorBase';
+import { IDecoratorBaseRegistry } from '../stateManagement/decorator';
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -78,11 +80,32 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private childrenWeakRefMap_: Map<int32, WeakRef<ExtendableComponent>> = new Map<int32, WeakRef<ExtendableComponent>>();
     private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
     private hasBeenRecycled_: boolean = false;
+    private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
         this.backLocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
+    }
+
+    __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void {
+        if (!this.ownedStateVariables_) {
+            this.ownedStateVariables_ = new Array<IDecoratorBaseRegistry>();
+        }
+        this.ownedStateVariables_!.push(stateVariable);
+    }
+
+    __clearStateVariables__Internal(): void {
+        this.delegate_ = undefined;
+        if (!this.ownedStateVariables_?.length) {
+            return;
+        }
+        this.ownedStateVariables_!.forEach((state: IDecoratorBaseRegistry) => {
+            if (state instanceof DecoratedVariableBase) {
+                state.aboutToBeDeletedInternal();
+            }
+        });
+        this.ownedStateVariables_ = undefined;
     }
 
     __aboutToReuse_Internal(param?: RecordData): void {
@@ -229,6 +252,10 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
             return localVar as object as IProvideDecoratedVariable<T>;
         }
         return this.parent_?.__findProvide__Internal<T>(providedPropName);
+    }
+
+    getownedStateVariables(): Array<IDecoratorBaseRegistry> | undefined {
+        return this.ownedStateVariables_;
     }
 
     getUIContext(): UIContext {

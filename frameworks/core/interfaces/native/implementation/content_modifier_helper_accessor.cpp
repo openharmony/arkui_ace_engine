@@ -48,9 +48,13 @@
 #include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
 namespace {
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
 {
+#ifdef ACE_UNITTEST
+    return GetCheckboxStaticContentModifier();
+#else
     static const GENERATED_ArkUICheckboxContentModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Checkbox");
@@ -62,6 +66,7 @@ const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
             module->GetCustomModifier("contentModifier"));
     }
     return cachedModifier;
+#endif
 }
 
 const GENERATED_ArkUICheckboxGroupContentModifier* GetCheckboxGroupContentModifier()
@@ -103,7 +108,7 @@ const GENERATED_ArkUIDataPanelContentModifier* GetDataPanelModifierWithCache()
         auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
         if (module != nullptr) {
             cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelContentModifier*>(
-                module->GetCustomModifier()
+                module->GetCustomModifier("contentModifier")
             );
         }
     });

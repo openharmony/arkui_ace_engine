@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "base/memory/ace_type.h"
+#include "core/common/display_info.h"
 
 namespace OHOS::Ace {
 
@@ -26,6 +27,7 @@ class ACE_FORCE_EXPORT DisplayManager : public virtual AceType {
 public:
     static DisplayManager& GetInstance();
     virtual bool ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t& rsScreenId) = 0;
+    virtual FoldDisplayMode GetFoldDisplayMode() = 0;
 };
 
 } //namespace OHOS::Ace

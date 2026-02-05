@@ -21,15 +21,16 @@
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
-#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 #include "core/pipeline/base/element.h"
 
+struct OH_NativeXComponent;
 namespace OHOS::Ace {
 class XComponentDelegate;
 class RenderXComponent;
 class XComponentComponent;
+class NativeXComponentImpl;
 
 using TaskFunction = std::function<void(RenderXComponent&, const Offset&)>;
 using PushTaskFunction = std::function<void(const TaskFunction&)>;

@@ -123,7 +123,8 @@ bool WindowScene::IsMainSessionRecent()
     auto windowScene = AceType::DynamicCast<WindowScene>(pattern);
     CHECK_NULL_RETURN(windowScene, false);
     CHECK_NULL_RETURN(windowScene->session_, false);
-    
+    CHECK_NULL_RETURN(windowScene->snapshotWindow_, false);
+
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "IsMainSessionRecent id:%{public}d, nodeId:%{public}d,"
         "type:%{public}d, recent:%{public}d", windowScene->session_->GetPersistentId(), host->GetId(),
         windowScene->session_->GetWindowType(), windowScene->session_->GetShowRecent());
@@ -663,7 +664,6 @@ void WindowScene::OnActivation()
             CHECK_EQUAL_VOID(isRestart, true);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
-            self->session_->SetEnableAddSnapshot(true);
             self->DisposeSnapshotAndBlankWindow();
             self->SetSubSessionVisible();
         }
@@ -856,17 +856,24 @@ void WindowScene::OnRemoveBlank()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::OnAddSnapshot()
+void WindowScene::OnAddSnapshot(std::function<void()>&& callback)
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    auto uiTask = [weakThis = WeakClaim(this), callback = std::move(callback)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
-        CHECK_EQUAL_VOID(self->session_->GetEnableAddSnapshot(), false);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        if (self->snapshotWindow_ || self->startingWindow_ || self->blankWindow_) {
-            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap/start/blank window id %{public}d host id %{public}d",
+        if (self->snapshotWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap window id %{public}d host id %{public}d",
+                self->session_->GetPersistentId(), host->GetId());
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+        if (self->startingWindow_ || self->blankWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In start/blank window id %{public}d host id %{public}d",
                 self->session_->GetPersistentId(), host->GetId());
             return;
         }
@@ -877,6 +884,9 @@ void WindowScene::OnAddSnapshot()
         }
         self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->RemoveChild(host, self->appWindow_, self->appWindowName_);
+        if (callback) {
+            callback();
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "OnAddSnapshot id %{public}d host id %{public}d", self->session_->GetPersistentId(), host->GetId());

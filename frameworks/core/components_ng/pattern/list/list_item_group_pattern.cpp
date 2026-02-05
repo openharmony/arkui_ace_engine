@@ -1364,6 +1364,7 @@ void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
     adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
     listContentSize_ = layoutAlgorithm->GetListContentSize();
     prevMeasureBreak_ = layoutAlgorithm->GroupMeasureInNextFrame();
+    isAxisChanged_ = false;
     layouted_ = true;
     if (indexChanged) {
         auto parentList = GetListFrameNode();

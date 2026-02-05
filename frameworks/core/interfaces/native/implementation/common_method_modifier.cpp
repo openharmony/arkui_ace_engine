@@ -17,6 +17,8 @@
 #include <variant>
 #include "arkoala_api_generated.h"
 
+#include "ui/focus/focus_constants.h"
+
 #include "base/geometry/response_region.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
@@ -34,6 +36,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -815,6 +819,8 @@ auto g_bindMenuOptionsParam = [](
     auto convValue = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
     Validator::ValidateNonNegative(convValue);
     menuParam.minKeyboardAvoidDistance = convValue;
+    auto material = OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(nullptr);
+    menuParam.systemMaterial = material ? material->Copy() : nullptr;
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
@@ -1240,7 +1246,7 @@ uint16_t Convert(const Ark_PixelRoundPolicy& src)
 template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
-    return Convert<float>(src.radius);
+    return OptConvert<float>(src.radius).value_or(0.0f);
 }
 
 template<>
@@ -1583,18 +1589,19 @@ MotionBlurOption Convert(const Ark_MotionBlurOptions& src)
     MotionBlurOption options;
     const float minValue = 0.0;
     const float maxValue = 1.0;
-    options.radius = Convert<float>(src.radius);
+    options.radius = OptConvert<float>(src.radius).value_or(0.0f);
     if (LessNotEqual(options.radius, minValue)) {
         options.radius = minValue;
     }
-    options.anchor.x = Convert<float>(src.anchor.x);
+    auto arkMotionBlurAnchor = GetOpt(src.anchor);
+    options.anchor.x = OPT_CONVERT_FIELD(float, arkMotionBlurAnchor, x).value_or(0.0f);
     if (LessNotEqual(options.anchor.x, minValue)) {
         options.anchor.x = minValue;
     }
     if (GreatNotEqual(options.anchor.x, maxValue)) {
         options.anchor.x = maxValue;
     }
-    options.anchor.y = Convert<float>(src.anchor.y);
+    options.anchor.y = OPT_CONVERT_FIELD(float, arkMotionBlurAnchor, y).value_or(0.0f);
     if (LessNotEqual(options.anchor.y, minValue)) {
         options.anchor.y = minValue;
     }
@@ -1816,12 +1823,13 @@ NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
     auto blurRadius = Dimension(0);
     std::pair<float, float> pair;
     std::vector<std::pair<float, float>> fractionStops;
-    auto fractionStopsVec = Convert<std::vector<Ark_FractionStop>>(value.fractionStops);
+    auto fractionStopsVec =
+        OptConvert<std::vector<Ark_FractionStop>>(value.fractionStops).value_or(std::vector<Ark_FractionStop> {});
     for (auto& arkPair : fractionStopsVec) {
         pair = Convert<std::pair<float, float>>(arkPair);
         fractionStops.push_back(pair);
     }
-    auto direction = Convert<GradientDirection>(value.direction);
+    auto direction = OptConvert<GradientDirection>(value.direction).value_or(GradientDirection::BOTTOM);
     return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
 }
 template<>
@@ -2158,62 +2166,6 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContex
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id, ctx);
 }
-void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
-void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx)
-{
-    dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
-    if (dst) {
-        dst->IncRefCount();
-        dst->Update(src);
-    }
-}
 
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src, ConvContext *ctx)
 {
@@ -2429,6 +2381,15 @@ void SetResponseRegionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetResponseRegion(frameNode, *convArray);
+        if (frameNode->GetTag() == V2::RADIO_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<RadioPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        }
     } else {
         ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
@@ -4325,6 +4286,14 @@ void SetEnabledImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    if (eventHub && eventHub->HasStateStyle(UI_STATE_DISABLED)) {
+        if (*convValue) {
+            eventHub->ResetCurrentUIState(UI_STATE_DISABLED);
+        } else {
+            eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
+        }
+    }
 }
 void SetAlignRulesInternal(FrameNode *frameNode, std::optional<std::map<AlignDirection, AlignRule>> convMapValue,
                            std::optional<BiasOpt> convBiasValue)
@@ -5451,20 +5420,48 @@ void SetBackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    
+    Alignment alignment = Alignment::CENTER;
+    uint32_t parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    bool hasEdges = false;
+    if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto alignOpt = Converter::OptConvert<Alignment>(options->value.align);
+        if (alignOpt) {
+            alignment = alignOpt.value();
+        }
+        const auto& optEdges = options->value.ignoresLayoutSafeAreaEdges;
+        if (optEdges.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(optEdges.value);
+            uint32_t mask = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+            for (auto edgeValue : edgeRawArray) {
+                mask |= edgeValue;
+            }
+            parsedEdges = mask;
+            hasEdges = true;
+        }
+    }
     Converter::VisitUnionPtr(content,
-        [frameNode, optAlign, node](const CustomNodeBuilder& builder) {
-            CallbackHelper(builder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-                CHECK_NULL_VOID(uiNode);
-                auto builderFunc = [uiNode]() -> RefPtr<UINode> {
-                    return uiNode;
-                };
-                ViewAbstract::SetIsBuilderBackground(frameNode, true);
-                ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, optAlign);
+        [frameNode, alignment, parsedEdges, hasEdges, node](const CustomNodeBuilder& builder) {
+            CallbackHelper(builder).BuildAsync(
+                [frameNode, alignment, parsedEdges, hasEdges](const RefPtr<UINode>& uiNode) {
+                    CHECK_NULL_VOID(uiNode);
+                    auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                        return uiNode;
+                    };
+                    uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+                    ViewAbstract::SetIsBuilderBackground(frameNode, true);
+                    bool isTransitionBackground = !(ignoreLayoutSafeAreaEdges == NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+                    ViewAbstract::SetIsTransitionBackground(frameNode, isTransitionBackground);
+                    ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+                    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
+                    ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, alignment);
                 }, node);
         },
-        [frameNode](const Ark_ResourceColor& resourceColor) {
+        [frameNode, alignment, parsedEdges, hasEdges](const Ark_ResourceColor& resourceColor) {
+            uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+            ViewAbstract::SetIsBuilderBackground(frameNode, false);
+            ViewAbstract::SetIsTransitionBackground(frameNode, true);
+            ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+            ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
             auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
             ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
         },
@@ -5773,19 +5770,19 @@ void SetOnDragSpringLoadingImpl(Ark_NativePointer node,
     auto config = AceType::MakeRefPtr<NG::DragSpringLoadingConfiguration>();
     CHECK_NULL_VOID(config);
     auto stillTimeLimit = Converter::OptConvert<int32_t>(configValue->stillTimeLimit);
-    if (stillTimeLimit.has_value()) {
+    if (stillTimeLimit.has_value() && stillTimeLimit.value() >= 0) {
         config->stillTimeLimit = stillTimeLimit.value();
     }
     auto updateInterval = Converter::OptConvert<int32_t>(configValue->updateInterval);
-    if (updateInterval.has_value()) {
+    if (updateInterval.has_value() && updateInterval.value() >= 0) {
         config->updateInterval = updateInterval.value();
     }
     auto updateNotifyCount = Converter::OptConvert<int32_t>(configValue->updateNotifyCount);
-    if (updateNotifyCount.has_value()) {
+    if (updateNotifyCount.has_value() && updateNotifyCount.value() >= 0) {
         config->updateNotifyCount = updateNotifyCount.value();
     }
     auto updateToFinishInterval = Converter::OptConvert<int32_t>(configValue->updateToFinishInterval);
-    if (updateToFinishInterval.has_value()) {
+    if (updateToFinishInterval.has_value() && updateToFinishInterval.value() >= 0) {
         config->updateToFinishInterval = updateToFinishInterval.value();
     }
     ViewAbstract::SetOnDragSpringLoadingConfiguration(frameNode, std::move(config));
@@ -6160,7 +6157,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     Converter::VisitUnion(menuOption->preview,
         [&menuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
@@ -6222,7 +6219,7 @@ void BindContextMenuBoth(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     for (auto& type : responseTypeArray) {
         auto triggerMenuParam = menuParam;
         Converter::VisitUnion(menuOption->preview,

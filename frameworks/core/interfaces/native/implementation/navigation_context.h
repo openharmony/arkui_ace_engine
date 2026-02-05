@@ -193,7 +193,8 @@ public:
     bool PushWithLaunchModeAndAnimated(const PathInfo& info, LaunchMode launchMode, bool animated);
     void PushPath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     PushDestinationResultType PushDestinationByName(const std::string& name,
-        const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
+        const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated,
+        std::function<void(int32_t errorCode, std::string errorMessage)>&& promise);
     PushDestinationResultType PushDestination(PathInfo info,
         const std::optional<NavigationOptions>& optionParam);
     void ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
@@ -207,11 +208,13 @@ public:
     void PopTo(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated, Ark_Object result);
-    void PopToIndex(size_t index, const std::optional<bool>& animated);
-    void PopToIndex(size_t index, const std::optional<bool>& animated, Ark_Object result);
+    void PopToIndex(int32_t index, const std::optional<bool>& animated);
+    void PopToIndex(int32_t index, const std::optional<bool>& animated, Ark_Object result);
     void PopToInternal(
-        std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, bool needFireOnResult = true);
-    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, Ark_Object result);
+        std::vector<PathInfo>::iterator it, const std::optional<bool>& animated,
+        bool needFireOnResult = true, bool clearAll = false);
+    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated, Ark_Object result,
+        bool clearAll = false);
     int MoveToTop(const std::string& name, const std::optional<bool>& animated);
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
     void MoveToTopInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
@@ -385,8 +388,9 @@ private:
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
-    bool CreateNavDestinationByRouterMap(
-        const std::string& name, int32_t index, RefPtr<NG::UINode>& node);
+    int32_t CreateNavDestinationByRouterMap(
+        const std::string& name, int32_t index, RefPtr<NG::UINode>& node,
+        RefPtr<NG::NavDestinationGroupNode>& desNode);
     std::string ErrorToMessage(int32_t code);
     void FirePromise(PathInfo*, int32_t errorCode);
     void ExecutePopCallbackInStack(Opt_Object param);

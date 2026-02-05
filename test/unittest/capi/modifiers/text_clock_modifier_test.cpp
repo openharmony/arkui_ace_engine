@@ -88,7 +88,7 @@ public:
 
 void TextClockModifierTest::InitTextShadow(Ark_Union_ShadowOptions_Array_ShadowOptions &options)
 {
-    WriteToUnion<Ark_ShadowOptions>(options).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+    WriteToUnion<Ark_ShadowOptions>(options).radius = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
         std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(options).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
@@ -335,7 +335,7 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusVa
     InitTextShadow(initValueTextShadow);
 
     auto checkValue = [this, frameNode, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_F64_Resource& value) {
+                          const Opt_Union_F64_Resource& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
@@ -354,10 +354,10 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusVa
     };
 
     for (auto& [input, value, expected] : testFixtureShadowRadiusNumberValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureShadowRadiusResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(value));
     }
 }
 
@@ -380,7 +380,7 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusIn
     InitTextShadow(initValueTextShadow);
 
     auto checkValue = [this, textClockProperty, &initValueTextShadow](
-        const std::string& input, const Ark_Union_F64_Resource& value) {
+        const std::string& input, const Opt_Union_F64_Resource& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
@@ -398,13 +398,13 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusIn
     };
 
     for (auto& [input, value] : testFixtureShadowRadiusNumberInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureShadowRadiusResInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_F64_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr));
 }
 
 /*

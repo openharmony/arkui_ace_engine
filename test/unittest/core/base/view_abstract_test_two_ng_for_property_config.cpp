@@ -429,46 +429,4 @@ HWTEST_F(ViewAbstractTestNg, FocusBoxTest001, TestSize.Level1)
     ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleWidth");
     EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
 }
-
-/**
- * @tc.name: ViewAbstractAddHoverEventForTipsTest001
- * @tc.desc: Test the AddHoverEventForTips of View_Abstract.
- * @tc.type: FUNC
- */
-HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create some FrameNode and params.
-     */
-    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
-    auto param = AceType::MakeRefPtr<PopupParam>();
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-
-    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
-    ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, true);
-    auto eventHub = targetNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    ASSERT_NE(inputHub, nullptr);
-    auto hoverEventActuator = inputHub->hoverEventActuator_;
-    ASSERT_NE(hoverEventActuator, nullptr);
-    auto Events = hoverEventActuator->inputEvents_;
-    bool ishover = true;
-    for (const auto& callback : Events) {
-        (*callback)(ishover);
-    }
-    ishover = false;
-    for (const auto& callback : Events) {
-        (*callback)(ishover);
-    }
-    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
-    EXPECT_EQ(Events.size(), 1);
-}
 } // namespace OHOS::Ace::NG

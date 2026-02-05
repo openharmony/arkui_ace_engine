@@ -159,6 +159,14 @@ void FfiOHOSAceFrameworkSearchSetTextFont(
     }
     Font font;
     handleFont(fontSize, sizeUnit, fontWeight, fontStyle, fontFamily, font);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        if (sizeUnit == static_cast<int32_t>(DimensionUnit::PERCENT) || LessNotEqual(fontSize, 0.0)) {
+            auto theme = GetTheme<SearchTheme>();
+            CHECK_NULL_VOID(theme);
+            auto themeFontSize = theme->GetFontSize();
+            font.fontSize = themeFontSize;
+        }
+    }
     SearchModel::GetInstance()->SetTextFont(font);
 }
 

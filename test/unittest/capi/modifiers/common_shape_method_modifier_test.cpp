@@ -443,11 +443,11 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1
     using OneTestStep = std::pair<Opt_Union_Number_String, std::string>;
     const std::vector<OneTestStep> testPlan = {
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(1)), "1.00vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(0)), "0.00px" },
+        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(0)), "0.00vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f)),
              "2.45vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(-2.45f)),
-             "0.00px" },
+             "0.00vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("5px")),
              "5.00px" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px")),
@@ -465,11 +465,11 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx")),
              "0.50lpx" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("3")), "3.00vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("")), "0.00px" },
+        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("")), "0.00vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("10.65")),
              "10.65vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("23%")),
-             "0.00px" },
+             "0.00vp" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;

@@ -43,7 +43,7 @@ export class FrameNodeTransfer {
             nodeType = nodeTypeESValue.toString();
         }
         let uiContext = new UIContextImpl(instanceId as int32);
-        let arkUINode = ESValue.load('@ohos.arkui.node');
+        let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
         let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
         let point = frameNodeTrans.invoke(input! as Object);
         if (point.isUndefined()) {
@@ -68,7 +68,7 @@ export class FrameNodeTransfer {
         //todo 
         let frameNodeRaw = FrameNodeExtender.unWrapRawPtr(point!);
         let nodeType: string | undefined = frameNodeStatic.nodeType_;
-        let arkUINode = ESValue.load('@ohos.arkui.node');
+        let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
         let frameNodeTrans = arkUINode.getProperty('createFrameNodeByTrans');
         let uiContext = UIContextTransfer.createDynamic(instanceId);
         if (nodeType) {

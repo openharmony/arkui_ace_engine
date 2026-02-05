@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
+enum class StatisticEventType;
 }
 namespace OHOS::Ace::NG {
 class XComponentExtSurfaceCallbackClient;
@@ -369,6 +370,7 @@ public:
     void UnlockCanvasAndPost(RSCanvas* canvas);
     void SetSurfaceIsOpaque(bool isOpaque);
     ArkUI_AccessibilityProvider* GetNativeProvider();
+    void PushType(StatisticEventType type);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 protected:
     void OnAttachToMainTree() override;
@@ -423,6 +425,7 @@ protected:
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     ArkUI_AccessibilityProvider* arkuiAccessibilityProvider_ = nullptr;
     bool isNeedSoftKeyboard_ = false;
+    std::list<StatisticEventType> statisticEventTypes_;
 
 private:
     void OnAreaChangedInner() override;
@@ -552,6 +555,7 @@ private:
     WeakPtr<PipelineContext> initialContext_ = nullptr;
     // record the initial surfaceId_ in InitSurface, this variable should not be modified after the initial assignment
     std::string initialSurfaceId_;
+    int32_t foldDisplayCallbackId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

@@ -3612,6 +3612,17 @@ void FrontendDelegateDeclarative::CancelAnimationFrame(const std::string& callba
     }
 }
 
+
+void FrontendDelegateDeclarative::SetMonitorForCrownEvents(const std::string& callbackId)
+{
+    LOGW("Not supported in declarative frontend.");
+}
+
+void FrontendDelegateDeclarative::ClearMonitorForCrownEvents()
+{
+    LOGW("Not supported in declarative frontend.");
+}
+
 void FrontendDelegateDeclarative::FlushAnimationTasks()
 {
     while (!animationFrameTaskIds_.empty()) {

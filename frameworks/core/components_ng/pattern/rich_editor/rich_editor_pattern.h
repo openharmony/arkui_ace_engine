@@ -124,7 +124,20 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS, UNDO };
+enum class OperationType {
+    DEFAULT = 0,
+    DRAG,
+    IME,
+    FINISH_PREVIEW,
+    PASTE,
+    ACCESSIBILITY,
+    AI_WRITE,
+    STYLUS,
+    SAFE_PASTE,
+    AUTO_FILL,
+    UNDO
+};
+
 const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP = {
     { OperationType::DEFAULT, TextChangeReason::INPUT },
     { OperationType::DRAG, TextChangeReason::DRAG },
@@ -134,6 +147,8 @@ const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP =
     { OperationType::ACCESSIBILITY, TextChangeReason::ACCESSIBILITY },
     { OperationType::AI_WRITE, TextChangeReason::AI_WRITE },
     { OperationType::STYLUS, TextChangeReason::STYLUS },
+    { OperationType::SAFE_PASTE, TextChangeReason::INPUT },
+    { OperationType::AUTO_FILL, TextChangeReason::AUTO_FILL },
 };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
@@ -431,16 +446,19 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorEventHub>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
     }
@@ -652,6 +670,7 @@ public:
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
+    int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
@@ -1509,6 +1528,7 @@ public:
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
@@ -1517,7 +1537,7 @@ public:
     void ProcessAutoFillOnPaste();
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
-    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
+    bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1541,6 +1561,7 @@ private:
     friend class RichEditorLayoutAlgorithm;
     friend class RichEditorPaintMethod;
     friend class RichEditorScrollController;
+    bool ParseCommand(const std::string& command);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);

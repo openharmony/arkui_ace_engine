@@ -38,6 +38,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
 constexpr int32_t MAX_THRESHOLD_PERCENTAGE = 100;
+constexpr uint32_t MAX_LINES = 3;
 constexpr float SCALE_LIMIT = 1.f;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 
@@ -156,6 +157,11 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
     auto controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
     if (peerPtr) {
         peerPtr->SetController(controller);
+        auto styledStringCache = peerPtr->GetStyledStringCache();
+        if (styledStringCache) {
+            peerPtr->controller_->SetPlaceholderStyledString(styledStringCache);
+            peerPtr->SetStyledStringCache(nullptr);
+        }
     }
 }
 } // TextInputInterfaceModifier
@@ -502,7 +508,10 @@ void SetShowErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convTextValue = Converter::OptConvertPtr<std::u16string>(value);
-    auto convBoolValue = convTextValue.has_value() && !convTextValue->empty();
+    auto convBoolValue = convTextValue.has_value();
+    if (!convTextValue.has_value()) {
+        convTextValue = u"";
+    }
     TextFieldModelStatic::SetShowError(frameNode, convTextValue, convBoolValue);
 }
 void SetShowUnitImpl(Ark_NativePointer node,
@@ -576,6 +585,9 @@ void SetMaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<int>(value);
+    if (!convValue.has_value() || convValue.value() <= 0) {
+        convValue = MAX_LINES;
+    }
     TextFieldModelStatic::SetMaxViewLines(frameNode, convValue);
 }
 void SetWordBreakImpl(Ark_NativePointer node,
@@ -1055,19 +1067,15 @@ void SetOnWillAttachIMEImpl(Ark_NativePointer node,
         TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
         return;
     }
-    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](const IMEClient& value) {
+    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](IMEClient& value) {
         Converter::ConvContext ctx;
         auto imeClientPeer = PeerUtils::CreatePeer<IMEClientPeer>();
-        if (imeClientPeer != nullptr) {
-            imeClientPeer->nodeId = value.nodeId;
-            imeClientPeer->extraInfo = reinterpret_cast<void*>(
-                const_cast<RefPtr<IMEExtraInfo>&>(value.extraInfo).GetRawPtr());
-        }
+        CHECK_NULL_VOID(imeClientPeer);
+        imeClientPeer->nodeId = value.nodeId;
         Ark_IMEClient arkIMEClient = reinterpret_cast<Ark_IMEClient>(imeClientPeer);
         callback.InvokeSync(arkIMEClient);
-        if (imeClientPeer) {
-            PeerUtils::DestroyPeer(imeClientPeer);
-        }
+        value.extraInfo = imeClientPeer->extraInfo;
+        PeerUtils::DestroyPeer(imeClientPeer);
     };
     TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(onWillAttachIME));
 }

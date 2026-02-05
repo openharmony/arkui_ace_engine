@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
@@ -313,6 +314,9 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo011, Te
     Rect rect;
     Offset offset(0.0f, 0.0f);
 
+    /**
+     * @tc.steps1: initialize parameters.
+     */
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
     paintMethod->state_.globalState.SetAlpha(1.0f);
     EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
@@ -326,11 +330,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo011, Te
     auto sharedPattern = std::make_shared<OHOS::Ace::Pattern>();
     sharedPattern->SetPixelMap(pixelMap);
     sharedPattern->SetImgSrc(src);
-    std::weak_ptr<Ace::Pattern> patternWeak = sharedPattern;
-    paintMethod->state_.fillState.SetPatternNG(patternWeak);
+    paintMethod->state_.fillState.SetPatternNG(sharedPattern);
     paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
     paintMethod->state_.shadow.SetOffset(offset);
     paintMethod->state_.shadow.SetLightRadius(0.5f);
+    /**
+     * @tc.steps2: Call the function fill and Path2DFill.
+     * @tc.expected: AttachBrush, DrawRect, DetachBrush, SetColor, SetAlphaF and AddRect are called.
+     */
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
@@ -354,6 +361,9 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo012, Te
     Testing::MockCanvas canvas;
     Offset offset(0.0, 0.0);
 
+    /**
+     * @tc.steps1: initialize parameters.
+     */
     OHOS::Ace::Pattern pattern;
     void* voidPtr = static_cast<void*>(new char[10]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
@@ -364,11 +374,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo012, Te
     auto sharedPattern = std::make_shared<OHOS::Ace::Pattern>();
     sharedPattern->SetPixelMap(pixelMap);
     sharedPattern->SetImgSrc(src);
-    std::weak_ptr<Ace::Pattern> patternWeak = sharedPattern;
-    paintMethod->state_.strokeState.SetPatternNG(patternWeak);
+    paintMethod->state_.strokeState.SetPatternNG(sharedPattern);
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
     paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
     paintMethod->state_.shadow.SetOffset(offset);
+    /**
+     * @tc.steps2: Call the function StrokeRect, Stroke and Path2DStroke.
+     * @tc.expected: AttachPen, DrawRect, AddRect and DetachPen are called.
+     */
     EXPECT_CALL(path, AddRect(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
@@ -488,6 +501,9 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo015, Te
     Testing::MockPath path;
     Offset offset(0.0f, 0.0f);
 
+    /**
+     * @tc.steps1: initialize parameters.
+     */
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
     paintMethod->state_.globalState.SetAlpha(1.0f);
     EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
@@ -501,11 +517,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo015, Te
     auto sharedPattern = std::make_shared<OHOS::Ace::Pattern>();
     sharedPattern->SetPixelMap(pixelMap);
     sharedPattern->SetImgSrc(src);
-    std::weak_ptr<Ace::Pattern> patternWeak = sharedPattern;
-    paintMethod->state_.fillState.SetPatternNG(patternWeak);
+    paintMethod->state_.fillState.SetPatternNG(sharedPattern);
     paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
     paintMethod->state_.shadow.SetOffset(offset);
     paintMethod->state_.shadow.SetLightRadius(0.5f);
+    /**
+     * @tc.steps2: Call the function fill and Path2DFill.
+     * @tc.expected: AttachBrush, DrawRect, DetachBrush, SetColor, SetAlphaF and AddRect are called.
+     */
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
@@ -867,5 +886,53 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo029, Te
     ColorSpace beginColorSpace = gradient.GetColors().front().GetColor().GetColorSpace();
     ColorSpace backColorSpace = gradient.GetColors().back().GetColor().GetColorSpace();
     EXPECT_TRUE(beginColorSpace == backColorSpace);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo030
+ * @tc.desc: Test the function 'SetAlpha' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo030, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_TRUE(paintMethod);
+    MockPipelineContext::SetUp();
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    MockPipelineContext::GetCurrent()->statisticEventReporter_ = reporter;
+    paintMethod->SetAlpha(-1);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    paintMethod->SetAlpha(0);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    paintMethod->SetAlpha(1);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo031
+ * @tc.desc: Test the function 'UpdateLineDash' of the class 'CustomPaintPaintMethod' when lineDash is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo031, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+
+    // Test case: lineDash is empty - should not set any path effect
+    RSPen pen;
+    LineDashParam lineDashParam;
+    lineDashParam.dashOffset = 0.0;
+    lineDashParam.lineDash = {};
+    paintMethod->state_.strokeState.SetLineDash(lineDashParam);
+
+    // When lineDash is empty, UpdateLineDash should do nothing (no crash, no path effect set)
+    paintMethod->UpdateLineDash(pen);
+
+    // Verify that lineDash size is 0 (empty)
+    EXPECT_EQ(paintMethod->state_.strokeState.GetLineDash().lineDash.size(), 0);
 }
 } // namespace OHOS::Ace::NG

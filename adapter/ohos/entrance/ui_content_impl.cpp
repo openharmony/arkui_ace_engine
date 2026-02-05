@@ -105,6 +105,7 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/utils/layout_break_point.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -181,7 +182,8 @@ static const uint64_t VSYNC_FIRST_FORCE_ENABLE_TIME_NS =
 enum class WindowChangeType {
     RECT_CHANGE,
     FOLD_STATUS_CHANGE,
-    DISPLAY_ID_CHANGE
+    DISPLAY_ID_CHANGE,
+    SUBWINDOW_ROTATION_CHANGE
 };
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
@@ -1765,6 +1767,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         // arkTSCard only support "esModule" compile mode
         frontend->SetIsBundle(false);
         container->SetBundleName(bundleName_);
+        container->SetModuleName(moduleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
@@ -3823,6 +3826,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
         TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer: %{public}s",
             rect.ToString().c_str());
+        if (SystemProperties::IsSuperFoldDisplayDevice() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer rotation");
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [instanceId = instanceId_] {
+                    ContainerScope scope(instanceId);
+                    ClearAllMenuPopup(instanceId, WindowChangeType::SUBWINDOW_ROTATION_CHANGE);
+                },
+                TaskExecutor::TaskType::UI, "ArkUISubwindowRoationChange");
+        }
     }
     // The density of sub windows related to dialog needs to be consistent with the main window.
     auto modifyConfig = config;
@@ -5449,7 +5463,14 @@ void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
     CHECK_NULL_VOID(taskExecutor);
     auto windowScale = transform.scaleX_;
     taskExecutor->PostTask(
-        [container, windowScale]() { container->SetWindowScale(windowScale); },
+        [container, windowScale]() {
+            container->SetWindowScale(windowScale);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+            CHECK_NULL_VOID(textFieldManager);
+            textFieldManager->TriggerCaretInfoUpdateOnScaleChange();
+        },
         TaskExecutor::TaskType::UI, "ArkUISetWindowScale");
 }
 
@@ -6482,5 +6503,47 @@ void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& ta
             TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
     };
     UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
+}
+
+const EcmaVM* UIContentImpl::GetEcmaVMOnJsThread() const
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
+    if (!taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "The JS object operation must be on UI thread!");
+        return nullptr;
+    }
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    CHECK_NULL_RETURN(env, nullptr);
+    return reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
+}
+
+const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEventFromAxisEvent(napi_value event)
+{
+    auto vm = GetEcmaVMOnJsThread();
+    CHECK_NULL_RETURN(vm, nullptr);
+    panda::Local<panda::ObjectRef> localRef((uintptr_t)event);
+    if (localRef->GetNativePointerFieldCount(vm) > 0) {
+        auto axisInfo = (AxisInfo*)localRef->GetNativePointerField(vm, 0);
+        CHECK_NULL_RETURN(axisInfo, nullptr);
+        return axisInfo->GetPointerEvent();
+    }
+    return nullptr;
+}
+
+const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEventFromTouchEvent(napi_value event)
+{
+    auto vm = GetEcmaVMOnJsThread();
+    CHECK_NULL_RETURN(vm, nullptr);
+    panda::Local<panda::ObjectRef> localRef((uintptr_t)event);
+    if (localRef->GetNativePointerFieldCount(vm) > 0) {
+        auto touchEventInfo = (TouchEventInfo*)localRef->GetNativePointerField(vm, 0);
+        CHECK_NULL_RETURN(touchEventInfo, nullptr);
+        return touchEventInfo->GetPointerEvent();
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace

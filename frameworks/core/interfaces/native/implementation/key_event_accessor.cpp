@@ -60,7 +60,10 @@ Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 void SetTypeImpl(Ark_KeyEvent peer,
                  Ark_KeyType type)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetTypeImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetKeyType(static_cast<KeyAction>(type));
 }
 Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
 {
@@ -72,7 +75,10 @@ Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
 }
 void SetKeyCodeImpl(Ark_KeyEvent peer, Ark_Int32 keyCode)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetKeyCodeImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetKeyCode(static_cast<KeyCode>(keyCode));
 }
 Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
 {
@@ -85,7 +91,11 @@ Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
 void SetKeyTextImpl(Ark_KeyEvent peer,
                     const Ark_String* keyText)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetKeyTextImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(keyText);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetKeyText(Converter::Convert<std::string>(*keyText));
 }
 Ark_KeySource GetKeySourceImpl(Ark_KeyEvent peer)
 {
@@ -98,7 +108,10 @@ Ark_KeySource GetKeySourceImpl(Ark_KeyEvent peer)
 void SetKeySourceImpl(Ark_KeyEvent peer,
                       Ark_KeySource keySource)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetKeySourceImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetKeySource(static_cast<SourceType>(keySource));
 }
 Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
 {
@@ -145,7 +158,10 @@ Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
 void SetIntentionCodeImpl(Ark_KeyEvent peer,
                           Ark_IntentionCode intentionCode)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetIntentionCodeImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetKeyIntention(static_cast<KeyIntention>(intentionCode));
 }
 Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
 {
@@ -180,7 +196,12 @@ Opt_Int64 GetUnicodeImpl(Ark_KeyEvent peer)
 void SetUnicodeImpl(Ark_KeyEvent peer,
                     const Opt_Int64* unicode)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetUnicodeImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    if (unicode != nullptr && unicode->tag != INTEROP_TAG_UNDEFINED) {
+        info->SetUnicode(static_cast<uint32_t>(unicode->value));
+    }
 }
 Opt_Boolean GetIsNumLockOnImpl(Ark_KeyEvent peer)
 {
@@ -195,7 +216,12 @@ Opt_Boolean GetIsNumLockOnImpl(Ark_KeyEvent peer)
 void SetIsNumLockOnImpl(Ark_KeyEvent peer,
                         const Opt_Boolean* isNumLockOn)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetIsNumLockOnImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    if (isNumLockOn != nullptr && isNumLockOn->tag != INTEROP_TAG_UNDEFINED) {
+        info->SetNumLock(isNumLockOn->value);
+    }
 }
 
 Opt_Boolean GetIsCapsLockOnImpl(Ark_KeyEvent peer)
@@ -211,7 +237,12 @@ Opt_Boolean GetIsCapsLockOnImpl(Ark_KeyEvent peer)
 void SetIsCapsLockOnImpl(Ark_KeyEvent peer,
                          const Opt_Boolean* isCapsLockOn)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetIsCapsLockOnImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    if (isCapsLockOn != nullptr && isCapsLockOn->tag != INTEROP_TAG_UNDEFINED) {
+        info->SetCapsLock(isCapsLockOn->value);
+    }
 }
 
 Opt_Boolean GetIsScrollLockOnImpl(Ark_KeyEvent peer)
@@ -227,7 +258,12 @@ Opt_Boolean GetIsScrollLockOnImpl(Ark_KeyEvent peer)
 void SetIsScrollLockOnImpl(Ark_KeyEvent peer,
                            const Opt_Boolean* isScrollLockOn)
 {
-    LOGW("ARKOALA KeyEventAccessor::SetIsScrollLockOnImpl doesn't have sense.");
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    if (isScrollLockOn != nullptr && isScrollLockOn->tag != INTEROP_TAG_UNDEFINED) {
+        info->SetScrollLock(isScrollLockOn->value);
+    }
 }
 } // KeyEventAccessor
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
