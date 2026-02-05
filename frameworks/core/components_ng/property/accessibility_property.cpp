@@ -499,8 +499,14 @@ static const std::set<std::string> TAGS_IGNORE_COMPONENT = {
     V2::CONTAINER_MODAL_ETS_TAG,
 };
 
-bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
+bool AccessibilityProperty::IsTagInSubTreeComponent(const RefPtr<FrameNode>& node, const std::string& tag)
 {
+    if (tag == V2::CUSTOM_ETS_TAG) {
+        CHECK_NULL_RETURN(node, false);
+        auto accessibility = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibility, false);
+        return accessibility->GetChildTreeId() > 0;
+    }
     if (TAGS_SUBTREE_COMPONENT.find(tag) != TAGS_SUBTREE_COMPONENT.end()) {
         return true;
     }
@@ -603,7 +609,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
             shouldSearchChildren = true;
         }
     } while (0);
-    shouldSearchSelf = IsTagInSubTreeComponent(node->GetTag()) ? true : shouldSearchSelf;
+    shouldSearchSelf = IsTagInSubTreeComponent(node, node->GetTag()) ? true : shouldSearchSelf;
     shouldSearchSelf = (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end()) ?
         true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
@@ -736,7 +742,7 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
     } while (0);
 
     focusable = focusable ||
-        IsTagInSubTreeComponent(node->GetTag()) ||
+        IsTagInSubTreeComponent(node, node->GetTag()) ||
         (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end());
 
     return focusable;

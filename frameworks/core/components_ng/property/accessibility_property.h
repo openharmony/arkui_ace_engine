@@ -584,7 +584,7 @@ public:
     */
     static bool IsAccessibilityFocusableTag(const std::string &tag);
 
-    static bool IsTagInSubTreeComponent(const std::string& tag);
+    static bool IsTagInSubTreeComponent(const RefPtr<FrameNode>& node, const std::string& tag);
 
     static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
 
