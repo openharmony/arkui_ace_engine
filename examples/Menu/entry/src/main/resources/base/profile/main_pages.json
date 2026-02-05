@@ -278,6 +278,13 @@
     "pages/MenuPlacement/RightClick/menuWidth1",
     "pages/MenuPlacement/RightClick/menuWidth2",
 
+    "pages/bindMenu/bindMenu_modifier",
+    "pages/bindMenu/bindMenu",
+    "pages/bindMenu/options_contentTest",
+
+    "pages/OpenMenu/OpenMenu",
+    "pages/OpenMenu/UpdateMenu",
+
     "pages/MenuPlacement/LongPress/Index",
     "pages/MenuPlacement/LongPress/menuWidth1",
     "pages/MenuPlacement/LongPress/menuWidth2",
