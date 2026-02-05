@@ -279,7 +279,7 @@ frameworks/core/animation/
 ├── svg_animate.h/cpp                 # SvgAnimate SVG 动画
 ├── picture_animation.h               # PictureAnimation 图片动画
 │
-├── 其他工具
+├── 其余工具
 ├── animation_util.h/cpp              # AnimationUtil 动画工具
 ├── native_curve_helper.h/cpp         # NativeCurveHelper 原生曲线助手
 ├── param_transfer.h                  # ParamTransfer 参数传递
@@ -1009,7 +1009,7 @@ private:
 - ✅ **自动停止**：检测值和速度阈值自动停止
 - ✅ **三种阻尼模式**：
   - **欠阻尼（Underdamped）**：振荡衰减
-  - **临界阻尼（CriticalDamped）**：最快收敛
+  - **临界阻尼（CriticalDamped）**：快速收敛
   - **过阻尼（Overdamped）**：缓慢收敛
 
 **使用示例**：
@@ -1549,7 +1549,7 @@ void SetEvaluator(const RefPtr<Evaluator<T>>& evaluator)
 - 非线性Evaluator（如ColorEvaluator）的计算成本高
 - 线性Evaluator可以在GPU上并行计算
 
-**最佳实践**：
+**实践**：
 - 需要异步性能 → 使用LinearEvaluator
 - 需要精确插值 → 使用专用Evaluator（同步）
 
@@ -1738,7 +1738,7 @@ void PropertyAnimation::Calculate(float keyTime)
         return;
     }
 
-    // ... 其他属性的处理 ...
+    // ... 其余属性的处理 ...
 }
 ```
 
@@ -1934,7 +1934,7 @@ m * x'' + c * x' + k * x = 0
 
 #### 1. 临界阻尼（Critical Damped, ζ = 1）
 
-**特点**：最快收敛到平衡位置，不产生振荡
+**特点**：快速收敛到平衡位置，不产生振荡
 
 **数学实现**：
 
@@ -2104,7 +2104,7 @@ static constexpr double DEFAULT_MASS = 1.0;          // 默认质量
 
 1. **控制节点（Control Node）**：
    - 控制整个弹簧链的运动
-   - 其他节点跟随控制节点运动
+   - 其余节点跟随控制节点运动
 
 2. **参数传递**：
    - `stiffnessTransfer_`：刚度传递曲线
@@ -2422,7 +2422,7 @@ ChainAnimation 内部使用弹簧链（SimpleSpringChain）实现：
 | **应用场景** | 并行动画 | 连锁反应动画 |
 | **参数控制** | 无传递参数 | conductivity、intensity |
 
-### 动画编排最佳实践
+### 动画编排实践
 
 #### 场景 1：复杂的进入动画
 
@@ -3269,14 +3269,14 @@ bool SetExpectedFrameRateRange(const FrameRateRange& frameRateRange)
 struct FrameRateRange {
     uint32_t min;    // 最小帧率
     uint32_t max;    // 最大帧率
-    uint32_t preferred;  // 首选帧率
+    uint32_t preferred;
 };
 ```
 
 **使用示例**：
 
 ```cpp
-// 设置帧率范围（30-60 FPS，首选60 FPS）
+// 设置帧率范围（30-60 FPS）
 FrameRateRange range;
 range.min = 30;
 range.max = 60;
@@ -3420,7 +3420,7 @@ private:
 };
 ```
 
-### 性能优化最佳实践
+### 性能优化实践
 
 #### 1. 减少监听器中的计算
 
@@ -3535,24 +3535,6 @@ private:
 };
 ```
 
-**使用示例**：
-
-```cpp
-AnimationProfiler profiler;
-
-// 在关键位置添加性能采样
-profiler.BeginSample("OnFrame");
-animator->OnFrame(duration);
-profiler.EndSample("OnFrame");
-
-profiler.BeginSample("NotifyInterpolator");
-NotifyInterpolator(playedTime);
-profiler.EndSample("NotifyInterpolator");
-
-// 输出性能报告
-profiler.DumpReport();
-```
-
 ---
 
 ## SVG 动画
@@ -3612,12 +3594,12 @@ enum class Fill {
 - `fill` - 填充颜色
 - `stroke` - 描边颜色
 - `stop-color` - 渐变停止点颜色
-- `flood-color` - 洪水填充颜色
+- `flood-color` - 填充颜色
 
 **变换属性**：
 - `transform` - 2D/3D 变换
 
-**其他属性**：
+**其余属性**：
 - `opacity` - 透明度
 - `filter` - 滤镜效果
 
@@ -3835,23 +3817,7 @@ animate->SetKeySplines({
 });
 ```
 
-#### 2. 路径动画
-
-```cpp
-auto animateMotion = AceType::MakeRefPtr<SvgAnimate>();
-animateMotion->SetAnimateType(SvgAnimateType::MOTION);
-
-// 设置SVG路径
-animateMotion->SetPath("M10,10 L100,100 L200,50");
-
-// 设置旋转角度
-animateMotion->SetRotate(45.0f);
-
-// 设置关键点（可选）
-animateMotion->SetKeyPoints("0.2; 0.5; 0.8");
-```
-
-#### 3. 变换动画
+#### 2. 变换动画
 
 ```cpp
 auto animateTransform = AceType::MakeRefPtr<SvgAnimate>();
@@ -4717,15 +4683,7 @@ chainAnimation->Play();
 | `spring_model.cpp` | ~300 | SpringModel 实现 |
 | `svg_animate.h` | 300+ | SVG 动画支持 |
 
-### C. 相关文档
-
-- [官方动画文档](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/animation-overview-V5)
-- [Animator 指南](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/arkts-animator-V5)
-- [animateTo 显式动画](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/arkts-explicit-animation-V5)
-- [属性动画](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/arkts-property-animation-V5)
-- [弹簧曲线](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/ts-curve-spring-V5)
-
-### D. 版本历史
+### C. 版本历史
 
 | 版本 | 日期 | 变更 |
 |-----|------|------|

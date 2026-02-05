@@ -1,85 +1,85 @@
-# Inner API 子目录规范
+# Inner API Subdirectory Specification
 
-本文档包含 Inner API 目录的专用规范，**必须继承并遵守**仓库根目录的 `CLAUDE.md`。本文档仅描述本目录特有的约束和知识。
+This document contains specialized specifications for the Inner API directory and **must inherit and comply with** the `CLAUDE.md` in the repository root directory. This document only describes constraints and knowledge specific to this directory.
 
-> **文档版本**: v1.0
-> **更新时间**: 2026-02-02
-> **源码版本**: OpenHarmony ace_engine (master branch)
-
----
-
-## 📋 目录
-
-1. [概述](#概述)
-2. [模块架构](#模块架构)
-3. [核心职责](#核心职责)
-4. [接口稳定性约束](#接口稳定性约束)
-5. [模块依赖规则](#模块依赖规则)
-6. [跨语言绑定](#跨语言绑定)
-7. [内存管理契约](#内存管理契约)
-8. [错误处理约定](#错误处理约定)
-9. [常见陷阱](#常见陷阱)
-10. [调试方法](#调试方法)
-11. [性能指南](#性能指南)
-12. [测试指南](#测试指南)
-13. [API 迁移指南](#api-迁移指南)
+> **Document Version**: v1.0
+> **Last Updated**: 2026-02-02
+> **Source Version**: OpenHarmony ace_engine (master branch)
 
 ---
 
-## 概述
+## 📋 Table of Contents
 
-### Inner API 定位
+1. [Overview](#overview)
+2. [Module Architecture](#module-architecture)
+3. [Core Responsibilities](#core-responsibilities)
+4. [Interface Stability Constraints](#interface-stability-constraints)
+5. [Module Dependency Rules](#module-dependency-rules)
+6. [Cross-Language Bindings](#cross-language-bindings)
+7. [Memory Management Contract](#memory-management-contract)
+8. [Error Handling Conventions](#error-handling-conventions)
+9. [Common Pitfalls](#common-pitfalls)
+10. [Debugging Methods](#debugging-methods)
+11. [Performance Guidelines](#performance-guidelines)
+12. [Testing Guidelines](#testing-guidelines)
+13. [API Migration Guide](#api-migration-guide)
 
-**Inner API** (`interfaces/inner_api/`) 是 ACE Engine 的**接口层**，位于框架层（frameworks）和平台适配层（adapter）之间，为整个 ace_engine 提供核心接口和基础设施支持。
+---
 
-**核心价值**：
-- 🏗️ **架构桥梁** - 连接 frameworks/core、frameworks/bridge 和 adapter 层
-- 🎯 **接口抽象** - 定义稳定的内部接口，隔离底层平台变化
-- 🔧 **基础设施** - 提供内存管理、几何计算、动画等基础能力
-- 🛡️ **平台适配** - 支持 OpenHarmony 和 Previewer 双平台
+## Overview
 
-### 在 ACE Engine 中的位置
+### Inner API Positioning
+
+**Inner API** (`interfaces/inner_api/`) is the **interface layer** of ACE Engine, located between the framework layer (frameworks) and platform adapter layer (adapter), providing core interfaces and infrastructure support for the entire ace_engine.
+
+**Core Value**:
+- 🏗️ **Architecture Bridge** - Connects frameworks/core, frameworks/bridge and adapter layers
+- 🎯 **Interface Abstraction** - Defines stable internal interfaces, isolating underlying platform changes
+- 🔧 **Infrastructure** - Provides memory management, geometry calculation, animation and other basic capabilities
+- 🛡️ **Platform Adaptation** - Supports both OpenHarmony and Previewer platforms
+
+### Position in ACE Engine
 
 ```
-应用层（ArkTS 应用）
+Application Layer (ArkTS Applications)
     ↓
-frameworks/bridge（前端桥接层）
+frameworks/bridge (Frontend Bridge Layer)
     ↓
-frameworks/core（核心框架层）
+frameworks/core (Core Framework Layer)
     ↓
-interfaces/inner_api（接口层）← 本文档范围
+interfaces/inner_api (Interface Layer) ← This document's scope
     ↓
-adapter（平台适配层）
+adapter (Platform Adapter Layer)
     ↓
-OpenHarmony 子系统（Ability、Window、Graphic2D、MMI、IPC）
+OpenHarmony Subsystems (Ability, Window, Graphic2D, MMI, IPC)
 ```
 
-### 代码规模
+### Code Scale
 
-- **总文件数**: 273 个文件
-  - 头文件: 203 个
-  - 源文件: 70 个
-- **主要模块**: 8 个
-- **构建产物**: 7 个主要库
+- **Total Files**: 273 files
+  - Header files: 203
+  - Source files: 70
+- **Main Modules**: 8 modules
+- **Build Artifacts**: 7 main libraries
 
 ---
 
-## 模块架构
+## Module Architecture
 
-### 8 大核心模块概览
+### Overview of 8 Core Modules
 
-| 模块 | 路径 | 构建产物 | 核心职责 | 主要使用者 |
-|------|------|---------|---------|-----------|
-| **Ace** | `ace/` | `libace_uicontent.z.so` | UI 内容管理核心接口 | `adapter/entrance`, `frameworks/bridge` |
-| **AceKit** | `ace_kit/` | `ace_kit.a` | 基础设施（内存、几何、动画） | 所有 NG 组件 |
-| **DrawableDescriptor** | `drawable_descriptor/` | （静态库） | 可绘制资源描述符 | 图片加载系统 |
-| **FormRender** | `form_render/` | `libace_form_render.z.so` | 卡片渲染器 | 卡片服务 |
-| **UIServiceManager** | `ui_service_manager/` | `libui_service_mgr.z.so` | UI 服务管理客户端 | 应用层 |
-| **UISession** | `ui_session/` | `libui_session.z.so` | UI 会话管理（跨进程） | DevEco Studio |
-| **XComponentController** | `xcomponent_controller/` | `libace_xcomponent_controller.z.so` | XComponent 控制 | `XComponentPattern` |
-| **Drawable** | `drawable/` | `libdrawable_inner_ani.so` | Drawable ANI 接口 | ANI 模块 |
+| Module | Path | Build Artifact | Core Responsibilities | Primary Users |
+|--------|------|----------------|----------------------|---------------|
+| **Ace** | `ace/` | `libace_uicontent.z.so` | UI content management core interfaces | `adapter/entrance`, `frameworks/bridge` |
+| **AceKit** | `ace_kit/` | `ace_kit.a` | Infrastructure (memory, geometry, animation) | All NG components |
+| **DrawableDescriptor** | `drawable_descriptor/` | (static library) | Drawable resource descriptor | Image loading system |
+| **FormRender** | `form_render/` | `libace_form_render.z.so` | Card renderer | Card service |
+| **UIServiceManager** | `ui_service_manager/` | `libui_service_mgr.z.so` | UI service management client | Application layer |
+| **UISession** | `ui_session/` | `libui_session.z.so` | UI session management (cross-process) | DevEco Studio |
+| **XComponentController** | `xcomponent_controller/` | `libace_xcomponent_controller.z.so` | XComponent control | `XComponentPattern` |
+| **Drawable** | `drawable/` | `libdrawable_inner_ani.so` | Drawable ANI interface | ANI module |
 
-### 模块依赖关系图
+### Module Dependency Diagram
 
 ```
                     ┌─────────────────────────────────────────┐
@@ -108,81 +108,81 @@ OpenHarmony 子系统（Ability、Window、Graphic2D、MMI、IPC）
                     └─────────────────────────────────────────┘
 ```
 
-### 模块选择规则
+### Module Selection Rules
 
 ```
-使用场景 → 模块映射：
+Use Case → Module Mapping:
 
-UI 生命周期管理 → Ace (UIContent)
-内存管理 → AceKit (AceType, RefPtr, WeakPtr)
-几何计算 → AceKit (Dimension, Size, Offset, Point)
-动画曲线 → AceKit (Curve, CubicCurve)
-图片抽象 → DrawableDescriptor
-卡片渲染 → FormRender
-跨进程通信（调试） → UISession
-UI 服务管理 → UIServiceManager
-自定义组件控制 → XComponentController
-ANI 接口 → Drawable
+UI lifecycle management → Ace (UIContent)
+Memory management → AceKit (AceType, RefPtr, WeakPtr)
+Geometry calculation → AceKit (Dimension, Size, Offset, Point)
+Animation curves → AceKit (Curve, CubicCurve)
+Image abstraction → DrawableDescriptor
+Card rendering → FormRender
+Cross-process communication (debugging) → UISession
+UI service management → UIServiceManager
+Custom component control → XComponentController
+ANI interface → Drawable
 ```
 
 ---
 
-## 核心职责
+## Core Responsibilities
 
-### Inner API 负责
+### Inner API is Responsible For
 
-1. **接口定义** - 定义稳定的公共 API
-2. **基础设施** - 提供内存管理、几何、动画工具
-3. **跨模块协调** - 协调 frameworks 和 adapter 之间的交互
-4. **多语言桥接** - C++ ↔ ArkTS ↔ NAPI 绑定
+1. **Interface Definition** - Define stable public APIs
+2. **Infrastructure** - Provide memory management, geometry, animation tools
+3. **Cross-module Coordination** - Coordinate interactions between frameworks and adapter
+4. **Multi-language Bridging** - C++ ↔ ArkTS ↔ NAPI bindings
 
-### Inner API 不负责
+### Inner API is NOT Responsible For
 
-- ❌ **组件实现** → **frameworks/core/components_ng**
-- ❌ **布局算法** → **frameworks/core/layout**
-- ❌ **平台适配** → **adapter/ohos**
-- ❌ **前端解析** → **frameworks/bridge**
+- ❌ **Component Implementation** → **frameworks/core/components_ng**
+- ❌ **Layout Algorithms** → **frameworks/core/layout**
+- ❌ **Platform Adaptation** → **adapter/ohos**
+- ❌ **Frontend Parsing** → **frameworks/bridge**
 
-### 模块特定职责
+### Module-Specific Responsibilities
 
-#### Ace 模块
+#### Ace Module
 
-**负责**：
-- UIContent 生命周期（Create、Initialize、Destroy、Foreground、Background）
-- 导航控制
-- UI 事件处理
-- 热重载支持
+**Responsible for**:
+- UIContent lifecycle (Create, Initialize, Destroy, Foreground, Background)
+- Navigation control
+- UI event handling
+- Hot reload support
 
-**不负责**：
-- ❌ 组件树构建 → frameworks/core
-- ❌ 布局测量 → frameworks/core/layout
-- ❌ 渲染 → adapter/ohos/rosen
+**NOT Responsible for**:
+- ❌ Component tree building → frameworks/core
+- ❌ Layout measurement → frameworks/core/layout
+- ❌ Rendering → adapter/ohos/rosen
 
-#### AceKit 模块
+#### AceKit Module
 
-**负责**：
-- 内存管理（AceType、RefPtr、WeakPtr）
-- 几何工具（Dimension、Size、Offset、Point）
-- 动画曲线
-- Pattern 基类
-- 属性系统
+**Responsible for**:
+- Memory management (AceType, RefPtr, WeakPtr)
+- Geometry tools (Dimension, Size, Offset, Point)
+- Animation curves
+- Pattern base classes
+- Property system
 
-**不负责**：
-- ❌ 具体组件逻辑 → components_ng/pattern/*
-- ❌ 布局算法 → frameworks/core/layout
+**NOT Responsible for**:
+- ❌ Specific component logic → components_ng/pattern/*
+- ❌ Layout algorithms → frameworks/core/layout
 
 ---
 
-## 接口稳定性约束
+## Interface Stability Constraints
 
-### 公共 API 语义（不可改变）
+### Public API Semantics (Immutable)
 
-#### Ace 模块
+#### Ace Module
 
 ```cpp
-// UIContent - 核心方法
+// UIContent - Core methods
 class UIContent {
-    // 必须保持向后兼容
+    // Must maintain backward compatibility
     virtual UIContentErrorCode Initialize(
         Window* window,
         const std::string& url,
@@ -195,16 +195,16 @@ class UIContent {
 };
 ```
 
-**禁止**：
-- ❌ 改变参数顺序
-- ❌ 改变返回值类型
-- ❌ 改变方法语义（例如 Destroy() 应该清理所有资源）
-- ❌ 删除公共方法
+**Prohibited**:
+- ❌ Changing parameter order
+- ❌ Changing return value type
+- ❌ Changing method semantics (e.g., Destroy() should clean up all resources)
+- ❌ Removing public methods
 
-#### AceKit 模块
+#### AceKit Module
 
 ```cpp
-// AceType - 内存管理
+// AceType - Memory management
 class AceType {
     template<typename T>
     static RefPtr<T> MakeRefPtr(Args&&... args);
@@ -214,77 +214,77 @@ class AceType {
 };
 ```
 
-**禁止**：
-- ❌ 改变 RefPtr/WeakPtr 语义
-- ❌ 修改引用计数行为
-- ❌ 改变类型转换行为
+**Prohibited**:
+- ❌ Changing RefPtr/WeakPtr semantics
+- ❌ Modifying reference counting behavior
+- ❌ Changing type casting behavior
 
-### API 版本规则
+### API Versioning Rules
 
-| API 级别 | 稳定性 | 允许破坏性变更 |
-|---------|-------|--------------|
-| 内部接口 | 主版本内稳定 | 否 |
-| 公共接口（导出） | 跨次版本稳定 | 否 |
-| 实验性接口 | 不稳定 | 是（需标记废弃） |
+| API Level | Stability | Breaking Changes Allowed |
+|-----------|-----------|-------------------------|
+| Internal Interface | Stable within major version | No |
+| Public Interface (Exported) | Stable across minor versions | No |
+| Experimental Interface | Unstable | Yes (must mark deprecation) |
 
-### 废弃流程
+### Deprecation Process
 
 ```cpp
-// 示例：废弃旧 API
+// Example: Deprecating old API
 
-// 1. 标记为废弃（至少使用 2 个次版本）
-class ACE_DEPRECATED("使用 NewMethod() 代替") UIContent {
-    virtual void OldMethod() = 0;  // API 10 废弃
-    virtual void NewMethod() = 0;  // API 10 新增
+// 1. Mark as deprecated (use for at least 2 minor versions)
+class ACE_DEPRECATED("Use NewMethod() instead") UIContent {
+    virtual void OldMethod() = 0;  // Deprecated in API 10
+    virtual void NewMethod() = 0;  // Added in API 10
 };
 
-// 2. 在下一个主版本移除
+// 2. Remove in next major version
 class UIContent {
-    // OldMethod() 在 API 11 移除（主版本升级）
+    // OldMethod() removed in API 11 (major version upgrade)
     virtual void NewMethod() = 0;
 };
 ```
 
 ---
 
-## 模块依赖规则
+## Module Dependency Rules
 
-### 允许的依赖
+### Allowed Dependencies
 
 ```
-Inner API 模块依赖关系：
+Inner API module dependencies:
 
-AceKit ← 独立（基础设施）
+AceKit ← Independent (infrastructure)
     ↑
     │
-Ace ← 依赖 AceKit
+Ace ← Depends on AceKit
     ↑
     │
-UISession ← 依赖 Ace
+UISession ← Depends on Ace
     ↑
     │
-XComponentController ← 依赖 Ace
+XComponentController ← Depends on Ace
 
-DrawableDescriptor ← 独立
+DrawableDescriptor ← Independent
     ↑
     │
-Ace ← 使用 DrawableDescriptor 处理图片
+Ace ← Uses DrawableDescriptor for images
 
-FormRender ← 依赖 Ace、AceKit
+FormRender ← Depends on Ace, AceKit
 ```
 
-### 禁止的依赖
+### Prohibited Dependencies
 
-**禁止**：
-- ❌ **Inner API → frameworks/core**: Inner API 不能依赖组件实现
-- ❌ **Inner API → frameworks/bridge**: Inner API 不能依赖前端
-- ❌ **AceKit → Ace**: AceKit 必须保持独立的基础层
-- ❌ **循环依赖**: 模块 A → 模块 B → 模块 A
+**Prohibited**:
+- ❌ **Inner API → frameworks/core**: Inner API cannot depend on component implementations
+- ❌ **Inner API → frameworks/bridge**: Inner API cannot depend on frontends
+- ❌ **AceKit → Ace**: AceKit must remain an independent base layer
+- ❌ **Circular Dependencies**: Module A → Module B → Module A
 
-### 依赖倒置原则
+### Dependency Inversion Principle
 
 ```cpp
-// ✅ 正确：Inner API 定义接口，adapter 实现
+// ✅ Correct: Inner API defines interface, adapter implements
 // Inner API (interfaces/inner_api/ace/ui_content.h)
 class UIContent {
     virtual void Initialize(...) = 0;
@@ -293,133 +293,133 @@ class UIContent {
 // Adapter (adapter/ohos/entrance/ui_content_impl.cpp)
 class UIContentImpl : public UIContent {
     void Initialize(...) override {
-        // 平台特定实现
+        // Platform-specific implementation
     }
 };
 
-// ❌ 错误：Inner API 直接依赖 adapter
+// ❌ Wrong: Inner API directly depends on adapter
 // interfaces/inner_api/ace/ui_content.h
-#include "adapter/ohos/entrance/platform_specific.h"  // 禁止
+#include "adapter/ohos/entrance/platform_specific.h"  // Prohibited
 ```
 
 ---
 
-## 跨语言绑定
+## Cross-Language Bindings
 
-### C++ ↔ ArkTS 绑定
+### C++ ↔ ArkTS Binding
 
-#### 示例：UIContent 绑定
+#### Example: UIContent Binding
 
-**C++ 接口** (inner_api/ace/ui_content.h):
+**C++ Interface** (inner_api/ace/ui_content.h):
 ```cpp
 class UIContent {
     virtual void SetBackgroundColor(const Color& color) = 0;
 };
 ```
 
-**ArkTS 声明** (bridge/declarative_frontend/jsview/js_ui_content.ts):
+**ArkTS Declaration** (bridge/declarative_frontend/jsview/js_ui_content.ts):
 ```typescript
 export class UIContent {
     SetBackgroundColor(color: string | Color | ResourceColor): void;
 }
 ```
 
-**绑定层** (adapter/ohos/entrance/ui_content_impl.cpp):
+**Binding Layer** (adapter/ohos/entrance/ui_content_impl.cpp):
 ```cpp
 void UIContentImpl::SetBackgroundColor(const Color& color) {
-    // 转换 ArkTS color 到 C++ Color
-    // 调用 framework 层
+    // Convert ArkTS color to C++ Color
+    // Call framework layer
 }
 ```
 
-### NAPI 桥接
+### NAPI Bridging
 
 ```cpp
 // napi_bind.cpp
 static napi_value SetBackgroundColor(napi_env env, napi_callback_info info) {
-    // 1. 从 JavaScript 提取参数
+    // 1. Extract parameters from JavaScript
     napi_value jsColor;
     napi_get_cb_info(env, info, &argc, &jsColor, nullptr, nullptr);
 
-    // 2. 转换 JavaScript color 到 C++ Color
+    // 2. Convert JavaScript color to C++ Color
     Color color = ConvertNapiToColor(env, jsColor);
 
-    // 3. 调用 C++ 接口
+    // 3. Call C++ interface
     uiContent->SetBackgroundColor(color);
 
     return nullptr;
 }
 ```
 
-### 绑定规则
+### Binding Rules
 
-**应该做**：
-- ✅ 保持接口简单，使用 POD（Plain Old Data）类型
-- ✅ 使用显式类型转换
-- ✅ 在语言边界处理异常
-- ✅ 记录类型映射
+**Should do**:
+- ✅ Keep interfaces simple, use POD (Plain Old Data) types
+- ✅ Use explicit type conversions
+- ✅ Handle exceptions at language boundaries
+- ✅ Document type mappings
 
-**禁止做**：
-- ❌ 直接暴露 C++ 特定类型（RefPtr、std::function）
-- ❌ 跨语言边界使用 C++ 异常
-- ❌ 假设内存管理语义直接对应
+**Should NOT do**:
+- ❌ Directly expose C++-specific types (RefPtr, std::function)
+- ❌ Use C++ exceptions across language boundaries
+- ❌ Assume memory management semantics directly correspond
 
 ---
 
-## 内存管理契约
+## Memory Management Contract
 
-### AceType 内存管理（AceKit）
+### AceType Memory Management (AceKit)
 
-#### 接口使用者规则
+#### Interface User Rules
 
 ```cpp
-// 规则 1: 为接口对象使用 RefPtr
+// Rule 1: Use RefPtr for interface objects
 RefPtr<UIContent> uiContent = UIContent::Create(context, runtime);
 
-// 规则 2: 传递 RefPtr 转移所有权
+// Rule 2: Pass RefPtr to transfer ownership
 void RegisterUIContent(const RefPtr<UIContent>& content);
 
-// 规则 3: 使用 WeakPtr 打破循环
+// Rule 3: Use WeakPtr to break cycles
 class MyClass {
-    WeakPtr<UIContent> uiContent_;  // 防止循环
+    WeakPtr<UIContent> uiContent_;  // Prevent cycles
 };
 
-// 规则 4: 始终检查 WeakPtr::Upgrade() 结果
+// Rule 4: Always check WeakPtr::Upgrade() result
 RefPtr<UIContent> locked = uiContent_.Upgrade();
 if (locked) {
     locked->Foreground();
 }
 ```
 
-#### 禁止的模式
+#### Prohibited Patterns
 
 ```cpp
-// ❌ 错误：裸指针
-UIContent* content = new UIContentImpl();  // 内存泄漏！
+// ❌ Wrong: Raw pointer
+UIContent* content = new UIContentImpl();  // Memory leak!
 
-// ❌ 错误：混用 RefPtr 和裸指针
+// ❌ Wrong: Mix RefPtr and raw pointer
 RefPtr<UIContent> ref = ...;
-UIContent* raw = ref.Get();  // 危险，如果 ref 超出作用域
+UIContent* raw = ref.Get();  // Dangerous if ref goes out of scope
 
-// ❌ 错误：删除 RefPtr 管理的对象
+// ❌ Wrong: Delete RefPtr-managed object
 RefPtr<UIContent> ref = ...;
-delete ref.Get();  // 双重删除！
+delete ref.Get();  // Double delete!
 ```
 
-### 内存所有权转移
+### Memory Ownership Transfer
 
 ```cpp
-// 工厂函数：返回 RefPtr（调用者拥有）
+// Factory function: Returns RefPtr (caller owns)
 RefPtr<UIContent> UIContent::Create(...) {
     return AceType::MakeRefPtr<UIContentImpl>();
 }
 
-// Setter：接受 RefPtr（转移共享所有权）
+// Setter: Accepts RefPtr (transfers shared ownership)
 void SetUIContent(const RefPtr<UIContent>& content) {
-    uiContent_ = content;  // 两者共享所有权
+    uiContent_ = content;  // Both share ownership
 }
 
-// Getter：返回 RefPtr（调用者获得共享所有权）
+// Getter: Returns RefPtr (caller gets shared ownership)
 RefPtr<UIContent> GetUIContent() const {
     return uiContent_;
 }
@@ -427,12 +427,12 @@ RefPtr<UIContent> GetUIContent() const {
 
 ---
 
-## 错误处理约定
+## Error Handling Conventions
 
-### 错误码策略（Ace 模块）
+### Error Code Strategy (Ace Module)
 
 ```cpp
-// UIContentErrorCode - 使用错误码，而非异常
+// UIContentErrorCode - Use error codes, not exceptions
 enum class UIContentErrorCode {
     NO_ERROR = 0,
     INVALID_WINDOW,
@@ -441,10 +441,10 @@ enum class UIContentErrorCode {
     // ...
 };
 
-// 返回错误码
+// Return error code
 virtual UIContentErrorCode Initialize(...) = 0;
 
-// 使用者检查错误码
+// Caller checks error code
 UIContentErrorCode err = uiContent->Initialize(...);
 if (err != UIContentErrorCode::NO_ERROR) {
     LOGE("Initialize failed: %{public}d", err);
@@ -452,9 +452,9 @@ if (err != UIContentErrorCode::NO_ERROR) {
 }
 ```
 
-### 错误处理模式
+### Error Handling Patterns
 
-#### 模式 1：错误码 + 日志
+#### Pattern 1: Error Code + Logging
 ```cpp
 UIContentErrorCode UIContentImpl::Initialize(...) {
     if (!window) {
@@ -465,7 +465,7 @@ UIContentErrorCode UIContentImpl::Initialize(...) {
 }
 ```
 
-#### 模式 2：可选返回 + 日志
+#### Pattern 2: Optional Return + Logging
 ```cpp
 std::optional<RefPtr<UIContent>> CreateUIContent(...) {
     if (!context) {
@@ -476,7 +476,7 @@ std::optional<RefPtr<UIContent>> CreateUIContent(...) {
 }
 ```
 
-#### 模式 3：回调错误
+#### Pattern 3: Callback Error
 ```cpp
 using ResultCallback = std::function<void(bool success, int32_t errorCode)>;
 
@@ -490,85 +490,85 @@ void AsyncOperation(ResultCallback callback) {
 
 ---
 
-## 常见陷阱
+## Common Pitfalls
 
-### 1. 接口破坏性变更
+### 1. Interface Breaking Changes
 
-**⚠️ 常见错误**：
+**⚠️ Common Mistake**:
 ```cpp
-// ❌ 错误：在现有接口中改变方法签名
+// ❌ Wrong: Changing method signature in existing interface
 class UIContent {
-    // 旧版本
+    // Old version
     virtual void Initialize(Window* window) = 0;
 
-    // 新版本 - 破坏所有使用者！
+    // New version - breaks all consumers!
     virtual void Initialize(Window* window, const std::string& url) = 0;
 };
 ```
 
-**✅ 正确做法**：
+**✅ Correct Approach**:
 ```cpp
-// 使用不同名称添加新方法
+// Add new method with different name
 class UIContent {
-    // 保留旧方法以保持兼容性
+    // Keep old method for compatibility
     virtual void Initialize(Window* window) = 0;
 
-    // 添加新方法
+    // Add new method
     virtual void InitializeWithURL(Window* window, const std::string& url) = 0;
 };
 
-// 或使用默认参数（如果 ABI 兼容）
+// Or use default parameters (if ABI compatible)
 class UIContent {
     virtual void Initialize(Window* window, const std::string& url = "") = 0;
 };
 ```
 
-### 2. 模块间循环依赖
+### 2. Circular Dependencies Between Modules
 
-**⚠️ 常见错误**：
+**⚠️ Common Mistake**:
 ```cpp
-// ❌ 错误：Ace 依赖 FormRender
+// ❌ Wrong: Ace depends on FormRender
 // ace/ui_content.h
-#include "form_render/form_renderer.h"  // 禁止
+#include "form_render/form_renderer.h"  // Prohibited
 
 class UIContent {
-    RefPtr<FormRenderer> renderer_;  // 创建循环依赖
+    RefPtr<FormRenderer> renderer_;  // Creates circular dependency
 };
 ```
 
-**✅ 正确做法**：
+**✅ Correct Approach**:
 ```cpp
-// 使用前向声明和接口
+// Use forward declaration and interfaces
 // ace/ui_content.h
-class FormRendererInterface;  // 前向声明
+class FormRendererInterface;  // Forward declaration
 
 class UIContent {
-    FormRendererInterface* renderer_;  // 使用接口指针
+    FormRendererInterface* renderer_;  // Use interface pointer
 };
 
 // form_render/form_renderer.h
-#include "ace/ui_content.h"  // OK: FormRender 依赖 Ace
+#include "ace/ui_content.h"  // OK: FormRender depends on Ace
 ```
 
-### 3. 回调中的内存泄漏
+### 3. Memory Leaks in Callbacks
 
-**⚠️ 常见错误**：
+**⚠️ Common Mistake**:
 ```cpp
-// ❌ 错误：在 lambda 中捕获 RefPtr 创建循环
+// ❌ Wrong: Capturing RefPtr in lambda creates cycle
 class MyClass {
     RefPtr<UIContent> uiContent_;
 
     void RegisterCallback() {
         uiContent_->SetCallback([this, uiContent = uiContent_]() {
-            // uiContent_ 和 this 相互保持存活，永远泄漏
+            // uiContent_ and this keep each other alive, forever leak
         });
     }
 };
 ```
 
-**✅ 正确做法**：
+**✅ Correct Approach**:
 ```cpp
-// 使用 WeakPtr 打破循环
+// Use WeakPtr to break cycle
 class MyClass {
     RefPtr<UIContent> uiContent_;
 
@@ -577,90 +577,90 @@ class MyClass {
         uiContent_->SetCallback([weakUi]() {
             auto ui = weakUi.Upgrade();
             if (ui) {
-                // 安全使用
+                // Safe to use
             }
         });
     }
 };
 ```
 
-### 4. 线程安全违规
+### 4. Thread Safety Violations
 
-**⚠️ 常见错误**：
+**⚠️ Common Mistake**:
 ```cpp
-// ❌ 错误：从错误线程访问 UIContent
-// 在 UI 线程创建
+// ❌ Wrong: Access UIContent from wrong thread
+// Created on UI thread
 auto uiContent = UIContent::Create(context, runtime);
 
-// 在工作线程访问
+// Access from worker thread
 std::thread([&]() {
-    uiContent->Foreground();  // 崩溃！仅 UI 线程
+    uiContent->Foreground();  // Crash! UI thread only
 }).detach();
 ```
 
-**✅ 正确做法**：
+**✅ Correct Approach**:
 ```cpp
-// 使用 task runner 发布到正确线程
+// Use task runner to post to correct thread
 uiContent->GetTaskRunner()->PostTask([&]() {
-    uiContent->Foreground();  // 在 UI 线程运行
+    uiContent->Foreground();  // Runs on UI thread
 });
 ```
 
-### 5. 违反依赖方向
+### 5. Violating Dependency Direction
 
-**⚠️ 常见错误**：
+**⚠️ Common Mistake**:
 ```cpp
-// ❌ 错误：AceKit 依赖 Ace
+// ❌ Wrong: AceKit depends on Ace
 // ace_kit/include/ui/base/ace_type.h
-#include "ace/ui_content.h"  // 禁止！
+#include "ace/ui_content.h"  // Prohibited!
 
 class AceType {
-    // 这样会创建循环依赖
+    // This creates circular dependency
 };
 ```
 
-**✅ 正确做法**：
+**✅ Correct Approach**:
 ```cpp
-// AceKit 保持独立
+// AceKit stays independent
 // ace_kit/include/ui/base/ace_type.h
-// 不包含任何 Ace 模块的头文件
+// Does not include any Ace module headers
 
 class AceType {
-    // 纯粹的基础设施
+    // Pure infrastructure
 };
 
-// Ace 可以使用 AceKit
+// Ace can use AceKit
 // ace/ui_content.h
 #include "ace_kit/include/ui/base/ace_type.h"
 
 class UIContent : public AceType {
-    // OK: Ace 依赖 AceKit
+    // OK: Ace depends on AceKit
 };
 ```
 
 ---
 
-## 调试方法
+## Debugging Methods
 
-### 1. 启用日志
+### 1. Enable Logging
 
 ```cpp
 #include "base/log/log_wrapper.h"
 
-// 使用适当的日志标签
+// Use appropriate log tags
 #define TAG "InnerApi"
 
-// 日志级别
+// Log levels
 LOGD("%{public}s", "Debug message");
 LOGI("%{public}s", "Info message");
 LOGW("%{public}s", "Warning message");
 LOGE("%{public}s", "Error message");
 ```
 
-### 2. 转储接口状态
+### 2. Dump Interface State
 
 ```cpp
-// 实现转储方法用于调试
+// Implement dump method for debugging
 class UIContentImpl : public UIContent {
     void DumpInfo(std::ostream& os) const override {
         os << "UIContent state:\n";
@@ -670,131 +670,131 @@ class UIContentImpl : public UIContent {
     }
 };
 
-// 在调试中使用
+// Use in debugging
 uiContent->DumpInfo(std::cerr);
 ```
 
-### 3. 内存泄漏检测
+### 3. Memory Leak Detection
 
 ```cpp
-// 使用内存监控（AceKit 功能）
+// Use memory monitoring (AceKit feature)
 #include "base/memory/memory_monitor.h"
 
-// 启用内存监控
+// Enable memory monitoring
 MemoryMonitor::GetInstance().StartTracking();
 
-// 创建对象
+// Create objects
 RefPtr<UIContent> content = UIContent::Create(...);
 
-// 检查泄漏
+// Check for leaks
 MemoryMonitor::GetInstance().DumpMemoryStats();
 ```
 
-### 4. 常见问题定位
+### 4. Common Issue Location
 
-| 问题 | 可能原因 | 检查清单 |
-|------|---------|---------|
-| **接口未找到** | 库未加载 | 检查 `out/` 中的 `.so` 文件 |
-| **符号未找到** | ABI 不匹配 | 重新构建所有依赖 |
-| **调用崩溃** | 错误线程 | 检查日志中的线程 ID |
-| **内存泄漏** | RefPtr 循环 | 使用 WeakPtr，检查转储 |
-| **回调未调用** | Task runner 未运行 | 检查 task runner 状态 |
+| Issue | Possible Cause | Checklist |
+|-------|---------------|-----------|
+| **Interface not found** | Library not loaded | Check `.so` files in `out/` |
+| **Symbol not found** | ABI mismatch | Rebuild all dependencies |
+| **Call crashes** | Wrong thread | Check thread ID in logs |
+| **Memory leak** | RefPtr cycle | Use WeakPtr, check dumps |
+| **Callback not called** | Task runner not running | Check task runner status |
 
-### 5. 关键数据结构检查
+### 5. Key Data Structure Checks
 
-**在调试器中检查**：
+**Check in debugger**:
 
 ```cpp
-// Ace 模块
-currentOffset_           // 当前偏移
-scrollableDistance_      // 可滚动距离
+// Ace module
+currentOffset_           // Current offset
+scrollableDistance_      // Scrollable distance
 
-// AceKit 模块
-refCount_                // 引用计数
-weakRefCount_            // 弱引用计数
+// AceKit module
+refCount_                // Reference count
+weakRefCount_            // Weak reference count
 
-// UISession 模块
-sessionId_               // 会话 ID
-proxy_                   // 代理对象
+// UISession module
+sessionId_               // Session ID
+proxy_                   // Proxy object
 ```
 
 ---
 
-## 性能指南
+## Performance Guidelines
 
-### 1. 最小化虚函数调用开销
+### 1. Minimize Virtual Function Call Overhead
 
 ```cpp
-// ✅ 好的做法：缓存接口指针
+// ✅ Good: Cache interface pointer
 class MyClass {
     RefPtr<UIContent> uiContent_;
 
     void Init() {
-        uiContent_ = UIContent::Create(...);  // 创建一次
+        uiContent_ = UIContent::Create(...);  // Create once
     }
 
     void Update() {
-        uiContent_->ProcessVsyncEvent(time);  // 重用
+        uiContent_->ProcessVsyncEvent(time);  // Reuse
     }
 };
 
-// ❌ 坏的做法：每次调用都创建接口
+// ❌ Bad: Create interface every call
 void Update() {
-    auto content = UIContent::Create(...);  // 昂贵！
+    auto content = UIContent::Create(...);  // Expensive!
     content->ProcessVsyncEvent(time);
 }
 ```
 
-### 2. 对大对象使用移动语义
+### 2. Use Move Semantics for Large Objects
 
 ```cpp
-// ✅ 好的做法：对字符串/向量使用 std::move
+// ✅ Good: Use std::move for strings/vectors
 virtual void SetURL(std::string url) = 0;
 
-// 调用
-uiContent->SetURL(std::string("https://..."));  // 拷贝
-uiContent->SetURL(std::move(urlString));         // 移动（更快）
+// Call
+uiContent->SetURL(std::string("https://..."));  // Copy
+uiContent->SetURL(std::move(urlString));         // Move (faster)
 
-// ❌ 坏的做法：按值传递大对象
-virtual void SetData(std::vector<uint8_t> data) = 0;  // 可能拷贝
+// ❌ Bad: Pass large objects by value
+virtual void SetData(std::vector<uint8_t> data) = 0;  // Potential copy
 ```
 
-### 3. 批量接口调用
+### 3. Batch Interface Calls
 
 ```cpp
-// ✅ 好的做法：批量属性更新
+// ✅ Good: Batch property updates
 uiContent->BeginPropertyUpdates();
 uiContent->SetWidth(100.0);
 uiContent->SetHeight(200.0);
 uiContent->SetBackgroundColor(Color::RED);
-uiContent->EndPropertyUpdates();  // 一次性应用
+uiContent->EndPropertyUpdates();  // Apply all at once
 
-// ❌ 坏的做法：单独更新（每次触发通知）
-uiContent->SetWidth(100.0);        // 通知
-uiContent->SetHeight(200.0);       // 通知
-uiContent->SetBackgroundColor(...); // 通知
+// ❌ Bad: Individual updates (triggers notification each time)
+uiContent->SetWidth(100.0);        // Notification
+uiContent->SetHeight(200.0);       // Notification
+uiContent->SetBackgroundColor(...); // Notification
 ```
 
-### 4. 避免频繁的 Measure/Layout
+### 4. Avoid Frequent Measure/Layout
 
 ```cpp
-// ❌ 坏的做法：在滚动回调中触发布局
+// ❌ Bad: Trigger layout in scroll callback
 void ScrollPattern::OnScrollCallback(float offset, int32_t source) override
 {
     UpdateCurrentOffset(offset, source);
-    FireOnDidScroll(offset);  // 如果回调修改属性，触发新布局
+    FireOnDidScroll(offset);  // Triggers new layout if callback modifies properties
 }
 
-// ✅ 好的做法：合并布局请求
-// 使用 requestFrame 合并多个布局请求
-// 仅在滚动结束时（OnScrollEndCallback）触发布局
+// ✅ Good: Coalesce layout requests
+// Use requestFrame to coalesce multiple layout requests
+// Only trigger layout at scroll end (OnScrollEndCallback)
 ```
 
 ---
 
-## 测试指南
+## Testing Guidelines
 
-### 1. 单元测试结构
+### 1. Unit Test Structure
 
 ```
 test/unittest/interfaces/inner_api/
@@ -811,10 +811,10 @@ test/unittest/interfaces/inner_api/
 └── ...
 ```
 
-### 2. 接口 Mock 示例
+### 2. Interface Mock Example
 
 ```cpp
-// Mock UIContent 用于测试
+// Mock UIContent for testing
 class MockUIContent : public UIContent {
 public:
     MOCK_METHOD(UIContentErrorCode, Initialize,
@@ -824,7 +824,7 @@ public:
     MOCK_METHOD(void, Background, (), (override));
 };
 
-// 在测试中使用 mock
+// Use mock in tests
 TEST(MyClassTest, UsesUIContent) {
     auto mockContent = std::make_shared<MockUIContent>();
     EXPECT_CALL(*mockContent, Initialize(_, _, _))
@@ -835,111 +835,111 @@ TEST(MyClassTest, UsesUIContent) {
 }
 ```
 
-### 3. 内存泄漏测试
+### 3. Memory Leak Testing
 
 ```cpp
 TEST(AceTypeTest, NoMemoryLeak) {
-    // 记录初始内存
+    // Record initial memory
     size_t initialMemory = MemoryMonitor::GetInstance().GetCurrentMemory();
 
     {
-        // 创建对象
+        // Create objects
         RefPtr<MyClass> obj1 = AceType::MakeRefPtr<MyClass>();
         RefPtr<MyClass> obj2 = AceType::MakeRefPtr<MyClass>();
         obj1->SetChild(obj2);
     }
 
-    // 对象应该被销毁
+    // Objects should be destroyed
     size_t finalMemory = MemoryMonitor::GetInstance().GetCurrentMemory();
-    ASSERT_NEAR(initialMemory, finalMemory, 1024);  // 允许小误差
+    ASSERT_NEAR(initialMemory, finalMemory, 1024);  // Allow small tolerance
 }
 ```
 
-### 4. 运行测试
+### 4. Running Tests
 
 ```bash
-# 编译单元测试
+# Build unit tests
 ./build.sh --product-name rk3568 --build-target unittest
 
-# 运行 inner_api 测试
+# Run inner_api tests
 cd out/rk3568/tests/ace_engine/unittest
 ./interfaces_test --gtest_filter="InnerApi*"
 ```
 
 ---
 
-## API 迁移指南
+## API Migration Guide
 
-### 从旧 API 迁移到新 API
+### Migrating from Old API to New API
 
-#### 示例：UIContent API 变更
+#### Example: UIContent API Changes
 
-**旧 API（已废弃）**：
+**Old API (Deprecated)**:
 ```cpp
-// 旧方式（API 9）
+// Old way (API 9)
 UIContent* content = new UIContentImpl();
 content->Init(window);
 content->SetPageUrl(url);
 content->CreateRootView();
 ```
 
-**新 API（推荐）**：
+**New API (Recommended)**:
 ```cpp
-// 新方式（API 10+）
+// New way (API 10+)
 RefPtr<UIContent> content = UIContent::Create(context, runtime);
 UIContentErrorCode err = content->Initialize(window, url, storage);
 if (err != UIContentErrorCode::NO_ERROR) {
-    // 处理错误
+    // Handle error
 }
 ```
 
-#### 迁移清单
+#### Migration Checklist
 
-- [ ] 替换工厂方法（new → Create）
-- [ ] 使用错误码替代异常
-- [ ] 使用 RefPtr 替代裸指针
-- [ ] 更新方法签名
-- [ ] 更新回调签名
-- [ ] 测试所有迁移的代码
-
----
-
-## 总结
-
-### 核心原则
-
-1. **接口稳定性优先** - 永不破坏现有 API
-2. **清晰的模块边界** - 尊重依赖规则
-3. **内存安全** - 正确使用 AceType
-4. **错误处理** - 使用错误码，而非异常
-5. **线程安全** - 尊重线程边界
-
-### 记住
-
-Inner API 是 ACE Engine 的基础。任何变更会影响：
-- 所有组件实现（frameworks/core/components_ng）
-- 所有前端桥接（frameworks/bridge）
-- 所有平台适配器（adapter/*）
-
-在修改 Inner API 之前：
-- 了解对所有使用者的影响
-- 检查 ABI 兼容性
-- 运行完整测试套件
-- 更新文档
-- 考虑破坏性变更的废弃流程
+- [ ] Replace factory methods (new → Create)
+- [ ] Use error codes instead of exceptions
+- [ ] Use RefPtr instead of raw pointers
+- [ ] Update method signatures
+- [ ] Update callback signatures
+- [ ] Test all migrated code
 
 ---
 
-## 相关资源
+## Summary
 
-### 内部文档
-- 📖 **[Inner API 完整知识库](../../docs/interfaces/inner_api/inner_api_Knowledge_Base.md)** - 深度技术参考
-- 📄 **[README.md](README.md)** - 快速索引
+### Core Principles
 
-### 参考文档
-- [ace_kit/include/ui/base/MEMORY_DESIGN.md](ace_kit/include/ui/base/MEMORY_DESIGN.md) - 内存管理设计
-- [CLAUDE.md](../../CLAUDE.md) - 项目指导文档
+1. **Interface Stability First** - Never break existing APIs
+2. **Clear Module Boundaries** - Respect dependency rules
+3. **Memory Safety** - Use AceType correctly
+4. **Error Handling** - Use error codes, not exceptions
+5. **Thread Safety** - Respect thread boundaries
 
-### 测试资源
-- `test/unittest/interfaces/inner_api/` - 单元测试
-- `test/mock/ohos_mock/` - Mock 对象
+### Remember
+
+Inner API is the foundation of ACE Engine. Any change affects:
+- All component implementations (frameworks/core/components_ng)
+- All frontend bridges (frameworks/bridge)
+- All platform adapters (adapter/*)
+
+Before modifying Inner API:
+- Understand impact on all consumers
+- Check ABI compatibility
+- Run full test suite
+- Update documentation
+- Consider deprecation process for breaking changes
+
+---
+
+## Related Resources
+
+### Internal Documentation
+- 📖 **[Inner API Complete Knowledge Base](../../docs/interfaces/inner_api/inner_api_Knowledge_Base.md)** - In-depth technical reference
+- 📄 **[README.md](README.md)** - Quick index
+
+### Reference Documentation
+- [ace_kit/include/ui/base/MEMORY_DESIGN.md](ace_kit/include/ui/base/MEMORY_DESIGN.md) - Memory management design
+- [CLAUDE.md](../../CLAUDE.md) - Project guidance document
+
+### Testing Resources
+- `test/unittest/interfaces/inner_api/` - Unit tests
+- `test/mock/ohos_mock/` - Mock objects
