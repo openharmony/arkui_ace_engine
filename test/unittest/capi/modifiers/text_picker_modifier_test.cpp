@@ -345,10 +345,6 @@ const std::vector<OptDimensionTestStep> GRADIENT_HEIGHT_TEST_PLAN = {
 };
 } // namespace
 
-namespace Converter {
-void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx);
-} // namespace Converter
-
 class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPickerModifier,
     &GENERATED_ArkUINodeModifiers::getTextPickerModifier, GENERATED_ARKUI_TEXT_PICKER> {
     public:

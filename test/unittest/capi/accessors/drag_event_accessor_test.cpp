@@ -374,7 +374,7 @@ HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level1)
 {
 #ifdef WRONG_GEN_v140
     // DISABLED_TEST: in gen140 DragEventAccessor has no getGetModifierKeyState, only setGetModifierKeyState
@@ -404,8 +404,6 @@ HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
         bool result = getResult(stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
-#else
-    GTEST_SKIP() << "getGetModifierKeyState not in gen140 DragEventAccessor API";
 #endif
 }
 

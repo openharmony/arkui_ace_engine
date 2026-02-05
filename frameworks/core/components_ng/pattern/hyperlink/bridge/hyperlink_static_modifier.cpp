@@ -53,7 +53,7 @@ void SetColorImpl(Ark_NativePointer node,
     HyperlinkModelStatic::SetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier
-const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
+const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkStaticModifier()
 {
     static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
         HyperlinkModifier::ConstructImpl,

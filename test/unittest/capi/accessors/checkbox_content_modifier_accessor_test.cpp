@@ -109,7 +109,7 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
     // Content modifier node should not change after rebuild
     FireBuilder(pattern.GetRawPtr());
     auto builtNode2 = checkBoxNode->GetChildAtIndex(0);
-    EXPECT_NE(AceType::RawPtr(builtNode1), AceType::RawPtr(builtNode2));
+    EXPECT_EQ(AceType::RawPtr(builtNode1), AceType::RawPtr(builtNode2));
 }
 
 }

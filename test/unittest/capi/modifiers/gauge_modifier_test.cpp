@@ -23,13 +23,16 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
+#include "generated/type_helpers.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     const auto ATTRIBUTE_TRACK_SHADOW_NAME = "trackShadow";
+#endif
 #ifdef GAUGE_HAS_INDICATOR
     const auto ATTRIBUTE_INDICATOR_NAME = "indicator";
 #endif
@@ -49,12 +52,14 @@ namespace  {
     const auto ATTRIBUTE_COLORS_DEFAULT_VALUE = "[\"#FF64BB5C\",\"#FFF7CE00\",\"#FFE84026\"]";
     const auto ATTRIBUTE_DESCRIPTION_NAME = "description";
     const auto ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE = "";
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     const auto ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME = "radius";
     const auto ATTRIBUTE_TRACK_SHADOW_RADIUS_DEFAULT_VALUE = "20.000000";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME = "offsetX";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_X_DEFAULT_VALUE = "5.000000";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME = "offsetY";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE = "5.000000";
+#endif
 #ifdef GAUGE_HAS_INDICATOR
     const auto ATTRIBUTE_INDICATOR_ICON_NAME = "icon";
     const auto ATTRIBUTE_INDICATOR_ICON_DEFAULT_VALUE = "SystemStyle";
@@ -675,7 +680,7 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
 static std::vector<std::tuple<std::string, Ark_Length>> strokeWidthStrokeWidthLengthInvalidValues = {
     {"10%", Converter::ArkValue<Ark_Length>("10%")},
     {"0%", Converter::ArkValue<Ark_Length>("0%")},
-#ifdef WRONG_API // Need to check synamic API behavior
+#ifdef WRONG_API // Need to check dynamic API behavior
     {"-5.0f", Converter::ArkValue<Ark_Length>(-5.0f)},
     {"-15.5vp", Converter::ArkValue<Ark_Length>("-15.5vp")},
     {"-25.0px", Converter::ArkValue<Ark_Length>("-25.0px")},
@@ -718,7 +723,7 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -732,8 +737,9 @@ HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTest_CustomNodeBuilder, TestSize.Level1)
 {
+#ifdef WRONG_API // setDescription not in GENERATED_ArkUIGaugeModifier
     ASSERT_NE(modifier_->setDescription, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -744,6 +750,7 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
     auto optBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     modifier_->setDescription(node_, &optBuilder);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
+#endif
 }
 
 /*
@@ -751,8 +758,9 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setTrackShadowTestDefaultValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestDefaultValues, TestSize.Level1)
 {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTrackShadow
         = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -766,8 +774,10 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE);
+#endif
 }
 
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
 // Valid values for attribute 'radius' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowRadiusValidValues = {
     {"0.05", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.05), "0.050000"},
@@ -794,14 +804,16 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>>
     {"res:str", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_NAME), "5.000000"},
     {"res:id", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_ID), "1.000000"},
 };
+#endif
 
 /*
  * @tc.name: setTrackShadowTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestValidValues, TestSize.Level1)
 {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
     std::string resultStr;
@@ -852,8 +864,10 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+#endif
 }
 
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
 // Invalid values for attribute 'radius' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowRadiusInvalidValues = {
     {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
@@ -873,20 +887,23 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowO
     {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
 };
+#endif
 
 /*
  * @tc.name: setTrackShadowTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestInvalidValues, TestSize.Level1)
 {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
     std::string resultStr;
     std::string expectedStr;
     Ark_GaugeShadowOptions inputValueTrackShadow;
-    Ark_GaugeShadowOptions initValueTrackShadow;
+    Opt_GaugeShadowOptions optInputValueTrackShadow;
+    Ark_GaugeShadowOptions& initValueTrackShadow = TypeHelper::WriteTo(optInputValueTrackShadow);
 
     // Initial setup
     initValueTrackShadow.radius = std::get<1>(trackShadowRadiusValidValues[0]);
@@ -896,10 +913,8 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'radius'  values
     for (auto&& value: trackShadowRadiusInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.radius = std::get<1>(value);
-        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -911,10 +926,8 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'offsetX'  values
     for (auto&& value: trackShadowOffsetXInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.offsetX = std::get<1>(value);
-        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -926,10 +939,8 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'offsetY'  values
     for (auto&& value: trackShadowOffsetYInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.offsetY = std::get<1>(value);
-        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
         resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
@@ -937,6 +948,7 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
         expectedStr = ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+#endif
 }
 
 #ifdef GAUGE_HAS_INDICATOR

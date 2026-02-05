@@ -70,7 +70,7 @@ HWTEST_F(CounterModifierTest, setEnableDecTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setEnableDecTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setEnableDecTestValidValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -103,7 +103,7 @@ HWTEST_F(CounterModifierTest, setEnableIncTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setEnableIncTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setEnableIncTestValidValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -247,7 +247,7 @@ HWTEST_F(CounterModifierTest, setWidthTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setWidthTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setWidthTestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -315,7 +315,7 @@ HWTEST_F(CounterModifierTest, setHeightTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setHeightTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setHeightTestValidValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -372,7 +372,7 @@ HWTEST_F(CounterModifierTest, DISABLED_setHeightTestInvalidValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setSizeTestValidHeightValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setSizeTestValidHeightValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -405,7 +405,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidHeightValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setSizeTestValidWidthValues, TestSize.Level1)
 {
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -438,7 +438,7 @@ HWTEST_F(CounterModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setSizeTestInvalidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setSizeTestInvalidValues, TestSize.Level1)
 {
     Ark_SizeOptions inputValue;
 

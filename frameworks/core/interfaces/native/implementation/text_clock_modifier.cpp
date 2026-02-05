@@ -19,14 +19,21 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "frameworks/base/log/log_wrapper.h"
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUITextClockModifier* GetTextClockStaticModifier();
+#endif
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier()
 {
     static const GENERATED_ArkUITextClockModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetTextClockStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUITextClockModifier*>(module->GetStaticModifier());
+#endif
     }
 
     return cachedModifier;
