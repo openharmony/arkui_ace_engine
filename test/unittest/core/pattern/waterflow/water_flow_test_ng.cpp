@@ -2887,4 +2887,33 @@ HWTEST_F(WaterFlowTestNg, ReportComponentChangeEventTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
 }
+
+/**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: Test water flow pattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; ++i) {
+        CreateItemWithHeight(60.0f);
+    }
+    CreateDone();
+
+    std::string command = R"({"cmd":"scrollBackward"})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
+
+    command = R"({"cmd":"scrollForward"})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+}
 } // namespace OHOS::Ace::NG

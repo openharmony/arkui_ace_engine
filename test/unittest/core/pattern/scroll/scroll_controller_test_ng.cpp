@@ -508,14 +508,22 @@ HWTEST_F(ScrollControllerTestNg, OnInjectionEventTest001, TestSize.Level1)
     pattern_->OnInjectionEvent(command);
     EXPECT_EQ(pattern_->currentOffset_, 0);
 
+    command = R"({"cmd":"scrollBackward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentOffset_, -400);
+
     command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentOffset_, -360);
+
+    command = R"({"cmd":"scrollForward"})";
     pattern_->OnInjectionEvent(command);
     EXPECT_EQ(pattern_->currentOffset_, 40);
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
     pattern_->OnInjectionEvent(command);
-    EXPECT_EQ(pattern_->currentOffset_, -640);
+    EXPECT_EQ(pattern_->currentOffset_, -600);
 }
 
 /**
