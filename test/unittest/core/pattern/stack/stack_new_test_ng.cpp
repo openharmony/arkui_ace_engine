@@ -455,7 +455,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest006, TestSize.Level0)
     /* corresponding ets code:
         Stack() {
             Stack() {
-                Flex().width("300px").height("400px")
+                Stack().width("300px").height("400px")
             }
             .width(LayoutPolicy.fixAtIdealSize)
             .height(LayoutPolicy.fixAtIdealSize)
@@ -592,7 +592,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest008, TestSize.Level0)
 
 /**
  * @tc.name: LayoutGravityTest
- * @tc.desc: Test stack Layout with LayoutGravityTest
+ * @tc.desc: Test stack layout gravity property
  * @tc.type: FUNC
  */
 HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level0)
@@ -660,7 +660,7 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
     stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(stackNode);
 
-    // Excepect child's frameRect equal parent's frameRect.
+    // Expect child's frameRect equal parent's frameRect.
     EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
         << child1->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(parent1->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 500.0f))
@@ -704,8 +704,8 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
     auto pattern = stackNode->GetPattern();
     ASSERT_NE(pattern, nullptr);
 
-    // beacause FeatureParam is false, use vOverflowHandler instead.
-    const auto &vOverflowHandler =
+    // because FeatureParam is false, use vOverflowHandler instead.
+    const auto& vOverflowHandler =
         pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
     ASSERT_NE(vOverflowHandler, nullptr);
     std::optional<RectF> totalChildFrameRect;
@@ -734,7 +734,7 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
 HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create flex component and its children
+     * @tc.steps: step1. Create stack component and its children
      */
     RefPtr<FrameNode> child;
     auto stackNode = CreateStack([this, &child](StackModelNG model) {
@@ -759,8 +759,7 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     FlushUITasks(stackNode);
     auto pattern = stackNode->GetPattern();
     ASSERT_NE(pattern, nullptr);
-    const auto &handler =
-        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
+    const auto& handler = pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
     const auto& childGeometry = child->GetGeometryNode();
     ASSERT_NE(childGeometry, nullptr);
     std::optional<RectF> totalChildFrameRect;
@@ -768,7 +767,7 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     handler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
     handler->CreateContentRect();
     handler->HandleContentOverflow();
- 
+
     /**
      * @tc.expected: register scrollEvent and initialize
      */
@@ -781,5 +780,124 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     EXPECT_EQ(handler->childFrameTop_.value_or(-1), -45);
     EXPECT_EQ(handler->offsetToChildFrameBottom_, 5);
     EXPECT_EQ(childGeometry->GetMarginFrameOffset(), OffsetF(0, -45));
+}
+
+/**
+ * @tc.name: CalculateStackAlignment001
+ * @tc.desc: Test CalculateStackAlignment with CENTER alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment001, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::CENTER);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    float expectedX = (500.0f - 100.0f) / 2.0f;
+    float expectedY = (500.0f - 100.0f) / 2.0f;
+    EXPECT_EQ(offset.GetX(), expectedX);
+    EXPECT_EQ(offset.GetY(), expectedY);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment002
+ * @tc.desc: Test CalculateStackAlignment with TOP_LEFT alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment002, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::TOP_LEFT);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment003
+ * @tc.desc: Test CalculateStackAlignment with BOTTOM_RIGHT alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment003, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::BOTTOM_RIGHT);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    float expectedX = 500.0f - 100.0f;
+    float expectedY = 500.0f - 100.0f;
+    EXPECT_EQ(offset.GetX(), expectedX);
+    EXPECT_EQ(offset.GetY(), expectedY);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment004
+ * @tc.desc: Test CalculateStackAlignment with TOP_CENTER alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment004, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::TOP_CENTER);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    float expectedX = (500.0f - 100.0f) / 2.0f;
+    EXPECT_EQ(offset.GetX(), expectedX);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment005
+ * @tc.desc: Test CalculateStackAlignment with child size equal to parent size
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment005, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(500.0f, 500.0f);
+
+    Alignment align(Alignment::CENTER);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment006
+ * @tc.desc: Test CalculateStackAlignment with different alignments
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment006, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    // Test CENTER_LEFT alignment
+    Alignment align1(Alignment::CENTER_LEFT);
+    auto offset1 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align1);
+    EXPECT_EQ(offset1.GetX(), 0.0f);
+    EXPECT_EQ(offset1.GetY(), (500.0f - 100.0f) / 2.0f);
+
+    // Test CENTER_RIGHT alignment
+    Alignment align2(Alignment::CENTER_RIGHT);
+    auto offset2 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align2);
+    EXPECT_EQ(offset2.GetX(), 500.0f - 100.0f);
+    EXPECT_EQ(offset2.GetY(), (500.0f - 100.0f) / 2.0f);
+
+    // Test BOTTOM_CENTER alignment
+    Alignment align3(Alignment::BOTTOM_CENTER);
+    auto offset3 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align3);
+    EXPECT_EQ(offset3.GetX(), (500.0f - 100.0f) / 2.0f);
+    EXPECT_EQ(offset3.GetY(), 500.0f - 100.0f);
 }
 } // namespace OHOS::Ace::NG
