@@ -1309,15 +1309,7 @@ abstract class ViewPU extends PUV2ViewBase
       return undefined;
     }
     const prop = Reflect.get(this, fieldName);
-    let value = stateMgmtDFX.unwrapRawValue(prop);
-    if (typeof value === 'string') {
-      try {
-        value = JSON.parse(value);
-      } catch {
-        stateMgmtConsole.error('Invalid json string');
-        return undefined;
-      }
-    }
+    const value = stateMgmtDFX.unwrapRawValue(prop);
     if (value === null || value === undefined) {
       return undefined;
     }
