@@ -84,10 +84,10 @@ RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
     return textNode;
 }
 
-RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
+RefPtr<FrameNode> CreateBarItemIconNode(const BarItem& barItem)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(src);
+    ImageSourceInfo info(barItem.icon.value_or(""), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -124,7 +124,7 @@ void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const Bar
         }
     }
     if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
-        auto iconNode = CreateBarItemIconNode(barItem.icon.value());
+        auto iconNode = CreateBarItemIconNode(barItem);
         barItemNode->SetIconNode(iconNode);
         barItemNode->AddChild(iconNode);
     }
@@ -186,7 +186,7 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
                     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(newBarItem.icon.value()));
                     iconNode->MarkModifyDone();
                 } else {
-                    auto iconNode = CreateBarItemIconNode(newBarItem.icon.value());
+                    auto iconNode = CreateBarItemIconNode(newBarItem);
                     oldBarItem->SetIconNode(iconNode);
                     oldBarItem->AddChild(iconNode);
                     oldBarItem->MarkModifyDone();
