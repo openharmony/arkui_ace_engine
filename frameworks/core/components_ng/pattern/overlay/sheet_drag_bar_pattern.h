@@ -38,11 +38,13 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetDragBarPaintProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetDragBarPaintMethod>();
     }
 

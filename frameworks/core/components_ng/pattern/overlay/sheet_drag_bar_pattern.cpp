@@ -45,6 +45,7 @@ void SheetDragBarPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     dragOffsetX_ = MAX_DRAG_X.ConvertToPx();
     dragOffsetY_ = MAX_DRAG_Y.ConvertToPx();
     auto hub = host->GetEventHub<EventHub>();
@@ -89,6 +90,7 @@ void SheetDragBarPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureH
         CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
     };
+    ACE_UINODE_TRACE(GetHost());
 
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
@@ -108,6 +110,7 @@ void SheetDragBarPattern::InitClickEvent()
         CHECK_NULL_VOID(sheetDragBarPattern);
         sheetDragBarPattern->OnClick();
     };
+    ACE_UINODE_TRACE(host);
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
 }
@@ -122,6 +125,7 @@ void SheetDragBarPattern::OnClick()
 
 void SheetDragBarPattern::ScaleAnimation(bool isDown)
 {
+    ACE_UINODE_TRACE(GetHost());
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     StopAnimation();
@@ -245,6 +249,7 @@ void SheetDragBarPattern::CreatePropertyCallback()
         }
         ref->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     };
+    ACE_UINODE_TRACE(GetHost());
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
 }
 } // namespace OHOS::Ace::NG
