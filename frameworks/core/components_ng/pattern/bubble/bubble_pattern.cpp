@@ -1054,7 +1054,7 @@ void BubblePattern::UpdateWidth(const CalcDimension& dimension)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void BubblePattern::UpdateBubbleGradient(const int32_t index, const Color& result, bool isOutlineGradient)
+void BubblePattern::UpdateBubbleGradient(const uint32_t index, const Color& result, bool isOutlineGradient)
 {
     if (isOutlineGradient) {
         if (outlineLinearGradient_.gradientColors.size() > index) {

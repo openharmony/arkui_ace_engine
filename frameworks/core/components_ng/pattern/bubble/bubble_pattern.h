@@ -180,7 +180,7 @@ public:
     void UpdateWidth(const CalcDimension& dimension);
     void UpdateRadius(const CalcDimension& dimension);
     void UpdateShadow();
-    void UpdateBubbleGradient(const int32_t index, const Color& result, bool isOutlineGradient);
+    void UpdateBubbleGradient(const uint32_t index, const Color& result, bool isOutlineGradient);
 
     void SetMessageColor(bool isSetMessageColor)
     {
