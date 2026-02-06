@@ -1316,6 +1316,13 @@ double PipelineBase::GetCurrentDensity()
     return pipelineContext ? pipelineContext->GetDensity() : 1.0;
 }
 
+ColorMode PipelineBase::GetCurrentColorMode()
+{
+    auto currentContainer = MockContainer::CurrentSafely();
+    CHECK_NULL_RETURN(currentContainer, ColorMode::LIGHT);
+    return currentContainer->GetColorMode();
+}
+
 double PipelineBase::Px2VpWithCurrentDensity(double px)
 {
     double density = GetCurrentDensity();

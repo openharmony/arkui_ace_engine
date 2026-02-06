@@ -30,6 +30,7 @@ namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
+constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -40,6 +41,10 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 } // namespace
 
 DeviceType SystemProperties::deviceType_ = DeviceType::PHONE;
+std::string SystemProperties::paramDeviceType_ = "phone";
+std::string SystemProperties::apiVersion_ = "9";
+std::string SystemProperties::brand_ = UNDEFINED_PARAM;
+bool SystemProperties::isRound_ = false;
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
