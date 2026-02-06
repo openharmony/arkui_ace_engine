@@ -188,7 +188,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager006, TestSize.Leve
     /**
      * @tc.steps: step2. test UnsubscribeToastObserver
      */
-    auto result = jsAccessibilityManager->SubscribeToastObserver();
+    auto result = jsAccessibilityManager->UnsubscribeToastObserver();
     EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG
