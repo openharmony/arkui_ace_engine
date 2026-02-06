@@ -695,7 +695,7 @@ struct ArkUIRichEditorTextStyle {
     ArkUI_Int32 decorationType;
     ArkUI_Uint32 decorationColor;
     ArkUI_Int32 decorationStyle;
-    uint32_t decorationThicknessScale;
+    float decorationThicknessScale;
     uint32_t textShadowSize;
     int32_t lineHeight;
     int32_t letterSpacing;
