@@ -27,6 +27,18 @@
 #include <type_traits>
 #include <vector>
 
+// this is for excluding the conflicts with macros which defined
+// in ../../prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/include/nb30.h
+#ifdef REGISTERING
+#undef REGISTERING
+#endif
+#ifdef REGISTERED
+#undef REGISTERED
+#endif
+#ifdef DELETE
+#undef DELETE
+#endif
+
 #include "base/geometry/ng/rect_t.h" // Using type
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/property/border_property.h" // Using type
@@ -37,7 +49,7 @@
 #include "generated/converter_generated.h"
 #include "peer_utils.h"
 
-// Forward delcarations
+// Forward declarations
 namespace OHOS::Ace {
 // SORTED_SECTION
 class CheckboxGroupResult;

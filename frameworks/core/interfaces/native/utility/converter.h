@@ -25,6 +25,18 @@
 #include <variant>
 #include <vector>
 
+// this is for excluding the conflicts with macros which defined
+// in ../../prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/include/nb30.h
+#ifdef REGISTERING
+#undef REGISTERING
+#endif
+#ifdef REGISTERED
+#undef REGISTERED
+#endif
+#ifdef DELETE
+#undef DELETE
+#endif
+
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
@@ -38,7 +50,7 @@
             Converter::OptConvert<type>((src)->field) : std::nullopt)
 #define GET_OPT_FIELD(src, field) ((src).has_value() ? Converter::GetOpt((src)->field) : std::nullopt)
 
-// Forward delcarations
+// Forward declarations
 namespace OHOS::Ace {
 // SORTED_SECTION
 class DrawableDescriptor;
