@@ -74,7 +74,7 @@ constexpr int MAX_SELECTED_AI_ENTITY = 1;
 constexpr int32_t PREVIEW_MENU_DELAY = 600;
 constexpr int32_t DRAG_NODE_HIDE = 300;
 constexpr int32_t HIGHLIGHT_ANIMATION_DURATION = 300;
-constexpr int32_t HIGHLIGHT_SHOWING_DURATION = 1500;
+constexpr int32_t HIGHLIGHT_SHOWING_DURATION = 5000;
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -3040,16 +3040,18 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
 
+    // Handle Shift + direction key for text selection
+    // Return HandleOnSelect result to allow event propagation for unsupported keys (e.g., Shift+Tab)
     if (keyEvent.IsShiftWith(keyEvent.code)) {
-        HandleOnSelect(keyEvent.code);
-        return true;
+        return HandleOnSelect(keyEvent.code);
     }
     return false;
 }
 
-void TextPattern::HandleOnSelect(KeyCode code)
+bool TextPattern::HandleOnSelect(KeyCode code)
 {
     auto end = textSelector_.GetEnd();
+    bool result = true;
     switch (code) {
         case KeyCode::KEY_DPAD_LEFT: {
             HandleSelection(true, end - 1);
@@ -3068,12 +3070,16 @@ void TextPattern::HandleOnSelect(KeyCode code)
             break;
         }
         default:
+            result = false;
             break;
     }
+    // Only when shiftFlag is true AND (UP/DOWN key), do NOT reset origin caret position.
+    // This preserves the original coordinate during Shift+UP/DOWN multi-line selection.
     if (!(shiftFlag_ && (code == KeyCode::KEY_DPAD_UP ||
                          code == KeyCode::KEY_DPAD_DOWN))) {
         ResetOriginCaretPosition();
     }
+    return result;
 }
 
 void TextPattern::HandleSelectionUp()
