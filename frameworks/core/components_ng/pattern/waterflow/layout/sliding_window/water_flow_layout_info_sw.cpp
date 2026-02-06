@@ -190,9 +190,9 @@ float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
     }
     if (offsetEnd_) {
 		// Fix over-scroll when content doesn't fill the viewport.
-		// Use totalOffset_ delta to avoid excessive friction at low scroll speed.
+		// Use startOverScroll delta to avoid excessive friction at low scroll speed.
         if (GetContentHeight() < mainSize) {
-            endOverScroll = totalOffset_;
+            endOverScroll = StartPosWithMargin() + delta;
         } else {
             endOverScroll = mainSize - (EndPosWithMargin() + footerHeight_ + contentEndOffset_ + delta);
         }
