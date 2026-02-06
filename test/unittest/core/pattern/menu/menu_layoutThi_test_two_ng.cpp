@@ -304,7 +304,6 @@ HWTEST_F(MenuLayout3TwoTestNg, Initialize004, TestSize.Level1)
     menuPattern->type_ = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU;
     layoutAlgorithm->canExpandCurrentWindow_ = true;
     layoutAlgorithm->isExpandDisplay_ = true;
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());

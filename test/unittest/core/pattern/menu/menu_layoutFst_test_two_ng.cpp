@@ -651,7 +651,6 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg046, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
@@ -697,7 +696,6 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg047, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
@@ -743,7 +741,6 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg048, TestSize.Level1)
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());

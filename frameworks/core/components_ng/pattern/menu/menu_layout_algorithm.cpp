@@ -378,9 +378,32 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     }
 }
 
-void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper, bool isContextMenu)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
+
+    InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty);
+    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
+
+    InitializeBasicProperties(layoutWrapper);
+    InitializePlacement(layoutWrapper);
+
+    if (!targetTag_.empty()) {
+        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
+    }
+    CalcWrapperRectForHoverMode(menuPattern);
+
+    InitializeMenuAvoidKeyboard(menuNode);
+}
+
+void MenuLayoutAlgorithm::InitializeBasicProperties(LayoutWrapper* layoutWrapper)
+{
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     auto menuNode = layoutWrapper->GetHostNode();
@@ -389,6 +412,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuPattern);
     auto menuTheme = GetMenuTheme(menuNode);
     CHECK_NULL_VOID(menuTheme);
+
     auto beforeAnimationScale = menuPattern->GetPreviewBeforeAnimationScale();
     auto afterAnimationScale = menuPattern->GetPreviewAfterAnimationScale();
     dumpInfo_.previewBeginScale =
@@ -396,19 +420,38 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     dumpInfo_.previewEndScale =
         LessOrEqual(afterAnimationScale, 0.0f) ? menuTheme->GetPreviewAfterAnimationScale() : afterAnimationScale;
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
+
     position_ = props->GetMenuOffset().value_or(OffsetF());
-    anchorPosition_ = props->GetAnchorPosition();
-    dumpInfo_.globalLocation = position_;
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     dumpInfo_.offset = positionOffset_;
+    anchorPosition_ = props->GetAnchorPosition();
+    dumpInfo_.globalLocation = position_;
+
     InitializePadding(layoutWrapper);
     InitializeParam(menuPattern);
+
+    auto previewRect = menuPattern->GetPreviewRect();
+    previewOriginOffset_ = menuPattern->GetPreviewOriginOffset();
+    previewOffset_ = previewRect.GetOffset();
+    previewSize_ = previewRect.GetSize();
+}
+
+void MenuLayoutAlgorithm::InitializePlacement(LayoutWrapper* layoutWrapper)
+{
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     if (needModify && canExpandCurrentWindow_) {
         TAG_LOGI(AceLogTag::ACE_MENU, "original position is : %{public}s", position_.ToString().c_str());
         ModifyOffset(position_, menuPattern);
     }
+
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
@@ -416,18 +459,17 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_RIGHT);
     }
+
     ModifyPositionToWrapper(layoutWrapper, position_);
     if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         ModifyPreviewMenuPlacement(layoutWrapper);
     }
     dumpInfo_.defaultPlacement = PlacementUtils::ConvertPlacementToString(placement_);
+
     InitSpace(props, menuPattern);
     holdEmbeddedMenuPosition_ = HoldEmbeddedMenuPosition(layoutWrapper);
-    auto previewRect = menuPattern->GetPreviewRect();
-    previewOriginOffset_ = menuPattern->GetPreviewOriginOffset();
-    previewOffset_ = previewRect.GetOffset();
-    previewSize_ = previewRect.GetSize();
 }
+
 
 void MenuLayoutAlgorithm::InitializeSecurityPadding()
 {
@@ -813,22 +855,15 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    MenuDumpInfo dumpInfo;
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
+
     auto isContextMenu = menuPattern->IsContextMenu();
-    InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty);
-    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
-    Initialize(layoutWrapper);
-    if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
-    }
-    CalcWrapperRectForHoverMode(menuPattern);
-    InitializeMenuAvoidKeyboard(menuNode);
+    Initialize(layoutWrapper, isContextMenu);
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
