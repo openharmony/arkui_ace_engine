@@ -61,17 +61,8 @@ const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
 
 class FolderStackTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite()
-    {
-        MockContainer::SetUp();
-        MockPipelineContext::SetUp();
-    }
-
-    static void TearDownTestSuite()
-    {
-        MockContainer::TearDown();
-        MockPipelineContext::TearDown();
-    }
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 
     RefPtr<FrameNode> CreateFolder(const std::function<void(FolderStackModelNG)>& callback)
     {
