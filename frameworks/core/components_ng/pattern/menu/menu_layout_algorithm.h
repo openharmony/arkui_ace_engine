@@ -144,7 +144,9 @@ private:
         None_Direction,
     };
 
-    void Initialize(LayoutWrapper* layoutWrapper);
+    void Initialize(LayoutWrapper* layoutWrapper, bool isContextMenu = false);
+    void InitializeBasicProperties(LayoutWrapper* layoutWrapper);
+    void InitializePlacement(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializeSecurityPadding();
