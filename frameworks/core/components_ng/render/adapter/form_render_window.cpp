@@ -289,7 +289,7 @@ void FormRenderWindow::InitOnVsyncCallback()
 
 void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
-#if defined(__OHOS__)
+#if defined(__OHOS__) && defined(ENABLE_ROSEN_BACKEND)
     if (receiver_ && (uiContentType_ == UIContentType::DYNAMIC_COMPONENT)) {
         receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
     }
