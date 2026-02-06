@@ -20,6 +20,7 @@ namespace OHOS::Ace::NG {
 RefPtr<CustomMeasureLayoutNode> CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
     int32_t nodeId, const std::string& viewKey)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<CustomMeasureLayoutNode>(nodeId, viewKey);
     node->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(node);
