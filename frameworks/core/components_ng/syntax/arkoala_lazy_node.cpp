@@ -244,6 +244,8 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
     if (parent) {
         if (isRepeat_ && parent->GetHostTag() == V2::LIST_ETS_TAG) {
             parent->NotifyChange(changeIndex, count, accessibilityId, NotificationType::START_AND_END_CHANGE_POSITION);
+        } else if (parent->GetHostTag() == V2::SWIPER_ETS_TAG) {
+            parent->NotifyChange(changeIndex, count, accessibilityId, NotificationType::START_AND_END_CHANGE_POSITION);
         } else {
             parent->NotifyChange(changeIndex, count, accessibilityId, type);
         }
