@@ -671,4 +671,216 @@ HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
     EXPECT_TRUE(textAccessibilityProperty->accessibilityLevel_.has_value());
     EXPECT_EQ(textAccessibilityProperty->accessibilityLevel_.value(), "no");
 }
+
+/**
+ * @tc.name: LayoutWithRefreshStatusTrue001
+ * @tc.desc: Test Layout algorithm with isRefreshing=true and positive customBuilderHeight
+ *           Verify content child position calculation: distance + customBuilderHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, LayoutWithRefreshStatusTrue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create refresh with custom builder (low version)
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto builder = CreateCustomNode();
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+
+    /**
+     * @tc.steps: step2. Add a content child node (text node) to Refresh
+     * @tc.expected: Refresh will have 2 children: custom builder (index 0) + content (index 1)
+     */
+    CreateText();
+
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Use low version layout algorithm (custom builder with content child positioning)
+     */
+    pattern_->isHigherVersion_ = false;
+
+    /**
+     * @tc.steps: step3. Set isRefreshing to true
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsRefreshing(true);
+
+    /**
+     * @tc.steps: step4. Measure and Layout
+     */
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step5. Verify content child position (index 1) with refreshing=true
+     * @tc.expected: Content child Y position = distance + customBuilderHeight (when height > 0)
+     *              Note: custom builder is at index 0, content child is at index 1
+     */
+    const auto& children = frameNode_->GetChildren();
+    ASSERT_GE(children.size(), 2UL)
+        << "Test setup failed: expected at least 2 children (custom builder + content), got " << children.size();
+
+    // Get content child (index 1), not custom builder (index 0)
+    auto it = children.begin();
+    std::advance(it, 1);
+    auto contentChild = AceType::DynamicCast<FrameNode>(*it);
+    ASSERT_NE(contentChild, nullptr);
+
+    auto childGeometryNode = contentChild->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+
+    auto childOffset = childGeometryNode->GetMarginFrameOffset();
+
+    /**
+     * @tc.expected: Y position = TRIGGER_REFRESH_DISTANCE (64.0) + CUSTOM_NODE_HEIGHT (10.0) = 74.0
+     */
+    EXPECT_FLOAT_EQ(childOffset.GetY(), TRIGGER_REFRESH_DISTANCE + CUSTOM_NODE_HEIGHT);
+}
+
+/**
+ * @tc.name: LayoutWithRefreshStatusFalse001
+ * @tc.desc: Test Layout algorithm with isRefreshing=false
+ *           Verify content child uses scrollOffset for positioning
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, LayoutWithRefreshStatusFalse001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create refresh with custom builder (low version)
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto builder = CreateCustomNode();
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+
+    /**
+     * @tc.steps: step2. Add a content child node (text node) to Refresh
+     * @tc.expected: Refresh will have 2 children: custom builder (index 0) + content (index 1)
+     */
+    CreateText();
+
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Use low version layout algorithm (custom builder with content child positioning)
+     */
+    pattern_->isHigherVersion_ = false;
+
+    /**
+     * @tc.steps: step3. Set isRefreshing to false and set scrollOffset
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsRefreshing(false);
+
+    pattern_->scrollOffset_ = 80.0f; // Test scroll offset value
+
+    /**
+     * @tc.steps: step4. Measure and Layout
+     */
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step5. Verify content child position (index 1) with refreshing=false
+     * @tc.expected: Content child Y position should be scrollOffset_
+     *              Note: custom builder is at index 0, content child is at index 1
+     */
+    const auto& children = frameNode_->GetChildren();
+    ASSERT_GE(children.size(), 2UL)
+        << "Test setup failed: expected at least 2 children (custom builder + content), got " << children.size();
+
+    // Get content child (index 1), not custom builder (index 0)
+    auto it = children.begin();
+    std::advance(it, 1);
+    auto contentChild = AceType::DynamicCast<FrameNode>(*it);
+    ASSERT_NE(contentChild, nullptr);
+
+    auto childGeometryNode = contentChild->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+
+    auto childOffset = childGeometryNode->GetMarginFrameOffset();
+
+    /**
+     * @tc.expected: Y position should equal scrollOffset_ (80.0f)
+     */
+    EXPECT_FLOAT_EQ(childOffset.GetY(), 80.0f);
+}
+
+/**
+ * @tc.name: LayoutWithCustomBuilderHeightZero001
+ * @tc.desc: Test Layout algorithm with isRefreshing=true but customBuilderHeight <= 0
+ *           Verify content child position is 0 when custom builder height is non-positive
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, LayoutWithCustomBuilderHeightZero001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create refresh with custom builder (low version)
+     * @tc.expected: Set zero height to custom builder
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto builder = CreateCustomNode();
+    // Set zero height to custom builder
+    auto builderLayoutProperty = builder->GetLayoutProperty();
+    ASSERT_NE(builderLayoutProperty, nullptr);
+    builderLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CUSTOM_NODE_WIDTH), CalcLength(0.0f)));
+
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+
+    /**
+     * @tc.steps: step2. Add a content child node (text node) to Refresh
+     * @tc.expected: Refresh will have 2 children: custom builder (index 0) + content (index 1)
+     */
+    CreateText();
+
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Use low version layout algorithm (custom builder with content child positioning)
+     */
+    pattern_->isHigherVersion_ = false;
+
+    /**
+     * @tc.steps: step3. Set isRefreshing to true
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsRefreshing(true);
+
+    /**
+     * @tc.steps: step4. Measure and Layout
+     */
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step5. Verify content child position (index 1) with zero height builder
+     * @tc.expected: When customBuilderHeight <= 0, refreshingPosition = 0
+     *              Note: custom builder is at index 0, content child is at index 1
+     */
+    const auto& children = frameNode_->GetChildren();
+    ASSERT_GE(children.size(), 2UL)
+        << "Test setup failed: expected at least 2 children (custom builder + content), got " << children.size();
+
+    // Get content child (index 1), not custom builder (index 0)
+    auto it = children.begin();
+    std::advance(it, 1);
+    auto contentChild = AceType::DynamicCast<FrameNode>(*it);
+    ASSERT_NE(contentChild, nullptr);
+
+    auto childGeometryNode = contentChild->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+
+    auto childOffset = childGeometryNode->GetMarginFrameOffset();
+
+    /**
+     * @tc.expected: Y position should be 0 when customBuilderHeight <= 0
+     */
+    EXPECT_FLOAT_EQ(childOffset.GetY(), 0.0f);
+}
 } // namespace OHOS::Ace::NG
