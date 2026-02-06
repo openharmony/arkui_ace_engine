@@ -813,6 +813,11 @@ void FfiOHOSAceFrameworkRenderingContextTransform(
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
         auto transformParam = GetTransformParam(scaleX, scaleY, skewX, skewY, translateX, translateY);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+            double density = context->GetDensity();
+            transformParam.translateX *= density;
+            transformParam.translateY *= density;
+        }
         context->Transform(transformParam);
     } else {
         LOGE("canvas transform error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
