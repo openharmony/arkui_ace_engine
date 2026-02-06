@@ -34,10 +34,21 @@ RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
     displayInfo_->SetDisplayId(dmDisplayInfo->GetDisplayId());
     auto dmRotation = dmDisplayInfo->GetRotation();
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
+    auto dmDisplaySourceMode = dmDisplayInfo->GetDisplaySourceMode();
+    displayInfo_->SetDisplaySourceMode(static_cast<DisplaySourceMode>(static_cast<uint32_t>(dmDisplaySourceMode)));
     GetIsFoldable();
     GetCurrentFoldStatus();
     GetCurrentFoldCreaseRegion();
     return displayInfo_;
+}
+
+void DisplayInfoUtils::UpdateDisplaySourceMode(const sptr<Rosen::Display>& display)
+{
+    CHECK_NULL_VOID(display);
+    auto dmDisplayInfo = display->GetDisplayInfo();
+    CHECK_NULL_VOID(dmDisplayInfo);
+    auto dmDisplaySourceMode = dmDisplayInfo->GetDisplaySourceMode();
+    displayInfo_->SetDisplaySourceMode(static_cast<DisplaySourceMode>(static_cast<uint32_t>(dmDisplaySourceMode)));
 }
 
 void DisplayInfoUtils::InitIsFoldable()
@@ -89,6 +100,11 @@ std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
     displayInfo_->SetCurrentFoldCreaseRegion(rects);
     hasInitFoldCreaseRegion_ = true;
     return rects;
+}
+
+DisplaySourceMode DisplayInfoUtils::GetDisplaySourceMode()
+{
+    return displayInfo_->GetDisplaySourceMode();
 }
 
 Rect DisplayInfoUtils::GetDisplayAvailableRect(int32_t displayId) const

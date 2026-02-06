@@ -3864,6 +3864,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             container->SetCurrentDisplayId(displayId);
             auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
             if (context && currentDisplay) {
+                auto displayUtils = container->GetDisplayInfoUtils();
+                if (displayUtils) {
+                    displayUtils->UpdateDisplaySourceMode(currentDisplay);
+                }
                 Rosen::DMRect availableArea;
                 Rosen::DMError ret = currentDisplay->GetAvailableArea(availableArea);
                 if (ret == Rosen::DMError::DM_OK) {

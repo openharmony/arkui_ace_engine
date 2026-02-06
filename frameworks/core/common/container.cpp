@@ -258,6 +258,29 @@ FoldStatus Container::GetCurrentFoldStatus()
     return displayManager_->GetCurrentFoldStatus();
 }
 
+DisplaySourceMode Container::GetDisplaySourceMode()
+{
+    return displayManager_->GetDisplaySourceMode();
+}
+
+bool Container::IsNeedModifySize(const RefPtr<Container>& subContainer)
+{
+    auto foldStatus = subContainer ? subContainer->GetCurrentFoldStatus() : GetCurrentFoldStatus();
+    auto sourceMode = subContainer ? subContainer->GetDisplaySourceMode() : GetDisplaySourceMode();
+    LOGD("FoldStatus: %{public}d, sourceMode: %{public}d", foldStatus, sourceMode);
+    if (foldStatus == FoldStatus::EXPAND || sourceMode == DisplaySourceMode::EXTEND) {
+        return false;
+    }
+
+    auto isCrossWindow = IsCrossAxisWindow();
+    auto isSceneBoard = IsSceneBoardWindow();
+    LOGD("isCrossWindow: %{public}d, isSceneBoard: %{public}d", isCrossWindow, isSceneBoard);
+    if (isCrossWindow || isSceneBoard) {
+        return true;
+    }
+    return false;
+}
+
 std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
 {
     return displayManager_->GetCurrentFoldCreaseRegion();

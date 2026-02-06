@@ -56,6 +56,10 @@ public:
     static RefPtr<MockContainer> GetContainer(int32_t containerId);
     static void SetMockColorMode(ColorMode mode);
     static ColorMode GetMockColorMode();
+    static void SetMockIsNeedModifySize(bool isNeedModifySize);
+    static bool GetMockIsNeedModifySize();
+    static void SetMockDisplayAvailableRect(const Rect& rect);
+    static Rect GetMockDisplayAvailableRect();
     void SetDisplayInfo(RefPtr<DisplayInfo> displayInfo);
 
     void SetIsFormRender(bool isFormRender) override
@@ -86,6 +90,11 @@ public:
     void SetIsSceneBoardWindow(bool isSceneBoardWindow)
     {
         isSceneBoardWindow_ = isSceneBoardWindow;
+    }
+
+    Rect GetDisplayAvailableRect() const override
+    {
+        return mockDisplayAvailableRect_;
     }
 
     bool IsCrossAxisWindow()
@@ -179,6 +188,8 @@ public:
     MOCK_METHOD(void, LoadCompleteManagerStopCollect, (), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
+    static bool mockIsNeedModifySize_;
+    static Rect mockDisplayAvailableRect_;
 
 private:
     RefPtr<TaskExecutor> taskExecutor_;

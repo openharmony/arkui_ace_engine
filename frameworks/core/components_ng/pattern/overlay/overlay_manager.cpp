@@ -20,7 +20,6 @@
 #include <utility>
 #include <vector>
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-#include "dm/display_manager.h"
 #include "want.h"
 #endif
 
@@ -9168,37 +9167,16 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode,
     }
 
     rect = container->GetDisplayAvailableRect();
-#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-    auto displayId = container->GetCurrentDisplayId();
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    auto displayInfo = defaultDisplay->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, rect);
-    auto sourceMode = displayInfo->GetDisplaySourceMode();
-    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND ||
-        sourceMode == Rosen::DisplaySourceMode::EXTEND) {
-        return rect;
-    }
-#else
-    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
-        return rect;
-    }
-#endif
-
     auto parentContainer = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
     CHECK_NULL_RETURN(parentContainer, rect);
-    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
-    if (isCrossWindow || isSceneBoard) {
+    if (parentContainer->IsNeedModifySize(container)) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
             pipeContext->GetInstanceId(), static_cast<SubwindowType>(type), GetSubwindowKeyNodeId(frameNode));
         CHECK_NULL_RETURN(subwindow, rect);
         rect = subwindow->GetFoldExpandAvailableRect();
     }
 
-    TAG_LOGI(AceLogTag::ACE_OVERLAY,
-        "parentWindow isSceneBoard: %{public}d isCrossWindow: %{public}d availableRect: %{public}s", isSceneBoard,
-        isCrossWindow, rect.ToString().c_str());
-
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "availableRect: %{public}s", rect.ToString().c_str());
     return rect;
 }
 
@@ -9283,6 +9261,13 @@ bool OverlayManager::IsNeedAvoidFoldCrease(
         pipeline = DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_RETURN(pipeline, false);
     }
+
+    auto sourceMode = container->GetDisplaySourceMode();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "displaySourceMode: %{public}d", sourceMode);
+    if (expandDisplay && sourceMode == DisplaySourceMode::EXTEND) {
+        return false;
+    }
+
     // Check is half fold status
     auto halfFoldStatus = expandDisplay ? container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD
                                         : pipeline->IsHalfFoldHoverStatus();
