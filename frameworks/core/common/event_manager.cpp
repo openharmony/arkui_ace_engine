@@ -1008,15 +1008,33 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
     return dispatchSuccess;
 }
 
+bool EventManager::CheckTouchInfoDump()
+{
+    NG::EventTouchInfoRecord& eventTouchInfoRecord = GetEventTouchInfoRecord();
+    if (eventTouchInfoRecord.dequeMaxCnt_ > 1) {
+        SetIsUseDumpTouchInfo(false);
+        eventTouchInfoRecord.dequeMaxCnt_ = 0;
+        return false;
+    }
+    return true;
+}
+
 void EventManager::AddDumpTouchInfo(const TouchEvent& event)
 {
     CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(event.sourceTool != SourceTool::MOUSE && event.sourceTool != SourceTool::TOUCHPAD &&
+                    event.convertInfo.first != UIInputEventType::MOUSE);
     if (IsUseDumpTouchInfo()) {
         NG::EventTouchInfoRecord& eventTouchInfoRecord = GetEventTouchInfoRecord();
-        eventTouchInfoRecord.AddTouchPoint(event, std::chrono::high_resolution_clock::now());
-        if (eventTouchInfoRecord.dequeMaxCnt_ > 1) {
-            SetIsUseDumpTouchInfo(false);
-            eventTouchInfoRecord.dequeMaxCnt_ = 0;
+        auto time = std::chrono::high_resolution_clock::now();
+        if (!event.history.empty()) {
+            for (const auto& item : event.history) {
+                eventTouchInfoRecord.AddTouchPoint(item, time);
+                CHECK_EQUAL_VOID(CheckTouchInfoDump(), false);
+            }
+        } else {
+            eventTouchInfoRecord.AddTouchPoint(event, time);
+            CheckTouchInfoDump();
         }
     }
 }

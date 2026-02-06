@@ -371,6 +371,17 @@ void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
     }
 }
 
+uint64_t GetDumpSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, 0);
+    auto inputTime = pointerEvent->GetSensorInputTime();
+    if (inputTime == 0) {
+        // inject event has no sensor time.
+        inputTime = static_cast<uint64_t>(pointerEvent->GetActionTime());
+    }
+    return inputTime;
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(pointerEvent, TouchEvent());
@@ -389,6 +400,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetTouchEventId(pointerEvent->GetId());
+    event.sensorTime = TimeStamp(std::chrono::microseconds(GetDumpSensorTime(pointerEvent)));
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();

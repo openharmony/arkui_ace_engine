@@ -290,6 +290,8 @@ public:
 
     void AddDumpTouchInfo(const TouchEvent& event);
 
+    bool CheckTouchInfoDump();
+
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
