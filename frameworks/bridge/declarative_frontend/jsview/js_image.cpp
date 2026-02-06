@@ -831,7 +831,7 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     RefPtr<ResourceObject> resObj;
-    bool status = ParseJsColor(info[0], color, resObj);
+    bool status = ParseJsColorForMaterial(info[0], color, resObj);
     if (!status) {
         if (ParseColorContent(info[0])) {
             ImageModel::GetInstance()->ResetImageFill();

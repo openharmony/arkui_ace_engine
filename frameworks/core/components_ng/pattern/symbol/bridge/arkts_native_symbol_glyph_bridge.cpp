@@ -379,16 +379,12 @@ bool IsJsView(const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
     return jsVal->IsBoolean() && jsVal->ToBoolean(vm)->Value();
 }
 
-void PrepareFontColorContainers(size_t length, std::vector<ArkUI_Uint32>& colorArray, std::vector<Color>* colorArr,
+void PrepareFontColorContainers(size_t length, std::vector<Color>& colorArray,
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>* resObjArr, std::vector<int32_t>* resIndexes,
     std::vector<RefPtr<ResourceObject>>* resObjects)
 {
     colorArray.clear();
     colorArray.reserve(length);
-    if (colorArr) {
-        colorArr->clear();
-        colorArr->reserve(length);
-    }
     if (resObjArr) {
         resObjArr->clear();
         resObjArr->reserve(length);
@@ -403,14 +399,11 @@ void PrepareFontColorContainers(size_t length, std::vector<ArkUI_Uint32>& colorA
     }
 }
 
-void ClearFontColorContainers(std::vector<ArkUI_Uint32>& colorArray, std::vector<Color>* colorArr,
+void ClearFontColorContainers(std::vector<Color>& colorArray,
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>* resObjArr, std::vector<int32_t>* resIndexes,
     std::vector<RefPtr<ResourceObject>>* resObjects)
 {
     colorArray.clear();
-    if (colorArr) {
-        colorArr->clear();
-    }
     if (resObjArr) {
         resObjArr->clear();
     }
@@ -441,12 +434,11 @@ void PushFontColorResource(size_t index, const RefPtr<ResourceObject>& resObj,
 }
 
 bool BuildFontColors(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<panda::ArrayRef>& array,
-    std::vector<ArkUI_Uint32>& colorArray, std::vector<Color>* colorArr,
-    std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>* resObjArr, std::vector<int32_t>* resIndexes,
-    std::vector<RefPtr<ResourceObject>>* resObjects)
+    std::vector<Color>& colorArray, std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>* resObjArr,
+    std::vector<int32_t>* resIndexes, std::vector<RefPtr<ResourceObject>>* resObjects)
 {
     size_t length = static_cast<size_t>(ArkTSUtils::GetArrayLength(vm, array));
-    PrepareFontColorContainers(length, colorArray, colorArr, resObjArr, resIndexes, resObjects);
+    PrepareFontColorContainers(length, colorArray, resObjArr, resIndexes, resObjects);
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
     for (size_t index = 0; index < length; index++) {
@@ -454,13 +446,10 @@ bool BuildFontColors(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<panda::
         Color color;
         RefPtr<ResourceObject> resObj;
         if (!ArkTSUtils::ParseJsSymbolColorAlpha(vm, value, color, resObj, nodeInfo)) {
-            ClearFontColorContainers(colorArray, colorArr, resObjArr, resIndexes, resObjects);
+            ClearFontColorContainers(colorArray, resObjArr, resIndexes, resObjects);
             return false;
         }
-        colorArray.emplace_back(color.GetValue());
-        if (colorArr) {
-            colorArr->emplace_back(color);
-        }
+        colorArray.emplace_back(color);
         PushFontColorResource(index, resObj, resObjArr, resIndexes, resObjects);
     }
     return true;
@@ -473,17 +462,17 @@ ArkUINativeModuleValue SetFontColorCommon(
         return panda::JSValueRef::Undefined(vm);
     }
     auto array = Local<panda::ArrayRef>(secondArg);
-    std::vector<ArkUI_Uint32> colorArray;
+    std::vector<Color> colorArray;
     std::vector<int32_t> resIndexes;
     std::vector<RefPtr<ResourceObject>> resObjects;
     auto modifier = GetArkUINodeModifiers()->getSymbolGlyphModifier();
-    if (!BuildFontColors(vm, nativeNode, array, colorArray, nullptr, nullptr, &resIndexes, &resObjects)) {
-        modifier->setFontColorJs(nativeNode, colorArray.data(), static_cast<ArkUI_Int32>(colorArray.size()),
-            nullptr, nullptr, 0);
+    if (!BuildFontColors(vm, nativeNode, array, colorArray, nullptr, &resIndexes, &resObjects)) {
+        modifier->setFontColorJs(nativeNode, reinterpret_cast<ArkUI_InnerColor*>(colorArray.data()),
+            static_cast<ArkUI_Int32>(colorArray.size()), nullptr, nullptr, 0);
         return panda::JSValueRef::Undefined(vm);
     }
-    modifier->setFontColorJs(nativeNode, colorArray.data(), static_cast<ArkUI_Int32>(colorArray.size()),
-        resIndexes.empty() ? nullptr : resIndexes.data(),
+    modifier->setFontColorJs(nativeNode, reinterpret_cast<ArkUI_InnerColor*>(colorArray.data()),
+        static_cast<ArkUI_Int32>(colorArray.size()), resIndexes.empty() ? nullptr : resIndexes.data(),
         resObjects.empty() ? nullptr : reinterpret_cast<void**>(resObjects.data()),
         static_cast<ArkUI_Int32>(resObjects.size()));
     return panda::JSValueRef::Undefined(vm);

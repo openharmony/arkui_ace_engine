@@ -1120,7 +1120,7 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
     CHECK_NULL_VOID(paragrah);
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE("TxtParagraph::UpdateColor[id:%d][from:%d][to:%d][color:%s]", paraStyle_.textStyleUid,
-            static_cast<int32_t>(from), static_cast<int32_t>(to), color.ColorToString().c_str());
+            static_cast<int32_t>(from), static_cast<int32_t>(to), color.ToString().c_str());
     }
     auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
     CHECK_NULL_VOID(paragraphTxt);

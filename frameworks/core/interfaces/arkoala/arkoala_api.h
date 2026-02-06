@@ -124,6 +124,7 @@ struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
 struct ArkUI_AccessibilityProvider;
+typedef struct ArkUI_InnerColor ArkUI_InnerColor;
 struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
 };
@@ -550,6 +551,7 @@ struct ArkUIIconOptionsStruct {
     ArkUI_Float32 value;
     ArkUI_Int32 unit;
     ArkUI_Int32 color;
+    ArkUI_Int32 colorPlaceholder;
     ArkUI_CharPtr src;
 };
 
@@ -3713,6 +3715,7 @@ struct ArkUITextModifier {
     void (*resetTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     void (*setFontColorWithPlaceholder)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder);
+    void (*setFontColorPtr)(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* fontColorRawPtr);
     void* (*getCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
     void (*getGlyphRangeForCharacterRange)(
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
@@ -3773,6 +3776,8 @@ struct ArkUIButtonModifier {
     ArkUI_Float32 (*getButtonMinFontScale)(ArkUINodeHandle node);
     ArkUI_Float32 (*getButtonMaxFontScale)(ArkUINodeHandle node);
     void (*setButtonFontColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 fontColor, ArkUI_VoidPtr colorRawPtr);
+    void (*setButtonFontColorUseColorPtr)(
+        ArkUINodeHandle node, const ArkUI_InnerColor* fontColor, ArkUI_VoidPtr colorRawPtr);
     void (*setButtonFontFamilyPtr)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, ArkUI_VoidPtr familyRawPtr);
     void (*setButtonLabelStylePtr)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
         const ArkUI_Int32* valueArray, const ArkUI_Float32* dimensionArray, const ArkUI_Uint32* dataCountArray,
@@ -3817,8 +3822,7 @@ struct ArkUIImageModifier {
     void (*setMatchTextDirection)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMatchTextDirection)(ArkUINodeHandle node);
     void (*setFillColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
-    void (*setFillColorWithColorSpace)(
-        ArkUINodeHandle node, ArkUI_Uint32 value, ArkUI_Uint32 colorSpace, void* colorRawPtr);
+    void (*setFillColorWithColorSpace)(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* colorRawPtr);
     void (*resetImageFill)(ArkUINodeHandle node);
     void (*resetFillColor)(ArkUINodeHandle node);
     void (*setAlt)(
@@ -6982,20 +6986,20 @@ struct ArkUISearchModifier {
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
-    void (*setSearchPlaceholderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    void (*setSearchPlaceholderColor)(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* resRawPtr);
     void (*resetSearchPlaceholderColor)(ArkUINodeHandle node);
     void (*setSearchTextFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr);
     void (*resetSearchTextFont)(ArkUINodeHandle node);
     void (*setSearchSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 selectionMenuHidden);
     void (*resetSearchSelectionMenuHidden)(ArkUINodeHandle node);
     void (*setSearchCaretStyle)(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit,
-        ArkUI_Uint32 caretColor, void* widthRawPtr, void* colorRawPtr);
+        const ArkUI_InnerColor* caretColor, void* widthRawPtr, void* colorRawPtr);
     void (*resetSearchCaretStyle)(ArkUINodeHandle node);
     void (*resetSearchCaretColor)(const ArkUI_Float32 number, ArkUI_Int32 unit, void* widthRawPtr);
     void (*setSearchTextAlign)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSearchTextAlign)(ArkUINodeHandle node);
     void (*setSearchCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-        ArkUI_Uint32 color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes);
+        const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes);
     void (*setJsSearchCancelButton)(ArkUI_Int32 style, const struct ArkUIIconOptionsStruct* value,
         ArkUIImageIconRes* imageIconRes, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
     void (*setJsSearchDefaultCancelButton)(ArkUI_Int32 style);
@@ -7014,7 +7018,7 @@ struct ArkUISearchModifier {
     void (*setSearchSearchButton)(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
         ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView);
     void (*resetSearchSearchButton)(ArkUINodeHandle node);
-    void (*setSearchFontColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr);
+    void (*setSearchFontColor)(ArkUINodeHandle node, const ArkUI_InnerColor* value, void* resRawPtr);
     void (*resetSearchFontColor)(ArkUINodeHandle node);
     void (*setSearchCopyOption)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchCopyOption)(ArkUINodeHandle node);
@@ -7345,7 +7349,7 @@ struct ArkUISymbolGlyphModifier {
     void (*resetSymbolShadow)(ArkUINodeHandle node);
     void (*setShaderStyle)(ArkUINodeHandle node, const OHOS::Ace::SymbolGradient* gradients, ArkUI_Int32 size);
     void (*resetShaderStyle)(ArkUINodeHandle node);
-    void (*setFontColorJs)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size,
+    void (*setFontColorJs)(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_Int32 size,
         ArkUI_Int32* resIndexes, void** resObjects, ArkUI_Int32 resSize);
 };
 

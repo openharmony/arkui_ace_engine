@@ -585,7 +585,7 @@ bool ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T&
     } else if constexpr (std::is_same_v<T, std::optional<Color>>) {
         if (name == "selectedColor" || name == "unselectedColor") {
             Color color;
-            if (ResourceParseUtils::ParseResColor(resObj, color)) {
+            if (ResourceParseUtils::ParseResColor(resObj, color, true)) {
                 result = color;
             }
             return true;
