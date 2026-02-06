@@ -296,6 +296,13 @@ public:
         return DragOperationsMask::DRAG_ALLOW_EVERY;
     }
     void SetAllowedDragOperation(DragOperationsMask allowed_op) override {}
+
+    bool isDataCleared_ = false;
+
+    void ClearDragData() override
+    {
+        isDataCleared_ = true;
+    }
 };
 
 class NWebDragDataTrueDummy : public NWeb::NWebDragData {
@@ -1348,6 +1355,34 @@ HWTEST_F(WebPatternAddTestNg, HandleTouchUpResetDragState001, TestSize.Level1)
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
         .WillRepeatedly(testing::Return(false));
+#endif
+}
+
+/**
+ * @tc.name: ClearDragData_001
+ * @tc.desc: ClearDragData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, ClearDragData_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<PixelMapImpl>();
+    auto mockNWebDragData = std::make_shared<NWebDragDataDummy>();
+    webPattern->delegate_->dragData_ = mockNWebDragData;
+    EXPECT_FALSE(mockNWebDragData->isDataCleared_);
+    webPattern->ClearDragData();
+    EXPECT_TRUE(mockNWebDragData->isDataCleared_);
 #endif
 }
 } // namespace OHOS::Ace::NG
