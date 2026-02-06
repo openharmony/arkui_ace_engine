@@ -86,6 +86,7 @@ struct NavigationOptions;
 struct NavigationTitlebarOptions;
 struct NavigationTransition;
 struct PreviewBadge;
+struct KeyboardAppearanceConfig;
 
 namespace Converter {
 // SORTED_SECTION
@@ -657,6 +658,7 @@ namespace Converter {
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
+    template<> KeyboardAppearanceConfig Convert(const Ark_KeyboardAppearanceConfig& src);
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> NG::LeadingMarginSpanOptions Convert(const Ark_LeadingMarginSpanDrawInfo& src);
     template<> NG::DrawableLeadingMargin Convert(const Ark_LeadingMarginSpan& src);

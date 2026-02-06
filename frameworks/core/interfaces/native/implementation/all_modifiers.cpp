@@ -310,6 +310,7 @@ const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionM
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
 const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor();
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor();
+const GENERATED_ArkUIMagnifierAccessor* GetMagnifierAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
 const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor();
 const GENERATED_ArkUIMenuItemConfigurationAccessor* GetMenuItemConfigurationAccessor();
@@ -664,6 +665,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetListScrollerAccessor,
         GetLongPressGestureEventAccessor,
         GetLongPressRecognizerAccessor,
+        GetMagnifierAccessor,
         GetMatrix2DAccessor,
         GetMeasurableAccessor,
         GetMenuItemConfigurationAccessor,

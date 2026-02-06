@@ -36286,6 +36286,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // IndicatorComponentControllerAccessor
     namespace IUIContextAccessor {
+    void DestroyPeerImpl(Ark_IUIContext peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_IUIContext ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_IUIContext>(100);
+        }
+        string out("new IUIContext(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_IUIContext>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_IUIContext>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -36462,6 +36496,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, feature);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_Magnifier>(300);
+        }
+        string out("getMagnifier(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_Magnifier>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_Magnifier>(300);
     }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
@@ -38139,6 +38185,79 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // LongPressRecognizerAccessor
+    namespace MagnifierAccessor {
+    void DestroyPeerImpl(Ark_Magnifier peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Magnifier ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_Magnifier>(100);
+        }
+        string out("new Magnifier(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_Magnifier>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_Magnifier>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void BindImpl(Ark_Magnifier peer,
+                  const Ark_String* id)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("bind(");
+        WriteToString(&out, id);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowImpl(Ark_Magnifier peer,
+                  Ark_Float64 x,
+                  Ark_Float64 y)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("show(");
+        WriteToString(&out, x);
+        out.append(", ");
+        WriteToString(&out, y);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UnbindImpl(Ark_Magnifier peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("unbind(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // MagnifierAccessor
     namespace Matrix2DAccessor {
     void DestroyPeerImpl(Ark_Matrix2D peer)
     {
@@ -52748,6 +52867,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::DestroyPeerImpl,
+            IUIContextAccessor::ConstructImpl,
+            IUIContextAccessor::GetFinalizerImpl,
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
             IUIContextAccessor::DispatchKeyEventImpl,
@@ -52756,10 +52878,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::GetMagnifierImpl,
         };
         return &IUIContextAccessorImpl;
     }
 
+    struct IUIContextPeer {
+        virtual ~IUIContextPeer() = default;
+    };
     const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     {
         static const GENERATED_ArkUIJsGeolocationAccessor JsGeolocationAccessorImpl {
@@ -53089,6 +53215,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct LongPressRecognizerPeer {
         virtual ~LongPressRecognizerPeer() = default;
+    };
+    const GENERATED_ArkUIMagnifierAccessor* GetMagnifierAccessor()
+    {
+        static const GENERATED_ArkUIMagnifierAccessor MagnifierAccessorImpl {
+            MagnifierAccessor::DestroyPeerImpl,
+            MagnifierAccessor::ConstructImpl,
+            MagnifierAccessor::GetFinalizerImpl,
+            MagnifierAccessor::BindImpl,
+            MagnifierAccessor::ShowImpl,
+            MagnifierAccessor::UnbindImpl,
+        };
+        return &MagnifierAccessorImpl;
+    }
+
+    struct MagnifierPeer {
+        virtual ~MagnifierPeer() = default;
     };
     const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     {
@@ -55276,6 +55418,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetListScrollerAccessor,
             GetLongPressGestureEventAccessor,
             GetLongPressRecognizerAccessor,
+            GetMagnifierAccessor,
             GetMatrix2DAccessor,
             GetMeasurableAccessor,
             GetMenuItemConfigurationAccessor,

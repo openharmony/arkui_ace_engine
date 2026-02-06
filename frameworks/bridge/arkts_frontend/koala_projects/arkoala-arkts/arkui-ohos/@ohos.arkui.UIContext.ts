@@ -1156,7 +1156,7 @@ export class UIObserver {
         }
     }
 
-    public onTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+    public onTextChange(callback: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTextChange(callback);
         }
@@ -1167,15 +1167,15 @@ export class UIObserver {
         }
     }
     public onTextChange(
-        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        identity: uiObserver.ObserverOptions, callback: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
-            this.observerImpl!.onTextChange(callback);
+            this.observerImpl!.onTextChange(identity, callback);
         }
     }
     public offTextChange(
         identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
-            this.observerImpl!.offTextChange(callback);
+            this.observerImpl!.offTextChange(identity, callback);
         }
     }
 

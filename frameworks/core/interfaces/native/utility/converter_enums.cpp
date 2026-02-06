@@ -2207,7 +2207,7 @@ void AssignCast(std::optional<KeyboardFluidLightMode>& dst, const Ark_KeyboardFl
         case Ark_KeyboardFluidLightMode::ARK_KEYBOARD_FLUID_LIGHT_MODE_BACKGROUND_FLUID_LIGHT:
             dst = KeyboardFluidLightMode::BACKGROUND_FLUID_LIGHT; break;
         default:
-            LOGE("Unexpected enum value in Ark_SuperscriptStyle: %{public}d", src);
+            LOGE("Unexpected enum value in Ark_KeyboardFluidLightMode: %{public}d", src);
             break;
     }
 }

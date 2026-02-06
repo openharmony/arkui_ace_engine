@@ -34891,6 +34891,14 @@ void impl_IndicatorComponentController_changeIndex(Ark_NativePointer thisPtr, KS
         GetAccessors()->getIndicatorComponentControllerAccessor()->changeIndex(self, static_cast<Opt_Int32*>(&indexValueTemp), static_cast<Opt_Boolean*>(&useAnimationValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(IndicatorComponentController_changeIndex, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_IUIContext_construct() {
+        return GetAccessors()->getIUIContextAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(IUIContext_construct, Ark_NativePointer)
+Ark_NativePointer impl_IUIContext_getFinalizer() {
+        return GetAccessors()->getIUIContextAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(IUIContext_getFinalizer, Ark_NativePointer)
 void impl_IUIContext_freezeUINode0(const KStringPtr& id, Ark_Boolean isFrozen) {
         GetAccessors()->getIUIContextAccessor()->freezeUINode0((const Ark_String*) (&id), isFrozen);
 }
@@ -34977,6 +34985,11 @@ void impl_IUIContext_unbindTabsFromNestedScrollable(Ark_NativePointer tabsContro
         GetAccessors()->getIUIContextAccessor()->unbindTabsFromNestedScrollable(static_cast<Ark_TabsController>(tabsController), static_cast<Ark_Scroller>(parentScroller), static_cast<Ark_Scroller>(childScroller));
 }
 KOALA_INTEROP_DIRECT_V3(IUIContext_unbindTabsFromNestedScrollable, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_IUIContext_getMagnifier(Ark_NativePointer thisPtr) {
+        Ark_IUIContext self = reinterpret_cast<Ark_IUIContext>(thisPtr);
+        return GetAccessors()->getIUIContextAccessor()->getMagnifier(self);
+}
+KOALA_INTEROP_DIRECT_1(IUIContext_getMagnifier, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_construct() {
         return GetAccessors()->getJsGeolocationAccessor()->construct();
 }
@@ -35771,6 +35784,29 @@ Ark_Int32 impl_LongPressRecognizer_getDuration(Ark_NativePointer thisPtr) {
         return GetAccessors()->getLongPressRecognizerAccessor()->getDuration(self);
 }
 KOALA_INTEROP_DIRECT_1(LongPressRecognizer_getDuration, Ark_Int32, Ark_NativePointer)
+Ark_NativePointer impl_Magnifier_construct() {
+        return GetAccessors()->getMagnifierAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(Magnifier_construct, Ark_NativePointer)
+Ark_NativePointer impl_Magnifier_getFinalizer() {
+        return GetAccessors()->getMagnifierAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(Magnifier_getFinalizer, Ark_NativePointer)
+void impl_Magnifier_bind(Ark_NativePointer thisPtr, const KStringPtr& id) {
+        Ark_Magnifier self = reinterpret_cast<Ark_Magnifier>(thisPtr);
+        GetAccessors()->getMagnifierAccessor()->bind(self, (const Ark_String*) (&id));
+}
+KOALA_INTEROP_V2(Magnifier_bind, Ark_NativePointer, KStringPtr)
+void impl_Magnifier_show(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
+        Ark_Magnifier self = reinterpret_cast<Ark_Magnifier>(thisPtr);
+        GetAccessors()->getMagnifierAccessor()->show(self, x, y);
+}
+KOALA_INTEROP_V3(Magnifier_show, Ark_NativePointer, KDouble, KDouble)
+void impl_Magnifier_unbind(Ark_NativePointer thisPtr) {
+        Ark_Magnifier self = reinterpret_cast<Ark_Magnifier>(thisPtr);
+        GetAccessors()->getMagnifierAccessor()->unbind(self);
+}
+KOALA_INTEROP_DIRECT_V1(Magnifier_unbind, Ark_NativePointer)
 Ark_NativePointer impl_Matrix2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto unitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

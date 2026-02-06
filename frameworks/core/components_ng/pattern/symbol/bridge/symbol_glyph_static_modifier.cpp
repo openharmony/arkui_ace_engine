@@ -286,6 +286,8 @@ SymbolGradient ProcessShaderStyleForSymbol(ShaderStylePeer* shaderPeer, FrameNod
                 const auto& colors = gradientValue.GetColors();
                 for (const auto& gradientColor : colors) {
                     gradient.symbolColor.emplace_back(gradientColor.GetColor());
+                    gradient.symbolOpacities.emplace_back(static_cast<float>(
+ 	                    gradientColor.GetDimension().Value() / 100.0));
                 }
                 gradient.repeating = gradientValue.GetRepeat();
                 if (gradientValue.GetLinearGradient()->angle.has_value()) {
@@ -306,6 +308,8 @@ SymbolGradient ProcessShaderStyleForSymbol(ShaderStylePeer* shaderPeer, FrameNod
                 const auto& colors = gradientValue.GetColors();
                 for (const auto& gradientColor : colors) {
                     gradient.symbolColor.emplace_back(gradientColor.GetColor());
+                    gradient.symbolOpacities.emplace_back(static_cast<float>(
+ 	                    gradientColor.GetDimension().Value() / 100.0));
                 }
                 gradient.repeating = gradientValue.GetRepeat();
                 gradient.radialCenterX = radialGradientValue->radialCenterX;

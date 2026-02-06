@@ -1657,6 +1657,16 @@ RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
     return contentChangeMgr_;
 }
 
+void NG::PipelineContext::SetMagnifierController(const RefPtr<NG::MagnifierController>& magnifierController)
+{
+    magnifierController_ = magnifierController;
+}
+
+RefPtr<NG::MagnifierController> NG::PipelineContext::GetMagnifierController() const
+{
+    return magnifierController_;
+}
+
 void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,

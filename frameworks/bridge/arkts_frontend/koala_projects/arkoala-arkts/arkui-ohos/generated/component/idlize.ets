@@ -3332,7 +3332,29 @@ export class GlobalScopeUicontextTextMenu {
         return
     }
 }
-export class IUIContext {
+export class IUIContextInternal {
+    public static fromPtr(ptr: KPointer): IUIContext {
+        return new IUIContext(ptr)
+    }
+}
+export class IUIContext implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, IUIContext.getFinalizer())
+    }
+    constructor() {
+        this(IUIContext.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._IUIContext_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._IUIContext_getFinalizer()
+    }
     static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? 1 : 0)
     }
@@ -3476,6 +3498,14 @@ export class IUIContext {
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
+    public getMagnifier(): Magnifier {
+        return this.getMagnifier_serialize()
+    }
+    getMagnifier_serialize(): Magnifier {
+        const retval = ArkUIGeneratedNativeModule._IUIContext_getMagnifier(this.peer!.ptr)
+        const obj : Magnifier = MagnifierInternal.fromPtr(retval)
+        return obj
+    }
 }
 export class LazyBuild {
     static ApplyLazyBuilder_serialize(): void {
@@ -3604,6 +3634,54 @@ export class LevelOrderExtender implements MaterializedBase {
     getOrder_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_getOrder(this.peer!.ptr)
         return retval
+    }
+}
+export class MagnifierInternal {
+    public static fromPtr(ptr: KPointer): Magnifier {
+        return new Magnifier(ptr)
+    }
+}
+export class Magnifier implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, Magnifier.getFinalizer())
+    }
+    constructor() {
+        this(Magnifier.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._Magnifier_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._Magnifier_getFinalizer()
+    }
+    public bind(id: string): void {
+        const id_casted = id as (string)
+        this.bind_serialize(id_casted)
+        return
+    }
+    public show(x: double, y: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        this.show_serialize(x_casted, y_casted)
+        return
+    }
+    public unbind(): void {
+        this.unbind_serialize()
+        return
+    }
+    bind_serialize(id: string): void {
+        ArkUIGeneratedNativeModule._Magnifier_bind(this.peer!.ptr, id)
+    }
+    show_serialize(x: double, y: double): void {
+        ArkUIGeneratedNativeModule._Magnifier_show(this.peer!.ptr, x, y)
+    }
+    unbind_serialize(): void {
+        ArkUIGeneratedNativeModule._Magnifier_unbind(this.peer!.ptr)
     }
 }
 export class NavExtender {
@@ -6761,6 +6839,17 @@ export class CustomDialogControllerExtender_serializer {
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
     }
 }
+export class IUIContext_serializer {
+    public static write(buffer: SerializerBase, value: IUIContext): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): IUIContext {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return IUIContextInternal.fromPtr(ptr)
+    }
+}
 export class LevelOrderExtender_serializer {
     public static write(buffer: SerializerBase, value: LevelOrderExtender): void {
         let valueSerializer : SerializerBase = buffer
@@ -6770,6 +6859,17 @@ export class LevelOrderExtender_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LevelOrderExtenderInternal.fromPtr(ptr)
+    }
+}
+export class Magnifier_serializer {
+    public static write(buffer: SerializerBase, value: Magnifier): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): Magnifier {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return MagnifierInternal.fromPtr(ptr)
     }
 }
 export class NodeEdgeStyles_serializer {
