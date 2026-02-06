@@ -4089,8 +4089,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        rootNode_->DumpSimplifyTreeWithParamConfig(
-            0, root, params[1] == "1", { params[2] == "1", params[3] == "1", params[4] == "1" });
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, params[1] == "1",
+            { params[2] == "1", params[3] == "1", params[4] == "1", params[5] == "1", params[6] == "1" });
         DumpLog::GetInstance().Print(root->ToString());
 #ifndef IS_RELEASE_VERSION
     } else if (params[0] == "-contentChange") {
