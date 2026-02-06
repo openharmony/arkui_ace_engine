@@ -169,11 +169,13 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<TabBarLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentDelta(currentDelta_);
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
@@ -191,6 +193,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<TabBarPaintProperty>();
     }
 
@@ -198,6 +201,7 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<TabBarAccessibilityProperty>();
     }
 

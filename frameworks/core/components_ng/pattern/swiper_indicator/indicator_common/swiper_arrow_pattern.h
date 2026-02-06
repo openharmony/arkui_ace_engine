@@ -34,11 +34,13 @@ public:
     ~SwiperArrowPattern() override = default;
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SwiperArrowLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SwiperArrowLayoutAlgorithm>();
     }
 

@@ -278,6 +278,7 @@ void TabContentModelStatic::SetOnWillHide(FrameNode* node, std::function<void()>
 
 RefPtr<FrameNode> TabContentModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     auto pipelineContext = frameNode->GetContext();
@@ -365,6 +366,7 @@ RefPtr<TabsNode> TabContentModelStatic::FindTabsNode(const RefPtr<UINode>& tabCo
 void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update)
 {
     CHECK_NULL_VOID(tabContent);
+    ACE_UINODE_TRACE(tabContent);
     auto tabContentId = tabContent->GetId();
 
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContent);

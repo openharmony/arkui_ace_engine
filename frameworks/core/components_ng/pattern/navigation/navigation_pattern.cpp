@@ -540,6 +540,7 @@ void NavigationPattern::OnModifyDone()
     UpdateChildLayoutPolicy();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     auto navBarOrHomeDesteNode =
         AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
     if (navBarOrHomeDesteNode) {
@@ -3829,6 +3830,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     std::string toPathInfo;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     bool isNotNeedAnimation = !isAnimated;
 #if defined(ENABLE_NAV_SPLIT_MODE)
     isNotNeedAnimation = !isAnimated ||

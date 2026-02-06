@@ -116,6 +116,7 @@ void NavToolbarPattern::OnModifyDone()
 {
     auto hostNode = AceType::DynamicCast<NavToolbarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     auto containerNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolbarContainerNode());
     CHECK_NULL_VOID(containerNode);
     auto gestureHub = containerNode->GetOrCreateGestureEventHub();

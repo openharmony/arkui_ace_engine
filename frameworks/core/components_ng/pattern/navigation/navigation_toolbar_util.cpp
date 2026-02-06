@@ -502,6 +502,7 @@ void BuildToolbarMoreMenuNodeAction(const RefPtr<BarItemNode>& barItemNode, cons
 bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vector<OptionParam>&& params,
     const FieldProperty& fieldProperty, const RefPtr<FrameNode>& containerNode, BarNode& barNode)
 {
+    ACE_UINODE_TRACE(barNode.nodeBase);
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
         V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
@@ -621,6 +622,7 @@ void NavigationToolbarUtil::SetToolbarConfiguration(const RefPtr<NavDestinationN
     std::vector<NG::BarItem>&& toolBarItems, bool enabled, const FieldProperty& fieldProperty)
 {
     CHECK_NULL_VOID(nodeBase);
+    ACE_UINODE_TRACE(nodeBase);
     if (nodeBase->GetPrevToolBarIsCustom().value_or(false)) {
         auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetPreToolBarNode());
         CHECK_NULL_VOID(toolbarNode);

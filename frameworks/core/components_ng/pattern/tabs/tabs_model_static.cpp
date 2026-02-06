@@ -54,6 +54,7 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
 
 RefPtr<FrameNode> TabsModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());

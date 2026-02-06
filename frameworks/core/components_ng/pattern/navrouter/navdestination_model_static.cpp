@@ -42,6 +42,7 @@ void CreateToolBarNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode
     }
     int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
+    ACE_UINODE_TRACE(toolBarNodeId);
     auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
         V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
     toolBarNode->MarkModifyDone();
@@ -328,6 +329,7 @@ RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(
     int32_t nodeId, const RefPtr<NavPathInfo>& navPathInfo, std::function<void()>&& deepRenderFunc)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(deepRenderFunc, nullptr);
         auto parent = AceType::DynamicCast<UINode>(FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId));
