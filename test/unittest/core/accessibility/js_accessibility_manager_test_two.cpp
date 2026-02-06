@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
- #include "gmock/gmock.h"
- #include "gtest/gtest.h"
- 
- #define private public
- #define protected public
- 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#define private public
+#define protected public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 
 using namespace OHOS::Accessibility;
@@ -72,7 +74,95 @@ void JsAccessibilityManagerTestTwo::TearDownTestCase()
  * @tc.desc: Test GetNextFocusNodeByManager with valid currentNode and rootNode
  * @tc.type: FUNC
  */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager001, TestSize.Level1)
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetNextFocusNodeByManager
+     */
+    RefPtr<NG::UINode> currentNode = AceType::MakeRefPtr<NG::UINode>();
+    RefPtr<NG::FrameNode> rootNode = AceType::MakeRefPtr<NG::FrameNode>();
+    RefPtr<NG::FrameNode> expectedNode = AceType::MakeRefPtr<NG::FrameNode>();
+    RefPtr<NG::FrameNode> result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
+    EXPECT_EQ(result, expectedNode);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager002
+ * @tc.desc: Test GetNextFocusNodeByManager with null currentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetNextFocusNodeByManager
+     */
+    RefPtr<NG::UINode> currentNode = nullptr;
+    RefPtr<NG::FrameNode> rootNode = AceType::MakeRefPtr<NG::FrameNode>();
+    RefPtr<NG::FrameNode> result = accessibilityManager_->GetNextFocusNodeByManager(currentNode, rootNode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager003
+ * @tc.desc: Test GetNextFocusNodeByManager with null rootNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetNextFocusNodeByManager
+     */
+    RefPtr<NG::UINode> currentNode = AceType::MakeRefPtr<NG::UINode>();
+    RefPtr<NG::FrameNode> rootNode = nullptr;
+    RefPtr<NG::FrameNode> result = accessibilityManager_->GetNextFocusNodeByManager(currentNode, rootNode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager003
+ * @tc.desc: Test GetNextFocusNodeByManager with both currentNode and rootNode as null
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetNextFocusNodeByManager
+     */
+    RefPtr<NG::UINode> currentNode = nullptr;
+    RefPtr<NG::FrameNode> rootNode = nullptr;
+    RefPtr<NG::FrameNode> result = accessibilityManager_->GetNextFocusNodeByManager(currentNode, rootNode);
+    EXPECT_EQ(result, nullptr);
 }
 } // namespace OHOS::Ace::NG
