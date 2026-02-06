@@ -3674,7 +3674,7 @@ test/unittest/core/pattern/radio/ @arkuipopupwindow_all
 test/unittest/core/pattern/rating/ @arkuipopupwindow_all
 test/unittest/core/pattern/recycle_node/
 test/unittest/core/pattern/refresh/ @arkuiscroll
-test/unittest/core/pattern/relative_container/
+test/unittest/core/pattern/relative_container/ @arkuilayout1
 test/unittest/core/pattern/render_node/ @arkui_framework_xnode
 test/unittest/core/pattern/rich_editor/ @arkui_rich_editor
 test/unittest/core/pattern/rich_editor_drag/ @arkui_rich_editor
