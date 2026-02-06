@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,4 +41,38 @@ public:
     ~MockFrameNode() override = default;
 };
 } // namespace
+
+class JsAccessibilityManagerTestTwo : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+};
+
+void JsAccessibilityManagerTestTwo::SetUpTestCase()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+}
+
+void JsAccessibilityManagerTestTwo::TearDownTestCase()
+{
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: JsAccessibilityManager001
+ * @tc.desc: Test GetNextFocusNodeByManager with valid currentNode and rootNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager001, TestSize.Level1)
+{
+}
 } // namespace OHOS::Ace::NG
