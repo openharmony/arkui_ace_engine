@@ -1503,4 +1503,327 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeScrollToIndexTest, TestSize.Level1)
     auto ret=nodeAPI->setAttribute(grid, NODE_GRID_SCROLL_TO_INDEX, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
+
+/**
+ * @tc.name: NativeNodeSpanFontWeightTest001
+ * @tc.desc: Test NODE_SPAN_FONT_WEIGHT attribute with simple value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{ .i32 = 700 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attr = nodeAPI->getAttribute(spanNode, NODE_SPAN_FONT_WEIGHT);
+    EXPECT_NE(attr, nullptr);
+    if (attr) {
+        EXPECT_EQ(attr->value[0].i32, 700);
+    }
+
+    EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT_WEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontWeightTest002
+ * @tc.desc: Test NODE_SPAN_FONT_WEIGHT attribute with FontWeightConfigs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    OH_ArkUI_FontWeightConfigs* configs = OH_ArkUI_FontWeightConfigs_Create();
+    ASSERT_NE(configs, nullptr);
+
+    OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(configs, true);
+    OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory(configs, true);
+
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(configs));
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(configs));
+
+    ArkUI_NumberValue value[] = {{ .i32 = 700 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    item.object = configs;
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT_WEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_FontWeightConfigs_Destroy(configs);
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontWeightTest003
+ * @tc.desc: Test NODE_SPAN_FONT_WEIGHT attribute with only variableFontWeight enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    OH_ArkUI_FontWeightConfigs* configs = OH_ArkUI_FontWeightConfigs_Create();
+    ASSERT_NE(configs, nullptr);
+
+    OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(configs, true);
+
+    ArkUI_NumberValue value[] = {{ .i32 = 600 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    item.object = configs;
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT_WEIGHT), ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_FontWeightConfigs_Destroy(configs);
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontWeightTest004
+ * @tc.desc: Test NODE_SPAN_FONT_WEIGHT with invalid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{ .i32 = -1 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    value[0].i32 = 100;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    EXPECT_EQ(nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontTest001
+ * @tc.desc: Test NODE_SPAN_FONT attribute with basic parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    ArkUI_NumberValue value[] = {
+        { .f32 = 16.0f }, { .i32 = 400 }, { .i32 = ARKUI_FONT_STYLE_NORMAL }
+    };
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "Arial,sans-serif"};
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attr = nodeAPI->getAttribute(spanNode, NODE_SPAN_FONT);
+    EXPECT_NE(attr, nullptr);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontTest002
+ * @tc.desc: Test NODE_SPAN_FONT attribute with FontConfigs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    OH_ArkUI_FontConfigs* fontConfigs = OH_ArkUI_FontConfigs_Create();
+    ASSERT_NE(fontConfigs, nullptr);
+
+    OH_ArkUI_FontWeightConfigs* weightConfigs = OH_ArkUI_FontWeightConfigs_Create();
+    ASSERT_NE(weightConfigs, nullptr);
+
+    OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(weightConfigs, true);
+    OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory(weightConfigs, true);
+
+    OH_ArkUI_FontConfigs_SetFontWeightConfigs(fontConfigs, weightConfigs);
+
+    auto retrievedWeightConfigs = OH_ArkUI_FontConfigs_GetFontWeightConfigs(fontConfigs);
+    EXPECT_NE(retrievedWeightConfigs, nullptr);
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(retrievedWeightConfigs));
+
+    ArkUI_NumberValue value[] = {
+        { .f32 = 18.0f }, { .i32 = 700 }, { .i32 = ARKUI_FONT_STYLE_NORMAL }
+    };
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    item.object = fontConfigs;
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT), ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_FontConfigs_Destroy(fontConfigs);
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontTest003
+ * @tc.desc: Test NODE_SPAN_FONT with invalid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{ .f32 = -1.0f }, { .i32 = 0 }, { .i32 = 0 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    value[0].f32 = 16.0f;
+    value[1].i32 = -1;
+    item.size = 2;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    value[1].i32 = 400;
+    value[2].i32 = 10;
+    item.size = 3;
+    ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    EXPECT_EQ(nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeSpanFontTest004
+ * @tc.desc: Test NODE_SPAN_FONT attribute with minimal parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto spanNode = nodeAPI->createNode(ARKUI_NODE_SPAN);
+    ASSERT_NE(spanNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{ .f32 = 14.0f }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    auto ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto attr = nodeAPI->getAttribute(spanNode, NODE_SPAN_FONT);
+    EXPECT_NE(attr, nullptr);
+    if (attr) {
+        EXPECT_FLOAT_EQ(attr->value[0].f32, 14.0f);
+    }
+
+    EXPECT_EQ(nodeAPI->resetAttribute(spanNode, NODE_SPAN_FONT), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(spanNode);
+}
+
+/**
+ * @tc.name: NativeNodeFontWeightConfigsTest001
+ * @tc.desc: Test OH_ArkUI_FontWeightConfigs_Create and Destroy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeFontWeightConfigsTest001, TestSize.Level1)
+{
+    OH_ArkUI_FontWeightConfigs* configs = OH_ArkUI_FontWeightConfigs_Create();
+    ASSERT_NE(configs, nullptr);
+
+    EXPECT_FALSE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(configs));
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(configs));
+
+    OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(configs, true);
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(configs));
+
+    OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory(configs, false);
+    EXPECT_FALSE(OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(configs));
+
+    OH_ArkUI_FontWeightConfigs_Destroy(configs);
+}
+
+/**
+ * @tc.name: NativeNodeFontWeightConfigsTest002
+ * @tc.desc: Test OH_ArkUI_FontWeightConfigs with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeFontWeightConfigsTest002, TestSize.Level1)
+{
+    EXPECT_FALSE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(nullptr));
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(nullptr));
+
+    OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(nullptr, true);
+    OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory(nullptr, false);
+    OH_ArkUI_FontWeightConfigs_Destroy(nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeFontConfigsTest001
+ * @tc.desc: Test OH_ArkUI_FontConfigs_Create and Destroy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeFontConfigsTest001, TestSize.Level1)
+{
+    OH_ArkUI_FontConfigs* configs = OH_ArkUI_FontConfigs_Create();
+    ASSERT_NE(configs, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_FontConfigs_GetFontWeightConfigs(configs), nullptr);
+
+    OH_ArkUI_FontWeightConfigs* weightConfigs = OH_ArkUI_FontWeightConfigs_Create();
+    OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(weightConfigs, true);
+
+    OH_ArkUI_FontConfigs_SetFontWeightConfigs(configs, weightConfigs);
+
+    auto retrieved = OH_ArkUI_FontConfigs_GetFontWeightConfigs(configs);
+    EXPECT_NE(retrieved, nullptr);
+    EXPECT_TRUE(OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(retrieved));
+
+    OH_ArkUI_FontConfigs_Destroy(configs);
+}
+
+/**
+ * @tc.name: NativeNodeFontConfigsTest002
+ * @tc.desc: Test OH_ArkUI_FontConfigs with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeFontConfigsTest002, TestSize.Level1)
+{
+    EXPECT_EQ(OH_ArkUI_FontConfigs_GetFontWeightConfigs(nullptr), nullptr);
+
+    OH_ArkUI_FontConfigs_SetFontWeightConfigs(nullptr, nullptr);
+    OH_ArkUI_FontConfigs_Destroy(nullptr);
+}
+
 } // namespace OHOS::Ace

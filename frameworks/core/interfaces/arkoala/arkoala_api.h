@@ -1214,6 +1214,17 @@ struct ArkUI_PickerIndicatorStyle {
     ArkUI_Float32 endMargin;
 };
 
+struct OH_ArkUI_FontWeightConfigs {
+    bool enableVariableFontWeight;
+    bool enableDeviceFontWeightCategory;
+    bool isEnableVariableFontWeightSet;
+    bool isEnableDeviceFontWeightCategorySet;
+};
+
+struct OH_ArkUI_FontConfigs {
+    struct OH_ArkUI_FontWeightConfigs* fontWeightConfigs;
+};
+
 struct ArkUIPickerDividerResObjStruct {
     void* strokeWidthRawPtr;
     void* colorRawPtr;
