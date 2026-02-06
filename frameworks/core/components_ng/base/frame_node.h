@@ -1491,6 +1491,7 @@ public:
     }
 
     void UpdateBackground();
+    void ReplacePattern(const RefPtr<Pattern>& newPattern);
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;

@@ -8593,6 +8593,10 @@ struct ArkUINDKRenderNodeModifier {
     void (*deleteInnerRenderNodeStruct)(ArkUIRenderNodeHandle node);
 };
 
+struct ArkUIDynamicLayoutModifier {
+    void (*createDynamicLayout)(void* params, ArkUI_Int32 type);
+};
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -8718,6 +8722,7 @@ struct ArkUINodeModifiers {
     const ArkUIContainerPickerModifier* (*getContainerPickerModifier)();
     const ArkUIAtomicServiceModifier* (*getAtomicServiceModifier)();
     const ArkUIMatrix4Modifier* (*getMatrix4Modifier)();
+    const ArkUIDynamicLayoutModifier* (*getDynamicLayoutModifier)();
 };
 
 // same as inner defines in property.h

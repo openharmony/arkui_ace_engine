@@ -104,6 +104,7 @@ if (is_ohos_standard_system) {
 
   ohos_copy("copy_abc_library") {
     deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_layoutalgorithm:layoutalgorithm",
       "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
       "$ace_root/frameworks/bridge/declarative_frontend:ark_theme_control",
       "$ace_root/frameworks/bridge/declarative_frontend:shape",
@@ -116,6 +117,7 @@ if (is_ohos_standard_system) {
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
+      "${out_path}/arkui/ace_engine/layoutalgorithm.abc",
       "${out_path}/arkui/ace_engine/modifier.abc",
       "${out_path}/arkui/ace_engine/node.abc",
       "${out_path}/arkui/ace_engine/shape.abc",
@@ -132,6 +134,7 @@ if (is_ohos_standard_system) {
 
   ohos_copy("copy_component_model_abc_library") {
     deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:dynamiclayout",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:datapanel",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
@@ -169,6 +172,7 @@ if (is_ohos_standard_system) {
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
+      "${out_path}/arkui/ace_engine/arkdynamiclayout.abc",
       "${out_path}/arkui/ace_engine/arkdatapanel.abc",
       "${out_path}/arkui/ace_engine/arkflowitem.abc",
       "${out_path}/arkui/ace_engine/arkcounter.abc",
