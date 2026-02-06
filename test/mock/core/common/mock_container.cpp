@@ -28,6 +28,8 @@ int32_t g_id = 0;
 
 RefPtr<MockContainer> MockContainer::container_;
 ColorMode MockContainer::mockColorMode_ = ColorMode::LIGHT;
+bool MockContainer::mockIsNeedModifySize_ = false;
+Rect MockContainer::mockDisplayAvailableRect_;
 bool Frontend::MaybeRelease()
 {
     return AceType::MaybeRelease();
@@ -189,6 +191,36 @@ RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
 FoldStatus Container::GetCurrentFoldStatus()
 {
     return MockContainer::Current()->GetMockDisplayInfo()->GetFoldStatus();
+}
+
+DisplaySourceMode Container::GetDisplaySourceMode()
+{
+    return MockContainer::Current()->GetMockDisplayInfo()->GetDisplaySourceMode();
+}
+
+bool Container::IsNeedModifySize(const RefPtr<Container>& subContainer)
+{
+    return MockContainer::GetMockIsNeedModifySize();
+}
+
+void MockContainer::SetMockIsNeedModifySize(bool isNeedModifySize)
+{
+    mockIsNeedModifySize_ = isNeedModifySize;
+}
+
+bool MockContainer::GetMockIsNeedModifySize()
+{
+    return mockIsNeedModifySize_;
+}
+
+void MockContainer::SetMockDisplayAvailableRect(const Rect& rect)
+{
+    mockDisplayAvailableRect_ = rect;
+}
+
+Rect MockContainer::GetMockDisplayAvailableRect()
+{
+    return mockDisplayAvailableRect_;
 }
 
 std::vector<Rect> Container::GetCurrentFoldCreaseRegion()
