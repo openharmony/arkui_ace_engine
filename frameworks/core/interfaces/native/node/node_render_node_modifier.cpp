@@ -1566,6 +1566,13 @@ ArkUI_Int32 RemoveAdoptedChild(ArkUINodeHandle node, ArkUINodeHandle child)
     return ERROR_CODE_NO_ERROR;
 }
 
+void DeleteInnerRenderNodeStruct(ArkUIRenderNodeHandle node)
+{
+    auto* nodeStruct = reinterpret_cast<RenderNodeStruct*>(node);
+    CHECK_NULL_VOID(nodeStruct);
+    delete nodeStruct;
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
@@ -1667,6 +1674,7 @@ const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
         .adoptChild = AdoptChild,
         .getRenderNode = GetRenderNode,
         .removeAdoptedChild = RemoveAdoptedChild,
+        .deleteInnerRenderNodeStruct = DeleteInnerRenderNodeStruct,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
