@@ -107,6 +107,50 @@
       "last_updated": "2026-02-03"
     },
     {
+      "name": "Sheet",
+      "name_cn": "半模态组件",
+      "category": "advanced",
+      "type": "component",
+      "keywords": [
+        "半模态",
+        "sheet",
+        "半模态面板",
+        "底部面板",
+        "侧边面板",
+        "bindSheet",
+        "拖拽",
+        "drag",
+        "键盘避让",
+        "keyboard avoid",
+        "多档位高度",
+        "detents",
+        "居中对话框",
+        "popup",
+        "侧边菜单",
+        "sheet type",
+        "嵌套滚动",
+        "spring animation",
+        "弹性动画"
+      ],
+      "aliases": [
+        "Sheet组件",
+        "半模态",
+        "BindSheet",
+        "半模态面板"
+      ],
+      "file_path": "pattern/sheet/Sheet_Knowledge_Base_CN.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
+        "manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+        "object": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
+        "style": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_style.h"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/@ohos.arkui.advanced.SheetPanel.d.ts"
+      },
+      "last_updated": "2026-02-05"
+    },
+    {
       "name": "Scroll",
       "name_cn": "滚动容器组件",
       "category": "container",
@@ -723,7 +767,8 @@
       "description": "提供复杂交互功能的高级组件",
       "components": [
         "Menu",
-        "Refresh"
+        "Refresh",
+        "Sheet"
       ]
     },
     "sdk": {
