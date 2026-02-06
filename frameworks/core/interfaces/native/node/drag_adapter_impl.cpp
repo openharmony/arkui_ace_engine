@@ -170,16 +170,6 @@ ArkUI_Int32 NotifyDragResult(ArkUI_Int32 requestId, ArkUI_Int32 result)
     return NG::DragDropFuncWrapper::NotifyDragResult(requestId, result);
 }
 
-ArkUI_Int32 NotifySuggestedDropOperation(ArkUI_Int32 requestId, ArkUI_Int32 operation)
-{
-    return NG::DragDropFuncWrapper::NotifySuggestedDropOperation(requestId, operation);
-}
-
-ArkUI_Int32 NotifyDisableDropAnimation(ArkUI_Int32 requestId, bool disable)
-{
-    return NG::DragDropFuncWrapper::NotifyDisableDropAnimation(requestId, disable);
-}
-
 ArkUI_Int32 NotifyDragEndPendingDone(ArkUI_Int32 requestId)
 {
     return NG::DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
@@ -200,8 +190,6 @@ const ArkUIDragAdapterAPI* GetDragAdapterAPI()
         .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext,
         .requestDragEndPending = RequestDragEndPending,
         .notifyDragResult = NotifyDragResult,
-        .notifySuggestedDropOperation = NotifySuggestedDropOperation,
-        .notifyDisableDropAnimation = NotifyDisableDropAnimation,
         .notifyDragEndPendingDone = NotifyDragEndPendingDone,
         .enableDropDisallowedBadge = EnableDropDisallowedBadge,
     };
