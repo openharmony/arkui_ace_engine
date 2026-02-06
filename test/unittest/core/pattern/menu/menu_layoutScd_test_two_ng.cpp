@@ -402,7 +402,6 @@ HWTEST_F(MenuLayout2TwoTestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     int32_t backApiversion = container->GetApiTargetVersion();
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
@@ -459,7 +458,6 @@ HWTEST_F(MenuLayout2TwoTestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     int32_t backApiversion = container->GetApiTargetVersion();
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
