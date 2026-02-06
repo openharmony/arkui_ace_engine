@@ -63,7 +63,7 @@ void JsAccessibilityManagerTestTwo::TearDownTestCase()
 
 /**
  * @tc.name: JsAccessibilityManager001
- * @tc.desc: Test GetNextFocusNodeByManager with valid currentNode and rootNode
+ * @tc.desc: Test GetNextFocusNodeByManager with valid currentNode and rootNode but no inspectorKey
  * @tc.type: FUNC
  */
 HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager001, TestSize.Level1)
@@ -81,9 +81,8 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager001, TestSize.Leve
      */
     RefPtr<NG::UINode> currentNode = AceType::MakeRefPtr<NG::UINode>();
     RefPtr<NG::FrameNode> rootNode = AceType::MakeRefPtr<NG::FrameNode>();
-    RefPtr<NG::FrameNode> expectedNode = AceType::MakeRefPtr<NG::FrameNode>();
     RefPtr<NG::FrameNode> result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
-    EXPECT_EQ(result, expectedNode);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
