@@ -34,10 +34,10 @@ export enum ChipSize {
 }
 
 enum IconType {
-  PREFIX_ICON = "PREFIXICON",
-  SUFFIX_ICON = "SUFFIXICON",
-  PREFIX_SYMBOL = "PREFIXSYMBOL",
-  SUFFIX_SYMBOL = "SUFFIXSYMBOL",
+  PREFIX_ICON = 'PREFIXICON',
+  SUFFIX_ICON = 'SUFFIXICON',
+  PREFIX_SYMBOL = 'PREFIXSYMBOL',
+  SUFFIX_SYMBOL = 'SUFFIXSYMBOL',
 }
 
 enum BreakPointsType {
@@ -500,7 +500,7 @@ export struct ChipComponent {
   }
 
   private defaultSymbolFontsize(): Length {
-    return this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? this.theme.defaultSymbol.smallSymbolFontSize :
+    return this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? this.theme.defaultSymbol.smallSymbolFontSize :
     this.theme.defaultSymbol.normalSymbolFontSize;
   }
 
@@ -695,7 +695,7 @@ export struct ChipComponent {
       suffixIconSize.width = this.suffixIcon?.size?.width
     } else {
       if (this.getSuffixIconSrc()) {
-        suffixIconSize.width = this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ?
+        suffixIconSize.width = this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ?
         this.theme.suffixIcon.smallSize.width : this.theme.suffixIcon.normalSize.width;
       } else {
         suffixIconSize.width = 0
@@ -705,7 +705,7 @@ export struct ChipComponent {
       suffixIconSize.height = this.suffixIcon?.size?.height
     } else {
       if (this.getSuffixIconSrc()) {
-        suffixIconSize.height = this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ?
+        suffixIconSize.height = this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ?
         this.theme.suffixIcon.smallSize.height : this.theme.suffixIcon.normalSize.height;
       } else {
         suffixIconSize.height = 0
@@ -721,7 +721,7 @@ export struct ChipComponent {
     } else {
       if (this.prefixIcon?.src) {
         prefixIconSize.width =
-          this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? this.theme.prefixIcon.smallSize.width :
+          this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? this.theme.prefixIcon.smallSize.width :
           this.theme.prefixIcon.normalSize.width;
       } else {
         prefixIconSize.width = 0
@@ -732,7 +732,7 @@ export struct ChipComponent {
     } else {
       if (this.prefixIcon?.src) {
         prefixIconSize.height =
-          this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? this.theme.prefixIcon.smallSize.height :
+          this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ? this.theme.prefixIcon.smallSize.height :
           this.theme.prefixIcon.normalSize.height;
       } else {
         prefixIconSize.height = 0
@@ -1160,7 +1160,7 @@ export struct ChipComponent {
     if (!this.chipNodeOnFocus) {
       return undefined;
     }
-    return this.resourceToNumber(this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ?
+    return this.resourceToNumber(this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL ?
     this.theme.chipNode.smallShadowStyle :
     this.theme.chipNode.normalShadowStyle, -1) as ShadowStyle;
   }
@@ -1171,7 +1171,7 @@ export struct ChipComponent {
     this.lgListener.off("change")
     if (this.callbackId) {
       this.getUIContext()
-        ?.getHostContext()
+      ?.getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
       this.callbackId = void (0)
@@ -1378,7 +1378,7 @@ export struct ChipComponent {
       let isDeleteChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
         !this.suffixIconOnFocus;
       let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false &&
-        !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
+      !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
       if (isDeleteChip || isEnterDeleteChip) {
         this.deleteChipNodeAnimate();
       }
