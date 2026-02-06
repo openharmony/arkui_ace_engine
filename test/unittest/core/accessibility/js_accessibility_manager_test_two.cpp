@@ -71,17 +71,15 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager001, TestSize.Leve
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(frameNode, nullptr);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     /**
      * @tc.steps: step2. test GetNextFocusNodeByManager
      */
-    RefPtr<NG::UINode> currentNode = AceType::MakeRefPtr<NG::UINode>();
-    RefPtr<NG::FrameNode> rootNode = AceType::MakeRefPtr<NG::FrameNode>();
-    RefPtr<NG::FrameNode> result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
+    auto currentNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto rootNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -95,8 +93,6 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager002, TestSize.Leve
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(frameNode, nullptr);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
@@ -104,8 +100,8 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager002, TestSize.Leve
      * @tc.steps: step2. test GetNextFocusNodeByManager
      */
     RefPtr<NG::UINode> currentNode = nullptr;
-    RefPtr<NG::FrameNode> rootNode = AceType::MakeRefPtr<NG::FrameNode>();
-    RefPtr<NG::FrameNode> result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
+    auto rootNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -119,17 +115,15 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager003, TestSize.Leve
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(frameNode, nullptr);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     /**
      * @tc.steps: step2. test GetNextFocusNodeByManager
      */
-    RefPtr<NG::UINode> currentNode = AceType::MakeRefPtr<NG::UINode>();
+    auto currentNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     RefPtr<NG::FrameNode> rootNode = nullptr;
-    RefPtr<NG::FrameNode> result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
+    auto result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
     EXPECT_EQ(result, nullptr);
 }
 
@@ -143,8 +137,6 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager004, TestSize.Leve
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ASSERT_NE(frameNode, nullptr);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
@@ -153,7 +145,50 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager004, TestSize.Leve
      */
     RefPtr<NG::UINode> currentNode = nullptr;
     RefPtr<NG::FrameNode> rootNode = nullptr;
-    RefPtr<NG::FrameNode> result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
+    auto result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager005
+ * @tc.desc: Test SubscribeToastObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->toastObserver_ = nullptr;
+
+    /**
+     * @tc.steps: step2. test SubscribeToastObserver
+     */
+    auto result = jsAccessibilityManager->SubscribeToastObserver();
+    EXPECT_EQ(result, true);
+    EXPECT_NE(jsAccessibilityManager->toastObserver_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager006
+ * @tc.desc: Test UnsubscribeToastObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->toastObserver_ = nullptr;
+
+    /**
+     * @tc.steps: step2. test UnsubscribeToastObserver
+     */
+    auto result = jsAccessibilityManager->SubscribeToastObserver();
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG
