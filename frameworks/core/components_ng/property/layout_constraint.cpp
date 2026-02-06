@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,225 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
+#include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/layout_policy_property.h"
+#include "core/components_ng/property/measure_property.h"
+
 namespace OHOS::Ace::NG {
+
+// ViewPosReference::operator==
+bool ViewPosReference::operator==(const ViewPosReference& other) const
+{
+    return NearEqual(viewPosStart, other.viewPosStart) &&
+           NearEqual(viewPosEnd, other.viewPosEnd) &&
+           NearEqual(referencePos, other.referencePos) &&
+           referenceEdge == other.referenceEdge &&
+           axis == other.axis;
+}
+
+// Static methods for LayoutConstraintT
+template<typename T>
+bool LayoutConstraintT<T>::CompareWithInfinityCheck(const OptionalSize<float>& first, const OptionalSize<float>& second)
+{
+    if (first.Width().has_value() ^ second.Width().has_value()) {
+        return false;
+    }
+    auto widthBothInf = GreaterOrEqualToInfinity(first.Width().value_or(0.0f)) &&
+                        GreaterOrEqualToInfinity(second.Width().value_or(0.0f));
+    if (!widthBothInf && !NearEqual(first.Width().value_or(0), second.Width().value_or(0))) {
+        return false;
+    }
+    if (first.Height().has_value() ^ second.Height().has_value()) {
+        return false;
+    }
+    auto heightBothInf = GreaterOrEqualToInfinity(first.Height().value_or(0.0f)) &&
+                        GreaterOrEqualToInfinity(second.Height().value_or(0.0f));
+    if (!heightBothInf && !NearEqual(first.Height().value_or(0), second.Height().value_or(0))) {
+        return false;
+    }
+    return true;
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::CompareWithInfinityCheck(const SizeT<float>& first, const SizeT<float>& second)
+{
+    auto widthBothInf = GreaterOrEqualToInfinity(first.Width()) && GreaterOrEqualToInfinity(second.Width());
+    auto heightBothInf = GreaterOrEqualToInfinity(first.Height()) && GreaterOrEqualToInfinity(second.Height());
+    if (widthBothInf && heightBothInf) {
+        return true;
+    }
+    return NearEqual(first.Width(), second.Width()) && NearEqual(first.Height(), second.Height());
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::CompareWithInfinityCheck(float first, float second)
+{
+    auto bothInf = GreaterOrEqualToInfinity(first) && GreaterOrEqualToInfinity(second);
+    if (bothInf) {
+        return true;
+    }
+    return NearEqual(first, second);
+}
+
+// Comparison operators
+template<typename T>
+bool LayoutConstraintT<T>::operator==(const LayoutConstraintT& layoutConstraint) const
+{
+    return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
+           (maxSize == layoutConstraint.maxSize) && (percentReference == layoutConstraint.percentReference) &&
+           (parentIdealSize == layoutConstraint.parentIdealSize) &&
+           (selfIdealSize == layoutConstraint.selfIdealSize) && (viewPosRef == layoutConstraint.viewPosRef);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::operator!=(const LayoutConstraintT& layoutConstraint) const
+{
+    return !(*this == layoutConstraint);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::EqualWithoutPercentWidth(const LayoutConstraintT& layoutConstraint) const
+{
+    return (scaleProperty == layoutConstraint.scaleProperty) &&
+           CompareWithInfinityCheck(minSize, layoutConstraint.minSize) &&
+           CompareWithInfinityCheck(maxSize, layoutConstraint.maxSize) &&
+           CompareWithInfinityCheck(parentIdealSize, layoutConstraint.parentIdealSize) &&
+           CompareWithInfinityCheck(percentReference.Height(), layoutConstraint.percentReference.Height()) &&
+           CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize) &&
+           (viewPosRef == layoutConstraint.viewPosRef);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::EqualWithoutPercentHeight(const LayoutConstraintT& layoutConstraint) const
+{
+    return (scaleProperty == layoutConstraint.scaleProperty) &&
+           CompareWithInfinityCheck(minSize, layoutConstraint.minSize) &&
+           CompareWithInfinityCheck(maxSize, layoutConstraint.maxSize) &&
+           CompareWithInfinityCheck(parentIdealSize, layoutConstraint.parentIdealSize) &&
+           CompareWithInfinityCheck(percentReference.Width(), layoutConstraint.percentReference.Width()) &&
+           CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize) &&
+           (viewPosRef == layoutConstraint.viewPosRef);
+}
+
+// Update methods
+template<typename T>
+ACE_FORCE_EXPORT
+bool LayoutConstraintT<T>::UpdateSelfMarginSizeWithCheck(const OptionalSize<T>& size)
+{
+    if (selfIdealSize == size) {
+        return false;
+    }
+    return selfIdealSize.UpdateSizeWithCheck(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateIllegalSelfMarginSizeWithCheck(const OptionalSize<T>& size)
+{
+    if (selfIdealSize == size) {
+        return false;
+    }
+    return selfIdealSize.UpdateIllegalSizeWithCheck(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateIllegalSelfIdealSizeWithCheck(const OptionalSize<T>& size)
+{
+    if (selfIdealSize == size) {
+        return false;
+    }
+    return selfIdealSize.UpdateIllegalSizeWithCheck(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateParentIdealSizeWithCheck(const OptionalSize<T>&& size)
+{
+    if (parentIdealSize == size) {
+        return false;
+    }
+    return parentIdealSize.UpdateSizeWithCheck(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateIllegalParentIdealSizeWithCheck(const OptionalSize<T>&& size)
+{
+    if (parentIdealSize == size) {
+        return false;
+    }
+    return parentIdealSize.UpdateIllegalSizeWithCheck(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateParentIdealSizeByLayoutPolicy(const SizeT<T>& size, bool isMax, NG::LayoutPolicyProperty layoutPolicy)
+{
+    bool widthUpdated = false;
+    bool heightUpdated = false;
+    if (layoutPolicy.IsWidthMatch()) {
+        if (isMax) {
+            widthUpdated = parentIdealSize.UpdateWidthWhenSmaller(size);
+        } else {
+            widthUpdated = parentIdealSize.UpdateWidthWhenLarger(size);
+        }
+    }
+    if (layoutPolicy.IsHeightMatch()) {
+        if (isMax) {
+            heightUpdated = parentIdealSize.UpdateHeightWhenSmaller(size);
+        } else {
+            heightUpdated = parentIdealSize.UpdateHeightWhenLarger(size);
+        }
+    }
+    return widthUpdated || heightUpdated;
+}
+
+template<typename T>
+ACE_FORCE_EXPORT
+bool LayoutConstraintT<T>::UpdateMaxSizeWithCheck(const SizeT<T>& size)
+{
+    if (maxSize == size) {
+        return false;
+    }
+    return maxSize.UpdateSizeWhenSmaller(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateMaxWidthWithCheck(const SizeT<T>& size)
+{
+    if (maxSize == size) {
+        return false;
+    }
+    return maxSize.UpdateWidthWhenSmaller(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateMaxHeightWithCheck(const SizeT<T>& size)
+{
+    if (maxSize == size) {
+        return false;
+    }
+    return maxSize.UpdateHeightWhenSmaller(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdateMinSizeWithCheck(const SizeT<T>& size)
+{
+    if (minSize == size) {
+        return false;
+    }
+    return minSize.UpdateSizeWhenLarger(size);
+}
+
+template<typename T>
+bool LayoutConstraintT<T>::UpdatePercentReference(const SizeT<T>& size)
+{
+    if (percentReference == size) {
+        return false;
+    }
+    percentReference.SetSizeT(size);
+    return true;
+}
+
+// Implementations moved from .inl file to reduce header dependencies
 template<typename T>
 void LayoutConstraintT<T>::ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize,
     const std::optional<NG::LayoutPolicyProperty>& layoutPolicy, bool greaterThanApiTen)
@@ -202,6 +420,7 @@ std::string LayoutConstraintT<T>::ToString() const
 }
 
 template<typename T>
+ACE_FORCE_EXPORT
 SizeF LayoutConstraintT<T>::Constrain(const SizeF& size) const
 {
     SizeF constrainSize;
@@ -209,4 +428,7 @@ SizeF LayoutConstraintT<T>::Constrain(const SizeF& size) const
     constrainSize.SetHeight(std::clamp(size.Height(), minSize.Height(), maxSize.Height()));
     return constrainSize;
 }
+
+template struct LayoutConstraintT<float>;
+
 } // namespace OHOS::Ace::NG

@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTY_TEMPLATES_PARSER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTY_TEMPLATES_PARSER_H
 
+#include <optional>
 #include <string>
 #include <vector>
 #include "core/components/common/layout/constants.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
 ACE_FORCE_EXPORT std::pair<std::vector<double>, double> ParseTemplateArgs(
