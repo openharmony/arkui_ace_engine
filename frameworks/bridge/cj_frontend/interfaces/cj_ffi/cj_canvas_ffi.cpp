@@ -145,8 +145,13 @@ void FfiOHOSAceFrameworkCanvasCreate(int64_t contextId)
     }
 
     auto pattern = CanvasModel::GetInstance()->Create();
+    if (pattern == nullptr) {
+        return;
+    }
+    CanvasModel::GetInstance()->SetImmediateRender(false);
     context->SetCanvasPattern(pattern);
     context->SetAntiAlias();
+    context->SetDensity();
 }
 
 void FfiOHOSAceFrameworkCanvasOnReady(void (*callback)())
