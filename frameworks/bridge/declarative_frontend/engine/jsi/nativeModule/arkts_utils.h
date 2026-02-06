@@ -509,6 +509,11 @@ public:
     static bool HasProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
     static Local<JSValueRef> GetProperty(
         const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
+    static void GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object,
+        CalcDimension& radius, RefPtr<ResourceObject>& resObj);
+    static void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
+        const RefPtr<ResourceObject>& topLeftResObj, const RefPtr<ResourceObject>& topRightResObj,
+        const RefPtr<ResourceObject>& bottomLeftResObj, const RefPtr<ResourceObject>& bottomRightResObj);
     static Local<JSValueRef> GetProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, int32_t propertyIndex);
     static bool CheckJavaScriptScope(const EcmaVM* vm);
     static void ParseStepOptionsMap(const EcmaVM* vm, const Local<JSValueRef>& optionsArg, StepOptions& optionsMap);
