@@ -40,6 +40,8 @@ public:
     bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
     bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
     bool UpdateMagnifierOffset();
+    bool UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pipelineContext, float& magnifierY,
+        float& layoutBottom, float& windowScale, int32_t& screenHeight);
 
     void UpdateShowMagnifier(bool isShowMagnifier = false);
 
@@ -108,6 +110,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     OffsetF globalOffset_;
+    OffsetF patternOffset_;
     std::optional<OffsetF> localOffsetWithoutTrans_;
     WeakPtr<Pattern> pattern_;
     bool removeFrameNode_ = false;
