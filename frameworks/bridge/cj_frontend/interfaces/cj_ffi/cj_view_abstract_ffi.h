@@ -830,6 +830,7 @@ CJ_EXPORT void FFIOHOSAceFrameworkBindContentCoverV2(bool isShow, void (*builder
 CJ_EXPORT ExternalString FFIGetResourceString(NativeResourceObject obj);
 CJ_EXPORT ExternalString FFIGetResourceMedia(NativeResourceObject obj);
 CJ_EXPORT uint32_t FFIGetResourceColor(NativeResourceObject obj);
+CJ_EXPORT ExternalString FFIGetResourceColorString(NativeResourceObject obj);
 CJ_EXPORT RetDimension FFIGetResourceDimension(NativeResourceObject obj);
 CJ_EXPORT double FFIGetResourceDouble(NativeResourceObject obj);
 CJ_EXPORT int32_t FFIGetResourceInt32(NativeResourceObject obj);
