@@ -18,11 +18,11 @@
 
 ## 1. 设计决策分析
 
-### 1.1 为什么使用 SkDOM 而不是其他 XML 解析器？
+### 1.1 SVG XML 解析方案
 
 **背景**：SVG 是基于 XML 的矢量图形格式，需要解析 XML 结构
 
-**决策**：使用 Skia 内置的 SkDOM 解析器
+**当前实现**：使用 Skia 内置的 SkDOM 解析器
 
 **源码位置**：`svg_dom.cpp:128-135`
 
@@ -38,24 +38,27 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
 }
 ```
 
-**设计理由**：
+**设计考量**：
 
 | 优点 | 说明 |
 |------|------|
 | **无额外依赖** | Skia 是 ACE 引擎的图形依赖，自带 XML 解析能力 |
-| **性能优秀** | SkDOM 是为图形场景优化的轻量级 DOM |
-| **内存高效** | 解析后直接使用 Skia 内存结构 |
-| **渲染集成** | 与 Skia 渲染管线天然集成 |
+| **性能良好** | SkDOM 是为图形场景优化的轻量级 DOM |
 
-**替代方案考虑**：
+**待优化方向**：
 
-| 方案 | 优点 | 缺点 | 未选择原因 |
+> **注意**：当前渲染引擎已切换到 Rosen，SkDOM 对 Skia 的硬依赖存在架构耦合问题。未来可考虑：
+> - 引入平台无关的 XML 解析器（如 tinyxml2）
+> - 解耦 XML 解析与图形渲染依赖
+
+**替代方案对比**：
+
+| 方案 | 优点 | 缺点 | 当前状态 |
 |------|------|------|------------|
-| tinyxml2 | 成熟稳定 | 额外依赖，内存开销大 | Skia 已包含 XML 解析 |
+| SkDOM（当前） | 无额外依赖，性能良好 | 与 Skia 强耦合 | 正在使用 |
+| tinyxml2 | 成熟稳定，API 简洁 | 额外依赖 | 可选方案 |
 | expat | 流式解析，内存友好 | 需手动构建 DOM 树 | 架构复杂度高 |
 | libxml2 | 功能完整 | 过于重量级 | 不适合嵌入式场景 |
-
-**权衡结论**：使用 SkDOM 在依赖、性能和集成度上都是最优选择
 
 ---
 
@@ -721,12 +724,25 @@ isStatic 标志是否为 false？
 **检查点**：
 
 1. **WeakPtr 使用是否正确**：
+
+> **线程安全提示**：当前实现中 `idMapper_` 访问未使用锁保护，若存在多线程访问场景需要添加同步机制。
+
+**当前源码**：
 ```cpp
 // svg_context.h:164
 std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
+```
 
-// 定期清理失效的弱引用
+**建议的线程安全实现**（如果需要多线程访问）：
+```cpp
+// 在 svg_context.h 中添加互斥锁
+private:
+    std::mutex idMapperMutex_;  // 添加互斥锁保护
+    std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
+
+// 定期清理失效的弱引用（线程安全版本）
 void CleanDeadReferences() {
+    std::lock_guard<std::mutex> lock(idMapperMutex_);
     for (auto it = idMapper_.begin(); it != idMapper_.end();) {
         if (!it->second.Upgrade()) {
             it = idMapper_.erase(it);
@@ -736,6 +752,10 @@ void CleanDeadReferences() {
     }
 }
 ```
+
+**注意事项**：
+- 当前代码假设在 UI 线程单线程环境下运行（如 `AnimateFlush()` 中的 `CHECK_RUN_ON(UI)` 检查）
+- 若 SvgContext 需要跨线程共享，必须添加锁保护
 
 2. **动画回调是否正确清理**：
 ```cpp
@@ -780,6 +800,10 @@ SvgDom (共享)
 ```cpp
 // 同一个 SvgDom 可被多个 CanvasImage 引用
 RefPtr<SvgDom> svgDom = SvgDom::CreateSvgDom(stream, src);
+if (!svgDom) {
+    LOGE("Failed to create SVG DOM");
+    return;
+}
 
 // 实例 A
 canvasImageA->SetSvgDom(svgDom);
@@ -816,7 +840,7 @@ Skia GPU 渲染
 // svg_graphic.cpp
 void SvgGraphic::OnGraphicFill()
 {
-    if (!path_.has_value()) {
+    if (!path_.has_value() || !rsCanvas_) {
         return;
     }
     rsCanvas_->AttachBrush(fillBrush_);
@@ -854,20 +878,31 @@ void SvgGraphic::OnGraphicFill()
 
 **缓存策略**：
 
+> **注意**：以下示例需要考虑线程安全问题。在多线程环境下使用缓存时，应添加互斥锁保护。
+
 ```cpp
-// 同一个 SVG 文件可以共享解析结果
+// 同一个 SVG 文件可以共享解析结果（线程安全版本）
 static std::unordered_map<std::string, RefPtr<SvgDom>> svgDomCache_;
+static std::mutex cacheMutex_;
 
 RefPtr<SvgDom> GetCachedDom(const std::string& path) {
+    std::lock_guard<std::mutex> lock(cacheMutex_);
     auto it = svgDomCache_.find(path);
     if (it != svgDomCache_.end()) {
         return it->second;
     }
     auto dom = SvgDom::CreateSvgDom(...);
-    svgDomCache_[path] = dom;
+    if (dom) {
+        svgDomCache_[path] = dom;
+    }
     return dom;
 }
 ```
+
+**注意事项**：
+- 缓存中的 `RefPtr<SvgDom>` 会保持 SVG DOM 的引用，可能导致内存长期占用
+- 建议添加缓存清理策略（如 LRU 淘汰、定期清理等）
+- 在多线程环境下必须使用互斥锁保护缓存访问
 
 ---
 

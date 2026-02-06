@@ -137,6 +137,12 @@ SvgSvg SvgG SvgUse Rect Circle Path...  ClipPath     RadialGradient    animateTr
 ### Creating an SVG DOM
 
 ```cpp
+// Verify stream is valid before parsing
+if (!svgStream.hasLength() || svgStream.getLength() == 0) {
+    LOGE("Invalid or empty SVG stream");
+    return;
+}
+
 // Parse SVG from stream
 RefPtr<SvgDom> svgDom = SvgDom::CreateSvgDom(svgStream, imageSourceInfo);
 if (!svgDom) {
@@ -148,11 +154,26 @@ if (!svgDom) {
 ### Drawing SVG
 
 ```cpp
+// Validate before drawing
+if (!svgDom) {
+    LOGE("SvgDom is null");
+    return;
+}
+
+// Check layout size validity
+if (layoutSize.Width() <= 0 || layoutSize.Height() <= 0) {
+    LOGW("Invalid layout size: %{public}f x %{public}f", layoutSize.Width(), layoutSize.Height());
+    return;
+}
+
 // Draw to canvas with fit mode
 svgDom->DrawImage(canvas, ImageFit::CONTAIN, layoutSize);
 
-// Direct drawing with viewport
-svgDom->GetRoot()->Draw(canvas, viewPortSize, fillColor);
+// Direct drawing with viewport (always check GetRoot() result)
+auto root = svgDom->GetRoot();
+if (root) {
+    root->Draw(canvas, viewPortSize, fillColor);
+}
 ```
 
 ### Setting Properties
@@ -223,6 +244,17 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "svg", []() -> RefPtr<SvgNode> { return SvgSvg::Create(); } },
     { "use", []() -> RefPtr<SvgNode> { return SvgUse::Create(); } },
 };
+```
+
+> **Note**: Current factory functions lack null pointer checks. Consider adding error handling for production use or when adding new elements:
+
+```cpp
+// Recommended improvement (with null pointer check)
+{ "animate", []() -> RefPtr<SvgNode> {
+    auto node = SvgAnimation::Create();
+    CHECK_NULL_RETURN(node, nullptr);  // Add null pointer check
+    return node;
+} },
 ```
 
 ---
