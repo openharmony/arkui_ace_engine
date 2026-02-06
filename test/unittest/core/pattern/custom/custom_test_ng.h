@@ -18,6 +18,7 @@
 
 #include <cstddef>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
 #define private public
