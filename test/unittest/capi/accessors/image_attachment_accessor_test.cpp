@@ -621,6 +621,40 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
 }
 
 /**
+ * @tc.name: getLayoutStyleTestPaddingConversion
+ * @tc.desc: Verify padding conversion with Ark_Padding type (OptValueFromOptCalcLength, ArkValueFromOptPadding)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestPaddingConversion, TestSize.Level1)
+{
+    const Ark_Padding arkPadding = {
+        .top = ArkValue<Opt_Length>("10vp"),
+        .right = ArkValue<Opt_Length>("20vp"),
+        .bottom = ArkValue<Opt_Length>("30vp"),
+        .left = ArkValue<Opt_Length>("40vp"),
+    };
+    const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkPadding),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+    };
+
+    const Ark_ImageAttachmentInterface content {
+        .layoutStyle = ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle),
+    };
+    auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
+        Ark_ImageAttachmentInterface>(content);
+    auto peer = accessor_->construct(&inputValue);
+    auto optGetValue = Converter::GetOpt(accessor_->getLayoutStyle(peer));
+    ASSERT_TRUE(optGetValue);
+
+    auto arkGetValue = *optGetValue;
+    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(imageLayoutStyle.margin));
+    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(imageLayoutStyle.padding));
+    accessor_->destroyPeer(peer);
+}
+
+/**
  * @tc.name: ctorTestImageStyleMargins
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
