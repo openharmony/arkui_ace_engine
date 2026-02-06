@@ -140,6 +140,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "webview:libnweb",
     "window_manager:libpip_ndk",
     "window_manager:libwm",
+    "window_manager:libwsutils",
   ]
 
   if (defined(global_parts_info.inputmethod_imf)) {
