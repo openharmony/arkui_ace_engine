@@ -134,6 +134,7 @@ void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)
         auto scopeId = frameNode->GetThemeScopeId();
         auto checkBoxTheme = SystemProperties::ConfigChangePerform() ? themeManager->GetTheme<CheckboxTheme>(scopeId)
             : themeManager->GetTheme<CheckboxTheme>();
+        CHECK_NULL_VOID(checkBoxTheme);
         CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
     } else {
         CheckBoxGroupModelNG::ResetUnSelectedColor(frameNode);
