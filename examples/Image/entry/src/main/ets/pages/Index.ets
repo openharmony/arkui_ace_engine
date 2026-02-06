@@ -154,6 +154,11 @@ struct Index {
             router.pushUrl({ url: 'pages/testcase/ImageTestcase008' })
           })
 
+          Button('router SVG Examples Index').onClick(() => {
+            console.log('router SVG Examples Index');
+            router.pushUrl({ url: 'pages/SVG/Index' })
+          })
+
         }
       }
     }
