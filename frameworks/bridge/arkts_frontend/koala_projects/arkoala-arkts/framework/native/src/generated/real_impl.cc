@@ -3861,7 +3861,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6881,7 +6881,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* weight,
+                           const Opt_Union_I32_FontWeight_ResourceStr* weight,
                            const Opt_FontSettingOptions* options)
     {
     }
@@ -6945,7 +6945,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7344,7 +7344,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,

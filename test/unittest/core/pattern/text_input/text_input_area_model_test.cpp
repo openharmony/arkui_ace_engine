@@ -1097,6 +1097,37 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg011, TestSize.Level1)
     TextFieldModelNG::SetShowCounter(frameNode, true);
     TextFieldModelNG::SetShowCounter(frameNode, false);
 }
+
+/**
+ * @tc.name: SetMaxLength010
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetMaxLength010, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.step: step2. Set MaxLength
+     */
+    uint32_t maxLines = { 3 };
+    textFieldModelNG.SetMaxLength(frameNode, maxLines);
+
+    /**
+     * @tc.steps: step3. Check MaxLength.
+     */
+    EXPECT_EQ(pattern->GetMaxLength(), 3);
+}
+
 HWTEST_F(TextInputAreaTest, testSetCounterTextColor02, TestSize.Level1)
 {
     /**

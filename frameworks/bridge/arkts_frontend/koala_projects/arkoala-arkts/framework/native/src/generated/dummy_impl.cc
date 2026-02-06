@@ -9000,7 +9000,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17572,7 +17572,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* weight,
+                           const Opt_Union_I32_FontWeight_ResourceStr* weight,
                            const Opt_FontSettingOptions* options)
     {
         if (!needGroupedLog(1))
@@ -17765,7 +17765,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
         if (!needGroupedLog(1))
         {
@@ -18940,7 +18940,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
         if (!needGroupedLog(1))
         {
