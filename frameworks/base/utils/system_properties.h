@@ -47,6 +47,7 @@ enum class FoldScreenType: int32_t {
     SMALL_FOLDER = 2,
     OUTER_FOLDER = 3,
     SUPER_FOLDER = 5,
+    PORTRAIT_FOLDER = 7,
 };
 
 constexpr int32_t MCC_UNDEFINED = 0;
@@ -672,6 +673,8 @@ public:
     static bool IsVelocityWithoutUpPoint();
 
     static bool IsSmallFoldProduct();
+
+    static bool IsPortraitFoldProduct();
 
     static bool IsBigFoldProduct();
 
