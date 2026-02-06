@@ -34,6 +34,21 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 namespace {
+bool IsParentRectInfoEqual(AccessibilityParentRectInfo& rectInfo1, AccessibilityParentRectInfo& rectInfo2)
+{
+    CHECK_NE_RETURN(rectInfo1.left, rectInfo2.left, false);
+    CHECK_NE_RETURN(rectInfo1.top, rectInfo2.top, false);
+    CHECK_NE_RETURN(rectInfo1.scaleX, rectInfo2.scaleX, false);
+    CHECK_NE_RETURN(rectInfo1.scaleY, rectInfo2.scaleY, false);
+    CHECK_NE_RETURN(rectInfo1.rotateTransform.rotateDegree, rectInfo2.rotateTransform.rotateDegree, false);
+    CHECK_NE_RETURN(rectInfo1.rotateTransform.centerX, rectInfo2.rotateTransform.centerX, false);
+    CHECK_NE_RETURN(rectInfo1.rotateTransform.centerY, rectInfo2.rotateTransform.centerY, false);
+    CHECK_NE_RETURN(rectInfo1.rotateTransform.innerCenterX, rectInfo2.rotateTransform.innerCenterX, false);
+    CHECK_NE_RETURN(rectInfo1.rotateTransform.innerCenterY, rectInfo2.rotateTransform.innerCenterY, false);
+    CHECK_NE_RETURN(rectInfo1.isChanged, rectInfo2.isChanged, false);
+
+    return true;
+}
 } // namespace
 
 class JsAccessibilityManagerTestTwo : public testing::Test {
@@ -190,5 +205,68 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager006, TestSize.Leve
      */
     auto result = jsAccessibilityManager->UnsubscribeToastObserver();
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager007
+ * @tc.desc: Test GetUECAccessibilityParentRectInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    AccessibilityParentRectInfo rectInfo;
+    rectInfo.left = 12;
+    rectInfo.top = 34;
+    rectInfo.scaleX = 56.0f;
+    rectInfo.scaleY = 78.0f;
+    rectInfo.rotateTransform.rotateDegree = 123;
+    rectInfo.rotateTransform.centerX = 234;
+    rectInfo.rotateTransform.centerY = 345;
+    rectInfo.rotateTransform.innerCenterX = 456;
+    rectInfo.rotateTransform.innerCenterY = 567;
+    rectInfo.isChanged = true;
+    jsAccessibilityManager->uecRectInfo = rectInfo;
+
+    /**
+     * @tc.steps: step2. test GetUECAccessibilityParentRectInfo
+     */
+    auto result = jsAccessibilityManager->GetUECAccessibilityParentRectInfo();
+    EXPECT_TRUE(IsParentRectInfoEqual(result, rectInfo));
+}
+
+/**
+ * @tc.name: JsAccessibilityManager008
+ * @tc.desc: Test UpdateUECAccessibilityParentRectInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateUECAccessibilityParentRectInfo
+     */
+    AccessibilityParentRectInfo rectInfo;
+    rectInfo.left = 12;
+    rectInfo.top = 34;
+    rectInfo.scaleX = 56.0f;
+    rectInfo.scaleY = 78.0f;
+    rectInfo.rotateTransform.rotateDegree = 234;
+    rectInfo.rotateTransform.centerX = 345;
+    rectInfo.rotateTransform.centerY = 456;
+    rectInfo.rotateTransform.innerCenterX = 567;
+    rectInfo.rotateTransform.innerCenterY = 678;
+    rectInfo.isChanged = true;
+    jsAccessibilityManager->UpdateUECAccessibilityParentRectInfo(rectInfo);
+    EXPECT_TRUE(IsParentRectInfoEqual(jsAccessibilityManager->uecRectInfo, rectInfo));
 }
 } // namespace OHOS::Ace::NG
