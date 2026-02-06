@@ -16,17 +16,28 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_symbol_glyph_ffi.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "cj_lambda.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
 
 extern "C" {
+NG::SymbolModelNG* GetSymbolModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("SymbolGlyph");
+    if (module == nullptr) {
+        LOGF("Can't find symbol dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::SymbolModelNG *>(module->GetModel());
+}
 void FfiOHOSAceFrameworkSymbolGlyphCreate(uint32_t symbolId)
 {
-    SymbolModel::GetInstance()->Create(symbolId);
+    GetSymbolModel()->Create(symbolId);
 }
 
 void FfiOHOSAceFrameworkSymbolGlyphFontColor(VectorUInt32Ptr colors)
@@ -36,28 +47,28 @@ void FfiOHOSAceFrameworkSymbolGlyphFontColor(VectorUInt32Ptr colors)
     for (size_t i = 0; i < vecColor.size(); ++i) {
         symbolColor.emplace_back(Color(vecColor[i]));
     }
-    SymbolModel::GetInstance()->SetFontColor(symbolColor);
+    GetSymbolModel()->SetFontColor(symbolColor);
 }
 
 void FfiOHOSAceFrameworkSymbolGlyphFontSize(double size, int32_t unit)
 {
     CalcDimension value(size, static_cast<DimensionUnit>(unit));
-    SymbolModel::GetInstance()->SetFontSize(value);
+    GetSymbolModel()->SetFontSize(value);
 }
 
 void FfiOHOSAceFrameworkSymbolGlyphFontWeight(const char* fontWeight)
 {
-    SymbolModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    GetSymbolModel()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void FfiOHOSAceFrameworkSymbolGlyphRenderingStrategy(int32_t value)
 {
-    SymbolModel::GetInstance()->SetSymbolRenderingStrategy(static_cast<uint32_t>(value));
+    GetSymbolModel()->SetSymbolRenderingStrategy(static_cast<uint32_t>(value));
 }
 
 void FfiOHOSAceFrameworkSymbolGlyphEffectStrategy(int32_t value)
 {
-    SymbolModel::GetInstance()->SetSymbolEffect(static_cast<uint32_t>(value));
+    GetSymbolModel()->SetSymbolEffect(static_cast<uint32_t>(value));
 }
 
 void FfiOHOSAceFrameworkSymbolGlyphSymbolEffect(EffectOptions effectOptions)
@@ -74,6 +85,6 @@ void FfiOHOSAceFrameworkSymbolGlyphSymbolEffect(EffectOptions effectOptions)
     if (effectOptions.triggerExist) {
         symbolEffectOptions.SetTriggerNum(effectOptions.triggerValue);
     }
-    SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
+    GetSymbolModel()->SetSymbolEffectOptions(symbolEffectOptions);
 }
 }

@@ -57,6 +57,11 @@
 #include "frameworks/base/utils/measure_util.h"
 #include "frameworks/core/components_ng/pattern/menu/menu_model_ng.h"
 
+#include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "frameworks/compatible/components/canvas/rosen_render_custom_paint.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1868,7 +1873,10 @@ std::function<void(WeakPtr<NG::FrameNode>)> GetCustomMenuItemSymbolFunc(const Me
         auto symbolId = item.symbolId.value();
         symbolFunc = [symbolId](WeakPtr<NG::FrameNode> weak) {
             auto symbolNode = weak.Upgrade();
-            SymbolModelNG::InitialSymbol(AceType::RawPtr(symbolNode), symbolId);
+            auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
+            if (customModifier) {
+                customModifier->initialSymbol(AceType::RawPtr(symbolNode), symbolId);
+            }
         };
     }
     return symbolFunc;
@@ -2471,10 +2479,13 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             auto symbolNode = Referenced::RawPtr(node);
-            SymbolModelNG::InitialSymbol(symbolNode, symbolId);
-            SymbolModelNG::SetFontSize(symbolNode, symbolSize);
+            auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
+            if (customModifier) {
+                customModifier->initialSymbol(symbolNode, symbolId);
+                customModifier->setFontSize(symbolNode, symbolSize);
+            }
             if (!symbolColor.empty()) {
-                SymbolModelNG::SetFontColor(symbolNode, symbolColor);
+                customModifier->setFontColor(symbolNode, symbolColor);
             }
         };
     }
@@ -2768,10 +2779,13 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             auto symbolSize = textOverlayTheme->GetSymbolSize();
             symbol = [symbolId, symbolSize, symbolColor](WeakPtr<NG::FrameNode> weak) {
                 auto symbolNode = weak.Upgrade();
-                SymbolModelNG::InitialSymbol(RawPtr(symbolNode), symbolId);
-                SymbolModelNG::SetFontSize(RawPtr(symbolNode), symbolSize);
+                auto customModifier = NodeModifier::GetSymbolGlyphCustomModifier();
+                if (customModifier) {
+                    customModifier->initialSymbol(RawPtr(symbolNode), symbolId);
+                    customModifier->setFontSize(RawPtr(symbolNode), symbolSize);
+                }
                 if (!symbolColor.empty()) {
-                    SymbolModelNG::SetFontColor(RawPtr(symbolNode), symbolColor);
+                    customModifier->setFontColor(RawPtr(symbolNode), symbolColor);
                 }
             };
         } else {
