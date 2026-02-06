@@ -28,7 +28,7 @@
 // @deprecated
 namespace OHOS::Ace::NG {
 struct MenuParam;
-struct MenuPathParams {
+struct ACE_FORCE_EXPORT MenuPathParams {
     float radiusTopLeftPx = 0.0f;
     float radiusTopRightPx = 0.0f;
     float radiusBottomLeftPx = 0.0f;

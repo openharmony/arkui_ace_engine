@@ -196,7 +196,7 @@ struct BorderRadiusPropertyT<float> {
     std::optional<float> radiusBottomRight;
     std::optional<float> radiusBottomLeft;
 
-    bool operator==(const BorderRadiusPropertyT<float>& value) const
+    ACE_FORCE_EXPORT bool operator==(const BorderRadiusPropertyT<float>& value) const
     {
         if (radiusTopLeft.has_value() ^ value.radiusTopLeft.has_value()) {
             return false;
@@ -266,7 +266,7 @@ struct BorderColorProperty {
         bottomColor = borderColor;
     }
 
-    bool operator==(const BorderColorProperty& value) const
+    ACE_FORCE_EXPORT bool operator==(const BorderColorProperty& value) const
     {
         return (leftColor == value.leftColor) && (rightColor == value.rightColor) && (topColor == value.topColor) &&
                (bottomColor == value.bottomColor);
@@ -370,7 +370,7 @@ struct ACE_FORCE_EXPORT BorderWidthPropertyT<Dimension> {
 
     ACE_FORCE_EXPORT void SetBorderWidth(const Dimension& borderWidth);
 
-    bool operator==(const BorderWidthPropertyT& value) const;
+    ACE_FORCE_EXPORT bool operator==(const BorderWidthPropertyT& value) const;
 
     bool UpdateWithCheck(const BorderWidthPropertyT& value);
 
@@ -413,7 +413,7 @@ struct BorderWidthPropertyT<float> {
     std::optional<float> rightDimen;
     std::optional<float> bottomDimen;
 
-    bool operator==(const BorderWidthPropertyT<float>& value) const
+    ACE_FORCE_EXPORT bool operator==(const BorderWidthPropertyT<float>& value) const
     {
         if (leftDimen.has_value() ^ value.leftDimen.has_value()) {
             return false;
@@ -464,7 +464,7 @@ struct ACE_FORCE_EXPORT BorderStyleProperty {
 
     ACE_FORCE_EXPORT void SetBorderStyle(const BorderStyle& borderStyle);
 
-    bool operator==(const BorderStyleProperty& value) const;
+    ACE_FORCE_EXPORT bool operator==(const BorderStyleProperty& value) const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, bool isOutline = false) const;

@@ -29,7 +29,7 @@ public:
     static bool IsGatherSelectedItemsAnimationEnabled(const RefPtr<FrameNode>& frameNode);
     static void BindContextMenu(FrameNode* frameNode);
 
-    void PublishMenuStatus(bool isShowing, const RefPtr<FrameNode>& menuNode);
+    ACE_FORCE_EXPORT void PublishMenuStatus(bool isShowing, const RefPtr<FrameNode>& menuNode);
 
 private:
     WeakPtr<FrameNode> menuNode_;

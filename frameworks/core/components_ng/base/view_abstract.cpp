@@ -49,7 +49,6 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -60,6 +59,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -4484,7 +4485,10 @@ void ViewAbstract::ShowMenuPreview(
         CHECK_NULL_VOID(pixelMap);
         gestureHub->SetPixelMap(pixelMap);
         menuWrapperPattern->SetIsShowFromUser(true);
-        MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        if (menuViewModifier) {
+            menuViewModifier->getMenuPixelMap(targetNode, menuParam, wrapperNode);
+        }
     }
 }
 
@@ -4514,7 +4518,10 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
         // The menu is already opened, close the previous menu and open the new menu
         overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false, HideMenuType::OPEN_MENU);
     }
-    auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_RETURN(menuViewModifier, ERROR_CODE_INTERNAL_ERROR);
+    auto wrapperNode = menuViewModifier->createWithCustomNode(
+        customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, nullptr);
     CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
     ShowMenuPreview(targetNode, wrapperNode, menuParam);
     auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
@@ -4523,10 +4530,10 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
     auto menu = menuWrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
-    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
-    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, ERROR_CODE_INTERNAL_ERROR);
     auto node = WeakPtr<UINode>(customNode);
-    menuPattern->SetCustomNode(node);
+    menuModifier->setCustomNode(menu, node);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
     menuWrapperPattern->SetIsOpenMenu(true);
@@ -4565,11 +4572,15 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
     wrapperPattern->SetMenuParam(menuParam);
-    MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
-    MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    if (menuViewModifier) {
+        menuViewModifier->updateMenuParam(menuWrapperNode, menu, menuParam);
+        menuViewModifier->updateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    }
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, ERROR_CODE_INTERNAL_ERROR);
     if (menuParam.anchorPosition.has_value()) {
-        auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
-        if (menuProperty) {
+        if (menuModifier) {
             auto target = ElementRegister::GetInstance()->
                 GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
             CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
@@ -4578,23 +4589,21 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
                                          targetNodePosition.GetX(),
                                          menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                                          targetNodePosition.GetY() };
-            menuProperty->UpdateMenuOffset(menuPosition);
-            menuProperty->ResetMenuPlacement();
+            menuModifier->updateMenuOffset(menu, menuPosition);
+            menuModifier->resetMenuPlacement(menu);
         }
     }
     auto pipeline = menuWrapperNode->GetContextRefPtr();
     if (pipeline) {
         wrapperPattern->SetForceUpdateEmbeddedMenu(true);
     }
-    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
-    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
-    auto embeddedMenuItems = menuPattern->GetEmbeddedMenuItems();
+    auto embeddedMenuItems = menuModifier->getEmbeddedMenuItems(menu);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto iter = embeddedMenuItems.begin(); iter != embeddedMenuItems.end(); ++iter) {
-        auto menuItemPattern = (*iter)->GetPattern<MenuItemPattern>();
-        if (!menuItemPattern) {
+        if (!menuItemModifier) {
             continue;
         }
-        menuItemPattern->HideEmbedded(false);
+        menuItemModifier->hideEmbedded(*iter, false);
     }
     uint32_t minChildrenSize = 1;
     if (menuWrapperNode->GetChildren().size() > minChildrenSize) {
@@ -4639,8 +4648,10 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     if (params.empty()) {
         return;
     }
-    auto menuNode =
-        MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menuNode = menuViewModifier->createWithOptionParams(
+                        std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     CHECK_NULL_VOID(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -4704,8 +4715,11 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    auto menuNode =
-        NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menuNode = menuViewModifier->createWithCustomNode(
+                        customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
+    CHECK_NULL_VOID(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);

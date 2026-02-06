@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1212,7 +1213,7 @@ void MenuLayoutAlgorithm::CheckPreviewConstraintForConstant(const RefPtr<Geometr
 void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect)
 {
     CHECK_NULL_VOID(frameNode &&
-        (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::FLEX_ETS_TAG));
+        (frameNode->GetTag() == MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == FLEX_ETS_TAG));
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
@@ -1267,7 +1268,7 @@ void MenuLayoutAlgorithm::CheckPreviewSize(
     auto previewNode = previewLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(previewNode);
     auto tag = previewNode->GetTag();
-    auto isPreview = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    auto isPreview = tag == IMAGE_ETS_TAG || tag == MENU_PREVIEW_ETS_TAG || tag == FLEX_ETS_TAG;
     CHECK_NULL_VOID(isPreview);
 
     auto previewGeometryNode = previewNode->GetGeometryNode();
@@ -1304,9 +1305,9 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
         return;
     }
 
-    bool isImageNode = hostNode->GetTag() == V2::IMAGE_ETS_TAG;
-    bool isPreviewNode = hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG;
-    bool isFlexNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
+    bool isImageNode = hostNode->GetTag() == IMAGE_ETS_TAG;
+    bool isPreviewNode = hostNode->GetTag() == MENU_PREVIEW_ETS_TAG;
+    bool isFlexNode = hostNode->GetTag() == FLEX_ETS_TAG;
     if (!isPreviewNode && !isImageNode && !isFlexNode) {
         return;
     }
@@ -1356,7 +1357,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         }
         GetPreviewNodeTotalSize(child, param_.menuWindowRect, previewLayoutWrapper, size, menuLayoutWrapper);
         auto menuPattern = hostNode->GetPattern<MenuPattern>();
-        if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
+        if (hostNode->GetTag() == MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize();
         }
@@ -3912,7 +3913,7 @@ bool MenuLayoutAlgorithm::UpdateSelectOverlayMenuColumnInfo(
     CHECK_NULL_RETURN(pattern->IsSelectOverlayExtensionMenu(), false);
     auto menuWrapper = pattern->GetMenuWrapper();
     CHECK_NULL_RETURN(menuWrapper, false);
-    if (menuWrapper->GetTag() != V2::SELECT_OVERLAY_ETS_TAG) {
+    if (menuWrapper->GetTag() != SELECT_OVERLAY_ETS_TAG) {
         return false;
     }
     auto selectOverlayPattern = menuWrapper->GetPattern<SelectOverlayPattern>();

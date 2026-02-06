@@ -462,6 +462,10 @@ public:
     mutable RefPtr<UINode> detachedProxy_ = nullptr;
     void HandleCloseSubMenu();
     void DoCloseSubMenu();
+    void SetOnClickEventSet(bool isSet)
+    {
+        onClickEventSet_ = isSet;
+    }
 
     void SetDetachedFreeRootProxy(const RefPtr<UINode>& node)
     {

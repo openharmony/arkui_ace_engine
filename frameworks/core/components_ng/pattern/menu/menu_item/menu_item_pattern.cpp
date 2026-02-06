@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -242,7 +243,7 @@ void MenuItemPattern::CreateBottomDivider()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+    bottomDivider_ = FrameNode::GetOrCreateFrameNode(MENU_DIVIDER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
     auto dividerPattern = bottomDivider_->GetPattern<MenuDividerPattern>();
     dividerPattern->BindMenuItem(host);
@@ -614,7 +615,7 @@ RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG || parent->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+        if (parent->GetTag() == MENU_WRAPPER_ETS_TAG || parent->GetTag() == SELECT_OVERLAY_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(parent);
         }
         parent = parent->GetParent();
@@ -629,7 +630,7 @@ RefPtr<FrameNode> MenuItemPattern::GetMenu(bool needTopMenu)
     auto parent = host->GetParent();
     RefPtr<FrameNode> menuNode = nullptr;
     while (parent) {
-        if (parent->GetTag() == V2::MENU_ETS_TAG) {
+        if (parent->GetTag() == MENU_ETS_TAG) {
             menuNode = AceType::DynamicCast<FrameNode>(parent);
             if (!needTopMenu) {
                 // innner menu
@@ -819,7 +820,7 @@ RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
 RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 {
     CHECK_NULL_RETURN(customNode, nullptr);
-    if (customNode->GetTag() == V2::MENU_ETS_TAG) {
+    if (customNode->GetTag() == MENU_ETS_TAG) {
         auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode;
@@ -827,15 +828,15 @@ RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
     uint32_t depth = 0;
     auto child = customNode->GetFrameChildByIndex(0, false);
     while (child && depth < MAX_SEARCH_DEPTH) {
-        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+        if (child->GetTag() == JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
-            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            if (child && child->GetTag() == JS_VIEW_ETS_TAG) {
                 child  = child->GetChildAtIndex(0);
                 ++depth;
             }
             continue;
         }
-        if (child->GetTag() == V2::MENU_ETS_TAG) {
+        if (child->GetTag() == MENU_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(child);
         }
         child  = child->GetChildAtIndex(0);
@@ -851,7 +852,7 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
         TAG_LOGW(AceLogTag::ACE_MENU, "subMenu has no Menu node");
     }
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
+    if (frameNode->GetTag() == MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(props);
         auto pattern = frameNode->GetPattern<MenuPattern>();
@@ -1001,7 +1002,7 @@ void MenuItemPattern::UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize)
     auto preview = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(1));
     CHECK_NULL_VOID(preview);
     auto tag = preview->GetTag();
-    auto isPreview = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    auto isPreview = tag == IMAGE_ETS_TAG || tag == MENU_PREVIEW_ETS_TAG || tag == FLEX_ETS_TAG;
     CHECK_NULL_VOID(isPreview);
 
     auto renderContext = preview->GetRenderContext();
@@ -1424,7 +1425,7 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive touch event", index_);
     auto menuWrapper = GetMenuWrapper();
     // When menu wrapper exists, the pressed state is handed over to the menu wrapper
-    if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+    if (menuWrapper && menuWrapper->GetTag() == MENU_WRAPPER_ETS_TAG) {
         return;
     }
     // change menu item paint props on press
@@ -1793,7 +1794,7 @@ void MenuItemPattern::OnVisibleChange(bool isVisible)
     CHECK_NULL_VOID(host);
     auto parentNode = host->GetParent();
     CHECK_NULL_VOID(parentNode);
-    if (parentNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+    if (parentNode->GetTag() == MENU_ITEM_GROUP_ETS_TAG) {
         parentNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -1879,11 +1880,13 @@ void MenuItemPattern::RegisterWrapperMouseEvent()
         auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
 
-        auto mouseTask = [weak = WeakClaim(this), menuWrapperPattern](MouseInfo& info) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto mouseTask = [weakMenuItem = WeakClaim(RawPtr(host)), menuWrapperPattern](MouseInfo& info) {
+            auto menuItem = weakMenuItem.Upgrade();
+            CHECK_NULL_VOID(menuItem);
             if (menuWrapperPattern) {
-                menuWrapperPattern->HandleMouseEvent(info, pattern);
+                menuWrapperPattern->HandleMouseEvent(info, menuItem);
             }
         };
         wrapperMouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -1970,7 +1973,7 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && SystemProperties::IsNeedSymbol()) {
         // iamge -> symbol
         row->RemoveChild(selectIcon);
-        selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        selectIcon = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         auto selectTheme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
@@ -2024,7 +2027,7 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         // symbol -> image
         row->RemoveChild(selectIcon);
         selectIcon = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         ImageSourceInfo imageSourceInfo;
         auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
         imageSourceInfo.SetSrc(userIcon);
@@ -2054,13 +2057,13 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
         if (!itemProperty->GetSelectIconSrc().value_or("").empty() ||
             Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !SystemProperties::IsNeedSymbol()) {
             selectIcon_ = FrameNode::CreateFrameNode(
-                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+                IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         } else {
-            selectIcon_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            selectIcon_ = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         }
     }
-    if (selectIcon_->GetTag() == V2::IMAGE_ETS_TAG) {
+    if (selectIcon_->GetTag() == IMAGE_ETS_TAG) {
         UpdateImageNode(row, selectIcon_);
     } else {
         UpdateSymbolNode(row, selectIcon_);
@@ -2084,7 +2087,7 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
 {
     CHECK_EQUAL_VOID(ISNeedAddExpandIcon(row), false);
     if (!expandIcon_) {
-        expandIcon_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        expandIcon_ = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(expandIcon_);
     }
@@ -2168,7 +2171,7 @@ void MenuItemPattern::UpdateLabelIfSelectOverlayExtensionMenu(std::string& label
     RefPtr<FrameNode> rightRow =
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
-    auto labelNode = GetChildNodeFromRow(rightRow, V2::TEXT_ETS_TAG);
+    auto labelNode = GetChildNodeFromRow(rightRow, TEXT_ETS_TAG);
     CHECK_NULL_VOID(labelNode);
     auto textProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
@@ -2186,7 +2189,7 @@ void MenuItemPattern::UpdateContentIfSelectOverlayExtensionMenu(std::string& con
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
-    auto contentNode = GetChildNodeFromRow(leftRow, V2::TEXT_ETS_TAG);
+    auto contentNode = GetChildNodeFromRow(leftRow, TEXT_ETS_TAG);
     CHECK_NULL_VOID(contentNode);
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
@@ -2204,7 +2207,7 @@ void MenuItemPattern::AddClickableArea()
         auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(hostAccessibilityProperty);
         hostAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        auto clickableArea = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_VOID(clickableArea);
         auto theme = GetCurrentSelectTheme();
@@ -2334,15 +2337,15 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     }
     if (!iconNode) {
         if (symbol) {
-            iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            iconNode = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         } else {
             iconNode = FrameNode::CreateFrameNode(
-                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+                IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         }
         CHECK_NULL_VOID(iconNode);
     }
-    if (iconNode->GetTag() == V2::IMAGE_ETS_TAG) {
+    if (iconNode->GetTag() == IMAGE_ETS_TAG) {
         UpdateImageIcon(row, iconNode, iconSrc, symbol, isStart);
     } else {
         UpdateSymbolIcon(row, iconNode, iconSrc, symbol, isStart);
@@ -2362,7 +2365,7 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     if (symbol) {
         // iamge -> symbol
         row->RemoveChild(iconNode);
-        iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        iconNode = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<TextPattern>(); });
 
         auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
@@ -2418,7 +2421,7 @@ void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         // symbol -> image
         row->RemoveChild(iconNode);
         iconNode = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
         auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
         ImageSourceInfo imageSourceInfo(iconSrc);
@@ -2445,7 +2448,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
 
     if (!node) {
         node = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     }
     CHECK_NULL_VOID(node);
     auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
@@ -2796,7 +2799,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const PointF& pos
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     if (expandingMode_ != SubMenuExpandingMode::EMBEDDED || !isExpanded_
-        || embeddedMenu_ == nullptr || embeddedMenu_->GetTag() != V2::MENU_ETS_TAG) {
+        || embeddedMenu_ == nullptr || embeddedMenu_->GetTag() != MENU_ETS_TAG) {
         return host;
     }
     CHECK_NULL_RETURN(clickableArea_, host);
@@ -2809,7 +2812,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const PointF& pos
     }
     RefPtr<FrameNode> menuItem = nullptr;
     for (const auto& child : embeddedMenu_->GetChildren()) {
-        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+        if (child->GetTag() == MENU_ITEM_ETS_TAG) {
             menuItem = AceType::DynamicCast<FrameNode>(child);
         }
         if (menuItem) {
@@ -2986,12 +2989,12 @@ void MenuItemPattern::UpdateIcon(const std::string& src, const std::function<voi
     RefPtr<FrameNode> row =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(row);
-    if (symbolIcon && (!icon_ || icon_->GetTag() != V2::SYMBOL_ETS_TAG)) {
+    if (symbolIcon && (!icon_ || icon_->GetTag() != SYMBOL_ETS_TAG)) {
         icon_ = MenuView::CreateSymbol(symbolIcon, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
-    } else if (symbolIcon == nullptr && !src.empty() && (!icon_ || icon_->GetTag() != V2::IMAGE_ETS_TAG)) {
+    } else if (symbolIcon == nullptr && !src.empty() && (!icon_ || icon_->GetTag() != IMAGE_ETS_TAG)) {
         icon_ = MenuView::CreateIcon(src, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -3370,7 +3373,7 @@ void MenuItemPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG:
 
 RefPtr<FrameNode> MenuItemPattern::CreateCheckMarkNode(const RefPtr<FrameNode>& parent, uint32_t index)
 {
-    auto checkMarkNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+    auto checkMarkNode = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_RETURN(checkMarkNode, nullptr);
     auto checkLayoutProperty = checkMarkNode->GetLayoutProperty<TextLayoutProperty>();
@@ -3411,7 +3414,7 @@ void MenuItemPattern::SetShowDefaultSelectedIcon(bool show)
     CHECK_NULL_VOID(host);
     if (isOptionPattern_ && showDefaultSelectedIcon_ && !endRowNode_) {
         auto endRow = FrameNode::CreateFrameNode(
-            V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemRowPattern>());
+            ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemRowPattern>());
         CHECK_NULL_VOID(endRow);
         endRow->MountToParent(host);
         auto rightRowLayoutProps = endRow->GetLayoutProperty<LinearLayoutProperty>();
@@ -3630,13 +3633,13 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionSelectedApply_) {
             ApplyTextModifier(optionSelectedApply_);
         }
-        selectPattern->UpdateSelectedOptionFontFromPattern(AceType::Claim<MenuItemPattern>(this));
+        selectPattern->UpdateSelectedOptionFontFromPattern(host);
     } else {
         ApplyOptionThemeStyles();
         if (optionApply_) {
             ApplyTextModifier(optionApply_);
         }
-        selectPattern->UpdateOptionFontFromPattern(AceType::Claim<MenuItemPattern>(this));
+        selectPattern->UpdateOptionFontFromPattern(host);
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
+#include "core/components_ng/pattern/menu/bridge/menu/arkts_native_menu_bridge.h"
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_theme.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,6 +33,8 @@ constexpr int NUM_5 = 5;
 constexpr int COUNT_PROP = 4;
 constexpr uint32_t TRANSPARENT_COLOR = 0x00000000;
 constexpr uint32_t FOREGROUND_COLOR = 0x00000001;
+const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
 struct RadiusParseParams {
     std::vector<ArkUI_Float32> radiusValues;
@@ -163,7 +165,6 @@ void ParseMenuDividerColor(EcmaVM* vm, std::vector<Local<JSValueRef>>& args, Ark
         dividerOptions.color = color.GetValue();
     }
 }
-
 
 void ParseMenuDividerStartMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& args,
     ArkUIMenuDividerOptions& dividerOptions, bool isJsView, bool isGroupDivider)
@@ -311,7 +312,9 @@ bool ParseFontOptions(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINo
             args[NUM_2] = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "family"));
             args[NUM_3] = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "style"));
         } else {
-            menuModifier->resetFont(nativeNode);
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                menuModifier->resetFont(nativeNode);
+            }
             return false;
         }
     } else {
@@ -326,6 +329,49 @@ bool ParseFontOptions(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINo
         return false;
     }
     return true;
+}
+
+void SetFontOptions(
+    EcmaVM* vm, bool isJsView, std::vector<Local<JSValueRef>>& args, ArkUIMenuFontOptions& menuFontOptions)
+{
+    CalcDimension size;
+    RefPtr<ResourceObject> sizeRawPtr;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], size, sizeRawPtr, false)) {
+        size = Dimension(0.0);
+    }
+    menuFontOptions.size.value = size.Value();
+    menuFontOptions.size.units = static_cast<int32_t>(size.Unit());
+    menuFontOptions.sizeRawPtr = AceType::RawPtr(sizeRawPtr);
+
+    std::string weight = DEFAULT_ERR_CODE;
+    if (args[NUM_1]->IsNumber()) {
+        weight = std::to_string(args[NUM_1]->Int32Value(vm));
+    } else {
+        if (!ArkTSUtils::ParseJsString(vm, args[NUM_1], weight) || weight.empty()) {
+            weight = DEFAULT_ERR_CODE;
+        }
+    }
+    menuFontOptions.weight = static_cast<int32_t>(Framework::ConvertStrToFontWeight(weight));
+
+    int32_t style = args[NUM_3]->IsNumber() ? args[NUM_3]->Int32Value(vm) : -1;
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        menuFontOptions.style = style;
+    } else {
+        menuFontOptions.style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
+    }
+
+    RefPtr<ResourceObject> familyResObj;
+    if (isJsView && !args[NUM_2]->IsString(vm) && !args[NUM_2]->IsObject(vm)) {
+        menuFontOptions.family = nullptr;
+        menuFontOptions.familyRawPtr = AceType::RawPtr(familyResObj);
+    } else {
+        std::string family;
+        if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, args[NUM_2], family, familyResObj) || family.empty()) {
+            family = DEFAULT_ERR_CODE;
+        }
+        menuFontOptions.family = family.c_str();
+        menuFontOptions.familyRawPtr = AceType::RawPtr(familyResObj);
+    }
 }
 
 void SetRadiusResObjs(std::vector<void*>& resObjs, RefPtr<ResourceObject>& topLeftResObj,
@@ -523,37 +569,9 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     bool isJsView = IsJsView(firstArg, vm);
     CHECK_EQUAL_RETURN(
         ParseFontOptions(vm, runtimeCallInfo, nativeNode, isJsView, args), false, panda::JSValueRef::Undefined(vm));
-
-    CalcDimension fontSize;
-    RefPtr<ResourceObject> fontSizeResObj;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], fontSize, fontSizeResObj, false)) {
-        fontSize = Dimension(0.0);
-    }
-    std::string weight = DEFAULT_ERR_CODE;
-    if (args[NUM_1]->IsNumber()) {
-        weight = std::to_string(args[NUM_1]->Int32Value(vm));
-    } else {
-        if (!ArkTSUtils::ParseJsString(vm, args[NUM_1], weight) || weight.empty()) {
-            weight = DEFAULT_ERR_CODE;
-        }
-    }
-
-    int32_t style = -1;
-    if (args[NUM_3]->IsNumber()) {
-        style = args[NUM_3]->Int32Value(vm);
-    }
-
-    std::string family;
-    RefPtr<ResourceObject> fontFamiliesResObj;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, args[NUM_2], family, fontFamiliesResObj) || family.empty()) {
-        family = DEFAULT_ERR_CODE;
-    }
-    std::string fontSizeStr = fontSize.ToString();
-    std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
-    auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
-    auto fontFamiliesRawPtr = AceType::RawPtr(fontFamiliesResObj);
-    menuModifier->setFont(nativeNode, fontInfo.c_str(), style, fontSizeRawPtr, fontFamiliesRawPtr);
+    ArkUIMenuFontOptions menuFontOptions;
+    SetFontOptions(vm, isJsView, args, menuFontOptions);
+    menuModifier->setFont(nativeNode, &menuFontOptions);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -739,8 +757,7 @@ ArkUINativeModuleValue MenuBridge::SetSubMenuExpandSymbol(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
     std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
     if (secondArg->IsObject(vm)) {
-        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-        Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[NUM_1]);
+        ArkTSUtils::SetSymbolOptionApply(vm, symbolApply, secondArg);
         menuModifier->setSubMenuExpandSymbol(nativeNode, reinterpret_cast<void*>(&symbolApply));
     } else {
         bool isJsView = IsJsView(firstArg, vm);
@@ -822,4 +839,53 @@ ArkUINativeModuleValue MenuBridge::CreateMenu(ArkUIRuntimeCallInfo* runtimeCallI
     Framework::JSMenuTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
+
+void MenuBridge::RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    const char* functionNames[] = {
+        "create",
+        "setMenuFontColor",
+        "resetMenuFontColor",
+        "setFont",
+        "resetFont",
+        "setRadius",
+        "resetRadius",
+        "setWidth",
+        "resetWidth",
+        "setMenuItemDivider",
+        "resetMenuItemDivider",
+        "setMenuItemGroupDivider",
+        "resetMenuItemGroupDivider",
+        "setSubMenuExpandingMode",
+        "resetSubMenuExpandingMode",
+        "setSubMenuExpandSymbol",
+        "resetSubMenuExpandSymbol",
+        "setFontSize",
+        "resetFontSize",
+    };
+    Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::CreateMenu),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuFontColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuFontColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFont),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetFont),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetRadius),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetRadius),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemDivider),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemDivider),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemGroupDivider),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemGroupDivider),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandingMode),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandingMode),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandSymbol),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandSymbol),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFontSize),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetFontSize),
+    };
+    auto menu = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menu"), menu);
+}
+
 } // namespace OHOS::Ace::NG

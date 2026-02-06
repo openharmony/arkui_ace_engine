@@ -31,6 +31,8 @@
 #include "frameworks/core/components_ng/pattern/text/advanced_text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+using FontFeaturesList = std::list<std::pair<std::string, int32_t>>;
+
 #define ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(group, name, type)                  \
     void Update##name(const type& value)                                        \
@@ -167,7 +169,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, VariableFontWeight, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FontFeaturesList, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, TextDecoration, std::vector<TextDecoration>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);

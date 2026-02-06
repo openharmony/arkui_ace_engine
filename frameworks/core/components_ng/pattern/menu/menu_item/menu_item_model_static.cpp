@@ -18,9 +18,9 @@
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
-
 void MenuItemModelStatic::AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,7 @@ void MenuItemModelStatic::DoMountRow(const RefPtr<NG::FrameNode>& menuItem)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto leftRow = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(leftRow);
     auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
@@ -50,7 +50,7 @@ void MenuItemModelStatic::DoMountRow(const RefPtr<NG::FrameNode>& menuItem)
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
     leftRow->MountToParent(menuItem);
-    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto rightRow = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
     auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
@@ -122,7 +122,7 @@ void MenuItemModelStatic::UpdateMenuProperty(FrameNode* frameNode, const MenuIte
 RefPtr<FrameNode> MenuItemModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+        MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
     return frameNode;
 }
 

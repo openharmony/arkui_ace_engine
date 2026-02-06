@@ -160,7 +160,9 @@ HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow005, TestSize.Level1)
     auto menuNode = AceType::MakeRefPtr<FrameNode>("menu", targetId, AceType::MakeRefPtr<Pattern>());
     auto wrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(targetId);
     menuNode->pattern_ = wrapperPattern;
-    overlayManager->menuMap_[targetId] = menuNode;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menuNode;
     EXPECT_TRUE(ViewAbstractModelStatic::CheckMenuIsShow(menuParam, targetId, targetNode, isBuildFuncNull));
 }
 
@@ -250,7 +252,9 @@ HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_BindMenuGestureBranch, TestSize
     auto rootNode = AceType::MakeRefPtr<FrameNode>("root", -1, AceType::MakeRefPtr<Pattern>());
     auto overlayManager = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
     pipeline->overlayManager_ = overlayManager;
-    overlayManager->menuMap_[targetId] = frameNode;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = frameNode;
     auto wrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(targetId);
     frameNode->pattern_ = wrapperPattern;
 

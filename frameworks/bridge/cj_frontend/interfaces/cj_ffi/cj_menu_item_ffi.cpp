@@ -14,12 +14,33 @@
  */
 
 #include "cj_menu_item_ffi.h"
-#include "core/components_ng/base/view_stack_model.h"
 #include "cj_lambda.h"
+
+#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::MenuItemModelNG* GetMenuItemModel()
+{
+    static NG::MenuItemModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
+        if (module == nullptr) {
+            LOGF("Can't find MenuItem dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::MenuItemModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkMenuItemCreateByBuilder(void(*builder)())
@@ -31,7 +52,7 @@ void FfiOHOSAceFrameworkMenuItemCreateByBuilder(void(*builder)())
         builderFunc();
         customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
     }
-    MenuItemModel::GetInstance()->Create(customNode);
+    GetMenuItemModel()->Create(customNode);
 }
 
 void FfiOHOSAceFrameworkMenuItemCreateByOption(const char* startIcon,
@@ -55,72 +76,72 @@ void FfiOHOSAceFrameworkMenuItemCreateByOption(const char* startIcon,
     if (builder) {
         menuItemProps.buildFunc = CJLambda::Create(builder);
     }
-    MenuItemModel::GetInstance()->Create(menuItemProps);
+    GetMenuItemModel()->Create(menuItemProps);
 }
 
 void FfiOHOSAceFrameworkMenuItemIsSelected(bool value)
 {
-    MenuItemModel::GetInstance()->SetSelected(value);
+    GetMenuItemModel()->SetSelected(value);
 }
 
 void FfiOHOSAceFrameworkMenuItemSelectIconByBool(bool value)
 {
-    MenuItemModel::GetInstance()->SetSelectIcon(value);
+    GetMenuItemModel()->SetSelectIcon(value);
 }
 
 void FfiOHOSAceFrameworkMenuItemSelectIconByResource(const char* value)
 {
     std::string icon = value;
-    MenuItemModel::GetInstance()->SetSelectIcon(true);
-    MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
+    GetMenuItemModel()->SetSelectIcon(true);
+    GetMenuItemModel()->SetSelectIconSrc(icon);
 }
 
 void FfiOHOSAceFrameworkMenuItemContentFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
-    MenuItemModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(style));
+    GetMenuItemModel()->SetFontStyle(static_cast<FontStyle>(style));
 
     std::string familyVal = family;
     auto fontFamilies = ConvertStrToFontFamilies(familyVal);
-    MenuItemModel::GetInstance()->SetFontFamily(fontFamilies);
+    GetMenuItemModel()->SetFontFamily(fontFamilies);
 
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    MenuItemModel::GetInstance()->SetFontSize(fontSize);
+    GetMenuItemModel()->SetFontSize(fontSize);
 
     std::string weightVal = weight;
-    MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weightVal));
+    GetMenuItemModel()->SetFontWeight(ConvertStrToFontWeight(weightVal));
 }
 
 void FfiOHOSAceFrameworkMenuItemContentFontColor(uint32_t value)
 {
     std::optional<Color> color = Color(value);
-    MenuItemModel::GetInstance()->SetFontColor(color);
+    GetMenuItemModel()->SetFontColor(color);
 }
 
 void FfiOHOSAceFrameworkMenuItemLabelFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
-    MenuItemModel::GetInstance()->SetLabelFontStyle(static_cast<FontStyle>(style));
+    GetMenuItemModel()->SetLabelFontStyle(static_cast<FontStyle>(style));
 
     std::string familyVal = family;
     auto fontFamilies = ConvertStrToFontFamilies(familyVal);
-    MenuItemModel::GetInstance()->SetLabelFontFamily(fontFamilies);
+    GetMenuItemModel()->SetLabelFontFamily(fontFamilies);
 
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);
+    GetMenuItemModel()->SetLabelFontSize(fontSize);
 
     std::string weightVal = weight;
-    MenuItemModel::GetInstance()->SetLabelFontWeight(ConvertStrToFontWeight(weightVal));
+    GetMenuItemModel()->SetLabelFontWeight(ConvertStrToFontWeight(weightVal));
 }
 
 void FfiOHOSAceFrameworkMenuItemLabelFontColor(uint32_t value)
 {
     std::optional<Color> color = Color(value);
-    MenuItemModel::GetInstance()->SetLabelFontColor(color);
+    GetMenuItemModel()->SetLabelFontColor(color);
 }
 
 void FfiOHOSAceFrameworkMenuItemOnChange(void (*callback)(bool isChecked))
 {
-    MenuItemModel::GetInstance()->SetOnChange(CJLambda::Create(callback));
+    GetMenuItemModel()->SetOnChange(CJLambda::Create(callback));
 }
 }

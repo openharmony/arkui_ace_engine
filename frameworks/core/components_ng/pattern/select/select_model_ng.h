@@ -26,7 +26,7 @@ class SelectTheme;
 }
 
 namespace OHOS::Ace::NG {
-class MenuItemConfiguration : public CommonConfiguration {
+class ACE_FORCE_EXPORT MenuItemConfiguration : public CommonConfiguration {
     public:
         MenuItemConfiguration(const std::string& value, const std::string& icon,
             RefPtr<SymbolModifier> symbolModifier, int index, bool selected, bool enabled)
@@ -40,7 +40,7 @@ class MenuItemConfiguration : public CommonConfiguration {
 };
 using SelectMakeCallback =
     std::function<RefPtr<FrameNode>(const MenuItemConfiguration menuItemConfiguration)>;
-class ACE_EXPORT SelectModelNG : public OHOS::Ace::SelectModel {
+class ACE_FORCE_EXPORT SelectModelNG : public OHOS::Ace::SelectModel {
 public:
     void Create(const std::vector<SelectParam>& params) override;
     void SetSelected(int32_t idx) override;
@@ -103,7 +103,7 @@ public:
     void SetLayoutDirection(TextDirection value) override;
     static void SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc);
     static void ResetBuilderFunc(FrameNode* frameNode);
-    static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
+    ACE_FORCE_EXPORT static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
     ControlSize GetControlSize() override;
     void BackgroundColor(const Color& color) override;
     void ResetBackgroundColor() override;

@@ -24328,6 +24328,7 @@ if (globalThis.IsolatedComponent !== undefined) {
 if (globalThis.Menu === undefined) {
   globalThis.Menu = {
     create: function (params) {
+      getUINativeModule().loadNativeModule('Menu');
       let module = globalThis.requireNapi('arkui.components.arkmenu');
       module.exportView();
       getUINativeModule().menu.create();
@@ -24341,6 +24342,7 @@ if (globalThis.Menu === undefined) {
 if (globalThis.MenuItem === undefined) {
   globalThis.MenuItem = {
     create: function (params) {
+      getUINativeModule().loadNativeModule('MenuItem');
       let module = globalThis.requireNapi('arkui.components.arkmenuitem');
       module.exportView();
       getUINativeModule().menuitem.create(params);
@@ -24353,9 +24355,10 @@ if (globalThis.MenuItem === undefined) {
 if (globalThis.MenuItemGroup === undefined) {
   globalThis.MenuItemGroup = {
     create: function (params) {
+      getUINativeModule().loadNativeModule('MenuItemGroup');
       let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
       module.exportView();
-      getUINativeModule().menuitemgroup.createMenuItemGroup(params);
+      getUINativeModule().menuitemgroup.create(params);
     },
     name: 'JSMenuItemGroup'
   }
