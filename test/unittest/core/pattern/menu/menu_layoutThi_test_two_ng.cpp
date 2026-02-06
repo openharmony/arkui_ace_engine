@@ -1132,7 +1132,7 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode003, TestSize.Level1)
     layoutAlgorithm->wrapperRect_ = wrapperRect;
     menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
     layoutAlgorithm->param_.bottomSecurity = WRAPPER_RECT_HEIGHT_SMALL;
-    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_FALSE(layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION));
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRect);
     /**
      * @tc.steps: step4. Set preview mode, ,male the height after avoidance is 0, but the theme value can be avoided

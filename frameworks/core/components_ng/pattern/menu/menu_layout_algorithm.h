@@ -151,9 +151,9 @@ private:
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
-    void CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern);
-    void UpdateWrapperRectForHoverMode(
-        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern, double creaseHeightOffset);
+    void CalcWrapperRectForHoverMode(const RefPtr<MenuPattern>& menuPattern, bool isAvoidKeyboard);
+    void UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern,
+        double creaseHeightOffset, bool isAvoidKeyboard);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -307,8 +307,8 @@ private:
     float CalcSubMenuMaxHeightNoPreview(const RefPtr<FrameNode>& parentItem, LayoutConstraintF& childConstraint,
         float lastItemTopPositionY, float firstItemBottomPositionY, float parentMenuPositionY);
     RefPtr<SelectTheme> GetCurrentSelectTheme(const RefPtr<FrameNode>& frameNode);
-    void InitializeMenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode);
-    void MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode, const std::optional<Dimension>& minKeyboardAvoidDistance,
+    bool InitializeMenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode);
+    bool MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode, const std::optional<Dimension>& minKeyboardAvoidDistance,
         float keyboardTopPosition);
     std::optional<float> GetKeyboardTopPosition(const RefPtr<FrameNode>& menuNode);
 
