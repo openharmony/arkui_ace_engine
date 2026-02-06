@@ -6334,6 +6334,14 @@ export class ArkUIGeneratedNativeModule {
     native static _SwiperController_finishAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _SwiperController_preloadItems(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SwiperController_startFakeDrag(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _SwiperController_fakeDragBy(ptr: KPointer, offset: KFloat): boolean
+    @ani.unsafe.Direct
+    native static _SwiperController_stopFakeDrag(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _SwiperController_isFakeDragging(ptr: KPointer): boolean
+    @ani.unsafe.Direct
     native static _SwipeRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _SwipeRecognizer_getFinalizer(): KPointer

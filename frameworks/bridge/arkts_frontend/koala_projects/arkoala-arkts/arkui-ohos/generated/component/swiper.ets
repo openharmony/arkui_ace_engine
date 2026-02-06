@@ -441,6 +441,20 @@ export class SwiperController implements MaterializedBase {
         const indices_casted = indices as (Array<int32> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
+    public startFakeDrag(): boolean {
+        console.info('hzq swiperets');
+        return this.startFakeDrag_serialize()
+    }
+    public fakeDragBy(offset: float): boolean {
+        const offset_casted = offset as (float)
+        return this.fakeDragBy_serialize(offset_casted)
+    }
+    public stopFakeDrag(): boolean {
+        return this.stopFakeDrag_serialize()
+    }
+    public isFakeDragging(): boolean {
+        return this.isFakeDragging_serialize()
+    }
     showNext_serialize(): void {
         ArkUIGeneratedNativeModule._SwiperController_showNext(this.peer!.ptr)
     }
@@ -502,6 +516,22 @@ export class SwiperController implements MaterializedBase {
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._SwiperController_preloadItems(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+        return retval
+    }
+    startFakeDrag_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_startFakeDrag(this.peer!.ptr)
+        return retval
+    }
+    fakeDragBy_serialize(offset: float): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_fakeDragBy(this.peer!.ptr, offset)
+        return retval
+    }
+    stopFakeDrag_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_stopFakeDrag(this.peer!.ptr)
+        return retval
+    }
+    isFakeDragging_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_isFakeDragging(this.peer!.ptr)
         return retval
     }
 }
