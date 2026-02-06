@@ -111,7 +111,6 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
@@ -130,6 +129,7 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 #endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
@@ -518,10 +518,11 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto searchModifier = nodeModifier->getSearchModifier();
+    CHECK_NULL_RETURN(searchModifier, nullptr);
+    return searchModifier->createSearchFrameNode(nodeId);
 }
 
 void* createGridRowNode(ArkUI_Int32 nodeId)

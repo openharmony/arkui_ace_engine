@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SearchModelNG : public OHOS::Ace::SearchModel {
+class ACE_FORCE_EXPORT SearchModelNG : public OHOS::Ace::SearchModel {
 public:
     RefPtr<TextFieldControllerBase> Create(const std::optional<std::u16string>& value,
         const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon) override;
@@ -148,7 +148,7 @@ public:
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetSearchImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
-    static void SetSearchButton(FrameNode* frameNode, const std::string& text);
+    static void SetSearchButton(FrameNode* frameNode, const std::string& text, bool isJsView = false);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color, bool isTheme = false);
     static void SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable);
@@ -162,6 +162,7 @@ public:
     static void SetCaretWidth(FrameNode* frameNode, const Dimension& value);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void ResetCaretColor(FrameNode* frameNode);
+    static void SetSearchDefaultIcon(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
@@ -237,6 +238,14 @@ public:
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetBorderRadius(FrameNode* frameNode);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void ResetBackgroundColorStatic();
+    static void SetSearchSymbolIcon(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
+    static void SetCancelSymbolIcon(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
+    static void SetDragPreviewOptions(FrameNode* frameNode, const NG::DragPreviewOption option);
+    static void SetCancelDefaultIcon(FrameNode* frameNode);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

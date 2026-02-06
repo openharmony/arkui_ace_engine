@@ -472,7 +472,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCanvasImageData::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
-    JSSearch::JSBind(globalObj);
     JSSelect::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);

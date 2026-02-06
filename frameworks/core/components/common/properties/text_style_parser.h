@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_TEXT_STYLE_PARSER_H
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_TEXT_STYLE_PARSER_H
 
+#include <list>
+
 namespace OHOS::Ace {
 
 bool ParseFontVariantCaps(const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);

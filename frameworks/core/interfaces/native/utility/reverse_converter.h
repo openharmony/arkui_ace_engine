@@ -420,7 +420,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
-    void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
@@ -464,11 +464,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
-    void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, ConvContext *ctx);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_TextChangeReason& dst, const TextChangeReason& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationStyle& dst, const TextDecorationStyle& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationType& dst, const TextDecoration& src);
-    void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextDirection& dst, const TextDirection& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx);
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);
