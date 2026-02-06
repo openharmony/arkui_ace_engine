@@ -872,7 +872,7 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
     }
     auto basicAPI = impl->getBasicAPI();
     CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    auto invalid = basicAPI->checkUIContextInvalide(instanceId);
+    auto invalid = basicAPI->checkUIContextInvalid(instanceId);
     if (invalid == ARKUI_ERROR_CODE_UI_CONTEXT_INVALID) {
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }

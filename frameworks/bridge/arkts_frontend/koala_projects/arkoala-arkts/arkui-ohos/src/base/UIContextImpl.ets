@@ -1650,6 +1650,7 @@ export class UIContextImpl extends UIContext {
             if (retval !== nullptr && retval !== 0) {
                 const peer = FrameNodeExtender.createByRawPtr(retval as KPointer);
                 if (!peer) {
+                    ArkUIAniModule._Common_Restore_InstanceId();
                     return null;
                 }
                 node = FrameNodeUtils.searchNodeInRegisterProxy(peer);
@@ -1657,11 +1658,12 @@ export class UIContextImpl extends UIContext {
                     node = FrameNodeUtils.createFrameNode(this, peer);
                 }
             }
-            return node;
         } catch (e) {
             ArkUIAniModule._Common_Restore_InstanceId();
             throw e;
         }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
     }
 
     getHostContext(): Context | undefined {
