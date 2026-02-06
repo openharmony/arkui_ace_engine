@@ -16,6 +16,8 @@
 import image from '@ohos.multimedia.image';
 import drawing from '@ohos.graphics.drawing';
 import { AnimationStatus, ResourceStr, Resource } from '@ohos.arkui.component';
+import { SystemOps } from "#generated"
+import { ArkUIAniModule } from 'arkui.ani';
 
 class NativeDestructor {
   private ptr: long = 0
@@ -24,7 +26,7 @@ class NativeDestructor {
   }
 
   clean(): void {
-    DrawableDescriptorInner.destructDrawable(this.ptr)
+    ArkUIAniModule._Drawable_DestructDrawable(this.ptr)
   }
 }
 
@@ -61,11 +63,11 @@ export class DrawableDescriptor {
   }
 
   loadSync(): DrawableDescriptorLoadedResult {
-    return DrawableDescriptorInner.loadSync(this)
+    return ArkUIAniModule._Drawable_LoadSync(this)
   }
 
   load(): Promise<DrawableDescriptorLoadedResult> {
-    return DrawableDescriptorInner.load(this)
+    return ArkUIAniModule._Drawable_Load(this)
   }
 
   static transferStatic(input: Any): Object {
@@ -78,7 +80,7 @@ export class DrawableDescriptor {
       return new Object();
     }
     let typeName = typeNameProperty.toString();
-    return DrawableDescriptorInner.nativeTransferStatic(inputVal, typeName);
+    return ArkUIAniModule._Drawable_NativeTransferStatic(inputVal, typeName);
   }
 
   static transferDynamic(input: Object): Any {
@@ -89,8 +91,8 @@ export class DrawableDescriptor {
     if (drawableDescriptor) {
       let module = ESValue.load("@ohos.arkui.drawableDescriptor").getProperty('default');
       let initFunc = module.getProperty("__createTransfer__");
-      if (initFunc) {
-        let drawableRet = initFunc.invoke(ESObject.wrap(drawableDescriptor.nativeObj));
+      if (!initFunc.isUndefined()) {
+        let drawableRet = initFunc.invoke(ESValue.wrap(drawableDescriptor.nativeObj));
         return drawableRet;
       }
     }
@@ -104,7 +106,7 @@ export class PixelMapDrawableDescriptor extends DrawableDescriptor {
   constructor(src?: image.PixelMap) {
     super()
     this.pixelMap = src
-    DrawableDescriptorInner.createPixelMapDrawable(this, src)
+    ArkUIAniModule._Drawable_CreatePixelMapDrawable(this, src)
     this.finalization = new NativeDestructor(this.nativeObj)
     finalizerRegister(this, this.finalization)
   }
@@ -113,7 +115,7 @@ export class PixelMapDrawableDescriptor extends DrawableDescriptor {
     if (this.pixelMap) {
       return this.pixelMap
     }
-    this.pixelMap = DrawableDescriptorInner.createPixelMap(this)
+    this.pixelMap = ArkUIAniModule._Drawable_CreatePixelMap(this)
     return this.pixelMap
   }
 }
@@ -129,7 +131,7 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     this.foreground = foreground
     this.background = background
     this.mask = mask
-    DrawableDescriptorInner.createLayeredDrawable(
+    ArkUIAniModule._Drawable_CreateLayeredDrawable(
       this, foreground?.getPixelMap(), background?.getPixelMap(), mask?.getPixelMap())
     this.finalization = new NativeDestructor(this.nativeObj)
     finalizerRegister(this, this.finalization)
@@ -139,7 +141,7 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     if (this.pixelMap != undefined) {
       return this.pixelMap
     }
-    this.pixelMap = DrawableDescriptorInner.composePixelMap(this)
+    this.pixelMap = ArkUIAniModule._Drawable_CreatePixelMap(this)
     return this.pixelMap
   }
 
@@ -147,7 +149,7 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     if (this.foreground != undefined) {
       return this.foreground
     }
-    this.foreground = DrawableDescriptorInner.createForeground(this)
+    this.foreground = ArkUIAniModule._Drawable_CreateForeground(this)
     return this.foreground
   }
 
@@ -155,7 +157,7 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     if (this.background != undefined) {
       return this.background
     }
-    this.background = DrawableDescriptorInner.createBackground(this)
+    this.background = ArkUIAniModule._Drawable_CreateBackground(this)
     return this.background
   }
 
@@ -163,17 +165,17 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
     if (this.mask != undefined) {
       return this.mask
     }
-    this.mask = DrawableDescriptorInner.createMask(this)
+    this.mask = ArkUIAniModule._Drawable_CreateMask(this)
     return this.mask
   }
 
   static getMaskClipPath(): string {
-    return DrawableDescriptorInner.getMaskClipPath()
+    return ArkUIAniModule._Drawable_GetMaskClipPath()
   }
 
   setBlendMode(mode: drawing.BlendMode | undefined): void {
     if (mode != undefined) {
-      DrawableDescriptorInner.setBlendMode(this, mode)
+      ArkUIAniModule._Drawable_SetBlendMode(this, mode)
     }
   }
 }
@@ -202,20 +204,27 @@ export interface AnimationController {
 }
 
 class AnimationControllerInner implements AnimationController {
-    static {
-        loadLibrary("drawable_descriptor_ani");
-    }
     @JSONStringifyIgnore private nativeObj: long = 0;
     constructor(nativeObj: long) {
       if (this.nativeObj === 0){
           this.nativeObj = nativeObj;
       }
     }
-    public native start(): void;
-    public native stop(): void;
-    public native pause(): void;
-    public native resume(): void;
-    public native getStatus(): AnimationStatus;
+    public start(): void {
+      ArkUIAniModule._Drawable_AnimationControllerStart(this)
+    }
+    public stop(): void {
+      ArkUIAniModule._Drawable_AnimationControllerStop(this)
+    }
+    public pause(): void {
+      ArkUIAniModule._Drawable_AnimationControllerPause(this)
+    }
+    public resume(): void {
+      ArkUIAniModule._Drawable_AnimationControllerResume(this)
+    }
+    public getStatus(): AnimationStatus {
+      return ArkUIAniModule._Drawable_AnimationControllerGetStatus(this)
+    }
 }
 
 export class AnimatedDrawableDescriptor extends DrawableDescriptor {
@@ -229,7 +238,7 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
     }
     this.pixelMaps = pixelMaps
     this.options = options
-    DrawableDescriptorInner.createAnimatedDrawable(this, pixelMaps, options)
+    ArkUIAniModule._Drawable_CreateAnimatedDrawable(this, pixelMaps, options)
     this.finalization = new NativeDestructor(this.nativeObj)
     finalizerRegister(this, this.finalization)
   }
@@ -239,10 +248,11 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
     this.options = options
     if (src instanceof ResourceStr) {
       if (src instanceof string) {
-        DrawableDescriptorInner.createAnimatedDrawableByString(this, src as string, options)
+        ArkUIAniModule._Drawable_CreateAnimatedDrawableByString(this, src as string, options)
       }
       else if (src instanceof Resource) {
-        DrawableDescriptorInner.createAnimatedDrawableByResource(this, src as Resource, options)
+        let resourceObjectKPointer = SystemOps.createResourceObject(src as Resource)
+        ArkUIAniModule._Drawable_CreateAnimatedDrawableByResource(this, resourceObjectKPointer, options)
       }
     } else {
       let pixelMapsParm: Array<image.PixelMap> = src as Array<image.PixelMap>
@@ -250,7 +260,7 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
         this.pixelMap = pixelMapsParm[0]
       }
       this.pixelMaps = pixelMapsParm
-      DrawableDescriptorInner.createAnimatedDrawable(this, pixelMapsParm, options)
+      ArkUIAniModule._Drawable_CreateAnimatedDrawable(this, pixelMapsParm, options)
     }
     
     this.finalization = new NativeDestructor(this.nativeObj)
@@ -261,36 +271,11 @@ export class AnimatedDrawableDescriptor extends DrawableDescriptor {
     if (this.pixelMap) {
       return this.pixelMap
     }
-    this.pixelMap = DrawableDescriptorInner.createPixelMap(this)
+    this.pixelMap = ArkUIAniModule._Drawable_CreatePixelMap(this)
     return this.pixelMap
   }
 
   getAnimationController(id?: string): AnimationController | undefined {
-    return DrawableDescriptorInner.getAnimationController(this, id)
+    return ArkUIAniModule._Drawable_GetAnimationController(this, id)
   }
-}
-
-class DrawableDescriptorInner {
-  static { loadLibrary("drawable_descriptor_ani") }
-  native static createPixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void;
-  native static createLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
-    background?: image.PixelMap, mask?: image.PixelMap): void;
-  native static createAnimatedDrawable(value: AnimatedDrawableDescriptor,
-      pixelMaps: Array<image.PixelMap>, options?: AnimationOptions): void;
-  native static createAnimatedDrawableByResource(value: AnimatedDrawableDescriptor,
-      resource: Resource, options?: AnimationOptions): void;
-  native static createAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
-      src: string, options?: AnimationOptions): void;
-  native static createPixelMap(value: DrawableDescriptor): image.PixelMap;
-  native static composePixelMap(value: LayeredDrawableDescriptor): image.PixelMap;
-  native static createForeground(value: LayeredDrawableDescriptor): DrawableDescriptor;
-  native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
-  native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
-  native static getMaskClipPath(): string;
-  native static loadSync(value: DrawableDescriptor): DrawableDescriptorLoadedResult;
-  native static load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>;
-  native static getAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined;
-  native static setBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void;
-  native static nativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor;
-  native static destructDrawable(ptr: long): void;
 }

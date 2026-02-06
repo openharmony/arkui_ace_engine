@@ -24,6 +24,7 @@
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "detached_free_root_node/detached_free_root_node.h"
+#include "drawable/drawable_module.h"
 #include "keyboard_avoid_mode/keyboard_avoid_mode_module.h"
 #include "custom_node/custom_node_module.h"
 #include "syntax/lazy_for_each_module.h"
@@ -673,6 +674,69 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ComponentSnapshot_createFromBuilderWithPromise",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
+        },
+        ani_native_function { "_Drawable_CreatePixelMapDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMapDrawable)
+        },
+        ani_native_function { "_Drawable_CreateLayeredDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateLayeredDrawable)
+        },
+        ani_native_function { "_Drawable_CreateAnimatedDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateAnimatedDrawable)
+        },
+        ani_native_function { "_Drawable_CreateAnimatedDrawableByResource", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateAnimatedDrawableByResource)
+        },
+        ani_native_function { "_Drawable_CreateAnimatedDrawableByString", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateAnimatedDrawableByString)
+        },
+        ani_native_function { "_Drawable_CreatePixelMap", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMap)
+        },
+        ani_native_function { "_Drawable_CreateForeground", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateForeground)
+        },
+        ani_native_function { "_Drawable_CreateBackground", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateBackground)
+        },
+        ani_native_function { "_Drawable_CreateMask", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateMask)
+        },
+        ani_native_function { "_Drawable_GetMaskClipPath", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableGetMaskClipPath)
+        },
+        ani_native_function { "_Drawable_LoadSync", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableLoadSync)
+        },
+        ani_native_function { "_Drawable_Load", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableLoad)
+        },
+        ani_native_function { "_Drawable_GetAnimationController", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableGetAnimationController)
+        },
+        ani_native_function { "_Drawable_SetBlendMode", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetBlendMode)
+        },
+        ani_native_function { "_Drawable_NativeTransferStatic", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableNativeTransferStatic)
+        },
+        ani_native_function { "_Drawable_DestructDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableDestructDrawable)
+        },
+        ani_native_function { "_Drawable_AnimationControllerStart", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableAnimationControllerStart)
+        },
+        ani_native_function { "_Drawable_AnimationControllerStop", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableAnimationControllerStop)
+        },
+        ani_native_function { "_Drawable_AnimationControllerPause", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableAnimationControllerPause)
+        },
+        ani_native_function { "_Drawable_AnimationControllerResume", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableAnimationControllerResume)
+        },
+        ani_native_function { "_Drawable_AnimationControllerGetStatus", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableAnimationControllerGetStatus)
         },
         ani_native_function {
             "_Common_GetSharedLocalStorage",

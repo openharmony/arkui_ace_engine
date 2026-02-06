@@ -20,16 +20,23 @@
 extern "C" {
 #endif
 
+struct ArkUIDrawableAsync;
+
 #define DRAWABLE_FUNC_NAME "GetArkUIDrawableDescriptor"
 
 struct ArkUIDrawableDescriptor {
     size_t (*getDrawableType)(void* object);
     void (*getPixelMap)(void* object, void* pixelMap);
+    void (*setPixelMapByPixelMap)(void* object, void* pixelMap);
+    void (*setLayeredForeground)(void* object, void* pixelMap);
+    void (*setLayeredBackground)(void* object, void* pixelMap);
+    void (*setLayeredMask)(void* object, void* pixelMap);
     void (*setPixelRawData)(void* object, uint8_t* data, size_t len);
     void (*setForegroundData)(void* object, uint8_t* data, size_t len);
     void (*setBackgroundData)(void* object, uint8_t* data, size_t len);
     void (*setMaskData)(void* object, uint8_t* data, size_t len);
     void (*setMaskPath)(void* object, const char* path);
+    void (*setBlendMode)(void* object, int32_t blendMode);
     void (*getForegroundPixelMap)(void* object, void* pixelMap);
     void (*getBackgroundPixelMap)(void* object, void* pixelMap);
     void (*getMaskPixelMap)(void* object, void* pixelMap);
@@ -47,6 +54,7 @@ struct ArkUIDrawableDescriptor {
     void (*setAnimatedAutoPlay)(void* object, bool autoPlay);
     void (*setAnimatedDurations)(void* object, const void* durationsVec);
     void (*loadSyncAnimated)(void* object, int32_t* width, int32_t* height, int32_t* errorCode);
+    void (*loadAsyncAnimated)(void* object, const ArkUIDrawableAsync& asyncCtx);
     void* (*getAnimatedController)(void* object, const char* id);
     void (*startAnimated)(void* object);
     void (*stopAnimated)(void* object);

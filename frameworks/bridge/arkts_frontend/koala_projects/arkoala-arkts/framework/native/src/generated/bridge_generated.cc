@@ -40978,6 +40978,12 @@ KInteropReturnBuffer impl_SystemOps_blendColorByColorMetrics(KInteropNumber colo
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_2(SystemOps_blendColorByColorMetrics, KInteropReturnBuffer, KInteropNumber, KInteropNumber)
+Ark_NativePointer impl_SystemOps_createResourceObject(KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_Resource resourceValueTemp = Resource_serializer::read(thisDeserializer);;
+        return GetAccessors()->getSystemOpsAccessor()->createResourceObject(static_cast<Ark_Resource*>(&resourceValueTemp));
+}
+KOALA_INTEROP_DIRECT_2(SystemOps_createResourceObject, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_TabBarSymbol_construct() {
         return GetAccessors()->getTabBarSymbolAccessor()->construct();
 }

@@ -27,6 +27,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
+  "arkui-preprocessed/@ohos.arkui.drawableDescriptor.ets",
   "arkui-preprocessed/@ohos.arkui.focusController.ets",
   "arkui-preprocessed/@ohos.arkui.graphics.ets",
   "arkui-preprocessed/@ohos.arkui.inspector.ets",

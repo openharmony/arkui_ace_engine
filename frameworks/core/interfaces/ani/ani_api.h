@@ -355,6 +355,15 @@ struct ArkUIComponentSnapshotAsync {
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
 
+struct ArkUIDrawableAsync {
+    int32_t imageWidth_ = 0;
+    int32_t imageHeight_ = 0;
+    int32_t errorCode = -1;
+    ani_env* env = nullptr;
+    ani_resolver deferred = nullptr;
+    std::function<void(std::shared_ptr<ArkUIDrawableAsync>)> callBackJsFunction;
+};
+
 typedef struct ArkUIAniTranslateOptions {
     ArkUIAniNumberString x;
     ArkUIAniNumberString y;

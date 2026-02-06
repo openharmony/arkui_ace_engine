@@ -31246,6 +31246,7 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     Array_Number (*blendColorByColorMetrics)(const Ark_Number* color,
                                              const Ark_Number* overlayColor);
     Ark_LengthMetricsCustom (*resourceToLengthMetrics)(const Ark_Resource* res);
+    Ark_NativePointer (*createResourceObject)(const Ark_Resource* resource);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUITabBarSymbolAccessor {
