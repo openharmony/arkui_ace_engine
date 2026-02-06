@@ -29,6 +29,7 @@ void FolderStackModelNG::Create(const std::vector<std::string>& itemId)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto folderStackGroupNode = FolderStackGroupNode::GetOrCreateGroupNode(
         FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
     folderStackGroupNode->SetItemId(itemId);
