@@ -854,7 +854,7 @@ class RichEditorSingleLineModifier extends ModifierWithKey {
 }
 RichEditorSingleLineModifier.identity = Symbol('richEditorSingleLine');
 
-class JSRichEditor extends JSContainerBase {
+class JSRichEditor extends JSViewAbstract {
     static create(params) {
         getUINativeModule().richEditor.create(params);
     }
