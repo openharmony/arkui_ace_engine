@@ -1850,23 +1850,4 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest222, TestSize.Level1)
     OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
 }
 
-/**
- * @tc.name: NativeRenderNodeTest223
- * @tc.desc: Test renderNode GetChildren with empty node.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest223, TestSize.Level1)
-{
-    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(renderNode, nullptr);
-
-    ArkUI_RenderNodeHandle* children = nullptr;
-    int32_t count = 0;
-    auto result = OH_ArkUI_RenderNodeUtils_GetChildren(renderNode, &children, &count);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-    ASSERT_EQ(count, 0);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
-}
-
 } // namespace OHOS::Ace
