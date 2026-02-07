@@ -37,6 +37,10 @@ public:
     static void SetCreateByTemplate(const JSCallbackInfo& info);
     static void JsParseItemDragEventHandler(
         const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj, int32_t repeatElmtId);
+    static void IsAllowAnimation(const JSCallbackInfo& info);
+    static void IsImplicitAnimationOpen(const JSCallbackInfo& info);
+    static void IsChildInAnimation(const JSCallbackInfo& info);
+    static void IsChildOnMainTree(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -16,6 +16,9 @@
 #include "core/components_ng/syntax/repeat_node.h"
 
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -95,17 +98,7 @@ void RepeatNode::AfterAddChild()
 // RepeatNode only
 void RepeatNode::MoveChild(uint32_t fromIndex)
 {
-    if (from_ >= 0) {
-        // from_ to_ exist, need adjust index.
-        if (fromIndex == static_cast<uint32_t>(from_)) {
-            fromIndex = static_cast<uint32_t>(to_);
-        } else if (fromIndex > static_cast<uint32_t>(from_) && fromIndex <= static_cast<uint32_t>(to_)) {
-            fromIndex--;
-        } else if (fromIndex < static_cast<uint32_t>(from_) && fromIndex >= static_cast<uint32_t>(to_)) {
-            fromIndex++;
-        }
-    }
-
+    fromIndex = AdjustFromIndex(fromIndex);
     // copy child from tempChildrenOfRepeat_[fromIndex] and append to children_
     if (fromIndex < tempChildrenOfRepeat_.size()) {
         auto& node = tempChildrenOfRepeat_.at(fromIndex);
@@ -238,6 +231,60 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
             pattern->DeInitDragManager();
         }
     }
+}
+
+bool RepeatNode::IsAllowAnimation()
+{
+    return GetParentFrameNode()->GetTag() == V2::LIST_ETS_TAG;
+}
+
+bool RepeatNode::IsChildInAnimation(uint32_t fromIndex)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    fromIndex = AdjustFromIndex(fromIndex);
+    CHECK_NULL_RETURN(fromIndex < tempChildrenOfRepeat_.size(), false);
+    auto child = tempChildrenOfRepeat_.at(fromIndex);
+    CHECK_NULL_RETURN(child, false);
+    auto node = AceType::DynamicCast<FrameNode>(child->GetFrameChildByIndex(0, false, true));
+    CHECK_NULL_RETURN(node, false);
+    auto renderContext = AceType::DynamicCast<RosenRenderContext>(
+        AceType::DynamicCast<FrameNode>(node)->GetRenderContext());
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rsNode = renderContext->GetRSNode();
+    CHECK_NULL_RETURN(rsNode, false);
+    return rsNode->GetAnimationsCount() > 0;
+#endif
+#ifndef ENABLE_ROSEN_BACKEND
+    return false;
+#endif
+}
+
+std::pair<int32_t, int32_t> RepeatNode::GetActiveRange()
+{
+    return { activeRangeStart_, activeRangeEnd_ };
+}
+
+void RepeatNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
+{
+    UINode::DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    activeRangeStart_ = start - cacheStart;
+    activeRangeEnd_ = end + cacheEnd;
+}
+
+uint32_t RepeatNode::AdjustFromIndex(uint32_t fromIndex)
+{
+    if (from_ >= 0) {
+        // from_ to_ exist, need adjust index.
+        if (fromIndex == static_cast<uint32_t>(from_)) {
+            fromIndex = static_cast<uint32_t>(to_);
+        } else if (fromIndex > static_cast<uint32_t>(from_) && fromIndex <= static_cast<uint32_t>(to_)) {
+            fromIndex--;
+        } else if (fromIndex < static_cast<uint32_t>(from_) && fromIndex >= static_cast<uint32_t>(to_)) {
+            fromIndex++;
+        }
+    }
+    return fromIndex;
 }
 
 void RepeatNode::DumpInfo()

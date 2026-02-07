@@ -2552,6 +2552,18 @@ void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
     }
 }
 
+void UINode::NeedSetInActiveAfterTransitionOut(bool needSetInActive)
+{
+    needSetInActiveAfterTransitionOut_ = needSetInActive;
+}
+
+void UINode::SetInActiveAfterTransitionOut()
+{
+    CHECK_NE_VOID(needSetInActiveAfterTransitionOut_, true);
+    SetActive(false);
+    needSetInActiveAfterTransitionOut_ = false;
+}
+
 bool UINode::GreatOrEqualAPITargetVersion(PlatformVersion version) const
 {
     if (!context_ || context_->GetApiTargetVersion() == 0) {

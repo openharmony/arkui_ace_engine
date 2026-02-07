@@ -74,10 +74,19 @@ public:
     void InitAllChildrenDragManager(bool init);
     void DumpInfo() override;
 
+    bool IsAllowAnimation();
+    bool IsChildInAnimation(uint32_t fromIndex);
+    std::pair<int32_t, int32_t> GetActiveRange();
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
+
 private:
     std::list<std::string> ids_;
     int32_t from_ = -1;
     int32_t to_ = -1;
+
+    int32_t activeRangeStart_ = -1;
+    int32_t activeRangeEnd_ = -1;
 
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
@@ -85,6 +94,8 @@ private:
 
     // RepeatNode only
     std::vector<RefPtr<UINode>> tempChildrenOfRepeat_;
+
+    uint32_t AdjustFromIndex(uint32_t fromIndex);
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatNode);
 };

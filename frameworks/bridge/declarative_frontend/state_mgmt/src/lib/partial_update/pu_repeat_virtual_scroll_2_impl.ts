@@ -356,6 +356,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
+    private implicitAnimationOpen_: boolean = false;
+    private allowAnimation_: boolean = false;
+
     // request container re-layout
     private firstIndexChanged_: number = 0;
 
@@ -571,6 +574,8 @@ class __RepeatVirtualScroll2Impl<T> {
             `${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         this.rerenderOngoing_ = true;
+        this.implicitAnimationOpen_ = RepeatVirtualScroll2Native.isImplicitAnimationOpen();
+        this.allowAnimation_ = RepeatVirtualScroll2Native.isAllowAnimation(this.repeatElmtId_);
 
         // update onMove
         // scenario: developers control whether onMove exists or not dynamically. 
@@ -603,6 +608,7 @@ class __RepeatVirtualScroll2Impl<T> {
         // create createMissingDataItem -type entries for all other new data items.
         if (!this.moveItemsUnchanged(newActiveDataItems, newL1Rid4Index)) {
             this.rerenderOngoing_ = false;
+            this.implicitAnimationOpen_ = false;
             return;
         }
 
@@ -641,6 +647,7 @@ class __RepeatVirtualScroll2Impl<T> {
             this.firstIndexChanged_, Array.from(newL1Rid4Index));
 
         this.rerenderOngoing_ = false;
+        this.implicitAnimationOpen_ = false;
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) reRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount()} - done`);
@@ -826,7 +833,9 @@ class __RepeatVirtualScroll2Impl<T> {
             }
 
             this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, activeIndex);
-            const optRid = this.canUpdate(activeIndex, newActiveDataItemAtActiveIndex.ttype);
+            const key = this.computeKey(newActiveDataItemAtActiveIndex.item as T, activeIndex,
+                /* monitor access already ongoing */ false, newActiveDataItems);
+            const optRid = this.canUpdate(activeIndex, newActiveDataItemAtActiveIndex.ttype, key);
             if (optRid <= 0) {
                 stateMgmtConsole.debug(`active range index ${activeIndex}: no rid found to update`);
                 continue;
@@ -841,8 +850,6 @@ class __RepeatVirtualScroll2Impl<T> {
                 newActiveDataItemAtActiveIndex.state = ActiveDataItem.UINodeExists;
 
                 if (this.useKeys_) {
-                    const key = this.computeKey(newActiveDataItemAtActiveIndex.item as T, activeIndex,
-                        /* monitor access already ongoing */ false, newActiveDataItems);
                     newActiveDataItemAtActiveIndex.key = key;
                     ridMeta.key_ = key;
                 }
@@ -952,7 +959,7 @@ class __RepeatVirtualScroll2Impl<T> {
      * @param forIndex 
      * @returns 
      */
-    private onGetRid4Index(forIndex: number): [number, number] {
+    private onGetRid4Index(forIndex: number, implicitAnimationOpen: boolean): [number, number] {
         if (forIndex < 0 || forIndex >= this.totalCount()) {
             throw new BusinessError(103803,`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
                 `\ndata array length: ${this.arr_.length}, totalCount: ${this.totalCount()}: ` +
@@ -972,7 +979,7 @@ class __RepeatVirtualScroll2Impl<T> {
             `ttype is '${ttype}' data array length: ${this.arr_.length}, totalCount: ${this.totalCount()} - start`);
 
         // spare UINode / RID available to update?
-        const optRid = this.canUpdateTryMatch(forIndex, ttype, dataItem, key);
+        const optRid = this.canUpdateTryMatch(forIndex, ttype, dataItem, key, implicitAnimationOpen);
 
         const result: [number, number] = (optRid > 0)
             ? this.updateChild(optRid, ttype, forIndex, key)
@@ -985,13 +992,30 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // return RID of Node that can be updated (matching ttype), 
     // or -1 if none
-    private canUpdate(index: number, ttype: string): number {
+    // In animation, reuse need meet the following rules:
+    // 1. When implicit animation is open, the node with same key can not be reused if the node is not on the main tree.
+    // 2. When implicit animation is open, the node with different key can not be reused.
+    // 3. When implicit animation is close, the node with same key can not be reused if the node is not on the main tree
+    //    and the original animation has not finished.
+    // 4. When implicit animation is close, the node with different key can not be reused if the original animation has
+    //    not finished.
+    private canUpdate(index: number, ttype: string, key: string): number {
         if (!this.allowUpdate_) {
             return -1;
         }
         for (const rid of this.spareRid_) {
             const ridMeta = this.meta4Rid_.get(rid);
             if (ridMeta && ridMeta.ttype_ === ttype) {
+                if (this.allowAnimation_ &&
+                    ((this.implicitAnimationOpen_ &&
+                        ((ridMeta.key_ === key && !RepeatVirtualScroll2Native.isChildOnMainTree(this.repeatElmtId_, rid)) || /* rule 1 */
+                        ridMeta.key_ !== key)) || /* rule 2 */
+                    (!this.implicitAnimationOpen_ &&
+                        ((ridMeta.key_ === key && !RepeatVirtualScroll2Native.isChildOnMainTree(this.repeatElmtId_, rid) &&
+                            RepeatVirtualScroll2Native.isChildInAnimation(this.repeatElmtId_, rid)) || /* rule 3 */
+                        (ridMeta.key_ !== key && RepeatVirtualScroll2Native.isChildInAnimation(this.repeatElmtId_, rid)))))) { /* rule 4 */
+                    continue;
+                }
                 stateMgmtConsole.debug(`canUpdate: Found spare rid ${rid} for ttype '${ttype}'`);
                 return rid;
             }
@@ -1002,32 +1026,52 @@ class __RepeatVirtualScroll2Impl<T> {
 
     // return RID of Node that can be updated (matching ttype), 
     // or -1 if none
-    private canUpdateTryMatch(index: number, ttype: string, dataItem: T, key?: string): number {
+    private canUpdateTryMatch(index: number, ttype: string, dataItem: T, key?: string, implicitAnimationOpen?: boolean): number {
         if (!this.allowUpdate_) {
             return -1;
         }
-        // 1. round: find matching RID, also data item matches
-        for (const rid of this.spareRid_) {
-            const ridMeta = this.meta4Rid_.get(rid);
-            // compare ttype and data item, or ttype and key
-            if (ridMeta && ridMeta.ttype_ === ttype &&
-                ((!this.useKeys_ && ridMeta.repeatItem_?.item === dataItem) ||
-                (this.useKeys_ && ridMeta.key_ === key))) {
-                stateMgmtConsole.debug(
-                    `canUpdateTryMatch: Found spare rid ${rid} for ttype '${ttype}' contentItem matches.`);
-                return rid;
-            }
+        // 1. round: find matching RID, also key matches
+        const ridWithSameKey = this.findRidWithSameKey(index, ttype, dataItem, key, implicitAnimationOpen);
+        if (ridWithSameKey !== -1) {
+            return ridWithSameKey;
+        }
+
+        if (this.allowAnimation_ && implicitAnimationOpen) {
+            return -1; /* rule 2 */
         }
 
         // just find a matching RID
         for (const rid of this.spareRid_) {
             const ridMeta = this.meta4Rid_.get(rid);
             if (ridMeta && ridMeta.ttype_ === ttype) {
+                if (this.allowAnimation_ && RepeatVirtualScroll2Native.isChildInAnimation(this.repeatElmtId_, rid)) {
+                    continue; /* rule 4 */
+                }
                 stateMgmtConsole.debug(`canUpdateTryMatch: Found spare rid ${rid} for ttype '${ttype}'`);
                 return rid;
             }
         }
         stateMgmtConsole.debug(`canUpdateTryMatch: Found NO spare rid for ttype '${ttype}'`);
+        return -1;
+    }
+
+    private findRidWithSameKey(index: number, ttype: string, dataItem: T, key?: string, implicitAnimationOpen?: boolean): number {
+        for (const rid of this.spareRid_) {
+            const ridMeta = this.meta4Rid_.get(rid);
+            // compare ttype and data item, or ttype and key
+            if (ridMeta && ridMeta.ttype_ === ttype &&
+                ((!this.useKeys_ && ridMeta.repeatItem_?.item === dataItem) ||
+                (this.useKeys_ && ridMeta.key_ === key))) {
+                if ((this.allowAnimation_ && implicitAnimationOpen && !RepeatVirtualScroll2Native.isChildOnMainTree(this.repeatElmtId_, rid)) || /* rule 1 */
+                    (this.allowAnimation_ && !implicitAnimationOpen && !RepeatVirtualScroll2Native.isChildOnMainTree(this.repeatElmtId_, rid) && /* rule 3 */
+                     RepeatVirtualScroll2Native.isChildInAnimation(this.repeatElmtId_, rid))) {
+                    continue;
+                }
+                stateMgmtConsole.debug(
+                    `canUpdateTryMatch: Found spare rid ${rid} for ttype '${ttype}' contentItem matches.`);
+                return rid;
+            }
+        }
         return -1;
     }
 

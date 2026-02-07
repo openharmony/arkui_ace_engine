@@ -38,7 +38,7 @@ RefPtr<RepeatVirtualScroll2CacheItem> RepeatVirtualScroll2CacheItem::MakeCacheIt
 }
 
 RepeatVirtualScroll2Caches::RepeatVirtualScroll2Caches(
-    const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index)
+    const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index)
     : onGetRid4Index_(onGetRid4Index)
 {}
 
@@ -199,7 +199,7 @@ OptCacheItem RepeatVirtualScroll2Caches::CallOnGetRid4Index(IndexType index)
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     auto* viewStack = NG::ViewStackProcessor::GetInstance();
 
-    const std::pair<RIDType, uint32_t> result = onGetRid4Index_(index);
+    const std::pair<RIDType, uint32_t> result = onGetRid4Index_(index, AnimationUtils::IsImplicitAnimationOpen());
     if (result.second == OnGetRid4IndexResult::CREATED_NEW_NODE) {
         // case: new node was created successfully
         // get it from ViewStackProcessor
