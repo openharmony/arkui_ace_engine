@@ -2801,6 +2801,13 @@ FingerInfo Convert(const Ark_FingerInfo& src)
     dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
     dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
     dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
+    // Handle globalDisplayX/Y
+    auto globalDisplayXOpt = Converter::OptConvert<float>(src.globalDisplayX);
+    auto globalDisplayYOpt = Converter::OptConvert<float>(src.globalDisplayY);
+    if (globalDisplayXOpt.has_value() && globalDisplayYOpt.has_value()) {
+        dst.globalDisplayLocation_.SetX(globalDisplayXOpt.value());
+        dst.globalDisplayLocation_.SetY(globalDisplayYOpt.value());
+    }
     return dst;
 }
 
@@ -3983,6 +3990,15 @@ TouchLocationInfo Convert(const Ark_TouchObject& src)
         PipelineBase::Vp2PxWithCurrentDensity(y)));
     dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
         PipelineBase::Vp2PxWithCurrentDensity(displayY)));
+    // Handle globalDisplayX/Y
+    auto globalDisplayXOpt = Converter::OptConvert<double>(src.globalDisplayX);
+    auto globalDisplayYOpt = Converter::OptConvert<double>(src.globalDisplayY);
+    if (globalDisplayXOpt.has_value() && globalDisplayYOpt.has_value()) {
+        dst.SetGlobalDisplayLocation(Offset(
+            PipelineBase::Vp2PxWithCurrentDensity(globalDisplayXOpt.value()),
+            PipelineBase::Vp2PxWithCurrentDensity(globalDisplayYOpt.value())
+        ));
+    }
     auto pressedTimeOpt = Converter::OptConvert<int64_t>(src.pressedTime);
     std::chrono::nanoseconds nanoseconds(pressedTimeOpt.value_or(0));
     TimeStamp time(nanoseconds);
