@@ -5462,7 +5462,7 @@ int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_Attrib
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
-    auto* menuOptions = reinterpret_cast<ArkUI_TextEditorSelectionMenuOptions*>(item->object);
+    auto* menuOptions = reinterpret_cast<OH_ArkUI_TextEditorSelectionMenuOptions*>(item->object);
     CHECK_NULL_RETURN(menuOptions->contentNode, ERROR_CODE_PARAM_INVALID);
     ArkUIRichEditorBindMenuParam richEditorBindMenuParam;
     richEditorBindMenuParam.richEditorSpanType = static_cast<ArkUI_Int32>(menuOptions->richEditorSpanType);
@@ -5570,7 +5570,7 @@ int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_Attri
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
-    auto* dataDetectorConfig = reinterpret_cast<ArkUI_TextDataDetectorConfig*>(item->object);
+    auto* dataDetectorConfig = reinterpret_cast<OH_ArkUI_TextDataDetectorConfig*>(item->object);
  
     ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string typesString;
@@ -5607,7 +5607,7 @@ void ResetRichEditorDataDetectorConfig(ArkUI_NodeHandle node)
 int32_t SetRichEditorPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
-    auto* options = reinterpret_cast<ArkUI_TextEditorPlaceholderOptions*>(item->object);
+    auto* options = reinterpret_cast<OH_ArkUI_TextEditorPlaceholderOptions*>(item->object);
     ArkUIRichEditorPlaceholderOptionsStruct placeholderOptions;
     placeholderOptions.value = options->value;
     placeholderOptions.fontWeight = options->fontWeight;
@@ -5628,7 +5628,7 @@ void ResetRichEditorPlaceholder(ArkUI_NodeHandle node)
 int32_t SetRichEditorStyledStringController(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
-    auto* controller = reinterpret_cast<ArkUI_TextEditorStyledStringController*>(item->object);
+    auto* controller = reinterpret_cast<OH_ArkUI_TextEditorStyledStringController*>(item->object);
     controller->node = node;
     return ERROR_CODE_NO_ERROR;
 }

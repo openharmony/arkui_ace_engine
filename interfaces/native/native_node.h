@@ -6187,7 +6187,7 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .object: the recognition configuration.
-     * The parameter type is {@link ArkUI_TextDataDetectorConfig}.\n
+     * The parameter type is {@link OH_ArkUI_TextDataDetectorConfig}.\n
      * 
      * @since 24
      */
@@ -6208,7 +6208,7 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .object: the placeholder options of the text editor. The parameter type is\n
-     * {@link ArkUI_TextEditorPlaceholderOptions}.\n
+     * {@link OH_ArkUI_TextEditorPlaceholderOptions}.\n
      *
      * @since 24
      */
@@ -6219,7 +6219,7 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .object: the styled string controller of text editor. The parameter type is
-     * {@link ArkUI_TextEditorStyledStringController}.\n
+     * {@link OH_ArkUI_TextEditorStyledStringController}.\n
      *
      * @since 24
      */
@@ -6411,7 +6411,7 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .object: the selection menu of TextEditor.
-     *     The parameter type is {@link ArkUI_TextEditorSelectionMenuOptions}.\n
+     *     The parameter type is {@link OH_ArkUI_TextEditorSelectionMenuOptions}.\n
      *
      * @since 24
      */

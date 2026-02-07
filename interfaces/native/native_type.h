@@ -6725,21 +6725,21 @@ typedef struct ArkUI_TextSelectionMenuOptions ArkUI_TextSelectionMenuOptions;
  *
  * @since 24
  */
-typedef struct ArkUI_DecorationStyleOptions OH_ArkUI_DecorationStyleOptions;
+typedef struct OH_ArkUI_DecorationStyleOptions OH_ArkUI_DecorationStyleOptions;
  
 /**
  * @brief Defines the config of data detector.
  *
  * @since 24
  */
-typedef struct ArkUI_TextDataDetectorConfig OH_ArkUI_TextDataDetectorConfig;
+typedef struct OH_ArkUI_TextDataDetectorConfig OH_ArkUI_TextDataDetectorConfig;
  
 /**
  * @brief Defines the selection menu option of text editor.
  *
  * @since 24
  */
-typedef struct ArkUI_TextEditorSelectionMenuOptions OH_ArkUI_TextEditorSelectionMenuOptions;
+typedef struct OH_ArkUI_TextEditorSelectionMenuOptions OH_ArkUI_TextEditorSelectionMenuOptions;
 
 /**
  * @brief Enumerates the text span type.
@@ -6797,7 +6797,7 @@ typedef enum {
 
 typedef enum {
     /** The span type of text. */
-    OH_ArkUI_TEXT_EDITOR_SPAN_TYPE_TEXT = 0,
+    OH_ARKUI_TEXT_EDITOR_SPAN_TYPE_TEXT = 0,
     /** The span type of image. */
     OH_ARKUI_TEXT_EDITOR_SPAN_TYPE_IMAGE = 1,
     /** The span type of mixed. */
@@ -6821,9 +6821,9 @@ typedef enum {
  
 typedef enum {
     /** The text menu type of selection menu. */
-    OH_ArkUI_TEXT_EDITOR_SELECTION_MENU = 0,
+    OH_ARKUI_TEXT_EDITOR_SELECTION_MENU = 0,
     /** The text menu type of preview menu. */
-    OH_ArkUI_TEXT_EDITOR_PREVIEW_MENU = 1,
+    OH_ARKUI_TEXT_EDITOR_PREVIEW_MENU = 1,
 } OH_ArkUI_TextMenuType;
 
 /**
@@ -8251,7 +8251,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu(
  *
  * @since 24
  */
-typedef struct ArkUI_TextEditorPlaceholderOptions OH_ArkUI_TextEditorPlaceholderOptions;
+typedef struct OH_ArkUI_TextEditorPlaceholderOptions OH_ArkUI_TextEditorPlaceholderOptions;
 
 /**
  * @brief Create a placeholder options object.
@@ -8442,7 +8442,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorPlaceholderOptions_GetFontColor(OH_ArkUI_Text
  * @brief Defines styled string controller for text editor.
  * @since 24
  */
-typedef struct ArkUI_TextEditorStyledStringController OH_ArkUI_TextEditorStyledStringController;
+typedef struct OH_ArkUI_TextEditorStyledStringController OH_ArkUI_TextEditorStyledStringController;
 
 /**
  * @brief Create a styled string controller object for text editor.
@@ -8575,7 +8575,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_DeleteBackward(
  * @brief Defines paragraph style for text editor.
  * @since 24
  */
-typedef struct ArkUI_TextEditorParagraphStyle OH_ArkUI_TextEditorParagraphStyle;
+typedef struct OH_ArkUI_TextEditorParagraphStyle OH_ArkUI_TextEditorParagraphStyle;
 
 /**
  * @brief Create a paragraph style object for text editor.
@@ -8843,7 +8843,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetTypingParagraphStyl
  * @brief Defines shadow options.
  * @since 24
  */
-typedef struct ArkUI_ShadowOptions OH_ArkUI_ShadowOptions;
+typedef struct OH_ArkUI_ShadowOptions OH_ArkUI_ShadowOptions;
 
 /**
  * @brief Create a shadow options object.
@@ -9008,7 +9008,7 @@ ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetFill(OH_ArkUI_ShadowOptions* options, 
  * @brief Defines text style for text editor.
  * @since 24
  */
-typedef struct ArkUI_TextEditorTextStyle OH_ArkUI_TextEditorTextStyle;
+typedef struct OH_ArkUI_TextEditorTextStyle OH_ArkUI_TextEditorTextStyle;
 
 /**
  * @brief Create a text style object.
