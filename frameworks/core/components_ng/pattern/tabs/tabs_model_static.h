@@ -60,7 +60,8 @@ public:
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
-    static void SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt);
+    static void SetDivider(FrameNode* frameNode, const TabsItemDivider& dividerOpt);
+    static void SetDividerColorByUser(FrameNode* frameNode, bool isByUser);
     static void InitDivider(FrameNode* frameNode);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);

@@ -396,8 +396,8 @@ void SetItemSpaceImpl(Ark_NativePointer node,
         SwiperModelStatic::SetItemSpace(frameNode, value);
         return;
     }
-    SwiperModelStatic::SetItemSpace(frameNode,
-        *aceOptVal < OHOS::Ace::Dimension(0) ? OHOS::Ace::Dimension(0) : *aceOptVal);
+    Validator::ValidateNonNegative(aceOptVal);
+    SwiperModelStatic::SetItemSpace(frameNode, aceOptVal.value_or(Dimension(0, DimensionUnit::VP)));
 }
 void SetDisplayModeImpl(Ark_NativePointer node,
                         const Opt_SwiperDisplayMode* value)
@@ -784,10 +784,14 @@ void SetPrevMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetPreviousMargin(frameNode, Dimension(0.0), optIgnore);
+        return;
+    }
     auto optMargin = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optMargin);
-    auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
-    SwiperModelStatic::SetPreviousMargin(frameNode, optMargin.value_or(Dimension(0.0)), optIgnore);
+    SwiperModelStatic::SetPreviousMargin(frameNode, optMargin.value_or(Dimension(0.0, DimensionUnit::VP)), optIgnore);
 }
 void SetNextMarginImpl(Ark_NativePointer node,
                        const Opt_Length* value,
@@ -795,10 +799,14 @@ void SetNextMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
+    if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetNextMargin(frameNode, Dimension(0.0), optIgnore);
+        return;
+    }
     auto optMargin = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(optMargin);
-    auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
-    SwiperModelStatic::SetNextMargin(frameNode, optMargin.value_or(Dimension(0.0)), optIgnore);
+    SwiperModelStatic::SetNextMargin(frameNode, optMargin.value_or(Dimension(0.0, DimensionUnit::VP)), optIgnore);
 }
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
