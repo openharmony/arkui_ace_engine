@@ -5534,5 +5534,45 @@
     {
         "first_introduced": "24",
         "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontWeightConfigs_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontWeightConfigs_Destroy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontConfigs_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontConfigs_Destroy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontConfigs_SetFontWeightConfigs"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_FontConfigs_GetFontWeightConfigs"
     }
 ]
