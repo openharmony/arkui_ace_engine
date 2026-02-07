@@ -417,6 +417,9 @@ public:
     bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) override;
 
     int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node) override;
+
+    void AccessibilityOnShowHide(bool isOnShow, const WeakPtr<PipelineBase>& context) override;
+
     void ChooseDumpEvent(const std::vector<std::string>& params,
         DumpInfoArgument& argument, uint32_t windowId, bool hasJson);
 
