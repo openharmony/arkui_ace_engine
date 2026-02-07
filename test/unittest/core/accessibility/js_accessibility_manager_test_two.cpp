@@ -208,6 +208,38 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager006, TestSize.Leve
 }
 
 /**
+ * @tc.name: IsSendAccessibilityEventTest001
+ * @tc.desc: Test IsSendAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin IsSendAccessibilityEventTest001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test non-page event returns true.
+     */
+    try {
+        AccessibilityEvent event;
+        event.type = AccessibilityEventType::CLICK;
+
+        bool result = jsAccessibilityManager->IsSendAccessibilityEvent(event);
+        EXPECT_TRUE(result);
+    } catch (...) {
+        EXPECT_TRUE(false);
+        GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-an exception occurred.";
+    }
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest001";
+}
+
+/**
  * @tc.name: JsAccessibilityManager007
  * @tc.desc: Test GetUECAccessibilityParentRectInfo
  * @tc.type: FUNC
