@@ -6851,6 +6851,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
             result.SetResourceId(static_cast<uint32_t>(UNKNOWN_RESOURCE_ID));
             return true;
         }
+        result = resourceWrapper->GetColorByName(param->ToString());
         return true;
     }
 
