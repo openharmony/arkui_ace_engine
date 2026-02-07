@@ -424,7 +424,7 @@ struct ImageMenuItem {
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
   systemFontScale?: number = 1;
-  isFollowingSystemFontScale: boolean = this.getUIContext().isFollowingSystemFontScale();;
+  isFollowingSystemFontScale: boolean = this.getUIContext().isFollowingSystemFontScale();
   maxFontScale: number = this.getUIContext().getMaxFontScale();
   @State fontSize: number = 1;
   @State isOnFocus: boolean = false;
@@ -699,7 +699,6 @@ struct ImageMenuItem {
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .fontSize(SYMBOL_SIZE)
-          .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
       } else {
         if (Util.isSymbolResource(this.item.value)) {
           SymbolGlyph(this.item.value as Resource)
@@ -709,7 +708,6 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
-            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         } else {
           Image(this.item.value)
             .fillColor(this.editableTitleBarTheme.iconColor)
@@ -720,7 +718,6 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
-            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         }
       }
     }
@@ -739,6 +736,7 @@ struct ImageMenuItem {
     .gestureModifier(this.buttonGestureModifier)
     .accessibilityLevel(this.getRightIconAccessibilityLevel())
     .accessibilityDescription(this.getAccessibilityDescription())
+    .defaultFocus(this.item.defaultFocus)
   }
 
   @Builder
@@ -758,7 +756,7 @@ struct ImageMenuItem {
         .buttonStateStyles()
         .buttonEventStyle()
         .gestureModifier(this.buttonGestureModifier)
-        .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
+        .defaultFocus(this.item.defaultFocus)
     }
     .margin({
       start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),

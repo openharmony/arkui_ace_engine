@@ -1161,12 +1161,11 @@ struct CustomDialogContentComponent {
   aboutToAppear(): void {
     try {
       let uiContext: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-      this.appMaxFontScale = uiContext?.getMaxFontScale();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+      this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
     } catch (err) {
       let code: number = (err as BusinessError)?.code;
-      let message: string = (err as BusinessError)?.message;
-      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}`);
     }
     this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
@@ -1861,35 +1860,6 @@ export struct PopoverDialogV2 {
   }
 }
 
-function toLengthString(value?: LengthMetrics): string | undefined {
-  if (!value) {
-    return undefined;
-  }
-  const length: number = value.value;
-  let lengthString: string = '';
-  switch (value.unit) {
-    case LengthUnit.PX:
-      lengthString = `${length}px`;
-      break;
-    case LengthUnit.FP:
-      lengthString = `${length}fp`;
-      break;
-    case LengthUnit.LPX:
-      lengthString = `${length}lpx`;
-      break;
-    case LengthUnit.PERCENT:
-      lengthString = `${length * 100}%`;
-      break;
-    case LengthUnit.VP:
-      lengthString = `${length}vp`;
-      break;
-    default:
-      lengthString = `${length}vp`;
-      break;
-  }
-  return lengthString;
-}
-
 function lengthMetricsToPX(value?: LengthMetrics): number {
   if (!value) {
     return 0;
@@ -1908,5 +1878,4 @@ function lengthMetricsToPX(value?: LengthMetrics): number {
       return 0;
   }
 }
-
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}
