@@ -19,6 +19,7 @@
 #include "test/unittest/core/pattern/navigation/mock_navigation_route.h"
 #include "test/unittest/core/pattern/navigation/mock_navigation_stack.h"
 
+#define private public
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -378,82 +379,131 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsOuterMostNavigation001
- * @tc.desc: Branch: if (dumpMap_.empty()) { => true;
+ * @tc.name: AttachNavigation001
+ * @tc.desc: Test AttachNavigation adds navigation to targetNavigationMap_
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation001, TestSize.Level1)
+HWTEST_F(NavigationManagerTestNg, AttachNavigation001, TestSize.Level1)
 {
-    auto manager = GetNavigationManager();
-    ASSERT_NE(manager, nullptr);
-    manager->dumpMap_.clear();
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->targetNavigationMap_.clear();
 
-    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest1, nullptr);
-    EXPECT_FALSE(manager->IsOuterMostNavigation(dest1->GetId(), dest1->GetDepth()));
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
+
+    navigationManager->AttachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 1);
 }
 
 /**
- * @tc.name: IsOuterMostNavigation002
- * @tc.desc: Branch: outerMostKey == DumpMapKey(nodeId, depth); => true;
+ * @tc.name: DetachNavigation001
+ * @tc.desc: Test DetachNavigation removes navigation from targetNavigationMap_
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation002, TestSize.Level1)
+HWTEST_F(NavigationManagerTestNg, DetachNavigation001, TestSize.Level1)
 {
-    auto manager = GetNavigationManager();
-    ASSERT_NE(manager, nullptr);
-    manager->dumpMap_.clear();
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->targetNavigationMap_.clear();
 
-    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest1, nullptr);
-    dest1->SetDepth(1);
-    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest2, nullptr);
-    dest2->SetDepth(2);
-    auto dest3 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest3, nullptr);
-    dest3->SetDepth(2);
-    manager->AddNavigationDumpCallback(dest1, [](int) {});
-    manager->AddNavigationDumpCallback(dest2, [](int) {});
-    manager->AddNavigationDumpCallback(dest3, [](int) {});
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
 
-    EXPECT_TRUE(manager->IsOuterMostNavigation(dest1->GetId(), dest1->GetDepth()));
+    navigationManager->AttachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 1);
+
+    navigationManager->DetachNavigation(navigationNode);
+    EXPECT_EQ(navigationManager->targetNavigationMap_.size(), 0);
 }
 
 /**
- * @tc.name: IsOuterMostNavigation003
- * @tc.desc: Branch: outerMostKey == DumpMapKey(nodeId, depth); => false;
+ * @tc.name: TryFindNewTargetNavigation001
+ * @tc.desc: Branch: !IsForceSplitSupported(false) => early return
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation003, TestSize.Level1)
+HWTEST_F(NavigationManagerTestNg, TryFindNewTargetNavigation001, TestSize.Level1)
 {
-    auto manager = GetNavigationManager();
-    ASSERT_NE(manager, nullptr);
-    manager->dumpMap_.clear();
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    ASSERT_NE(forceSplitMgr, nullptr);
 
-    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest1, nullptr);
-    dest1->SetDepth(1);
-    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest2, nullptr);
-    dest2->SetDepth(2);
-    auto dest3 = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dest3, nullptr);
-    dest3->SetDepth(2);
-    manager->AddNavigationDumpCallback(dest1, [](int) {});
-    manager->AddNavigationDumpCallback(dest2, [](int) {});
-    manager->AddNavigationDumpCallback(dest3, [](int) {});
+    navigationManager->targetNavigationMap_.clear();
 
-    EXPECT_FALSE(manager->IsOuterMostNavigation(dest2->GetId(), dest2->GetDepth()));
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    RunNavigationStackSync(navigationPattern);
+
+    // Attach one navigation so that targetNavigationMap_ is not empty.
+    navigationManager->AttachNavigation(navigationNode);
+
+    // Ensure no existing force split navigation and force split is not supported.
+    navigationManager->existForceSplitNav_.first = false;
+    navigationManager->existForceSplitNav_.second = INVALID_NODE_ID;
+    navigationPattern->SetIsTargetForceSplitNav(false);
+    forceSplitMgr->SetIsRouter(false);
+    forceSplitMgr->SetForceSplitSupported(false);
+
+    navigationManager->TryFindNewTargetNavigation();
+
+    EXPECT_FALSE(navigationManager->existForceSplitNav_.first);
+    EXPECT_EQ(navigationManager->existForceSplitNav_.second, INVALID_NODE_ID);
+    EXPECT_FALSE(navigationPattern->GetIsTargetForceSplitNav());
+}
+
+/**
+ * @tc.name: TryFindNewTargetNavigation002
+ * @tc.desc: Branch: no id/depth config, first navigation becomes target
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, TryFindNewTargetNavigation002, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    navigationManager->targetNavigationMap_.clear();
+
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    RunNavigationStackSync(navigationPattern);
+    navigationNode->OnInspectorIdUpdate("TryFindNewTargetNavigation002");
+
+    navigationManager->AttachNavigation(navigationNode);
+
+    // Reset force split configuration to simulate that previous target has been cleared.
+    navigationManager->existForceSplitNav_.first = false;
+    navigationManager->existForceSplitNav_.second = INVALID_NODE_ID;
+    navigationManager->forceSplitNavigationId_.reset();
+    navigationManager->forceSplitNavigationDepth_.reset();
+    navigationPattern->SetIsTargetForceSplitNav(false);
+
+    // Enable force split for non-router scenario so that TryFindNewTargetNavigation can proceed.
+    forceSplitMgr->SetIsRouter(false);
+    forceSplitMgr->SetForceSplitSupported(true);
+
+    navigationManager->TryFindNewTargetNavigation();
+
+    EXPECT_TRUE(navigationManager->existForceSplitNav_.first);
+    EXPECT_EQ(navigationManager->existForceSplitNav_.second, navigationNode->GetId());
+    EXPECT_TRUE(navigationPattern->GetIsTargetForceSplitNav());
 }
 } // namespace OHOS::Ace::NG
