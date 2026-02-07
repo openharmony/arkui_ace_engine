@@ -287,16 +287,44 @@ HWTEST_F(JsAccessibilityManagerTestTwo, GetComponentTypeAndPageIdByNodeIdTest001
      * @tc.steps: step2. test GetComponentTypeAndPageIdByNodeId when context is null.
      */
     RefPtr<PipelineBase> context = nullptr;
-    GetInfoByNodeId infoOfNode;
+    Framework::GetInfoByNodeId infoOfNode;
     infoOfNode.componentType = "Stack";
     infoOfNode.pageId = 666;
-    info.nodeInstanceId = 777;
+    infoOfNode.nodeInstanceId = 777;
     jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(-1LL, context, infoOfNode);
     EXPECT_EQ(infoOfNode.componentType, "Stack");
     EXPECT_EQ(infoOfNode.pageId, 666);
     EXPECT_EQ(infoOfNode.nodeInstanceId, 777);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end GetComponentTypeAndPageIdByNodeIdTest001";
+}
+
+/**
+ * @tc.name: CheckPageEventValidInCacheTest001
+ * @tc.desc: Test CheckPageEventValidInCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, CheckPageEventValidInCacheTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin CheckPageEventValidInCacheTest001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test CheckPageEventValidInCache
+     */
+    EXPECT_CALL(manager_->pageController_, HasAnyAccessibilityEvent(200)).WillOnce(Return(false));
+    bool result = jsAccessibilityManager->CheckPageEventValidInCache(200);
+    EXPECT_FALSE(result);
+    EXPECT_CALL(manager_->pageController_, HasAnyAccessibilityEvent(100)).WillOnce(Return(true));
+    result = jsAccessibilityManager->CheckPageEventValidInCache(100);
+    EXPECT_TRUE(result);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end CheckPageEventValidInCacheTest001";
 }
 
 /**
