@@ -251,11 +251,18 @@ HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest002, TestSiz
     /**
      * @tc.steps: step2. test page event with null PipelineContext returns result of IsSendAccessibilityEventForHost.
      */
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_STATE_UPDATE;
-    event.nodeId = -1;
+    AccessibilityEvent eventPageChange;
+    eventPageChange.type = AccessibilityEventType::PAGE_CHANGE;
+    eventPageChange.nodeId = -1;
     jsAccessibilityManager->context_ = nullptr;
-    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(event);
+    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(eventPageChange);
+    EXPECT_TRUE(result);
+
+    AccessibilityEvent eventPageOpen;
+    eventPageOpen.type = AccessibilityEventType::PAGE_OPEN;
+    eventPageOpen.nodeId = -1;
+    jsAccessibilityManager->context_ = nullptr;
+    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(eventPageOpen);
     EXPECT_TRUE(result);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest002";
