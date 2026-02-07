@@ -702,7 +702,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetTextShadows(OH_ArkUI_TextEditorT
     CHECK_NULL_RETURN(style && options && length > 0, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     for (int32_t i = 0; i < length; i++) {
         auto temp = options[i];
-        OH_ArkUI_ShadowOptions opt = new OH_ArkUI_ShadowOptions();
+        OH_ArkUI_ShadowOptions opt = OH_ArkUI_ShadowOptions();
         opt.radius = temp->radius;
         opt.type = temp->type;
         opt.color = temp->color;
