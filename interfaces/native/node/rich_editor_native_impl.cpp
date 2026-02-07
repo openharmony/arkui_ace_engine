@@ -199,7 +199,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetSelection(
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_IsEditing(OH_ArkUI_TextEditorStyledStringController* controller,
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_IsEditing(
+    OH_ArkUI_TextEditorStyledStringController* controller,
     bool* isEditing)
 {
     CHECK_NULL_RETURN(controller && controller->node && isEditing, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -621,14 +622,16 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetFontSize(OH_ArkUI_TextEditorText
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetFontStyle(OH_ArkUI_TextEditorTextStyle* style, ArkUI_FontStyle fontStyle)
+ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetFontStyle(
+    OH_ArkUI_TextEditorTextStyle* style, ArkUI_FontStyle fontStyle)
 {
     CHECK_NULL_RETURN(style, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     style->fontStyle = fontStyle;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetFontStyle(OH_ArkUI_TextEditorTextStyle* style, ArkUI_FontStyle* fontStyle)
+ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetFontStyle(
+    OH_ArkUI_TextEditorTextStyle* style, ArkUI_FontStyle* fontStyle)
 {
     CHECK_NULL_RETURN(style && fontStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *fontStyle = style->fontStyle;
@@ -750,21 +753,24 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetLineHeight(OH_ArkUI_TextEditorTe
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetLetterSpacing(OH_ArkUI_TextEditorTextStyle* style, int32_t letterSpacing)
+ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetLetterSpacing(
+    OH_ArkUI_TextEditorTextStyle* style, int32_t letterSpacing)
 {
     CHECK_NULL_RETURN(style, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     style->letterSpacing = letterSpacing;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetLetterSpacing(OH_ArkUI_TextEditorTextStyle* style, int32_t* letterSpacing)
+ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_GetLetterSpacing(
+    OH_ArkUI_TextEditorTextStyle* style, int32_t* letterSpacing)
 {
     CHECK_NULL_RETURN(style && letterSpacing, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *letterSpacing = style->letterSpacing;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetFontFeature(OH_ArkUI_TextEditorTextStyle* style, const char* fontFeature)
+ArkUI_ErrorCode OH_ArkUI_TextEditorTextStyle_SetFontFeature(
+    OH_ArkUI_TextEditorTextStyle* style, const char* fontFeature)
 {
     CHECK_NULL_RETURN(style && fontFeature, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     style->fontFeature = std::string(fontFeature);

@@ -1830,7 +1830,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetContentNode(OH_ArkUI_
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
  
-ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetResponseType(OH_ArkUI_TextEditorSelectionMenuOptions* options,
+ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetResponseType(
+    OH_ArkUI_TextEditorSelectionMenuOptions* options,
     OH_ArkUI_TextEditorResponseType  responseType)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -1838,7 +1839,8 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetResponseType(OH_ArkUI
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
  
-ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetResponseType(OH_ArkUI_TextEditorSelectionMenuOptions* options,
+ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetResponseType(
+    OH_ArkUI_TextEditorSelectionMenuOptions* options,
     OH_ArkUI_TextEditorResponseType * responseType)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
