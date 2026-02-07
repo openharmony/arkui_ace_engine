@@ -1904,4 +1904,231 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0060, TestSize.Level1)
     ret = OH_ArkUI_NotifyDisableDefaultDropAnimation(requestIdentify, disable);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
 }
+
+/**
+ * @tc.name: DragAndDropTest0061
+ * @tc.desc: Test OH_ArkUI_DragAction_SetPixelMaps with size < 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0061, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_PixelmapNative* pixelmapArray[2];
+
+    /**
+     * @tc.steps: step2.set size < 0, related function is called.
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, -1);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: DragAndDropTest0062
+ * @tc.desc: Test OH_ArkUI_DragAction_SetPixelMaps with null element in array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_PixelmapNative* pixelmapArray[3];
+    pixelmapArray[0] = nullptr;
+    pixelmapArray[1] = nullptr;
+    pixelmapArray[2] = nullptr;
+    int32_t size = 3;
+
+    /**
+     * @tc.steps: step2.set pixelmapArray with all null elements, related function is called.
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: DragAndDropTest0063
+ * @tc.desc: Test OH_ArkUI_DragAction_SetPixelMaps with partial null elements in array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_PixelmapNative* pixelmapArray[3];
+    pixelmapArray[0] = nullptr;
+    pixelmapArray[1] = nullptr;
+    pixelmapArray[2] = nullptr;
+    int32_t size = 2;
+
+    /**
+     * @tc.steps: step2.set pixelmapArray with partial null elements (count < size), related function is called.
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: DragAndDropTest0064
+ * @tc.desc: Test OH_ArkUI_DragAction_SetPixelMaps reset pixelmaps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0064, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_PixelmapNative* pixelmapArray[2];
+    pixelmapArray[0] = nullptr;
+    pixelmapArray[1] = nullptr;
+    int32_t size = 2;
+
+    /**
+     * @tc.steps: step2.set pixelmaps first time.
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    /**
+     * @tc.steps: step3.reset pixelmaps (should free old array and allocate new one).
+     */
+    ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, size);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: DragAndDropTest0065
+ * @tc.desc: Test OH_ArkUI_DragAction_Dispose with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set dragAction is nullptr.
+     */
+    ArkUI_DragAction* dragAction = nullptr;
+    OH_ArkUI_DragAction_Dispose(dragAction);
+    ASSERT_EQ(dragAction, nullptr);
+}
+
+/**
+ * @tc.name: DragAndDropTest0066
+ * @tc.desc: Test OH_ArkUI_DragAction_Dispose with null pixelmapNativeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction without setting pixelmaps.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    auto* internalDragAction = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    
+    /**
+     * @tc.steps: step2.verify pixelmapNativeList is null.
+     */
+    EXPECT_EQ(internalDragAction->pixelmapNativeList, nullptr);
+
+    /**
+     * @tc.steps: step3.dispose dragAction (should not free pixelmapNativeList, only delete dragAction).
+     */
+    OH_ArkUI_DragAction_Dispose(dragAction);
+}
+
+/**
+ * @tc.name: DragAndDropTest0067
+ * @tc.desc: Test OH_ArkUI_DragAction_Dispose with valid pixelmapNativeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0067, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction and set pixelmaps.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_PixelmapNative* pixelmapArray[2];
+    pixelmapArray[0] = nullptr;
+    pixelmapArray[1] = nullptr;
+
+    /**
+     * @tc.steps: step2.set pixelmaps with size 0 (allocates array but elements are null).
+     */
+    int32_t ret = OH_ArkUI_DragAction_SetPixelMaps(dragAction, pixelmapArray, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    
+    /**
+     * @tc.steps: step3.dispose dragAction (should free pixelmapNativeList and delete dragAction).
+     */
+    OH_ArkUI_DragAction_Dispose(dragAction);
+}
 } // namespace OHOS::Ace
