@@ -28,51 +28,6 @@ using namespace testing;
 using namespace testing::ext;
 
 /**
- * @tc.name: FlexLayoutAlgorithmDirection001
- * @tc.desc: Test FlexLayoutAlgorithm with different flex directions
- * @tc.type: FUNC
- */
-HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmDirection001, TestSize.Level0)
-{
-    /**
-     * @tc.steps1: Create layout property with ROW direction
-     */
-    auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
-    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
-
-    /**
-     * @tc.expected: Direction should be set to ROW
-     */
-    auto flexDirection = layoutProperty->GetFlexDirection();
-    ASSERT_TRUE(flexDirection.has_value());
-    EXPECT_EQ(flexDirection.value(), FlexDirection::ROW);
-
-    /**
-     * @tc.steps2: Change to COLUMN direction
-     */
-    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
-    flexDirection = layoutProperty->GetFlexDirection();
-    ASSERT_TRUE(flexDirection.has_value());
-    EXPECT_EQ(flexDirection.value(), FlexDirection::COLUMN);
-
-    /**
-     * @tc.steps3: Test ROW_REVERSE
-     */
-    layoutProperty->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
-    flexDirection = layoutProperty->GetFlexDirection();
-    ASSERT_TRUE(flexDirection.has_value());
-    EXPECT_EQ(flexDirection.value(), FlexDirection::ROW_REVERSE);
-
-    /**
-     * @tc.steps4: Test COLUMN_REVERSE
-     */
-    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN_REVERSE);
-    flexDirection = layoutProperty->GetFlexDirection();
-    ASSERT_TRUE(flexDirection.has_value());
-    EXPECT_EQ(flexDirection.value(), FlexDirection::COLUMN_REVERSE);
-}
-
-/**
  * @tc.name: FlexLayoutAlgorithmAlign001
  * @tc.desc: Test FlexLayoutAlgorithm with different main axis alignments
  * @tc.type: FUNC
@@ -147,24 +102,99 @@ HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmCrossAlign001, TestSize.Level0)
 }
 
 /**
- * @tc.name: FlexLayoutAlgorithmSpace001
- * @tc.desc: Test FlexLayoutAlgorithm with space property
+ * @tc.name: FlexLayoutAlgorithmClone001
+ * @tc.desc: Test FlexLayoutProperty clone functionality
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmSpace001, TestSize.Level0)
+HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmClone001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
+    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::STRETCH);
 
     /**
-     * @tc.steps1: Update space with different values
+     * @tc.steps: Clone the property
      */
-    layoutProperty->UpdateSpace(Dimension(10.0, DimensionUnit::PX));
-    auto space = layoutProperty->GetSpaceValue({});
-    EXPECT_EQ(space.ConvertToPx(), 10.0f);
+    auto clonedProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty->Clone());
 
-    layoutProperty->UpdateSpace(Dimension(20.0, DimensionUnit::PX));
-    space = layoutProperty->GetSpaceValue({});
-    EXPECT_EQ(space.ConvertToPx(), 20.0f);
+    /**
+     * @tc.expected: Cloned property should have same values
+     */
+    ASSERT_NE(clonedProperty, nullptr);
+    auto clonedDirection = clonedProperty->GetFlexDirection();
+    ASSERT_TRUE(clonedDirection.has_value());
+    EXPECT_EQ(clonedDirection.value(), FlexDirection::COLUMN);
+    EXPECT_EQ(clonedProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START), FlexAlign::CENTER);
+    EXPECT_EQ(clonedProperty->GetCrossAxisAlignValue(FlexAlign::FLEX_START), FlexAlign::STRETCH);
+}
+
+/**
+ * @tc.name: FlexLayoutAlgorithmDirection001
+ * @tc.desc: Test FlexLayoutAlgorithm with different flex directions
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmDirection001, TestSize.Level0)
+{
+    /**
+     * @tc.steps1: Create layout property with ROW direction
+     */
+    auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
+    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+
+    /**
+     * @tc.expected: Direction should be set to ROW
+     */
+    auto flexDirection = layoutProperty->GetFlexDirection();
+    ASSERT_TRUE(flexDirection.has_value());
+    EXPECT_EQ(flexDirection.value(), FlexDirection::ROW);
+
+    /**
+     * @tc.steps2: Change to COLUMN direction
+     */
+    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+    flexDirection = layoutProperty->GetFlexDirection();
+    ASSERT_TRUE(flexDirection.has_value());
+    EXPECT_EQ(flexDirection.value(), FlexDirection::COLUMN);
+
+    /**
+     * @tc.steps3: Test ROW_REVERSE
+     */
+    layoutProperty->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
+    flexDirection = layoutProperty->GetFlexDirection();
+    ASSERT_TRUE(flexDirection.has_value());
+    EXPECT_EQ(flexDirection.value(), FlexDirection::ROW_REVERSE);
+
+    /**
+     * @tc.steps4: Test COLUMN_REVERSE
+     */
+    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN_REVERSE);
+    flexDirection = layoutProperty->GetFlexDirection();
+    ASSERT_TRUE(flexDirection.has_value());
+    EXPECT_EQ(flexDirection.value(), FlexDirection::COLUMN_REVERSE);
+}
+
+/**
+ * @tc.name: FlexLayoutAlgorithmReset001
+ * @tc.desc: Test FlexLayoutProperty reset functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmReset001, TestSize.Level0)
+{
+    auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
+    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::BASELINE);
+
+    /**
+     * @tc.steps: Reset the property
+     */
+    layoutProperty->Reset();
+
+    /**
+     * @tc.expected: Property should be reset to default
+     */
+    EXPECT_FALSE(layoutProperty->GetFlexDirection().has_value());
 }
 
 /**
@@ -196,54 +226,24 @@ HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmRTL001, TestSize.Level0)
 }
 
 /**
- * @tc.name: FlexLayoutAlgorithmClone001
- * @tc.desc: Test FlexLayoutProperty clone functionality
+ * @tc.name: FlexLayoutAlgorithmSpace001
+ * @tc.desc: Test FlexLayoutAlgorithm with space property
  * @tc.type: FUNC
  */
-HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmClone001, TestSize.Level0)
+HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmSpace001, TestSize.Level0)
 {
     auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
-    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::STRETCH);
 
     /**
-     * @tc.steps: Clone the property
+     * @tc.steps1: Update space with different values
      */
-    auto clonedProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty->Clone());
+    layoutProperty->UpdateSpace(Dimension(10.0, DimensionUnit::PX));
+    auto space = layoutProperty->GetSpaceValue({});
+    EXPECT_EQ(space.ConvertToPx(), 10.0f);
 
-    /**
-     * @tc.expected: Cloned property should have same values
-     */
-    ASSERT_NE(clonedProperty, nullptr);
-    auto clonedDirection = clonedProperty->GetFlexDirection();
-    ASSERT_TRUE(clonedDirection.has_value());
-    EXPECT_EQ(clonedDirection.value(), FlexDirection::COLUMN);
-    EXPECT_EQ(clonedProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START), FlexAlign::CENTER);
-    EXPECT_EQ(clonedProperty->GetCrossAxisAlignValue(FlexAlign::FLEX_START), FlexAlign::STRETCH);
-}
-
-/**
- * @tc.name: FlexLayoutAlgorithmReset001
- * @tc.desc: Test FlexLayoutProperty reset functionality
- * @tc.type: FUNC
- */
-HWTEST_F(FlexNewTestNG, FlexLayoutAlgorithmReset001, TestSize.Level0)
-{
-    auto layoutProperty = AceType::MakeRefPtr<FlexLayoutProperty>();
-    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::BASELINE);
-
-    /**
-     * @tc.steps: Reset the property
-     */
-    layoutProperty->Reset();
-
-    /**
-     * @tc.expected: Property should be reset to default
-     */
-    EXPECT_FALSE(layoutProperty->GetFlexDirection().has_value());
+    layoutProperty->UpdateSpace(Dimension(20.0, DimensionUnit::PX));
+    space = layoutProperty->GetSpaceValue({});
+    EXPECT_EQ(space.ConvertToPx(), 20.0f);
 }
 
 /**
