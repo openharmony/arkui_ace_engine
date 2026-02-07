@@ -233,38 +233,6 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
     return value as Value
 }
 
-class CustomProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
-    private readonly metadataClass: MetadataClass
-
-    constructor(metadataClass: MetadataClass) {
-        super();
-        this.metadataClass = metadataClass
-    }
-
-    override get(target: T, name: string): Any {
-        const value = super.get(target, name)
-        const targetHandler = ObservableHandler.find(target)
-        if (targetHandler && this.metadataClass.isObservedClass) {
-            const valueHandler = ObservableHandler.find(value as Object)
-            if (valueHandler && !targetHandler.hasChild(valueHandler)) {
-                valueHandler.addParent(targetHandler)
-            }
-        }
-        targetHandler?.onAccess(this.metadataClass.trackedProperties?.has(name) ? name : undefined)
-        return value
-    }
-
-    override set(target: T, name: string, value: Any): boolean {
-        const observable = ObservableHandler.find(target)
-        if (observable) {
-            observable.onModify(this.metadataClass.trackedProperties?.has(name) ? name : undefined)
-            observable.removeChild(super.get(target, name))
-            value = observableProxy(value, observable, ObservableHandler.contains(observable))
-        }
-        return super.set(target, name, value)
-    }
-}
-
 function proxyChildrenOnly<T>(array: T[], parent: ObservableHandler, observed?: boolean) {
     for (let i = 0; i < array.length; i++) {
         if (observed === undefined) observed = ObservableHandler.contains(parent)
