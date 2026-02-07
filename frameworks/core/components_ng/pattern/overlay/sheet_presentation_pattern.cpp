@@ -94,6 +94,7 @@ void SheetPresentationPattern::OnModifyDone()
     Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     if (renderContext) {
         auto pipeline = host->GetContext();
@@ -400,6 +401,7 @@ void SheetPresentationPattern::RegisterHoverModeChangeCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
@@ -578,6 +580,7 @@ void SheetPresentationPattern::HandleFocusEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto sheetId = host->GetId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet get focus, and id is : %{public}d", sheetId);
     SheetManager::GetInstance().SetFocusSheetId(sheetId);
@@ -4047,6 +4050,7 @@ void SheetPresentationPattern::UpdateSheetType()
 
 void SheetPresentationPattern::InitSheetObject()
 {
+    ACE_UINODE_TRACE(GetHost());
     // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
     // And must be earlier than the entry animation.
     if (sheetType_ == SheetType::SHEET_SIDE) {
@@ -4082,6 +4086,7 @@ void SheetPresentationPattern::InitSheetObject()
  */
 void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 {
+    ACE_UINODE_TRACE(GetHost());
     CHECK_NULL_VOID(sheetObject_);
     RefPtr<SheetObject> sheetObject = sheetObject_;
     if (sheetObject->GetSheetType() == newType) {
@@ -4663,6 +4668,7 @@ void SheetPresentationPattern::RegisterShadowRes(const RefPtr<FrameNode>& sheetN
 void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode,
     NG::SheetStyle& sheetStyle)
 {
+    ACE_UINODE_TRACE(GetHost());
     if (sheetStyle.sheetHeight.height.has_value()) {
         auto resObj = sheetStyle.GetSheetHeightResObj();
         RegisterHeightRes(sheetNode, resObj);
@@ -4752,6 +4758,7 @@ bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
 
 RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
 {
+    ACE_UINODE_TRACE(GetHost());
     auto sheetType = sheetType_;
     if (sheetType == SheetType::SHEET_SIDE) {
         return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
