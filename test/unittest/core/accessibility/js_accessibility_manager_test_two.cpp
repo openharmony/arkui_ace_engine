@@ -317,10 +317,10 @@ HWTEST_F(JsAccessibilityManagerTestTwo, CheckPageEventValidInCacheTest001, TestS
     /**
      * @tc.steps: step2. test CheckPageEventValidInCache
      */
-    EXPECT_CALL(manager_->pageController_, HasAnyAccessibilityEvent(200)).WillOnce(Return(false));
+    EXPECT_CALL(jsAccessibilityManager->pageController_, HasAnyAccessibilityEvent(200)).WillOnce(Return(false));
     bool result = jsAccessibilityManager->CheckPageEventValidInCache(200);
     EXPECT_FALSE(result);
-    EXPECT_CALL(manager_->pageController_, HasAnyAccessibilityEvent(100)).WillOnce(Return(true));
+    EXPECT_CALL(jsAccessibilityManager->pageController_, HasAnyAccessibilityEvent(100)).WillOnce(Return(true));
     result = jsAccessibilityManager->CheckPageEventValidInCache(100);
     EXPECT_TRUE(result);
 
