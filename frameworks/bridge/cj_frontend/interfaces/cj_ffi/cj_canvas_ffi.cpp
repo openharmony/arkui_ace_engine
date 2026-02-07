@@ -934,6 +934,32 @@ void FfiOHOSAceFrameworkRenderingContextDrawImageWithImageBitMap(
         LOGE("canvas DrawImage error, Cannot get CJRenderImage by id: %{public}" PRId64, bitMapID);
         return;
     }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        if (!OHOS::Ace::Framework::Utils::CheckParamsValid(imageInfo.flag, CANVAS_IMAGE_TYPE_LIST.size())) {
+            return;
+        }
+        auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+        if (context == nullptr) {
+            LOGE("canvas drawImage error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+            return;
+        }
+        // Priority: use pixelMap if available, otherwise use src
+        // This matches the behavior of CreatePattern which uses both src and pixelMap
+        auto pixelMap = imageBitmap->GetPixelMap();
+        if (pixelMap != nullptr) {
+            CanvasImage image { .flag = imageInfo.flag,
+                .sx = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.sx),
+                .sy = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.sy),
+                .sWidth = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.sWidth),
+                .sHeight = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.sHeight),
+                .dx = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dx),
+                .dy = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dy),
+                .dWidth = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dWidth),
+                .dHeight = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dHeight) };
+            context->DrawImage(pixelMap, image);
+            return;
+        }
+    }
     if (!imageBitmap->GetSrc().empty()) {
         FfiOHOSAceFrameworkRenderingContextDrawImage(contextId, imageBitmap->GetSrc().c_str(), imageInfo);
     } else {
