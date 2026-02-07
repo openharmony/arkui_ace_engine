@@ -866,7 +866,8 @@ void NavigationManager::FireNavigateChangeCallback(
         " %{public}s -> %{public}s",
         from.isSplit, from.name.c_str(), to.name.c_str());
     // full screen, fire all registered callback
-    for (auto callback : changeCallbacks_) {
+    auto callbacks = changeCallbacks_;
+    for (auto callback : callbacks) {
         callback.second(from, to, isRouter);
     }
 }
