@@ -40,6 +40,8 @@ import {
     IMonitor,
     IMonitorDecoratedVariable,
     IComputedDecoratedVariable,
+    IEnvDecoratedVariable,
+    EnvOptions
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
 import { MutableStateMeta } from './mutableStateMeta';
@@ -65,6 +67,7 @@ import { ComputedDecoratedVariable } from '../decoratorImpl/decoratorComputed';
 import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
 import { FactoryInternal } from './iFactoryInternal';
+import { EnvDecoratedVariable } from '../decoratorImpl/decoratorEnv';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
@@ -583,5 +586,19 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         owningView?: IVariableOwner
     ): IMonitorDecoratedVariable {
         return new MonitorFunctionDecorator(pathLambda, monitorFunction, owningView);
+    }
+
+    makeEnv<T>(
+        owningView: IVariableOwner,
+        envValue: string,
+        varName: string,
+        envOptions?: EnvOptions<T>
+    ): IEnvDecoratedVariable<T> {
+        return new EnvDecoratedVariable<T>(
+            owningView,
+            envValue,
+            varName,
+            envOptions
+        ) as IEnvDecoratedVariable<T>;
     }
 }
