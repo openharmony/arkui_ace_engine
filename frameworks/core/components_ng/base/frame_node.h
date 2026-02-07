@@ -81,6 +81,7 @@ struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
 class ExtensionHandler;
 class PaintWrapper;
+class SamplerManager;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -829,6 +830,9 @@ public:
     // due to differences in compilation implementation.
     bool HasAnimatableProperty(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
+    void SetSamplerManager(const RefPtr<SamplerManager>& manager);
+    RefPtr<SamplerManager> GetSamplerManager();
+    static RefPtr<FrameNode> FindChildByNameUINode(const RefPtr<UINode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
     void DeleteAnimatablePropertyFloat(const std::string& propertyName);
@@ -1806,6 +1810,7 @@ private:
     std::map<std::string, std::function<void()>> destroyCallbacks_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
+    RefPtr<SamplerManager> samplerManager_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };

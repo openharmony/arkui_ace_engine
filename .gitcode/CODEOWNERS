@@ -2706,6 +2706,9 @@ frameworks/core/components_ng/render/adapter/render_texture_impl.h @arkuieco3
 frameworks/core/components_ng/render/adapter/rich_editor_paragraph.cpp @arkui_rich_editor
 frameworks/core/components_ng/render/adapter/rich_editor_paragraph.h @arkui_rich_editor
 frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp @arkuicodepulse
+frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.cpp @arkuicodepulse
+frameworks/core/components_ng/render/adapter/rosen_luminance_sampling_helper.h @arkuicodepulse
+frameworks/core/components_ng/render/adapter/sampler_manager.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/drawing_image.cpp @arkui001
@@ -3181,6 +3184,7 @@ interfaces/napi/kits/focus_controller/ @ArkUI_Event
 interfaces/napi/kits/font/ @huawei_g_five
 interfaces/napi/kits/grid/ @arkuilayout1
 interfaces/napi/kits/inspector/ @ArkUI_ability_group
+interfaces/napi/kits/luminance_sampler/ @arkuicodepulse
 interfaces/napi/kits/measure/ @huawei_g_five
 interfaces/napi/kits/mediaquery/ @arkuilayout1
 interfaces/napi/kits/napi_lib.gni @arkui_architecture
