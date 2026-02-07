@@ -71,6 +71,7 @@ public:
         return true;
     }
 
+
     RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override;
@@ -81,7 +82,6 @@ public:
     {
         return true;
     }
-
 private:
     RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
