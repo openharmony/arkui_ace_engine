@@ -196,6 +196,10 @@ static RefPtr<PipelineContext> GetPipeContextByWeakPtr(const WeakPtr<FrameNode>&
 }
 } // namespace
 
+const std::unordered_set<std::string> OverlayManager::OVERLAY_TAGS = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
+    V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
+    V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
+
 OverlayManager::OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode)
 {
     if (rootNode) {
