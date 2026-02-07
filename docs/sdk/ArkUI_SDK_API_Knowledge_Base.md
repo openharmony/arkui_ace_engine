@@ -549,10 +549,11 @@ class ButtonModifier extends ButtonAttribute
 ```
 
 **Modifier 模式说明**:
-- Modifier 类用于在命令式 API 中设置组件属性
+- Modifier 类用于创建声明式配置对象，支持属性复用和动态修改
 - 继承自对应的 Attribute 基类
 - 实现 AttributeModifier<T> 接口
 - 提供链式调用能力（通过返回 this）
+- 可在运行时动态修改属性值，影响所有使用该 Modifier 的组件
 
 ---
 
@@ -736,7 +737,499 @@ class ButtonModifier extends ButtonAttribute
 
 ---
 
-## 4. 增量渲染 API
+## 4. Component Static API 详解
+
+本章详细说明 `interface/sdk-js/api/arkui/component` 目录中的 Static API 定义文件结构、模式和规范。
+
+### 4.1 Static API 文件结构
+
+每个 `.static.d.ets` 文件定义了一个组件或功能的完整 Static API。文件包含以下类型的定义：
+
+#### 4.1.1 枚举定义 (`export declare enum`)
+
+用于定义组件特定的枚举值。
+
+**示例**（Button 组件）:
+```typescript
+// 文件: button.static.d.ets
+export declare enum ButtonType {
+    Capsule,        // 胶囊按钮（默认圆角为高度的一半）
+    Circle,         // 圆形按钮
+    Normal,         // 普通按钮（默认无圆角）
+    ROUNDED_RECTANGLE = 3  // 圆角矩形按钮
+}
+
+export declare enum ButtonStyleMode {
+    NORMAL = 0,     // 普通按钮
+    EMPHASIZED = 1, // 强调按钮
+    TEXTUAL = 2     // 文本按钮
+}
+```
+
+**示例**（List 组件）:
+```typescript
+// 文件: list.static.d.ets
+export declare enum ScrollState {
+    Idle,           // 空闲状态
+    Scroll,         // 滚动状态
+    Fling           // 惯性滚动状态
+}
+
+export declare enum ListItemAlign {
+    Start,          // 列表项交叉轴起始对齐
+    Center,         // 列表项交叉轴居中对齐
+    End             // 列表项交叉轴末尾对齐
+}
+```
+
+#### 4.1.2 接口定义 (`export declare interface`)
+
+组件的 Static API 定义包含多种接口类型：
+
+| 接口类型 | 命名模式 | 用途 | 示例 |
+|---------|---------|------|------|
+| **Attribute** | `{ComponentName}Attribute` | 组件属性接口（继承自 CommonMethod） | `TextAttribute`, `ButtonAttribute` |
+| **Configuration** | `{ComponentName}Configuration` | 组件配置接口（用于 Modifier 模式） | `ButtonConfiguration` |
+| **Options** | `{ComponentName}Options` | 组件选项接口（参数配置） | `CalendarOptions` |
+| **Param** | `{ComponentName}Param` | 组件参数接口（对话框等特殊组件） | `AlertDialogParam` |
+
+**Attribute 接口示例**（Text 组件）:
+```typescript
+// 文件: text.static.d.ets
+export declare interface TextAttribute extends CommonMethod {
+    // 字体相关（8个属性）
+    default font(fontValue: Font | undefined, options?: FontSettingOptions | undefined): this;
+    default fontColor(value: ResourceColor | undefined): this;
+    default fontSize(value: double | string | Resource | undefined): this;
+    default minFontSize(value: double | string | Resource | undefined): this;
+    default maxFontSize(value: double | string | Resource | undefined): this;
+
+    // 文本布局（12个属性）
+    default textAlign(value: TextAlign | undefined): this;
+    default lineHeight(value: string | number | Resource | undefined): this;
+    default lineSpacing(value: string | number | Length[] | undefined): this;
+    default maxLines(value: number | undefined): this;
+    default textOverflow(value: TextOverflow | undefined): this;
+
+    // 文本行为（10个属性）
+    default textSelectable(value: boolean | undefined): this;
+    default copyOption(value: CopyOptions | undefined): this;
+    default draggable(value: boolean | undefined): this;
+
+    // 事件回调（5个事件）
+    default onCopy(callback: Callback<TextRange> | undefined): this;
+    default onTextSelectionChange(callback: Callback<TextRange> | undefined): this;
+}
+
+// TextOptions 接口定义
+export declare interface TextOptions {
+    controller: TextController;
+}
+```
+`TextOptions` 只有一个 `controller` 属性，用于控制 Text 组件。
+
+---
+
+**函数声明**：
+```typescript
+// 文件: text.static.d.ets
+/**
+ * Defines Text Component.
+ *
+ * @param { string | Resource } [content]
+ * @param { TextOptions } [value]
+ * @param { CustomBuilder } [content_]
+ * @returns { TextAttribute }
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 23 static
+ */
+@ComponentBuilder
+export declare function Text(
+    content?: string | Resource,
+    value?: TextOptions,
+    content_?: CustomBuilder
+): TextAttribute;
+```
+
+**Configuration 接口示例**（Button 组件）:
+```typescript
+// 文件: button.static.d.ets
+export declare interface ButtonConfiguration extends CommonConfiguration<ButtonConfiguration> {
+    label: string;              // 按钮文本标签
+    stateEffect?: boolean;      // 是否启用按下效果
+    type?: ButtonType;          // 按钮类型
+    role?: ButtonRole;          // 按钮角色
+}
+```
+
+#### 4.1.3 类型定义 (`export type`)
+
+用于定义回调函数类型等复杂类型。
+
+**示例**:
+```typescript
+// 文件: button.static.d.ets
+export type ButtonTriggerClickCallback = (xPos: double, yPos: double) => void;
+
+// 文件: list.static.d.ets
+export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
+export type OnItemDragStartCallback = (item: ListItem, index: number) => ItemDragInfo;
+```
+
+#### 4.1.4 函数声明 (`export declare function`)
+
+组件的构造函数声明。
+
+**示例**:
+```typescript
+// 文件: text.static.d.ets
+/**
+ * Defines Text Component.
+ *
+ * @param { string | Resource } [content]
+ * @param { TextOptions } [value]
+ * @param { CustomBuilder } [content_]
+ * @returns { TextAttribute }
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 23 static
+ */
+@ComponentBuilder
+export declare function Text(
+    content?: string | Resource,
+    value?: TextOptions,
+    content_?: CustomBuilder
+): TextAttribute;
+
+// 文件: button.static.d.ets
+export declare function Button(value: string | Resource | undefined): ButtonAttribute;
+
+// 文件: list.static.d.ets
+export declare function List(value: { (item: ListItem, index: number) => void } | undefined): ListAttribute;
+```
+
+### 4.2 文档注释规范
+
+Static API 文件使用标准的 JSDoc 注释格式：
+
+#### 4.2.1 文件头注释
+
+```typescript
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @file
+ * @kit ArkUI
+ */
+```
+
+#### 4.2.2 方法注释
+
+```typescript
+/**
+ * Called when the font size is set.
+ * 设置字体大小
+ *
+ * <p><strong>NOTE</strong>:
+ * <br>If fontSize is of the number type, the unit fp is used.
+ * <br>如果 fontSize 是 number 类型，则使用 fp 单位
+ * </p>
+ *
+ * @param { double | string | Resource } value - Font size value. Default value is 16fp.
+ * @returns { TextAttribute } The attribute of the text.
+ * @default 16
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 23 static
+ */
+default fontSize(value: double | string | Resource | undefined): this;
+```
+
+#### 4.2.3 常用 JSDoc 标签说明
+
+| 标签 | 用途 | 示例 |
+|------|------|------|
+| `@file` | 文件标识 | `@file` |
+| `@kit` | 所属 Kit | `@kit ArkUI` |
+| `@param` | 参数说明 | `@param { string } value - 参数描述` |
+| `@returns` | 返回值说明 | `@returns { this } 返回自身，支持链式调用` |
+| `@default` | 默认值 | `@default 16` |
+| `@syscap` | 系统能力 | `@syscap SystemCapability.ArkUI.ArkUI.Full` |
+| `@since` | 起始版本 | `@since 23 static` |
+| `@systemapi` | 系统API标识 | `@systemapi` |
+
+#### 4.2.4 @ComponentBuilder 装饰器
+
+`@ComponentBuilder` 是组件构造函数的标记装饰器，表示该函数可以接受：
+- 普通参数（如 `content`, `value`）
+- 尾随闭包参数（通常命名为 `xxx_`，类型为 `CustomBuilder`）
+
+**示例**：
+```typescript
+@ComponentBuilder
+export declare function Text(
+    content?: string | Resource,
+    value?: TextOptions,
+    content_?: CustomBuilder  // 尾随闭包参数
+): TextAttribute;
+```
+
+##### CustomBuilder 类型
+
+**定义**: `export type CustomBuilder = @Builder (() => void);`
+
+`CustomBuilder` 是 `@Builder` 装饰的函数类型，用于组件的尾随闭包。
+
+**示例**:
+```typescript
+@Builder
+function MyBuilder() {
+  Text('Child Text')
+}
+
+// 使用
+Text() {  // content_ 参数
+  MyBuilder()
+}
+```
+
+##### 尾随闭包 (Trailing Closure)
+
+尾随闭包是 ArkUI 的语法特性，允许在组件调用后直接写子组件。
+
+**参数命名约定**: 通常在原参数名后加下划线 `_`，如 `content_`
+
+**完整示例**:
+```typescript
+// 定义
+@ComponentBuilder
+export declare function Column(
+    space?: Length | Resource,
+    value?: ColumnOptions,
+    content_?: CustomBuilder  // 尾随闭包参数
+): ColumnAttribute;
+
+// 使用
+Column({ space: 10 }) {  // value 参数
+  Text('Hello')          // content_ 尾随闭包
+  Text('World')
+}
+```
+
+### 4.3 文件规模统计
+
+| 文件名 | 行数 | 类型 | 说明 |
+|--------|------|------|------|
+| **common.static.d.ets** | 14,174 | 核心支持 | 定义所有组件通用的属性方法 |
+| **web.static.d.ets** | 6,935 | 组件 | Web 组件（最大组件文件） |
+| **enums.static.d.ets** | 4,329 | 核心支持 | 定义所有枚举类型 |
+| **richEditor.static.d.ets** | 2,428 | 组件 | 富文本编辑器 |
+| **gesture.static.d.ets** | 2,318 | 核心支持 | 手势识别定义 |
+| **navigation.static.d.ets** | 1,955 | 组件 | 导航组件 |
+| **textInput.static.d.ets** | 1,947 | 组件 | 文本输入框 |
+| **canvas.static.d.ets** | 1,925 | 组件 | 画布组件 |
+| **styledString.static.d.ets** | 1,696 | 组件 | 样式字符串 |
+| **units.static.d.ets** | 1,609 | 核心支持 | 单位类型定义 |
+| **text.static.d.ets** | 1,240 | 组件 | 文本组件 |
+| **list.static.d.ets** | 1,060 | 组件 | 列表组件 |
+
+---
+
+## 5. 核心支持文件详解
+
+本章详细说明 `component` 目录中的核心支持文件，这些文件被所有组件依赖使用。
+
+### 5.1 common.static.d.ets - 通用属性定义
+
+**文件路径**: `interface/sdk-js/api/arkui/component/common.static.d.ets`
+**文件规模**: 14,174 行
+**作用**: 定义所有组件通用的属性方法（CommonMethod 接口）
+
+#### 5.1.1 CommonMethod 接口结构
+
+CommonMethod 是所有组件 Attribute 接口的基类，定义了约 100+ 个通用方法：
+
+```typescript
+export declare interface CommonMethod {
+    // ========== 尺寸属性 (15个) ==========
+    default width(value: Length | undefined): this;
+    default height(value: Length | undefined): this;
+    default size(value: SizeOptions | undefined): this;
+    default constraintSize(value: ConstraintSizeOptions | undefined): this;
+
+    // ========== 位置属性 (8个) ==========
+    default position(value: Position | undefined): this;
+    default offset(value: Offset | undefined): this;
+    default markAnchor(value: Offset | undefined): this;
+    default pivot(value: Pivot | undefined): this;
+
+    // ========== 布局属性 (12个) ==========
+    default padding(value: Padding | Length | undefined): this;
+    default margin(value: Margin | Length | undefined): this;
+    default layoutWeight(value: number | string | undefined): this;
+    default align(alignment: Alignment | undefined): this;
+
+    // ========== 背景和边框 (25个) ==========
+    default backgroundColor(value: ResourceColor | undefined): this;
+    default borderRadius(value: BorderRadiuses | Length | undefined): this;
+    default borderStyle(value: EdgeStyles | BorderStyle | undefined): this;
+    default borderWidth(value: EdgeWidths | Length | undefined): this;
+    default borderColor(value: EdgeColors | LocalizedEdgeColors | undefined): this;
+
+    // ========== 显示和透明度 (8个) ==========
+    default visibility(value: Visibility | undefined): this;
+    default opacity(value: number | Resource | undefined): this;
+    default alpha(value: number | undefined): this;
+
+    // ========== 事件处理 (20+个) ==========
+    default onClick(callback: Callback | undefined): this;
+    default onTouch(callback: Callback | undefined): this;
+    default onHover(callback: Callback | undefined): this;
+
+    // ========== 动画相关 (10个) ==========
+    default animateTo(value: AnimateParam | undefined): this;
+    default transition(value: AnimateParam | undefined): this;
+
+    // ... 更多方法
+}
+```
+
+#### 5.1.2 主要分类统计
+
+| 分类 | 方法数量 | 说明 |
+|------|---------|------|
+| **尺寸属性** | 15 | width, height, size, constraintSize 等 |
+| **位置属性** | 8 | position, offset, markAnchor, pivot 等 |
+| **布局属性** | 12 | padding, margin, layoutWeight, align 等 |
+| **背景和边框** | 25 | backgroundColor, borderRadius, border 等 |
+| **显示相关** | 8 | visibility, opacity, alpha 等 |
+| **事件处理** | 20+ | onClick, onTouch, onHover 等 |
+| **动画相关** | 10 | animateTo, transition 等 |
+| **其他** | 30+ | id, key, enabled, focusable 等 |
+| **总计** | **100+** | 所有组件通用的属性方法 |
+
+### 5.2 enums.static.d.ets - 枚举类型定义
+
+**文件路径**: `interface/sdk-js/api/arkui/component/enums.static.d.ets`
+**文件规模**: 4,329 行
+**作用**: 定义所有组件使用的枚举类型
+
+#### 5.2.1 主要枚举分类
+
+| 分类 | 枚举示例 | 数量 |
+|------|---------|------|
+| **对齐相关** | `HorizontalAlign`, `VerticalAlign`, `Alignment` | ~10 |
+| **布局相关** | `Axis`, `Direction`, `ItemAlign`, `FlexAlign` | ~15 |
+| **样式相关** | `BorderStyle`, `FontStyle`, `FontWeight`, `Color` | ~20 |
+| **文本相关** | `TextOverflow`, `EllipsisMode`, `TextAlign` | ~15 |
+| **动画相关** | `Curve`, `PlayMode`, `FillMode` | ~10 |
+| **交互相关** | `TouchType`, `MouseButton`, `MouseAction` | ~15 |
+| **手势相关** | `GestureType`, `GestureMask` | ~10 |
+| **滚动相关** | `EdgeEffect`, `ScrollState`, `BarState` | ~15 |
+| **显示相关** | `Visibility`, `RenderStrategy`, `HoverEffect` | ~10 |
+| **其他** | `ResponseType`, `FocusPriority`, `ItemType` 等 | ~80 |
+| **总计** | **~200+** | 所有枚举类型 |
+
+### 5.3 units.static.d.ets - 单位类型定义
+
+**文件路径**: `interface/sdk-js/api/arkui/component/units.static.d.ets`
+**文件规模**: 1,609 行
+**作用**: 定义长度、颜色、尺寸等单位类型
+
+#### 5.3.1 主要类型定义
+
+```typescript
+// ========== 长度类型 ==========
+type Length = string | number | Resource;
+
+// ========== 颜色类型 ==========
+type ResourceColor = Color | string | Resource | LinearGradient;
+
+// ========== 尺寸和位置 ==========
+interface SizeOptions {
+    width?: Length;
+    height?: Length;
+}
+
+interface Padding {
+    top?: Length; right?: Length; bottom?: Length; left?: Length;
+}
+
+interface Margin {
+    top?: Length; right?: Length; bottom?: Length; left?: Length;
+}
+
+// ========== 圆角 ==========
+interface BorderRadiuses {
+    topLeft?: Length; topRight?: Length;
+    bottomLeft?: Length; bottomRight?: Length;
+}
+```
+
+### 5.4 gesture.static.d.ets - 手势识别定义
+
+**文件路径**: `interface/sdk-js/api/arkui/component/gesture.static.d.ets`
+**文件规模**: 2,318 行
+**作用**: 定义手势识别相关类型和接口
+
+#### 5.4.1 主要内容
+
+```typescript
+// ========== 手势类型 ==========
+enum GestureType {
+    Tap,        // 点击
+    LongPress,  // 长按
+    Pan,        // 拖动
+    Pinch,      // 捏合
+    Rotation,   // 旋转
+    Swipe       // 滑动
+}
+
+// ========== 手势识别器 ==========
+class GestureRecognizer {
+    gestureID: number;
+    priority: GesturePriority;
+}
+
+class TapGestureRecognizer extends GestureRecognizer {
+    count: number;          // 点击次数
+    fingers: number;        // 手指数量
+}
+```
+
+### 5.5 builder.static.d.ets - 构建器定义
+
+**文件路径**: `interface/sdk-js/api/arkui/component/builder.static.d.ets`
+**文件规模**: 146 行
+**作用**: 定义构建器相关类型
+
+```typescript
+// 自定义构建器装饰器
+declare function CustomBuilder(type: FunctionType): void;
+
+// 包装构建器
+declare class WrappedBuilder<T> {
+    initialize(...args: T): void;
+}
+
+// 包装构建器函数以便复用
+declare function wrapBuilder<T>(builder: T): WrappedBuilder<T>;
+```
+
+---
+
+## 6. 增量渲染 API
 
 **文件**: `incremental/runtime/state.static.d.ets`
 
@@ -773,9 +1266,9 @@ type __memo_id_type = int
 
 ---
 
-## 5. 状态管理 API
+## 7. 状态管理 API
 
-### 5.1 状态装饰器
+### 7.1 状态装饰器
 
 **文件**: `stateManagement/decorator.static.d.ets`
 
@@ -798,7 +1291,7 @@ type __memo_id_type = int
 @LocalStorageLink    // LocalStorage 双向绑定
 ```
 
-### 5.2 存储管理
+### 7.2 存储管理
 
 **文件目录**: `stateManagement/storage/`
 
@@ -825,7 +1318,7 @@ storage.setOrCreate('pageData', { key: 'value' })
 PersistentStorage.persistProp('userSettings', 'defaultSettings')
 ```
 
-### 5.3 记忆函数
+### 7.3 记忆函数
 
 **文件**: `stateManagement/remember.static.d.ets`
 
@@ -836,9 +1329,9 @@ PersistentStorage.persistProp('userSettings', 'defaultSettings')
 
 ---
 
-## 6. 关键概念说明
+## 8. 关键概念说明
 
-### 6.1 Modifier 模式
+### 8.1 Modifier 模式
 
 **定义**:
 Modifier 是一种属性修改器模式，用于链式设置组件属性。
@@ -871,7 +1364,7 @@ Text('Hello')
   .fontWeight(FontWeight.Bold)
 ```
 
-### 6.2 Node 层级关系
+### 8.2 Node 层级关系
 
 ```
 Content (抽象基类)
@@ -911,7 +1404,7 @@ BuilderNode<Args> (构建器节点)
 └── dispose()
 ```
 
-### 6.3 单位系统
+### 8.3 单位系统
 
 | 单位 | 名称 | 说明 |
 |------|------|------|
@@ -924,9 +1417,9 @@ BuilderNode<Args> (构建器节点)
 
 ---
 
-## 7. 与 ace_engine 的对应关系
+## 9. 与 ace_engine 的对应关系
 
-### 7.1 SDK API → ace_engine 层次映射
+### 9.1 SDK API → ace_engine 层次映射
 
 | SDK API 类型 | ace_engine 层次 | 路径示例 |
 |-------------|-----------------|----------|
@@ -938,7 +1431,7 @@ BuilderNode<Args> (构建器节点)
 | **Modifier** | Property 层 | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/*_property.cpp` |
 | **状态管理** | Bridge 层 State Management | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/` |
 
-### 7.2 组件从 SDK 到 ace_engine 的完整路径
+### 9.2 组件从 SDK 到 ace_engine 的完整路径
 
 **示例**: Text 组件
 
@@ -946,12 +1439,13 @@ BuilderNode<Args> (构建器节点)
 应用层 (App)
   ↓
 SDK API 层 (OpenHarmony/interface/sdk-js/api/arkui/)
-  ├── text.static.d.ets          (Static API)
-  └── TextModifier.d.ts           (Dynamic API)
+  ├── text.static.d.ets          (Static API - 声明式语法)
+  └── TextModifier.d.ts           (Dynamic API - 声明式配置对象)
   ↓
 ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
   ├── Bridge 层
-  │   └── frameworks/bridge/declarative_frontend/jsview/js_text.cpp     (Static API 实现)
+  │   ├── frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp  (Static API 实现)
+  │   └── frameworks/bridge/declarative_frontend/jsview/js_text.cpp             (Dynamic API 实现)
   └── Core 层
       ├── Pattern 层
       │   ├── frameworks/core/components_ng/pattern/text/text_pattern.h
@@ -963,7 +1457,7 @@ ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
           └── frameworks/core/components_ng/render/text_render_property.cpp
 ```
 
-### 7.3 关键文件路径对照表
+### 9.3 关键文件路径对照表
 
 | SDK API 文件 | ace_engine 实现文件 |
 |-------------|-------------------|
@@ -972,15 +1466,94 @@ ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
 | `OpenHarmony/interface/sdk-js/api/arkui/RenderNode.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/render_node.cpp` |
 | `OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp` |
 | `OpenHarmony/interface/sdk-js/api/arkui/ButtonModifier.d.ts` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/button_property.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp` |
-| `OpenHarmony/interface/sdk-js/api/arkui/component/button.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_button.cpp` |
+| `OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp` |
+| `OpenHarmony/interface/sdk-js/api/arkui/component/button.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_button_modifier.cpp` |
 | `OpenHarmony/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets` | `OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/` |
 
 ---
 
-## 8. API 快速参考
+## 10. API 定义规范
 
-### 8.1 FrameNode 常用方法和属性
+本章说明 ArkUI Component Static API 的定义规范和命名约定。
+
+### 10.1 文件命名规范
+
+**Static API 文件命名**: `{componentName}.static.d.ets`
+- 使用小写开头的小驼峰命名：`text.static.d.ets`, `button.static.d.ets`
+- 多个单词合并：`textInput.static.d.ets`, `imageAnimator.static.d.ets`
+
+**支持文件命名**: `{category}.static.d.ets`
+- `common.static.d.ets` (14,174行) - 通用属性方法
+- `enums.static.d.ets` (4,329行) - 枚举类型
+- `units.static.d.ets` (1,609行) - 单位类型
+- `gesture.static.d.ets` (2,318行) - 手势识别
+
+### 10.2 接口命名规范
+
+| 接口类型 | 命名模式 | 示例 |
+|---------|---------|------|
+| **Attribute** | `{ComponentName}Attribute` | `TextAttribute`, `ButtonAttribute` |
+| **Configuration** | `{ComponentName}Configuration` | `ButtonConfiguration` |
+| **Options** | `{ComponentName}Options` | `CalendarOptions` |
+| **Param** | `{ComponentName}Param` | `AlertDialogParam` |
+
+### 10.3 枚举命名规范
+
+使用大驼峰命名（PascalCase）：
+```typescript
+export declare enum ButtonType {
+    Capsule,
+    Circle,
+    Normal,
+    ROUNDED_RECTANGLE = 3
+}
+```
+
+### 10.4 函数命名规范
+
+**组件构造函数**: 与组件名相同（首字母大写）
+```typescript
+export declare function Text(value: ResourceStr | undefined): TextAttribute;
+export declare function Button(value: string | Resource | undefined): ButtonAttribute;
+```
+
+**属性方法**: 小驼峰命名，返回 `this`
+```typescript
+default fontSize(value: number | undefined): this;
+default fontColor(value: ResourceColor | undefined): this;
+```
+
+### 10.5 事件方法规范
+
+**命名模式**: `on` + 事件名称（首字母大写）
+```typescript
+default onClick(callback: Callback | undefined): this;
+default onTouch(callback: Callback<TouchEvent> | undefined): this;
+default onScroll(callback: OnScrollCallback | undefined): this;
+```
+
+### 10.6 导入依赖规范
+
+标准导入顺序：
+```typescript
+// 1. 通用接口（必需）
+import { CommonMethod, Callback, AttributeModifier } from "./common";
+
+// 2. 枚举类型
+import { TextAlign, FontStyle, FontWeight } from "./enums";
+
+// 3. 单位类型
+import { Resource, ResourceColor, Font, Length } from "./units";
+
+// 4. 相关组件类型
+import { TextRange } from "./textCommon";
+```
+
+---
+
+## 11. API 快速参考
+
+### 11.1 FrameNode 常用方法和属性
 
 #### 树操作
 | 方法 | 说明 | 使用场景 |
@@ -1012,7 +1585,7 @@ ace_engine 层 (OpenHarmony/foundation/arkui/ace_engine/)
 |------|------|----------|
 | `dispose()` | 销毁节点，释放资源 | 调用后节点不可再用 |
 
-### 8.2 BuilderNode 使用要点
+### 11.2 BuilderNode 使用要点
 
 #### 创建和构建
 ```typescript
@@ -1038,7 +1611,7 @@ builderNode.dispose()        // 销毁
 - reuse()/recycle() 用于性能优化，实现组件复用
 - ReactiveBuilderNode（API 12+）提供 flushState() 强制同步状态
 
-### 8.3 组件命名规则
+### 11.3 组件命名规则
 
 #### SDK API 文件命名
 | 类型 | 命名规则 | 示例 |
@@ -1061,14 +1634,15 @@ builderNode.dispose()        // 销毁
 - Modifier: 大写开头，驼峰命名 + Modifier → `TextInputModifier`
 - Pattern: 全小写，下划线连接 + _pattern → `text_input_pattern`
 
-### 8.4 文件路径快速查询
+### 11.4 文件路径快速查询
 
 #### 从组件名查找实现
 ```
 Text 组件
 ├── SDK API (Static):     OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
 ├── SDK API (Dynamic):    OpenHarmony/interface/sdk-js/api/arkui/TextModifier.d.ts
-├── Bridge 层:            OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
+├── Bridge 层 (Static):   OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp
+├── Bridge 层 (Dynamic):  OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
 ├── Pattern 层:           OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp
 ├── Property 层:          OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp
 └── Render 层:            OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/text_render_property.cpp
@@ -1084,9 +1658,9 @@ Text 组件
 
 ---
 
-## 9. 版本演进
+## 12. 版本演进
 
-### 9.1 API 11 - API 23 重要变更
+### 12.1 API 11 - API 23 重要变更
 
 #### API 11 (初始版本)
 - 引入 FrameNode/BuilderNode/RenderNode 核心 API
@@ -1118,7 +1692,7 @@ Text 组件
 - **新的状态管理**: @ObservedV2、@TraceV2
 - **渲染性能提升**: 增量渲染改进
 
-### 9.2 兼容性注意事项
+### 12.2 兼容性注意事项
 
 #### 废弃的 API
 | API | 废弃版本 | 替代方案 |
@@ -1132,7 +1706,7 @@ Text 组件
 2. **Builder 构建方式**: API 12+ 支持参数化构建
 3. **事件回调签名**: 部分组件的事件参数类型有变化
 
-### 9.3 新旧 API 迁移指南
+### 12.3 新旧 API 迁移指南
 
 #### 从 API 11 迁移到 API 12+
 ```typescript
@@ -1157,9 +1731,9 @@ builderNode.flushState()  // 强制同步状态
 
 ---
 
-## 10. 常见问题解答
+## 13. 常见问题解答
 
-### 10.1 SDK API 和 ace_engine 的关系
+### 13.1 SDK API 和 ace_engine 的关系
 
 **Q: SDK API 和 ace_engine 是什么关系？**
 
@@ -1202,11 +1776,13 @@ A:
 | 特性 | Static API | Dynamic API |
 |------|-----------|-------------|
 | **文件类型** | `.static.d.ets` | `*.d.ts` |
-| **使用方式** | 声明式 `Text().width(100)` | 命令式 `new TextModifier()` |
-| **实现位置** | Bridge 层 | Core 层 (Property) |
+| **使用方式** | 声明式 `Text().width(100)` | 声明式 `new TextModifier().width(100)` |
+| **实现位置** | Modifier 层 | Bridge 层 |
 | **性能** | 编译时优化 | 运行时动态设置 |
 | **灵活性** | 较低，编译时确定 | 高，可动态修改 |
 | **适用场景** | 常规 UI 开发 | 动态属性修改、复用 |
+
+**说明**：两者都是声明式 API，Dynamic API 的 "Dynamic" 指的是支持运行时动态修改属性值，而非使用方式是命令式的。
 
 **示例对比**:
 ```typescript
@@ -1215,10 +1791,11 @@ Text('Hello')
   .fontSize(20)
   .fontColor(Color.Red)
 
-// Dynamic API (推荐用于动态属性修改)
-const modifier = new TextModifier()
-modifier.fontSize(20)
+// Dynamic API (推荐用于动态属性修改和复用)
+const modifier = new TextModifier()  // 声明式创建配置对象
+modifier.fontSize(20)                // 声明式设置属性
 modifier.fontColor(Color.Red)
+Text().attribute(modifier)           // 应用配置
 // modifier 可以复用，动态修改属性
 ```
 
@@ -1230,7 +1807,7 @@ A: 以下场景优先使用 Dynamic API：
 - 与 C++/Cangjie 等其他语言交互
 - 需要精细控制属性更新时机
 
-### 10.3 如何查找组件实现
+### 13.3 如何查找组件实现
 
 **Q: 如何从 SDK API 快速找到 ace_engine 的实现代码？**
 
@@ -1249,7 +1826,7 @@ A: 按以下步骤操作：
 
 **快捷工具**: 使用本知识库"第 3 章 组件 API 分类清单"快速查找
 
-### 10.4 API 版本兼容性问题
+### 13.4 API 版本兼容性问题
 
 **Q: 不同 API 版本之间有哪些常见兼容性问题？**
 
@@ -1270,7 +1847,7 @@ A:
 3. 参考官方文档的 API Reference
 4. 使用本知识库"第 9 章 版本演进"
 
-### 10.5 常见错误和陷阱
+### 13.5 常见错误和陷阱
 
 #### 陷阱 1: FrameNode 未附加到 UIContext
 ```typescript
@@ -1339,7 +1916,7 @@ const frameNode = FrameNode.create(uiContext, 'Text')
 frameNode.appendChild(modifier)
 ```
 
-### 10.6 性能优化建议
+### 13.6 性能优化建议
 
 **Q: 如何优化 ArkUI 应用性能？**
 
@@ -1354,9 +1931,9 @@ A: 关键优化点：
 
 ---
 
-## 11. 开发调试指南
+## 14. 开发调试指南
 
-### 11.1 从 SDK API 追踪到源码
+### 14.1 从 SDK API 追踪到源码
 
 **步骤 1: 确定入口点**
 ```
@@ -1384,20 +1961,23 @@ Pattern → frameworks/core/components_ng/render/*_render_property.cpp
 # 1. 从 SDK API 开始
 OpenHarmony/interface/sdk-js/api/arkui/component/text.static.d.ets
 
-# 2. Bridge 层实现
+# 2. Bridge 层实现 (Static API)
+OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp
+
+# 3. Bridge 层实现 (Dynamic API)
 OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_text.cpp
 
-# 3. Pattern 层实现
+# 4. Pattern 层实现
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp
 
-# 4. Property 层
+# 5. Property 层
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/property/text_property.cpp
 
-# 5. Render 层
+# 6. Render 层
 OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/render/text_render_property.cpp
 ```
 
-### 11.2 常用调试技巧
+### 14.2 常用调试技巧
 
 #### 查看 FrameNode 树结构
 ```typescript
@@ -1428,7 +2008,7 @@ void TextPattern::OnModifyDone() {
 }
 ```
 
-### 11.3 日志分析方法
+### 14.3 日志分析方法
 
 #### 启用详细日志
 ```bash
@@ -1459,9 +2039,126 @@ grep "Layout" performance.log | awk '{print $1, $2, $NF}'
 
 ---
 
-## 12. 总结
+## 15. 实战示例
 
-### 12.1 统计数据
+本章通过实际示例帮助开发者深入理解 ArkUI Component Static API 的使用方法和最佳实践。
+
+### 15.1 从 Static API 追溯到实现代码
+
+#### 15.1.1 Static API vs Dynamic API 调用路径
+
+**Static API（声明式语法）**：
+```typescript
+Text('Hello').fontSize(20)
+```
+- **实现路径**: `node_text_modifier.cpp` (Modifier 层）
+- **说明**: Static API 的 "Static" 指的是声明式语法（Declarative Syntax），不是"静态"的意思
+
+**Dynamic API（Modifier 模式）**：
+```typescript
+const modifier = new TextModifier()
+modifier.fontSize(20)
+Text().attribute(modifier)
+```
+- **实现路径**: `js_text.cpp` (Bridge 层）
+- **说明**: Dynamic API 的 "Dynamic" 指的是命令式动态修改（Imperative Dynamic Modification）
+
+#### 15.1.2 Static API 完整调用链
+
+**完整调用链示例 - Text 组件**：
+
+```
+应用层: Text('Hello').fontSize(20)
+  ↓
+Static API: text.static.d.ets (TextAttribute 接口)
+  ↓
+Modifier 层: node_text_modifier.cpp (SetTextFontSize)
+  ↓
+Property 层: text_property.cpp (TextProperty::SetFontSize)
+  ↓
+Pattern 层: text_pattern.cpp (TextPattern::OnModifyDone)
+  ↓
+Render 层: text_render_property.cpp (Paint 方法)
+  ↓
+屏幕显示
+```
+
+**快速查找实现代码的路径**：
+- **Static API**: `interface/sdk-js/api/arkui/component/text.static.d.ets`
+- **Modifier 层**: `ace_engine/frameworks/bridge/declarative_frontend/jsview/node_text_modifier.cpp`
+- **Property 层**: `ace_engine/frameworks/core/components_ng/property/text_property.cpp`
+- **Pattern 层**: `ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp`
+- **Render 层**: `ace_engine/frameworks/core/components_ng/render/text_render_property.cpp`
+
+### 15.2 理解 Attribute 接口
+
+**核心特性**：
+
+1. **继承 CommonMethod** - 所有通用属性（width, height, padding等）自动可用
+2. **链式调用** - 所有方法返回 `this`，支持 `.fontSize(20).fontColor(Color.Red)`
+3. **可选参数** - 支持 `undefined` 恢复为默认值
+4. **default 关键字** - 属性方法使用 `default` 修饰
+
+**使用示例**：
+```typescript
+// 基础使用
+Text('Hello World')
+  .fontSize(20)
+  .fontColor(Color.Red)
+  .textAlign(TextAlign.Center)
+
+// 结合状态管理
+@Component
+struct Example {
+  @State fontSize: number = 16
+  build() {
+    Text('Hello')
+      .fontSize(this.fontSize)
+      .onClick(() => { this.fontSize = 24 })
+  }
+}
+```
+
+### 15.3 Configuration vs Options vs Attribute
+
+| 特性 | Attribute | Configuration | Options |
+|------|-----------|----------------|---------|
+| **API 模式** | 声明式 | 声明式 | 初始化参数 |
+| **链式调用** | ✅ | ❌ | ❌ |
+| **配置复用** | ❌ | ✅ | ⚠️ |
+| **动态修改** | ⚠️ | ✅ | ❌ |
+| **推荐场景** | 常规 UI 开发 | 属性复用 | 组件初始化 |
+
+**说明**：
+
+- **三者都是声明式的**：
+  - **Attribute**: 声明式属性设置（`.fontSize(20)`）
+  - **Configuration**: 声明式配置对象（`new TextModifier().fontSize(20)`）
+  - **Options**: 初始化参数（`Text({ controller: this.controller })`）
+
+- **Configuration 不是"命令式"**：
+  - Configuration 对象本身是声明式创建的
+  - 用于配置复用、动态属性修改、条件属性应用
+
+**Configuration 的实际作用**：
+
+```typescript
+// 1. 配置复用
+const myStyle = new TextModifier()
+myStyle.fontSize(20).fontColor(Color.Red)
+
+Text('H1').attribute(myStyle)
+Text('H2').attribute(myStyle)
+
+// 2. 动态修改
+myStyle.fontSize(24)  // 所有使用 myStyle 的地方都会更新
+```
+
+---
+
+## 16. 总结
+
+### 16.1 统计数据
 
 | 类别 | 数量 |
 |------|------|
@@ -1477,7 +2174,7 @@ grep "Layout" performance.log | awk '{print $1, $2, $NF}'
 | **高级组件** | 17 个 |
 | **辅助工具** | 27+ 个 |
 
-### 12.2 API 特点
+### 16.2 API 特点
 
 1. **完整的组件库**: 涵盖基础、容器、选择器、形状、媒体等全场景
 2. **强大的状态管理**: @State, @Prop, @Link, @Provide 等多种装饰器
