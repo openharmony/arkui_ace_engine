@@ -300,13 +300,13 @@ HWTEST_F(JsAccessibilityManagerTestTwo, GetComponentTypeAndPageIdByNodeIdTest001
 }
 
 /**
- * @tc.name: CheckPageEventValidInCacheTest001
- * @tc.desc: Test CheckPageEventValidInCache
+ * @tc.name: CheckPageEventCachedTest001
+ * @tc.desc: Test CheckPageEventCached when node is null
  * @tc.type: FUNC
  */
-HWTEST_F(JsAccessibilityManagerTestTwo, CheckPageEventValidInCacheTest001, TestSize.Level1)
+HWTEST_F(JsAccessibilityManagerTestTwo, CheckPageEventCachedTest001, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin CheckPageEventValidInCacheTest001";
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin CheckPageEventCachedTest001";
 
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
@@ -315,16 +315,13 @@ HWTEST_F(JsAccessibilityManagerTestTwo, CheckPageEventValidInCacheTest001, TestS
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     /**
-     * @tc.steps: step2. test CheckPageEventValidInCache
+     * @tc.steps: step2. test CheckPageEventCached
      */
-    EXPECT_CALL(jsAccessibilityManager->pageController_, HasAnyAccessibilityEvent(200)).WillOnce(Return(false));
-    bool result = jsAccessibilityManager->CheckPageEventValidInCache(200);
+    RefPtr<NG::FrameNode> node = nullptr;
+    bool result = jsAccessibilityManager->CheckPageEventCached(node, 1);
     EXPECT_FALSE(result);
-    EXPECT_CALL(jsAccessibilityManager->pageController_, HasAnyAccessibilityEvent(100)).WillOnce(Return(true));
-    result = jsAccessibilityManager->CheckPageEventValidInCache(100);
-    EXPECT_TRUE(result);
 
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end CheckPageEventValidInCacheTest001";
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end CheckPageEventCachedTest001";
 }
 
 /**
