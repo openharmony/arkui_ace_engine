@@ -625,6 +625,7 @@ export class TipsDialog extends ViewPU {
                             resourceManager?.getStringSync(125833935)
                     });
                     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.info(`Accessibility send event`);
                     });
                 } catch (exception) {
                     let code = exception.code;
@@ -793,7 +794,7 @@ export class TipsDialog extends ViewPU {
                 params: ['sys.color.font_primary'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
-        };
+            };
         let uiContext = this.getUIContext();
         this.appMaxFontScale = uiContext.getMaxFontScale();
         this.initButtons();
@@ -1810,6 +1811,7 @@ export class ConfirmDialog extends ViewPU {
                             resourceManager?.getStringSync(125833935)
                     });
                     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.info(`Accessibility send event`);
                     });
                 } catch (exception) {
                     let code = exception.code;
@@ -3038,13 +3040,12 @@ class CustomDialogContentComponent extends ViewPU {
     aboutToAppear() {
         try {
             let uiContext = this.getUIContext();
-            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-            this.appMaxFontScale = uiContext?.getMaxFontScale();
+            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+            this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
         }
         catch (err) {
             let code = err?.code;
-            let message = err?.message;
-            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}`);
         }
         this.fontSizeScale = this.updateFontScale();
         if (this.controller && this.customStyle === undefined) {
