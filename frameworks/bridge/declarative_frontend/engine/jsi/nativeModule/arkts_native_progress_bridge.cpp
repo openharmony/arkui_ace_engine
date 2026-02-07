@@ -537,7 +537,8 @@ void ParseRingStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, Ark
 }
 
 void ParseCapsuleStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle,
-    std::vector<std::string>& fontFamilies, std::unique_ptr<const char*[]>& families, const NodeInfo& nodeInfo)
+    std::vector<std::string>& fontFamilies, std::unique_ptr<const char*[]>& families,
+    const NodeInfo& nodeInfo)
 {
     ParseBorderColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_COLOR, nodeInfo);
     ParseBorderWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_WIDTH);
@@ -589,8 +590,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
         DEFAULT_BORDER_WIDTH, static_cast<int8_t>(DimensionUnit::VP), DEFAULT_SCALE_COUNT,
         static_cast<uint8_t>(DEFAULT_PROGRESS_STATUS), DEFAULT_SCALE_WIDTH, static_cast<int8_t>(DimensionUnit::VP),
         DEFAULT_STROKE_RADIUS, static_cast<int8_t>(DimensionUnit::PERCENT), true,
-        static_cast<ArkUI_Uint32>(DEFAULT_BORDER_COLOR.GetValue()), nullptr,
-        static_cast<ArkUI_Uint32>(progressTheme->GetTextColor().GetValue()), false, false, false, false,
+        static_cast<double>(DEFAULT_BORDER_COLOR.GetValue()), nullptr,
+        static_cast<double>(progressTheme->GetTextColor().GetValue()), false, false, false, false,
         { DEFAULT_CAPSULE_FONT_SIZE, static_cast<int8_t>(DEFAULT_CAPSULE_FONT_UNIT),
             static_cast<uint8_t>(theme->GetTextStyle().GetFontWeight()),
             static_cast<uint8_t>(theme->GetTextStyle().GetFontStyle()), families.get(), fontFamilies.size() } };

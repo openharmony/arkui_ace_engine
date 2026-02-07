@@ -21,6 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -274,12 +275,13 @@ ArkUINativeModuleValue TextTimerBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     std::vector<RefPtr<ResourceObject>> colorResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
         radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),
-        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray);
+        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray, nodeInfo);
     bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_4),
         offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResObjArray);
     bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_5),
