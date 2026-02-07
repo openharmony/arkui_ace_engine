@@ -225,18 +225,40 @@ HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest001, TestSiz
     /**
      * @tc.steps: step2. test non-page event returns true.
      */
-    try {
-        AccessibilityEvent event;
-        event.type = AccessibilityEventType::CLICK;
-
-        bool result = jsAccessibilityManager->IsSendAccessibilityEvent(event);
-        EXPECT_TRUE(result);
-    } catch (...) {
-        EXPECT_TRUE(false);
-        GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-an exception occurred.";
-    }
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::CLICK;
+    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(event);
+    EXPECT_TRUE(result);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest001";
+}
+
+/**
+ * @tc.name: IsSendAccessibilityEventTest002
+ * @tc.desc: Test page event with null PipelineContext returns result of IsSendAccessibilityEventForHost.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin IsSendAccessibilityEventTest002";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test page event with null PipelineContext returns result of IsSendAccessibilityEventForHost.
+     */
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::PAGE_STATE_UPDATE;
+    event.nodeId = -1;
+    jsAccessibilityManager->context_ = nullptr;
+    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(event);
+    EXPECT_TRUE(result);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest002";
 }
 
 /**
