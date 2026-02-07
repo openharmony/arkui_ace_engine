@@ -313,4 +313,17 @@ void TextStyle::SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptio
     }
     SetInnerSymbolEffectOptionsWithoutMark(symbolEffectOptions);
 }
+
+void TextStyle::UpdateFontSizeOrColorChanged()
+{
+    std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)> allowedMask;
+    allowedMask.set(static_cast<int32_t>(TextStyleAttribute::FONT_SIZE));
+    allowedMask.set(static_cast<int32_t>(TextStyleAttribute::FONT_COLOR));
+    // other properties have also changed.
+    if ((reLayoutTextStyleBitmap_ & ~allowedMask).any()) {
+        isFontSizeOrColorChanged_ = false;
+        return;
+    }
+    isFontSizeOrColorChanged_ = (reLayoutTextStyleBitmap_ & allowedMask).any();
+}
 }  // namespace OHOS::Ace

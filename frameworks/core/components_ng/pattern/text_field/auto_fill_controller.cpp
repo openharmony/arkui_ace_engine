@@ -50,9 +50,7 @@ void AutoFillController::StartAutoFillAnimation(
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
     if (textFieldPattern) {
         auto host = textFieldPattern->GetHost();
-        if (host) {
-            ACE_UINODE_TRACE(host);
-        }
+        ACE_UINODE_TRACE(host);
     }
     auto initParagraphSuc = InitAutoFillParagraph(content);
     auto createAutoFillIconSuc = CreateAutoFillIcon();
@@ -164,9 +162,7 @@ void AutoFillController::PlayAutoFillDefaultCharAnimation(const AutoFillContentL
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldPattern);
     auto host = textFieldPattern->GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     auto contentLength = autoFillParagraph_->GetParagraphText().length();
     auto response = GetSpringAnimationResponse(mode);
     auto damping = GetSpringAnimationDamping(mode);
@@ -198,9 +194,7 @@ void AutoFillController::PlayAutoFillTranslationAnimation(const AutoFillContentL
     CHECK_NULL_VOID(pattern);
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->GetHost()) {
-        ACE_UINODE_TRACE(textFieldPattern->GetHost());
-    }
+    ACE_UINODE_TRACE(textFieldPattern->GetHost());
     auto symbolNode = autoFillIconNode_.Upgrade();
     CHECK_NULL_VOID(symbolNode);
     auto symbolRenderContext = symbolNode->GetRenderContext();

@@ -132,6 +132,15 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
     return {};
 }
 
+void TextFieldManagerNG::TriggerCaretInfoUpdateOnScaleChange()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->UpdateCaretInfoToController(true);
+}
+
 RectF TextFieldManagerNG::GetFocusedNodeCaretRect()
 {
     auto node = onFocusTextField_.Upgrade();
@@ -311,13 +320,16 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
     bool isShowKeyboard = manager->GetKeyboardInset().IsValid();
     int32_t keyboardOrientation = manager->GetKeyboardOrientation();
     auto container = Container::Current();
-    if (keyboardOrientation != -1 && container && container->GetDisplayInfo()) {
-        auto nowOrientation = static_cast<int32_t>(container->GetDisplayInfo()->GetRotation());
-        if (nowOrientation != keyboardOrientation) {
-            // When rotating the screen, sometimes we might get a keyboard height that in wrong
-            // orientation due to timeing issue. In this case, we assume there is no keyboard.
-            TAG_LOGI(ACE_KEYBOARD, "Current Orientation can't match keyboard orientation");
-            keyboardInset = { .start = bottom, .end = bottom };
+    if (keyboardOrientation != -1 && container) {
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo) {
+            auto nowOrientation = static_cast<int32_t>(displayInfo->GetRotation());
+            if (nowOrientation != keyboardOrientation) {
+                // When rotating the screen, sometimes we might get a keyboard height that in wrong
+                // orientation due to timeing issue. In this case, we assume there is no keyboard.
+                TAG_LOGI(ACE_KEYBOARD, "Current Orientation can't match keyboard orientation");
+                keyboardInset = { .start = bottom, .end = bottom };
+            }
         }
     }
     if (isShowKeyboard) {

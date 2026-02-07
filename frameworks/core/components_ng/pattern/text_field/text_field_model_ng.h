@@ -170,6 +170,7 @@ public:
     void ResetTextDirection() override;
     void SetSelectedDragPreviewStyle(const Color& value) override;
     void ResetSelectedDragPreviewStyle() override;
+    void SetUserAccessibilityText() override;
 
     static void ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);

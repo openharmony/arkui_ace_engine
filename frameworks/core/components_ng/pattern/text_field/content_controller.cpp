@@ -394,9 +394,7 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, false);
     auto host = textField->GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     
     auto errorValue = FilterWithRegex(filter, result);
     if (!errorValue.empty()) {

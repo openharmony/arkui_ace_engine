@@ -2669,4 +2669,10 @@ void JSTextField::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
+
+void JSTextField::SetAccessibilityText(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsAccessibilityText(info);
+    TextFieldModel::GetInstance()->SetUserAccessibilityText();
+}
 } // namespace OHOS::Ace::Framework

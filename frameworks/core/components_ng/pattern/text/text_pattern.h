@@ -71,7 +71,7 @@ class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
-using ExternalDrawCallback = std::function<bool(float, float, float, float)>;
+using ExternalDrawCallback = std::function<bool(const ExternalDrawCallbackInfo&)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
@@ -265,9 +265,7 @@ public:
     {
         if (!dataDetectorAdapter_) {
             auto host = GetHost();
-            if (host) {
-                ACE_UINODE_TRACE(host);
-            }
+            ACE_UINODE_TRACE(host);
             dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return dataDetectorAdapter_;
@@ -276,9 +274,7 @@ public:
     {
         if (!selectDetectorAdapter_) {
             auto host = GetHost();
-            if (host) {
-                ACE_UINODE_TRACE(host);
-            }
+            ACE_UINODE_TRACE(host);
             selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return selectDetectorAdapter_;
@@ -624,9 +620,7 @@ public:
     {
         if (!styledString_) {
             auto host = GetHost();
-            if (host) {
-                ACE_UINODE_TRACE(host);
-            }
+            ACE_UINODE_TRACE(host);
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
@@ -658,17 +652,17 @@ public:
         return isAskCeliaEnabled_;
     }
 
+    bool IsAskCeliaSupported();
+
     void SetIsShowAskCeliaInRightClick(bool isShowAskCeliaInRightClick)
     {
         isShowAskCeliaInRightClick_ = isShowAskCeliaInRightClick && IsNeedAskCelia();
     }
-
+    
     bool IsShowAskCeliaInRightClick() const
     {
         return isShowAskCeliaInRightClick_;
     }
-
-    bool IsAskCeliaSupported();
 
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
@@ -763,6 +757,11 @@ public:
     TextStyle GetTextStyle()
     {
         return textStyle_.value_or(TextStyle());
+    }
+
+    bool IsOnlyFontSizeOrColorChanged()
+    {
+        return textStyle_.has_value() ? textStyle_->CheckIsFontSizeOrColorChanged() : false;
     }
 
     bool DidExceedMaxLines() const override;
@@ -875,9 +874,7 @@ public:
     {
         if (!magnifierController_) {
             auto host = GetHost();
-            if (host) {
-                ACE_UINODE_TRACE(host);
-            }
+            ACE_UINODE_TRACE(host);
             magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
         }
         return magnifierController_;
@@ -969,6 +966,10 @@ public:
     void SetExternalDrawCallback(ExternalDrawCallback&& callback)
     {
         externalDrawCallback_ = std::move(callback);
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
+            textLayoutProperty->SetIsNewMaterial(externalDrawCallback_ != nullptr);
+        }
     }
 
     const ExternalDrawCallback& GetExternalDrawCallback()
@@ -994,6 +995,15 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
     void ReportSelectedText(bool isRegister = false) override;
+    void MarkMeasured(bool isMeasured)
+    {
+        isMeasured_ = isMeasured;
+    }
+
+    bool IsMeasured() const
+    {
+        return isMeasured_;
+    }
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1089,9 +1099,7 @@ protected:
     {
         if (!multipleClickRecognizer_) {
             auto host = GetHost();
-            if (host) {
-                ACE_UINODE_TRACE(host);
-            }
+            ACE_UINODE_TRACE(host);
             multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
         }
     }
@@ -1361,6 +1369,7 @@ private:
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
     ExternalDrawCallback externalDrawCallback_;
+    bool isMeasured_ = false;
 
     std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
     std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;

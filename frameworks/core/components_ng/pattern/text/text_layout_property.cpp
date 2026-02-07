@@ -206,7 +206,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("compressLeadingPunctuation",
         GetCompressLeadingPunctuation().value_or(false) ? "true" : "false", filter);
     if (HasLineHeightMultiply()) {
-        json->PutExtAttr("lineHeightMultiply", std::to_string(GetLineHeightMultiply().value()).c_str(), filter);
+        json->PutExtAttr("lineHeightMultiply", std::to_string(GetLineHeightMultiply().value()).c_str(),
+            filter);
     }
     json->PutExtAttr("maxLineHeight", GetMaximumLineHeight().value_or(0.0_fp).ToString().c_str(), filter);
     json->PutExtAttr("minLineHeight", GetMinimumLineHeight().value_or(0.0_fp).ToString().c_str(), filter);

@@ -104,6 +104,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (isSpanStringMode_ && spanStringHasMaxLines_ && !textLayoutProperty->GetIsTextMaxlinesFirstValue(false)) {
         textStyle_.SetMaxLines(UINT32_MAX);
     }
+    if (textLayoutProperty->IsNewMaterial()) {
+        pattern->MarkMeasured(true);
+        textStyle_.UpdateFontSizeOrColorChanged();
+    }
     // inheritTextStyle_ is used to control spans_ in versions below VERSION_EIGHTEEN, preventing them from
     // adapting to font size automatically.
     inheritTextStyle_ = textStyle_;

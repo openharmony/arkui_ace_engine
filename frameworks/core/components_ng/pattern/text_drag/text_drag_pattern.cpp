@@ -53,12 +53,7 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
     bool hasResult = false;
     RectF result;
     RectF preBox;
-    auto deviceHeight = SystemProperties::GetDevicePhysicalHeight();
-    auto container = Container::CurrentSafely();
-    if (container && container->GetDisplayInfo()) {
-        deviceHeight = container->GetDisplayInfo()->GetHeight();
-    }
-    auto maxBottom = contentRect.GetY() + deviceHeight;
+    auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
     for (const auto& box : boxes) {
         auto caculateBottom = box.Bottom() + textStartY;
         bool isReachingBottom = (caculateBottom >= maxBottom) || (caculateBottom >= contentRect.Bottom());
@@ -239,9 +234,7 @@ void TextDragPattern::AdjustHandlers(const RectF contentRect, RectF& leftHandler
 std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     auto selectPosition = GetSelectPosition();
     float startX = selectPosition.startX_;
@@ -275,9 +268,7 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
 std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset, float radiusRatio)
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     std::vector<TextPoint> points;
     GenerateBackgroundPoints(points, offset);
@@ -288,9 +279,7 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset, fl
 std::shared_ptr<RSPath> TextDragPattern::GenerateSelBackgroundPath(float offset)
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     std::vector<TextPoint> points;
     GenerateBackgroundPoints(points, offset);

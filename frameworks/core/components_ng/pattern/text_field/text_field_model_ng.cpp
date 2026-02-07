@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -289,7 +289,7 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
@@ -608,7 +608,7 @@ void TextFieldModelNG::SetShowPasswordIcon(bool value)
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true) != true) {
+    if (pattern->IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true) != value) {
         pattern->SetTextChangedAtCreation(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value);
@@ -849,7 +849,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
-        auto theme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+        auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
     }
@@ -1358,7 +1358,7 @@ void TextFieldModelNG::SetShowPasswordIcon(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->IsInPasswordMode() && layoutProperty-> GetShowPasswordIconValue(true) != value) {
+    if (pattern->IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true) != value) {
         pattern->SetTextChangedAtCreation(true);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode);
@@ -2907,6 +2907,15 @@ void TextFieldModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const C
 void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
+
+void TextFieldModelNG::SetUserAccessibilityText()
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasUserAccessibilityText();
 }
 
 } // namespace OHOS::Ace::NG

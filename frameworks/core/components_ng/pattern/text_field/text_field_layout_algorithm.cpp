@@ -280,7 +280,7 @@ void TextFieldLayoutAlgorithm::GetInlineMeasureItem(
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
         inlineMeasureItem_.inlineSizeHeight = pattern->GetSingleLineHeight() * std::min(
             static_cast<uint32_t>(paragraph_->GetLineCount()),
-                textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
+            textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     } else {
         // calc inline status in advance
         CalcInlineMeasureItem(layoutWrapper);
@@ -716,7 +716,6 @@ float TextFieldLayoutAlgorithm::CalculateContentHeight(const LayoutConstraintF& 
 
 void TextFieldLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -843,6 +842,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleSetTextColor(
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(frameNode);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
     auto theme = textFieldPattern->GetTheme();
     CHECK_NULL_VOID(theme);
     if (isTextColorByUser) {
@@ -1488,7 +1488,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleLineHeight(const RefPtr<FrameNode>
         textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
 }
-
+ 
 void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled)
 {
@@ -1536,12 +1536,11 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetIsOnlyBetweenLines(layoutProperty->GetIsOnlyBetweenLines().value_or(false));
     }
 }
-
+ 
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
-    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPlaceholderValue(u"").empty()) {
         if (layoutProperty->HasAdaptMinFontSize()) {
             placeholderTextStyle.SetAdaptMinFontSize(layoutProperty->GetAdaptMinFontSize().value());
