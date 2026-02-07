@@ -137,6 +137,7 @@
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
@@ -607,10 +608,9 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
 
 void* createTextClockNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto textClockCustomModifier = NodeModifier::GetTextClockCustomModifier();
+    CHECK_NULL_RETURN(textClockCustomModifier, nullptr);
+    return textClockCustomModifier->createTextClockFrameNode(nodeId);
 }
 
 void* createTextTimerNode(ArkUI_Int32 nodeId)
@@ -776,10 +776,10 @@ void* createFormLinkNode(ArkUI_Int32 nodeId)
 
 void* createGaugeNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = GaugeModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto gaugeModifier = nodeModifier->getGaugeModifier();
+    CHECK_NULL_RETURN(gaugeModifier, nullptr);
     return nullptr;
 }
 

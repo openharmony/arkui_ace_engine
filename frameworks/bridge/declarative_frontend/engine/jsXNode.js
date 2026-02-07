@@ -2110,7 +2110,9 @@ const __creatorMap__ = new Map([
         }],
     ['TextClock', (context) => {
             return new TypedFrameNode(context, 'TextClock', (node, type) => {
-                return new ArkTextClockComponent(node, type);
+                getUINativeModule().loadNativeModule('TextClock');
+ 	            let module = globalThis.requireNapi('arkui.components.arktextclock');
+ 	            return module.createComponent(node, type);
             });
         }],
     ['TextTimer', (context) => {

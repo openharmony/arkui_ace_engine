@@ -159,6 +159,9 @@
       void?OHOS::Ace::StringUtils::TransformStrCase*;
       void?OHOS::Ace::StringUtils::StringSplitter*;
       OHOS::Ace::UtfUtils::*;
+      OHOS::Ace::UINodeTracer::*;
+      OHOS::Ace::ResTracer::*;
+      OHOS::Ace::IndexerModel::*;
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::ButtonModel::*;
@@ -253,7 +256,8 @@
       OHOS::Ace::SymbolSpanModel::*;
       OHOS::Ace::TabsModel::*;
       OHOS::Ace::TabContentModel::*;
-      OHOS::Ace::TextClockModel::*;
+      OHOS::Ace::NG::TextClockModelNG::*;
+      OHOS::Ace::Framework::JSTextClockController::removeController*;
       OHOS::Ace::TextModel::*;
       OHOS::Ace::NG::TextModelNG::*;
       OHOS::Ace::TextFieldModel::*;
@@ -591,6 +595,7 @@
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
       OHOS::Ace::CheckableComponent::*;
+      OHOS::Ace::TextClockComponent::*;
       OHOS::Ace::RenderCheckable::*;
       OHOS::Ace::NG::MinusPaddingToSize*;
       OHOS::Ace::NG::AddPaddingToSize*;
@@ -793,6 +798,7 @@
       vtable?for?OHOS::Ace::FocusNode;
       vtable?for?OHOS::Ace::NG::GaugeModelNG;
       vtable?for?OHOS::Ace::GaugeModel;
+      vtable?for?OHOS::Ace::NG::TextClockModelNG;
       vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::Player;
@@ -1017,6 +1023,7 @@
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;
       OHOS::Ace::V2::PatternLockComponent::*;
+      *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -2115,12 +2122,14 @@
       VTT?for?OHOS::Ace::LongPressRecognizer;
       VTT?for?OHOS::Ace::CheckableComponent;
       VTT?for?OHOS::Ace::PaddingComponent;
+      VTT?for?OHOS::Ace::TextClockComponent;
       vtable?for?OHOS::Ace::BoxComponent;
       vtable?for?OHOS::Ace::RawRecognizer;
       vtable?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::LongPressRecognizer;
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::LengthLimitingFormatter;
+      vtable?for?OHOS::Ace::TextClockComponent;
 
       OHOS::Ace::DOM_DISABLED;
       OHOS::Ace::DOM_TEXT_VALUE;

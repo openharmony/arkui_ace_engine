@@ -69,6 +69,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ColumnSplit", "linearsplit" },
         { "Counter", "counter" },
         { "DataPanel", "datapanel" },
+        {"TextClock", "textclock"},
         { "FlowItem", "waterflow" },
         { "FolderStack", "folderstack" },
         {"DynamicLayout", "dynamiclayout"},

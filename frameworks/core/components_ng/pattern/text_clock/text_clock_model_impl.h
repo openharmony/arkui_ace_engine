@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXT_CLOCK_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXT_CLOCK_MODEL_IMPL_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXTCLOCK_TEXTCLOCK_MODEL_IMPL_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXTCLOCK_TEXTCLOCK_MODEL_IMPL_H
 
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "core/components/text_clock/text_clock_component.h"
 #include "core/components/text_clock/text_clock_controller.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
@@ -48,4 +47,4 @@ private:
     static RefPtr<TextClockComponent> GetComponent();
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXT_CLOCK_MODEL_IMPL_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXTCLOCK_TEXTCLOCK_MODEL_IMPL_H

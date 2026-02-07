@@ -38,6 +38,7 @@ arkui_modules = [
   "patternlock",
   "counter",
   "sidebarcontainer",
+  "textclock",
   "checkbox",
   "checkboxgroup",
   "alphabetindexer",
