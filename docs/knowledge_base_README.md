@@ -21,11 +21,12 @@
 
 **统计数据**（截至 2026-02-07）：
 
-- 总知识库文档: 33 个
+- 总知识库文档: 35 个
 - 组件知识库: 27 个
 - SDK API 知识库: 2 个
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
+- 架构文档: 1 个
 - 覆盖组件: 26 个
 - 检索关键词: 220+ 个
 
@@ -41,6 +42,8 @@ knowledge_base/
 ├── sdk/                   # SDK 相关知识库
 │   ├── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
 │   └── Component_API_Knowledge_Base_CN.md     # ArkUI 组件 API 知识库
+├── architecture/          # 架构文档
+│   └── ThemeManager_Architecture_CN.md        # ThemeManager 主题系统架构
 ├── pattern/               # 组件模式知识库
 │   ├── badge/
 │   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
