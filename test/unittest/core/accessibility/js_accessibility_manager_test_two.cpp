@@ -262,7 +262,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest002, TestSiz
     eventPageOpen.type = AccessibilityEventType::PAGE_OPEN;
     eventPageOpen.nodeId = -1;
     jsAccessibilityManager->context_ = nullptr;
-    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(eventPageOpen);
+    result = jsAccessibilityManager->IsSendAccessibilityEvent(eventPageOpen);
     EXPECT_TRUE(result);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest002";
