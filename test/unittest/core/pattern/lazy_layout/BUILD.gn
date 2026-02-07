@@ -16,5 +16,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("lazy_grid_layout_test") {
   module_name = "ScrollingSet-LazyVGridLayout"
   type = "new"
-  sources = [ "grid_layout/lazy_grid_layout_test.cpp" ]
+  sources = [
+    "grid_layout/lazy_grid_layout_test.cpp",
+    "grid_layout/lazy_grid_generated_layout_test.cpp",
+  ]
 }

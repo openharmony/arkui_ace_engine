@@ -40,6 +40,7 @@ enum LayoutType {
   COLUMN_LAYOUT = 2,
   ROW_LAYOUT = 3,
   STACK_LAYOUT = 4,
+  GRID_LAYOUT = 5,
 }
 
 enum FlexAlign {
@@ -82,6 +83,12 @@ interface ColumnLayoutAlgorithmOption {
   alignItems?: HorizontalAlign;
   justifyContent?: FlexAlign;
   isReverse?: boolean;
+}
+
+interface GridLayoutAlgorithmOption {
+  columnsTemplate?: string | ItemFillPolicy;
+  rowsGap?: LengthMetrics;
+  columnsGap?: LengthMetrics;
 }
 
 function getOptionalVal<T>(defaultVal: T, arg?: T) : T{
@@ -152,6 +159,25 @@ class RowLayoutAlgorithm extends BaseLayoutAlgorithm {
   @Trace public isReverse?: boolean;
 }
 
+@ObservedV2
+class GridLayoutAlgorithm extends BaseLayoutAlgorithm {
+  constructor(option?: GridLayoutAlgorithmOption) {
+    super()
+    this.columnsTemplate = '1fr'
+    this.rowsGap = 0
+    this.columnsGap = 0
+    if (option) {
+      this.columnsTemplate = getOptionalVal('1fr', option.columnsTemplate)
+      this.rowsGap = getOptionalVal(0, option.rowsGap)
+      this.columnsGap = getOptionalVal(0, option.columnsGap)
+    }
+    this.layoutType = LayoutType.GRID_LAYOUT;
+  }
+  @Trace public columnsTemplate?: string | ItemFillPolicy;
+  @Trace public rowsGap?: LengthMetrics;
+  @Trace public columnsGap?: LengthMetrics;
+}
+
 class CustomLayoutAlgorithm extends BaseLayoutAlgorithm {
   constructor() {
     super()
@@ -162,5 +188,5 @@ class CustomLayoutAlgorithm extends BaseLayoutAlgorithm {
 }
 
 export default {
-  StackLayoutAlgorithm, ColumnLayoutAlgorithm, RowLayoutAlgorithm, CustomLayoutAlgorithm
+  StackLayoutAlgorithm, ColumnLayoutAlgorithm, RowLayoutAlgorithm, GridLayoutAlgorithm, CustomLayoutAlgorithm
 };
