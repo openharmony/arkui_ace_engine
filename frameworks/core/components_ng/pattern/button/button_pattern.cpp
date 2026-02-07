@@ -407,7 +407,7 @@ void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorTy
     CHECK_NULL_VOID(textRenderContext);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonColorType) {
             case ButtonColorType::FONT_COLOR:
                 textRenderContext->UpdateForegroundColor(color);
@@ -440,7 +440,7 @@ void ButtonPattern::UpdateComponentString(const std::string& value, const Button
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::LABEL:
                 textLayoutProperty->UpdateContent(value);
@@ -466,7 +466,7 @@ void ButtonPattern::UpdateComponentFamilies(const std::vector<std::string>& valu
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
                 textLayoutProperty->UpdateFontFamily(value);
@@ -492,7 +492,7 @@ void ButtonPattern::UpdateComponentDimension(const CalcDimension value, const Bu
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonDimensionType) {
             case ButtonDimensionType::MIN_FONT_SIZE:
                 textLayoutProperty->UpdateAdaptMinFontSize(value);
@@ -520,7 +520,7 @@ void ButtonPattern::UpdateComponentDouble(const double value, const ButtonDouble
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonDoubleType) {
             case ButtonDoubleType::MIN_FONT_SCALE:
                 textLayoutProperty->UpdateMinFontScale(value);
