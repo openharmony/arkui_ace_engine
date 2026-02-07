@@ -2245,6 +2245,7 @@ export class FrameNodeExtender {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(statesChangeHandler)
         ArkUIGeneratedNativeModule._FrameNodeExtender_addSupportedUIStates(extractors.toFrameNodePtr(peer), uiStates, thisSerializer.asBuffer(), thisSerializer.length(), excludeInner ? 1 : 0)
+        thisSerializer.release()
     }
     static removeSupportedUIStates_serialize(peer: FrameNode, uiStates: int32): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_removeSupportedUIStates(extractors.toFrameNodePtr(peer), uiStates)

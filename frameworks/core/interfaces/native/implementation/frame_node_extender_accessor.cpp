@@ -452,33 +452,27 @@ void DisposeTreeImpl(Ark_FrameNode peer)
         parent->RemoveChild(frameNode);
     }
 }
-void AddSupportedUIStatesImpl(Ark_FrameNode peer,
-                              Ark_Int32 uiStates,
-                              const UIStatesChangeHandler* statesChangeHandler,
-                              Ark_Boolean excludeInner)
+void AddSupportedUIStatesImpl(
+    Ark_FrameNode peer, Ark_Int32 uiStates, const UIStatesChangeHandler* statesChangeHandler, Ark_Boolean excludeInner)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(frameNode);
     frameNode->CreateEventHubInner();
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto callFunc = statesChangeHandler ? statesChangeHandler->call : nullptr;
-    auto resourceId = statesChangeHandler ? statesChangeHandler->resource.resourceId : 0;
+    if (!statesChangeHandler) {
+        return;
+    }
     WeakPtr<FrameNode> weakFrameNode(frameNode);
-    std::function<void(uint64_t)> callback = [callFunc, resourceId, weakFrameNode](uint64_t currentUIStates) {
+    std::function<void(uint64_t)> callback = [arkCallback = CallbackHelper(*statesChangeHandler), weakFrameNode](
+                                                 uint64_t currentUIStates) {
         auto frameNode = weakFrameNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        if (callFunc) {
-            callFunc(resourceId,
-                     FrameNodePeer::Create(frameNode),
-                     static_cast<Ark_Int32>(currentUIStates));
-        }
+        arkCallback.Invoke(Converter::ArkValue<Ark_FrameNode>(FrameNodePeer::Create(frameNode)),
+            Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(currentUIStates)));
     };
     eventHub->AddSupportedUIStateWithCallback(
-        static_cast<UIState>(uiStates),
-        callback,
-        false,
-        static_cast<bool>(excludeInner));
+        static_cast<UIState>(uiStates), callback, false, static_cast<bool>(excludeInner));
 }
 void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
                                  Ark_Int32 uiStates)

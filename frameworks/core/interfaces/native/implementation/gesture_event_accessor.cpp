@@ -301,13 +301,15 @@ Ark_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
     CHECK_NULL_RETURN(info, {});
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
     EventLocationInfo tapLocation;
-    if (!fingerList.empty()) {
-        tapLocation = {
-            fingerList.back().localLocation_,
-            fingerList.back().screenLocation_,
-            fingerList.back().globalLocation_,
-            fingerList.back().globalDisplayLocation_
-        };
+    if (info->GetGestureTypeName() == GestureTypeName::TAP_GESTURE) {
+        if (!fingerList.empty()) {
+            tapLocation = {
+                fingerList.back().localLocation_,
+                fingerList.back().globalLocation_,
+                fingerList.back().screenLocation_,
+                fingerList.back().globalDisplayLocation_
+            };
+        }
     }
     return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation, Converter::FC);
 }
