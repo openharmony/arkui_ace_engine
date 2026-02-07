@@ -25933,6 +25933,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                      const Opt_Callback_CutEvent_Void* value);
     void (*setOnCopy)(Ark_NativePointer node,
                       const Opt_Callback_CopyEvent_Void* value);
+    void (*setOnWillAttachIME)(Ark_NativePointer node,
+                               const Opt_Callback_IMEClient_Void* value);                  
     void (*setEditMenuOptions)(Ark_NativePointer node,
                                const Opt_EditMenuOptions* value);
     void (*setEnableKeyboardOnFocus)(Ark_NativePointer node,

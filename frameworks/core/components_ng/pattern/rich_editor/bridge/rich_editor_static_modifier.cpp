@@ -22,6 +22,7 @@
 #include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/copy_event_peer.h"
 #include "core/interfaces/native/implementation/cut_event_peer.h"
+#include "core/interfaces/native/implementation/ime_client_peer.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
@@ -654,6 +655,26 @@ void SetOnCopyImpl(Ark_NativePointer node,
     };
     RichEditorModelStatic::SetOnCopy(frameNode, std::move(onCopy));
 }
+void SetOnWillAttachIMEImpl(Ark_NativePointer node, const Opt_Callback_IMEClient_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        RichEditorModelStatic::SetOnWillAttachIME(frameNode, nullptr);
+        return;
+    }
+    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](IMEClient& value) {
+        Converter::ConvContext ctx;
+        auto imeClientPeer = PeerUtils::CreatePeer<IMEClientPeer>();
+        CHECK_NULL_VOID(imeClientPeer);
+        imeClientPeer->nodeId = value.nodeId;
+        Ark_IMEClient arkIMEClient = reinterpret_cast<Ark_IMEClient>(imeClientPeer);
+        callback.InvokeSync(arkIMEClient);
+        value.extraInfo = imeClientPeer->extraInfo;
+        PeerUtils::DestroyPeer(imeClientPeer);
+    };
+    RichEditorModelStatic::SetOnWillAttachIME(frameNode, std::move(onWillAttachIME));
+}
 void SetEditMenuOptionsImpl(Ark_NativePointer node,
                             const Opt_EditMenuOptions* value)
 {
@@ -953,6 +974,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
         RichEditorAttributeModifier::SetOnDidChangeImpl,
         RichEditorAttributeModifier::SetOnCutImpl,
         RichEditorAttributeModifier::SetOnCopyImpl,
+        RichEditorAttributeModifier::SetOnWillAttachIMEImpl,
         RichEditorAttributeModifier::SetEditMenuOptionsImpl,
         RichEditorAttributeModifier::SetEnableKeyboardOnFocusImpl,
         RichEditorAttributeModifier::SetEnableHapticFeedbackImpl,

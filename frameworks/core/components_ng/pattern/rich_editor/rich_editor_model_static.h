@@ -31,6 +31,7 @@ public:
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
+    static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     static void SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& action);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
