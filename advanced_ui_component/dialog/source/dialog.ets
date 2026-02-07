@@ -1232,7 +1232,8 @@ struct CustomDialogContentComponent {
       this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
     } catch (err) {
       let code: number = (err as BusinessError)?.code;
-      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}`);
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
     }
     this.fontSizeScale = this.updateFontScale();
     if (this.controller && this.customStyle === undefined) {

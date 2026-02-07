@@ -3043,7 +3043,8 @@ class CustomDialogContentComponent extends ViewPU {
         }
         catch (err) {
             let code = err?.code;
-            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}`);
+            let message = err?.message;	 
+            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
         }
         this.fontSizeScale = this.updateFontScale();
         if (this.controller && this.customStyle === undefined) {
