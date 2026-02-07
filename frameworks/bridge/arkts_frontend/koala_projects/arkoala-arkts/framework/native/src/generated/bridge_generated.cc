@@ -42045,6 +42045,64 @@ KInteropReturnBuffer impl_TextStyle_getFontStyle(Ark_NativePointer thisPtr) {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(TextStyle_getFontStyle, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_TextStyle_getSuperscript(Ark_NativePointer thisPtr) {
+        Ark_TextStyle self = reinterpret_cast<Ark_TextStyle>(thisPtr);
+        const auto &retValue = GetAccessors()->getTextStyleAccessor()->getSuperscript(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(static_cast<Ark_SuperscriptStyle>(retValueTmpValue));
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(TextStyle_getSuperscript, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_TextStyle_getStrokeWidth(Ark_NativePointer thisPtr) {
+        Ark_TextStyle self = reinterpret_cast<Ark_TextStyle>(thisPtr);
+        const auto &retValue = GetAccessors()->getTextStyleAccessor()->getStrokeWidth(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(TextStyle_getStrokeWidth, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_TextStyle_getStrokeColor(Ark_NativePointer thisPtr) {
+        Ark_TextStyle self = reinterpret_cast<Ark_TextStyle>(thisPtr);
+        const auto &retValue = GetAccessors()->getTextStyleAccessor()->getStrokeColor(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            if (retValueTmpValue.selector == 0) {
+                _retSerializer.writeInt8(0);
+                const auto retValueTmpValueForIdx0 = retValueTmpValue.value0;
+                _retSerializer.writeInt32(static_cast<Ark_Color>(retValueTmpValueForIdx0));
+            } else if (retValueTmpValue.selector == 1) {
+                _retSerializer.writeInt8(1);
+                const auto retValueTmpValueForIdx1 = retValueTmpValue.value1;
+                _retSerializer.writeInt32(retValueTmpValueForIdx1);
+            } else if (retValueTmpValue.selector == 2) {
+                _retSerializer.writeInt8(2);
+                const auto retValueTmpValueForIdx2 = retValueTmpValue.value2;
+                _retSerializer.writeString(retValueTmpValueForIdx2);
+            } else if (retValueTmpValue.selector == 3) {
+                _retSerializer.writeInt8(3);
+                const auto retValueTmpValueForIdx3 = retValueTmpValue.value3;
+                Resource_serializer::write(_retSerializer, retValueTmpValueForIdx3);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(TextStyle_getStrokeColor, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_TextTimerController_construct() {
         return GetAccessors()->getTextTimerControllerAccessor()->construct();
 }

@@ -805,6 +805,16 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
     }
 }
 
+void AssignArkValue(Ark_SuperscriptStyle& dst, const SuperscriptStyle& src)
+{
+    switch (src) {
+        case SuperscriptStyle::NORMAL: dst = ARK_SUPERSCRIPT_STYLE_NORMAL; break;
+        case SuperscriptStyle::SUPERSCRIPT: dst = ARK_SUPERSCRIPT_STYLE_SUPERSCRIPT; break;
+        case SuperscriptStyle::SUBSCRIPT: dst = ARK_SUPERSCRIPT_STYLE_SUBSCRIPT; break;
+        default: LOGE("Unexpected enum value in SuperscriptStyle: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
 {
     switch (src) {

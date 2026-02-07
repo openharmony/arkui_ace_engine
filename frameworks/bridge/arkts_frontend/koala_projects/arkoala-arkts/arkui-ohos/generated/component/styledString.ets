@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.dra
 import { default as image } from "@ohos.multimedia.image"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
-import { TextVerticalAlign, TextDirection } from "./textCommon"
+import { TextVerticalAlign, TextDirection, SuperscriptStyle } from "./textCommon"
 import { ShadowOptions_serializer, ShadowOptions, ClickEvent, TouchEvent, ClickEvent_serializer, TouchEvent_serializer } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -1146,6 +1146,9 @@ export class TextStyle implements MaterializedBase {
     readonly fontSize?: double | undefined
     readonly fontWeight?: int32 | undefined
     readonly fontStyle?: FontStyle | undefined
+    readonly superscript?: SuperscriptStyle | undefined
+    readonly strokeWidth?: double | undefined
+    readonly strokeColor?: ResourceColor | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextStyle.getFinalizer())
         this.fontColor = this.getFontColor()
@@ -1153,6 +1156,9 @@ export class TextStyle implements MaterializedBase {
         this.fontSize = this.getFontSize()
         this.fontWeight = this.getFontWeight()
         this.fontStyle = this.getFontStyle()
+        this.superscript = this.getSuperscript()
+        this.strokeWidth = this.getStrokeWidth()
+        this.strokeColor = this.getStrokeColor()
     }
     constructor(value?: TextStyleInterface) {
         this(false, TextStyle.construct(value))
@@ -1187,6 +1193,15 @@ export class TextStyle implements MaterializedBase {
     }
     private getFontStyle(): FontStyle | undefined {
         return this.getFontStyle_serialize()
+    }
+    private getSuperscript(): SuperscriptStyle | undefined {
+        return this.getSuperscript_serialize()
+    }
+    private getStrokeWidth(): double | undefined {
+        return this.getStrokeWidth_serialize()
+    }
+    private getStrokeColor(): ResourceColor | undefined {
+        return this.getStrokeColor_serialize()
     }
     private getFontColor_serialize(): ResourceColor | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_getFontColor(this.peer!.ptr)
@@ -1256,6 +1271,52 @@ export class TextStyle implements MaterializedBase {
         const returnResult : FontStyle | undefined = buffer
         return returnResult
     }
+    private getSuperscript_serialize(): SuperscriptStyle | undefined {
+        const retval  = ArkUIGeneratedNativeModule._TextStyle_getSuperscript(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : SuperscriptStyle | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = SuperscriptStyle.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : SuperscriptStyle | undefined = buffer
+        return returnResult
+    }
+    private getStrokeWidth_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._TextStyle_getStrokeWidth(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private getStrokeColor_serialize(): ResourceColor | undefined {
+        const retval  = ArkUIGeneratedNativeModule._TextStyle_getStrokeColor(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : ResourceColor | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
+            let buffer_ : Color | int32 | string | Resource | undefined
+            if (buffer_UnionSelector == (0).toByte()) {
+                buffer_ = Color.values()[retvalDeserializer.readInt32()]
+            } else if (buffer_UnionSelector == (1).toByte()) {
+                buffer_ = retvalDeserializer.readInt32()
+            } else if (buffer_UnionSelector == (2).toByte()) {
+                buffer_ = (retvalDeserializer.readString() as string)
+            } else if (buffer_UnionSelector == (3).toByte()) {
+                buffer_ = Resource_serializer.read(retvalDeserializer)
+            } else {
+                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+            }
+            buffer = (buffer_ as Color | int32 | string | Resource)
+        }
+        const returnResult : ResourceColor | undefined = buffer
+        return returnResult
+    }
 }
 export class UrlStyleInternal {
     public static fromPtr(ptr: KPointer): UrlStyle {
@@ -1311,6 +1372,9 @@ export interface TextStyleInterface {
     fontSize?: LengthMetrics;
     fontWeight?: int32 | FontWeight | string;
     fontStyle?: FontStyle;
+    superscript?: SuperscriptStyle;
+    strokeWidth?: LengthMetrics;
+    strokeColor?: ResourceColor;
 }
 export interface DecorationStyleInterface {
     type: TextDecorationType | undefined;
@@ -1882,6 +1946,46 @@ export class TextStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSuperscript  = value.superscript
+        if (valueHolderForSuperscript !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSuperscriptTmpValue  = (valueHolderForSuperscript as SuperscriptStyle)
+            valueSerializer.writeInt32(valueHolderForSuperscriptTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStrokeWidth  = value.strokeWidth
+        if (valueHolderForStrokeWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStrokeColor  = value.strokeColor
+        if (valueHolderForStrokeColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
+            if (valueHolderForStrokeColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForStrokeColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx1)
+            } else if (valueHolderForStrokeColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx2  = valueHolderForStrokeColorTmpValue as string
+                valueSerializer.writeString(valueHolderForStrokeColorTmpValueForIdx2)
+            } else if (valueHolderForStrokeColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx3  = valueHolderForStrokeColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
@@ -1948,7 +2052,38 @@ export class TextStyleInterface_serializer {
             fontStyleTmpBuf = FontStyle.fromValue(valueDeserializer.readInt32())
         }
         const fontStyleTmpResult : FontStyle | undefined = fontStyleTmpBuf
-        let value : TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult} as TextStyleInterface)
+        const superscriptTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let superscriptTmpBuf : SuperscriptStyle | undefined = undefined
+        if ((superscriptTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            superscriptTmpBuf = SuperscriptStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const superscriptTmpResult : SuperscriptStyle | undefined = superscriptTmpBuf
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
+        if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
+        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeColorTmpBuf : ResourceColor | undefined = undefined
+        if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const strokeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeColorTmpBuf_ : Color | int32 | string | Resource | undefined
+            if (strokeColorTmpBuf_UnionSelector == (0).toByte()) {
+                strokeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (strokeColorTmpBuf_UnionSelector == (1).toByte()) {
+                strokeColorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (strokeColorTmpBuf_UnionSelector == (2).toByte()) {
+                strokeColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (strokeColorTmpBuf_UnionSelector == (3).toByte()) {
+                strokeColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for strokeColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const strokeColorTmpResult : ResourceColor | undefined = strokeColorTmpBuf
+        let value : TextStyleInterface = ({fontColor: fontColorTmpResult, fontFamily: fontFamilyTmpResult, fontSize: fontSizeTmpResult, fontWeight: fontWeightTmpResult, fontStyle: fontStyleTmpResult, superscript: superscriptTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult} as TextStyleInterface)
         return value
     }
 }

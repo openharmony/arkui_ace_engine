@@ -20386,6 +20386,9 @@ typedef struct Ark_TextStyleInterface {
     Opt_LengthMetrics fontSize;
     Opt_Union_I32_FontWeight_String fontWeight;
     Opt_FontStyle fontStyle;
+    Opt_SuperscriptStyle superscript;
+    Opt_LengthMetrics strokeWidth;
+    Opt_ResourceColor strokeColor;
 } Ark_TextStyleInterface;
 typedef struct Opt_TextStyleInterface {
     Ark_Tag tag;
@@ -31399,6 +31402,9 @@ typedef struct GENERATED_ArkUITextStyleAccessor {
     Opt_Float64 (*getFontSize)(Ark_TextStyle peer);
     Opt_Int32 (*getFontWeight)(Ark_TextStyle peer);
     Opt_FontStyle (*getFontStyle)(Ark_TextStyle peer);
+    Opt_SuperscriptStyle (*getSuperscript)(Ark_TextStyle peer);
+    Opt_Float64 (*getStrokeWidth)(Ark_TextStyle peer);
+    Opt_ResourceColor (*getStrokeColor)(Ark_TextStyle peer);
 } GENERATED_ArkUITextStyleAccessor;
 
 typedef struct GENERATED_ArkUITextTimerControllerAccessor {

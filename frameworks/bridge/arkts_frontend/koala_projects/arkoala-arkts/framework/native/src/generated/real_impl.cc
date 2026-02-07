@@ -19820,6 +19820,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_SuperscriptStyle GetSuperscriptImpl(Ark_TextStyle peer)
+    {
+        return {};
+    }
+    Opt_Float64 GetStrokeWidthImpl(Ark_TextStyle peer)
+    {
+        return {};
+    }
+    Opt_ResourceColor GetStrokeColorImpl(Ark_TextStyle peer)
+    {
+        return {};
+    }
     } // TextStyleAccessor
     namespace TextTimerControllerAccessor {
     void DestroyPeerImpl(Ark_TextTimerController peer)
@@ -24497,6 +24509,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextStyleAccessor::GetFontSizeImpl,
             TextStyleAccessor::GetFontWeightImpl,
             TextStyleAccessor::GetFontStyleImpl,
+            TextStyleAccessor::GetSuperscriptImpl,
+            TextStyleAccessor::GetStrokeWidthImpl,
+            TextStyleAccessor::GetStrokeColorImpl,
         };
         return &TextStyleAccessorImpl;
     }
