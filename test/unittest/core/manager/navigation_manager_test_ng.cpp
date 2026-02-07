@@ -32,6 +32,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char DEST_NAME_BASE[] = "dest";
+constexpr int32_t INVALID_NODE_ID = -1;
 RefPtr<NavigationManager> GetNavigationManager()
 {
     auto pipeline = MockPipelineContext::GetCurrent();
@@ -485,6 +486,7 @@ HWTEST_F(NavigationManagerTestNg, TryFindNewTargetNavigation002, TestSize.Level1
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     ASSERT_NE(navigationPattern, nullptr);
     RunNavigationStackSync(navigationPattern);
+    navigationPattern->pageNode_ = WeakPtr<FrameNode>(navigationNode);
     navigationNode->OnInspectorIdUpdate("TryFindNewTargetNavigation002");
 
     navigationManager->AttachNavigation(navigationNode);
