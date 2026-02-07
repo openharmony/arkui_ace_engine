@@ -269,6 +269,37 @@ HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest002, TestSiz
 }
 
 /**
+ * @tc.name: GetComponentTypeAndPageIdByNodeIdTest001
+ * @tc.desc: Test GetComponentTypeAndPageIdByNodeId when context is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, GetComponentTypeAndPageIdByNodeIdTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin GetComponentTypeAndPageIdByNodeIdTest001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetComponentTypeAndPageIdByNodeId when context is null.
+     */
+    RefPtr<PipelineBase> context = nullptr;
+    GetInfoByNodeId infoOfNode;
+    infoOfNode.componentType = "Stack";
+    infoOfNode.pageId = 666;
+    info.nodeInstanceId = 777;
+    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(-1LL, context, infoOfNode);
+    EXPECT_EQ(infoOfNode.componentType, "Stack");
+    EXPECT_EQ(infoOfNode.pageId, 666);
+    EXPECT_EQ(infoOfNode.nodeInstanceId, 777);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end GetComponentTypeAndPageIdByNodeIdTest001";
+}
+
+/**
  * @tc.name: JsAccessibilityManager007
  * @tc.desc: Test GetUECAccessibilityParentRectInfo
  * @tc.type: FUNC
