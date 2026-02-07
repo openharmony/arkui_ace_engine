@@ -17,7 +17,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk, InteropNativeModule
 } from "@koalaui/interop"
 import { finalizerRegister, int32 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani"
@@ -485,7 +485,9 @@ export class FrameNode implements MaterializedBase {
         }
     }
     public getOpacity(): double {
-        return FrameNodeExtender.getOpacity(this);
+        let opacity: double = FrameNodeExtender.getOpacity(this);
+        opacity = opacity > 1.0 ? 1.0 : opacity;
+        return opacity;
     }
     public getPositionToWindowWithTransform(): NodePosition {
         return FrameNodeExtender.getPositionToWindowWithTransform(this);
