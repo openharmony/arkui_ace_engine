@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -625,7 +625,6 @@ export class TipsDialog extends ViewPU {
                             resourceManager?.getStringSync(125833935)
                     });
                     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-                        console.info(`Accessibility send event`);
                     });
                 } catch (exception) {
                     let code = exception.code;
@@ -1811,7 +1810,6 @@ export class ConfirmDialog extends ViewPU {
                             resourceManager?.getStringSync(125833935)
                     });
                     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-                        console.info(`Accessibility send event`);
                     });
                 } catch (exception) {
                     let code = exception.code;
