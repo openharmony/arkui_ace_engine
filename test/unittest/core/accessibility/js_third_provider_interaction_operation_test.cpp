@@ -162,7 +162,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
         ohAccessibilityProvider, jsAccessibilityManager, frameNode);
 
-    auto ret =jsInteractionOperation->ClearFocusFromProvider();
+    auto ret = jsInteractionOperation->ClearFocusFromProvider();
     jsInteractionOperation->ClearFocus();
     EXPECT_EQ(ret, true);
     EXPECT_EQ(ohAccessibilityProvider->providerMockResult_.receiveClear_, true);
@@ -213,7 +213,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
 /**
  * @tc.name: JsThirdProviderInteractionOperationTest003
- * @tc.desc: earchElementInfosByText
+ * @tc.desc: SearchElementInfosByText
  * @tc.type: FUNC
  */
 HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOperationTest003, TestSize.Level1)
@@ -232,7 +232,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
     int64_t elementId = -1;
     int32_t requestId = 2;
-    std::string& text = TEST_CONTENT_STR;
+    const std::string text = TEST_CONTENT_STR;
     MockAccessibilityElementOperatorCallback operatorCallback;
 
     // 1 provider abnormal, callback should receive same request id and empty infos
@@ -423,7 +423,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
 /**
  * @tc.name: JsThirdProviderInteractionOperationTest008
- * @tc.desc: GetCursorPosition
+ * @tc.desc: SendAccessibilityAsyncEvent
  * @tc.type: FUNC
  */
 HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOperationTest008, TestSize.Level1)
@@ -563,7 +563,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
 /**
  * @tc.name: JsThirdProviderInteractionOperationTest011
- * @tc.desc: HandleEventByFramework ARKUI_ACCESSIBILITY_NATIVE_EVENT_TYPE_FOCUS_NODE_UPDATE
+ * @tc.desc: HandleEventByFramework FOCUS_NODE_UPDATE
  * @tc.type: FUNC
  */
 HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOperationTest011, TestSize.Level1)
@@ -702,8 +702,8 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, FrameNodeAccessibilityVisible0
 HWTEST_F(JsThirdProviderInteractionOperationTest, GetNodeConfig01, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. create jsInteractionOperation.
-    */
+     * @tc.steps: step1. create jsInteractionOperation.
+     */
     auto ohAccessibilityProvider
         = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -716,7 +716,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, GetNodeConfig01, TestSize.Leve
         ohAccessibilityProvider, jsAccessibilityManager, frameNode);
 
     /**
-     * @tc.steps: step2. test func .
+     * @tc.steps: step2. test func.
      */
     Framework::NodeConfig config;
     jsInteractionOperation->GetNodeConfig(config);
@@ -822,7 +822,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
 
 /**
  * @tc.name: FindNativeInfoById001
- * @tc.desc: ClearFocusFromProvider
+ * @tc.desc: FindNativeInfoById
  * @tc.type: FUNC
  */
 HWTEST_F(JsThirdProviderInteractionOperationTest, FindNativeInfoById001, TestSize.Level1)
