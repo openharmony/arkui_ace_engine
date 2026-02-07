@@ -17,6 +17,7 @@
 
 #include "cj_lambda.h"
 
+#include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -48,8 +49,11 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
 
     if (animationValue.tempo.hasValue) {
         float tempo = animationValue.tempo.value;
-        if (NonPositive(tempo)) {
+        if (LessNotEqual(tempo, 0.0f)) {
             tempo = 1.0f;
+        }        
+        if (SystemProperties::GetRosenBackendEnabled() && NearZero(static_cast<double>(tempo))) {
+            result.SetDuration(0);
         }
         result.SetTempo(tempo);
     }
