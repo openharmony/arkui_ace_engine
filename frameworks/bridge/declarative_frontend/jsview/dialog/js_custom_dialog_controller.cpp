@@ -378,6 +378,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -440,6 +441,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     }
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto cancelTask = ([cancelCallback = jsCancelFunction_, node = frameNode]() {
         if (cancelCallback) {
             ACE_SCORING_EVENT("CustomDialog.cancel");

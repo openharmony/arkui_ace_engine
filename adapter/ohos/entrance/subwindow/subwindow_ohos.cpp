@@ -756,6 +756,7 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show tips ng enter, subwindowId: %{public}d", window_->GetWindowId());
     auto popup = popupInfo.popupNode;
     CHECK_NULL_VOID(popup);
+    ACE_UINODE_TRACE(popup);
     auto pattern = popup->GetPattern<NG::BubblePattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->IsTipsAppearing()) {
@@ -1074,6 +1075,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
     auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     auto menuNode = customNode;
+    ACE_UINODE_TRACE(menuNode);
     if (customNode->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
         const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
         CHECK_NULL_VOID(menuViewModifier);
@@ -1120,6 +1122,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     auto menuNode = menuViewModifier->createWithCustomNode(
         customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);

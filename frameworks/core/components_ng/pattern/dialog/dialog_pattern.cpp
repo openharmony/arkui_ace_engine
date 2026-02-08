@@ -128,6 +128,7 @@ void DialogPattern::OnAttachToFrameNodeImpl()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -151,6 +152,7 @@ void DialogPattern::RegisterHoverModeChangeCallback()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        ACE_UINODE_TRACE(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto window = context->GetWindow();
@@ -172,6 +174,7 @@ void DialogPattern::RegisterHoverModeChangeCallback()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto hoverModeCallId = context->RegisterHalfFoldHoverChangedCallback(std::move(hoverModeChangeCallback));
@@ -281,6 +284,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto globalOffset = host->GetPaintRectOffset(false, true);
@@ -317,6 +321,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto overlayManager = GetOverlayManager(host);
     CHECK_NULL_VOID(overlayManager);
 
@@ -513,6 +518,7 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
     CHECK_NULL_RETURN(scroll, nullptr);
+    ACE_UINODE_TRACE(scroll);
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -538,6 +544,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentColumn);
+    ACE_UINODE_TRACE(contentColumn);
     if (!props.title.empty() || !props.subtitle.empty()) {
         auto title = BuildTitle(props);
         CHECK_NULL_VOID(title);
@@ -587,6 +594,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         bool hasTitle = !props.title.empty() || !props.subtitle.empty();
         auto menu = BuildMenu(props.buttons, hasTitle);
         CHECK_NULL_VOID(menu);
+        ACE_UINODE_TRACE(menu);
         menu->MountToParent(contentColumn);
     } else {
         // build buttons
@@ -598,6 +606,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
 
     auto dialog = GetHost();
+    ACE_UINODE_TRACE(dialog);
     contentColumn->MountToParent(dialog);
     AddExtraMaskNode(props);
     UpdateTextFontScale();
@@ -617,6 +626,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
 {
     auto dialog = GetHost();
     CHECK_NULL_VOID(dialog);
+    ACE_UINODE_TRACE(dialog);
     auto pipeline = dialog->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -626,6 +636,7 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);
+        ACE_UINODE_TRACE(extraMaskNode);
         auto extraMaskNodeContext = extraMaskNode->GetRenderContext();
         CHECK_NULL_VOID(extraMaskNodeContext);
         auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
@@ -648,6 +659,7 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     }
     customNode->MountToParent(contentWrapper);
     auto dialog = GetHost();
+    ACE_UINODE_TRACE(dialog);
     contentWrapper->MountToParent(dialog);
     AddExtraMaskNode(props);
 }
@@ -661,6 +673,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
 {
     auto title = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(title);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
@@ -725,6 +738,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
 {
     auto subtitle = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(subtitle);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
@@ -752,6 +766,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     auto subtitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(subtitleRow, nullptr);
+    ACE_UINODE_TRACE(subtitleRow);
     auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(subtitleRowProps, nullptr);
     subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
@@ -791,6 +806,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     // Make Content node
     auto contentNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(contentNode);
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
     // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
@@ -845,6 +861,7 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
     auto closeCallback = [weak = WeakClaim(RawPtr(host)), buttonIdx](GestureEvent& /*info*/) {
         auto dialog = weak.Upgrade();
         CHECK_NULL_VOID(dialog);
+        ACE_UINODE_TRACE(dialog);
         dialog->GetPattern<DialogPattern>()->PopDialog(buttonIdx);
     };
 
@@ -903,6 +920,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
+    ACE_UINODE_TRACE(buttonNode);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
     // parse button text color and background color
     std::string textColor;
@@ -979,6 +997,7 @@ void DialogPattern::RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<Fr
             event.action == KeyAction::DOWN) {
             auto dialog = weak.Upgrade();
             CHECK_NULL_RETURN(dialog, false);
+            ACE_UINODE_TRACE(dialog);
             if (params.action) {
                 auto actionFunc = params.action->GetGestureEventFunc();
                 GestureEvent info;
@@ -1112,6 +1131,7 @@ void DialogPattern::AddButtonAndDivider(
         }
         auto buttonNode = CreateButton(buttons[i], i, false, isVertical, length);
         CHECK_NULL_VOID(buttonNode);
+        ACE_UINODE_TRACE(buttonNode);
         auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(buttonPattern);
         buttonPattern->SetSkipColorConfigurationUpdate();
@@ -1291,11 +1311,13 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 {
     auto menu = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
+    ACE_UINODE_TRACE(menu);
     menuNode_ = menu;
     // column -> button
     const size_t size = buttons.size();
     for (size_t i = 0; i < size; ++i) {
         RefPtr<FrameNode> button;
+        ACE_UINODE_TRACE(button);
         uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
             button = CreateButton(buttons[i], i, false, isSuitableForElderly_, size);
@@ -1662,6 +1684,7 @@ void DialogPattern::UpdateButtonsProperty()
             if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
                 continue;
             }
+            ACE_UINODE_TRACE(buttonNode);
             auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
             UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
             ++btnIndex;
@@ -1732,6 +1755,7 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_RETURN(buttonNode, false);
+            ACE_UINODE_TRACE(buttonNode);
             auto buttonTextNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
             CHECK_NULL_RETURN(buttonTextNode, false);
             auto textGeometryNode = buttonTextNode->GetGeometryNode();
@@ -1881,6 +1905,7 @@ void DialogPattern::UpdateTextFontScale()
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
+            ACE_UINODE_TRACE(buttonNode);
             auto buttonTextNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
             CHECK_NULL_VOID(buttonTextNode);
             auto textProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());

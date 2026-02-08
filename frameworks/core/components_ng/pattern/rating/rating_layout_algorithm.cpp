@@ -23,6 +23,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
+    ACE_UINODE_TRACE(host);
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
@@ -80,6 +81,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     BoxLayoutAlgorithm::Layout(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
 

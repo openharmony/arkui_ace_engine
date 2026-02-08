@@ -60,6 +60,7 @@ void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(toastPattern);
     auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
@@ -111,6 +112,7 @@ void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(toastProps);
     auto toastNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(toastNode);
+    ACE_UINODE_TRACE(toastNode);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(toastPattern);
     toastPattern->InitWrapperRect(layoutWrapper, toastProps);
@@ -138,6 +140,7 @@ LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* l
     layoutConstraint = toastLayoutProperty->CreateChildConstraint();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, layoutConstraint);
+    ACE_UINODE_TRACE(frameNode);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();
     CHECK_NULL_RETURN(toastPattern, layoutConstraint);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);

@@ -311,6 +311,7 @@ void MenuItemPattern::UpdateLeftRow(RefPtr<FrameNode>& leftRow)
     }
     UpdateIcon(leftRow, true);
     auto menuNode = GetMenu();
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     UpdateText(leftRow, menuProperty, false);
 
@@ -324,6 +325,7 @@ void MenuItemPattern::UpdateRightRow(RefPtr<FrameNode>& rightRow)
 {
     CHECK_NULL_VOID(rightRow);
     auto menuNode = GetMenu();
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     UpdateText(rightRow, menuProperty, true);
     UpdateIcon(rightRow, false);
@@ -542,6 +544,7 @@ void MenuItemPattern::HandleFocusEvent()
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
     auto menuNode = GetMenu();
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     UpdateText(leftRow, menuProperty, false);
 }
@@ -569,6 +572,7 @@ void MenuItemPattern::HandleBlurEvent()
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
     auto menuNode = GetMenu();
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     UpdateText(leftRow, menuProperty, false);
 }
@@ -629,6 +633,7 @@ RefPtr<FrameNode> MenuItemPattern::GetMenu(bool needTopMenu)
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
     RefPtr<FrameNode> menuNode = nullptr;
+    ACE_UINODE_TRACE(menuNode);
     while (parent) {
         if (parent->GetTag() == MENU_ETS_TAG) {
             menuNode = AceType::DynamicCast<FrameNode>(parent);
@@ -646,6 +651,7 @@ RefPtr<FrameNode> MenuItemPattern::GetMenu(bool needTopMenu)
 RefPtr<MenuPattern> MenuItemPattern::GetMenuPattern(bool needTopMenu)
 {
     auto menu = GetMenu(needTopMenu);
+    ACE_UINODE_TRACE(menu);
     if (!menu) {
         return nullptr;
     }
@@ -658,6 +664,7 @@ void MenuItemPattern::CleanParentMenuItemBgColor()
     CHECK_NULL_VOID(host);
     auto menu = GetMenu(true);
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     SetBgBlendColor(Color::TRANSPARENT);
@@ -680,6 +687,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto customNode = BuildSubMenuCustomNode();
@@ -936,6 +944,7 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     isExpanded_ = !isExpanded_;
@@ -957,6 +966,7 @@ void MenuItemPattern::HideEmbedded(bool isNeedAnimation)
     isExpanded_ = false;
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     CHECK_NULL_VOID(embeddedMenu_);
@@ -1397,6 +1407,7 @@ bool MenuItemPattern::OnClick()
     }
     auto menuNode = GetMenu();
     CHECK_NULL_RETURN(menuNode, false);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, false);
     auto lastSelectedItem = menuPattern->GetLastSelectedItem();
@@ -1454,6 +1465,7 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     CHECK_NULL_VOID(props);
     auto menu = GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto parent = AceType::DynamicCast<UINode>(host->GetParent());
@@ -1547,6 +1559,7 @@ void MenuItemPattern::OnHover(bool isHover)
     } else {
         auto menu = GetMenu(false);
         CHECK_NULL_VOID(menu);
+        ACE_UINODE_TRACE(menu);
         auto menuPattern = menu->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         auto props = GetPaintProperty<MenuItemPaintProperty>();
@@ -2092,6 +2105,7 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& row)
         CHECK_NULL_VOID(expandIcon_);
     }
     auto menuNode = GetMenu();
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(menuProperty);
     auto symbol = menuProperty->GetExpandSymbol();
@@ -2135,6 +2149,7 @@ bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
     CHECK_NULL_RETURN(host, false);
     auto menuNode = GetMenu();
     CHECK_NULL_RETURN(menuNode, false);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, false);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -2281,6 +2296,7 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     menuItemProps.content = content;
     auto menu = GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     auto symbol = menuProperty->GetExpandSymbol();
@@ -2568,6 +2584,7 @@ void MenuItemPattern::UpdateTextNodes()
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
@@ -2746,6 +2763,7 @@ void MenuItemPattern::ModifyDivider()
 {
     auto menu = GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     auto divider = menuProperty->GetItemDivider();
@@ -3187,6 +3205,7 @@ bool MenuItemPattern::OnSelectProcess()
     CHECK_NULL_RETURN(overlayManager, false);
     auto menu = GetMenuWeak().Upgrade();
     CHECK_NULL_RETURN(menu, false);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, false);
     if (!blockClick_) {
@@ -3576,6 +3595,7 @@ void MenuItemPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     auto pipeline = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -3616,6 +3636,7 @@ void MenuItemPattern::UpdateOptionStyle()
     CHECK_NULL_VOID(host);
 
     auto menuNode = GetMenuWeak().Upgrade();
+    ACE_UINODE_TRACE(menuNode);
     if (!menuNode) {
         TAG_LOGW(AceLogTag::ACE_MENU, "GetMenuWeak null");
         menuNode = GetMenu();

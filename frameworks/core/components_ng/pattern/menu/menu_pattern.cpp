@@ -199,6 +199,7 @@ void MenuPattern::OnAttachToFrameNode()
                                               const OffsetF& /* origin */) {
         auto menuNode = menuNodeWk.Upgrade();
         CHECK_NULL_VOID(menuNode);
+        ACE_UINODE_TRACE(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         auto menuWarpper = menuPattern->GetMenuWrapper();
@@ -1100,6 +1101,7 @@ void MenuPattern::HideStackMenu() const
     }
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapper->GetFirstChild());
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     ShowStackMenuDisappearAnimation(menuNode, host, option);
 }
 
@@ -1261,6 +1263,7 @@ RefPtr<FrameNode> MenuPattern::GetMenuColumn() const
 {
     auto menu = GetHost();
     CHECK_NULL_RETURN(menu, nullptr);
+    ACE_UINODE_TRACE(menu);
     auto scroll = menu->GetChildren().front();
     CHECK_NULL_RETURN(scroll, nullptr);
     auto column = scroll->GetChildren().front();
