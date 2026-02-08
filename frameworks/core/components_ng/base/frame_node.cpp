@@ -510,6 +510,9 @@ FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
+    if (isRoot) {
+        isPendingState_ = true;
+    }
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
     if (IsFree()) {
@@ -2883,18 +2886,17 @@ void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChi
             oldChildrenSet.emplace(AceType::RawPtr(child));
         }
     }
-    bool isOnMainTree = renderContext_->IsOnRenderTree();
     for (const auto& item: newChildren) {
         auto* childPtr = AceType::RawPtr(item);
         if (oldChildrenSet.find(childPtr) == oldChildrenSet.end()) {
-            item->AttachToRenderTree(isOnMainTree);
+            item->AttachToRenderTree(isPendingState_);
         } else {
             oldChildrenSet.erase(childPtr);
         }
     }
 
     for (auto* item : oldChildrenSet) {
-        item->DetachFromRenderTree(isOnMainTree);
+        item->DetachFromRenderTree(isPendingState_);
     }
 }
 
