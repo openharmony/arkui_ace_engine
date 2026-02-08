@@ -43,6 +43,7 @@
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
@@ -396,6 +397,24 @@ void SetParallelScoped(ani_boolean parallel)
 {
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
     MultiThreadBuildManager::SetIsParallelizeUI(parallel);
+}
+
+void CheckThreadValid(ani_boolean checkUIThread, ani_long node)
+{
+    if (checkUIThread) {
+        if (!MultiThreadBuildManager::CheckOnUIThread()) {
+            OHOS::Ace::NG::AccessorUtils::ThrowTSException(
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on main thread.");
+        }
+    } else {
+        auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
+        CHECK_NULL_VOID(frameNodePeer);
+        auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+        if (!MultiThreadBuildManager::CheckNodeOnValidThread(AceType::RawPtr(frameNode))) {
+            OHOS::Ace::NG::AccessorUtils::ThrowTSException(
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on valid thread.");
+        }
+    }
 }
 
 static void SetCustomPropertyCallBack(ArkUINodeHandle node, std::function<void()>&& func,
@@ -1118,6 +1137,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
         .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
         .setParallelScoped = OHOS::Ace::NG::SetParallelScoped,
+        .checkThreadValid = OHOS::Ace::NG::CheckThreadValid,
         .setCustomPropertyCallBack = OHOS::Ace::NG::SetCustomPropertyCallBack,
         .getCustomProperty = OHOS::Ace::NG::GetCustomProperty,
         .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent,

@@ -988,6 +988,15 @@ void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
     modifier->getCommonAniModifier()->setParallelScoped(parallel);
 }
 
+void CheckThreadValid(ani_env* env, ani_object obj, ani_boolean checkUIThread, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier()) {
+        return;
+    }
+    modifier->getCommonAniModifier()->checkThreadValid(checkUIThread, node);
+}
+
 void ConvertRemoveCallbackFun(
     ani_vm* vm, std::function<void()>& callback, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {

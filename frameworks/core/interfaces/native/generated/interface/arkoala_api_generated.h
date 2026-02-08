@@ -29205,7 +29205,7 @@ typedef struct GENERATED_ArkUIForEachOpsAccessor {
 } GENERATED_ArkUIForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
-    Ark_NativePointer (*constructorFrameNode)();
+    Ark_NativePointer (*constructorFrameNode)(Ark_Boolean supportMultiThread);
     Ark_NativePointer (*getDestroy)();
     void (*destroyPeer)(Ark_FrameNode peer);
     Ark_Boolean (*isModifiable)(Ark_NativePointer peer);
@@ -29289,7 +29289,8 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Array_Float64 (*getNodePropertyValue)(Ark_FrameNode peer,
                                           Ark_AnimationPropertyType property);
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
-    Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type);
+    Ark_NativePointer (*createTypedFrameNode)(const Ark_String* type,
+                                              Ark_Boolean supportMultiThread);
     Ark_NativePointer (*createByRawPtr)(Ark_NativePointer ptr);
     Ark_NativePointer (*unWrapRawPtr)(Ark_NativePointer ptr);
     Ark_UICommonEvent (*getCommonEvent)(Ark_NativePointer peer);
