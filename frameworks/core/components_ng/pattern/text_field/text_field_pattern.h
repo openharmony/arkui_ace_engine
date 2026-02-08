@@ -108,6 +108,12 @@ enum class InputOperation {
     SET_PREVIEW_TEXT,
     SET_PREVIEW_FINISH,
     INPUT,
+    CARET_SET,
+};
+
+struct CaretSetInfo {
+    int32_t pos;
+    std::string text;
 };
 
 struct PasswordModeStyle {
@@ -1236,6 +1242,7 @@ public:
         return isFillRequestFinish_;
     }
 
+    void ProcessPendingCaretEvent();
     bool IsNormalInlineState() const;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
@@ -2167,7 +2174,7 @@ private:
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;
-
+    std::optional<CaretSetInfo> pendingCaretInfo_;
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     // inline
@@ -2200,6 +2207,7 @@ private:
 
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
+    std::queue<CaretSetInfo> caretMoveOperation_;
     std::queue<InsertCommandInfo> insertCommands_;
     std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
