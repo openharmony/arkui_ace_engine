@@ -22,9 +22,9 @@
 
 namespace OHOS::Ace::Napi {
 namespace {
-static constexpr uint32_t MIN_INTERVAL_VALUE = 180;
-static constexpr uint32_t MIN_LUMINANCE_VALUE = 0;
-static constexpr uint32_t MAX_LUMINANCE_VALUE = 255;
+static constexpr int32_t MIN_INTERVAL_VALUE = 180;
+static constexpr int32_t MIN_LUMINANCE_VALUE = 0;
+static constexpr int32_t MAX_LUMINANCE_VALUE = 255;
 } // namespace
 #define GET_PARAMS(env, info, max) \
     size_t argc = max;             \

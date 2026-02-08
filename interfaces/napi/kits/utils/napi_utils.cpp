@@ -837,7 +837,7 @@ bool ParseLengthMetricValue(napi_env env, napi_value value, CalcDimension& dimen
 
             if (valType == napi_number && unitType == napi_number &&
                 napi_get_value_double(env, objValue, &val) == napi_ok &&
-                napi_get_value_int32(env, objUnit, &unit) == napi_ok && GreatOrEqual(val, 0.0f)) {
+                napi_get_value_int32(env, objUnit, &unit) == napi_ok) {
                 dimension.SetValue(val);
                 dimension.SetUnit(static_cast<DimensionUnit>(unit));
                 return true;
