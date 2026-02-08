@@ -1192,6 +1192,12 @@ void RadioPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void RadioPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    InitDefaultMargin();
+}
+
 int32_t RadioPattern::OnInjectionEvent(const std::string& command)
 {
     auto json = JsonUtil::ParseJsonString(command);
