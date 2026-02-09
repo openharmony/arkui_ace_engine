@@ -82,7 +82,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isModal_ && !isShowInSubWindow_;
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
-    needAdaptFoceSplitMode_ = pipeline->IsCurrentInforceSplitMode() && !IsEmbeddedDialog(hostNode);
+    needAdaptForceSplitMode_ = pipeline->IsCurrentInforceSplitMode() && !IsEmbeddedDialog(hostNode);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
@@ -109,7 +109,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
     ResizeDialogSubwindow(dialogPattern->IsShowInFreeMultiWindow(), isShowInSubWindow_, isShowInFloatingWindow_);
     auto layoutConstraint = dialogProp->GetLayoutConstraint();
-    if (needAdaptFoceSplitMode_) {
+    if (needAdaptForceSplitMode_) {
         layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() / HALF);
         layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() / HALF);
     }
@@ -168,7 +168,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        float widthRatio = needAdaptFoceSplitMode_ ?
+        float widthRatio = needAdaptForceSplitMode_ ?
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
         childLayoutConstraint.maxSize.SetWidth(widthRatio);
