@@ -23,6 +23,17 @@
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_NavPathInfo& dst,
+    const RefPtr<OHOS::Ace::NG::GeneratedModifier::NavigationContext::JSNavPathInfoStatic>& src, ConvContext *ctx)
+{
+    CHECK_NULL_VOID(src);
+    OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo info(src->GetName(), src->GetParam(), src->GetOnPop(),
+                                                                       src->GetIsEntry());
+    AssignArkValue(dst, info);
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
 void DestroyPeerImpl(Ark_NavPathStack peer)
@@ -646,6 +657,48 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
             }
             callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
+        };
+    }
+    if (interception->interception.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        result->interception = [callback = CallbackHelper(interception->interception.value),
+                                curStack = AceType::WeakClaim(AceType::RawPtr(pathStack))](
+                                   const RefPtr<NG::NavigationStack> &stack,
+                                   const RefPtr<NG::NavDestinationContext> &from, const int32_t index,
+                                   bool isAnimated) {
+            Ark_Union_NavPathInfo_NavBar tempfrom;
+            auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
+            if (!preDestination) {
+                tempfrom = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_String>("navbar");
+            } else {
+                tempfrom = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_NavPathInfo>(
+                    AceType::DynamicCast<NavigationContext::JSNavPathInfoStatic>(from->GetNavPathInfo()));
+            }
+
+            auto navStack = AceType::DynamicCast<NG::GeneratedModifier::NavigationContext::NavigationStack>(stack);
+            CHECK_NULL_VOID(navStack);
+            auto pathStack = Converter::ArkValue<Ark_NavPathStack>(navStack);
+
+            auto curPathStack = curStack.Upgrade();
+            CHECK_NULL_VOID(curPathStack);
+
+            Ark_Union_NavPathInfo_NavBar tempto;
+            auto pathInfo = curPathStack->PathStack::GetPathInfo(index);
+            if (!pathInfo) {
+                tempto = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_String>("navbar");
+            } else {
+                tempto = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_NavPathInfo>(*pathInfo);
+            }
+            NG::NavigationOperation operation;
+            auto replaceValue = curPathStack->PathStack::GetIsReplace();
+            if (replaceValue != 0) {
+                operation = NG::NavigationOperation::REPLACE;
+            } else {
+                operation = NG::NavigationOperation::PUSH;
+            }
+
+            auto animated = curPathStack->PathStack::GetIsAnimated();
+            callback.InvokeSync(tempfrom, tempto, pathStack, Converter::ArkValue<Ark_NavigationOperation>(operation),
+                Converter::ArkValue<Ark_Boolean>(animated));
         };
     }
     pathStack->NavigationContext::PathStack::SetInterception(result);

@@ -17,10 +17,12 @@
 #include "nav_destination_context_peer.h"
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_model_static.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #if !defined(PREVIEW)
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #endif
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -62,40 +64,31 @@ void SetNavDestinationBuilderCallbackImpl(Ark_NativePointer ptr,
     CHECK_NULL_VOID(frameNode);
     auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
-    auto navigationStack = AceType::DynamicCast<NavigationContext::NavigationStack>(navigationPattern->GetNavigationStack());
+    auto navigationStack =
+        AceType::DynamicCast<NavigationContext::NavigationStack>(navigationPattern->GetNavigationStack());
     CHECK_NULL_VOID(navigationStack);
-    auto builderCallback = [loaderCallback = CallbackHelper(*callback), stack = AceType::WeakClaim(AceType::RawPtr(navigationStack))](int32_t index) -> RefPtr<UINode> {
-        auto navigationStack = stack.Upgrade();
-        if (!navigationStack) {
-            return nullptr;
-        }
-        auto name = navigationStack->GetNameByIndex(index);
+    auto builderCallback = [loaderCallback = CallbackHelper(*callback)](const std::string& name, Opt_Object param) {
         Ark_String nameVal = Converter::ArkValue<Ark_String>(name, Converter::FC);
-        auto paramVal = navigationStack->GetParamByIndex(index);
-        Opt_Object param = {
-            .tag = InteropTag::INTEROP_TAG_UNDEFINED
-        };
-        if (paramVal) {
-            param = paramVal->data_;
-        }
         return loaderCallback.BuildSync(nameVal, param);
     };
     navigationStack->SetNavDestinationBuilder(std::move(builderCallback));
 }
 
-void SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
-                                         const NavExtender_CreateNavDestination* callback)
+void SetNavDestinationRouterMapBuilderCallbackImpl(Ark_NativePointer navigation,
+    const NavExtender_PageMapNodeBuilder* callback)
 {
-    CHECK_NULL_VOID(peer);
-    auto navigationStack = peer->GetNavPathStack();
+    auto frameNode = reinterpret_cast<FrameNode*>(navigation);
+    CHECK_NULL_VOID(frameNode);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto navigationStack =
+        AceType::DynamicCast<NavigationContext::NavigationStack>(navigationPattern->GetNavigationStack());
     CHECK_NULL_VOID(navigationStack);
-    auto stack = AceType::DynamicCast<Nav::NavigationStack>(navigationStack);
-    CHECK_NULL_VOID(stack);
-    auto creater = [callback = CallbackHelper(*callback)](int32_t index) -> RefPtr<NG::UINode> {
-        auto node = callback.InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(index);
-        return Referenced::Claim(reinterpret_cast<UINode*>(node));
+    auto builderCallback = [loaderCallback = CallbackHelper(*callback)](const std::string& name, Opt_Object param) {
+        Ark_String nameVal = Converter::ArkValue<Ark_String>(name, Converter::FC);
+        return loaderCallback.BuildSync(nameVal, param);
     };
-    stack->SetCreateNavDestinationCallback(std::move(creater));
+    navigationStack->SetNavDestinationRouterMapBuilder(std::move(builderCallback));
 }
 
 void SyncStackImpl(Ark_NavPathStack peer)
@@ -237,6 +230,15 @@ Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
     }
     return Converter::ArkValue<Array_String>(result, Converter::FC);
 }
+void SetSplitPlaceholderImpl(Ark_NativePointer navigation, Ark_NativePointer placeholderNode)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(navigation);
+    CHECK_NULL_VOID(frameNode);
+    auto* phNodePeer = reinterpret_cast<FrameNodePeer*>(placeholderNode);
+    CHECK_NULL_VOID(phNodePeer);
+    auto phNodeRef = FrameNodePeer::GetFrameNodeByPeer(phNodePeer);
+    NavigationModelStatic::SetSplitPlaceholder(frameNode, phNodeRef);
+}
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
 {
@@ -253,8 +255,9 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::GetIdByNameImpl,
         NavExtenderAccessor::PopToIndexImpl,
         NavExtenderAccessor::PopToNameImpl,
-        NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
+        NavExtenderAccessor::SetNavDestinationRouterMapBuilderCallbackImpl,
         NavExtenderAccessor::GetRouteMapInConfigImpl,
+        NavExtenderAccessor::SetSplitPlaceholderImpl,
     };
     return &NavExtenderAccessorImpl;
 }

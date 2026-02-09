@@ -4159,9 +4159,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // NavigationModifier
     namespace NavigationInterfaceModifier {
-    void SetNavigationOptionsImpl(Ark_NativePointer node,
-                                  const Opt_NavPathStack* pathInfos,
-                                  const Opt_NavigationModuleInfo* moduleInfo)
+    void SetNavigationOptions0Impl(Ark_NativePointer node,
+                                   const Opt_NavPathStack* pathInfos,
+                                   const Opt_NavigationModuleInfo* moduleInfo)
+    {
+    }
+    void SetNavigationOptions1Impl(Ark_NativePointer node,
+                                   const Opt_NavPathStack* pathInfos,
+                                   const Opt_HomePathInfo* homeDestination,
+                                   const Opt_NavigationModuleInfo* moduleInfo)
     {
     }
     } // NavigationInterfaceModifier
@@ -9796,7 +9802,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
             NavigationModifier::ConstructImpl,
-            NavigationInterfaceModifier::SetNavigationOptionsImpl,
+            NavigationInterfaceModifier::SetNavigationOptions0Impl,
+            NavigationInterfaceModifier::SetNavigationOptions1Impl,
             NavigationAttributeModifier::SetNavBarWidthImpl,
             NavigationAttributeModifier::SetNavBarPositionImpl,
             NavigationAttributeModifier::SetNavBarWidthRangeImpl,
@@ -16669,13 +16676,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    void SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
-                                             const NavExtender_CreateNavDestination* callback)
+    void SetNavDestinationRouterMapBuilderCallbackImpl(Ark_NativePointer navigation,
+                                                       const NavExtender_PageMapNodeBuilder* callback)
     {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
     }
     Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
     {
         return {};
+    }
+    void SetSplitPlaceholderImpl(Ark_NativePointer navigation,
+                                 Ark_NativePointer placeholderNode)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
     }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
@@ -23173,6 +23188,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::PopToNameImpl,
             NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
             NavExtenderAccessor::GetRouteMapInConfigImpl,
+            NavExtenderAccessor::SetSplitPlaceholderImpl,
         };
         return &NavExtenderAccessorImpl;
     }

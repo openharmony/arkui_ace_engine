@@ -4001,6 +4001,28 @@ void callManagedCallback_RouterCallbackInfo_VoidSync(Ark_VMContext vmContext, Ar
     RouterCallbackInfo_serializer::write(argsSerializer, value0);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
+void callManagedCallback_ScrollState_Void(Ark_Int32 resourceId, Ark_ScrollState value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_ScrollState_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(static_cast<Ark_ScrollState>(value0));
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_ScrollState_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ScrollState value0)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_ScrollState_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(static_cast<Ark_ScrollState>(value0));
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCallback_SheetDismiss_Void(Ark_Int32 resourceId, Ark_SheetDismiss sheetDismiss)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -5941,6 +5963,68 @@ void callManagedImageOnCompleteCallbackSync(Ark_VMContext vmContext, Ark_Int32 r
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedInterceptionCallback(Ark_Int32 resourceId, Ark_Union_NavPathInfo_NavBar from, Ark_Union_NavPathInfo_NavBar to, Ark_NavPathStack pathStack, Ark_NavigationOperation operation, Ark_Boolean isAnimated)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_InterceptionCallback);
+    argsSerializer.writeInt32(resourceId);
+    if (from.selector == 0) {
+        argsSerializer.writeInt8(0);
+        const auto fromForIdx0 = from.value0;
+        NavPathInfo_serializer::write(argsSerializer, fromForIdx0);
+    } else if (from.selector == 1) {
+        argsSerializer.writeInt8(1);
+        const auto fromForIdx1 = from.value1;
+        argsSerializer.writeString(fromForIdx1);
+    }
+    if (to.selector == 0) {
+        argsSerializer.writeInt8(0);
+        const auto toForIdx0 = to.value0;
+        NavPathInfo_serializer::write(argsSerializer, toForIdx0);
+    } else if (to.selector == 1) {
+        argsSerializer.writeInt8(1);
+        const auto toForIdx1 = to.value1;
+        argsSerializer.writeString(toForIdx1);
+    }
+    NavPathStack_serializer::write(argsSerializer, pathStack);
+    argsSerializer.writeInt32(static_cast<Ark_NavigationOperation>(operation));
+    argsSerializer.writeBoolean(isAnimated);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedInterceptionCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Union_NavPathInfo_NavBar from, Ark_Union_NavPathInfo_NavBar to, Ark_NavPathStack pathStack, Ark_NavigationOperation operation, Ark_Boolean isAnimated)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_InterceptionCallback);
+    argsSerializer.writeInt32(resourceId);
+    if (from.selector == 0) {
+        argsSerializer.writeInt8(0);
+        const auto fromForIdx0 = from.value0;
+        NavPathInfo_serializer::write(argsSerializer, fromForIdx0);
+    } else if (from.selector == 1) {
+        argsSerializer.writeInt8(1);
+        const auto fromForIdx1 = from.value1;
+        argsSerializer.writeString(fromForIdx1);
+    }
+    if (to.selector == 0) {
+        argsSerializer.writeInt8(0);
+        const auto toForIdx0 = to.value0;
+        NavPathInfo_serializer::write(argsSerializer, toForIdx0);
+    } else if (to.selector == 1) {
+        argsSerializer.writeInt8(1);
+        const auto toForIdx1 = to.value1;
+        argsSerializer.writeString(toForIdx1);
+    }
+    NavPathStack_serializer::write(argsSerializer, pathStack);
+    argsSerializer.writeInt32(static_cast<Ark_NavigationOperation>(operation));
+    argsSerializer.writeBoolean(isAnimated);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedInterceptionModeCallback(Ark_Int32 resourceId, Ark_NavigationMode mode)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -6217,33 +6301,6 @@ void callManagedNavDestinationTransitionDelegateSync(Ark_VMContext vmContext, Ar
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
-}
-void callManagedNavExtender_CreateNavDestination(Ark_Int32 resourceId, Ark_Int32 index, Callback_Pointer_Void continuation)
-{
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_NavExtender_CreateNavDestination);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(index);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    enqueueCallback(10, &callbackBuffer);
-}
-void callManagedNavExtender_CreateNavDestinationSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Callback_Pointer_Void continuation)
-{
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
-    argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_NavExtender_CreateNavDestination);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(index);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
 void callManagedNavExtender_OnUpdateStack(Ark_Int32 resourceId)
 {
@@ -9475,6 +9532,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_RichEditorSelection_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorSelection_Void);
         case Kind_Callback_RichEditorTextSpanResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorTextSpanResult_Void);
         case Kind_Callback_RouterCallbackInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RouterCallbackInfo_Void);
+        case Kind_Callback_ScrollState_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ScrollState_Void);
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_Void);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_Void);
         case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_Void);
@@ -9539,6 +9597,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_ImageCompleteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageCompleteCallback);
         case Kind_ImageErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageErrorCallback);
         case Kind_ImageOnCompleteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageOnCompleteCallback);
+        case Kind_InterceptionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedInterceptionCallback);
         case Kind_InterceptionModeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedInterceptionModeCallback);
         case Kind_InterceptionShowCallback: return reinterpret_cast<Ark_NativePointer>(callManagedInterceptionShowCallback);
         case Kind_LoadingProgressModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedLoadingProgressModifierBuilder);
@@ -9548,7 +9607,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_ModifierKeyStateGetter: return reinterpret_cast<Ark_NativePointer>(callManagedModifierKeyStateGetter);
         case Kind_MouseInfoCallback: return reinterpret_cast<Ark_NativePointer>(callManagedMouseInfoCallback);
         case Kind_NavDestinationTransitionDelegate: return reinterpret_cast<Ark_NativePointer>(callManagedNavDestinationTransitionDelegate);
-        case Kind_NavExtender_CreateNavDestination: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_CreateNavDestination);
         case Kind_NavExtender_OnUpdateStack: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_OnUpdateStack);
         case Kind_NavExtender_PageMapNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_PageMapNodeBuilder);
         case Kind_OnAdsBlockedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAdsBlockedCallback);
@@ -9833,6 +9891,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_RichEditorSelection_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorSelection_VoidSync);
         case Kind_Callback_RichEditorTextSpanResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorTextSpanResult_VoidSync);
         case Kind_Callback_RouterCallbackInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RouterCallbackInfo_VoidSync);
+        case Kind_Callback_ScrollState_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ScrollState_VoidSync);
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_VoidSync);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_VoidSync);
         case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_VoidSync);
@@ -9897,6 +9956,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_ImageCompleteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageCompleteCallbackSync);
         case Kind_ImageErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageErrorCallbackSync);
         case Kind_ImageOnCompleteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageOnCompleteCallbackSync);
+        case Kind_InterceptionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedInterceptionCallbackSync);
         case Kind_InterceptionModeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedInterceptionModeCallbackSync);
         case Kind_InterceptionShowCallback: return reinterpret_cast<Ark_NativePointer>(callManagedInterceptionShowCallbackSync);
         case Kind_LoadingProgressModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedLoadingProgressModifierBuilderSync);
@@ -9906,7 +9966,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_ModifierKeyStateGetter: return reinterpret_cast<Ark_NativePointer>(callManagedModifierKeyStateGetterSync);
         case Kind_MouseInfoCallback: return reinterpret_cast<Ark_NativePointer>(callManagedMouseInfoCallbackSync);
         case Kind_NavDestinationTransitionDelegate: return reinterpret_cast<Ark_NativePointer>(callManagedNavDestinationTransitionDelegateSync);
-        case Kind_NavExtender_CreateNavDestination: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_CreateNavDestinationSync);
         case Kind_NavExtender_OnUpdateStack: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_OnUpdateStackSync);
         case Kind_NavExtender_PageMapNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedNavExtender_PageMapNodeBuilderSync);
         case Kind_OnAdsBlockedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnAdsBlockedCallbackSync);

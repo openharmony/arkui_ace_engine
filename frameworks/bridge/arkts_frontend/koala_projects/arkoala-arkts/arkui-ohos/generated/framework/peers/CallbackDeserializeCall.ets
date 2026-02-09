@@ -58,7 +58,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, InnerGestureTriggerInfo_serializer, Event_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, GestureSwipeHandler, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, InnerGestureTriggerInfo_serializer, Event_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, GestureSwipeHandler, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
@@ -1702,6 +1702,12 @@ export function deserializeAndCallRouter_BusinessError_Void(thisDeserializer: De
     let message : string = (thisDeserializer.readString() as string)
     _call(code, message)
 }
+export function deserializeAndCallCallback_ScrollState_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: ScrollState) => void))
+    let value0 : ScrollState = ScrollState.fromValue(thisDeserializer.readInt32())
+    _call(value0)
+}
 export function deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((sheetDismiss: SheetDismiss) => void))
@@ -2582,28 +2588,6 @@ export function deserializeAndCallNavDestinationTransitionDelegate(thisDeseriali
     resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
     let continuationResult : ((value: Array<NavDestinationTransition> | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(operation, isEnter)
-    continuationResult(_callResult)
-}
-export function deserializeAndCallNavExtender_CreateNavDestination(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as NavExtender_CreateNavDestination)
-    let index : int32 = thisDeserializer.readInt32()
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    const continuationBufferClosure  = (value: KPointer):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
-    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
-    const _callResult  = _call(index)
     continuationResult(_callResult)
 }
 export function deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer: DeserializerBase): void {
@@ -4230,6 +4214,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_RouterCallbackInfo_Void: return deserializeAndCallCallback_RouterCallbackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Router_BusinessError_Void: return deserializeAndCallRouter_BusinessError_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ScrollState_Void: return deserializeAndCallCallback_ScrollState_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_SheetDismiss_Void: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_SheetType_Void: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Size_Void: return deserializeAndCallCallback_Size_Void(thisDeserializer);
@@ -4303,7 +4288,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_ModifierKeyStateGetter: return deserializeAndCallModifierKeyStateGetter(thisDeserializer);
         case CallbackKind.Kind_MouseInfoCallback: return deserializeAndCallMouseInfoCallback(thisDeserializer);
         case CallbackKind.Kind_NavDestinationTransitionDelegate: return deserializeAndCallNavDestinationTransitionDelegate(thisDeserializer);
-        case CallbackKind.Kind_NavExtender_CreateNavDestination: return deserializeAndCallNavExtender_CreateNavDestination(thisDeserializer);
         case CallbackKind.Kind_NavExtender_OnUpdateStack: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
         case CallbackKind.Kind_NavExtender_PageMapNodeBuilder: return deserializeAndCallNavExtender_PageMapNodeBuilder(thisDeserializer);
         case CallbackKind.Kind_OnAdsBlockedCallback: return deserializeAndCallOnAdsBlockedCallback(thisDeserializer);

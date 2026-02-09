@@ -56,7 +56,7 @@ import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
 import { ErrorCallback } from "@ohos.base";
-import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, HomePathInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { CustomBuilder, PageMapBuilder } from '../component/builder';
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
@@ -501,12 +501,20 @@ export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
     TabsOpsHandWritten.hookTabsApplyAttributesFinish(node);
 }
 
-export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
-  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, moduleInfo);
+export function hookSetNavigationOptions0(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
+  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, undefined, moduleInfo);
+}
+
+export function hookSetNavigationOptions1(component: ArkNavigationComponent, pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): void {
+  NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, homeDestination, moduleInfo);
 }
 
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {
   NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
+}
+
+export function hookSplitPlaceholder(component: ArkNavigationComponent, value: ComponentContent): void {
+  NavigationOpsHandWritten.hookSplitPlaceholderImpl(component, value);
 }
 
 export function hookGetConfigInRouteMap(info: NavDestinationContextInternal): RouteMapConfig | undefined {

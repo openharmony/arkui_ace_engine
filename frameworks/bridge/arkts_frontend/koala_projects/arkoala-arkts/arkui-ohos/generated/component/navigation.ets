@@ -21,7 +21,8 @@ import { VoidCallback, Length, Dimension, ResourceStr, ResourceColor } from "./u
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, AttributeModifier, hookSetNavigationOptions, hookSetNavDestination, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookSetNavigationOptions0, hookSetNavigationOptions1, hookSetNavDestination, hookSplitPlaceholder, hookNavigationAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ComponentContent } from "arkui.ComponentContent"
 import { ModifierStateManager } from '../CommonModifier';
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
@@ -1150,7 +1151,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setNavigationOptionsAttribute(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
+    setNavigationOptions0Attribute(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (pathInfos !== undefined) {
@@ -1167,7 +1168,34 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setNavigationOptions1Attribute(pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (pathInfos !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const pathInfosTmpValue  = pathInfos!
+            NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (homeDestination !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const homeDestinationTmpValue  = homeDestination!
+            HomePathInfo_serializer.write(thisSerializer, homeDestinationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (moduleInfo !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleInfoTmpValue  = moduleInfo!
+            NavigationModuleInfo_serializer.write(thisSerializer, moduleInfoTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNavBarWidthAttribute(value: Length | Bindable<Length> | undefined): void {
@@ -1469,6 +1497,18 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableModeChangeAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableVisibilityLifecycleWithContentCoverAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_setEnableVisibilityLifecycleWithContentCover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBackButtonIconAttribute(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (icon !== undefined) {
@@ -1737,11 +1777,17 @@ export interface NavigationOptions {
 }
 export type NavBar = string;
 export type InterceptionShowCallback = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean) => void;
+export type InterceptionCallback = (from: NavPathInfo | NavBar, to: NavPathInfo | NavBar, pathStack: NavPathStack, operation: NavigationOperation, isAnimated: boolean) => void;
 export type InterceptionModeCallback = (mode: NavigationMode) => void;
 export interface NavigationInterception {
     willShow?: InterceptionShowCallback;
     didShow?: InterceptionShowCallback;
     modeChange?: InterceptionModeCallback;
+    interception?: InterceptionCallback;
+}
+export interface HomePathInfo {
+    name: string;
+    param?: Object;
 }
 export enum ToolbarItemStatus {
     NORMAL = 0,
@@ -1798,6 +1844,9 @@ export interface MoreButtonOptions {
 }
 export interface NavigationAttribute extends CommonMethod {
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
+        throw new Error("Unimplemented method setNavigationOptions")
+    }
+    setNavigationOptions(pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): this {
         throw new Error("Unimplemented method setNavigationOptions")
     }
     navBarWidth(value: Length | Bindable<Length> | undefined): this {
@@ -1863,6 +1912,12 @@ export interface NavigationAttribute extends CommonMethod {
     enableModeChangeAnimation(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableModeChangeAnimation")
     }
+    splitPlaceholder(value: ComponentContent): this {
+        throw new Error("Unimplemented method splitPlaceholder")
+    }
+    enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableVisibilityLifecycleWithContentCover")
+    }
     backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
         throw new Error("Unimplemented method backButtonIcon")
     }
@@ -1910,7 +1965,12 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     enableDragBar_value?: boolean | undefined
     divider_value?: NavigationDividerStyle | null
     enableModeChangeAnimation_value?: boolean | undefined
+    splitPlaceholder_value?: ComponentContent
+    enableVisibilityLifecycleWithContentCover_value?: boolean | undefined
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
+        return this
+    }
+    setNavigationOptions(pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): this {
         return this
     }
     navBarWidth(value: Length | Bindable<Length> | undefined): this {
@@ -1974,6 +2034,12 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
         return this
     }
     enableModeChangeAnimation(value: boolean | undefined): this {
+        return this
+    }
+    splitPlaceholder(value: ComponentContent): this {
+        return this
+    }
+    enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
         return this
     }
     backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
@@ -2045,7 +2111,13 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
     public setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
         if (this.checkPriority("setNavigationOptions")) {
-            hookSetNavigationOptions(this, pathInfos, moduleInfo)
+            hookSetNavigationOptions0(this, pathInfos, moduleInfo)
+        }
+        return this
+    }
+    public setNavigationOptions(pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): this {
+        if (this.checkPriority("setNavigationOptions")) {
+            hookSetNavigationOptions1(this, pathInfos, homeDestination, moduleInfo)
         }
         return this
     }
@@ -2215,6 +2287,20 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public splitPlaceholder(value: ComponentContent): this {
+        if (this.checkPriority("splitPlaceholder")) {
+            hookSplitPlaceholder(this, value)
+        }
+        return this
+    }
+    public enableVisibilityLifecycleWithContentCover(value: boolean | undefined): this {
+        if (this.checkPriority("enableVisibilityLifecycleWithContentCover")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableVisibilityLifecycleWithContentCoverAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
         if (this.checkPriority("backButtonIcon")) {
             const icon_casted = icon as (string | image.PixelMap | Resource | SymbolGlyphModifier | undefined)
@@ -2321,6 +2407,33 @@ export class NavPathStack_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return NavPathStackInternal.fromPtr(ptr)
+    }
+}
+export class HomePathInfo_serializer {
+    public static write(buffer: SerializerBase, value: HomePathInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForName  = value.name
+        valueSerializer.writeString(valueHolderForName)
+        const valueHolderForParam  = value.param
+        if (valueHolderForParam !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParamTmpValue  = valueHolderForParam!
+            valueSerializer.holdAndWriteObject(valueHolderForParamTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): HomePathInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const nameTmpResult : string = (valueDeserializer.readString() as string)
+        const paramTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paramTmpBuf : Object | undefined = undefined
+        if ((paramTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paramTmpBuf = (valueDeserializer.readObject() as object)
+        }
+        const paramTmpResult : Object | undefined = paramTmpBuf
+        let value : HomePathInfo = ({name: nameTmpResult, param: paramTmpResult} as HomePathInfo)
+        return value
     }
 }
 export class NavContentInfo_serializer {
@@ -2502,6 +2615,14 @@ export class NavigationInterception_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForInterception  = value.interception
+        if (valueHolderForInterception !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForInterceptionTmpValue  = valueHolderForInterception!
+            valueSerializer.holdAndWriteCallback(valueHolderForInterceptionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): NavigationInterception {
         let valueDeserializer : DeserializerBase = buffer
@@ -2603,7 +2724,45 @@ export class NavigationInterception_serializer {
             modeChangeTmpBuf = modeChangeTmpBuf_Closure
         }
         const modeChangeTmpResult : InterceptionModeCallback | undefined = modeChangeTmpBuf
-        let value : NavigationInterception = ({willShow: willShowTmpResult, didShow: didShowTmpResult, modeChange: modeChangeTmpResult} as NavigationInterception)
+        const interceptionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let interceptionTmpBuf : InterceptionCallback | undefined = undefined
+        if ((interceptionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const interceptionTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const interceptionTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const interceptionTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            interceptionTmpBuf = (from: NavPathInfo | NavBar, to: NavPathInfo | NavBar, pathStack: NavPathStack, operation: NavigationOperation, isAnimated: boolean):void => {
+                const interceptionTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                interceptionTmpBuf_BufArgsSerializer.writeInt32(interceptionTmpBuf_BufResource.resourceId);
+                interceptionTmpBuf_BufArgsSerializer.writePointer(interceptionTmpBuf_BufCall);
+                interceptionTmpBuf_BufArgsSerializer.writePointer(interceptionTmpBuf_BufCallSync);
+                if (from instanceof NavPathInfo) {
+                    interceptionTmpBuf_BufArgsSerializer.writeInt8((0).toByte());
+                    const fromForIdx0  = from as NavPathInfo;
+                    NavPathInfo_serializer.write(interceptionTmpBuf_BufArgsSerializer, fromForIdx0);
+                } else if (from instanceof NavBar) {
+                    interceptionTmpBuf_BufArgsSerializer.writeInt8((1).toByte());
+                    const fromForIdx1  = from as NavBar;
+                    interceptionTmpBuf_BufArgsSerializer.writeString(fromForIdx1);
+                }
+                if (to instanceof NavPathInfo) {
+                    interceptionTmpBuf_BufArgsSerializer.writeInt8((0).toByte());
+                    const toForIdx0  = to as NavPathInfo;
+                    NavPathInfo_serializer.write(interceptionTmpBuf_BufArgsSerializer, toForIdx0);
+                } else if (to instanceof NavBar) {
+                    interceptionTmpBuf_BufArgsSerializer.writeInt8((1).toByte());
+                    const toForIdx1  = to as NavBar;
+                    interceptionTmpBuf_BufArgsSerializer.writeString(toForIdx1);
+                }
+                NavPathStack_serializer.write(interceptionTmpBuf_BufArgsSerializer, pathStack);
+                interceptionTmpBuf_BufArgsSerializer.writeInt32(operation.valueOf());
+                interceptionTmpBuf_BufArgsSerializer.writeBoolean(isAnimated);
+                InteropNativeModule._CallCallbackSync(10, 1966466325, interceptionTmpBuf_BufArgsSerializer.asBuffer(), interceptionTmpBuf_BufArgsSerializer.length());
+                interceptionTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const interceptionTmpResult : InterceptionCallback | undefined = interceptionTmpBuf
+        let value : NavigationInterception = ({willShow: willShowTmpResult, didShow: didShowTmpResult, modeChange: modeChangeTmpResult, interception: interceptionTmpResult} as NavigationInterception)
         return value
     }
 }

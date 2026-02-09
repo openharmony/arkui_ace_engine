@@ -2002,6 +2002,33 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getSwiperAttribute(node: FrameNode): SwiperAttribute | undefined {
+        if (node.getType() !== 'Swiper') {
+            return undefined
+        }
+        let swiperNode = node as SwiperFrameNode
+        if (swiperNode !== undefined) {
+            return swiperNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindSwiperController(node: FrameNode, controller: SwiperController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Swiper') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let swiperNode = node as SwiperFrameNode
+        if (!swiperNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        swiperNode.initialize(controller)
+        return
+    }
+
+    // @ts-ignore
     function createTextAreaNode(context: UIContext): TextAreaFrameNode {
         return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
             let arknode = new ArkTextAreaNode();
