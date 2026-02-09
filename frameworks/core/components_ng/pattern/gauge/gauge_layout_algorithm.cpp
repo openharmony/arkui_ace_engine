@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -94,7 +93,7 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<GaugePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             host->GetGeometryNode()->ResetContent();
         } else {
             host->GetGeometryNode()->Reset();
