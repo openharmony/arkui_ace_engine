@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("scroll_bar_test_ng") {
-  module_name = "ScrollingSet-ArcScrollBar"
   type = "new"
   sources = [
     "scroll_bar_accessibility_test_ng.cpp",
@@ -25,6 +24,9 @@ ace_unittest("scroll_bar_test_ng") {
   ]
 
   if (ace_engine_enable_circle_feature) {
-    sources += [ "arc_scroll_bar_test_ng.cpp" ]
+    sources += [ 
+      "arc_scroll_bar_test_ng.cpp",
+      "arc_scroll_bar_ai_test_ng.cpp",
+    ]
   }
 }
