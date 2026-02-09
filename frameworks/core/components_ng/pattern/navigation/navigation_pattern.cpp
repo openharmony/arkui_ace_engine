@@ -6463,6 +6463,26 @@ bool NavigationPattern::IsRelatedDestinationAtTop()
     return true;
 }
 
+void NavigationPattern::UpdateForceSplitHomeDestVisibility()
+{
+    auto homeDest = forceSplitHomeDest_.Upgrade();
+    CHECK_NULL_VOID(homeDest);
+    auto property = homeDest->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (forceSplitSuccess_) {
+        property->UpdateVisibility(VisibleType::VISIBLE);
+        return;
+    }
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navNode);
+    auto lastStandardIndex = navNode->GetLastStandardIndex();
+    if (homeDest->GetIndex() < lastStandardIndex) {
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        property->UpdateVisibility(VisibleType::VISIBLE);
+    }
+}
+
 void NavigationPattern::FireRelatedDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle)
 {
     auto node = AceType::DynamicCast<NavigationGroupNode>(GetHost());

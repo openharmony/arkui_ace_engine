@@ -644,6 +644,7 @@ public:
     {
         isSplitDisplay_ = isSplit;
     }
+    void UpdateForceSplitHomeDestVisibility();
     //-------for force split------- end------
 
 private:
