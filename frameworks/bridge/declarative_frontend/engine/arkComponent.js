@@ -33802,7 +33802,8 @@ if (globalThis.Marquee === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmarquee');
       module.exportView();
       getUINativeModule().marquee.create(params);
-    }
+    },
+    name: 'JSMarquee'
   }
 }
 

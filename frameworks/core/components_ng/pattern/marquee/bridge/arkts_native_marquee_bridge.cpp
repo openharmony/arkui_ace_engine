@@ -266,6 +266,9 @@ ArkUINativeModuleValue MarqueeBridge::CreateMarquee(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    if (runtimeCallInfo->GetArgsNumber() == 0) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     bool isJSView = IsJsView(firstArg, vm);
