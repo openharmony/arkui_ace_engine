@@ -856,6 +856,18 @@ void WaterFlowPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("WaterFlowCacheCount: ")
         .append(std::to_string(property->GetCachedCount().value_or(layoutInfo_->defCachedCount_))));
+
+    auto layoutMode = layoutInfo_->Mode() == LayoutMode::TOP_DOWN ? "TOP_DOWN" : "SLIDING_WINDOW";
+    DumpLog::GetInstance().AddDesc(
+        std::string("WaterFlowLayoutMode: ")
+        .append(layoutMode));
+
+    DumpLog::GetInstance().AddDesc(
+        std::string("WaterFlowSections: ")
+        .append(sections_ ? "YES": "NO"));
+    if (sections_) {
+        DumpInfoAddSections();
+    }
 }
 
 void WaterFlowPattern::DumpAdvanceInfo()
@@ -882,8 +894,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(layoutInfo_->endIndex_));
     DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(layoutInfo_->jumpIndex_));
 
-    DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    DumpLog::GetInstance().AddDesc("RowsTemplate:" + property->GetRowsTemplate().value_or("null"));
+    DumpLog::GetInstance().AddDesc("ColumnsTemplate:" + property->GetColumnsTemplate().value_or("null"));
     DumpLog::GetInstance().AddDesc(
         "CachedCount:" + std::to_string(property->GetCachedCount().value_or(layoutInfo_->defCachedCount_)));
     DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);

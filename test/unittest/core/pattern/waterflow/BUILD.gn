@@ -24,6 +24,7 @@ ace_unittest("water_flow_test_original") {
   module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
   sources = [
+    "water_flow_dump_test.cpp",
     "water_flow_layout_info_test.cpp",
     "water_flow_misc_test.cpp",
     "water_flow_property_test.cpp",
