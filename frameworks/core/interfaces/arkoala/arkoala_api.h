@@ -6093,6 +6093,8 @@ struct ArkUICounterModifier {
     void (*resetCounterOnInc)(ArkUINodeHandle node);
     void (*setCounterOnDec)(ArkUINodeHandle node, void* callback);
     void (*resetCounterOnDec)(ArkUINodeHandle node);
+    void (*setControlWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setStateChange)(ArkUINodeHandle node, ArkUI_Bool state);
     ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 

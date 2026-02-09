@@ -48,6 +48,8 @@ public:
     static void HandleBackgroundColorResource(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void ResetBackgroundColor(FrameNode* frameNode);
+    static void SetControlWidth(FrameNode* frameNode, const Dimension& value) {}
+    static void SetStateChange(FrameNode* frameNode, bool value) {}
 
 private:
     RefPtr<FrameNode> CreateButtonChild(

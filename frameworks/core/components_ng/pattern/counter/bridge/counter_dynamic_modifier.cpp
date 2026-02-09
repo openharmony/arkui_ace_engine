@@ -226,6 +226,21 @@ ArkUINodeHandle CreateFrameNode(int32_t nodeId)
     return nullptr;
 }
 
+void SetControlWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    CounterModelNG::SetControlWidth(frameNode, width);
+}
+
+void SetStateChange(ArkUINodeHandle node, ArkUI_Bool state)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetStateChange(frameNode, state);
+}
+
 #ifndef CROSS_PLATFORM
 
 void CreateModelImpl()
@@ -328,6 +343,17 @@ void ResetCounterOnDecImpl(ArkUINodeHandle node)
 {
     GetCounterModelImpl()->SetOnDec(nullptr);
 }
+
+void SetControlWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    GetCounterModelImpl()->SetControlWidth(Dimension(value, unitEnum));
+}
+
+void SetStateChangeImpl(ArkUINodeHandle node, ArkUI_Bool state)
+{
+    GetCounterModelImpl()->SetStateChange(state);
+}
 #endif
 
 const ArkUICounterModifier* GetCounterDynamicModifier()
@@ -356,6 +382,8 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
             .resetCounterOnInc = ResetCounterOnIncImpl,
             .setCounterOnDec = SetCounterOnDecImpl,
             .resetCounterOnDec = ResetCounterOnDecImpl,
+            .setControlWidth = SetControlWidthImpl,
+            .setStateChange = SetStateChangeImpl,
             .createFrameNode = CreateFrameNode,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
@@ -384,6 +412,8 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
         .resetCounterOnInc = ResetCounterOnInc,
         .setCounterOnDec = SetCounterOnDec,
         .resetCounterOnDec = ResetCounterOnDec,
+        .setControlWidth = SetControlWidth,
+        .setStateChange = SetStateChange,
         .createFrameNode = CreateFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
