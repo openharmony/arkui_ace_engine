@@ -52,6 +52,7 @@ OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupNodeId);
     CHECK_NULL_RETURN(popupNode, OffsetF());
+    ACE_UINODE_TRACE(popupNode);
     auto pipelineContext = popupNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto overlayManager = pipelineContext->GetOverlayManager();
@@ -108,6 +109,7 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
         textLayoutProps->UpdateTextColor(textColor.value());
     }
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto pipelineContext = popupNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     double maxAppFontScale = pipelineContext->GetMaxAppFontScale();
@@ -147,6 +149,7 @@ void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
 
 int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode)
 {
+    ACE_UINODE_TRACE(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, 0);
     auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
@@ -175,6 +178,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::POPUP_ETS_TAG, popupId);
     auto popupNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ACE_UINODE_TRACE(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());
     auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
     auto useCustom = param->IsUseCustom();
@@ -390,6 +394,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto popupNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ACE_UINODE_TRACE(popupNode);
     auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
     if (bubbleHub) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
@@ -507,6 +512,7 @@ void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const R
     auto secondaryButton = param->GetSecondaryButtonProperties();
     if (primaryButton.showButton) {
         auto button = AceType::DynamicCast<FrameNode>(buttons.front());
+        ACE_UINODE_TRACE(button);
         buttons.pop_front();
         auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
         CHECK_NULL_VOID(textNode);
@@ -521,6 +527,7 @@ void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const R
     }
     if (secondaryButton.showButton) {
         auto button = AceType::DynamicCast<FrameNode>(buttons.front());
+        ACE_UINODE_TRACE(button);
         buttons.pop_front();
         auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
         CHECK_NULL_VOID(textNode);
@@ -539,6 +546,7 @@ void BubbleView::UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& 
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto message = param->GetMessage();
     auto primaryButton = param->GetPrimaryButtonProperties();
     auto secondaryButton = param->GetSecondaryButtonProperties();
@@ -591,6 +599,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     UpdateBubbleContent(popupId, param);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());
     auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
     auto message = param->GetMessage();
@@ -643,6 +652,7 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     UpdateCommonParam(popupId, param);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(popupLayoutProp);
     auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
@@ -664,6 +674,7 @@ void BubbleView::GetPopupMaxWidthAndHeight(
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupNodeId);
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto pipelineContext = popupNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
@@ -706,6 +717,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
     if (bubbleHub && (!(param->GetIsPartialUpdate().has_value()))) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
@@ -826,6 +838,7 @@ void BubbleView::ResetBubbleProperty(int32_t popupId)
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(popupLayoutProp);
     popupLayoutProp->ResetEnableArrow();
@@ -861,6 +874,7 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
 {
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(textNode);
     // The buttons in popupNode can not get focus, if the textNode in the button is not focusable
     textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -895,6 +909,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
 {
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ACE_UINODE_TRACE(columnNode);
     auto layoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
     layoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
@@ -977,6 +992,7 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
 {
     auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> layoutNode;
+    ACE_UINODE_TRACE(layoutNode);
     if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         layoutNode =
             FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, rowId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -1023,6 +1039,7 @@ void UpdateButtonFontSize(RefPtr<TextLayoutProperty>& textLayoutProps,
     CHECK_NULL_VOID(textLayoutProps);
     auto host = textLayoutProps->GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto popupTheme = GetPopupTheme();
@@ -1065,6 +1082,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     }
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_RETURN(popupNode, nullptr);
+    ACE_UINODE_TRACE(popupNode);
     auto pipelineContext = popupNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
@@ -1080,6 +1098,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     buttonPattern->SetFocusBorderColor(focusColor);
     auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
     CHECK_NULL_RETURN(buttonPattern, nullptr);
+    ACE_UINODE_TRACE(buttonNode);
 
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
     auto isUseCustom = param->IsUseCustom();

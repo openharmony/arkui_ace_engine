@@ -390,6 +390,7 @@ void MenuWrapperPattern::HideMenu(const HideMenuType& reason)
     CHECK_NULL_VOID(host);
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     HideMenu(menuNode, reason);
 }
 
@@ -409,6 +410,7 @@ void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenu
     CHECK_NULL_VOID(menuItemModifier);
     auto menuNode = menuItemModifier->getMenu(menuItem, false);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     expandingMode = menuModifier->getExpandingMode(menuNode).value_or(SubMenuExpandingMode::SIDE);
     menuItemModifier->setIsSubMenuShowed(menuItem, false);
 }
@@ -426,6 +428,7 @@ void MenuWrapperPattern::HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem)
     CHECK_NULL_VOID(menuItemModifier);
     auto menuNode = menuItemModifier->getMenu(menuItem, true);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_VOID(menuModifier);
     auto curDepth = menuModifier->getSubMenuDepth(menuNode);
@@ -479,6 +482,7 @@ void MenuWrapperPattern::HideSubMenu()
 
     auto menuNode = GetParentMenu(subMenu);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     MenuFocusViewShow(menuNode);
     menuModifier->setShowedSubMenu(menuNode, nullptr);
     auto innerMenu = GetMenuChild(menuNode);
@@ -641,6 +645,7 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     CHECK_NULL_VOID(host);
     auto menuNode = host->GetFirstChild();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     AnimationOption option;
     option.SetOnFinishEvent(
         [weak = WeakClaim(RawPtr(host)), subMenuWk = WeakClaim(RawPtr(subMenu))] {
@@ -802,6 +807,7 @@ void MenuWrapperPattern::ChangeTouchItem(const TouchEventInfo& info, TouchType t
     if (touchType == TouchType::MOVE) {
         auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
+        ACE_UINODE_TRACE(menuNode);
         if (GetPreviewMode() != MenuPreviewMode::NONE || IsSelectOverlayCustomMenu(menuNode)) {
             return;
         }
@@ -925,6 +931,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto expandDisplay = theme->GetExpandDisplay();
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_RETURN(menuNode, false);
+    ACE_UINODE_TRACE(menuNode);
     // copy menu pattern properties to rootMenu
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, false);
@@ -1071,6 +1078,7 @@ void MenuWrapperPattern::StartShowAnimation()
     }
     if (theme->GetMenuAnimationDuration() && GetPreviewMode() == MenuPreviewMode::NONE) {
         auto menu = GetMenu();
+        ACE_UINODE_TRACE(menu);
         auto menuGeometryNode = menu ? menu->GetGeometryNode() : nullptr;
         if (menuGeometryNode) {
             auto offset = menuGeometryNode->GetFrameOffset();

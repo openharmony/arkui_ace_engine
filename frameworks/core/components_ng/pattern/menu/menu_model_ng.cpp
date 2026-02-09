@@ -261,6 +261,7 @@ void MenuModelNG::Create()
     auto menuNode = FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto layoutProps = menuNode->GetLayoutProperty();
@@ -291,6 +292,7 @@ RefPtr<FrameNode> MenuModelNG::CreateMenu()
     auto menuNode = FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_RETURN(menuNode, nullptr);
+    ACE_UINODE_TRACE(menuNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto layoutProps = menuNode->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProps, nullptr);

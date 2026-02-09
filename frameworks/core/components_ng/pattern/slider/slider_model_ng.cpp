@@ -50,6 +50,7 @@ void SliderModelNG::SetSliderValue(float value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateValue(value);
@@ -112,6 +113,7 @@ void SliderModelNG::SetMinResponsiveDistance(float value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto minResponse = 0.0f;
@@ -155,6 +157,7 @@ void SliderModelNG::SetThickness(const Dimension& value)
     if (value.IsNonPositive()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
+        ACE_UINODE_TRACE(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto pipeline = frameNode->GetContext();
@@ -201,6 +204,7 @@ void SliderModelNG::SetBlockSize(const Dimension& width, const Dimension& height
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -425,6 +429,7 @@ void SliderModelNG::SetBlockShape(FrameNode* frameNode, const RefPtr<BasicShape>
 void SliderModelNG::SetBlockSize(FrameNode* frameNode, const Dimension& width, const Dimension& height)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = frameNode->GetContext();
@@ -666,6 +671,7 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
         return SliderModelNG::ResetValidSlideRange(frameNode);
     }
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto minValue = paintProperty->GetMinValue(0.0f);
@@ -715,6 +721,7 @@ Gradient SliderModelNG::GetLinearGradientBlockColor(FrameNode* frameNode)
 {
     Gradient value;
     CHECK_NULL_RETURN(frameNode, value);
+    ACE_UINODE_TRACE(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
@@ -729,6 +736,7 @@ Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
 {
     Gradient value;
     CHECK_NULL_RETURN(frameNode, value);
+    ACE_UINODE_TRACE(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
@@ -743,6 +751,7 @@ Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
     Gradient value;
     CHECK_NULL_RETURN(frameNode, value);
+    ACE_UINODE_TRACE(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
@@ -878,6 +887,7 @@ void SliderModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& res
 void SliderModelNG::UpdateComponentColor(FrameNode* frameNode, const SliderColorType sliderColorType)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     if (pipelineContext->IsSystmColorChange()) {
@@ -910,6 +920,7 @@ void SliderModelNG::CreateWithColorResourceObj(
     FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SliderColorType sliderColorType)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "slider" + ColorTypeToString(sliderColorType);
@@ -1062,6 +1073,7 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
 {
     Dimension defaultTrackThickness = Dimension(0.0f);
     CHECK_NULL_RETURN(frameNode, defaultTrackThickness);
+    ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultTrackThickness);
     auto pipeline = frameNode->GetContext();

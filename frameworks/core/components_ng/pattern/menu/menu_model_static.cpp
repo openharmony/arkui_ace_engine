@@ -86,6 +86,7 @@ void MenuModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Col
     } else {
         auto menuNode = reinterpret_cast<FrameNode*>(frameNode);
         CHECK_NULL_VOID(menuNode);
+        ACE_UINODE_TRACE(menuNode);
         auto pipeline = menuNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();

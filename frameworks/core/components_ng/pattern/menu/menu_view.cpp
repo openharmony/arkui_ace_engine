@@ -83,6 +83,7 @@ static RefPtr<FrameNode> GetMenuTargetNode(const RefPtr<MenuWrapperPattern>& wra
     CHECK_NULL_RETURN(wrapperPattern, nullptr);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, nullptr);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     return FrameNode::GetFrameNodeOnly(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
@@ -167,7 +168,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
         MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
-
+    ACE_UINODE_TRACE(menuNode);
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
@@ -942,6 +943,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateZIndex(-1);
         auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             MenuView::ShowPixelMapAnimation(menuNode);
         }
@@ -1243,6 +1245,7 @@ bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPatt
     if (hoverStatus != MenuHoverScaleStatus::MENU_SHOW) {
         auto menu = wrapperPattern->GetMenu();
         CHECK_NULL_RETURN(menu, false);
+        ACE_UINODE_TRACE(menu);
         auto menuRenderContext = menu->GetRenderContext();
         CHECK_NULL_RETURN(menuRenderContext, false);
         menuRenderContext->UpdateOpacity(0.0);
@@ -1362,6 +1365,7 @@ void MenuView::GetMenuPixelMap(
     auto menuNode = FrameNode::CreateFrameNode(
         MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), type));
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
     MountTextNode(wrapperNode, nullptr);
 }
@@ -2218,6 +2222,7 @@ void MenuView::ExecuteMenuDisappearAnimation(const PreparedInfoForDrag& data)
 {
     auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     RefPtr<Curve> menuOpacityCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f);
     RefPtr<Curve> menuScaleCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.4f, 0.0f, 1.0f, 1.0f);
     AnimationOption optionOpacity;
@@ -2248,6 +2253,7 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
     stackNode->UpdateInspectorId("__stack__");
     auto menuNode = data.menuNode;
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto scrollNode = data.scrollNode;
     CHECK_NULL_VOID(scrollNode);
     auto menuUINode = scrollNode->GetParent();
@@ -2545,6 +2551,7 @@ void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& m
             CHECK_NULL_RETURN(node, result);
             auto menu = weak.Upgrade();
             CHECK_NULL_RETURN(menu, result);
+            ACE_UINODE_TRACE(menu);
             auto eventHub = menu->GetEventHub<NG::EventHub>();
             CHECK_NULL_RETURN(eventHub, result);
             auto gesture = eventHub->GetGestureEventHub();
