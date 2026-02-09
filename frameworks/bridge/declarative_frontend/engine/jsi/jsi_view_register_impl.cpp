@@ -158,6 +158,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -674,7 +675,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
 #endif
 #endif
-    { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockControllerBinding::JSBind },
@@ -732,7 +732,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "IsolatedComponent", JSIsolatedComponent::JSBind },
 #endif
 #endif
-    { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
     { "RichEditorStyledStringController", JSRichEditorStyledStringController::JSBind },
     { "LayoutManager", JSLayoutManager::JSBind },

@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT MenuItemGroupPattern : public Pattern {
+class ACE_FORCE_EXPORT MenuItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuItemGroupPattern, Pattern);
 
 public:

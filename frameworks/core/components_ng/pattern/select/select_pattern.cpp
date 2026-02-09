@@ -43,6 +43,8 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
@@ -64,6 +66,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -188,9 +192,9 @@ void SelectPattern::OnModifyDone()
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     UpdateMenuBorderStyle(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->UpdateSelectIndex(selected_);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateSelectIndex(menu, selected_);
     InitFocusEvent();
     for (const auto& option : options_) {
         option->MarkModifyDone();
@@ -243,10 +247,10 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     CHECK_NULL_VOID(host);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
     isSelected_ = true;
-    menuPattern->UpdateSelectIndex(index);
+    menuModifier->updateSelectIndex(menu, index);
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
@@ -254,7 +258,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     textProps->UpdateContent(value);
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    menuPattern->HideMenu(HideMenuType::SELECT_SELECTED);
+    menuModifier->hideMenu(menu, HideMenuType::SELECT_SELECTED);
     auto hub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
 
@@ -313,7 +317,9 @@ void SelectPattern::ConfigMenuParam()
     menuParam.systemMaterial = GetMenuSystemMaterial();
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    MenuView::SetMenuSystemMaterial(menuNode, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    menuViewModifier->setMenuSystemMaterial(menuNode, menuParam);
     wrapperPattern->SetMenuParam(menuParam);
 }
 
@@ -331,9 +337,9 @@ void SelectPattern::ShowSelectMenuInSubWindow()
     offset.AddX(-CALIBERATE_X.ConvertToPx());
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateShowInSubWindow(true);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateShowInSubWindow(menu, true);
     auto subwindowManager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(subwindowManager);
     MenuParam menuParam {};
@@ -347,18 +353,16 @@ void SelectPattern::ShowSelectMenuInSubWindow()
 
 void SelectPattern::UpdateOptionsWidth(float selectWidth)
 {
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionNode = options_[i];
         CHECK_NULL_VOID(optionNode);
         auto optionGeoNode = optionNode->GetGeometryNode();
         CHECK_NULL_VOID(optionGeoNode);
         auto optionWidth = selectWidth - OPTION_MARGIN.ConvertToPx();
-        auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(optionPaintProperty);
-        optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
+        menuItemModifier->setIsWidthModifiedBySelect(optionNode, true);
+        menuItemModifier->updateSelectModifiedWidth(optionNode, optionWidth);
         optionNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -573,6 +577,8 @@ void SelectPattern::CreateSelectedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     auto callback = [weak = WeakClaim(RawPtr(host))](int32_t index) {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
@@ -592,15 +598,14 @@ void SelectPattern::CreateSelectedCallback()
             selectChangeEvent(index);
         }
         auto valueChangeEvent = hub->GetValueChangeEvent();
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
         if (valueChangeEvent) {
-            auto newSelected = pattern->options_[index]->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(newSelected);
-            valueChangeEvent(newSelected->GetText());
+            auto text = menuItemModifier->getText(pattern->options_[index]);
+            valueChangeEvent(text);
         }
         // execute onSelect callback
-        auto newSelected = pattern->options_[index]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(newSelected);
-        auto value = newSelected->GetText();
+        auto value = menuItemModifier->getText(pattern->options_[index]);
         pattern->ReportOnSelectEvent(index, value);
         auto onSelect = hub->GetSelectEvent();
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d", index);
@@ -610,9 +615,8 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
-        hub->SetOnSelect(callback);
+        menuItemModifier->setOnSelect(option, callback);
         option->MarkModifyDone();
     }
 }
@@ -879,10 +883,10 @@ void SelectPattern::SetSelected(int32_t index)
     }
     UpdateLastSelectedProps(index);
     selected_ = index;
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        if (pattern) {
-            pattern->SetSelected(selected_);
+        if (menuItemModifier) {
+            menuItemModifier->setSelectedInt(options_[i], selected_);
         }
     }
 }
@@ -905,8 +909,9 @@ void SelectPattern::BuildChild()
 
     bool hasRowNode = HasRowNode();
     auto rowId = GetRowId();
-    auto row = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<MenuItemRowPattern>(); });
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    auto row = menuItemModifier->getOrCreateFrameNode(V2::ROW_ETS_TAG, rowId, false, -1);
     CHECK_NULL_VOID(row);
     if (textApply_ && textId_.has_value()) {
         if (hasRowNode) {
@@ -1103,10 +1108,10 @@ void SelectPattern::SetOptionBgColor(const Color& color)
     if (!optionBgColor_.has_value()) {
         return;
     }
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (const auto& option : options_) {
-        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateOptionBgColor(optionBgColor_.value());
+        menuItemModifier->updateOptionBgColor(option, optionBgColor_.value());
     }
 }
 
@@ -1125,67 +1130,65 @@ void SelectPattern::SetOptionFontSizeImpl(const Dimension& value)
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
         }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontSize(value);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        menuItemModifier->setFontSize(options_[i], value);
     }
 }
 
 void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     optionFont_.FontStyle = value;
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
         }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetItalicFontStyle(value);
+        menuItemModifier->setItalicFontStyle(options_[i], value);
     }
 }
 
 void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
     optionFont_.FontWeight = value;
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
         }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontWeight(value);
+        menuItemModifier->setFontWeight(options_[i], value);
     }
 }
 
 void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
     optionFont_.FontFamily = value;
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
         }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontFamily(value);
+        menuItemModifier->setFontFamily(options_[i], value);
     }
 }
 
 void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         if (optionFont_.FontColor.has_value()) {
-            auto paintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
-            CHECK_NULL_VOID(paintProperty);
-            paintProperty->UpdateOptionFontColor(optionFont_.FontColor.value());
+            menuItemModifier->updateOptionFontColor(options_[i], optionFont_.FontColor.value());
         }
 
         if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetOptionFontColor(color);
+        menuItemModifier->setOptionFontColor(options_[i], color);
     }
 }
 
@@ -1196,10 +1199,10 @@ void SelectPattern::SetSelectedOptionBgColor(const Color& color)
     if (!selectedBgColor_.has_value()) {
         return;
     }
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (const auto& option : options_) {
-        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateSelectedOptionBgColor(selectedBgColor_.value());
+        menuItemModifier->updateSelectedOptionBgColor(option, selectedBgColor_.value());
     }
 }
 
@@ -1207,9 +1210,9 @@ void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 {
     selectedFont_.FontSize = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontSize(value);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        menuItemModifier->setFontSize(options_[selected_], value);
     }
 }
 
@@ -1217,9 +1220,9 @@ void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value
 {
     selectedFont_.FontStyle = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetItalicFontStyle(value);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        menuItemModifier->setItalicFontStyle(options_[selected_], value);
     }
 }
 
@@ -1227,9 +1230,9 @@ void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
 {
     selectedFont_.FontWeight = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontWeight(value);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        menuItemModifier->setFontWeight(options_[selected_], value);
     }
 }
 
@@ -1237,9 +1240,9 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
 {
     selectedFont_.FontFamily = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetFontFamily(value);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        menuItemModifier->setFontFamily(options_[selected_], value);
     }
 }
 
@@ -1249,10 +1252,10 @@ void SelectPattern::SetSelectedOptionFontColor(const Color& color)
     if (!selectedFont_.FontColor.has_value()) {
         return;
     }
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (const auto& option : options_) {
-        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateSelectedOptionFontColor(selectedFont_.FontColor.value());
+        menuItemModifier->updateSelectedOptionFontColor(option, selectedFont_.FontColor.value());
     }
 }
 
@@ -1262,96 +1265,107 @@ const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
 }
 
 void SelectPattern::ResetOptionToInitProps(
-    const RefPtr<MenuItemPattern>& optionPattern, const RefPtr<MenuItemPattern>& selectingOptionPattern)
+    const RefPtr<FrameNode>& optionNode, const RefPtr<FrameNode>& selectingOptionNode)
 {
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     if (textOptionApply_) {
-        optionPattern->SetOptionTextModifier(textOptionApply_);
+        menuItemModifier->setOptionTextModifier(optionNode, textOptionApply_);
     } else if (textSelectOptionApply_ && !textOptionApply_) {
-        optionPattern->ResetSelectTextProps();
-        optionPattern->ApplyOptionThemeStyles();
+        menuItemModifier->resetSelectTextProps(optionNode);
+        menuItemModifier->applyOptionThemeStyles(optionNode);
     } else {
-        optionPattern->ApplyOptionThemeStyles();
+        menuItemModifier->applyOptionThemeStyles(optionNode);
     }
-    if (selectingOptionPattern) {
-        optionPattern->SetBgColor(selectingOptionPattern->GetBgColor());
+    if (menuItemModifier->hasMenuItemPattern(selectingOptionNode)) {
+        auto bgColor = menuItemModifier->getBgColor(selectingOptionNode);
+        menuItemModifier->setBgColor(optionNode, bgColor);
     }
 }
 
-void SelectPattern::UpdateOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern)
+void SelectPattern::UpdateOptionCustomProperties(const RefPtr<FrameNode>& optionNode)
 {
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     if (optionFont_.FontColor.has_value()) {
-        optionPattern->SetFontColor(optionFont_.FontColor.value());
+        menuItemModifier->setFontColor(optionNode, optionFont_.FontColor.value(), true);
     }
     if (optionFont_.FontFamily.has_value()) {
-        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+        menuItemModifier->setFontFamily(optionNode, optionFont_.FontFamily.value());
     }
     if (optionFont_.FontSize.has_value()) {
-        optionPattern->SetFontSize(optionFont_.FontSize.value());
+        menuItemModifier->setFontSize(optionNode, optionFont_.FontSize.value());
     }
     if (optionFont_.FontStyle.has_value()) {
-        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+        menuItemModifier->setItalicFontStyle(optionNode, optionFont_.FontStyle.value());
     }
     if (optionFont_.FontWeight.has_value()) {
-        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+        menuItemModifier->setFontWeight(optionNode, optionFont_.FontWeight.value());
     }
     if (optionBgColor_.has_value()) {
-        optionPattern->SetBgColor(optionBgColor_.value());
+        menuItemModifier->setBgColor(optionNode, optionBgColor_.value());
     }
 }
 
-void SelectPattern::ResetSelectedOptionToInitProps(const RefPtr<MenuItemPattern>& optionPattern)
+void SelectPattern::ResetSelectedOptionToInitProps(const RefPtr<FrameNode>& optionNode)
 {
+    auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     if (textSelectOptionApply_) {
-        optionPattern->SetSelectedOptionTextModifier(textSelectOptionApply_);
+        menuItemModifier->setSelectedOptionTextModifier(optionNode, textSelectOptionApply_);
     } else if (!textSelectOptionApply_ && textOptionApply_) {
-        optionPattern->ResetSelectTextProps();
-        optionPattern->ApplySelectedThemeStyles();
+        menuItemModifier->resetSelectTextProps(optionNode);
+        menuItemModifier->applySelectedThemeStyles(optionNode);
     } else {
-        optionPattern->ApplySelectedThemeStyles();
+        menuItemModifier->applySelectedThemeStyles(optionNode);
     }
 }
 
-void SelectPattern::UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern)
+void SelectPattern::UpdateSelectedOptionCustomProperties(const RefPtr<FrameNode>& optionNode)
 {
+    auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     if (selectedFont_.FontColor.has_value()) {
-        optionPattern->SetFontColor(selectedFont_.FontColor.value());
+        menuItemModifier->setFontColor(optionNode, selectedFont_.FontColor.value(), true);
     }
     if (selectedFont_.FontFamily.has_value()) {
-        optionPattern->SetFontFamily(selectedFont_.FontFamily.value());
+        menuItemModifier->setFontFamily(optionNode, selectedFont_.FontFamily.value());
     } else if (optionFont_.FontFamily.has_value()) {
-        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+        menuItemModifier->setFontFamily(optionNode, optionFont_.FontFamily.value());
     }
     if (selectedFont_.FontSize.has_value()) {
-        optionPattern->SetFontSize(selectedFont_.FontSize.value());
+        menuItemModifier->setFontSize(optionNode, selectedFont_.FontSize.value());
     } else if (optionFont_.FontSize.has_value()) {
-        optionPattern->SetFontSize(optionFont_.FontSize.value());
+        menuItemModifier->setFontSize(optionNode, optionFont_.FontSize.value());
     }
     if (selectedFont_.FontStyle.has_value()) {
-        optionPattern->SetItalicFontStyle(selectedFont_.FontStyle.value());
+        menuItemModifier->setItalicFontStyle(optionNode, selectedFont_.FontStyle.value());
     } else if (optionFont_.FontStyle.has_value()) {
-        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+        menuItemModifier->setItalicFontStyle(optionNode, optionFont_.FontStyle.value());
     }
     if (selectedFont_.FontWeight.has_value()) {
-        optionPattern->SetFontWeight(selectedFont_.FontWeight.value());
+        menuItemModifier->setFontWeight(optionNode, selectedFont_.FontWeight.value());
     } else if (optionFont_.FontWeight.has_value()) {
-        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+        menuItemModifier->setFontWeight(optionNode, optionFont_.FontWeight.value());
     }
     if (selectedBgColor_.has_value()) {
-        optionPattern->SetBgColor(selectedBgColor_.value());
+        menuItemModifier->setBgColor(optionNode, selectedBgColor_.value());
     }
 }
 
-void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern)
+void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<FrameNode>& optionNode)
 {
-    CHECK_NULL_VOID(optionPattern);
-    optionPattern->SetSelected(false);
-    optionPattern->UpdateNextNodeDivider(true);
+    CHECK_NULL_VOID(optionNode);
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    menuItemModifier->setSelectedBool(optionNode, false);
+    menuItemModifier->updateNextNodeDivider(optionNode, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     CHECK_NULL_VOID(selectLayoutProps);
     if (selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
-        optionPattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+        menuItemModifier->setCheckMarkVisibleType(optionNode, VisibleType::INVISIBLE);
     }
 }
 
@@ -1361,14 +1375,14 @@ void SelectPattern::ResetOptionProps()
     CHECK_NULL_VOID(host);
     FREE_NODE_CHECK(host, ResetOptionProps);
     auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (const auto& option : options_) {
-        auto pattern = option->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetSelected(false);
-        ResetOptionToInitProps(pattern);
-        UpdateOptionCustomProperties(pattern);
+        menuItemModifier->setSelectedBool(option, false);
+        ResetOptionToInitProps(option);
+        UpdateOptionCustomProperties(option);
         if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
-            pattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+            menuItemModifier->setCheckMarkVisibleType(option, VisibleType::INVISIBLE);
         }
     }
 }
@@ -1429,14 +1443,14 @@ void SelectPattern::UpdateMenuOption(int32_t index, const std::string& value, co
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
     switch (optionType) {
         case SelectOptionType::TEXT:
-            menuPattern->UpdateSelectOptionTextByIndex(index, value);
+            menuModifier->updateSelectOptionTextByIndex(menu, index, value);
             break;
         case SelectOptionType::ICON:
-            menuPattern->UpdateSelectOptionIconByIndex(index, value);
+            menuModifier->updateSelectOptionIconByIndex(menu, index, value);
             break;
         default:
             break;
@@ -1448,25 +1462,21 @@ void SelectPattern::UpdateMenuOption(int32_t index, const std::string& value, co
 void SelectPattern::UpdateLastSelectedProps(int32_t index)
 {
     CHECK_NULL_VOID(options_[index]);
-    auto newSelected = options_[index]->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(newSelected);
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     // set lastSelected option props back to default (unselected) values
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         CHECK_NULL_VOID(options_[selected_]);
-        auto lastSelected = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(lastSelected);
-        ResetOptionToInitProps(lastSelected, newSelected);
-        UpdateOptionCustomProperties(lastSelected);
-        ResetLastSelectedOptionFlags(lastSelected);
+        ResetOptionToInitProps(options_[selected_], options_[index]);
+        UpdateOptionCustomProperties(options_[selected_]);
+        ResetLastSelectedOptionFlags(options_[selected_]);
         if (optionFont_.FontColor.has_value()) {
-            lastSelected->SetOptionFontColor(optionFont_.FontColor.value());
+            menuItemModifier->setOptionFontColor(options_[selected_], optionFont_.FontColor.value());
         }
         if (selected_ != 0) {
-            auto lastSelectedNode = lastSelected->GetHost();
+            auto lastSelectedNode = options_[selected_];
             CHECK_NULL_VOID(lastSelectedNode);
-            auto lastSelectedPros = lastSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
-            CHECK_NULL_VOID(lastSelectedPros);
-            lastSelectedPros->UpdateNeedDivider(true);
+            menuItemModifier->updateNeedDivider(lastSelectedNode, true);
         }
         options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
@@ -1481,9 +1491,9 @@ void SelectPattern::SetShowInSubWindow(bool isShowInSubWindow)
     selectLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateShowInSubWindow(isShowInSubWindow);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateShowInSubWindow(menuNode, isShowInSubWindow);
 }
 
 void SelectPattern::ResetShowInSubWindow()
@@ -1508,13 +1518,13 @@ void SelectPattern::SetShowDefaultSelectedIcon(bool show)
     selectLayoutProps->UpdateShowDefaultSelectedIcon(show);
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateShowDefaultSelectedIcon(show);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateShowDefaultSelectedIcon(menuNode, show);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(menuItemPattern);
-        menuItemPattern->SetShowDefaultSelectedIcon(show);
+        menuItemModifier->setShowDefaultSelectedIcon(options_[i], show);
     }
     if (show) {
         ResetOptionProps();
@@ -1530,13 +1540,13 @@ void SelectPattern::ResetShowDefaultSelectedIcon()
     selectLayoutProps->ResetShowDefaultSelectedIcon();
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->ResetShowDefaultSelectedIcon();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->resetShowDefaultSelectedIcon(menuNode);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto menuItemPattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(menuItemPattern);
-        menuItemPattern->SetShowDefaultSelectedIcon(false);
+        menuItemModifier->setShowDefaultSelectedIcon(options_[i], false);
     }
 }
 
@@ -1544,36 +1554,32 @@ void SelectPattern::ResetShowDefaultSelectedIcon()
 void SelectPattern::UpdateSelectedProps(int32_t index)
 {
     CHECK_NULL_VOID(options_[index]);
-    auto newSelected = options_[index]->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(newSelected);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
 
     // set newSelected props
-    ResetSelectedOptionToInitProps(newSelected);
-    UpdateSelectedOptionCustomProperties(newSelected);
-    newSelected->SetSelected(true);
+    ResetSelectedOptionToInitProps(options_[index]);
+    UpdateSelectedOptionCustomProperties(options_[index]);
+    menuItemModifier->setSelectedBool(options_[index], true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
-        newSelected->SetCheckMarkVisibleType(VisibleType::VISIBLE);
+        menuItemModifier->setCheckMarkVisibleType(options_[index], VisibleType::VISIBLE);
         if (index != static_cast<int32_t>(GetOptions().size()) - 1) {
-            newSelected->UpdateNextNodeDivider(true);
+            menuItemModifier->updateNextNodeDivider(options_[index], true);
         }
         if (index != FIRST_NODE_INDEX) {
-            auto newSelectedNode = newSelected->GetHost();
+            auto newSelectedNode = options_[index];
             CHECK_NULL_VOID(newSelectedNode);
-            auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
-            CHECK_NULL_VOID(newSelectedPros);
-            newSelectedPros->UpdateNeedDivider(true);
+            menuItemModifier->updateNeedDivider(newSelectedNode, true);
         }
         return;
     }
-    newSelected->UpdateNextNodeDivider(false);
-    auto newSelectedNode = newSelected->GetHost();
+    menuItemModifier->updateNextNodeDivider(options_[index], false);
+    auto newSelectedNode = options_[index];
     CHECK_NULL_VOID(newSelectedNode);
-    auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
-    CHECK_NULL_VOID(newSelectedPros);
-    newSelectedPros->UpdateNeedDivider(false);
+    menuItemModifier->updateNeedDivider(newSelectedNode, false);
 }
 
 void SelectPattern::UpdateText(int32_t index)
@@ -1585,14 +1591,14 @@ void SelectPattern::UpdateText(int32_t index)
     if (index >= static_cast<int32_t>(options_.size()) || index < 0) {
         return;
     }
-    auto newSelected = options_[index]->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(newSelected);
-    textProps->UpdateContent(newSelected->GetText());
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    textProps->UpdateContent(menuItemModifier->getText(options_[index]));
     text_->MarkModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    selectValue_ = newSelected->GetText();
+    selectValue_ = menuItemModifier->getText(options_[index]);
 }
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
@@ -1662,33 +1668,31 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     ToJsonArrowAndText(json, filter);
     json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
     ToJsonSelectedOptionFontAndColor(json, filter);
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     if (options_.empty()) {
         json->PutExtAttr("optionBgColor", "", filter);
         json->PutExtAttr("optionFont", "", filter);
         json->PutExtAttr("optionFontColor", "", filter);
     } else {
-        auto optionPattern = options_[0]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        auto bgColor = selected_ == 0 ? selectedBgColor_ : optionPattern->GetBgColor();
+        CHECK_NULL_VOID(menuItemModifier);
+        auto bgColor = selected_ == 0 ? selectedBgColor_ : menuItemModifier->getBgColor(options_[0]);
         json->PutExtAttr("optionBgColor", bgColor->ColorToString().c_str(), filter);
-        json->PutExtAttr("optionFont", optionPattern->InspectorGetFont().c_str(), filter);
-        auto fontColor =
-            selected_ == 0 ? selectedFont_.FontColor.value_or(Color::BLACK) : optionPattern->GetFontColor();
+        json->PutExtAttr("optionFont", menuItemModifier->inspectorGetFont(options_[0]).c_str(), filter);
+        auto fontColor = selected_ == 0 ? selectedFont_.FontColor.value_or(Color::BLACK)
+                                        : menuItemModifier->getFontColor(options_[0]);
         json->PutExtAttr("optionFontColor", fontColor.ColorToString().c_str(), filter);
     }
     ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(optionPaintProperty);
-        std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
+        std::string optionWidth = std::to_string(menuItemModifier->getSelectModifiedWidthValue(options_[i], 0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
     ToJsonOptionMaxlines(json, filter);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    std::string optionHeight = std::to_string(menuModifier->getSelectModifiedHeightValue(menu, 0.0f));
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
@@ -1707,11 +1711,11 @@ void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>&
                 selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
             return;
         }
-        CHECK_NULL_VOID(options_[selected_]);
-        auto optionPattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        json->PutExtAttr("selectedOptionFont", optionPattern->InspectorGetFont().c_str(), filter);
-        json->PutExtAttr("selectedOptionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
+        auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        json->PutExtAttr("selectedOptionFont", menuItemModifier->inspectorGetFont(options_[selected_]).c_str(), filter);
+        json->PutExtAttr("selectedOptionFontColor",
+            menuItemModifier->getFontColor(options_[selected_]).ColorToString().c_str(), filter);
         return;
     }
     json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
@@ -1800,14 +1804,14 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
     if (options_.empty()) {
         json->PutExtAttr("divider", "", filter);
     } else {
-        auto props = options_[0]->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(props);
+        auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
         auto divider = JsonUtil::Create(true);
-        if (props->HasDivider()) {
-            divider->Put("strokeWidth", props->GetDividerValue().strokeWidth.ToString().c_str());
-            divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
-            divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
-            divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+        if (menuItemModifier->hasDivider(options_[0])) {
+            divider->Put("strokeWidth", menuItemModifier->getDividerValue(options_[0]).strokeWidth.ToString().c_str());
+            divider->Put("startMargin", menuItemModifier->getDividerValue(options_[0]).startMargin.ToString().c_str());
+            divider->Put("endMargin", menuItemModifier->getDividerValue(options_[0]).endMargin.ToString().c_str());
+            divider->Put("color", menuItemModifier->getDividerValue(options_[0]).color.ColorToString().c_str());
             ToJsonDividerMode(divider);
             json->PutExtAttr("divider", divider->ToString().c_str(), filter);
         } else {
@@ -1820,9 +1824,9 @@ void SelectPattern::ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    auto mode = menuLayoutProps->GetItemDividerMode();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto mode = menuModifier->getItemDividerMode(menu);
     if (!mode.has_value()) {
         return;
     }
@@ -1861,10 +1865,10 @@ void SelectPattern::ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const
     }
     if (!options_.empty()) {
         std::string optionMaxLines;
+        auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
         for (size_t i = 0; i < options_.size(); ++i) {
-            auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(optionPattern);
-            auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+            auto textNode = AceType::DynamicCast<FrameNode>(menuItemModifier->getTextNode(options_[i]));
             CHECK_NULL_VOID(textNode);
             auto props = textNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(props);
@@ -1908,11 +1912,13 @@ std::string SelectPattern::InspectorGetOptions() const
 {
     auto jsonValue = JsonUtil::Create(true);
     auto jsonOptions = JsonUtil::CreateArray(true);
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (size_t i = 0; i < options_.size(); ++i) {
         auto temp = JsonUtil::Create(true);
-        auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
-        temp->Put("value", optionPattern->GetText().c_str());
-        temp->Put("icon", optionPattern->GetIcon().c_str());
+        if (menuItemModifier) {
+            temp->Put("value", menuItemModifier->getText(options_[i]).c_str());
+            temp->Put("icon", menuItemModifier->getIcon(options_[i]).c_str());
+        }
         auto index = std::to_string(i);
         jsonOptions->Put(index.c_str(), temp);
     }
@@ -1955,15 +1961,13 @@ void SelectPattern::UpdateTargetSize()
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateTargetSize(selectSize_);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateTargetSize(menu, selectSize_);
     if (isFitTrigger_) {
         auto selectWidth = selectSize_.Width();
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->SetIsWidthModifiedBySelect(true);
-        menuLayoutProps->UpdateSelectMenuModifiedWidth(selectWidth);
+        menuModifier->setIsWidthModifiedBySelect(menu, true);
+        menuModifier->updateSelectMenuModifiedWidth(menu, selectWidth);
         auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
         CHECK_NULL_VOID(scroll);
         auto scrollPattern = scroll->GetPattern<ScrollPattern>();
@@ -2032,19 +2036,19 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuAlign_ = menuAlign;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateAlignType(menuAlign.alignType);
-    menuLayoutProps->UpdateOffset(menuAlign.offset);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateAlignType(menu, menuAlign.alignType);
+    menuModifier->updateOffset(menu, menuAlign.offset);
 }
 
 void SelectPattern::SetAvoidance(AvoidanceMode mode)
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateSelectAvoidanceMode(mode);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->updateSelectAvoidanceMode(menu, mode);
 }
 
 std::string SelectPattern::ProvideRestoreInfo()
@@ -2080,8 +2084,8 @@ void SelectPattern::OnColorConfigurationUpdate()
 
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
     auto renderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
@@ -2091,14 +2095,15 @@ void SelectPattern::OnColorConfigurationUpdate()
     }
 
     UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
-    auto optionNode = menuPattern->GetOptions();
+    auto optionNode = menuModifier->getOptions(menuNode);
+    auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto child : optionNode) {
-        auto optionsPattern = child->GetPattern<MenuItemPattern>();
-        auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
-        if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
-            optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
+        if (menuItemModifier) {
+            auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+            if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
+                menuItemModifier->updateCheckMarkColor(child, selectTheme->GetCheckMarkColor());
+            }
         }
-
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -2125,10 +2130,10 @@ void SelectPattern::SetOptionBgColorByUser(const Color& color, const RefPtr<Sele
     if (!optionBgColor_.has_value()) {
         return;
     }
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (const auto& option : options_) {
-        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateOptionBgColor(optionBgColor_.value());
+        menuItemModifier->updateOptionBgColor(option, optionBgColor_.value());
         option->MarkModifyDone();
         option->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
@@ -2207,9 +2212,9 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
                 return;
             }
-            auto newSelected = pattern->options_[index]->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(newSelected);
-            auto value = newSelected->GetText();
+            const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+            CHECK_NULL_VOID(menuItemModifier);
+            auto value = menuItemModifier->getText(pattern->options_[index]);
             auto valueChangeEvent = hub->GetValueChangeEvent();
             if (valueChangeEvent) {
                 valueChangeEvent(value);
@@ -2246,12 +2251,10 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
     isFitTrigger_ = false;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetIsWidthModifiedBySelect(true);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateSelectMenuModifiedWidth(value.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->setIsWidthModifiedBySelect(menu, true);
+    menuModifier->updateSelectMenuModifiedWidth(menu, (value.ConvertToPx() + OPTION_MARGIN.ConvertToPx()));
 
     auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
     CHECK_NULL_VOID(scroll);
@@ -2262,14 +2265,12 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
     CHECK_NULL_VOID(scrollLayoutProps);
     scrollLayoutProps->UpdateScrollWidth(value.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
 
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionWidth = value.ConvertToPx();
-        auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(optionPaintProperty);
-        optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
+        menuItemModifier->setIsWidthModifiedBySelect(options_[i], true);
+        menuItemModifier->updateSelectModifiedWidth(options_[i], optionWidth);
     }
 }
 
@@ -2282,18 +2283,18 @@ void SelectPattern::SetHasOptionWidth(bool hasOptionWidth)
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetHasOptionWidth(true);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->setHasOptionWidth(menu, true);
     auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
     CHECK_NULL_VOID(scroll);
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);
     scrollPattern->SetHasOptionWidth(true);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        optionPattern->SetHasOptionWidth(true);
+        menuItemModifier->setHasOptionWidth(options_[i], true);
     }
 }
 
@@ -2302,12 +2303,10 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
     auto menuMaxHeight = value.ConvertToPx();
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetIsHeightModifiedBySelect(true);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateSelectModifiedHeight(menuMaxHeight);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->setIsHeightModifiedBySelect(menu, true);
+    menuModifier->updateSelectModifiedHeight(menu, menuMaxHeight);
 }
 
 void SelectPattern::SetMenuBackgroundColor(const Color& color)
@@ -2395,9 +2394,9 @@ bool SelectPattern::IsValidIndex(int32_t index)
 void SelectPattern::GetSelectedValue(int32_t index, std::string& value)
 {
     CHECK_NULL_VOID(options_[index]);
-    auto newSelected = options_[index]->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(newSelected);
-    value = newSelected->GetText();
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    value = menuItemModifier->getText(options_[index]);
 }
 
 bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
@@ -2542,13 +2541,11 @@ bool SelectPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
 void SelectPattern::SetDivider(const SelectDivider& divider)
 {
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (auto&& option : options_) {
-        auto props = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(props);
-        props->UpdateDivider(divider);
-        auto optionPattern = option->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        auto frameNode = optionPattern->GetBottomDivider();
+        menuItemModifier->updateDivider(option, divider);
+        auto frameNode = menuItemModifier->getBottomDivider(option);
         if (!frameNode) {
             continue;
         }
@@ -2587,16 +2584,14 @@ void SelectPattern::SetDividerMode(const std::optional<DividerMode>& mode)
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
     if (mode.has_value()) {
-        menuLayoutProps->UpdateItemDividerMode(mode.value());
+        menuModifier->updateItemDividerMode(menu, mode.value());
     } else {
-        menuLayoutProps->ResetItemDividerMode();
+        menuModifier->resetItemDividerMode(menu);
     }
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->UpdateMenuItemDivider();
+    menuModifier->updateMenuItemDivider(menu);
 }
 
 void SelectPattern::SetMenuOutline(const MenuParam& menuParam)
@@ -2684,35 +2679,37 @@ std::function<void(WeakPtr<NG::FrameNode>)>& SelectPattern::GetArrowModifier()
 void SelectPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& textOptionApply)
 {
     textOptionApply_ = textOptionApply;
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (size_t i = 0; i < options_.size(); ++i) {
         if (static_cast<int32_t>(i) == selected_ && textOptionApply_) {
             continue;
         }
-        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetOptionTextModifier(textOptionApply);
+        menuItemModifier->setOptionTextModifier(options_[i], textOptionApply);
         if (textOptionApply) {
-            UpdateOptionFontFromPattern(pattern);
+            UpdateOptionFontFromPattern(options_[i]);
         }
     }
 }
 
-void SelectPattern::UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern)
+void SelectPattern::UpdateOptionFontFromPattern(const RefPtr<FrameNode>& optionNode)
 {
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     if (optionFont_.FontColor.has_value()) {
-        optionPattern->SetFontColor(optionFont_.FontColor.value());
+        menuItemModifier->setFontColor(optionNode, optionFont_.FontColor.value(), true);
     }
     if (optionFont_.FontFamily.has_value()) {
-        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+        menuItemModifier->setFontFamily(optionNode, optionFont_.FontFamily.value());
     }
     if (optionFont_.FontSize.has_value()) {
-        optionPattern->SetFontSize(optionFont_.FontSize.value());
+        menuItemModifier->setFontSize(optionNode, optionFont_.FontSize.value());
     }
     if (optionFont_.FontStyle.has_value()) {
-        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+        menuItemModifier->setItalicFontStyle(optionNode, optionFont_.FontStyle.value());
     }
     if (optionFont_.FontWeight.has_value()) {
-        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+        menuItemModifier->setFontWeight(optionNode, optionFont_.FontWeight.value());
     }
 }
 
@@ -2721,39 +2718,41 @@ void SelectPattern::SetSelectedOptionTextModifier(
 {
     textSelectOptionApply_ = textSelectOptionApply;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
-        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetSelectedOptionTextModifier(textSelectOptionApply);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_VOID(menuItemModifier);
+        menuItemModifier->setSelectedOptionTextModifier(options_[selected_], textSelectOptionApply);
         if (textSelectOptionApply) {
-            UpdateSelectedOptionFontFromPattern(pattern);
+            UpdateSelectedOptionFontFromPattern(options_[selected_]);
         }
     }
 }
 
-void SelectPattern::UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern)
+void SelectPattern::UpdateSelectedOptionFontFromPattern(const RefPtr<FrameNode>& optionNode)
 {
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     if (selectedFont_.FontColor.has_value()) {
-        optionPattern->SetOptionFontColor(selectedFont_.FontColor.value());
+        menuItemModifier->setOptionFontColor(optionNode, selectedFont_.FontColor.value());
     }
     if (selectedFont_.FontFamily.has_value()) {
-        optionPattern->SetFontFamily(selectedFont_.FontFamily.value());
+        menuItemModifier->setFontFamily(optionNode, selectedFont_.FontFamily.value());
     } else if (optionFont_.FontFamily.has_value()) {
-        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+        menuItemModifier->setFontFamily(optionNode, optionFont_.FontFamily.value());
     }
     if (selectedFont_.FontSize.has_value()) {
-        optionPattern->SetFontSize(selectedFont_.FontSize.value());
+        menuItemModifier->setFontSize(optionNode, selectedFont_.FontSize.value());
     } else if (optionFont_.FontSize.has_value()) {
-        optionPattern->SetFontSize(optionFont_.FontSize.value());
+        menuItemModifier->setFontSize(optionNode, optionFont_.FontSize.value());
     }
     if (selectedFont_.FontStyle.has_value()) {
-        optionPattern->SetItalicFontStyle(selectedFont_.FontStyle.value());
+        menuItemModifier->setItalicFontStyle(optionNode, selectedFont_.FontStyle.value());
     } else if (optionFont_.FontStyle.has_value()) {
-        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+        menuItemModifier->setItalicFontStyle(optionNode, optionFont_.FontStyle.value());
     }
     if (selectedFont_.FontWeight.has_value()) {
-        optionPattern->SetFontWeight(selectedFont_.FontWeight.value());
+        menuItemModifier->setFontWeight(optionNode, selectedFont_.FontWeight.value());
     } else if (optionFont_.FontWeight.has_value()) {
-        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+        menuItemModifier->setFontWeight(optionNode, optionFont_.FontWeight.value());
     }
 }
 

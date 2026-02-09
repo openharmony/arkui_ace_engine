@@ -49,6 +49,7 @@ arkui_modules = [
   "menuitem",
   "menuitemgroup",
   "marquee",
+  "search",
   "stepper",
   "stepperitem",
   "radio",
@@ -57,6 +58,7 @@ arkui_modules = [
   "calendarpicker",
   "hyperlink",
   "symbolglyph",
+  "richeditor",
 ]
 
 if (qrcodegen_support) {

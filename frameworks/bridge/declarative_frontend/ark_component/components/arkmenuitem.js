@@ -167,7 +167,7 @@ class ArkMenuItemComponent extends ArkComponent {
   }
 }
 
-class JSMenuItem extends JSViewAbstract {
+class JSMenuItem extends JSContainerBase {
   static create(params) {
     getUINativeModule().menuitem.create(params);
   }

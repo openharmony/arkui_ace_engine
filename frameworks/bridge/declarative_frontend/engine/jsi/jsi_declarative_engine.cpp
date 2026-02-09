@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -829,6 +829,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
         { "Gauge", "arkui.components.arkgauge" },
         { "Rating", "arkui.components.arkrating" },
+        { "Richeditor", "arkui.components.arkricheditor" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
@@ -837,6 +838,10 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
         { "Hyperlink", "arkui.components.arkhyperlink" },
         { "Marquee", "arkui.components.arkmarquee" },
+        { "Search", "arkui.components.arksearch" },
+        { "Menu", "arkui.components.arkmenu" },
+        { "MenuItem", "arkui.components.arkmenuitem" },
+        { "MenuItemGroup", "arkui.components.arkmenuitemgroup" },
         { "Stepper", "arkui.components.arkstepper" },
         { "StepperItem", "arkui.components.arkstepperitem" },
         { "Radio", "arkui.components.arkradio" },

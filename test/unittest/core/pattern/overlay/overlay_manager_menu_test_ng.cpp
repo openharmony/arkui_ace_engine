@@ -44,6 +44,7 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -252,11 +253,13 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest001, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
     /**
      * @tc.steps: step2. call SendToAccessibility
      * @tc.expected: menuWrapperNode is not null
      */
-    overlayManager->SendToAccessibility(menuWrapperNode, true);
+    menuManager->SendToAccessibility(menuWrapperNode, AceType::WeakClaim(AceType::RawPtr(overlayManager)), true);
     ASSERT_NE(menuWrapperNode, nullptr);
 }
 
@@ -290,11 +293,13 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest002, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
     /**
      * @tc.steps: step2. call SendToAccessibility
      * @tc.expected: menuWrapperNode is not null
      */
-    overlayManager->SendToAccessibility(menuWrapperNode, false);
+    menuManager->SendToAccessibility(menuWrapperNode, AceType::WeakClaim(AceType::RawPtr(overlayManager)), false);
     ASSERT_NE(menuWrapperNode, nullptr);
 }
 
@@ -333,16 +338,18 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest003, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
-    overlayManager->ShowMenuAnimation(menuNode);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -354,7 +361,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest003, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -363,7 +370,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest003, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -392,26 +399,28 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest004, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
     overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step3. call showMenu when menuNode is not appended.
      * @tc.expected: menuNode mounted successfully
      */
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step4. call showMenu when menuNode is nullptr and menuMap is not empty.
      * @tc.expected: function exits normally
      */
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step5. call HideAllMenus.
      * @tc.expected: function exits normally
      */
     overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));
@@ -461,7 +470,9 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest005, TestSize.Level1)
      */
     EXPECT_EQ(rootNode->GetChildren().size(), 1);
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
-    overlayManager->PopMenuAnimation(menuWrapperNode, true);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->PopMenuAnimation(menuWrapperNode, overlayManager, true);
     pipeline->taskExecutor_ = nullptr;
     EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
     EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
@@ -475,7 +486,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest005, TestSize.Level1)
      * @tc.expected: the none of node will remove.
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
-    overlayManager->PopMenuAnimation(menuWrapperNode, false);
+    menuManager->PopMenuAnimation(menuWrapperNode, overlayManager, false);
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
 
@@ -559,11 +570,13 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest007, TestSize.Level1)
     auto focusHub = menuWrapperNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
     /**
      * @tc.steps: step2. call ShowMenuAnimation and call StartShowAnimation of menu pattern
      * @tc.expected: the isFirstShow_ of preview pattern true and parentFocusable_ of menuWrapper's focus hub is true
      */
-    overlayManager->ShowMenuAnimation(menuWrapperNode);
+    menuManager->ShowMenuAnimation(menuWrapperNode, overlayManager);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->StartShowAnimation();
     pipeline->taskExecutor_ = nullptr;
@@ -659,16 +672,18 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest009, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
-    overlayManager->ShowMenuAnimation(menuNode);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -680,7 +695,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest009, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -689,7 +704,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest009, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -720,21 +735,23 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest010, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
     overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step3. call showMenu when menuNode is not appended.
      * @tc.expected: menuNode mounted successfully
      */
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call showMenu when menuNode is nullptr and menuMap is not empty.
      * @tc.expected: function exits normally
      */
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step5. call HideAllMenus.
@@ -742,7 +759,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest010, TestSize.Level1)
      */
     overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));
@@ -833,8 +850,10 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest012, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->menuAnimationDuration_ = 100;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
     AnimationOption option;
-    overlayManager->UpdateMenuAnimationOptions(menuWrapperNode, option);
+    menuManager->UpdateMenuAnimationOptions(menuWrapperNode, option, overlayManager);
     EXPECT_EQ(option.GetDuration(), 100);
     EXPECT_EQ(option.GetCurve(), Curves::FAST_OUT_SLOW_IN);
 
@@ -842,7 +861,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest012, TestSize.Level1)
      * @tc.steps: step2. call UpdateMenuAnimationOptions duration 150ms.
      */
     selectTheme->menuAnimationDuration_ = 0;
-    overlayManager->UpdateMenuAnimationOptions(menuWrapperNode, option);
+    menuManager->UpdateMenuAnimationOptions(menuWrapperNode, option, overlayManager);
     EXPECT_EQ(option.GetDuration(), 150);
 }
 
@@ -880,7 +899,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackNoCallback, TestSi
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: Basic operations execute but callback condition fails
      */
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
 
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
     EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
@@ -925,7 +946,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackWithMainPipelineAn
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: All operations execute including pipeline flush due to both conditions being true
      */
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
 
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
     EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
@@ -968,7 +991,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMenuStatusChangeCa
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: Status and disappear state are updated correctly
      */
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
 
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
     EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
@@ -996,24 +1021,26 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackComprehensiveBranc
      * @tc.steps: step3. Call HandleMenuDisappearCallback with various conditions
      * @tc.expected: All branches execute correctly
      */
-    overlayManager->HandleMenuDisappearCallback(nullptr);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(nullptr);
 
     auto invalidMenuNode = FrameNode::CreateFrameNode(
         V2::MENU_WRAPPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    overlayManager->HandleMenuDisappearCallback(invalidMenuNode);
+    menuManager->HandleMenuDisappearCallback(invalidMenuNode);
 
     auto validMenuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
     auto validMenuWrapperPattern = validMenuWrapper->GetPattern<MenuWrapperPattern>();
 
-    overlayManager->HandleMenuDisappearCallback(validMenuWrapper);
+    menuManager->HandleMenuDisappearCallback(validMenuWrapper);
     EXPECT_EQ(validMenuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
 
     auto menuWrapper2 = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
     auto menuWrapperPattern2 = menuWrapper2->GetPattern<MenuWrapperPattern>();
 
-    overlayManager->HandleMenuDisappearCallback(menuWrapper2);
+    menuManager->HandleMenuDisappearCallback(menuWrapper2);
     EXPECT_EQ(menuWrapperPattern2->GetMenuStatus(), MenuStatus::HIDE);
 
     auto menuWrapper3 = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
@@ -1024,7 +1051,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackComprehensiveBranc
     auto disappearCallback = [&callbackExecuted]() { callbackExecuted = true; };
     menuWrapperPattern3->RegisterMenuDisappearCallback(disappearCallback);
 
-    overlayManager->HandleMenuDisappearCallback(menuWrapper3);
+    menuManager->HandleMenuDisappearCallback(menuWrapper3);
     EXPECT_EQ(menuWrapperPattern3->GetMenuStatus(), MenuStatus::HIDE);
 }
 
@@ -1062,7 +1089,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMainPipelineExists
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: Basic operations execute, pipeline branch is taken but callback condition fails
      */
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
 
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
     EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
@@ -1106,7 +1135,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMainPipelineExists
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: All operations execute including pipeline flush due to both conditions being true
      */
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
 
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
     EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
@@ -1140,7 +1171,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackStateChangeCallbac
      * @tc.steps: step2. Call HandleMenuDisappearCallback
      * @tc.expected: CallMenuStateChangeCallback is invoked with "false"
      */
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
 
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
     EXPECT_FALSE(menuWrapperPattern->GetOnMenuDisappear());
@@ -1180,7 +1213,9 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallback_InvalidMainPipeli
      * @tc.expected: The function executes correctly, updates menu status, and calls the callback
      */
     MockPipelineContext::TearDown();
-    overlayManager->HandleMenuDisappearCallback(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->HandleMenuDisappearCallback(menuWrapper);
     MockPipelineContext::SetUp();
 
     /**
@@ -1208,7 +1243,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullMenu_Test, Te
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(nullMenu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(nullMenu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1236,7 +1273,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullOverlayManage
     RefPtr<OverlayManager> nullOverlayManager = nullptr;
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, nullOverlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, nullOverlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1264,7 +1303,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_MenuWithNoChildre
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1294,7 +1335,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_InvalidMenuPatter
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1329,7 +1372,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullMenuLayoutPro
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1359,7 +1404,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_ExpandDisplayFals
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = false;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1393,7 +1440,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NonSelectTargetTa
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1430,7 +1479,9 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_ShowInSubWindowFa
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
-    bool result = overlayManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
     EXPECT_FALSE(result);
 }
 
@@ -1464,25 +1515,27 @@ HWTEST_F(OverlayManagerMenuTestNg, HideAllMenusWithoutAnimation001, TestSize.Lev
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
     overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step3. call showMenu when menuNode is not appended.
      * @tc.expected: menuNode mounted successfully
      */
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step4. call showMenu when menuNode is nullptr and menuMap is not empty.
      * @tc.expected: function exits normally
      */
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step5. call HideAllMenus.
      * @tc.expected: function exits normally
      */
     overlayManager->HideAllMenusWithoutAnimation();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     EXPECT_FALSE(overlayManager->IsMenuShow());
 }
 
@@ -1552,10 +1605,12 @@ HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearWithStatus001, TestSize.Leve
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->CallMenuDisappearWithStatus(menuWrapper);
     EXPECT_EQ(callCount, EXPECT_CALL_TWICE_TIMES);
     menuWrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
-    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    menuManager->CallMenuDisappearWithStatus(menuWrapper);
     EXPECT_EQ(callCount, EXPECT_CALL_THREE_TIMES);
 }
 
@@ -1594,10 +1649,12 @@ HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearOnlyNewLifeCycle, TestSize.L
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->CallMenuDisappearWithStatus(menuWrapper);
     EXPECT_EQ(callCount, EXPECT_CALL_TWICE_TIMES);
     menuWrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
-    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    menuManager->CallMenuDisappearWithStatus(menuWrapper);
     EXPECT_EQ(callCount, EXPECT_CALL_THREE_TIMES);
 }
 
@@ -1649,7 +1706,10 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleAccessibilityPageEventControl_Accessibi
     menuNode->MountToParent(menuWrapperNode);
     menuWrapperNode->MountToParent(rootNode);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->SendToAccessibility(menuWrapperNode, false);
+    ASSERT_NE(overlayManager, nullptr);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->SendToAccessibility(menuWrapperNode, AceType::WeakClaim(AceType::RawPtr(overlayManager)), false);
     EXPECT_NE(menuWrapperNode, nullptr);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(oldState);
 }
@@ -1681,10 +1741,12 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleAccessibilityPageEventControl_AddAndRem
     EXPECT_CALL(*frontend, GetAccessibilityManager()).WillRepeatedly(Return(accessibilityManager));
     pipeline->weakFrontend_ = AceType::WeakClaim(AceType::RawPtr(frontend));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->menuMap_[1] = menuWrapperNode;
-    overlayManager->SendToAccessibility(menuWrapperNode, false);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[1] = menuWrapperNode;
+    menuManager->SendToAccessibility(menuWrapperNode, AceType::WeakClaim(AceType::RawPtr(overlayManager)), false);
     EXPECT_NE(menuWrapperNode, nullptr);
-    overlayManager->PopMenuAnimation(menuWrapperNode, false, false);
+    menuManager->PopMenuAnimation(menuWrapperNode, overlayManager, false, false);
     EXPECT_NE(menuWrapperNode, nullptr);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(oldState);
 }

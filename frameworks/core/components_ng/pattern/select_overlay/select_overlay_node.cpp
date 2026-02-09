@@ -40,6 +40,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -54,8 +57,9 @@
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 #include "frameworks/base/utils/measure_util.h"
-#include "frameworks/core/components_ng/pattern/menu/menu_model_ng.h"
 
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 
@@ -339,9 +343,12 @@ RefPtr<FrameNode> BuildPasteButton(const std::shared_ptr<SelectOverlayInfo>& inf
     } else {
         buttonPaintProperty->UpdateFontColor(
             textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
-        auto buttonEventHub = pasteButton->GetEventHub<MenuItemEventHub>();
-        CHECK_NULL_RETURN(buttonEventHub, pasteButton);
-        buttonEventHub->SetEnabled(false);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_RETURN(menuItemModifier, pasteButton);
+        if (!menuItemModifier->hasMenuItemEventHub(pasteButton)) {
+            return pasteButton;
+        }
+        menuItemModifier->setEnabled(pasteButton, false);
     }
     SetResponseRegion(pasteButton);
     auto buttonNode = GetSecCompChildNode(pasteButton, V2::BUTTON_ETS_TAG);
@@ -520,9 +527,12 @@ RefPtr<FrameNode> BuildButton(const std::shared_ptr<SelectOverlayInfo>& info, st
                 }
             });
     } else {
-        auto buttonEventHub = button->GetEventHub<MenuItemEventHub>();
-        CHECK_NULL_RETURN(buttonEventHub, button);
-        buttonEventHub->SetEnabled(false);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        CHECK_NULL_RETURN(menuItemModifier, button);
+        if (!menuItemModifier->hasMenuItemEventHub(button)) {
+            return button;
+        }
+        menuItemModifier->setEnabled(button, false);
     }
     SetResponseRegion(button);
     button->MarkModifyDone();
@@ -1415,18 +1425,14 @@ void UpdateMenuItemOpacityAndAction(const MenuItemSetupInfo& cfg, const RowNodeP
             leftRowNode->MarkModifyDone();
         }
     }
-    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(menuItemPattern);
-    auto eventHub = menuItemPattern->GetEventHub<MenuItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetSelectOverlayMenuOnClick([action = param.action]() {
-        action();
-    });
-    eventHub->SetEnabled(param.enabled);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    menuItemModifier->setSelectOverlayMenuOnClick(menuItem, [action = param.action]() { action(); });
+    menuItemModifier->setEnabled(menuItem, param.enabled);
     auto focusHub = menuItem->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetEnabled(param.enabled);
-    if (menuItemPattern->IsDisabled()) {
+    if (menuItemModifier->isDisabled(menuItem)) {
         leftRowRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         leftRowNode->MarkModifyDone();
         if (!param.subMenuItems.empty() && cfg.isUsingMouse) {
@@ -1434,7 +1440,7 @@ void UpdateMenuItemOpacityAndAction(const MenuItemSetupInfo& cfg, const RowNodeP
             rightRowNode->MarkModifyDone();
         }
     }
-    menuItemPattern->SetBlockClick(param.disableSystemClick);
+    menuItemModifier->setBlockClick(menuItem, param.disableSystemClick);
 }
 
 RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, const int32_t targetNodeId,
@@ -1448,15 +1454,15 @@ struct MenuItemRowText {
 void SetSubMenuItemBuildCallback(const RefPtr<FrameNode>& menuItem, RefPtr<FrameNode>& leftTextNode,
     OptionParam& param, bool isUsingMouse)
 {
-    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(menuItemPattern);
-    menuItemPattern->SetTextNode(leftTextNode);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    menuItemModifier->setTextNode(menuItem, leftTextNode);
     if (!param.subMenuItems.empty()) {
         auto subMenuBuildCallback = [param, isUsingMouse]() mutable -> RefPtr<UINode> {
             auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             return CreateInnerMenuWithItems(param.subMenuItems, targetNodeId, isUsingMouse, true);
         };
-        menuItemPattern->SetSubSelectMenuBuilder(subMenuBuildCallback);
+        menuItemModifier->setSubSelectMenuBuilder(menuItem, subMenuBuildCallback);
     }
 }
 
@@ -1534,9 +1540,9 @@ void GetExtensionMenuItemDividerInfo(const RefPtr<FrameNode>& node, V2::ItemDivi
 void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode, OptionParam& param,
     const RefPtr<SelectTheme>& theme)
 {
-    auto eventHub = menuItem->GetEventHub<MenuItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabled(false);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
+    menuItemModifier->setEnabled(menuItem, false);
     auto focusHub = menuItem->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetEnabled(false);
@@ -1556,10 +1562,8 @@ void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<Frame
             action();
         }
     });
-    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(menuItemPattern);
-    menuItemPattern->SetBlockClick(param.disableSystemClick);
-    menuItemPattern->SetPasteButton(pasteNode);
+    menuItemModifier->setBlockClick(menuItem, param.disableSystemClick);
+    menuItemModifier->setPasteButton(menuItem, pasteNode);
 }
 
 RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode,
@@ -1635,15 +1639,16 @@ void CreateMenuItemPasteDivider(const RefPtr<FrameNode>& innerMenuNode, const Re
         if (index != 0) {
             V2::ItemDivider divider;
             GetExtensionMenuItemDividerInfo(menuItem, divider);
-            auto menuItemPaintProperty = menuItem->GetPaintProperty<MenuItemPaintProperty>();
-            CHECK_NULL_VOID(menuItemPaintProperty);
-            menuItemPaintProperty->UpdateStartMargin(divider.startMargin);
-            menuItemPaintProperty->UpdateEndMargin(divider.endMargin);
-            menuItemPaintProperty->UpdateDividerColor(divider.color);
+            const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+            if (menuItemModifier) {
+                menuItemModifier->updateStartMargin(menuItem, divider.startMargin);
+                menuItemModifier->updateEndMargin(menuItem, divider.endMargin);
+                menuItemModifier->updateDividerColor(menuItem, divider.color);
+            }
         } else {
-            auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
-            CHECK_NULL_VOID(menuPattern);
-            menuPattern->SetNeedDivider();
+            auto menuModifer = NG::NodeModifier::GetMenuInnerModifier();
+            CHECK_NULL_VOID(menuModifer);
+            menuModifer->menuSetNeedDivider(innerMenuNode);
         }
     }
 }
@@ -1662,13 +1667,13 @@ RefPtr<FrameNode> CreateMenuItemPaste(const std::string& content, const std::str
         static_cast<int32_t>(ButtonType::NORMAL), true, overlayTheme->GetPasteSymbolId());
     CHECK_NULL_RETURN(pasteNode, nullptr);
     SetPasteNodeProperties(pasteNode, theme, param.enabled, isUsingMouse);
-    auto menuItem =
-        FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            [index]() { return AceType::MakeRefPtr<MenuItemPattern>(false, index); });
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    auto menuItem = menuItemModifier ? menuItemModifier->getOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), false, index) : nullptr;
     CHECK_NULL_RETURN(menuItem, nullptr);
-    auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    menuPattern->AddMenuItemNode(menuItem);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, nullptr);
+    menuModifier->addMenuItemNode(innerMenuNode, menuItem);
     BorderRadiusProperty border;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         border.SetRadius(theme->GetMenuDefaultInnerRadius());
@@ -1699,11 +1704,12 @@ void CreateMenuItemDivider(const RefPtr<FrameNode>& menuItem, bool isUsingMouse,
     if (menuItem && !isUsingMouse && isSubMenu) {
         V2::ItemDivider divider;
         GetExtensionMenuItemDividerInfo(menuItem, divider);
-        auto menuItemPaintProperty = menuItem->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(menuItemPaintProperty);
-        menuItemPaintProperty->UpdateStartMargin(divider.startMargin);
-        menuItemPaintProperty->UpdateEndMargin(divider.endMargin);
-        menuItemPaintProperty->UpdateDividerColor(divider.color);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        if (menuItemModifier) {
+            menuItemModifier->updateStartMargin(menuItem, divider.startMargin);
+            menuItemModifier->updateEndMargin(menuItem, divider.endMargin);
+            menuItemModifier->updateDividerColor(menuItem, divider.color);
+        }
     }
 }
 
@@ -1715,13 +1721,13 @@ RefPtr<FrameNode> CreateMenuItem(const std::string& content, const std::string& 
     CHECK_NULL_RETURN(stack, nullptr);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto menuItem =
-        FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            [index]() { return AceType::MakeRefPtr<MenuItemPattern>(false, index); });
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    auto menuItem = menuItemModifier ? menuItemModifier->getOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), false, index) : nullptr;
     CHECK_NULL_RETURN(menuItem, nullptr);
-    auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    menuPattern->AddMenuItemNode(menuItem);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, nullptr);
+    menuModifier->addMenuItemNode(innerMenuNode, menuItem);
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -1754,14 +1760,12 @@ RefPtr<FrameNode> CreateInnerMenuWithItems(std::vector<OptionParam>& params, con
 
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, nullptr);
-    auto innerMenuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, stack->ClaimNodeId(), [targetNodeId]() {
-        return AceType::MakeRefPtr<InnerMenuPattern>(targetNodeId, V2::MENU_ETS_TAG, MenuType::MULTI_MENU);
-    });
+    auto menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, nullptr);
+    auto innerMenuNode = menuModifier->menuCreateFrameNode(targetNodeId, stack->ClaimNodeId());
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
     if (!isUsingMouse && isSubMenu) {
-        auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, nullptr);
-        menuPattern->SetNeedDivider();
+        menuModifier->menuSetNeedDivider(innerMenuNode);
     }
     RefPtr<FrameNode> menuItem = nullptr;
     for (size_t i = 0; i < params.size(); i++) {
@@ -1789,8 +1793,10 @@ RefPtr<FrameNode> GetRightClickMenuWrapper(std::vector<OptionParam>& params)
     auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto innerMenuNode = CreateInnerMenuWithItems(params, targetNodeId, true, false);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
-    menuWrapper = MenuView::Create(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
-        { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU });
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_RETURN(menuViewModifier, nullptr);
+    menuWrapper = menuViewModifier->createWithCustomNode(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
+        { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU }, true, nullptr);
     menuWrapper->UpdateInspectorId("select_overlay_right_click_menuWrapper");
     return menuWrapper;
 }
@@ -1799,9 +1805,9 @@ RefPtr<UINode> GetEmbeddedMenuFirstNodeInExMenu(const RefPtr<UINode>& embeddedMe
 {
     auto menuItem = AceType::DynamicCast<FrameNode>(embeddedMenuitem);
     CHECK_NULL_RETURN(menuItem, nullptr);
-    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_RETURN(menuItemPattern, nullptr);
-    CHECK_NULL_RETURN(menuItemPattern->GetSubSelectMenuBuilder(), nullptr);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_RETURN(menuItemModifier, nullptr);
+    CHECK_NULL_RETURN(menuItemModifier->getSubSelectMenuBuilder(menuItem), nullptr);
     return AceType::DynamicCast<UINode>(menuItem->GetChildByIndex(2));  /* 2: clickableRow */
 }
 
@@ -1886,9 +1892,9 @@ std::function<void(WeakPtr<NG::FrameNode>)> GetCustomMenuItemSymbolFunc(const Me
 void SelectOverlayNode::ProcessSubMenuOnHide()
 {
     if (isExtensionMenu_) {
-        auto menuPattern = extensionMenu_->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->HideAllEmbeddedMenuItems(false);
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
+        menuModifier->hideAllEmbeddedMenuItems(extensionMenu_, false);
         return;
     }
     if (GetSubToolbarStatus() == SubToolbarStatus::UNEXPANDED) {
@@ -2108,11 +2114,11 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(
 
 void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info)
 {
-    selectMenu_ =
-        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
-            return AceType::MakeRefPtr<MenuPattern>(
-                ElementRegister::GetInstance()->MakeUniqueId(), V2::MENU_ETS_TAG, MenuType::SELECT_OVERLAY_CUSTOM_MENU);
-        });
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    selectMenu_ = menuModifier->getOrCreateMenuNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MenuType::SELECT_OVERLAY_CUSTOM_MENU);
+    CHECK_NULL_VOID(selectMenu_);
     selectMenu_->MountToParent(Claim(this));
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateCustomSelectOverlay by menu:%{public}d", selectMenu_->GetId());
     AddCustomMenuCallbacks(info);
@@ -2121,7 +2127,6 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
     renderContext->UpdateClipEdge(false);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
-    auto layoutProperty = selectMenu_->GetLayoutProperty<MenuLayoutProperty>();
     auto customMenu = CreateCustomSelectMenu(info);
     CHECK_NULL_VOID(selectMenu_);
     CHECK_NULL_VOID(customMenu);
@@ -2202,9 +2207,9 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f, noAnimation);
     modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f, noAnimation);
     modifier->SetLineEndOffset(true, noAnimation);
-    auto menuPattern = extensionMenu_->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetMenuShow();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->setMenuShow(extensionMenu_);
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty, id = containerId,
                                   weak = WeakClaim(this), weakExtensionMenu = WeakClaim(RawPtr(extensionMenu_))]() {
         ContainerScope scope(id);
@@ -2270,10 +2275,10 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
 
     selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto menuPattern = extensionMenu_->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->ShowMenuDisappearAnimation();
-    menuPattern->HideAllEmbeddedMenuItems(false);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->showMenuDisappearAnimation(extensionMenu_);
+    menuModifier->hideAllEmbeddedMenuItems(extensionMenu_, false);
     AnimationOption extensionOption;
     extensionOption.SetDuration(ANIMATION_DURATION2);
     extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -2406,9 +2411,9 @@ void SelectOverlayNode::SetMenuItemsColor(
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     auto color = textStyle.GetTextColor();
     for (size_t i = 0; i < menuItems.size(); ++i) {
-        auto pattern = menuItems[i]->GetPattern<MenuItemPattern>();
-        if (pattern) {
-            pattern->SetFontColor(color, true);
+        const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+        if (menuItemModifier) {
+            menuItemModifier->setFontColor(menuItems[i], color, true);
         }
     }
 }
@@ -2631,22 +2636,26 @@ RefPtr<FrameNode> SelectOverlayNode::GetExtensionMenuOutterrMenu(std::vector<Opt
     auto innerMenuNode = CreateInnerMenuWithItems(params, nodeId, false, false);
     CHECK_NULL_RETURN(innerMenuNode, nullptr);
 
-    MenuModelNG::SetWidth(innerMenuNode.GetRawPtr(), EXTENSION_MENU_DEFAULT_WIDTH);
-    MenuModelNG::SetExpandingMode(innerMenuNode.GetRawPtr(), SubMenuExpandingMode::EMBEDDED);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, nullptr);
+    menuModifier->setWidth(innerMenuNode.GetRawPtr(), EXTENSION_MENU_DEFAULT_WIDTH);
+    menuModifier->setExpandingMode(innerMenuNode.GetRawPtr(), SubMenuExpandingMode::EMBEDDED);
     V2::ItemDivider divider;
     GetExtensionMenuItemDividerInfo(innerMenuNode, divider);
-    MenuModelNG::SetItemDivider(innerMenuNode.GetRawPtr(), divider, DividerMode::FLOATING_ABOVE_MENU);
+    menuModifier->setItemDivider(innerMenuNode.GetRawPtr(), divider, DividerMode::FLOATING_ABOVE_MENU);
 
-    auto menuWrapper = MenuView::Create(innerMenuNode, buttonId, "SelectMoreOrBackButton", menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    auto menuWrapper = menuViewModifier ? menuViewModifier->createWithCustomNode(
+        innerMenuNode, buttonId, "SelectMoreOrBackButton", menuParam, true, nullptr) : nullptr;
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     CHECK_NULL_RETURN(menu, nullptr);
     menuWrapper->RemoveChild(menu);
     menuWrapper.Reset();
     if (menuParam.blurStyleOption->colorMode != ThemeColorMode::SYSTEM) {
-        auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
-        if (menuPattern) {
-            auto menuItems = menuPattern->GetMenuItems();
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        if (menuModifier) {
+            auto menuItems = menuModifier->getMenuItems(innerMenuNode);
             SetMenuItemsColor(menuItems, caller);
         }
     }
@@ -2672,16 +2681,14 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params, co
     auto menu = GetExtensionMenuOutterrMenu(params, menuParam, caller);
     CHECK_NULL_VOID(menu);
     // set click position to menu
-    auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
     auto context = menu->GetRenderContext();
-    CHECK_NULL_VOID(props);
-    props->UpdateMenuOffset(GetPageOffset());
-    props->UpdateExpandingMode(SubMenuExpandingMode::EMBEDDED);
+    menuModifier->updateMenuOffset(menu, GetPageOffset());
+    menuModifier->updateExpandingMode(menu, SubMenuExpandingMode::EMBEDDED);
     // 224vp
-    props->UpdateMenuWidth(EXTENSION_MENU_DEFAULT_WIDTH);
+    menuModifier->updateMenuWidth(menu, EXTENSION_MENU_DEFAULT_WIDTH);
     context->UpdateBackShadow(ShadowConfig::NoneShadow);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
     ElementRegister::GetInstance()->AddUINode(menu);
     menu->MountToParent(Claim(this));
 
@@ -2697,7 +2704,7 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params, co
     extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
     extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     extensionMenu_->MarkModifyDone();
-    menuPattern->SetSelectOverlayExtensionMenuShow();
+    menuModifier->setSelectOverlayExtensionMenuShow(menu);
 }
 
 void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
@@ -3711,8 +3718,6 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu
     CHECK_NULL_RETURN(menu, nullptr);
-    auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(props, nullptr);
     OffsetF pageOffset;
     auto windowManager = pipeline->GetWindowManager();
     auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
@@ -3721,7 +3726,9 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
         pageOffset = GetPageOffset();
         TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "CreateMenuNode pageOffset:%{public}s", pageOffset.ToString().c_str());
     }
-    props->UpdateMenuOffset(info->rightClickOffset + pageOffset);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, nullptr);
+    menuModifier->updateMenuOffset(menu, info->rightClickOffset + pageOffset);
 
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ElementRegister::GetInstance()->AddUINode(menu);

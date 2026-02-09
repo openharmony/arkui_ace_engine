@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -253,19 +254,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -277,7 +280,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest001, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -286,7 +289,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest001, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -325,23 +328,23 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
@@ -352,7 +355,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest002, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -361,7 +364,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest002, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -400,23 +403,23 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest003, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
@@ -427,7 +430,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest003, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -436,7 +439,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest003, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -475,23 +478,23 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest004, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
@@ -502,7 +505,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest004, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -511,7 +514,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest004, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -551,22 +554,24 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest005, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -578,7 +583,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest005, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -587,7 +592,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest005, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -627,22 +632,24 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest006, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -654,7 +661,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest006, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -663,7 +670,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest006, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -703,19 +710,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest007, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -727,7 +736,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest007, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -736,7 +745,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest007, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -776,19 +785,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest008, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -800,7 +811,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest008, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -809,7 +820,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest008, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -848,19 +859,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest009, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -872,7 +885,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest009, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -881,7 +894,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest009, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -920,23 +933,23 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest010, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
@@ -947,7 +960,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest010, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -956,7 +969,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest010, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -995,23 +1008,23 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest011, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
@@ -1022,7 +1035,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest011, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1031,7 +1044,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest011, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1070,23 +1083,23 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest012, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
@@ -1097,7 +1110,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest012, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1106,7 +1119,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest012, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1146,22 +1159,24 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest013, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -1173,7 +1188,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest013, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1182,7 +1197,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest013, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1222,22 +1237,24 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest014, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -1249,7 +1266,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest014, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1258,7 +1275,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest014, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1298,19 +1315,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest015, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -1322,7 +1341,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest015, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1331,7 +1350,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest015, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1371,19 +1390,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest016, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -1395,7 +1416,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest016, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1404,7 +1425,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest016, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1443,19 +1464,21 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest017, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::GONE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
     auto layoutProp1 = menuNode->GetLayoutProperty();
     EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    auto menuHelper = menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
     EXPECT_TRUE(menuHelper);
 
     /**
@@ -1467,7 +1490,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest017, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
@@ -1476,7 +1499,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest017, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**
@@ -1515,11 +1538,13 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     auto layoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     /**
@@ -1527,15 +1552,13 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
      * @tc.expected: visibility will change to VISIBLE.
      */
     layoutProperty->UpdateVisibility(VisibleType::GONE, true);
-    overlayManager->ShowMenuAnimation(menuNode);
-    overlayManager->UpdateMenuVisibility(menuNode);
-    auto layoutProp1 = menuNode->GetLayoutProperty();
-    EXPECT_EQ(layoutProp1->GetVisibility(), VisibleType::VISIBLE);
+    menuManager->ShowMenuAnimation(menuNode, overlayManager);
+    menuManager->UpdateMenuVisibility(menuNode);
+    EXPECT_EQ((menuNode->GetLayoutProperty())->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
     menuPattern->StartShowAnimation();
-    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
-    EXPECT_TRUE(menuHelper);
+    EXPECT_TRUE(menuManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET));
 
     /**
      * @tc.steps: step4. call HideMenu related functions after menuNode already erased.
@@ -1546,7 +1569,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     overlayManager->HideMenu(menuNode, targetId);
     overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 
     /**
      * @tc.steps: step5. call DeleteMenu again after menuNode already erased.
@@ -1555,7 +1578,7 @@ HWTEST_F(OverlayNewTestNg, MenuNewTest018, TestSize.Level1)
     overlayManager->RemoveMenu(menuNode);
     overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
 }
 
 /**

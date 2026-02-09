@@ -18,10 +18,12 @@
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -105,9 +107,9 @@ void MenuWrapperPaintMethod::PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* p
         if (!NearEqual(opacity, 1.0)) {
             continue;
         }
-        auto pattern = frameNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto params = pattern->GetMenuPathParams();
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
+        auto params = menuModifier->getMenuPathParams(frameNode);
         if (params.has_value()) {
             PaintInnerBorderAndClipSinglePath(canvas, paintWrapper, params.value());
             PaintOuterBorderAndClipSinglePath(canvas, paintWrapper, params.value());

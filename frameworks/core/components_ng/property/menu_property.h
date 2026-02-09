@@ -85,7 +85,7 @@ enum class MenuKeyboardAvoidMode {
     TRANSLATE_AND_RESIZE = 1,
 };
 
-struct MenuParam {
+struct ACE_FORCE_EXPORT MenuParam {
     std::string title;
     OffsetF positionOffset;
     bool setShow = false;

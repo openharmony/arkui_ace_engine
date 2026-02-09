@@ -21,17 +21,22 @@
 #include <string>
 
 #include "core/components_ng/base/frame_node.h"
-
 namespace OHOS::Ace::NG {
 enum class MenuItemGroupStringType {
     HEADER,
     FOOTER
 };
-class ACE_FORCE_EXPORT MenuItemGroupView {
+class ACE_FORCE_EXPORT MenuItemGroupView{
 public:
+    virtual void CreateCJ();
+    virtual void SetHeaderCJ(const RefPtr<UINode>& header);
+    virtual void SetHeaderCJ(const std::string& headerStr);
+    virtual void SetFooterCJ(const RefPtr<UINode>& footer);
+    virtual void SetFooterCJ(const std::string& footerStr);
     // createMenuItem with custom
     static void Create();
     static void Create(const RefPtr<UINode>& groupNode);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeader(const RefPtr<UINode>& header);
     static void SetHeader(const std::string& headerStr);
     static void SetHeader(FrameNode* frameNode, const RefPtr<UINode>& header);

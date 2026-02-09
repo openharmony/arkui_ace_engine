@@ -21,11 +21,13 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1461,11 +1463,11 @@ void SelectContentOverlayManager::UpdateRightClickSubWindowMenuProps(const RefPt
     auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (!isContainerModal) {
-        auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(props);
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
         OffsetF containerModalOffset = GetContainerModalOffset();
 
-        props->UpdateMenuOffset(shareOverlayInfo_->rightClickOffset + containerModalOffset);
+        menuModifier->updateMenuOffset(menu, shareOverlayInfo_->rightClickOffset + containerModalOffset);
         TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY,
             "UpdateRightClickSubWindowMenuProps rightClickOffset:%{public}s containerModalOffset:%{public}s",
             shareOverlayInfo_->rightClickOffset.ToString().c_str(), containerModalOffset.ToString().c_str());

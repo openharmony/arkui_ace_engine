@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_paint_property.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -42,7 +43,7 @@ public:
     {
         menuItemWk_ = menuItemWk;
         auto item = menuItemWk.Upgrade();
-        isOption_ = item && item->GetTag() == V2::OPTION_ETS_TAG;
+        isOption_ = item && item->GetTag() == OPTION_ETS_TAG;
     }
 
     RefPtr<FrameNode> GetMenuItem()

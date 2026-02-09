@@ -48,6 +48,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 

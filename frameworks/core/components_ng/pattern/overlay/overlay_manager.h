@@ -49,6 +49,7 @@
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
+
 enum class HideMenuType : int32_t {
     NORMAL = 0,
     IS_SHOW,
@@ -69,6 +70,7 @@ enum class HideMenuType : int32_t {
     CLOSE_AI_MENU,
     REMOVE_MENU,
 };
+
 struct PopupInfo {
     int32_t popupId = -1;
     WeakPtr<FrameNode> target;
@@ -683,14 +685,8 @@ public:
     {
         return gatherNodeChildrenInfo_;
     }
-    bool IsGatherWithMenu() const
-    {
-        return isGatherWithMenu_;
-    }
-    void SetIsGatherWithMenu(bool isGatherWithMenu)
-    {
-        isGatherWithMenu_ = isGatherWithMenu;
-    }
+    bool IsGatherWithMenu();
+    void SetIsGatherWithMenu(bool isGatherWithMenu);
     void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
     void RemovePreviewBadgeNode();
     void CreateOverlayNode();
@@ -711,23 +707,12 @@ public:
     void TriggerCustomKeyboardAvoid(int32_t targetId, float safeHeight);
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
-    void ExecuteFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode);
-    void EraseMenuInfo(int32_t targetId)
-    {
-        if (menuMap_.find(targetId) != menuMap_.end()) {
-            menuMap_.erase(targetId);
-        }
-    }
+    void EraseMenuInfo(int32_t targetId);
     bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
     void UpdatePopupCustomNode();
-
-    bool IsMenuShow() const
-    {
-        return isMenuShow_;
-    }
-
+    bool IsMenuShow();
     void PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>& menuNode = nullptr);
     void SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode = nullptr);
 
@@ -755,6 +740,25 @@ public:
         return overlayInfo_;
     }
 
+    // The focus logic of overlay node (menu and dialog):
+    // 1. before start show animation: lower level node set unfocusabel and lost focus;
+    // 2. end show animation: overlay node get focus;
+    // 3. before start hide animation: lower level node set focusable;
+    // 4. end hide animation: overlay node lost focus, lower level node get focus.
+    void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow);
+    void BlurLowerNode(const RefPtr<FrameNode>& currentOverlay);
+    void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
+    void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
+    const std::set<WeakPtr<UINode>>& GetwindowScenes()
+    {
+        return windowSceneSet_;
+    }
+    CancelableCallback<void()>& GetPreviewFilterTask()
+    {
+        return previewFilterTask_;
+    }
+
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle);
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
@@ -775,25 +779,15 @@ public:
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PopToast(int32_t targetId);
     void RegisterMenuLifeCycleCallback(int32_t targetId,
-        const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>&& callback)
-    {
-        menuLifeCycleCallbackMap_[targetId] = std::move(callback);
-    }
-    void UnRegisterMenuLifeCycleCallback(int32_t targetId)
-    {
-        menuLifeCycleCallbackMap_.erase(targetId);
-    }
-    std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback(int32_t targetId)
-    {
-        return menuLifeCycleCallbackMap_[targetId];
-    }
+        const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>&& callback);
+    void UnRegisterMenuLifeCycleCallback(int32_t targetId);
+    std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback(int32_t targetId);
     bool CheckTargetIdIsValid(int32_t targetId);
 
     void UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId);
     bool CloseImageGeneratorSheet();
     void UpdateImageGeneratorSheetScale(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
         int32_t targetId, std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack);
-    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -840,21 +834,7 @@ private:
     // toast should contain id to avoid multiple delete.
     std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
 
-    /**  find/register menu node and update menu's display position
-     *
-     *   @return     true if process is successful
-     */
-    bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
-    void ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper);
-    // The focus logic of overlay node (menu and dialog):
-    // 1. before start show animation: lower level node set unfocusabel and lost focus;
-    // 2. end show animation: overlay node get focus;
-    // 3. before start hide animation: lower level node set focusable;
-    // 4. end hide animation: overlay node lost focus, lower level node get focus.
-    void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
     void BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow = false);
-    void BlurLowerNode(const RefPtr<FrameNode>& currentOverlay);
-    void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
     void PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk);
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
@@ -862,14 +842,6 @@ private:
     RefPtr<PipelineContext> GetMainPipelineContext(int32_t containerId);
     RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& node);
 
-    void SetPreviewFirstShow(const RefPtr<FrameNode>& menu);
-    void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
-    void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
-    void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
-    void ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu);
-    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
-        bool showPreviewAnimation, bool startDrag);
-    bool IsContextMenuBindedOnOrigNode();
     void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
         bool isReadFirstNode = true);
     void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
@@ -935,16 +907,6 @@ private:
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
-    void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
-        int32_t instanceId);
-    void HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu);
-    bool CheckSelectSubWindowToClose(
-        const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay);
-    void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
-        const WeakPtr<OverlayManager> weak, int32_t instanceId);
-    void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
-    void RemoveMenuNotInSubWindow(
-        const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
     bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId, SheetKey& sheetKey);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
@@ -986,18 +948,11 @@ private:
     bool SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node,
         std::optional<double> levelOrder = std::nullopt);
     RefPtr<FrameNode> GetOverlayFrameNode();
-    void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
-    void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
-    void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline);
-    void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
-    void CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode);
-    void EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode);
     void SetDragNodeNeedClean(bool needClean = true);
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
-    void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -1008,8 +963,6 @@ private:
     std::unordered_map<int32_t, std::list<std::pair<int32_t, bool>>> tipsEnterAndLeaveInfoMap_;
     std::list<std::pair<int32_t, NG::PopupInfo>> tipsInfoList_;
     std::list<std::pair<int32_t, bool>> tipsStatusList_;
-    // K: target frameNode ID, V: menuNode
-    std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
     std::unordered_map<int32_t, double> nodeIdOrderMap_;
     std::map<double, std::vector<RefPtr<FrameNode>>> orderNodesMap_;
@@ -1064,11 +1017,9 @@ private:
     int32_t dismissPopupId_ = 0;
 
     bool hasGatherNode_ { false };
-    bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     WeakPtr<FrameNode> dragNodeCopyWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
-    bool isMenuShow_ = false;
     bool isAttachToCustomNode_ = false;
 
     // Only used when CreateModalUIExtension
@@ -1076,14 +1027,14 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
-    std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
     WeakPtr<FrameNode> customKeyboardNode_;
     int32_t oldTargetId_ = -1;
     bool isKeyBoardContinue_ = false;
     std::unordered_set<int32_t> onDisappearFilterIds_;
-    std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
     std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
+
+    RefPtr<AceType> menuManager_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

@@ -33,10 +33,12 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"
@@ -788,13 +790,11 @@ void CalcOriginPreviewRectDependsOnHoverImage(
     auto menuPreview = menuWrapperPattern->GetPreview();
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto previewPattern = menuPreview->GetPattern<MenuPreviewPattern>();
-    CHECK_NULL_VOID(previewPattern);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
     auto rate = animationInfo.clipRate;
-    auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
-    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    auto scaleBefore = menuModifier->getPreviewBeforeAnimationScale(menuNode);
+    auto scaleAfter = menuModifier->getPreviewAfterAnimationScale(menuNode);
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -807,10 +807,10 @@ void CalcOriginPreviewRectDependsOnHoverImage(
         data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
         return;
     }
-    auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth() * previewScale;
-    auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight() * previewScale;
-    auto clipEndWidth = previewPattern->GetStackAfterScaleActualWidth() * previewScale;
-    auto clipEndHeight = previewPattern->GetStackAfterScaleActualHeight() * previewScale;
+    auto clipStartWidth = menuModifier->getHoverImageAfterScaleWidth(menuPreview) * previewScale;
+    auto clipStartHeight = menuModifier->getHoverImageAfterScaleHeight(menuPreview) * previewScale;
+    auto clipEndWidth = menuModifier->getStackAfterScaleActualWidth(menuPreview) * previewScale;
+    auto clipEndHeight = menuModifier->getStackAfterScaleActualHeight(menuPreview) * previewScale;
     auto curentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
     auto curentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
     auto centerX = data.originPreviewRect.GetX() + data.originPreviewRect.Width() / 2;
@@ -1729,9 +1729,9 @@ void GestureEventHub::UpdateMenuNode(
     auto rate = animationInfo.clipRate;
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    data.isMenuNotShow = menuWrapperPattern->IsShow() && rate == -1.0f && menuPattern->GetIsShowHoverImage();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    data.isMenuNotShow = menuWrapperPattern->IsShow() && rate == -1.0f && menuModifier->getIsShowHoverImage(menuNode);
     if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
         menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide()) {
         return;
@@ -1764,8 +1764,8 @@ void GestureEventHub::UpdateMenuNode(
     data.menuPositionBottom =
         imageNodeOffset.GetY() + imageNodeSize.Height() - menuNodeOffset.GetY() - menuNodeSize.Height();
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    data.menuPosition = menuPattern->GetLastPlacement().value_or(Placement::NONE);
-    auto newMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
+    data.menuPosition = menuModifier->getLastPlacement(menuNode).value_or(Placement::NONE);
+    auto newMenuNode = menuModifier->duplicateMenuNode(menuNode, menuNode, menuParam);
     CHECK_NULL_VOID(newMenuNode);
     data.menuNode = newMenuNode;
 }

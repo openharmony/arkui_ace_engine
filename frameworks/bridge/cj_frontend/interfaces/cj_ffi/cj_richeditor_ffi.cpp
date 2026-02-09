@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,9 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 #include "cj_lambda.h"
 #include "securec.h"
@@ -22,6 +24,19 @@
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::RichEditorModelNG* GetRichEditorModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Richeditor");
+    if (module == nullptr) {
+        LOGF("Can't find richeditor dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::RichEditorModelNG*>(module->GetModel());
+}
+}
 
 namespace {
 std::vector<NG::TextResponseType> RESPONSE_TYPES = {
@@ -111,8 +126,8 @@ void ParseDataDetectorConfig(NativeTextDataDetectorConfig origin, TextDetectConf
 extern "C" {
 void FfiOHOSAceFrameworkRichEditorCreateWithController(int64_t controllerId)
 {
-    RichEditorModel::GetInstance()->Create();
-    RefPtr<RichEditorBaseControllerBase> controller = RichEditorModel::GetInstance()->GetRichEditorController();
+    GetRichEditorModel()->Create();
+    RefPtr<RichEditorBaseControllerBase> controller = GetRichEditorModel()->GetRichEditorController();
 
     auto nativeController = FFIData::GetData<NativeRichEditorController>(controllerId);
     if (nativeController != nullptr) {
@@ -125,8 +140,8 @@ void FfiOHOSAceFrameworkRichEditorCreateWithController(int64_t controllerId)
 
 void FfiOHOSAceFrameworkRichEditorCreateWithStyledStringController(int64_t controllerId)
 {
-    RichEditorModel::GetInstance()->Create(true);
-    RefPtr<RichEditorBaseControllerBase> controller = RichEditorModel::GetInstance()->GetRichEditorController();
+    GetRichEditorModel()->Create(true);
+    RefPtr<RichEditorBaseControllerBase> controller = GetRichEditorModel()->GetRichEditorController();
 
     auto nativeController = FFIData::GetData<NativeRichEditorController>(controllerId);
     if (nativeController != nullptr) {
@@ -140,7 +155,7 @@ void FfiOHOSAceFrameworkRichEditorCreateWithStyledStringController(int64_t contr
 void FfiOHOSAceFrameworkRichEditorCustomKeyboard(void(*builder)())
 {
     auto builderFunc = CJLambda::Create(builder);
-    RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc));
+    GetRichEditorModel()->SetCustomKeyboard(std::move(builderFunc), false);
 }
 
 void FfiOHOSAceFrameworkRichEditorBindSelectionMenu(
@@ -163,7 +178,7 @@ void FfiOHOSAceFrameworkRichEditorBindSelectionMenu(
 
     std::function<void()> buildFunc = CJLambda::Create(content);
 
-    RichEditorModel::GetInstance()->BindSelectionMenu(
+    GetRichEditorModel()->BindSelectionMenu(
         EDITOR_TYPES[spantype], RESPONSE_TYPES[responseType], buildFunc, menuParam);
 }
 
@@ -173,17 +188,17 @@ void FfiOHOSAceFrameworkRichEditorCopyOptions(int32_t copyOptions)
         LOGE("CopyOptions error, invalid value for copyOptions");
         return;
     }
-    RichEditorModel::GetInstance()->SetCopyOption(COPYOPTIONS_TYPES[copyOptions]);
+    GetRichEditorModel()->SetCopyOption(COPYOPTIONS_TYPES[copyOptions]);
 }
 
 void FfiOHOSAceFrameworkRichEditorOnReady(void(*callback)())
 {
-    RichEditorModel::GetInstance()->SetOnReady(CJLambda::Create(callback));
+    GetRichEditorModel()->SetOnReady(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnDeleteComplete(void(*callback)())
 {
-    RichEditorModel::GetInstance()->SetOnDeleteComplete(CJLambda::Create(callback));
+    GetRichEditorModel()->SetOnDeleteComplete(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkRichEditorAboutToIMEInput(bool(*callback)(NativeRichEditorInsertValue))
@@ -199,7 +214,7 @@ void FfiOHOSAceFrameworkRichEditorAboutToIMEInput(bool(*callback)(NativeRichEdit
         free(utilstring);
         return res;
     };
-    RichEditorModel::GetInstance()->SetAboutToIMEInput(std::move(aboutToIMEInputFunc));
+    GetRichEditorModel()->SetAboutToIMEInput(std::move(aboutToIMEInputFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorAboutToIMEInput12(bool(*callback)(NativeRichEditorInsertValue12))
@@ -213,7 +228,7 @@ void FfiOHOSAceFrameworkRichEditorAboutToIMEInput12(bool(*callback)(NativeRichEd
         };
         return cjCallback(result);
     };
-    RichEditorModel::GetInstance()->SetAboutToIMEInput(std::move(aboutToIMEInputFunc));
+    GetRichEditorModel()->SetAboutToIMEInput(std::move(aboutToIMEInputFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichEditorTextSpanResult))
@@ -254,7 +269,7 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichE
         free((void*) textStyle.fontFamily);
         free(utilstring);
     };
-    RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(onIMEInputCompleteFunc));
+    GetRichEditorModel()->SetOnIMEInputComplete(std::move(onIMEInputCompleteFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete12(void(*callback)(NativeRichEditorTextSpanResult12))
@@ -265,7 +280,7 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete12(void(*callback)(NativeRic
         NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(textSpanResult, result);
         cjCallback(result);
     };
-    RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(onIMEInputCompleteFunc));
+    GetRichEditorModel()->SetOnIMEInputComplete(std::move(onIMEInputCompleteFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelection))
@@ -305,7 +320,7 @@ void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelec
         cjCallback(result);
         delete[] spans;
     };
-    RichEditorModel::GetInstance()->SetOnSelect(std::move(onSelectFunc));
+    GetRichEditorModel()->SetOnSelect(std::move(onSelectFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnSelect12(void(*callback)(NativeRichEditorSelection12))
@@ -346,7 +361,7 @@ void FfiOHOSAceFrameworkRichEditorOnSelect12(void(*callback)(NativeRichEditorSel
         cjCallback(result);
         delete[] spans;
     };
-    RichEditorModel::GetInstance()->SetOnSelect(std::move(onSelectFunc));
+    GetRichEditorModel()->SetOnSelect(std::move(onSelectFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditorDeleteValue))
@@ -397,7 +412,7 @@ void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditor
         delete[] spans;
         return res;
     };
-    RichEditorModel::GetInstance()->SetAboutToDelete(std::move(aboutToDeleteFunc));
+    GetRichEditorModel()->SetAboutToDelete(std::move(aboutToDeleteFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorAboutToDelete12(bool(*callback)(NativeRichEditorDeleteValue12))
@@ -435,7 +450,7 @@ void FfiOHOSAceFrameworkRichEditorAboutToDelete12(bool(*callback)(NativeRichEdit
         delete[] spans;
         return res;
     };
-    RichEditorModel::GetInstance()->SetAboutToDelete(std::move(aboutToDeleteFunc));
+    GetRichEditorModel()->SetAboutToDelete(std::move(aboutToDeleteFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t))
@@ -447,7 +462,7 @@ void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t))
         }
         cjCallback(nativePasteEvent->GetID());
     };
-    RichEditorModel::GetInstance()->SetOnPaste(std::move(onPast));
+    GetRichEditorModel()->SetOnPaste(std::move(onPast));
 }
 
 void FfiOHOSAceFrameworkRichEditorPreventDefault(int64_t id)
@@ -466,19 +481,19 @@ void FfiOHOSAceFrameworkRichEditorOnDidChange(void(*callback)(CJTextRange rangeB
 
         cjCallback(cjRangeBefore, cjRangeAfter);
     };
-    RichEditorModel::GetInstance()->SetOnDidChange(std::move(onDidChange));
+    GetRichEditorModel()->SetOnDidChange(std::move(onDidChange));
 }
 
 void FfiOHOSAceFrameworkRichEditorEnableDataDetector(bool enable)
 {
-    RichEditorModel::GetInstance()->SetTextDetectEnable(enable);
+    GetRichEditorModel()->SetTextDetectEnable(enable);
 }
 
 void FfiOHOSAceFrameworkRichEditorDataDetectorConfig(NativeTextDataDetectorConfig config)
 {
     TextDetectConfig textDetectConfig;
     ParseDataDetectorConfig(config, textDetectConfig);
-    RichEditorModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
+    GetRichEditorModel()->SetTextDetectConfig(textDetectConfig);
 }
 
 void FfiOHOSAceFrameworkRichEditorEditMenuOptions(
@@ -487,13 +502,13 @@ void FfiOHOSAceFrameworkRichEditorEditMenuOptions(
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
-    RichEditorModel::GetInstance()->SetSelectionMenuOptions(
+    GetRichEditorModel()->SetSelectionMenuOptions(
         std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 void FfiOHOSAceFrameworkRichEditorEnablePreviewText(bool enable)
 {
-    RichEditorModel::GetInstance()->SetSupportPreviewText(enable);
+    GetRichEditorModel()->SetSupportPreviewText(enable);
 }
 
 void FfiOHOSAceFrameworkRichEditorPlaceholder(const char* value, NativePlaceholderStyle style)
@@ -529,34 +544,34 @@ void FfiOHOSAceFrameworkRichEditorPlaceholder(const char* value, NativePlacehold
         options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
     }
 
-    RichEditorModel::GetInstance()->SetPlaceholder(options);
+    GetRichEditorModel()->SetPlaceholder(options);
 }
 
 void FfiOHOSAceFrameworkRichEditorCaretColor(uint32_t color)
 {
-    RichEditorModel::GetInstance()->SetCaretColor(Color(color));
+    GetRichEditorModel()->SetCaretColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkRichEditorSelectedBackgroundColor(uint32_t color)
 {
-    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(Color(color));
+    GetRichEditorModel()->SetSelectedBackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkRichEditorEnterKeyType(uint32_t value)
 {
     TextInputAction textInputAction = TransfromToTextInputAction(value);
-    RichEditorModel::GetInstance()->SetEnterKeyType(textInputAction);
+    GetRichEditorModel()->SetEnterKeyType(textInputAction);
 }
 
 void FfiOHOSAceFrameworkRichEditorEnableKeyboardOnFocus(bool enable)
 {
-    RichEditorModel::GetInstance()->SetRequestKeyboardOnFocus(enable);
+    GetRichEditorModel()->SetRequestKeyboardOnFocus(enable);
 }
 
 void FfiOHOSAceFrameworkRichEditorCustomKeyboardWithOptions(void(*builder)(), NativeKeyboardOptions options)
 {
     auto builderFunc = CJLambda::Create(builder);
-    RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options.supportAvoidance);
+    GetRichEditorModel()->SetCustomKeyboard(std::move(builderFunc), options.supportAvoidance);
 }
 
 void FfiOHOSAceFrameworkRichEditorOnDidIMEInput(void(*callback)(NativeTextRange))
@@ -565,7 +580,7 @@ void FfiOHOSAceFrameworkRichEditorOnDidIMEInput(void(*callback)(NativeTextRange)
         NativeTextRange range { textRange.start, textRange.end };
         return cjCallback(range);
     };
-    RichEditorModel::GetInstance()->SetOnDidIMEInput(std::move(onDidIMEInputFunc));
+    GetRichEditorModel()->SetOnDidIMEInput(std::move(onDidIMEInputFunc));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnSelectionChange(void(*callback)(NativeRichEditorRange))
@@ -575,7 +590,7 @@ void FfiOHOSAceFrameworkRichEditorOnSelectionChange(void(*callback)(NativeRichEd
         NativeRichEditorRange range { eventInfo->start_, eventInfo->end_ };
         cjCallback(range);
     };
-    RichEditorModel::GetInstance()->SetOnSelectionChange(std::move(onSelectionChange));
+    GetRichEditorModel()->SetOnSelectionChange(std::move(onSelectionChange));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnEditingChange(void(*callback)(bool))
@@ -583,7 +598,7 @@ void FfiOHOSAceFrameworkRichEditorOnEditingChange(void(*callback)(bool))
     auto onEditingChange = [cjCallback = CJLambda::Create(callback)](const bool& isEditing) {
         cjCallback(isEditing);
     };
-    RichEditorModel::GetInstance()->SetOnEditingChange(std::move(onEditingChange));
+    GetRichEditorModel()->SetOnEditingChange(std::move(onEditingChange));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnSubmit(bool(*callback)(int32_t, CJSubmitEvent))
@@ -610,7 +625,7 @@ void FfiOHOSAceFrameworkRichEditorOnSubmit(bool(*callback)(int32_t, CJSubmitEven
             event.SetKeepEditable(cjCallback(key, *submitEvent));
         }
     };
-    RichEditorModel::GetInstance()->SetOnSubmit(std::move(onsubmit));
+    GetRichEditorModel()->SetOnSubmit(std::move(onsubmit));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnCut(void(*callback)(int64_t))
@@ -624,7 +639,7 @@ void FfiOHOSAceFrameworkRichEditorOnCut(void(*callback)(int64_t))
         PipelineContext::SetCallBackNode(node);
         cjCallback(nativeCutEvent->GetID());
     };
-    RichEditorModel::GetInstance()->SetOnCut(std::move(onCut));
+    GetRichEditorModel()->SetOnCut(std::move(onCut));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnCopy(void(*callback)(int64_t))
@@ -638,7 +653,7 @@ void FfiOHOSAceFrameworkRichEditorOnCopy(void(*callback)(int64_t))
         PipelineContext::SetCallBackNode(node);
         cjCallback(nativeCopyEvent->GetID());
     };
-    RichEditorModel::GetInstance()->SetOnCopy(std::move(onCopy));
+    GetRichEditorModel()->SetOnCopy(std::move(onCopy));
 }
 
 void FfiOHOSAceFrameworkRichEditorOnWillChange(bool(*callback)(NativeRichEditorChangeValue))
@@ -689,11 +704,11 @@ void FfiOHOSAceFrameworkRichEditorOnWillChange(bool(*callback)(NativeRichEditorC
 
         return res;
     };
-    RichEditorModel::GetInstance()->SetOnWillChange(std::move(onWillChange));
+    GetRichEditorModel()->SetOnWillChange(std::move(onWillChange));
 }
 
 void FfiOHOSAceFrameworkRichEditorSetEnableHapticFeedback(bool enable)
 {
-    RichEditorModel::GetInstance()->SetEnableHapticFeedback(enable);
+    GetRichEditorModel()->SetEnableHapticFeedback(enable);
 }
 }

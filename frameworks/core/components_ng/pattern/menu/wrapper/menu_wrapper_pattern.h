@@ -36,7 +36,6 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
 enum class MenuStatus {
     INIT,              // Neither exists in the menuMap_ nor on the tree
     ON_SHOW_ANIMATION, // Exists in the menuMap_ also exists on the tree
@@ -47,7 +46,7 @@ enum class MenuStatus {
 
 // has full screen size
 // used for detecting clicks outside Menu area
-class MenuWrapperPattern : public PopupBasePattern {
+class ACE_FORCE_EXPORT MenuWrapperPattern : public PopupBasePattern {
     DECLARE_ACE_TYPE(MenuWrapperPattern, Pattern);
 
 public:
@@ -79,7 +78,7 @@ public:
         return AceType::MakeRefPtr<MenuWrapperPaintMethod>();
     }
 
-    void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
+    void HandleMouseEvent(const MouseInfo& info, const RefPtr<FrameNode>& menuItemNode);
 
     int32_t GetTargetId() const override
     {
@@ -93,32 +92,9 @@ public:
         return menuStatus_ == MenuStatus::ON_HIDE_ANIMATION || menuStatus_ == MenuStatus::HIDE;
     }
 
-    bool IsContextMenu() const
-    {
-        auto menu = GetMenu();
-        CHECK_NULL_RETURN(menu, false);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, false);
-        return menuPattern->IsContextMenu();
-    }
-
-    MenuPreviewMode GetPreviewMode() const
-    {
-        auto menu = GetMenu();
-        CHECK_NULL_RETURN(menu, MenuPreviewMode::NONE);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, MenuPreviewMode::NONE);
-        return menuPattern->GetPreviewMode();
-    }
-
-    bool IsSelectMenu() const
-    {
-        auto menu = GetMenu();
-        CHECK_NULL_RETURN(menu, false);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, false);
-        return menuPattern->IsSelectMenu();
-    }
+    bool IsContextMenu() const;
+    MenuPreviewMode GetPreviewMode() const;
+    bool IsSelectMenu() const;
 
     void HideSubMenu();
     void ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& host, const RefPtr<UINode>& subMenu);
@@ -134,81 +110,13 @@ public:
         return menu;
     }
 
-    RefPtr<FrameNode> GetHoverImageFlexNode() const
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto node = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(node, nullptr);
-        if (node->GetTag() != V2::FLEX_ETS_TAG) {
-            return nullptr;
-        }
-        return node;
-    }
-
-    RefPtr<FrameNode> GetHoverImageStackNode() const
-    {
-        auto hoverImageFlexNode = GetHoverImageFlexNode();
-        CHECK_NULL_RETURN(hoverImageFlexNode, nullptr);
-        auto node = AceType::DynamicCast<FrameNode>(hoverImageFlexNode->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(node, nullptr);
-        if (node->GetTag() != V2::STACK_ETS_TAG) {
-            return nullptr;
-        }
-        return node;
-    }
-
-    RefPtr<FrameNode> GetHoverImagePreview() const
-    {
-        auto hoverImageStackNode = GetHoverImageStackNode();
-        CHECK_NULL_RETURN(hoverImageStackNode, nullptr);
-        auto node = AceType::DynamicCast<FrameNode>(hoverImageStackNode->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(node, nullptr);
-        if (node->GetTag() != V2::IMAGE_ETS_TAG) {
-            return nullptr;
-        }
-        return node;
-    }
-
-    RefPtr<FrameNode> GetHoverImageCustomPreview() const
-    {
-        auto hoverImageStackNode = GetHoverImageStackNode();
-        CHECK_NULL_RETURN(hoverImageStackNode, nullptr);
-        auto node = AceType::DynamicCast<FrameNode>(hoverImageStackNode->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(node, nullptr);
-        if (node->GetTag() != V2::MENU_PREVIEW_ETS_TAG) {
-            return nullptr;
-        }
-        return node;
-    }
-
-    RefPtr<FrameNode> GetPreview() const
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(preview, nullptr);
-        if (preview->GetTag() == V2::FLEX_ETS_TAG) {
-            auto hoverImageCustomPreview = GetHoverImageCustomPreview();
-            CHECK_NULL_RETURN(hoverImageCustomPreview, preview);
-            return hoverImageCustomPreview;
-        }
-        return preview;
-    }
-
+    RefPtr<FrameNode> GetHoverImageFlexNode();
+    RefPtr<FrameNode> GetHoverImageStackNode();
+    RefPtr<FrameNode> GetHoverImagePreview();
+    RefPtr<FrameNode> GetHoverImageCustomPreview();
+    RefPtr<FrameNode> GetPreview();
     // used to obtain the Badge node and delete it.
-    RefPtr<FrameNode> GetBadgeNode() const
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        for (const auto& child : host->GetChildren()) {
-            auto node = DynamicCast<FrameNode>(child);
-            if (node && node->GetTag() == V2::TEXT_ETS_TAG) {
-                return node;
-            }
-        }
-        return nullptr;
-    }
+    RefPtr<FrameNode> GetBadgeNode();
 
     OffsetT<Dimension> GetAnimationOffset();
     void SetAniamtinOption(const AnimationOption& animationOption);
@@ -750,8 +658,8 @@ private:
     bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     void HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason = HideMenuType::NORMAL);
-    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position,
-        const HideMenuType& reason = HideMenuType::NORMAL);
+    void HideMenu(
+        const RefPtr<FrameNode>& menu, const PointF& position, const HideMenuType& reason = HideMenuType::NORMAL);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);

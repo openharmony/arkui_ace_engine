@@ -2313,6 +2313,53 @@ bool ArkTSUtils::HandleCallbackJobs(
     return true;
 }
 
+bool ArkTSUtils::GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm)
+{
+    if (firstArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
+        nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm)
+{
+    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+}
+
+void ArkTSUtils::SetSymbolOptionApply(
+    EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const Local<JSValueRef> modifierObj)
+{
+    auto globalObj = panda::JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    if (globalFunc->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = globalFunc->ToObject(vm);
+        if (!modifierObj->IsObject(vm)) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [vm, func = panda::CopyableGlobal(vm, func),
+                               modifierParam = panda::CopyableGlobal(vm, modifierObj)](
+                               WeakPtr<NG::FrameNode> frameNode) {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                Local<JSValueRef> params[NUM_2];
+                params[NUM_0] = modifierParam.ToLocal();
+                params[NUM_1] = panda::NativePointerRef::New(vm, AceType::RawPtr(node));
+                PipelineContext::SetCallBackNode(node);
+                auto result = func->Call(vm, func.ToLocal(), params, 2);
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            };
+            symbolApply = onApply;
+        }
+    }
+}
+
 uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     RefPtr<ResourceObject> resObj;
@@ -3125,16 +3172,18 @@ bool ArkTSUtils::ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const Ecm
     if (!secondArg->IsObject(vm) || secondArg->IsUndefined()) {
         return false;
     }
+    auto isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    auto* frameNode =
+ 	    isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, false);
     auto menuOptionsObject = secondArg->ToObject(vm);
     auto jsValueOnCreateMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onCreateMenu"));
-    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback);
+    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback, isJsView);
     auto jsValueOnMenuItemClick = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMenuItemClick"));
-    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback);
+    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback, isJsView);
     auto jsValueOnPrepareMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onPrepareMenu"));
-    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback);
+    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback, isJsView);
     return true;
 }
 
@@ -3208,14 +3257,15 @@ Local<panda::ObjectRef> ArkTSUtils::CreateJsTextMenuId(const EcmaVM* vm, const s
 }
 
 void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& jsValueOnCreateMenu,
-    NG::OnCreateMenuCallback& onCreateMenuCallback)
+    NG::OnCreateMenuCallback& onCreateMenuCallback, bool isJsView)
 {
     if (jsValueOnCreateMenu.IsEmpty() || !jsValueOnCreateMenu->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnCreateMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
@@ -3225,6 +3275,9 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
         auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, menuItems);
+        }
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
@@ -3235,14 +3288,15 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
 }
 
 void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
-    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback)
+    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback, bool isJsView)
 {
     if (jsValueOnPrepareMenu.IsEmpty() || !jsValueOnPrepareMenu->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnPrepareMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
@@ -3252,6 +3306,9 @@ void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
         auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, menuItems);
+        }
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
@@ -3321,15 +3378,16 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
 }
 
 void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
-    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback)
+    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+    bool isJsView)
 {
     if (jsValueOnMenuItemClick.IsEmpty() || !jsValueOnMenuItemClick->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnMenuItemClick->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
-                          const NG::MenuItemParam& menuOptionsParam) -> bool {
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](const NG::MenuItemParam& menuOptionsParam) -> bool {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -3342,6 +3400,9 @@ void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
             panda::ArrayRef::GetValueAt(vm, paramArrayObj, 0), panda::ArrayRef::GetValueAt(vm, paramArrayObj, 1)
         };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
+        }
         if (ret->IsBoolean()) {
             return ret->ToBoolean(vm)->Value();
         }
@@ -3633,6 +3694,165 @@ bool ArkTSUtils::CheckJavaScriptScope(const EcmaVM* vm)
     return !(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || vm == nullptr);
 }
 
+void ParseDragPreviewMode(DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
+{
+    isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
+        default:
+            break;
+    }
+}
+
+DragPreviewOption ArkTSUtils::ParseDragPreviewOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm)
+{
+    DragPreviewOption previewOption;
+    Local<JSValueRef> secondArg = info->GetCallArgRef(1);
+    if (!secondArg->IsObject(vm)) {
+        return previewOption;
+    }
+    auto obj = secondArg->ToObject(vm);
+    auto mode = GetProperty(vm, obj, "mode");
+    bool isAuto = true;
+    if (mode->IsNumber()) {
+        ParseDragPreviewMode(previewOption, mode->ToNumber(vm)->Value(), isAuto);
+    } else if (mode->IsArray(vm)) {
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(mode);
+        for (size_t i = 0; i < params->Length(vm); i++) {
+            auto value = panda::ArrayRef::GetValueAt(vm, params, i);
+            if (value->IsNumber()) {
+                ParseDragPreviewMode(previewOption, value->ToNumber(vm)->Value(), isAuto);
+            }
+            if (isAuto) {
+                break;
+            }
+        }
+    }
+
+    auto sizeChangeEffect = GetProperty(vm, obj, "sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        previewOption.sizeChangeEffect = static_cast<DraggingSizeChangeEffect>(sizeChangeEffect->ToNumber(vm)->Value());
+    }
+
+    ArkTSUtils::SetDragNumberBadge(info, vm, previewOption);
+
+    ParseDragInteractionOptions(info, vm, previewOption);
+
+    ArkTSUtils::SetDragPreviewOptionApply(info, vm, previewOption);
+
+    return previewOption;
+}
+
+void ArkTSUtils::ParseDragInteractionOptions(
+    ArkUIRuntimeCallInfo* info, const EcmaVM* vm, NG::DragPreviewOption& previewOption)
+{
+    Local<JSValueRef> thirdArg = info->GetCallArgRef(NUM_2);
+    if (!thirdArg->IsNull() && thirdArg->IsObject(vm)) {
+        auto interObj = thirdArg->ToObject(vm);
+        auto multiSelection = GetProperty(vm, interObj, "isMultiSelectionEnabled");
+        if (multiSelection->IsBoolean()) {
+            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean(vm)->Value();
+        }
+        auto defaultAnimation = GetProperty(vm, interObj, "defaultAnimationBeforeLifting");
+        if (defaultAnimation->IsBoolean()) {
+            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean(vm)->Value();
+        }
+        auto hapicFeedback = GetProperty(vm, interObj, "enableHapticFeedback");
+        if (hapicFeedback->IsBoolean()) {
+            previewOption.enableHapticFeedback = hapicFeedback->ToBoolean(vm)->Value();
+        }
+        auto enableEdgeAutoScroll = GetProperty(vm, interObj, "enableEdgeAutoScroll");
+        if (enableEdgeAutoScroll->IsBoolean()) {
+            previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean(vm)->Value();
+        }
+        auto isLiftingDisabled = GetProperty(vm, interObj, "isLiftingDisabled");
+        if (isLiftingDisabled->IsBoolean()) {
+            previewOption.isLiftingDisabled = isLiftingDisabled->ToBoolean(vm)->Value();
+        }
+    }
+}
+
+void ArkTSUtils::SetDragNumberBadge(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& option)
+{
+    Local<JSValueRef> secondArg = info->GetCallArgRef(1);
+    if (!secondArg->IsObject(vm)) {
+        return;
+    }
+    auto obj = secondArg->ToObject(vm);
+    auto numberBadge = GetProperty(vm, obj, "numberBadge");
+    if (!numberBadge->IsNull()) {
+        if (numberBadge->IsNumber()) {
+            int64_t number = numberBadge->ToNumber(vm)->Value();
+            if (number < 0 || number > INT_MAX) {
+                option.isNumber = false;
+                option.isShowBadge = true;
+            } else {
+                option.isNumber = true;
+                option.badgeNumber = numberBadge->ToNumber(vm)->Value();
+            }
+        } else if (numberBadge->IsBoolean()) {
+            option.isNumber = false;
+            option.isShowBadge = numberBadge->ToBoolean(vm)->Value();
+        }
+    } else {
+        option.isNumber = false;
+        option.isShowBadge = true;
+    }
+}
+
+void ArkTSUtils::SetDragPreviewOptionApply(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, NG::DragPreviewOption& option)
+{
+    Local<JSValueRef> secondArg = info->GetCallArgRef(1);
+    if (!secondArg->IsObject(vm)) {
+        return;
+    }
+    auto interObj = secondArg->ToObject(vm);
+    auto globalObj = panda::JSNApi::GetGlobalObject(vm);
+    auto globalFuncValue = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyImageModifierToNode"));
+    if (globalFuncValue->IsFunction(vm)) {
+        auto modifierObj = GetProperty(vm, interObj, "modifier");
+        if (modifierObj->IsUndefined()) {
+            option.onApply = nullptr;
+        } else {
+            panda::Local<panda::FunctionRef> globalFunc = globalFuncValue->ToObject(vm);
+            auto onApply = [vm, func = panda::CopyableGlobal(vm, globalFunc), modifier = std::move(modifierObj)](
+                               WeakPtr<NG::FrameNode> frameNode) {
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                PipelineContext::SetCallBackNode(node);
+                panda::Local<panda::JSValueRef> params[2];
+                params[0] = modifier;
+                params[1] = panda::NativePointerRef::New(vm, AceType::RawPtr(node));
+                func->Call(vm, func.ToLocal(), params, 2);
+            };
+            option.onApply = onApply;
+        }
+    }
+}
+
 template<class T>
 bool ArkTSUtils::ConvertFromJSValueNG(
     const EcmaVM* vm, const Local<JSValueRef>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
@@ -3805,6 +4025,8 @@ std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues(const EcmaVM* vm, A
 
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<double>(const EcmaVM* vm, double);
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<int32_t>(const EcmaVM* vm, int32_t);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<std::u16string>(
+    const EcmaVM* vm, std::u16string);
 
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<Color>(
     const EcmaVM*, const Local<JSValueRef>&, Color&, RefPtr<ResourceObject>&);
@@ -5029,4 +5251,14 @@ bool ArkTSUtils::ParseCommonMarginOrPaddingCorner(
     }
     return false;
 }
+
+#ifdef PIXEL_MAP_SUPPORTED
+void ArkTSUtils::ConvertPixmap(const Local<panda::ObjectRef>& obj, const EcmaVM* vm, const RefPtr<PixelMap>& pixelMap)
+{
+    auto jsPixmap = Framework::ConvertPixmap(pixelMap);
+    if (!jsPixmap->IsUndefined()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"), jsPixmap.Get().GetLocalHandle());
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

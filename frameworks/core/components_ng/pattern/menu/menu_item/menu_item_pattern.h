@@ -460,6 +460,10 @@ public:
     mutable RefPtr<UINode> detachedProxy_ = nullptr;
     void HandleCloseSubMenu();
     void DoCloseSubMenu();
+    void SetOnClickEventSet(bool isSet)
+    {
+        onClickEventSet_ = isSet;
+    }
 
 protected:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;

@@ -71,8 +71,10 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
         { "ColumnSplit", "linearsplit" },
+        { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},
+        { "Search", "search" },
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
         {"Radio", "radio"},
@@ -85,6 +87,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
         {"SymbolGlyph", "symbol"},
+        { "Menu", "menu" },
+        { "MenuItem", "menu" },
+        { "MenuItemGroup", "menu" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

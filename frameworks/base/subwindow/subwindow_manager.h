@@ -96,7 +96,7 @@ public:
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
 
     // Get the subwindow of subInstance, return the window or nullptr.
-    const RefPtr<Subwindow> GetSubwindowById(int32_t subinstanceId);
+    ACE_FORCE_EXPORT const RefPtr<Subwindow> GetSubwindowById(int32_t subinstanceId);
 
     void HideCurrentSubwindow();
 
@@ -111,9 +111,9 @@ public:
     RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow, bool isRestartDrag = false);
     void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
+    ACE_FORCE_EXPORT void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
-    void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+    ACE_FORCE_EXPORT void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
     ACE_FORCE_EXPORT void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     ACE_FORCE_EXPORT void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
@@ -131,9 +131,10 @@ public:
         int32_t appearingTime, int32_t appearingTimeWithContinuousOperation);
     void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
-    void CloseMenu();
-    void ClearMenu();
-    void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
+    ACE_FORCE_EXPORT void CloseMenu();
+    ACE_FORCE_EXPORT void ClearMenu();
+    ACE_FORCE_EXPORT void ClearMenuNG(
+        int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
     void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
     void ClearAllMenuPopup(int32_t instanceId);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
@@ -160,7 +161,7 @@ public:
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
-    void DeleteHotAreas(int32_t subwindowId, int32_t nodeId, SubwindowType type);
+    ACE_FORCE_EXPORT void DeleteHotAreas(int32_t subwindowId, int32_t nodeId, SubwindowType type);
 
     void ClearToastInSubwindow();
     ACE_FORCE_EXPORT void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
@@ -190,7 +191,7 @@ public:
     const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
-    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
+    ACE_FORCE_EXPORT bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
     bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
@@ -234,11 +235,12 @@ public:
         int32_t containerId, const ToastWindowType& windowType, uint32_t mainWindowId);
     RefPtr<Subwindow> GetOrCreateMenuSubWindow(int32_t instanceId, bool reuse = true);
     void SetSelectOverlayHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId);
-    void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
+    ACE_FORCE_EXPORT void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
     void OnDestroyContainer(int32_t subInstanceId);
     bool GetIsExpandDisplay();
-    const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
+    ACE_FORCE_EXPORT const RefPtr<Subwindow> GetSubwindowByType(
+        int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow, int32_t nodeId = -1);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
     void RemoveSubwindowByNodeId(const int32_t nodeId);

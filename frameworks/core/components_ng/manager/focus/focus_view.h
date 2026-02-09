@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 
 const char ENTRY_ANY_FOCUSVIEW[] = "entry_any_view";
 
-class FocusView : public virtual AceType {
+class ACE_FORCE_EXPORT FocusView : public virtual AceType {
     DECLARE_ACE_TYPE(FocusView, AceType);
 
 public:

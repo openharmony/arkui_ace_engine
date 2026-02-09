@@ -44,7 +44,7 @@ using FrameNodeSet = std::unordered_set<RefPtr<NG::FrameNode>, Hash>;
 
 class ACE_EXPORT StylusDetectorMgr final : public StylusDetectorInterface {
 public:
-    static StylusDetectorMgr* GetInstance();
+    ACE_FORCE_EXPORT static StylusDetectorMgr* GetInstance();
 
     bool IsEnable() override;
     bool RegisterStylusInteractionListener(
@@ -56,7 +56,7 @@ public:
     bool IsNeedInterceptedTouchEvent(
         const TouchEvent& touchEvent, std::unordered_map<size_t, TouchTestResult> touchTestResults);
 
-    void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode,
+    ACE_FORCE_EXPORT void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode,
         const WeakPtr<NG::LayoutInfoInterface>& layoutInfo);
     void RemoveTextFieldFrameNode(const int32_t id);
 

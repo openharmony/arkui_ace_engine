@@ -68,7 +68,7 @@ public:
     virtual bool InBarHoverRegion(const Point& point) const;
     virtual bool InBarRectRegion(const Point& point) const;
     bool NeedScrollBar() const;
-    bool NeedPaint() const;
+    ACE_FORCE_EXPORT bool NeedPaint() const;
     void UpdateScrollBarRegion(
         const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource);
     double GetNormalWidthToPx() const;
@@ -393,7 +393,7 @@ public:
     void SetPositionMode(PositionMode positionMode);
     void SetDisplayMode(DisplayMode displayMode);
     void PlayScrollBarDisappearAnimation();
-    void PlayScrollBarAppearAnimation();
+    ACE_FORCE_EXPORT void PlayScrollBarAppearAnimation();
     void PlayScrollBarGrowAnimation();
     void PlayScrollBarShrinkAnimation();
     void PlayScrollBarAdaptAnimation();
@@ -403,7 +403,7 @@ public:
     void SetHoverEvent();
     void FlushBarWidth(const RefPtr<PipelineContext>& context = nullptr);
     virtual void CalcReservedHeight(const RefPtr<PipelineContext>& context = nullptr);
-    void ScheduleDisappearDelayTask();
+    ACE_FORCE_EXPORT void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
     float GetMainSize(const Size& size) const;
     void SetReverse(bool reverse);

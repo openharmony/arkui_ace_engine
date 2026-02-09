@@ -99,6 +99,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Radio", "radio"},
         { "Slider", "slider" },
         { "FolderStack", "folderstack" },
+        { "Search", "search" },
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
         {"CalendarPicker", "calendarpicker"},
@@ -106,6 +107,10 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
         {"SymbolGlyph", "symbol"},
+        {"Richeditor", "richeditor"},
+        { "Menu", "menu" },
+        { "MenuItem", "menu" },
+        { "MenuItemGroup", "menu" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

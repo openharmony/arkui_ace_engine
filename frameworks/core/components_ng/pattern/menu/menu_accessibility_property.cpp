@@ -18,6 +18,7 @@
 #include "accessibility_element_info.h"
 #endif
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
 bool MenuAccessibilityProperty::IsScrollable() const
@@ -25,7 +26,7 @@ bool MenuAccessibilityProperty::IsScrollable() const
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
     auto firstChild = DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
-    if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+    if (firstChild && firstChild->GetTag() == SCROLL_ETS_TAG) {
         auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
         CHECK_NULL_RETURN(scrollPattern, false);
         if (scrollPattern->IsScrollable() && !NearZero(scrollPattern->GetScrollableDistance())) {
@@ -40,7 +41,7 @@ void MenuAccessibilityProperty::SetSpecificSupportAction()
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto firstChild = DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
-    if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+    if (firstChild && firstChild->GetTag() == SCROLL_ETS_TAG) {
         auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
         CHECK_NULL_VOID(scrollPattern);
         if (scrollPattern->IsScrollable() && !NearZero(scrollPattern->GetScrollableDistance())) {

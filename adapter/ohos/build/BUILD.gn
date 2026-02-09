@@ -28,6 +28,7 @@ component_modules = [
   "linear_split",
   "side_bar",
   "marquee",
+  "search",
   "stepper",
   "radio",
   "slider",
@@ -35,6 +36,8 @@ component_modules = [
   "calendar_picker",
   "indexer",
   "symbol",
+  "rich_editor",
+  "menu",
 ]
 
 if (!ace_engine_feature_wearable) { 
