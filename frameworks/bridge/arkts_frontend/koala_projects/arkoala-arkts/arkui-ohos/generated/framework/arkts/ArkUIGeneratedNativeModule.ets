@@ -6623,6 +6623,12 @@ export class ArkUIGeneratedNativeModule {
     native static _TextStyle_getFontWeight(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _TextStyle_getFontStyle(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getSuperscript(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getStrokeWidth(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getStrokeColor(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextTimerController_construct(): KPointer
     @ani.unsafe.Direct

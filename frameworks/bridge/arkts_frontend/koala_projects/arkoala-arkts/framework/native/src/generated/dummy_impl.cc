@@ -48180,6 +48180,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Opt_SuperscriptStyle GetSuperscriptImpl(Ark_TextStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getSuperscript(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_Float64 GetStrokeWidthImpl(Ark_TextStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStrokeWidth(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_ResourceColor GetStrokeColorImpl(Ark_TextStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStrokeColor(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // TextStyleAccessor
     namespace TextTimerControllerAccessor {
     void DestroyPeerImpl(Ark_TextTimerController peer)
@@ -54836,6 +54872,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextStyleAccessor::GetFontSizeImpl,
             TextStyleAccessor::GetFontWeightImpl,
             TextStyleAccessor::GetFontStyleImpl,
+            TextStyleAccessor::GetSuperscriptImpl,
+            TextStyleAccessor::GetStrokeWidthImpl,
+            TextStyleAccessor::GetStrokeColorImpl,
         };
         return &TextStyleAccessorImpl;
     }

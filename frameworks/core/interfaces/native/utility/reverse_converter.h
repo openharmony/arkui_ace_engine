@@ -115,6 +115,7 @@ enum class SheetType;
 enum class SourceTool;
 enum class SourceType;
 enum class SpanType;
+enum class SuperscriptStyle;
 enum class SwipeActionState : uint32_t;
 enum class TabAnimateMode;
 enum class TabBarMode;
@@ -471,6 +472,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx);
     void AssignArkValue(Ark_StyledStringKey& dst, SpanType src);
+    void AssignArkValue(Ark_SuperscriptStyle& dst, const SuperscriptStyle& src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeDirection& dst, const SwipeDirection& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
