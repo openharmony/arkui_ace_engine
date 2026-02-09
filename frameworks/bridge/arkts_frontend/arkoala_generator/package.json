@@ -1,0 +1,18 @@
+{
+    "name": "peer-generator",
+    "description": "",
+    "scripts": {
+        "ets2idl": "PANDA_SDK_PATH=../../../../../../../developtools/ace_ets2bundle/ets1.2/libarkts/sdk npx etsgen --ets2idl --output-dir ./out/idl --base-dir ../../../../../../../out/rk3568/sdk-interface/static/sdk-js/api --input-dir ../../../../../../../out/rk3568/sdk-interface/static/sdk-js/api"
+    },
+    "dependencies": {
+        "commander": "10.0.0",
+        "rimraf": "^3.0.2",
+        "@koalaui/libarkts": "../../../../../../../developtools/ace_ets2bundle/ets1.2/libarkts",
+        "@idlizer/arkgen": "../../../../prebuilt/idlizer-arkgen-2.1.140-panda-1.5.0-dev.42718.tgz",
+        "@idlizer/core": "../../../../prebuilt/idlizer-core-2.1.140-panda-1.5.0-dev.42718.tgz",
+        "@idlizer/etsgen": "../../../../prebuilt/idlizer-etsgen-2.1.140-panda-1.5.0-dev.42718.tgz",
+        "@idlizer/libohos": "../../../../prebuilt/idlizer-libohos-2.1.140-panda-1.5.0-dev.42718.tgz",
+        "@idlizer/runner": "../../../../prebuilt/idlizer-runner-2.1.140-panda-1.5.0-dev.42718.tgz",
+        "@idlizer/interfaces": "../../../../prebuilt/idlizer-interfaces-2.1.140-panda-1.5.0-dev.42718.tgz"
+    }
+}

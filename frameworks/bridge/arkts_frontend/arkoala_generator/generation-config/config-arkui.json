@@ -1,0 +1,143 @@
+{
+    "moduleName": "arkui",
+    "modules": {
+        "global.resource": {
+            "name": "global.resource",
+            "packages": ["global.resource"]
+        },
+        "ohos.multimedia.image": {
+            "name": "ohos.multimedia.image",
+            "external": true,
+            "packages": ["ohos.multimedia.image"]
+        },
+        "arkui": {
+            "name": "arkui",
+            "packages": [
+                "api.internal.component.ets",
+                "application",
+                "arkui",
+                "arkui.component",
+                "arkui.stateManagement.decorators",
+                "ohos.app.ability",
+                "ohos.arkui",
+                "ohos.base",
+                "ohos.curves",
+                "ohos.data",
+                "ohos.font",
+                "ohos.graphics",
+                "ohos.intl",
+                "ohos.matrix4",
+                "ohos.measure",
+                "ohos.router",
+                "ohos.multimodalInput",
+                "ohos.promptAction",
+                "ohos.window",
+                "ohos.web.webview",
+                "graphics3d.Scene",
+
+                "idlize.stdlib",
+                "idlize.internal"
+            ]
+        }
+    },
+    "libraryNameMapping": {
+        "global.resource": {
+            "TS": "global.resource",
+            "ArkTS": "global.resource"
+        }
+    },
+    "hooks": {
+        "ButtonAttribute": {
+            "contentModifier": {
+                "hookName": "hookButtonContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "CommonMethod": {
+            "id": {
+                "hookName": "hookId",
+                "replaceImplementation": false
+            },
+            "stateStyles": {
+                "hookName": "hookStateStyleImpl",
+                "replaceImplementation": true
+            },
+            "gestureModifier": {
+                "hookName": "hookGestureModifier",
+                "replaceImplementation": true
+            }
+        },
+        "CheckboxAttribute": {
+            "contentModifier": {
+                "hookName": "hookCheckBoxContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "DataPanelAttribute": {
+            "contentModifier": {
+                "hookName": "hookDataPanelContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "GaugeAttribute": {
+            "contentModifier": {
+                "hookName": "hookGaugeContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "LoadingProgressAttribute": {
+            "contentModifier": {
+                "hookName": "hookLoadingProgressContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "ProgressAttribute": {
+            "contentModifier": {
+                "hookName": "hookProgressContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "RadioAttribute": {
+            "contentModifier": {
+                "hookName": "hookRadioContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "RatingAttribute": {
+            "contentModifier": {
+                "hookName": "hookRatingContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "SelectAttribute": {
+            "menuItemContentModifier": {
+                "hookName": "hookSelectContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "SliderAttribute": {
+            "contentModifier": {
+                "hookName": "hookSliderContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "TextClockAttribute": {
+            "contentModifier": {
+                "hookName": "hookTextClockContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "TextTimerAttribute": {
+            "contentModifier": {
+                "hookName": "hookTextTimerContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "ToggleAttribute": {
+            "contentModifier": {
+                "hookName": "hookToggleContentModifier",
+                "replaceImplementation": true
+            }
+        }
+    }
+}
