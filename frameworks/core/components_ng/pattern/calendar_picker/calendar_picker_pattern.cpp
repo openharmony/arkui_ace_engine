@@ -1501,7 +1501,7 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
     auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         Color defaultColor = pickerProperty->GetColor().value_or(calendarTheme->GetEntryFontColor());
         pickerProperty->UpdateColor(textStyle.textColor.value_or(defaultColor));
 

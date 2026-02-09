@@ -440,7 +440,7 @@ void TextTimerPattern::UpdateTextColor(const Color& color, bool isFirstLoad)
     CHECK_NULL_VOID(renderContext);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         layoutProperty->UpdateTextColor(color);
         renderContext->UpdateForegroundColor(color);
         renderContext->ResetForegroundColorStrategy();
@@ -456,7 +456,7 @@ void TextTimerPattern::UpdateFontWeight(const FontWeight& value, bool isFirstLoa
     CHECK_NULL_VOID(layoutProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         layoutProperty->UpdateFontWeight(value);
     }
 }
@@ -469,7 +469,7 @@ void TextTimerPattern::UpdateFontSize(const Dimension& value, bool isFirstLoad)
     CHECK_NULL_VOID(layoutProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         layoutProperty->UpdateFontSize(value);
     }
 }
@@ -496,7 +496,7 @@ void TextTimerPattern::UpdateFontFamily(const std::vector<std::string>& fontFami
     CHECK_NULL_VOID(layoutProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         layoutProperty->UpdateFontFamily(fontFamilies);
     }
 }
