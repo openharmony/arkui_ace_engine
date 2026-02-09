@@ -138,7 +138,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    if (needAdaptFoceSplitMode_) {
+    if (needAdaptForceSplitMode_) {
         childLayoutConstraint->percentReference.SetWidth(childLayoutConstraint->percentReference.Width() / HALF);
         childLayoutConstraint->maxSize.SetWidth(childLayoutConstraint->maxSize.Width() / HALF);
     }
@@ -170,7 +170,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         float widthRatio = needAdaptFoceSplitMode_ ?
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
-            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth())
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
         childLayoutConstraint.maxSize.SetWidth(widthRatio);
     }
     // childSize_ and childOffset_ is used in Layout.
@@ -478,7 +478,7 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
             innerLayout.minSize = SizeF(width, 0.0);
             float widthRatio = needAdaptForceSplitMode_ ?
                 (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
-                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth())
+                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
             innerLayout.maxSize.SetWidth(widthRatio);
         }
     }
