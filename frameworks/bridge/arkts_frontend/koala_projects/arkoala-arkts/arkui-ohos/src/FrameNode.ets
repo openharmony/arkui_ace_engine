@@ -190,6 +190,7 @@ export class FrameNodeInternal {
     public static fromPtr(ptr: KPointer): FrameNode {
         const obj: FrameNode = new FrameNode(undefined)
         obj.peer = new Finalizable(ptr, FrameNode.getFinalizer())
+        obj.nodePtr_ = obj.peer?.ptr;
         return obj
     }
 }
