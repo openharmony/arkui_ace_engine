@@ -637,4 +637,51 @@ HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg019, TestSi
     EXPECT_TRUE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId,
         false, false, false, isNavigation));
 }
+
+/**
+ * @tc.name: TransparentNodeDetectorTestNg020
+ * @tc.desc: CheckWindowTransparent overlay node not transparent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg020, TestSize.Level1)
+{
+    const RefPtr<FrameNode> root = AceType::MakeRefPtr<FrameNode>("root", 0, AceType::MakeRefPtr<Pattern>(), true);
+    bool isNavigation = false;
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto containerId = pipelineContext->GetInstanceId();
+
+    auto stageNode = FrameNode::CreateFrameNode("stageNode", 1, AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode("pageNode", 2, AceType::MakeRefPtr<StagePattern>());
+    auto jsViewNode = FrameNode::CreateFrameNode("jsview", 3, AceType::MakeRefPtr<StagePattern>());
+    auto columnNode = FrameNode::CreateFrameNode("column", 4, AceType::MakeRefPtr<StagePattern>());
+    root->AddChild(stageNode);
+    stageNode->AddChild(pageNode);
+    pageNode->AddChild(jsViewNode);
+    jsViewNode->AddChild(columnNode);
+
+    auto pageRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(pageRenderContext, nullptr);
+    pageRenderContext->rect_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+    columnNode->renderContext_ = pageRenderContext;
+    auto pageLayoutProperty = columnNode->GetLayoutProperty();
+    ASSERT_NE(pageLayoutProperty, nullptr);
+    pageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    auto modalPage = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 46, AceType::MakeRefPtr<Pattern>(), true);
+    root->AddChild(modalPage);
+
+    auto overlayRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(overlayRenderContext, nullptr);
+    overlayRenderContext->rect_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modalPage->renderContext_ = overlayRenderContext;
+    auto overlayLayoutProperty = modalPage->GetLayoutProperty();
+    ASSERT_NE(overlayLayoutProperty, nullptr);
+    overlayLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    auto checkResult = TransparentNodeDetector::GetInstance().CheckWindowTransparent(
+        root, containerId, false, false, false, isNavigation);
+    EXPECT_FALSE(checkResult);
+}
 } // namespace OHOS::Ace::NG
