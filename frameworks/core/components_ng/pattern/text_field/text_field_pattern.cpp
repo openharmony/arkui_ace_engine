@@ -1290,7 +1290,15 @@ void TextFieldPattern::HandleFocusEvent()
     ResetFirstClickAfterGetFocus();
     SetFocusStyle();
     ReportTextChangeEvent(FIELD_FOCUS_EVENT);
-    OnFocusCustomKeyboardChange();
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    bool continueFeature = textFieldManager->GetCustomKeyboardContinueFeature();
+    if (continueFeature) {
+        OnFocusCustomKeyboardChange();
+    }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1715,6 +1723,16 @@ void TextFieldPattern::SetNeedToRequestKeyboardInner(bool needToRequestKeyboardI
     needToRequestKeyboardInner_ = needToRequestKeyboardInner;
 }
 
+bool TextFieldPattern::IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager)
+{
+    bool continueFeature = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
+    bool isNoContinueFeatureClose =
+        !continueFeature && (customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
+    bool isCloseCustomKeyboard = continueFeature && blurReason_ == BlurReason::WINDOW_BLUR &&
+                                 ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
+    return isCloseCustomKeyboard || isNoContinueFeatureClose;
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -1725,13 +1743,11 @@ void TextFieldPattern::HandleBlurEvent()
     firstClickResetTask_.Cancel();
     firstClickAfterLosingFocus_ = true;
     UpdateBlurReason();
-    bool isCloseCustomKeyboard = blurReason_ == BlurReason::WINDOW_BLUR &&
-                                 ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
-    if (isCloseCustomKeyboard) {
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    if (IsCloseKeyboard(textFieldManager)) {
         CloseKeyboard(true);
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "textfield %{public}d on blur, close custom keyboard", host->GetId());
     }
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
     }

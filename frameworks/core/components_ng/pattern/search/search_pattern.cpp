@@ -1660,7 +1660,14 @@ void SearchPattern::HandleFocusEvent(bool forwardFocusMovement, bool backwardFoc
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->SetIsFocusedBeforeClick(true);
-    textFieldPattern->OnFocusCustomKeyboardChange();
+
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    if (textFieldManager->GetCustomKeyboardContinueFeature()) {
+        textFieldPattern->OnFocusCustomKeyboardChange();
+    }
 
     focusChoice_ = FocusChoice::SEARCH;
     if (forwardFocusMovement || backwardFocusMovement) { // Don't update focus if no factical focus movement
