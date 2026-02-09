@@ -155,6 +155,11 @@ void MenuModelStatic::ResetBorderRadius(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE, frameNode);
+    auto menuNode = reinterpret_cast<FrameNode*>(frameNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
+    menuRenderContext->SetClipToBounds(false);
 }
 
 void MenuModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
