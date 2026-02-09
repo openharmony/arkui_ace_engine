@@ -1095,15 +1095,10 @@ ArkUINativeModuleValue SliderBridge::SetValidSlideRange(ArkUIRuntimeCallInfo* ru
 
     Local<JSValueRef> fromArg = Local<JSValueRef>();
     Local<JSValueRef> toArg = Local<JSValueRef>();
-    if (IsJsView(firstArg, vm)) {
-        Local<JSValueRef> rangeOptionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (rangeOptionArg->IsObject(vm)) {
-            fromArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "from"));
-            toArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "to"));
-        }
-    } else {
-        fromArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        toArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> rangeOptionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (rangeOptionArg->IsObject(vm)) {
+        fromArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "from"));
+        toArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "to"));
     }
 
     if (!fromArg.IsNull() && !fromArg->IsUndefined() && fromArg->IsNumber()) {
@@ -1300,11 +1295,12 @@ ArkUINativeModuleValue SliderBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(float, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView](
-                                                       float number, int32_t mode) {
+    std::function<void(float, int32_t)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                                       func = panda::CopyableGlobal(vm, func),
+                                                       isJsView](float number, int32_t mode) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
 
         panda::Local<panda::NumberRef> numberParam = panda::NumberRef::New(vm, number);
         panda::Local<panda::NumberRef> modeParam = panda::NumberRef::New(vm, mode);
