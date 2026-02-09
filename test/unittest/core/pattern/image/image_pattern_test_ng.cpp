@@ -2332,6 +2332,36 @@ HWTEST_F(ImagePatternTestNg, TestImageJsonImageWidth_Height01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnRecycleTest001
+ * @tc.desc: call DumpAdvanceInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnRecycleTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+    * @tc.steps: step2. set image and create node paint method.
+    */
+    auto mockImage = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_ = mockImage;
+    imagePattern->CreateNodePaintMethod();
+    EXPECT_NE(imagePattern->imagePaintMethod_, nullptr);
+    /**
+    * @tc.steps: step3. call OnRecycle.
+    * @tc.expected: imagePaintMethod_ is nullptr.
+    */
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->imagePaintMethod_, nullptr);
+}
+
+/**
  * @tc.name: MaskUrl001
  * @tc.desc: Test MaskUrl for ImagePattern.
  * @tc.type: FUNC
