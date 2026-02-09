@@ -939,6 +939,96 @@ HWTEST_F(TextTestNgEight, HandleOnSelect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleOnSelect002
+ * @tc.desc: test HandleOnSelect return value for event handling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEight, HandleOnSelect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    EXPECT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize text and textSelector_.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"12345");
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step3. test return value for supported direction keys.
+     * @tc.expect: expect HandleOnSelect returns true for supported keys.
+     */
+    // Test KEY_DPAD_LEFT returns true
+    KeyCode code = KeyCode::KEY_DPAD_LEFT;
+    bool result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+
+    // Test KEY_DPAD_RIGHT returns true
+    code = KeyCode::KEY_DPAD_RIGHT;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+
+    // Test KEY_DPAD_UP returns true
+    code = KeyCode::KEY_DPAD_UP;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+
+    // Test KEY_DPAD_DOWN returns true
+    code = KeyCode::KEY_DPAD_DOWN;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step4. test return value for unsupported keys (default case).
+     * @tc.expect: expect HandleOnSelect returns false for unsupported keys.
+     */
+    // Test KEY_DPAD_CENTER returns false (default case)
+    code = KeyCode::KEY_DPAD_CENTER;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_FALSE(result);
+
+    // Test KEY_TAB returns false (default case, e.g., Shift+Tab)
+    code = KeyCode::KEY_TAB;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step5. test return value with shiftFlag_ true for UP/DOWN keys.
+     * @tc.expect: expect return true and textSelector end unchanged.
+     */
+    textPattern->shiftFlag_ = true;
+    code = KeyCode::KEY_DPAD_UP;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+
+    /**
+     * @tc.steps: step6. test return value with shiftFlag_ false.
+     * @tc.expect: expect return true.
+     */
+    textPattern->shiftFlag_ = false;
+    code = KeyCode::KEY_DPAD_UP;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    result = textPattern->HandleOnSelect(code);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+}
+
+/**
  * @tc.name: HandleMouseLeftReleaseAction001
  * @tc.desc: test DeleteRange
  * @tc.type: FUNC
