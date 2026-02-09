@@ -109,7 +109,6 @@ enum class TextAlign;
 enum class TextDecoration;
 enum class TextDecorationStyle;
 enum class TextDeleteDirection;
-enum class TextFlipDirection;
 enum class TextInputAction;
 enum class TextOverflow;
 enum class TouchType : size_t;
@@ -299,7 +298,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
-    void AssignArkValue(Ark_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
@@ -321,7 +319,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src);
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *ctx);
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
-    void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const Dimension& src);
     void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const double& src);
@@ -401,8 +398,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
-    void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
-    void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
     void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src);
     void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src);

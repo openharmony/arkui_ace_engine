@@ -29,7 +29,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { DecorationStyleInterface } from "./component/styledString"
-import { TextDataDetectorConfig, TextVerticalAlign, EditMenuOptions, TextDirection, FontSettingOptions, SelectedDragPreviewStyle, ShaderStyle, ContentTransition, TextContentAlign, LineSpacingOptions } from "./component/textCommon"
+import { TextDataDetectorConfig, TextVerticalAlign, EditMenuOptions, TextDirection, FontSettingOptions, SelectedDragPreviewStyle } from "./component/textCommon"
 import { CustomBuilder } from "./component/builder"
 import { SelectionMenuOptions } from "./component/richEditor"
 import { TextModifier } from "arkui.TextModifier"
@@ -64,7 +64,6 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _fontStyle_0_0value?: FontStyle | undefined
     _lineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineSpacing_0_0value?: LengthMetrics | undefined
-    _lineSpacing_0_1value?: LineSpacingOptions | undefined
     _textAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textAlign_0_0value?: TextAlign | undefined
     _textVerticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -129,26 +128,6 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _halfLeading_0_0value?: boolean | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
-    _optimizeTrailingSpace_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optimizeTrailingSpace_0_0value?: boolean | undefined
-    _shaderStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _shaderStyle_0_0value?: ShaderStyle | undefined
-    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableAutoSpacing_0_0value?: boolean | undefined
-    _contentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentTransition_0_0value?: ContentTransition | undefined
-    _textContentAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textContentAlign_0_0value?: TextContentAlign | undefined
-    _minLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minLines_0_0value?: int32 | undefined
-    _minLineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minLineHeight_0_0value?: LengthMetrics | undefined
-    _maxLineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLineHeight_0_0value?: LengthMetrics | undefined
-    _lineHeightMultiple_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lineHeightMultiple_0_0value?: double | undefined
-    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableSelectedDataDetector_0_0value?: boolean | undefined
     _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -307,7 +286,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._lineSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined), (this._lineSpacing_0_1value as LineSpacingOptions | undefined | undefined));
+                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined));
                     this._lineSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -317,7 +296,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._lineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined | undefined));
+                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined));
                 }
             }
         }
@@ -987,186 +966,6 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
-        if (this._optimizeTrailingSpace_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optimizeTrailingSpace_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOptimizeTrailingSpaceAttribute((this._optimizeTrailingSpace_0_0value as boolean | undefined));
-                    this._optimizeTrailingSpace_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optimizeTrailingSpace_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._optimizeTrailingSpace_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOptimizeTrailingSpaceAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._shaderStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._shaderStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShaderStyleAttribute((this._shaderStyle_0_0value as ShaderStyle | undefined));
-                    this._shaderStyle_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._shaderStyle_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._shaderStyle_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShaderStyleAttribute((undefined as ShaderStyle | undefined));
-                }
-            }
-        }
-        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._contentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._contentTransition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentTransitionAttribute((this._contentTransition_0_0value as ContentTransition | undefined));
-                    this._contentTransition_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._contentTransition_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._contentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentTransitionAttribute((undefined as ContentTransition | undefined));
-                }
-            }
-        }
-        if (this._textContentAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textContentAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTextContentAlignAttribute((this._textContentAlign_0_0value as TextContentAlign | undefined));
-                    this._textContentAlign_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textContentAlign_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._textContentAlign_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTextContentAlignAttribute((undefined as TextContentAlign | undefined));
-                }
-            }
-        }
-        if (this._minLines_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._minLines_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinLinesAttribute((this._minLines_0_0value as int32 | undefined));
-                    this._minLines_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._minLines_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._minLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinLinesAttribute((undefined as int32 | undefined));
-                }
-            }
-        }
-        if (this._minLineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._minLineHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinLineHeightAttribute((this._minLineHeight_0_0value as LengthMetrics | undefined));
-                    this._minLineHeight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._minLineHeight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._minLineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinLineHeightAttribute((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (this._maxLineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._maxLineHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLineHeightAttribute((this._maxLineHeight_0_0value as LengthMetrics | undefined));
-                    this._maxLineHeight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._maxLineHeight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._maxLineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLineHeightAttribute((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (this._lineHeightMultiple_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._lineHeightMultiple_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineHeightMultipleAttribute((this._lineHeightMultiple_0_0value as double | undefined));
-                    this._lineHeightMultiple_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._lineHeightMultiple_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._lineHeightMultiple_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineHeightMultipleAttribute((undefined as double | undefined));
-                }
-            }
-        }
-        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._font_0_flag) {
@@ -1339,11 +1138,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             switch (modifier._lineSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.lineSpacing(modifier._lineSpacing_0_0value, modifier._lineSpacing_0_1value);
+                    this.lineSpacing(modifier._lineSpacing_0_0value);
                     break;
                 }
                 default: {
-                    this.lineSpacing((undefined as LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined | undefined));
+                    this.lineSpacing((undefined as LengthMetrics | undefined));
                 }
             }
         }
@@ -1828,136 +1627,6 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
-        if (modifier._optimizeTrailingSpace_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optimizeTrailingSpace_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.optimizeTrailingSpace(modifier._optimizeTrailingSpace_0_0value);
-                    break;
-                }
-                default: {
-                    this.optimizeTrailingSpace((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._shaderStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._shaderStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.shaderStyle(modifier._shaderStyle_0_0value);
-                    break;
-                }
-                default: {
-                    this.shaderStyle((undefined as ShaderStyle | undefined));
-                }
-            }
-        }
-        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableAutoSpacing((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._contentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._contentTransition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.contentTransition(modifier._contentTransition_0_0value);
-                    break;
-                }
-                default: {
-                    this.contentTransition((undefined as ContentTransition | undefined));
-                }
-            }
-        }
-        if (modifier._textContentAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textContentAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.textContentAlign(modifier._textContentAlign_0_0value);
-                    break;
-                }
-                default: {
-                    this.textContentAlign((undefined as TextContentAlign | undefined));
-                }
-            }
-        }
-        if (modifier._minLines_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._minLines_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.minLines(modifier._minLines_0_0value);
-                    break;
-                }
-                default: {
-                    this.minLines((undefined as int32 | undefined));
-                }
-            }
-        }
-        if (modifier._minLineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._minLineHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.minLineHeight(modifier._minLineHeight_0_0value);
-                    break;
-                }
-                default: {
-                    this.minLineHeight((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (modifier._maxLineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._maxLineHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.maxLineHeight(modifier._maxLineHeight_0_0value);
-                    break;
-                }
-                default: {
-                    this.maxLineHeight((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (modifier._lineHeightMultiple_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._lineHeightMultiple_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.lineHeightMultiple(modifier._lineHeightMultiple_0_0value);
-                    break;
-                }
-                default: {
-                    this.lineHeightMultiple((undefined as double | undefined));
-                }
-            }
-        }
-        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableSelectedDataDetector((undefined as boolean | undefined));
-                }
-            }
-        }
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {
@@ -2095,12 +1764,11 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
-        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+    lineSpacing(value: LengthMetrics | undefined): this {
+        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._lineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineSpacing_0_0value = value
-            this._lineSpacing_0_1value = options
             this._state.fireChange()
         } else
         {
@@ -2548,116 +2216,6 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         } else
         {
             this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    optimizeTrailingSpace(value: boolean | undefined): this {
-        if (((this._optimizeTrailingSpace_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._optimizeTrailingSpace_0_0value) !== (value)))
-        {
-            this._optimizeTrailingSpace_0_flag = AttributeUpdaterFlag.UPDATE
-            this._optimizeTrailingSpace_0_0value = value
-        } else
-        {
-            this._optimizeTrailingSpace_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    shaderStyle(value: ShaderStyle | undefined): this {
-        if (((this._shaderStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._shaderStyle_0_flag = AttributeUpdaterFlag.UPDATE
-            this._shaderStyle_0_0value = value
-        } else
-        {
-            this._shaderStyle_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    enableAutoSpacing(value: boolean | undefined): this {
-        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableAutoSpacing_0_0value = value
-        } else
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    contentTransition(value: ContentTransition | undefined): this {
-        if (((this._contentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._contentTransition_0_flag = AttributeUpdaterFlag.UPDATE
-            this._contentTransition_0_0value = value
-        } else
-        {
-            this._contentTransition_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    textContentAlign(value: TextContentAlign | undefined): this {
-        if (((this._textContentAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textContentAlign_0_flag = AttributeUpdaterFlag.UPDATE
-            this._textContentAlign_0_0value = value
-        } else
-        {
-            this._textContentAlign_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    minLines(value: int32 | undefined): this {
-        if (((this._minLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minLines_0_0value) !== (value)))
-        {
-            this._minLines_0_flag = AttributeUpdaterFlag.UPDATE
-            this._minLines_0_0value = value
-        } else
-        {
-            this._minLines_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    minLineHeight(value: LengthMetrics | undefined): this {
-        if (((this._minLineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._minLineHeight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._minLineHeight_0_0value = value
-        } else
-        {
-            this._minLineHeight_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    maxLineHeight(value: LengthMetrics | undefined): this {
-        if (((this._maxLineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._maxLineHeight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._maxLineHeight_0_0value = value
-        } else
-        {
-            this._maxLineHeight_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    lineHeightMultiple(value: double | undefined): this {
-        if (((this._lineHeightMultiple_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._lineHeightMultiple_0_0value) !== (value)))
-        {
-            this._lineHeightMultiple_0_flag = AttributeUpdaterFlag.UPDATE
-            this._lineHeightMultiple_0_0value = value
-        } else
-        {
-            this._lineHeightMultiple_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    enableSelectedDataDetector(value: boolean | undefined): this {
-        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableSelectedDataDetector_0_0value = value
-        } else
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

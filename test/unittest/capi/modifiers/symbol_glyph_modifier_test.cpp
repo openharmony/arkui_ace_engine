@@ -568,7 +568,7 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Lev
     auto checkValue = [this](const std::string& input, const OHOS::Ace::ScopeType& value,
         const std::string& expectedStr) {
         auto peer = static_cast<SymbolEffectPeer*>(
-            PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value, SymbolEffectPeer::Type::REPLACE));
+            PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(value));
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
         modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);

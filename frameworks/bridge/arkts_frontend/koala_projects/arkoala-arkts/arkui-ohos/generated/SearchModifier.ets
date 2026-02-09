@@ -28,12 +28,11 @@ import { ResourceColor, Dimension, Font, ResourceStr } from "./component/units"
 import { Color, CopyOptions, TextAlign } from "./component/enums"
 import { Resource } from "global.resource"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection, IMEClient } from "./component/textCommon"
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection } from "./component/textCommon"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
-import { ColorMetrics, LengthMetrics } from "arkui.Graphics"
+import { ColorMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
-import { ComponentContentBase } from "arkui.ComponentContent"
 export class SearchModifier extends CommonMethodModifier implements SearchAttribute,AttributeModifier<SearchAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -134,16 +133,6 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
-    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeWidth_0_0value?: LengthMetrics | undefined
-    _onWillAttachIME_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillAttachIME_0_0value?: ((value0: IMEClient) => void) | undefined
-    _strokeColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeColor_0_0value?: ResourceColor | undefined
-    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableAutoSpacing_0_0value?: boolean | undefined
-    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableSelectedDataDetector_0_0value?: boolean | undefined
     _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -163,7 +152,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _inputFilter_0_0value?: ResourceStr | undefined
     _inputFilter_0_1value?: ((value0: string) => void) | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | ComponentContentBase | undefined
+    _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
@@ -1069,96 +1058,6 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as LengthMetrics | undefined));
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeWidthAttribute((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (this._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillAttachIME_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as ((value0: IMEClient) => void) | undefined));
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnWillAttachIMEAttribute((undefined as ((value0: IMEClient) => void) | undefined));
-                }
-            }
-        }
-        if (this._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._strokeColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeColorAttribute((this._strokeColor_0_0value as ResourceColor | undefined));
-                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._strokeColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeColorAttribute((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -1199,7 +1098,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1209,7 +1108,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -1867,71 +1766,6 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
-        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.strokeWidth(modifier._strokeWidth_0_0value);
-                    break;
-                }
-                default: {
-                    this.strokeWidth((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (modifier._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillAttachIME_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillAttachIME(modifier._onWillAttachIME_0_0value);
-                    break;
-                }
-                default: {
-                    this.onWillAttachIME((undefined as ((value0: IMEClient) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._strokeColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.strokeColor(modifier._strokeColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.strokeColor((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableAutoSpacing((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableSelectedDataDetector((undefined as boolean | undefined));
-                }
-            }
-        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -1967,7 +1801,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.customKeyboard((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined | undefined));
+                    this.customKeyboard((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
@@ -2572,61 +2406,6 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    strokeWidth(value: LengthMetrics | undefined): this {
-        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeWidth_0_0value = value
-        } else
-        {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
-        if (((this._onWillAttachIME_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onWillAttachIME_0_0value = value
-        } else
-        {
-            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    strokeColor(value: ResourceColor | undefined): this {
-        if (((this._strokeColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._strokeColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeColor_0_0value = value
-        } else
-        {
-            this._strokeColor_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    enableAutoSpacing(value: boolean | undefined): this {
-        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableAutoSpacing_0_0value = value
-        } else
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    enableSelectedDataDetector(value: boolean | undefined): this {
-        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableSelectedDataDetector_0_0value = value
-        } else
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         if (((this._searchButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._searchButton_0_0value) !== (value)) || (true))
         {
@@ -2653,7 +2432,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE

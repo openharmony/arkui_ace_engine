@@ -64,7 +64,6 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpan
     dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.GetTextDecoration());
     dst.color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(src.GetColor(), ctx);
     dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.GetTextDecorationStyle());
-    dst.thicknessScale = Converter::ArkValue<Opt_Float64>(src.GetLineThicknessScale());
 }
 
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)

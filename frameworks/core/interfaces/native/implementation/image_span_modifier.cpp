@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/image_span_view_static.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
@@ -141,14 +140,6 @@ void SetAltImpl(Ark_NativePointer node,
         ImageModelNG::SetAlt(frameNode, ImageSourceInfo(pixelMapPeer->pixelMap));
     }
 }
-void SetSupportSvg2Impl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    ImageModelStatic::SetSupportSvg2(frameNode, convValue.value_or(false));
-}
 } // ImageSpanAttributeModifier
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
 {
@@ -161,7 +152,6 @@ const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
         ImageSpanAttributeModifier::SetOnCompleteImpl,
         ImageSpanAttributeModifier::SetOnErrorImpl,
         ImageSpanAttributeModifier::SetAltImpl,
-        ImageSpanAttributeModifier::SetSupportSvg2Impl,
     };
     return &ArkUIImageSpanModifierImpl;
 }

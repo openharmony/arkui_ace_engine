@@ -1491,44 +1491,6 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
 }
 
 template<>
-Gradient Convert(const Ark_RadialGradientOptions& src)
-{
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
-
-    // center
-    auto centerX = Converter::OptConvert<Dimension>(src.center.value0);
-    if (centerX) {
-        gradient.GetRadialGradient()->radialCenterX = IsPercent(*centerX) ? *centerX * PERCENT_100 : *centerX;
-    }
-
-    auto centerY = Converter::OptConvert<Dimension>(src.center.value1);
-    if (centerY) {
-        gradient.GetRadialGradient()->radialCenterY = IsPercent(*centerY) ? *centerY * PERCENT_100 : *centerY;
-    }
-
-    // radius
-    std::optional<Dimension> radiusOpt = Converter::OptConvertFromArkLength(src.radius, DimensionUnit::VP);
-    if (radiusOpt) {
-        // radius should be positive [0, +∞)
-        Dimension radius = radiusOpt.value().IsNonPositive() ? Dimension(0, DimensionUnit::VP) : radiusOpt.value();
-        gradient.GetRadialGradient()->radialVerticalSize = radius;
-        gradient.GetRadialGradient()->radialHorizontalSize = radius;
-    }
-
-    // repeating
-    std::optional<bool> repeating = Converter::OptConvert<bool>(src.repeating);
-    if (repeating) {
-        gradient.SetRepeat(repeating.value());
-    }
-
-    // color stops
-    Converter::AssignGradientColors(&gradient, &(src.colors));
-
-    return gradient;
-}
-
-template<>
 GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     GradientColor gradientColor;
@@ -3854,29 +3816,6 @@ TextRange Convert(const Ark_TextRange& src)
     if (end.has_value()) {
         dst.end = end.value();
     }
-    return dst;
-}
-template<>
-bool Convert(const Ark_LineSpacingOptions& src)
-{
-    return Converter::OptConvert<bool>(src.onlyBetweenLines).value_or(false);
-}
-
-template<>
-OverflowMode Convert(const Ark_MaxLinesOptions& src)
-{
-    auto overflowMode = Converter::OptConvert<OverflowMode>(src.overflowMode);
-    return overflowMode.value();
-}
-
-template<>
-SymbolShadow Convert(const Ark_ShadowOptions& src)
-{
-    SymbolShadow dst;
-    dst.color = Converter::OptConvert<Color>(src.color).value_or(Color::BLACK);
-    dst.offset.first = Converter::OptConvert<float>(src.offsetX).value_or(0.0f);
-    dst.offset.second = Converter::OptConvert<float>(src.offsetY).value_or(0.0f);
-    dst.radius = Converter::OptConvert<float>(src.radius).value_or(0.0f);
     return dst;
 }
 

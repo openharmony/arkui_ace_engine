@@ -735,7 +735,7 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest034, TestSize.Level0)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
-    TextModelStatic::SetSelectionMenuOptions(frameNode.GetRawPtr(), nullptr, nullptr, nullptr);
+    TextModelStatic::SetSelectionMenuOptions(frameNode.GetRawPtr(), nullptr, nullptr);
     EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
 }
 

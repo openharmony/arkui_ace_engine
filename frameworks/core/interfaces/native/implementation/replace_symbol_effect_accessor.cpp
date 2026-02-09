@@ -25,12 +25,10 @@ void DestroyPeerImpl(Ark_ReplaceSymbolEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ReplaceSymbolEffect ConstructImpl(const Opt_EffectScope* scope,
-                                      const Opt_ReplaceEffectType* replaceType)
+Ark_ReplaceSymbolEffect ConstructImpl(const Opt_EffectScope* scope)
 {
     auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
-    auto type = Converter::OptConvertPtr<OHOS::Ace::SymbolEffectType>(replaceType);
-    return PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(optScope, type.value_or(SymbolEffectType::REPLACE));
+    return PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -48,15 +46,6 @@ void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
     CHECK_NULL_VOID(peer);
     peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
 }
-Opt_ReplaceEffectType GetReplaceTypeImpl(Ark_ReplaceSymbolEffect peer)
-{
-    return {};
-}
-void SetReplaceTypeImpl(Ark_ReplaceSymbolEffect peer,
-                        const Opt_ReplaceEffectType* replaceType)
-{
-    //can not be set
-}
 } // ReplaceSymbolEffectAccessor
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor()
 {
@@ -66,8 +55,6 @@ const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor
         ReplaceSymbolEffectAccessor::GetFinalizerImpl,
         ReplaceSymbolEffectAccessor::GetScopeImpl,
         ReplaceSymbolEffectAccessor::SetScopeImpl,
-        ReplaceSymbolEffectAccessor::GetReplaceTypeImpl,
-        ReplaceSymbolEffectAccessor::SetReplaceTypeImpl,
     };
     return &ReplaceSymbolEffectAccessorImpl;
 }

@@ -617,8 +617,7 @@ void SearchModelStatic::SetKeyboardAppearance(FrameNode* frameNode, const std::o
 }
 
 void SearchModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick,
-    const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -626,7 +625,7 @@ void SearchModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
-        std::move(onPrepareMenuCallback));
+        nullptr);
 }
 
 void SearchModelStatic::RequestKeyboardOnFocus(FrameNode* frameNode, std::optional<bool>& needToRequest)
@@ -717,55 +716,5 @@ void SearchModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const 
         return;
     }
     SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
-}
-
-void SearchModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
-{
-    if (value.has_value()) {
-        SearchModelNG::SetStrokeWidth(frameNode, value.value());
-        return;
-    }
-    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeWidth, frameNode);
-}
-
-void SearchModelStatic::SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& color)
-{
-    if (color.has_value()) {
-        SearchModelNG::SetStrokeColor(frameNode, color.value());
-        return;
-    }
-    ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, StrokeColor, frameNode);
-}
-
-void SearchModelStatic::SetEnableAutoSpacing(FrameNode* frameNode, std::optional<bool>& value)
-{
-    SearchModelNG::SetEnableAutoSpacing(frameNode, value.value_or(false));
-}
-
-void SearchModelStatic::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
-{
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(textFieldEventHub);
-    textFieldEventHub->SetOnWillAttachIME(std::move(func));
-}
-
-void SearchModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, std::optional<bool>& value)
-{
-    if (value) {
-        SearchModelNG::SetSelectDetectEnable(frameNode, value.value());
-    }
-    SearchModelNG::ResetSelectDetectEnable(frameNode);
-}
-
-void SearchModelStatic::SetCustomKeyboardWithNode(
-    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
-    pattern->SetCustomKeyboardOption(supportAvoidance.value_or(false));
 }
 } // namespace OHOS::Ace::NG

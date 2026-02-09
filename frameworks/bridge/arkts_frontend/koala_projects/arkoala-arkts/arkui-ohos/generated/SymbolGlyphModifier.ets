@@ -23,11 +23,10 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolEffect, SymbolGlyphAttribute } from "./component/symbolglyph"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CommonMethod, ShadowOptions } from "./component/common"
+import { CommonMethod } from "./component/common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./component/units"
 import { Color, FontWeight } from "./component/enums"
-import { ShaderStyle } from "./component/textCommon"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker } from "#components"
@@ -71,10 +70,6 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _minFontScale_0_0value?: double | Resource | undefined
     _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxFontScale_0_0value?: double | Resource | undefined
-    _shaderStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _shaderStyle_0_0value?: Array<ShaderStyle | undefined> | ShaderStyle | undefined
-    _symbolShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _symbolShadow_0_0value?: ShadowOptions | undefined
     _symbolEffect_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _symbolEffect_1_0value?: SymbolEffect | undefined
     _symbolEffect_1_1value?: boolean | undefined
@@ -189,42 +184,6 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 default: {
                     this._renderingStrategy_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setRenderingStrategyAttribute((undefined as SymbolRenderingStrategy | undefined));
-                }
-            }
-        }
-        if (this._shaderStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._shaderStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShaderStyleAttribute((this._shaderStyle_0_0value as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
-                    this._shaderStyle_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._shaderStyle_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._shaderStyle_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShaderStyleAttribute((undefined as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
-                }
-            }
-        }
-        if (this._symbolShadow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._symbolShadow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSymbolShadowAttribute((this._symbolShadow_0_0value as ShadowOptions | undefined));
-                    this._symbolShadow_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._symbolShadow_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._symbolShadow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSymbolShadowAttribute((undefined as ShadowOptions | undefined));
                 }
             }
         }
@@ -400,32 +359,6 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
                 }
             }
         }
-        if (modifier._shaderStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._shaderStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.shaderStyle(modifier._shaderStyle_0_0value);
-                    break;
-                }
-                default: {
-                    this.shaderStyle((undefined as Array<ShaderStyle | undefined> | ShaderStyle | undefined));
-                }
-            }
-        }
-        if (modifier._symbolShadow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._symbolShadow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.symbolShadow(modifier._symbolShadow_0_0value);
-                    break;
-                }
-                default: {
-                    this.symbolShadow((undefined as ShadowOptions | undefined));
-                }
-            }
-        }
         if (modifier._symbolEffect_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._symbolEffect_0_flag) {
@@ -596,28 +529,6 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    shaderStyle(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): this {
-        if (((this._shaderStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._shaderStyle_0_flag = AttributeUpdaterFlag.UPDATE
-            this._shaderStyle_0_0value = value
-        } else
-        {
-            this._shaderStyle_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    symbolShadow(value: ShadowOptions | undefined): this {
-        if (((this._symbolShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._symbolShadow_0_flag = AttributeUpdaterFlag.UPDATE
-            this._symbolShadow_0_0value = value
-        } else
-        {
-            this._symbolShadow_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
