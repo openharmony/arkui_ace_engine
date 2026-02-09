@@ -120,8 +120,6 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
-    CHECK_NULL_VOID(pattern);
     const auto& layoutProperty = DynamicCast<FolderStackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
@@ -135,19 +133,7 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OnHoverStatusChange(layoutWrapper);
     if (!isIntoFolderStack_) {
         MeasureByStack(hostNode, layoutWrapper);
-        pattern->SetNeedCallBack(false);
         return;
-    }
-    if (!pattern->GetNeedCallBack()) {
-        pattern->SetNeedCallBack(true);
-        auto displayInfo = pattern->GetDisplayInfo();
-        if (displayInfo) {
-            FolderEventInfo event(displayInfo->GetFoldStatus());
-            auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
-            if (eventHub) {
-                eventHub->OnFolderStateChange(event);
-            }
-        }
     }
     RangeCalculation(hostNode, layoutProperty, size);
     MeasureHoverStack(layoutWrapper, hostNode, layoutProperty, size);
@@ -214,6 +200,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
         creaseY = static_cast<int32_t>(foldCrease.Bottom() - foldCrease.Height());
         creaseHeight = static_cast<int32_t>(foldCrease.Height());
     }
+
     preHoverStackHeight_ = static_cast<float>(creaseY - length);
     preControlPartsStackHeight_ = static_cast<float>(size.Height() - creaseHeight - preHoverStackHeight_);
     controlPartsStackRect_ = OffsetF(0.0f, creaseY - length + creaseHeight);
@@ -412,7 +399,6 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     auto geometryNode = hoverStackWrapper->GetGeometryNode();
     geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
 }
-
 
 void FolderStackLayoutAlgorithm::MatchParentWhenChildrenMatch(
     LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& controlPartsLayoutWrapper)
