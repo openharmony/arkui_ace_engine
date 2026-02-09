@@ -207,7 +207,6 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const NativeResourceObject& obj, R
             return nullptr;
         }
     } else {
-        CHECK_NULL_RETURN(obj.bundleName, nullptr);
         CHECK_NULL_RETURN(obj.moduleName, nullptr);
         themeConstants = ViewAbstract::GetThemeConstants(obj.bundleName, obj.moduleName);
         if (!themeConstants) {
@@ -373,6 +372,7 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
             }
             int count = countVal->GetInt();
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->GetString(), count);
+            // cangjie remains consistent with arkts
             ReplaceHolder(pluralStr, params, 2);
             result = pluralStr;
         } else {
