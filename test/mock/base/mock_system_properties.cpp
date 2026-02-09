@@ -290,6 +290,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsPortraitFoldProduct()
+{
+    return false;
+}
+
 bool SystemProperties::IsBigFoldProduct()
 {
     return false;
