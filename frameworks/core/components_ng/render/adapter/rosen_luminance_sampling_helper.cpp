@@ -49,7 +49,7 @@ void LuminanceSamplingHelper::SetSamplingOptions(const WeakPtr<FrameNode>& node,
             bottom = region->bottom->ConvertToPx();
             left = region->left->ConvertToPx();
             right = region->right->ConvertToPx();
-            setRegion = Rosen::Vector4f(left, top, right - left, bottom - top);
+            setRegion = Rosen::Vector4f(left, top, right, bottom);
         }
     }
     rsNode->SetColorPickerOptions(samplingInterval, std::make_pair(darkThreshold, brightThreshold), setRegion);
@@ -68,4 +68,4 @@ void LuminanceSamplingHelper::UnRegisterSamplingCallback(const WeakPtr<NG::Frame
     CHECK_NULL_VOID(rsNode);
     rsNode->UnregisterColorPickerCallback();
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
