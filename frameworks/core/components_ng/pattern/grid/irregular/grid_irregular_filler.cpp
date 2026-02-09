@@ -276,6 +276,54 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     return { childHeight, constraint };
 }
 
+int32_t GridIrregularFiller::FillAndMeasureUntilIndex(
+    const FillParameters& params, int32_t startIdx, int32_t endIdx, int32_t& outTargetLine)
+{
+    int32_t idx = startIdx;
+    outTargetLine = -1;
+
+    while (idx <= endIdx) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+
+        // Record the line where endIdx is located
+        if (idx == endIdx) {
+            outTargetLine = posY_;
+        }
+
+        // Measure current item (update lineHeightMap_)
+        auto constraint = MeasureItem(params, idx, posX_, posY_, false);
+        if (constraint.first < 0) {
+            return -1; // Measurement failed
+        }
+        idx++;
+    }
+
+    return idx - 1; // Return last successfully processed index
+}
+
+int32_t GridIrregularFiller::FillAndMeasureUntilLine(const FillParameters& params, int32_t startIdx, int32_t endLine)
+{
+    int32_t idx = startIdx;
+    int32_t childrenCount = info_->GetChildrenCount();
+
+    while (idx < childrenCount && posY_ < endLine) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+
+        // Measure current item (update lineHeightMap_)
+        auto constraint = MeasureItem(params, idx, posX_, posY_, false);
+        if (constraint.first < 0) {
+            return -1; // Measurement failed
+        }
+        idx++;
+    }
+
+    return idx - 1; // Return last successfully processed index
+}
+
 int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
 {
     auto res = info_->FindEndIdx(lineIdx);
@@ -451,6 +499,7 @@ void GridIrregularFiller::SetItemInfo(
 float GridIrregularFiller::FillMatrixFromStartIndexWithMeasure(
     const FillParameters& params, int32_t startLine, int32_t startIndex, int32_t targetIdx)
 {
+    // ━━━ Step 0: Parameter validation ━━━
     if (targetIdx >= info_->GetChildrenCount()) {
         targetIdx = info_->GetChildrenCount() - 1;
     }
@@ -460,47 +509,28 @@ float GridIrregularFiller::FillMatrixFromStartIndexWithMeasure(
     }
 
     posY_ = startLine;
-    int32_t idx = startIndex;
-    int32_t targetLine = -1; // Record the line where targetIdx is located
 
-    // ━━━ Step 1: Fill matrix to targetIdx and record targetLine ━━━
-    while (idx <= targetIdx) {
-        if (!FindNextItem(idx)) {
-            FillOne(idx);
-        }
-
-        // Record the line where targetIdx is located
-        if (idx == targetIdx) {
-            targetLine = posY_;
-        }
-
-        // Measure current item (update lineHeightMap_)
-        MeasureItem(params, idx, posX_, posY_, false);
-        idx++;
+    // ━━━ Step 1: Fill and measure to targetIdx ━━━
+    int32_t targetLine = -1;
+    int32_t lastIdx = FillAndMeasureUntilIndex(params, startIndex, targetIdx, targetLine);
+    if (lastIdx < 0) {
+        return 0.0f; // Measurement failed
     }
 
-    // ━━━ Step 2: Only calculate height within targetLine range ━━━
+    // ━━━ Step 2: Handle row-spanning items ━━━
     if (targetLine == -1) {
-        targetLine = posY_; // If not found, use the last line
+        targetLine = posY_;
     }
-
-    // Get the number of rows occupied by targetIdx (handle row-spanning items)
     auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, targetIdx);
-    int32_t rowSpan = itemSize.rows; // Number of rows occupied by targetIdx
+    int32_t rowSpan = itemSize.rows;
+    int32_t endRow = targetLine + rowSpan;
 
-    // Only accumulate height from targetLine to targetLine+rowSpan-1
-    float totalHeight = 0.0f;
-    for (int32_t i = 0; i < rowSpan; i++) {
-        auto it = info_->lineHeightMap_.find(targetLine + i);
-        if (it != info_->lineHeightMap_.end()) {
-            totalHeight += it->second;
-            // Only add gap if not the last row
-            if (i < rowSpan - 1) {
-                totalHeight += params.mainGap;
-            }
-        }
+    // ━━━ Step 3: Complete measurement for all spanned rows ━━━
+    if (posY_ < endRow) {
+        FillAndMeasureUntilLine(params, lastIdx + 1, endRow);
     }
 
-    return totalHeight;
+    // ━━━ Step 4: Calculate and return height ━━━
+    return info_->GetHeightInRange(targetLine, targetLine + rowSpan, params.mainGap) - params.mainGap;
 }
 } // namespace OHOS::Ace::NG
