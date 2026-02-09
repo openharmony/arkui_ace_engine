@@ -34,6 +34,7 @@ component_modules = [
   "calendar_picker",
   "indexer",
   "symbol",
+  "rich_editor",
 ]
 
 if (!ace_engine_feature_wearable) { 

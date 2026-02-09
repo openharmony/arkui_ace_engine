@@ -19,6 +19,8 @@
 #include <string>
 #include "frameworks/base/utils/macros.h"
 
+#include "ui/base/macros.h"
+
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT VibratorUtils {
 public:
@@ -26,7 +28,7 @@ public:
     ~VibratorUtils() = delete;
 
     static void StartVibraFeedback();
-    static void StartVibraFeedback(const std::string& vibratorType);
+    ACE_FORCE_EXPORT static void StartVibraFeedback(const std::string& vibratorType);
     bool StartExclusiveVibraFeedback(const char* effectId);
     static void StartViratorDirectly(const std::string& vibratorType);
 private:

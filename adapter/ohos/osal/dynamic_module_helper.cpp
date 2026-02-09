@@ -70,6 +70,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
         { "ColumnSplit", "linearsplit" },
+        { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},
         { "Stepper", "stepper" },

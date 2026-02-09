@@ -543,16 +543,6 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaWillChange,
 };
 
-const ComponentAsyncEventHandler richEditorNodeAsyncEventHandlers[] = {
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnSelectionChange,
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnReady,
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnPaste,
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnEditingChange,
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnSubmit,
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnCut,
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnCopy,
-};
-
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
@@ -789,16 +779,6 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnTextAreaWillChange,
 };
 
-const ResetComponentAsyncEventHandler RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnSelectionChange,
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnReady,
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnPaste,
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnEditingChange,
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnSubmit,
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnCut,
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnCopy,
-};
-
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetRefreshOnStateChange,
     NodeModifier::ResetOnRefreshing,
@@ -1005,11 +985,11 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_RICH_EDITOR: {
             // richEditor event type.
-            if (subKind >= sizeof(richEditorNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
-            }
-            eventHandle = richEditorNodeAsyncEventHandlers[subKind];
+            auto* richEditorModifier = NodeModifier::GetRichEditorModifier();
+                if (richEditorModifier) {
+                    eventHandle =
+                        reinterpret_cast<ComponentAsyncEventHandler>(richEditorModifier->getEventSetHandler(subKind));
+                }
             break;
         }
         case ARKUI_REFRESH: {
@@ -1287,14 +1267,11 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             break;
         }
         case ARKUI_RICH_EDITOR: {
-            // rich editor event type.
-            if (subKind >=
-                sizeof(RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
-            }
-            eventHandle = RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            auto* richEditorModifier = NodeModifier::GetRichEditorModifier();
+                if (richEditorModifier) {
+                    eventHandle = reinterpret_cast<ResetComponentAsyncEventHandler>(
+                        richEditorModifier->getEventResetHandler(subKind));
+                }
             break;
         }
         case ARKUI_REFRESH: {

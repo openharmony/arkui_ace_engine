@@ -158,6 +158,7 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:timepicker",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:alphabetindexer",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:symbolglyph",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:richeditor",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -194,6 +195,7 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arktimepicker.abc",
       "${out_path}/arkui/ace_engine/arkalphabetindexer.abc",
       "${out_path}/arkui/ace_engine/arksymbolglyph.abc",
+      "${out_path}/arkui/ace_engine/arkricheditor.abc",
     ]
     if (!ace_engine_feature_wearable) { 
       sources += [

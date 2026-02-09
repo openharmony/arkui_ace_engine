@@ -1728,7 +1728,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
 }
 
 template<>
-void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
 {
     switch (src) {
         case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;

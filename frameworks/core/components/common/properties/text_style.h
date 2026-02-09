@@ -1257,7 +1257,7 @@ public:
         return GetInnerSymbolEffectOptions();
     }
 
-    std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     const std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)>& GetReLayoutTextStyleBitmap() const
     {
@@ -1348,10 +1348,10 @@ public:
 
     void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&, TextStyle&)>&& updateFunc);
-    const RefPtr<ResourceObject>& GetResource(const std::string& key) const;
-    void CopyResource(const TextStyle& source);
+    ACE_FORCE_EXPORT const RefPtr<ResourceObject>& GetResource(const std::string& key) const;
+    ACE_FORCE_EXPORT void CopyResource(const TextStyle& source);
     void AppendResource(const TextStyle& source);
-    void ReloadResources();
+    ACE_FORCE_EXPORT void ReloadResources();
 
 private:
     ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(InnerSymbolEffectOptions, NG::SymbolEffectOptions);

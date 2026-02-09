@@ -200,7 +200,7 @@ public:
         keyboardOffset_ = offset;
     }
 
-    float GetKeyboardOffset(bool withoutProcess = false) const;
+    ACE_FORCE_EXPORT float GetKeyboardOffset(bool withoutProcess = false) const;
 
     void SetKeyboardInfo(float height);
 
