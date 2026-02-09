@@ -619,6 +619,40 @@ HWTEST_F(WebPatternPartOneTest, OnAttachToMainTree_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsAccessibilitySamePage_001
+ * @tc.desc: IsAccessibilitySamePage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, IsAccessibilitySamePage_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, [](){ return AceType::MakeRefPtr<WebPattern>();  });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnAttachToMainTree();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), false);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilitySamePage("FULL_SILENT");
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), true);
+
+    accessibilityProperty->SetAccessibilitySamePage("SEMI_SILENT");
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), true);
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), false);
+#endif
+}
+
+/**
  * @tc.name: OnDetachFromMainTree_001
  * @tc.desc: OnDetachFromMainTree.
  * @tc.type: FUNC
