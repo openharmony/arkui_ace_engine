@@ -18,6 +18,7 @@
 #include "interaction_manager.h"
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "adapter/ohos/capability/udmf/udmf_impl.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
@@ -70,6 +71,7 @@ struct DragControllerAsyncCtx {
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData = nullptr;
+    RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams = nullptr;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -474,18 +476,27 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
 {
     int32_t dataSize = 1;
     CHECK_NULL_RETURN(asyncCtx, dataSize);
-    if (asyncCtx->unifiedData) {
-        int32_t ret =
-            UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
+    int32_t ret = 1;
+    if (asyncCtx->dataLoadParams) {
+        ret = UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        if (ret != 0) {
+            LOGE("AceDrag, udmf set delayInfo failed, return value is %{public}d", ret);
+        }
+        auto recordCount = asyncCtx->dataLoadParams->GetRecordCount();
+        dataSize = (recordCount == 0 || recordCount > INT32_MAX) ? 1 : static_cast<int32_t>(recordCount);
+    }
+    if (!asyncCtx->dataLoadParams && asyncCtx->unifiedData) {
+        ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
             LOGE("AceDrag, udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
-            if (ret != 0) {
-                LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
-            }
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
+    }
+    if (ret == 0) {
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
+        if (ret != 0) {
+            LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
+        }
     }
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
@@ -518,10 +529,11 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
     return true;
 }
@@ -742,10 +754,11 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto windowId = container->GetWindowId();
     auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
     return true;
 }
@@ -968,6 +981,12 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
         auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
         udData->SetUnifiedData(unifiedDataPtr);
         dragAsyncContext->unifiedData = udData;
+    }
+    if (asyncCtx.dataLoadParams) {
+        auto dataLoadParamsPtr = std::static_pointer_cast<UDMF::DataLoadParams>(asyncCtx.dataLoadParams.GetSharedPtr());
+        auto dataLP = AceType::MakeRefPtr<DataLoadParamsImpl>();
+        dataLP->SetDataLoadParams(dataLoadParamsPtr);
+        dragAsyncContext->dataLoadParams = dataLP;
     }
 #if defined(PIXEL_MAP_SUPPORTED)
     if (asyncCtx.pixelMap) {

@@ -99,6 +99,7 @@ export namespace dragController {
         extraParams?: string;
         touchPoint?: TouchPoint;
         previewOptions?: DragPreviewOptions;
+        dataLoadParams?: unifiedDataChannel.DataLoadParams;
     }
 
     export interface DragEventParam {
