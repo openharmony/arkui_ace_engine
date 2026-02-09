@@ -23,7 +23,7 @@ namespace OHOS::Ace {
 
 constexpr uint32_t DEFAULT_GRID_COLUMN_SPAN = 0;
 
-class GridColumnInfo : public GridLayoutInfo {
+class ACE_FORCE_EXPORT GridColumnInfo : public GridLayoutInfo {
     DECLARE_ACE_TYPE(GridColumnInfo, GridLayoutInfo);
 
 public:

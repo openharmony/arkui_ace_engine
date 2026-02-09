@@ -583,14 +583,14 @@ namespace Converter {
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_ResourceColor& src);
-    template<> BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
+    template<> ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Float64& src);
     template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Number& src);
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
-    template<> BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src);
+    template<> ACE_FORCE_EXPORT BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_Float64& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src);
@@ -848,7 +848,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<DistributionType>& dst, const Ark_DistributionType& src);
-    template<> void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src);
     template<> void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src);
     template<> void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& src);
     template<> void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src);
@@ -979,7 +979,8 @@ namespace Converter {
     ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
     template<> void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src);
     template<> void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src);
-    template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
     template<> void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState& src);
     template<> void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);

@@ -1239,13 +1239,15 @@ HWTEST_F(SelectPatternTheTestNg, UpdateSelectedOptionFontFromPattern, TestSize.L
      * @tc.steps: step2. Test UpdateSelectedOptionFontFromPattern with different user-defined flags.
      * @tc.expected: step2. Color properties are updated based on user-defined flags and theme.
      */
-    const RefPtr<MenuItemPattern>& optionPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
     selectPattern->selectedFont_.FontColor = std::nullopt;
     selectPattern->selectedFont_.FontFamily = std::nullopt;
     selectPattern->selectedFont_.FontSize = std::nullopt;
     selectPattern->selectedFont_.FontStyle = std::nullopt;
     selectPattern->selectedFont_.FontWeight = std::nullopt;
-    selectPattern->UpdateSelectedOptionFontFromPattern(optionPattern);
+    selectPattern->UpdateSelectedOptionFontFromPattern(option);
     ASSERT_EQ(selectPattern->selectedFont_.FontFamily, std::nullopt);
 
     selectPattern->selectedFont_.FontColor = Color::FromRGB(100, 100, 100);
@@ -1253,7 +1255,7 @@ HWTEST_F(SelectPatternTheTestNg, UpdateSelectedOptionFontFromPattern, TestSize.L
     selectPattern->selectedFont_.FontSize = OPTION_MARGIN;
     selectPattern->selectedFont_.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
     selectPattern->selectedFont_.FontWeight = FontWeight::BOLD;
-    selectPattern->UpdateSelectedOptionFontFromPattern(optionPattern);
+    selectPattern->UpdateSelectedOptionFontFromPattern(option);
     ASSERT_NE(selectPattern->selectedFont_.FontFamily, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

@@ -352,7 +352,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg004, TestSize.Level1)
     auto wrapperNode =
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemPattern);
+    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemNode);
     ASSERT_NE(wrapperPattern, nullptr);
     /**
      * @tc.steps: step3. add submenu to wrapper
@@ -376,10 +376,10 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg004, TestSize.Level1)
      * @tc.expected: menuItemPattern IsSubMenuShowed as expected
      */
     subMenuPattern->SetParentMenuItem(currentMenuItemNode);
-    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemPattern);
+    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemNode);
     EXPECT_TRUE(currentMenuItemPattern->IsSubMenuShowed());
     subMenuPattern->SetParentMenuItem(menuItemNode);
-    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemPattern);
+    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemNode);
     EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
 }
 
@@ -927,16 +927,16 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     ASSERT_NE(menuItemPattern2, nullptr);
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
-    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
+    wrapperPattern->HideMenu(mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
     subMenuPattern->SetParentMenuItem(menuItemNode1);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
+    wrapperPattern->HideMenu(subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
+    wrapperPattern->HideMenu(subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
@@ -1044,7 +1044,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg020, TestSize.Level1)
     auto wrapperNode =
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
-    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemPattern);
+    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemNode);
     ASSERT_NE(wrapperPattern, nullptr);
     /**
      * @tc.steps: step3. add submenu to wrapper
@@ -1068,10 +1068,10 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg020, TestSize.Level1)
      * @tc.expected: menuItemPattern IsSubMenuShowed as expected
      */
     subMenuPattern->SetParentMenuItem(currentMenuItemNode);
-    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemPattern);
+    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemNode);
     EXPECT_TRUE(currentMenuItemPattern->IsSubMenuShowed());
     subMenuPattern->SetParentMenuItem(menuItemNode);
-    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemPattern);
+    wrapperPattern->HandleMouseEvent(mouseInfo, menuItemNode);
     EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
 }
 

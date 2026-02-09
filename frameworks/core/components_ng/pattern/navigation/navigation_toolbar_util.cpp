@@ -30,6 +30,8 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -41,6 +43,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -468,12 +471,10 @@ void BuildToolbarMoreMenuNodeAction(const RefPtr<BarItemNode>& barItemNode, cons
 
         auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
-        auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(menuLayoutProperty);
-        menuLayoutProperty->UpdateTargetSize(imageSize);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->SetIsSelectMenu(true);
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
+        menuModifier->updateTargetSize(menuNode, imageSize);
+        menuModifier->setIsSelectMenu(menuNode, true);
 
         bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (isRightToLeft) {
@@ -528,8 +529,9 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
             menuParam.backgroundEffectOption = toolBarMoreButtonOptions.bgOptions.effectOption.value();
         }
     }
-    auto barMenuNode = MenuView::Create(
-        std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    auto barMenuNode = menuViewModifier ? menuViewModifier->createWithOptionParams(
+        std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam) : nullptr;
     auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
     CHECK_NULL_RETURN(toolBarItemNode, false);
     BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode, menuParam);

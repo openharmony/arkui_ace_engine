@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.h"
+#include "core/components_ng/pattern/menu/bridge/menu_item/arkts_native_menu_item_bridge.h"
+
+#include "jsnapi_expo.h"
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/core/components_ng/base/view_stack_model.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/view_stack_model.h"
 
 using namespace OHOS::Ace::Framework;
 
@@ -107,35 +109,6 @@ bool ParseFontOptions(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, bool is
     return true;
 }
 
-void SetSymbolOptionApply(
-    EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const Local<JSValueRef> modifierObj)
-{
-    auto globalObj = JSNApi::GetGlobalObject(vm);
-    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
-    if (globalFunc->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> func = globalFunc->ToObject(vm);
-        if (!modifierObj->IsObject(vm)) {
-            symbolApply = nullptr;
-        } else {
-            auto onApply = [vm, func = panda::CopyableGlobal(vm, func),
-                               modifierParam = panda::CopyableGlobal(vm, modifierObj)](
-                               WeakPtr<NG::FrameNode> frameNode) {
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
-                auto node = frameNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                Local<JSValueRef> params[NUM_2];
-                params[NUM_0] = modifierParam.ToLocal();
-                params[NUM_1] = panda::NativePointerRef::New(vm, AceType::RawPtr(node));
-                PipelineContext::SetCallBackNode(node);
-                auto result = func->Call(vm, func.ToLocal(), params, 2);
-                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
-            };
-            symbolApply = onApply;
-        }
-    }
-}
-
 void ParseMenuItemOptionsResource(EcmaVM* vm, const Local<ObjectRef>& menuItemObj,
     ArkUIMenuItemOptions& menuItemOptions, MenuItemParseResult& parseResult)
 {
@@ -147,7 +120,7 @@ void ParseMenuItemOptionsResource(EcmaVM* vm, const Local<ObjectRef>& menuItemOb
     Local<JSValueRef> symbolEnd = menuItemObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "symbolEndIcon"));
 
     if (symbolStart->IsObject(vm)) {
-        SetSymbolOptionApply(vm, parseResult.startSymbolApply, symbolStart);
+        ArkTSUtils::SetSymbolOptionApply(vm, parseResult.startSymbolApply, symbolStart);
         menuItemOptions.startSymbolApply = reinterpret_cast<void*>(&parseResult.startSymbolApply);
     } else if (ArkTSUtils::ParseJsMedia(vm, startIcon, parseResult.startIconPath, parseResult.startIconObj, true)) {
         std::string bundleName;
@@ -161,7 +134,7 @@ void ParseMenuItemOptionsResource(EcmaVM* vm, const Local<ObjectRef>& menuItemOb
     menuItemOptions.content = parseResult.contentStr.c_str();
 
     if (symbolEnd->IsObject(vm)) {
-        SetSymbolOptionApply(vm, parseResult.endSymbolApply, symbolEnd);
+        ArkTSUtils::SetSymbolOptionApply(vm, parseResult.endSymbolApply, symbolEnd);
         menuItemOptions.endSymbolApply = reinterpret_cast<void*>(&parseResult.endSymbolApply);
     } else if (ArkTSUtils::ParseJsMedia(vm, endIcon, parseResult.endIconPath, parseResult.endIconObj, true)) {
         std::string bundleName;
@@ -361,7 +334,6 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     bool isJsView = IsJsView(firstArg, vm);
     CHECK_EQUAL_RETURN(
         ParseFontOptions(vm, runtimeCallInfo, isJsView, args, true), false, panda::JSValueRef::Undefined(vm));
-
     CalcDimension fontSize;
     RefPtr<ResourceObject> fontSizeResObj;
     if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], fontSize, fontSizeResObj, false)) {
@@ -428,7 +400,6 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     bool isJsView = IsJsView(firstArg, vm);
     CHECK_EQUAL_RETURN(
         ParseFontOptions(vm, runtimeCallInfo, isJsView, args, false), false, panda::JSValueRef::Undefined(vm));
-
     CalcDimension fontSize;
     RefPtr<ResourceObject> fontSizeResObj;
     if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], fontSize, fontSizeResObj, false)) {
@@ -504,8 +475,7 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
         isShow = true;
     } else if (inputArg->IsObject(vm)) {
         isShow = true;
-        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-        Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[NUM_1]);
+        ArkTSUtils::SetSymbolOptionApply(vm, symbolApply, inputArg);
     }
     auto selectIconRawPtr = AceType::RawPtr(selectIconResObj);
     menuItemModifier->setSelectIcon(nativeNode, isShow);
@@ -601,7 +571,6 @@ ArkUINativeModuleValue MenuItemBridge::Create(ArkUIRuntimeCallInfo* runtimeCallI
 
     if (runtimeCallInfo->GetArgsNumber() < 1 || (!paramArg->IsObject(vm) && !paramArg->IsFunction(vm))) {
         menuItemModifier->createWithCustomNode(nullptr);
-        JSMenuItemTheme::ApplyTheme();
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -644,5 +613,45 @@ ArkUINativeModuleValue MenuItemBridge::Create(ArkUIRuntimeCallInfo* runtimeCallI
     }
     JSMenuItemTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
+}
+
+void MenuItemBridge::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    const char* functionNames[] = {
+        "create",
+        "setMenuItemSelected",
+        "resetMenuItemSelected",
+        "setLabelFontColor",
+        "resetLabelFontColor",
+        "setContentFontColor",
+        "resetContentFontColor",
+        "setLabelFont",
+        "resetLabelFont",
+        "setContentFont",
+        "resetContentFont",
+        "setSelectIcon",
+        "resetSelectIcon",
+        "setOnChange",
+        "resetOnChange",
+    };
+    Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::Create),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetMenuItemSelected),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetMenuItemSelected),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFontColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetLabelFontColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetContentFontColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetContentFontColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFont),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetLabelFont),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetContentFont),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetContentFont),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetSelectIcon),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetSelectIcon),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetOnChange),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetOnChange),
+    };
+    auto menuItem = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitem"), menuItem);
 }
 } // namespace OHOS::Ace::NG

@@ -112,7 +112,7 @@ struct LayoutConstraintT {
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
         const std::optional<T>& bottom);
 
-    void MinusPaddingToNonNegativeSize(const std::optional<T>& left, const std::optional<T>& right,
+    ACE_FORCE_EXPORT void MinusPaddingToNonNegativeSize(const std::optional<T>& left, const std::optional<T>& right,
         const std::optional<T>& top, const std::optional<T>& bottom);
 
     bool operator==(const LayoutConstraintT& layoutConstraint) const

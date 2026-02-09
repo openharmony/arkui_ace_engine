@@ -21,10 +21,13 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -295,7 +298,8 @@ void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
         return;
     }
     if (!data.isMenuNotShow) {
-        MenuView::ExecuteMenuDisappearAnimation(data);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        menuViewModifier ? menuViewModifier->executeMenuDisappearAnimation(data) : void();
     }
 }
 
@@ -334,11 +338,11 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     dragDropManager->SetIsShowBadgeAnimation(false);
 }
 
-OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<MenuPattern>& menuPattern,
-    const RefPtr<FrameNode>& imageNode, const RefPtr<PipelineBase>& context, int32_t badgeLength)
+OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& imageNode,
+    const RefPtr<PipelineBase>& context, int32_t badgeLength)
 {
     CHECK_NULL_RETURN(imageNode, OffsetF());
-    CHECK_NULL_RETURN(menuPattern, OffsetF());
+    CHECK_NULL_RETURN(node, OffsetF());
     auto offset = imageNode->GetPaintRectOffset();
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         double textOffsetX = offset.GetX() - BADGE_RELATIVE_OFFSET.ConvertToPx();
@@ -346,7 +350,9 @@ OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<MenuPattern>& menu
         return OffsetF(textOffsetX, textOffsetY);
     }
     auto width = imageNode->GetGeometryNode()->GetFrameSize().Width();
-    auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, OffsetF());
+    auto scaleAfter = menuModifier->getPreviewAfterAnimationScale(node);
     auto menuTheme = context->GetTheme<NG::MenuTheme>();
     CHECK_NULL_RETURN(menuTheme, OffsetF());
     auto previewAfterAnimationScale =
@@ -357,17 +363,19 @@ OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<MenuPattern>& menu
     return OffsetF(textOffsetX, textOffsetY);
 }
 
-void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuPattern,
-    const RefPtr<OverlayManager>& manager, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode)
+void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<FrameNode>& node, const RefPtr<OverlayManager>& manager,
+    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode)
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
-    CHECK_NULL_VOID(menuPattern);
+    CHECK_NULL_VOID(node);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto frameNode = FrameNode::GetFrameNode(menuModifier->getTargetTag(node), menuModifier->getTargetId(node));
     CHECK_NULL_VOID(frameNode);
     auto badgeNumber = SelectableUtils::GetBadgeNumber(frameNode);
     auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
@@ -378,7 +386,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipelineContext, badgeLength);
+    auto offset = CalcBadgeTextOffset(node, imageNode, pipelineContext, badgeLength);
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     textNode->MarkModifyDone();
@@ -481,10 +489,9 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         auto imageNode = menuWrapperPattern->GetPreview();
         auto menuNode = menuWrapperPattern->GetMenu();
         CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
         DragAnimationHelper::HideDragNodeCopy(manager);
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
-        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::CalcBadgeTextPosition(menuNode, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
 }
@@ -1175,7 +1182,8 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
 void DragAnimationHelper::MountMenuNode(PreparedInfoForDrag& data)
 {
     auto menuNode = data.menuNode;
-    MenuView::UpdateMenuNodePosition(data);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    menuViewModifier ? menuViewModifier->updateMenuNodePosition(data) : void();
     data.relativeContainerNode->AddChild(data.menuNode);
     if (data.isMenuNotShow) {
         auto menuNodeRenderContext = menuNode->GetRenderContext();

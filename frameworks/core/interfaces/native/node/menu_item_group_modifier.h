@@ -16,10 +16,14 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_ITEM_GROUP_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_ITEM_GROUP_MODIFIER_H
 
-#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_group_inner_modifier.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier();
+const CJUIMenuItemGroupModifier* GetCJUIMenuItemGroupModifier();
+const ArkUIMenuItemGroupInnerModifier* GetMenuItemGroupInnerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_ITEM_GROUP_MODIFIER_H

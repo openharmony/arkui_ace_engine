@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,7 +43,7 @@ RefPtr<FrameNode> MenuItemGroupViewStatic::CreateFrameNode(int32_t nodeId)
 {
     const std::function<RefPtr<Pattern>(void)>& patternCreator =
         []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); };
-    return FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, patternCreator);
+    return FrameNode::GetOrCreateFrameNode(MENU_ITEM_GROUP_ETS_TAG, nodeId, patternCreator);
 }
 
 void MenuItemGroupViewStatic::SetHeader(FrameNode* frameNode, const std::optional<std::string>& header)
@@ -50,10 +51,10 @@ void MenuItemGroupViewStatic::SetHeader(FrameNode* frameNode, const std::optiona
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto content = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(row && content);
     UpdateRowPadding(row);
     content->MountToParent(row);
@@ -83,10 +84,10 @@ void MenuItemGroupViewStatic::SetFooter(FrameNode* frameNode, const std::optiona
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto content = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(row && content);
     UpdateRowPadding(row);
     content->MountToParent(row);
@@ -110,7 +111,7 @@ void MenuItemGroupViewStatic::SetHeader(FrameNode* frameNode, std::function<RefP
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     UpdateRowPadding(row);
     RefPtr<UINode> unitNode = builder();
@@ -123,7 +124,7 @@ void MenuItemGroupViewStatic::SetFooter(FrameNode* frameNode, std::function<RefP
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     UpdateRowPadding(row);
     RefPtr<UINode> unitNode = builder();

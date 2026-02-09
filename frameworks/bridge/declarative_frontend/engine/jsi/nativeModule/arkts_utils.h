@@ -358,6 +358,8 @@ public:
         const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
     static bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm);
     static bool IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm);
+    static void SetSymbolOptionApply(
+        EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const Local<JSValueRef> modifierObj);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

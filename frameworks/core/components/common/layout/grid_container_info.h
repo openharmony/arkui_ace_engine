@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 constexpr int32_t UNDEFINED_INT = -1;
 constexpr Dimension UNDEFINED_DIMENSION(-1.0, DimensionUnit::VP);
 
-class GridContainerInfo : public GridLayoutInfo {
+class ACE_FORCE_EXPORT GridContainerInfo : public GridLayoutInfo {
     DECLARE_ACE_TYPE(GridContainerInfo, GridLayoutInfo);
 
 public:

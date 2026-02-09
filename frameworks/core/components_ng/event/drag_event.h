@@ -99,7 +99,7 @@ private:
     std::vector<KeyCode> pressedKeyCodes_;
 };
 
-class ACE_EXPORT DragEventActuator : public GestureEventActuator {
+class ACE_FORCE_EXPORT DragEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator);
 public:
     DragEventActuator(
@@ -151,7 +151,8 @@ public:
     static void UpdateGatherAnimatePosition(
         const RefPtr<FrameNode>& gatherNode, const OffsetF& GatherNodeOffset);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
-    static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
+    ACE_FORCE_EXPORT static void ExecutePreDragAction(
+        const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
     static void ExecutePreDragFunc(const RefPtr<FrameNode>& node, const PreDragStatus preDragStatus,
         const PreDragStatus onPreDragStatus);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);

@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/marquee/marquee_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
@@ -47,6 +49,8 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::ComponentTest {
 namespace {
@@ -371,6 +375,7 @@ bool ComponentTestComponentImpl::IsLongPressableImpl(ErrInfo& errInfo) const
 bool IsScrollableByPattern(const RefPtr<NG::FrameNode>& frameNode)
 {
     const RefPtr<NG::Pattern>& pattern = frameNode->GetPattern();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     if (AceType::InstanceOf<OHOS::Ace::NG::ScrollablePattern>(pattern)) {
         auto scrollablePattern = AceType::DynamicCast<OHOS::Ace::NG::ScrollablePattern>(pattern);
         return scrollablePattern->IsScrollable();
@@ -385,7 +390,7 @@ bool IsScrollableByPattern(const RefPtr<NG::FrameNode>& frameNode)
         auto refreshPattern = frameNode->GetPattern<OHOS::Ace::NG::RefreshPattern>();
         CHECK_NULL_RETURN(refreshPattern, false);
         return !refreshPattern->IsRefreshing();
-    } else if (AceType::InstanceOf<OHOS::Ace::NG::MenuPattern>(pattern)) {
+    } else if (menuModifier && menuModifier->isMenuPattern(pattern)) {
         auto firstChild = AceType::DynamicCast<NG::FrameNode>(frameNode->GetChildAtIndex(0));
         if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
             auto scrollPattern = firstChild->GetPattern<OHOS::Ace::NG::ScrollPattern>();
@@ -480,6 +485,7 @@ bool ComponentTestComponentImpl::IsSelectedImpl(ErrInfo& errInfo) const
         errInfo = QueryRetMsg(ErrCode::RET_ERR_COMPONENT_INVISIBLE_OR_DESTROYED);
         return false;
     }
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     if (AceType::InstanceOf<NG::ListItemPattern>(pattern)) {
         auto listItemPattern = AceType::DynamicCast<NG::ListItemPattern>(pattern);
         if (listItemPattern) {
@@ -495,10 +501,9 @@ bool ComponentTestComponentImpl::IsSelectedImpl(ErrInfo& errInfo) const
         if (textBase) {
             return textBase->IsSelected();
         }
-    } else if (AceType::InstanceOf<NG::MenuItemPattern>(pattern)) {
-        auto menuItemPattern = AceType::DynamicCast<NG::MenuItemPattern>(pattern);
-        if (menuItemPattern) {
-            return menuItemPattern->IsSelected();
+    } else if (menuItemModifier && menuItemModifier->isMenuItemPattern(pattern)) {
+        if (menuItemModifier->hasMenuItemPattern(frameNode)) {
+            return menuItemModifier->isSelected(frameNode);
         }
     }
     return false;

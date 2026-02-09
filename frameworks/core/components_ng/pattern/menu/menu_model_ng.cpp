@@ -17,8 +17,18 @@
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<FrameNode> MenuModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("MenuModelNG::CreateFrameNode [nodeId = %d]", nodeId);
+    const std::function<RefPtr<Pattern>(void)>& patternCreator =
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); };
+    return FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId, patternCreator);
+}
+
 void MenuModelNG::CreateWithColorResourceObj(
     const RefPtr<ResourceObject>& resObj, const MenuColorType menuColorType)
 {
@@ -247,9 +257,9 @@ void MenuModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ETS_TAG, nodeId);
-    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", MENU_ETS_TAG, nodeId);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -260,12 +270,26 @@ void MenuModelNG::Create()
     }
 }
 
+void MenuModelNG::CreateMenu(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", MENU_ETS_TAG, nodeId);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    CHECK_NULL_VOID(menuNode);
+    ViewStackProcessor::GetInstance()->Push(menuNode);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto layoutProps = menuNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProps);
+        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    }
+}
+
 RefPtr<FrameNode> MenuModelNG::CreateMenu()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_RETURN(menuNode, nullptr);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto layoutProps = menuNode->GetLayoutProperty();
