@@ -417,7 +417,7 @@ public:
 
     bool IsFullPageNavigation() const
     {
-        return isFullPageNavigation_;
+        return isFullPageNavigation_.value_or(false);
     }
 
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
@@ -627,6 +627,8 @@ public:
     }
 
     void FireNavigateChangeCallback();
+
+    void FireChangeCallbackAfterLayout();
 
     //-------for force split------- begin------
     bool CreateRelatedDestination(
@@ -866,7 +868,7 @@ private:
     RectF dragRect_;
     RectF dragBarRect_;
     WeakPtr<FrameNode> pageNode_;
-    bool isFullPageNavigation_ = false;
+    std::optional<bool> isFullPageNavigation_;
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;
