@@ -36,13 +36,6 @@ class ArkLogConsole {
       aceConsole.error(LogTag.ARK_COMPONENT, ...args);
   }
 }
-const arkUINativeModule = globalThis.getArkUINativeModule();
-function getUINativeModule() {
-  if (arkUINativeModule) {
-    return arkUINativeModule;
-  }
-  return arkUINativeModule;
-}
 let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
@@ -5658,6 +5651,7 @@ class ArkComponent {
     return this;
   }
 }
+globalThis.__ArkComponent__ = ArkComponent;
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
 const isDate = (val) => val instanceof Date;
@@ -9958,19 +9952,6 @@ if (globalThis.ImageSpan !== undefined) {
       return new modifierJS.ImageSpanModifier(nativePtr, classType);
     });
   };
-}
-
-// @ts-ignore
-if (globalThis.PatternLock === undefined) {
-  globalThis.PatternLock = {
-    create: function(value) {
-      getUINativeModule().loadNativeModule('PatternLock');
-      let module = globalThis.requireNapi('arkui.components.arkpatternlock');
-      module.exportView();
-      getUINativeModule().patternlock.create(value);
-    },
-    name: 'JSPatternLock'
-  }
 }
 
 /// <reference path='./import.ts' />
@@ -22717,17 +22698,7 @@ if (globalThis.NavDestination !== undefined) {
     });
   };
 }
-// @ts-ignore
-if (globalThis.Counter === undefined) {
-  globalThis.Counter = {
-    create: function() {
-      getUINativeModule().loadNativeModule("Counter");
-      let module = globalThis.requireNapi('arkui.components.arkcounter');
-      module.exportView();
-      getUINativeModule().counter.create();
-    }
-  }
-}
+
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -24322,46 +24293,6 @@ if (globalThis.IsolatedComponent !== undefined) {
       return new modifierJS.CommonModifier(nativePtr, classType);
     });
   };
-}
-
-// @ts-ignore
-if (globalThis.Menu === undefined) {
-  globalThis.Menu = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('Menu');
-      let module = globalThis.requireNapi('arkui.components.arkmenu');
-      module.exportView();
-      getUINativeModule().menu.create();
-    },
-    name: 'JSMenu'
-  }
-}
-
-
-// @ts-ignore
-if (globalThis.MenuItem === undefined) {
-  globalThis.MenuItem = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('MenuItem');
-      let module = globalThis.requireNapi('arkui.components.arkmenuitem');
-      module.exportView();
-      getUINativeModule().menuitem.create(params);
-    },
-    name: 'JSMenuItem'
-  }
-}
-
-// @ts-ignore
-if (globalThis.MenuItemGroup === undefined) {
-  globalThis.MenuItemGroup = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('MenuItemGroup');
-      let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
-      module.exportView();
-      getUINativeModule().menuitemgroup.create(params);
-    },
-    name: 'JSMenuItemGroup'
-  }
 }
 
 /// <reference path='./import.ts' />
@@ -28141,18 +28072,6 @@ if (globalThis.Badge !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.FlowItem === undefined) {
-  globalThis.FlowItem = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('FlowItem');
-      let module = globalThis.requireNapi('arkui.components.arkflowitem');
-      module.exportView();
-      getUINativeModule().flowItem.create();
-    }
-  }
-}
-
 /// <reference path='./import.ts' />
 class ArkFormLinkComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -31694,18 +31613,6 @@ if (globalThis.UIExtensionComponent !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.WaterFlow === undefined) {
-  globalThis.WaterFlow = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('WaterFlow');
-      let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-      module.exportView();
-      getUINativeModule().waterFlow.create(params);
-    }
-  }
-}
-
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -33095,18 +33002,6 @@ if (globalThis.MediaCachedImage !== undefined) {
     });
   };
 }
-// @ts-ignore
-if (globalThis.SymbolGlyph === undefined) {
-  globalThis.SymbolGlyph = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('SymbolGlyph');
-      let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
-      module.exportView();
-      getUINativeModule().symbolGlyph.create(params);
-    },
-    name: 'JSSymbolGlyph'
-  }
-}
 class SystemBarEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -33581,335 +33476,6 @@ if (globalThis.UIPickerComponent !== undefined) {
   };
 }
 
-function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
-    getUINativeModule().loadNativeModule(componentName);
-    let module = globalThis.requireNapi(abcName);
-    module.exportView();
-}
-
-// @ts-ignore
-if (globalThis.Hyperlink === undefined) {
-  globalThis.Hyperlink = {
-    create: function(address, content) {
-      getUINativeModule().loadNativeModule("Hyperlink");
-      let module = globalThis.requireNapi('arkui.components.arkhyperlink');
-      module.exportView();
-      getUINativeModule().hyperlink.create(address, content);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.CalendarPicker === undefined) {
-  globalThis.CalendarPicker = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('CalendarPicker');
-      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportView();
-      getUINativeModule().calendarPicker.create(params);
-    },
-    name: 'JSCalendarPicker'
-  }
-}
-
-// @ts-ignore
-if (globalThis.CalendarPickerDialog === undefined) {
-  globalThis.CalendarPickerDialog = {
-    show: function(params) {
-      getUINativeModule().loadNativeModule('CalendarPickerDialog');
-      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportDialogView();
-      getUINativeModule().calendarPickerDialog.show(params);
-    },
-    name: 'JSCalendarPickerDialog'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Gauge === undefined) {
-  globalThis.Gauge = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Gauge');
-      let module = globalThis.requireNapi('arkui.components.arkgauge');
-      module.exportView();
-      getUINativeModule().gauge.create(params);
-    },
-    name: 'JSGauge'
-  }
-}
-
-// @ts-ignore
-if (globalThis.AlphabetIndexer === undefined) {
-  globalThis.AlphabetIndexer = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('Indexer');
-      let module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().alphabetIndexer.create(params, false);
-      } else {
-        getUINativeModule().alphabetIndexer.create(undefined, false);
-      }
-      return this;
-    },
-    createArc: function (params) {
-      getUINativeModule().loadNativeModule('Indexer');
-      let module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().alphabetIndexer.create(params, true);
-      } else {
-        getUINativeModule().alphabetIndexer.create(undefined, true);
-      }
-      return this;
-    },
-    name: 'JSAlphabetIndexer'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Checkbox === undefined) {
-  globalThis.Checkbox = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Checkbox');
-      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      module.exportView();
-      getUINativeModule().checkbox.create(params);
-    },
-    name: 'JSCheckbox'
-  };
-}
-
-// @ts-ignore
-if (globalThis.CheckboxGroup === undefined) {
-  globalThis.CheckboxGroup = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('CheckboxGroup');
-      let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
-      module.exportView();
-      getUINativeModule().checkboxgroup.create(params);
-    },
-    name: 'JSCheckboxGroup'
-  };
-}
-
-// @ts-ignore
-if (globalThis.Rating === undefined) {
-  globalThis.Rating = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Rating');
-      const module = globalThis.requireNapi('arkui.components.arkrating');
-      module.exportView();
-      getUINativeModule().rating.create(params);
-    },
-    name: 'JSRating'
-  };
-}
-
-// @ts-ignore
-if (globalThis.TextClock === undefined) {
-  globalThis.TextClock = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule("TextClock");
-      let module = globalThis.requireNapi('arkui.components.arktextclock');
-      module.exportView();
-      getUINativeModule().textclock.create(params);
-    },
-    name: 'JSTextClock'
-  }
-}
-
-// @ts-ignore
-if (globalThis.SideBarContainer === undefined) {
-  globalThis.SideBarContainer = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Sidebar');
-      let module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
-      module.exportView();
-      getUINativeModule().sideBarContainer.create(params);
-    }
-  }
-}
-
-if (globalThis.RichEditor === undefined) {
-  globalThis.RichEditor = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule("Richeditor");
-      let module = globalThis.requireNapi('arkui.components.arkricheditor');
-      module.exportView();
-      getUINativeModule().richEditor.create(params);
-    },
-    name: 'JSRichEditor'
-  };
-}
-
-// @ts-ignore
-if (globalThis.RowSplit === undefined) {
-  globalThis.RowSplit = {
-    create: function() {
-      getUINativeModule().loadNativeModule('RowSplit');
-      let module = globalThis.requireNapi('arkui.components.arkrowsplit');
-      module.exportView();
-      getUINativeModule().rowSplit.create();
-    },
-    name: 'JSRowSplit'
-  };
-}
-
-// @ts-ignore
-if (globalThis.ColumnSplit === undefined) {
-  globalThis.ColumnSplit = {
-    create: function() {
-      getUINativeModule().loadNativeModule('ColumnSplit');
-      let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
-      module.exportView();
-      getUINativeModule().columnSplit.create();
-    },
-    name: 'JSColumnSplit'
-  };
-}
-// @ts-ignore
-if (globalThis.Stepper === undefined) {
-  globalThis.Stepper = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Stepper');
-      let module = globalThis.requireNapi('arkui.components.arkstepper');
-      module.exportView();
-      getUINativeModule().stepper.create(params);
-    },
-    name: 'JSStepper'
-  };
-}
-
-// @ts-ignore
-if (globalThis.StepperItem === undefined) {
-  globalThis.StepperItem = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('StepperItem');
-      let module = globalThis.requireNapi('arkui.components.arkstepperitem');
-      module.exportView();
-      getUINativeModule().stepperItem.create(params);
-    },
-    name: 'JSStepperItem'
-  };
-}
-
-// @ts-ignore
-if (globalThis.Marquee === undefined) {
-  globalThis.Marquee = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Marquee');
-      let module = globalThis.requireNapi('arkui.components.arkmarquee');
-      module.exportView();
-      getUINativeModule().marquee.create(params);
-    },
-    name: 'JSMarquee'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Search === undefined) {
-  globalThis.Search = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule("Search");
-      var module = globalThis.requireNapi('arkui.components.arksearch');
-      module.exportView();
-      getUINativeModule().search.jsCreate(params);
-    },
-    name: 'JSSearch'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Radio === undefined) {
-  globalThis.Radio = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Radio');
-      let module = globalThis.requireNapi('arkui.components.arkradio');
-      module.exportView();
-      getUINativeModule().radio.create(params);
-    },
-    name: 'JSRadio'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Slider === undefined) {
-  globalThis.Slider = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule("Slider");
-      let module = globalThis.requireNapi('arkui.components.arkslider');
-      module.exportView();
-      getUINativeModule().slider.create(params);
-    },
-    name: 'JSSlider'
-  }
-}
-
-if (globalThis.QRCode === undefined) {
-  globalThis.QRCode = {
-    create: function(value) {
-      getUINativeModule().loadNativeModule('QRCode');
-      let module = globalThis.requireNapi('arkui.components.arkqrcode');
-      module.exportView();
-      getUINativeModule().qrcode.create(value);
-    },
-    name: 'JSQRCode'
-  }
-}
-
-// @ts-ignore
-if (globalThis.FolderStack === undefined) {
-  globalThis.FolderStack = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('FolderStack');
-      let module = globalThis.requireNapi('arkui.components.arkfolderstack');
-      module.exportView();
-      getUINativeModule().folderStack.create(params);
-    },
-    name: 'JSFolderStack'
-  };
-}
-
-// @ts-ignore
-if (globalThis.TimePicker === undefined) {
-  globalThis.TimePicker = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('TimePicker');
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
-      module.exportView();
-      getUINativeModule().timePicker.create(params);
-    },
- 	  name: 'JSTimePicker'
-  }
-}
-
-// @ts-ignore
-if (globalThis.TimePickerDialog === undefined) {
-  globalThis.TimePickerDialog = {
-    show: function(params) {
-      getUINativeModule().loadNativeModule('TimePickerDialog');
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
-      module.exportViewDialog();
-      getUINativeModule().timePickerDialog.show(params);
-    },
- 	  name: 'JSTimePickerDialog'
-  }
-}
-
-// @ts-ignore
-if (globalThis.DataPanel === undefined) {
-  globalThis.DataPanel = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('DataPanel');
-      let module = globalThis.requireNapi('arkui.components.arkdatapanel');
-      module.exportView();
-      getUINativeModule().dataPanel.create(params);
-    },
-    name: 'JSDataPanel'
-  }
-}
-
 function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {
       globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
@@ -33918,7 +33484,3 @@ function getArkUINodeFromNapi() {
 }
 
 globalThis.__getArkUINode__ = getArkUINodeFromNapi;
-
-function __getArkUINativeModuleForm__() {
-  return arkUINativeModule;
-}

@@ -149,5 +149,5 @@ function exportComponent() {
 function exportView() {
   globalThis.ColumnSplit = JSColumnSplit;
 }
-
-export default { ArkColumnSplitComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkColumnSplitComponent, createComponent, exportComponent, exportView, loadComponent };

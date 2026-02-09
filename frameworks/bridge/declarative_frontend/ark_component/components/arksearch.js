@@ -1700,5 +1700,5 @@ function exportComponent() {
 function exportView() {
   globalThis.Search = JSSearch;
 }
-
-export default { ArkSearchComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkSearchComponent, createComponent, exportComponent, exportView, loadComponent };

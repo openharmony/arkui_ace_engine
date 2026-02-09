@@ -170,5 +170,5 @@ function exportComponent() {
 function exportView() {
   globalThis.Hyperlink = JSHyperlink;
 }
-
-export default { ArkHyperlinkComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkHyperlinkComponent, createComponent, exportComponent, exportView, loadComponent };
