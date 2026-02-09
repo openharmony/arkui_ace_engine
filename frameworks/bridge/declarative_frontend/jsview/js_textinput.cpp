@@ -25,6 +25,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -159,6 +160,6 @@ void JSTextInput::Create(const JSCallbackInfo& info)
 void JSTextInputController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Declare("TextInputController");
-    JSTextEditableController::JSBind(globalObj);
+    JSTextEditableControllerBinding::JSBind(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -210,7 +210,7 @@ enum class TextFlipDirection {
 namespace StringUtils {
 std::string ToString(const TextFlipDirection& textFlipDirection);
 
-std::string ToString(const TextDirection& textDirection);
+ACE_FORCE_EXPORT std::string ToString(const TextDirection& textDirection);
 } // namespace StringUtils
 
 namespace StringUtils {

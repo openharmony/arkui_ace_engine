@@ -677,7 +677,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
 #endif
 #endif
-    { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },

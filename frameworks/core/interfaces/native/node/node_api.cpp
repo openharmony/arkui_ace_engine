@@ -3065,7 +3065,7 @@ const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
     return &OHOS::Ace::NG::impl_full;
 }
 
-void SendArkUISyncEvent(ArkUINodeEvent* event)
+ACE_FORCE_EXPORT void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
     OHOS::Ace::NG::NodeEvent::SendArkUISyncEvent(event);
 }

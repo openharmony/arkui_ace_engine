@@ -1663,7 +1663,7 @@ std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 }
 
 template<>
-CaretStyle Convert(const Ark_CaretStyle& src)
+ACE_FORCE_EXPORT CaretStyle Convert(const Ark_CaretStyle& src)
 {
     CaretStyle caretStyle;
     caretStyle.color = OptConvert<Color> (src.color);
@@ -1704,7 +1704,7 @@ void AssignCast(std::optional<DateTimeType>& dst, const Ark_intl_DateTimeOptions
 }
 
 template<>
-TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
+ACE_FORCE_EXPORT TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 {
     TextDecorationOptions options;
     options.textDecoration = OptConvert<TextDecoration>(src.type);

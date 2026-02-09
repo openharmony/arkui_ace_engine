@@ -17,8 +17,8 @@
 namespace OHOS::Ace {
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
-    TextAlign::LEFT, TextAlign::RIGHT };
+ACE_FORCE_EXPORT const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END,
+    TextAlign::JUSTIFY, TextAlign::LEFT, TextAlign::RIGHT };
 
 const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
     TextContentAlign::BOTTOM };

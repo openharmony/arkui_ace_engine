@@ -169,7 +169,7 @@ public:
         return refereeState_;
     }
 
-    bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+    ACE_FORCE_EXPORT bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 
     void SetEventImportGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
 

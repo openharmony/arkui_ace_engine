@@ -290,7 +290,7 @@ struct RelatedLPXInfo {
     bool initTextRectWithLPX = false;
 };
 
-class TextFieldPattern : public ScrollablePattern,
+class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
                          public TextInputClient,
