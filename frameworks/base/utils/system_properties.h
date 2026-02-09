@@ -566,6 +566,8 @@ public:
 
     static int32_t GetComponentLoadNumber();
 
+    static int32_t GetStopCollectTimeWait();
+
     static bool IsFormAnimationLimited();
 
     static bool GetResourceDecoupling();

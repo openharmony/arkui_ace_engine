@@ -421,6 +421,12 @@ int32_t ReadComponentLoadNumber()
         "persist.ace.componentload.number", 1); // Number of components loaded in 100 milliseconds.
 }
 
+int32_t ReadStopCollectTimeWait()
+{
+    return system::GetIntParameter(
+        "persist.ace.stopCollect.timeWait", 800); // 800 : Stop collecting asynchronous task waiting time.
+}
+
 bool IsExtSurfaceEnabled()
 {
 #ifdef EXT_SURFACE_ENABLE
@@ -1108,6 +1114,12 @@ ACE_WEAK_SYM int32_t SystemProperties::GetComponentLoadNumber()
 {
     static int32_t componentLoadNumber = ReadComponentLoadNumber();
     return componentLoadNumber;
+}
+
+ACE_WEAK_SYM int32_t SystemProperties::GetStopCollectTimeWait()
+{
+    static int32_t stopCollectTimeWait = ReadStopCollectTimeWait();
+    return stopCollectTimeWait;
 }
 
 bool SystemProperties::IsFormAnimationLimited()

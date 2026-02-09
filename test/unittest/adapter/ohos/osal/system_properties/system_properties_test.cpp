@@ -101,4 +101,63 @@ HWTEST_F(SystemPropertiesTest, SystemPropertiesTest004, TestSize.Level1)
      */
     EXPECT_EQ(SystemProperties::GetTransformEnabled(), true);
 }
+
+/**
+ * @tc.name: SystemPropertiesTest005
+ * @tc.desc: Test GetStopCollectTimeWait returns default value when system parameter is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemPropertiesTest, SystemPropertiesTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call GetStopCollectTimeWait without setting system parameter
+     * @tc.expected: step1. returns default value 800 milliseconds
+     */
+    constexpr int32_t DEFAULT_STOP_COLLECT_TIME_WAIT = 800;
+    EXPECT_EQ(SystemProperties::GetStopCollectTimeWait(), DEFAULT_STOP_COLLECT_TIME_WAIT);
+}
+
+/**
+ * @tc.name: SystemPropertiesTest006
+ * @tc.desc: Test GetStopCollectTimeWait returns consistent value across multiple calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemPropertiesTest, SystemPropertiesTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call GetStopCollectTimeWait multiple times
+     * @tc.expected: step1. all calls return the same value due to static variable caching
+     */
+    constexpr int32_t DEFAULT_STOP_COLLECT_TIME_WAIT = 800;
+    int32_t firstCall = SystemProperties::GetStopCollectTimeWait();
+    int32_t secondCall = SystemProperties::GetStopCollectTimeWait();
+    int32_t thirdCall = SystemProperties::GetStopCollectTimeWait();
+
+    EXPECT_EQ(firstCall, DEFAULT_STOP_COLLECT_TIME_WAIT);
+    EXPECT_EQ(secondCall, DEFAULT_STOP_COLLECT_TIME_WAIT);
+    EXPECT_EQ(thirdCall, DEFAULT_STOP_COLLECT_TIME_WAIT);
+    EXPECT_EQ(firstCall, secondCall);
+    EXPECT_EQ(secondCall, thirdCall);
+}
+
+/**
+ * @tc.name: SystemPropertiesTest007
+ * @tc.desc: Test GetStopCollectTimeWait returns positive value for delayed task scheduling
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemPropertiesTest, SystemPropertiesTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call GetStopCollectTimeWait
+     * @tc.expected: step1. returns positive value suitable for PostDelayedTask delay parameter
+     */
+    int32_t stopCollectTimeWait = SystemProperties::GetStopCollectTimeWait();
+
+    // Verify the value is positive (required for delayed task scheduling)
+    EXPECT_GT(stopCollectTimeWait, 0);
+
+    // Verify the value is reasonable (not too large, e.g., less than 1 minute)
+    constexpr int32_t MAX_REASONABLE_DELAY_MS = 60000; // 60 seconds in milliseconds
+    EXPECT_LT(stopCollectTimeWait, MAX_REASONABLE_DELAY_MS);
+}
 }
