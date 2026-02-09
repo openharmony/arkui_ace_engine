@@ -721,7 +721,7 @@ export struct ToolBarV2 {
                 ).then((dialogId: int) => {
                   this.itemDialogId = dialogId;
                 });
-              } catch (error: ClassCastError) {
+              } catch (error) {
                 let code = (error as ClassCastError)?.code;
                 let message = (error as ClassCastError)?.message;
                 hilog.error(0x3900, 'Ace',
@@ -732,7 +732,7 @@ export struct ToolBarV2 {
               if (this.itemDialogId) {
                 try {
                   this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as int)
-                } catch (error: ClassCastError) {
+                } catch (error) {
                   let message = (error as ClassCastError).message;
                   let code = (error as ClassCastError).code;
                   console.error(`closeCustomDialog error code is ${code}, message is ${message}`);
@@ -743,7 +743,7 @@ export struct ToolBarV2 {
               if (this.itemDialogId) {
                 try {
                   this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as int)
-                } catch (error: ClassCastError) {
+                } catch (error) {
                   let message = (error as ClassCastError).message;
                   let code = (error as ClassCastError).code;
                   console.error(`closeCustomDialog error code is ${code}, message is ${message}`);

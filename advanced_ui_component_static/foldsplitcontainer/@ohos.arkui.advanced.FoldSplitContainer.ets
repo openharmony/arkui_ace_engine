@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -432,7 +432,7 @@ export struct FoldSplitContainer {
 
     try {
       this.foldStatus = display.getFoldStatus();
-    } catch (err : BusinessError<void>) {
+    } catch (err) {
       Logger.error('Failed to get foldStatus. code:%{public}d, message:%{public}s', err.code, err.message);
     }
     try {
@@ -443,7 +443,7 @@ export struct FoldSplitContainer {
           this.updatePreferredOrientation();
         }
       });
-    } catch (err : BusinessError<void>) {
+    } catch (err) {
       Logger.error('Failed display.onFoldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
     }
 
@@ -468,7 +468,7 @@ export struct FoldSplitContainer {
             this.dealWindowStatusChange();
           });
       }
-    } catch (err : BusinessError<void>) {
+    } catch (err) {
       Logger.error('Failed getLastWindow. code:%{public}d, message:%{public}s', err.code, err.message);
     }
   }
@@ -478,7 +478,7 @@ export struct FoldSplitContainer {
       this.windowInstance?.onWindowStatusChange((status) => {
         this.windowStatusType = status;
       });
-    } catch (err : BusinessError<void>) {
+    } catch (err) {
       Logger.error('Failed windowInstance.onWindowStatusChange. code:%{public}d, message:%{public}s',
         err.code, err.message);
     }
@@ -491,7 +491,7 @@ export struct FoldSplitContainer {
     }
     try {
       display.offFoldStatusChange();
-    } catch (err : BusinessError<void>) {
+    } catch (err) {
       Logger.error('Failed display.offFoldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
     }
     if (this.windowInstance) {
@@ -557,7 +557,7 @@ export struct FoldSplitContainer {
       let rotation: number = 0;
       try {
         rotation = display.getDefaultDisplaySync().rotation;
-      } catch (err : BusinessError<void>) {
+      } catch (err) {
         Logger.error('Failed display.getDefaultDisplaySync(). code:%{public}d, message:%{public}s',
           err.code, err.message);
       }
@@ -823,7 +823,7 @@ export struct FoldSplitContainer {
     let orientation : display.Orientation = display.Orientation.PORTRAIT;
     try {
       orientation = display.getDefaultDisplaySync().orientation;
-    } catch (err : BusinessError<void>) {
+    } catch (err) {
       Logger.error('Failed display.getDefaultDisplaySync(). code:%{public}d, message:%{public}s',
         err.code, err.message);
     }

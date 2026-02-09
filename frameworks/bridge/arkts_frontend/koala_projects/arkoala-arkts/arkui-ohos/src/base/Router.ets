@@ -1,6 +1,6 @@
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -275,7 +275,7 @@ export class RouterImpl implements Router {
         }
         try {
             return JSON.stringify(params); 
-        } catch (e: Error) { 
+        } catch (e) { 
             console.log(`AceRouter: RouterUtil.stringifyParams failed`); 
             console.log(e.stack); 
             return ""; 
@@ -324,7 +324,7 @@ export class RouterImpl implements Router {
             }
         }
         //@ts-ignore
-        catch (e: Error) {
+        catch (e) {
             InteropNativeModule._NativeLog("AceRouter: catch RunPage error: " + e)
         }
         return undefined
@@ -452,7 +452,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -592,7 +592,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -672,7 +672,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -761,7 +761,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -881,7 +881,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1022,7 +1022,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1102,7 +1102,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1189,7 +1189,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1357,7 +1357,7 @@ export class RouterImpl implements Router {
             peerNode = findPeerNode(incNode);
         }
         //@ts-ignore
-        catch (e: Error) {
+        catch (e) {
             console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1447,7 +1447,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.pushUrl(options);
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: pushUrl failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1479,7 +1479,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.replaceUrl(options);
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: replaceUrl failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1511,7 +1511,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.back(options);
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: back failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1531,7 +1531,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.clear();
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: clear failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1549,7 +1549,7 @@ export class RouterUtil {
             }
             let len = routerImpl.getLength();
             return len;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getLength error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return "0";
@@ -1566,7 +1566,7 @@ export class RouterUtil {
                 return 0;
             }
             return routerImpl.getStackSize();
-        } catch (e: Error) {
+        } catch (e) {
             console.error(`AceRouter: getStackSize error, name: ${e.name} message: ${e.message}`);
             console.error(e.stack);
             return 0;
@@ -1585,7 +1585,7 @@ export class RouterUtil {
             let params = routerImpl.getParams();
             let paramsStr = RouterImpl.StringifyParams(params);
             return paramsStr;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getParams error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return "";
@@ -1614,7 +1614,7 @@ export class RouterUtil {
                 result.push(innerState);
             }
             return result;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getStateByUrl error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return new Array<InnerRouterState>();
@@ -1641,7 +1641,7 @@ export class RouterUtil {
                 params: RouterImpl.StringifyParams(state!.params)
             } as InnerRouterState;
             return innerState;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getStateByIndex error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return undefined;
@@ -1665,7 +1665,7 @@ export class RouterUtil {
                 params: RouterImpl.StringifyParams(state.params)
             } as InnerRouterState;
             return innerState;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getState error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return undefined;
