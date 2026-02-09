@@ -906,4 +906,60 @@ HWTEST_F(ShapePatternTestNg, SetHeight001, TestSize.Level1)
     EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: ShapePatternUINodeTraceTest001
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in ShapePattern::CreateLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Shape node.
+     * @tc.expected: Shape node created successfully.
+     */
+    ResetLastTraceId();
+    CircleModelNG().Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CreateLayoutAlgorithm which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
+}
+
+/**
+ * @tc.name: ShapePatternUINodeTraceTest002
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in ShapePattern::CreatePaintProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ShapePatternTestNg, ShapePatternUINodeTraceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Shape node.
+     * @tc.expected: Shape node created successfully.
+     */
+    ResetLastTraceId();
+    CircleModelNG().Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ShapePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CreatePaintProperty which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    auto paintProperty = pattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
+}
 } // namespace OHOS::Ace::NG
