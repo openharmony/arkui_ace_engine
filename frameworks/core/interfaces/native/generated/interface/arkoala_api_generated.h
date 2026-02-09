@@ -31214,6 +31214,11 @@ typedef struct GENERATED_ArkUISwiperControllerAccessor {
                          Ark_SwiperController peer,
                          const Opt_Array_Int32* indices,
                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    Ark_Boolean (*startFakeDrag)(Ark_SwiperController peer);
+    Ark_Boolean (*fakeDragBy)(Ark_SwiperController peer,
+                              Ark_Float32 offset);
+    Ark_Boolean (*stopFakeDrag)(Ark_SwiperController peer);
+    Ark_Boolean (*isFakeDragging)(Ark_SwiperController peer);
 } GENERATED_ArkUISwiperControllerAccessor;
 
 typedef struct GENERATED_ArkUISwipeRecognizerAccessor {

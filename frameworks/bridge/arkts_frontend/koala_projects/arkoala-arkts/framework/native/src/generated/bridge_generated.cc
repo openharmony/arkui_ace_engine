@@ -40879,6 +40879,26 @@ void impl_SwiperController_preloadItems(KVMContext vmContext, Ark_NativePointer 
         GetAccessors()->getSwiperControllerAccessor()->preloadItems(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), self, static_cast<Opt_Array_Int32*>(&indicesValueTemp), static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
 }
 KOALA_INTEROP_CTX_V3(SwiperController_preloadItems, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Boolean impl_SwiperController_startFakeDrag(Ark_NativePointer thisPtr) {
+        Ark_SwiperController self = reinterpret_cast<Ark_SwiperController>(thisPtr);
+        return GetAccessors()->getSwiperControllerAccessor()->startFakeDrag(self);
+}
+KOALA_INTEROP_DIRECT_1(SwiperController_startFakeDrag, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_SwiperController_fakeDragBy(Ark_NativePointer thisPtr, KFloat offset) {
+        Ark_SwiperController self = reinterpret_cast<Ark_SwiperController>(thisPtr);
+        return GetAccessors()->getSwiperControllerAccessor()->fakeDragBy(self, offset);
+}
+KOALA_INTEROP_DIRECT_2(SwiperController_fakeDragBy, Ark_Boolean, Ark_NativePointer, KFloat)
+Ark_Boolean impl_SwiperController_stopFakeDrag(Ark_NativePointer thisPtr) {
+        Ark_SwiperController self = reinterpret_cast<Ark_SwiperController>(thisPtr);
+        return GetAccessors()->getSwiperControllerAccessor()->stopFakeDrag(self);
+}
+KOALA_INTEROP_DIRECT_1(SwiperController_stopFakeDrag, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_SwiperController_isFakeDragging(Ark_NativePointer thisPtr) {
+        Ark_SwiperController self = reinterpret_cast<Ark_SwiperController>(thisPtr);
+        return GetAccessors()->getSwiperControllerAccessor()->isFakeDragging(self);
+}
+KOALA_INTEROP_DIRECT_1(SwiperController_isFakeDragging, Ark_Boolean, Ark_NativePointer)
 Ark_NativePointer impl_SwipeRecognizer_construct() {
         return GetAccessors()->getSwipeRecognizerAccessor()->construct();
 }
