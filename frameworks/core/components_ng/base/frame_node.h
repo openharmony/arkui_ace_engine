@@ -48,6 +48,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
@@ -80,6 +81,7 @@ struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
 class ExtensionHandler;
 class PaintWrapper;
+class SamplerManager;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -828,6 +830,9 @@ public:
     // due to differences in compilation implementation.
     bool HasAnimatableProperty(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
+    void SetSamplerManager(const RefPtr<SamplerManager>& manager);
+    RefPtr<SamplerManager> GetSamplerManager();
+    static RefPtr<FrameNode> FindChildByNameUINode(const RefPtr<UINode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
     void DeleteAnimatablePropertyFloat(const std::string& propertyName);
@@ -1491,6 +1496,7 @@ public:
     }
 
     void UpdateBackground();
+    void ReplacePattern(const RefPtr<Pattern>& newPattern);
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1804,6 +1810,7 @@ private:
     std::map<std::string, std::function<void()>> destroyCallbacks_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
+    RefPtr<SamplerManager> samplerManager_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };

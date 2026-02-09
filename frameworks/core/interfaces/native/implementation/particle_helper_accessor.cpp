@@ -519,6 +519,38 @@ bool ParseParticleObject(const Ark_EmitterParticleOptions& src, Particle& result
     return true;
 }
 
+bool ParseAnnulusRegionObject(const Ark_ParticleAnnulusRegionInner& src, ParticleAnnulusRegion& result)
+{
+    std::pair<CalcDimension, CalcDimension> center;
+    if (src.center.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        const auto& arkCenter = src.center.value;
+        std::optional<CalcDimension> centerXOpt = Converter::OptConvert<CalcDimension>(arkCenter.x);
+        std::optional<CalcDimension> centerYOpt = Converter::OptConvert<CalcDimension>(arkCenter.y);
+        center.first = centerXOpt.value_or(CalcDimension(0.0));
+        center.second = centerYOpt.value_or(CalcDimension(0.0));
+    } else {
+        center = { CalcDimension(0.0), CalcDimension(0.0) };
+    }
+
+    CalcDimension innerRadius = Converter::Convert<CalcDimension>(src.innerRadius);
+
+    CalcDimension outerRadius = Converter::Convert<CalcDimension>(src.outerRadius);
+
+    float startAngle = 0.0f;
+    if (src.startAngle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        startAngle = Converter::Convert<float>(src.startAngle.value);
+    }
+
+    float endAngle = 360.0f;
+    if (src.endAngle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        endAngle = Converter::Convert<float>(src.endAngle.value);
+    }
+
+    result = ParticleAnnulusRegion(center, innerRadius, outerRadius, startAngle, endAngle);
+
+    return true;
+}
+
 bool ParseEmitterOption(const Ark_EmitterOptionsInner& src, EmitterOption& result)
 {
     Particle particle;
@@ -543,6 +575,15 @@ bool ParseEmitterOption(const Ark_EmitterOptionsInner& src, EmitterOption& resul
         ParseSize(sizeValue, src.size.value);
     }
     result.SetSize(sizeValue);
+
+    if (src.annulusRegion.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        ParticleAnnulusRegion annulusRegion(
+            { CalcDimension(0.0), CalcDimension(0.0) }, CalcDimension(0.0), CalcDimension(0.0), 0.0f, 360.0f);
+        if (ParseAnnulusRegionObject(src.annulusRegion.value, annulusRegion)) {
+            result.SetAnnulusRegion(annulusRegion);
+        }
+    }
+
     return true;
 }
 

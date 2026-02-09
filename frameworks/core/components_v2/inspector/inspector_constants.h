@@ -103,9 +103,9 @@ ACE_EXPORT extern const char TEXT_ATTRS_OVER_FLOW[];
 ACE_EXPORT extern const char TEXT_ATTRS_MAX_LINES[];
 
 // rich editor
-ACE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
 ACE_EXPORT extern const char RICH_EDITOR_DRAG_ETS_TAG[];
-ACE_EXPORT extern const char RICH_EDITOR_CONTENT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char RICH_EDITOR_CONTENT_ETS_TAG[];
 
 // stack
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
@@ -115,7 +115,7 @@ ACE_FORCE_EXPORT extern const char STACK_ETS_TAG[];
 ACE_EXPORT extern const char FOLDER_STACK_COMPONENT_TAG[];
 ACE_EXPORT extern const char FOLDER_STACK_ETS_TAG[];
 ACE_EXPORT extern const char HOVER_STACK_ETS_TAG[];
-ACE_EXPORT extern const char CONTROL_PARTS_STACK_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CONTROL_PARTS_STACK_ETS_TAG[];
 
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
@@ -185,7 +185,7 @@ ACE_EXPORT extern const char COUNTER_ETS_TAG[];
 
 // flex
 ACE_EXPORT extern const char FLEX_COMPONENT_TAG[];
-ACE_EXPORT extern const char FLEX_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char FLEX_ETS_TAG[];
 ACE_EXPORT extern const char WRAP_COMPONENT_TAG[];
 ACE_EXPORT extern const char WRAP_ETS_TAG[];
 
@@ -277,11 +277,11 @@ ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 
 // span
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
-ACE_EXPORT extern const char SPAN_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SPAN_ETS_TAG[];
 
 // symbol span
 ACE_EXPORT extern const char SYMBOL_SPAN_COMPONENT_TAG[];
-ACE_EXPORT extern const char SYMBOL_SPAN_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SYMBOL_SPAN_ETS_TAG[];
 
 // image span
 ACE_EXPORT extern const char IMAGE_SPAN_COMPONENT_TAG[];
@@ -289,7 +289,7 @@ ACE_EXPORT extern const char IMAGE_SPAN_ETS_TAG[];
 
 // placeholder span
 ACE_EXPORT extern const char PLACEHOLDER_SPAN_COMPONENT_TAG[];
-ACE_EXPORT extern const char PLACEHOLDER_SPAN_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PLACEHOLDER_SPAN_ETS_TAG[];
 
 // text
 ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
@@ -467,11 +467,11 @@ ACE_FORCE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
-ACE_EXPORT extern const char MENU_ETS_TAG[];
-ACE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
-ACE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
-ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
-ACE_EXPORT extern const char MENU_PREVIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char MENU_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char MENU_PREVIEW_ETS_TAG[];
 ACE_EXPORT extern const char MENU_DIVIDER_TAG[];
 
 // textarea
@@ -588,7 +588,7 @@ ACE_EXPORT extern const char MODEL_ETS_TAG[];
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[];
 ACE_EXPORT extern const char SCREEN_ETS_TAG[];
-ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 
 // ui_extension_component
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];

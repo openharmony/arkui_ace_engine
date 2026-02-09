@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/image/image_source_info.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_STANDARD_INPUT
@@ -2686,5 +2687,21 @@ void JSTextField::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
         RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
     }
     TextFieldModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+void JSTextField::SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
+    auto customModifier = NG::NodeModifier::GetSearchCustomModifier();
+    customModifier->setKeyboardAppearanceConfig(frameNode, config);
 }
 } // namespace OHOS::Ace::Framework

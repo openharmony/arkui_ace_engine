@@ -28,6 +28,7 @@ RefPtr<IndicatorController> IndicatorModelNG::Create()
     CHECK_NULL_RETURN(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDICATOR_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(
         V2::INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
 
@@ -40,6 +41,7 @@ RefPtr<IndicatorController> IndicatorModelNG::Create()
 
 RefPtr<FrameNode> IndicatorModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     return FrameNode::CreateFrameNode(
         V2::INDICATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<IndicatorPattern>());
 }

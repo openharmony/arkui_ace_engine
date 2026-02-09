@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");q
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,17 +21,32 @@
 #include "cj_lambda.h"
 
 #include "base/utils/utf_helper.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "bridge/cj_frontend/cppview/search_controller.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::SearchModelNG* GetSearchModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Search");
+    if (module == nullptr) {
+        LOGF("Can't find search dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::SearchModelNG*>(module->GetModel());
+}
+} // namespace OHOS::Ace
 namespace {
 const std::vector<FontStyle> FONT_STYLE = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
@@ -84,12 +99,11 @@ void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value)
         LOGI("icon url not found");
     }
     if (value.controllerID == -1) {
-        SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
+        GetSearchModel()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
     } else {
         auto self_ = FFIData::GetData<SearchController>(value.controllerID);
         if (self_ != nullptr) {
-            auto controller =
-                SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
+            auto controller = GetSearchModel()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
             self_->SetController(controller);
         } else {
             LOGE("invalid scrollerID");
@@ -97,7 +111,7 @@ void FfiOHOSAceFrameworkSearchCreateByIconID(SearchCreateParam value)
     }
     std::string bundleName;
     std::string moduleName;
-    SearchModel::GetInstance()->SetSearchSrcPath(iconUrl, bundleName, moduleName);
+    GetSearchModel()->SetSearchSrcPath(iconUrl, bundleName, moduleName);
 }
 
 void FfiOHOSAceFrameworkSearchCreateByIconRes(
@@ -107,12 +121,11 @@ void FfiOHOSAceFrameworkSearchCreateByIconRes(
     std::optional<std::string> tip = placeholder;
     std::optional<std::string> src = iconUrl;
     if (controllerId == -1) {
-        SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
+        GetSearchModel()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
     } else {
         auto nativeController = FFIData::GetData<SearchController>(controllerId);
         if (nativeController != nullptr) {
-            auto controller =
-                SearchModel::GetInstance()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
+            auto controller = GetSearchModel()->Create(OptionalStr8ToStr16(key), OptionalStr8ToStr16(tip), src);
             nativeController->SetController(controller);
         } else {
             LOGE("Invalid controller id.");
@@ -122,12 +135,12 @@ void FfiOHOSAceFrameworkSearchCreateByIconRes(
 
 void FfiOHOSAceFrameworkSearchSetSearchButton(const char* text)
 {
-    SearchModel::GetInstance()->SetSearchButton(text);
+    GetSearchModel()->SetSearchButton(text);
 }
 
 void FfiOHOSAceFrameworkSearchSetPlaceholderColor(uint32_t color)
 {
-    SearchModel::GetInstance()->SetPlaceholderColor(Color(color));
+    GetSearchModel()->SetPlaceholderColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSearchResetPlaceholderColor()
@@ -135,7 +148,7 @@ void FfiOHOSAceFrameworkSearchResetPlaceholderColor()
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     Color colorval = theme->GetPlaceholderColor();
-    SearchModel::GetInstance()->SetPlaceholderColor(colorval);
+    GetSearchModel()->SetPlaceholderColor(colorval);
 }
 
 void FfiOHOSAceFrameworkSearchSetPlaceholderFont(
@@ -147,7 +160,7 @@ void FfiOHOSAceFrameworkSearchSetPlaceholderFont(
     }
     Font font;
     handleFont(fontSize, sizeUnit, fontWeight, fontStyle, fontFamily, font);
-    SearchModel::GetInstance()->SetPlaceholderFont(font);
+    GetSearchModel()->SetPlaceholderFont(font);
 }
 
 void FfiOHOSAceFrameworkSearchSetTextFont(
@@ -167,7 +180,7 @@ void FfiOHOSAceFrameworkSearchSetTextFont(
             font.fontSize = themeFontSize;
         }
     }
-    SearchModel::GetInstance()->SetTextFont(font);
+    GetSearchModel()->SetTextFont(font);
 }
 
 void FfiOHOSAceFrameworkSearchSetBorder(SearchSetBorder value)
@@ -178,19 +191,19 @@ void FfiOHOSAceFrameworkSearchSetBorder(SearchSetBorder value)
     }
     FfiOHOSAceFrameworkViewAbstractSetBorder(
         CJBorder({ value.width, value.widthUnit, value.color, value.radius, value.radiusUnit, value.style }));
-    SearchModel::GetInstance()->SetBackBorder();
+    GetSearchModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkSearchSetBorderWidth(double width, int32_t widthUnit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderWidth(width, widthUnit);
-    SearchModel::GetInstance()->SetBackBorder();
+    GetSearchModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkSearchSetBorderColor(uint32_t color)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderColor(color);
-    SearchModel::GetInstance()->SetBackBorder();
+    GetSearchModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkSearchSetBorderStyle(int32_t style)
@@ -200,13 +213,13 @@ void FfiOHOSAceFrameworkSearchSetBorderStyle(int32_t style)
         return;
     }
     FfiOHOSAceFrameworkViewAbstractSetBorderStyle(style);
-    SearchModel::GetInstance()->SetBackBorder();
+    GetSearchModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkSearchSetBorderRadius(double radius, int32_t radiusUnit)
 {
     FfiOHOSAceFrameworkViewAbstractSetBorderRadius(radius, radiusUnit);
-    SearchModel::GetInstance()->SetBackBorder();
+    GetSearchModel()->SetBackBorder();
 }
 
 void FfiOHOSAceFrameworkSearchSetHeight(double height, int32_t heightUnit)
@@ -216,7 +229,7 @@ void FfiOHOSAceFrameworkSearchSetHeight(double height, int32_t heightUnit)
     if (LessNotEqual(heightDim.Value(), 0.0)) {
         heightDim.SetValue(0.0);
     }
-    SearchModel::GetInstance()->SetHeight(heightDim);
+    GetSearchModel()->SetHeight(heightDim);
 }
 
 void FfiOHOSAceFrameworkSearchSetCopyOption(int32_t copyOption)
@@ -225,7 +238,7 @@ void FfiOHOSAceFrameworkSearchSetCopyOption(int32_t copyOption)
         LOGE("invalid value for style");
         return;
     }
-    SearchModel::GetInstance()->SetCopyOption(COPY_OPTION[copyOption]);
+    GetSearchModel()->SetCopyOption(COPY_OPTION[copyOption]);
 }
 
 void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
@@ -238,7 +251,7 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
         std::string utf8String = convert.to_bytes(value);
         func(utf8String.c_str());
     };
-    SearchModel::GetInstance()->SetOnSubmit(std::move(task));
+    GetSearchModel()->SetOnSubmit(std::move(task));
 }
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
@@ -248,7 +261,7 @@ void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
         const std::string valueStr = UtfUtils::Str16DebugToStr8(info.value);
         lambda(valueStr.c_str());
     };
-    SearchModel::GetInstance()->SetOnChange(std::move(onChange));
+    GetSearchModel()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkSearchOnCopy(void (*callback)(const char* value))
@@ -257,7 +270,7 @@ void FfiOHOSAceFrameworkSearchOnCopy(void (*callback)(const char* value))
         const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
         lambda(valueStr.c_str());
     };
-    SearchModel::GetInstance()->SetOnCopy(std::move(onCopy));
+    GetSearchModel()->SetOnCopy(std::move(onCopy));
 }
 
 void FfiOHOSAceFrameworkSearchOnCut(void (*callback)(const char* value))
@@ -266,7 +279,7 @@ void FfiOHOSAceFrameworkSearchOnCut(void (*callback)(const char* value))
         const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
         lambda(valueStr.c_str());
     };
-    SearchModel::GetInstance()->SetOnCut(std::move(onCut));
+    GetSearchModel()->SetOnCut(std::move(onCut));
 }
 
 void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
@@ -276,7 +289,7 @@ void FfiOHOSAceFrameworkSearchOnPaste(void (*callback)(const char* value))
         const std::string valStr = UtfUtils::Str16DebugToStr8(val);
         lambda(valStr.c_str());
     };
-    SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
+    GetSearchModel()->SetOnPasteWithEvent(std::move(onPaste));
 }
 
 int64_t FfiOHOSAceFrameworkSearchController()
@@ -301,31 +314,31 @@ void FfiOHOSAceFrameworkSearchCaretPosition(int64_t selfID, int32_t carePosition
 void FfiOHOSAceFrameworkSearchSetMaxFontSize(double fontSize, int32_t unit)
 {
     Dimension dimValue(fontSize, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetAdaptMaxFontSize(dimValue);
+    GetSearchModel()->SetAdaptMaxFontSize(dimValue);
 }
 
 void FfiOHOSAceFrameworkSearchSetMinFontSize(double fontSize, int32_t unit)
 {
     Dimension dimValue(fontSize, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetAdaptMinFontSize(dimValue);
+    GetSearchModel()->SetAdaptMinFontSize(dimValue);
 }
 
 void FfiOHOSAceFrameworkSearchSetFontFeature(const char* fontFeature)
 {
     std::string fontFeatureSettings = fontFeature;
-    SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+    GetSearchModel()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void FfiOHOSAceFrameworkSearchSetLineHeight(double lineHeight, int32_t unit)
 {
     Dimension dimValue(lineHeight, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetLineHeight(dimValue);
+    GetSearchModel()->SetLineHeight(dimValue);
 }
 
 void FfiOHOSAceFrameworkSearchSetLetterSpacing(double space, int32_t unit)
 {
     Dimension value(space, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetLetterSpacing(value);
+    GetSearchModel()->SetLetterSpacing(value);
 }
 
 void FfiOHOSAceFrameworkSearchSetDecoration(int32_t type, uint32_t color, int32_t style)
@@ -335,9 +348,9 @@ void FfiOHOSAceFrameworkSearchSetDecoration(int32_t type, uint32_t color, int32_
         LOGE("invalid value for searchDirection");
         return;
     }
-    SearchModel::GetInstance()->SetTextDecoration(TEXT_DECORATIONS[type]);
-    SearchModel::GetInstance()->SetTextDecorationColor(Color(color));
-    SearchModel::GetInstance()->SetTextDecorationStyle(TEXT_DECORATION_STYLES[style]);
+    GetSearchModel()->SetTextDecoration(TEXT_DECORATIONS[type]);
+    GetSearchModel()->SetTextDecorationColor(Color(color));
+    GetSearchModel()->SetTextDecorationStyle(TEXT_DECORATION_STYLES[style]);
 }
 
 void FfiOHOSAceFrameworkSearchSetEnterKeyType(int32_t type)
@@ -346,18 +359,18 @@ void FfiOHOSAceFrameworkSearchSetEnterKeyType(int32_t type)
         LOGE("invalid value for text input action");
         return;
     }
-    SearchModel::GetInstance()->SetSearchEnterKeyType(TEXT_INPUT_ACTIONS[type]);
+    GetSearchModel()->SetSearchEnterKeyType(TEXT_INPUT_ACTIONS[type]);
 }
 
 void FfiOHOSAceFrameworkSearchSetSelectedBackgroundColor(uint32_t color)
 {
-    SearchModel::GetInstance()->SetSelectedBackgroundColor(Color(color));
+    GetSearchModel()->SetSelectedBackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSearchSetTextIndent(double value, int32_t unit)
 {
     Dimension dimValue(value, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetTextIndent(dimValue);
+    GetSearchModel()->SetTextIndent(dimValue);
 }
 
 void FfiOHOSAceFrameworkSearchStopEditing(int64_t selfID)
@@ -387,21 +400,21 @@ void FfiOHOSAceFrameworkSearchSetCancelButton(
     int32_t style, double value, int32_t unit, uint32_t color, const char* src)
 {
     Dimension iconSize(value, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetCancelButtonStyle(static_cast<CancelButtonStyle>(style));
+    GetSearchModel()->SetCancelButtonStyle(static_cast<CancelButtonStyle>(style));
     NG::IconOptions cancelIconOptions = NG::IconOptions(Color(color), iconSize, std::string(src), "", "");
-    SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+    GetSearchModel()->SetCancelImageIcon(cancelIconOptions);
 }
 
 void FfiOHOSAceFrameworkSearchSetSearchIcon(double value, int32_t unit, uint32_t color, const char* src)
 {
     Dimension iconSize(value, static_cast<DimensionUnit>(unit));
     NG::IconOptions searchIcon = NG::IconOptions(Color(color), iconSize, std::string(src), "", "");
-    SearchModel::GetInstance()->SetSearchImageIcon(searchIcon);
+    GetSearchModel()->SetSearchImageIcon(searchIcon);
 }
 
 void FfiOHOSAceFrameworkSearchSetEnablePreviewText(bool enablePreviewText)
 {
-    SearchModel::GetInstance()->SetEnablePreviewText(enablePreviewText);
+    GetSearchModel()->SetEnablePreviewText(enablePreviewText);
 }
 
 void FfiOHOSAceFrameworkSearchSetType(int32_t value)
@@ -414,33 +427,33 @@ void FfiOHOSAceFrameworkSearchSetType(int32_t value)
     } else {
         textInputType = static_cast<TextInputType>(value);
     }
-    SearchModel::GetInstance()->SetType(textInputType);
+    GetSearchModel()->SetType(textInputType);
 }
 
 void FfiOHOSAceFrameworkSearchSetMaxLength(uint32_t maxLength)
 {
     if (GreatOrEqual(maxLength, 0)) {
-        SearchModel::GetInstance()->SetMaxLength(maxLength);
+        GetSearchModel()->SetMaxLength(maxLength);
     } else {
-        SearchModel::GetInstance()->ResetMaxLength();
+        GetSearchModel()->ResetMaxLength();
     }
 }
 
 void FfiOHOSAceFrameworkSearchSetSelectionMenuHidden(bool value)
 {
-    SearchModel::GetInstance()->SetSelectionMenuHidden(value);
+    GetSearchModel()->SetSelectionMenuHidden(value);
 }
 
 void FfiOHOSAceFrameworkSearchSetEnableKeyboardOnFocus(bool value)
 {
-    SearchModel::GetInstance()->RequestKeyboardOnFocus(value);
+    GetSearchModel()->RequestKeyboardOnFocus(value);
 }
 
 void FfiOHOSAceFrameworkSearchSetCaretStyle(double value, int32_t unit, uint32_t color)
 {
     CalcDimension caretWidth(value, static_cast<DimensionUnit>(unit));
-    SearchModel::GetInstance()->SetCaretWidth(caretWidth);
-    SearchModel::GetInstance()->SetCaretColor(Color(color));
+    GetSearchModel()->SetCaretWidth(caretWidth);
+    GetSearchModel()->SetCaretColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSearchSetTextAlign(int32_t value)
@@ -449,12 +462,12 @@ void FfiOHOSAceFrameworkSearchSetTextAlign(int32_t value)
         LOGE("invalid value for set text align");
         return;
     }
-    SearchModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
+    GetSearchModel()->SetTextAlign(TEXT_ALIGNS[value]);
 }
 
 void FfiOHOSAceFrameworkSearchSetFontColor(uint32_t color)
 {
-    SearchModel::GetInstance()->SetTextColor(Color(color));
+    GetSearchModel()->SetTextColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSearchOnDidInsert(void (*callback)(double insertOffset, const char* insertValue))
@@ -465,7 +478,7 @@ void FfiOHOSAceFrameworkSearchOnDidInsert(void (*callback)(double insertOffset, 
         const char* insertValue = insertStr.c_str();
         lambda(insertOffset, insertValue);
     };
-    SearchModel::GetInstance()->SetOnDidInsertValueEvent(onDidInsert);
+    GetSearchModel()->SetOnDidInsertValueEvent(onDidInsert);
 }
 
 void FfiOHOSAceFrameworkSearchOnDidDelete(
@@ -478,7 +491,7 @@ void FfiOHOSAceFrameworkSearchOnDidDelete(
         const char* deleteValue = deleteStr.c_str();
         lambda(deleteOffset, direction, deleteValue);
     };
-    SearchModel::GetInstance()->SetOnDidDeleteEvent(onDidDelete);
+    GetSearchModel()->SetOnDidDeleteEvent(onDidDelete);
 }
 
 void FfiOHOSAceFrameworkSearchOnWillInsert(bool (*callback)(double insertOffset, const char* insertValue))
@@ -489,7 +502,7 @@ void FfiOHOSAceFrameworkSearchOnWillInsert(bool (*callback)(double insertOffset,
         const char* insertValue = insertStr.c_str();
         return lambda(insertOffset, insertValue);
     };
-    SearchModel::GetInstance()->SetOnWillInsertValueEvent(onWillInsert);
+    GetSearchModel()->SetOnWillInsertValueEvent(onWillInsert);
 }
 
 void FfiOHOSAceFrameworkSearchOnWillDelete(
@@ -502,26 +515,26 @@ void FfiOHOSAceFrameworkSearchOnWillDelete(
         const char* deleteValue = deleteStr.c_str();
         return lambda(deleteOffset, direction, deleteValue);
     };
-    SearchModel::GetInstance()->SetOnWillDeleteEvent(onWillDelete);
+    GetSearchModel()->SetOnWillDeleteEvent(onWillDelete);
 }
 
 void FfiOHOSAceFrameworkSearchOnContentScroll(void (*callback)(float totalOffsetX, float totalOffsetY))
 {
     auto onScroll = [lambda = CJLambda::Create(callback)](
                         float totalOffsetX, float totalOffsetY) -> void { lambda(totalOffsetX, totalOffsetY); };
-    SearchModel::GetInstance()->SetOnScroll(onScroll);
+    GetSearchModel()->SetOnScroll(onScroll);
 }
 
 void FfiOHOSAceFrameworkSearchOnTextSelectionChange(void (*callback)(int32_t selectionStart, int32_t selectionEnd))
 {
     auto onTextSelectionChange = [lambda = CJLambda::Create(callback)](int32_t selectionStart,
                                      int32_t selectionEnd) -> void { lambda(selectionStart, selectionEnd); };
-    SearchModel::GetInstance()->SetOnTextSelectionChange(onTextSelectionChange);
+    GetSearchModel()->SetOnTextSelectionChange(onTextSelectionChange);
 }
 
 void FfiOHOSAceFrameworkSearchOnEditChange(void (*callback)(bool value))
 {
-    SearchModel::GetInstance()->SetOnEditChanged(CJLambda::Create(callback));
+    GetSearchModel()->SetOnEditChanged(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkSearchSetInputFilter(const char* value, void (*callback)(const char* value))
@@ -530,13 +543,13 @@ void FfiOHOSAceFrameworkSearchSetInputFilter(const char* value, void (*callback)
         const std::string valueStr = UtfUtils::Str16ToStr8(value);
         lambda(valueStr.c_str());
     };
-    SearchModel::GetInstance()->SetInputFilter(value, inputFilter);
+    GetSearchModel()->SetInputFilter(value, inputFilter);
 }
 
 void FfiOHOSAceFrameworkSearchSetCustomKeyboard(void (*callback)(), bool options)
 {
     auto builderFunc = CJLambda::Create(callback);
-    SearchModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options);
+    GetSearchModel()->SetCustomKeyboard(std::move(builderFunc), options);
 }
 
 void FfiOHOSAceFrameworkSearchEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
@@ -544,8 +557,7 @@ void FfiOHOSAceFrameworkSearchEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjO
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
-    SearchModel::GetInstance()->SetSelectionMenuOptions(
-        std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
+    GetSearchModel()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 SearchTextMenuItemHandle FfiOHOSAceFrameworkSearchCreateTextMenuItem(int64_t size)

@@ -38,6 +38,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 ScopedViewStackProcessor scopedViewStackProcessor;
                 auto* stack = ViewStackProcessor::GetInstance();
                 auto nodeId = stack->ClaimNodeId();
+                ACE_UINODE_TRACE(nodeId);
                 frameNode = FrameNode::GetOrCreateFrameNode(
                     "dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
                 stack->Push(frameNode);

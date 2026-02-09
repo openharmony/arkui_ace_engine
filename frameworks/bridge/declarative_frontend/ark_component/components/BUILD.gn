@@ -31,12 +31,14 @@ template("arkui_abc") {
 }
 
 arkui_modules = [
+  "dynamiclayout",
   "datapanel",
   "flowitem",
   "gauge",
   "patternlock",
   "counter",
   "sidebarcontainer",
+  "textclock",
   "checkbox",
   "checkboxgroup",
   "alphabetindexer",
@@ -48,6 +50,7 @@ arkui_modules = [
   "menuitem",
   "menuitemgroup",
   "marquee",
+  "search",
   "stepper",
   "stepperitem",
   "radio",
@@ -56,6 +59,7 @@ arkui_modules = [
   "calendarpicker",
   "hyperlink",
   "symbolglyph",
+  "richeditor",
 ]
 
 if (qrcodegen_support) {

@@ -679,7 +679,7 @@ HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode001, TestSize.Level1)
     int32_t creaseYTop = CREASE_Y;
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_TOP);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0, false);
 
     auto left = wraperRect.Left();
     auto top = wraperRect.Top();
@@ -740,7 +740,7 @@ HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode002, TestSize.Level1)
  
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0, false);
 
     auto left = wraperRect.Left();
     auto bottom = wraperRect.Bottom();
@@ -799,7 +799,7 @@ HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode003, TestSize.Level1)
     layoutAlgorithm->wrapperRect_ = wraperRect;
     layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0, false);
  
     /**
      * @tc.steps: menu component is located in the crease area of the screen.
@@ -854,7 +854,7 @@ HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode004, TestSize.Level1)
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
     auto wrapperRectTop = Rect(CREASE_X, 0, CREASE_WIDTH, rect.Top());
     layoutAlgorithm->wrapperRect_ = wrapperRectTop;
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0, false);
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRectTop);
 
     // test click bottom
@@ -862,7 +862,7 @@ HWTEST_F(MenuLayout3TestNg, UpdateWrapperRectForHoverMode004, TestSize.Level1)
     layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
     auto wrapperRectBottom = Rect(CREASE_X, rect.Bottom(), CREASE_WIDTH, CREASE_HEIGHT);
     layoutAlgorithm->wrapperRect_ = wrapperRectBottom;
-    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern, 0.0, false);
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, wrapperRectBottom);
 }
 

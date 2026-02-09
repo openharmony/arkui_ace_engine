@@ -16,11 +16,18 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_MODIFIER_H
 
-#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_manager_inner_modifier.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier();
 const CJUIMenuModifier* GetCJUIMenuModifier();
+const ArkUIMenuInnerModifier* GetMenuInnerModifier();
+const ArkUIMenuViewInnerModifier* GetMenuViewInnerModifier();
+const ArkUIMenuManagerInnerModifier* GetMenuManagerInnerModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_MODIFIER_H

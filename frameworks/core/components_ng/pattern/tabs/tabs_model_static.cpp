@@ -54,6 +54,7 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
 
 RefPtr<FrameNode> TabsModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -615,7 +616,7 @@ void TabsModelStatic::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)
     tabBarPaintProperty->UpdateFadingEdge(fadingEdge);
 }
 
-void TabsModelStatic::SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt)
+void TabsModelStatic::SetDivider(FrameNode* frameNode, const TabsItemDivider& dividerOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto dividerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
@@ -623,23 +624,23 @@ void TabsModelStatic::SetDivider(FrameNode* frameNode, const std::optional<TabsI
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
 
-    if (!dividerOpt.has_value()) {
+    if (dividerOpt.isNull) {
         dividerRenderContext->UpdateOpacity(0.0f);
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, frameNode);
+        auto tabsLayoutProperty = frameNode->GetLayoutProperty<TabsLayoutProperty>();
+        CHECK_NULL_VOID(tabsLayoutProperty);
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.strokeWidth = Dimension(1.0f);
+        currentDivider.isNull = true;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, currentDivider, frameNode);
     } else {
-        if (dividerOpt.value().isNull) {
-            dividerRenderContext->UpdateOpacity(0.0f);
-            auto tabsLayoutProperty = frameNode->GetLayoutProperty<TabsLayoutProperty>();
-            CHECK_NULL_VOID(tabsLayoutProperty);
-            auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
-            currentDivider.strokeWidth = Dimension(1.0f);
-            currentDivider.isNull = true;
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, currentDivider, frameNode);
-        } else {
-            dividerRenderContext->UpdateOpacity(1.0f);
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, dividerOpt.value(), frameNode);
-        }
+        dividerRenderContext->UpdateOpacity(1.0f);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, dividerOpt, frameNode);
     }
+}
+
+void TabsModelStatic::SetDividerColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, DividerColorSetByUser, isByUser, frameNode);
 }
 
 void TabsModelStatic::InitDivider(FrameNode* frameNode)

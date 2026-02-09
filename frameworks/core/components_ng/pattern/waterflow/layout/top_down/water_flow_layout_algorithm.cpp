@@ -457,11 +457,9 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     }
     layoutInfo_->endIndex_ = !fill ? currentIndex : currentIndex - 1;
 
-    layoutInfo_->itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_->GetChildrenCount();
+    HandleItemEnd(currentIndex);
     if (layoutInfo_->itemEnd_) {
         ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
-    } else {
-        layoutInfo_->offsetEnd_ = false;
     }
 }
 
@@ -597,6 +595,50 @@ void WaterFlowLayoutAlgorithm::ReMeasureItems(LayoutWrapper* layoutWrapper)
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { crossSize, mainSize_, axis_ }, ref, layoutProperty, itemWrapper));
         }
+    }
+}
+
+void WaterFlowLayoutAlgorithm::HandleItemEnd(int32_t currentIndex)
+{
+    int32_t childrenCount = layoutInfo_->GetChildrenCount();
+    // Check if startIndex has reached or exceeded total count
+    if (GetChildIndexWithFooter(currentIndex) >= childrenCount) {
+        layoutInfo_->itemEnd_ = true;
+        return;
+    }
+
+    int32_t zeroHeightCount = 0;
+    // Check from currentIndex to the end to count zero-height items
+    for (int32_t i = currentIndex; i < childrenCount; i++) {
+        auto crossIndex = layoutInfo_->GetCrossIndex(i);
+        if (crossIndex == -1) {
+            break;
+        }
+
+        auto& items = layoutInfo_->items_[0][crossIndex];
+        auto it = items.find(i);
+        if (it == items.end()) {
+            break;
+        }
+
+        if (!NearZero(it->second.second)) {
+            break;
+        }
+
+        zeroHeightCount++;
+    }
+
+    // Set itemEnd_ based on whether all remaining items are zero-height
+    layoutInfo_->itemEnd_ = (zeroHeightCount > 0 && currentIndex + zeroHeightCount >= childrenCount);
+
+    // Adjust endIndex_ to include zero-height trailing items
+    if (layoutInfo_->itemEnd_ && zeroHeightCount > 0) {
+        layoutInfo_->endIndex_ = currentIndex + zeroHeightCount - 1;
+    }
+
+    // Set offsetEnd_ if not at end
+    if (!layoutInfo_->itemEnd_) {
+        layoutInfo_->offsetEnd_ = false;
     }
 }
 } // namespace OHOS::Ace::NG

@@ -67,7 +67,7 @@ void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
+    ACE_UINODE_TRACE(frameNode);
     auto dividerPattern = frameNode->GetPattern<DividerPattern>();
     CHECK_NULL_VOID(dividerPattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -124,6 +124,7 @@ void DividerModelNG::SetDividerColor(FrameNode* frameNode, std::optional<Color> 
 void DividerModelNG::SetDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, bool isSetByTheme)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto dividerPattern = frameNode->GetPattern<DividerPattern>();
     CHECK_NULL_VOID(dividerPattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {

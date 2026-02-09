@@ -153,6 +153,11 @@ import { Size } from '@ohos.arkui.node'
             navigationUniqueId: int, callback: Callback<NavDestinationInfo>): void;
         public native offNavDestinationSizeChangeByUniqueId(
             navigationUniqueId: int, callback?: Callback<NavDestinationInfo>): void;
+
+        public native onTextChange(callback: Callback<TextChangeEventInfo>): void;
+        public native offTextChange(callback?: Callback<TextChangeEventInfo>): void;
+        public native onTextChange(identity: ObserverOptions, callback: Callback<TextChangeEventInfo>): void;
+        public native offTextChange(identity: ObserverOptions, callback?: Callback<TextChangeEventInfo>): void;
     }
 
     export interface NavigationInfo {
@@ -622,4 +627,17 @@ import { Size } from '@ohos.arkui.node'
             }
         }
     }
+
+    export interface TextChangeEventInfo {
+        id: string;
+        uniqueId: int;
+        content: string;
+    }
+
+    export class TextChangeEventInfoImpl implements TextChangeEventInfo {
+        id: string;
+        uniqueId: int;
+        content: string;
+    }
+
  }

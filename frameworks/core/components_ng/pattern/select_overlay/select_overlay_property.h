@@ -113,7 +113,7 @@ struct SelectHandleInfo {
         return paintRect;
     }
 
-    static Dimension GetDefaultLineWidth();
+    ACE_FORCE_EXPORT static Dimension GetDefaultLineWidth();
 
     std::string ToString() const
     {

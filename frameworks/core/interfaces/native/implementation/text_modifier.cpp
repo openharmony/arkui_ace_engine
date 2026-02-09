@@ -872,7 +872,7 @@ void SetFontImpl(Ark_NativePointer node,
     TextModelStatic::SetFont(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_String* weight,
+                       const Opt_Union_I32_FontWeight_ResourceStr* weight,
                        const Opt_FontSettingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

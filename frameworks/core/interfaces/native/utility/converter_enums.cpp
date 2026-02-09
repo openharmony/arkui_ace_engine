@@ -101,7 +101,7 @@ void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& 
 }
 
 template<>
-void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
 {
     switch (src) {
         case ARK_AUTO_CAPITALIZATION_MODE_NONE: dst = AutoCapitalizationMode::NONE; break;
@@ -622,7 +622,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
 }
 
 template<>
-void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
 {
     switch (src) {
         case ARK_BAR_STATE_OFF: dst = DisplayMode::OFF; break;
@@ -750,7 +750,7 @@ void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 }
 
 template<>
-void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
 {
     switch (src) {
         case ARK_TEXT_ALIGN_CENTER: dst = TextAlign::CENTER; break;
@@ -789,7 +789,7 @@ void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeig
 }
 
 template<>
-void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src)
 {
     switch (src) {
         case ARK_ENTER_KEY_TYPE_GO: dst = TextInputAction::GO; break;
@@ -850,7 +850,7 @@ void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
 }
 
 template<>
-void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
 {
     switch (src) {
         case ARK_SEARCH_TYPE_NORMAL: dst = TextInputType::TEXT; break;
@@ -864,7 +864,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
 }
 
 template<>
-void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src)
 {
     switch (src) {
         case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CancelButtonStyle::CONSTANT; break;
@@ -905,7 +905,7 @@ void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDir
 }
 
 template<>
-void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src)
 {
     switch (src) {
         case ARK_COPY_OPTIONS_NONE: dst = CopyOptions::None; break;
@@ -1004,7 +1004,7 @@ void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src)
 {
     switch (src) {
         case ARK_FONT_STYLE_NORMAL: dst = OHOS::Ace::FontStyle::NORMAL; break;
@@ -1184,7 +1184,7 @@ void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src)
 }
 
 template<>
-void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
 {
     switch (src) {
         case ARK_SUB_MENU_EXPANDING_MODE_SIDE_EXPAND: dst = SubMenuExpandingMode::SIDE; break;
@@ -1195,7 +1195,7 @@ void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpan
 }
 
 template<>
-void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src)
 {
     switch (src) {
         case ARK_UNDO_STYLE_CLEAR_STYLE: dst = UndoStyle::CLEAR_STYLE; break;
@@ -1205,7 +1205,7 @@ void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src)
 {
     switch (src) {
         case ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE: dst = KeyboardAppearance::NONE_IMMERSIVE; break;
@@ -1457,7 +1457,7 @@ void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrate
 }
 
 template<>
-void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src)
 {
     switch (src) {
         case ARK_TEXT_DIRECTION_LTR: dst = TextDirection::LTR; break;
@@ -1764,7 +1764,7 @@ void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessa
 }
 
 template<>
-void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src)
 {
     switch (src) {
         case ARK_RICH_EDITOR_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
@@ -1777,7 +1777,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& 
 }
 
 template<>
-void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src)
 {
     switch (src) {
         case ARK_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
@@ -1787,7 +1787,7 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& sr
 }
 
 template<>
-void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorResponseType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorResponseType& src)
 {
     switch (src) {
         case ARK_RICH_EDITOR_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
@@ -2207,7 +2207,7 @@ void AssignCast(std::optional<KeyboardFluidLightMode>& dst, const Ark_KeyboardFl
         case Ark_KeyboardFluidLightMode::ARK_KEYBOARD_FLUID_LIGHT_MODE_BACKGROUND_FLUID_LIGHT:
             dst = KeyboardFluidLightMode::BACKGROUND_FLUID_LIGHT; break;
         default:
-            LOGE("Unexpected enum value in Ark_SuperscriptStyle: %{public}d", src);
+            LOGE("Unexpected enum value in Ark_KeyboardFluidLightMode: %{public}d", src);
             break;
     }
 }
@@ -2634,7 +2634,7 @@ void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedback
 }
 
 template<>
-void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
 {
     switch (src) {
         case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU: dst = DividerMode::FLOATING_ABOVE_MENU; break;

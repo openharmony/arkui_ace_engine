@@ -71,6 +71,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
         return deepChild;
     };
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
@@ -98,6 +99,7 @@ void TabContentModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);
@@ -111,6 +113,7 @@ void TabContentModelNG::Create()
 
 RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     auto pipelineContext = frameNode->GetContext();
@@ -153,6 +156,7 @@ RefPtr<TabsNode> TabContentModelNG::FindTabsNode(const RefPtr<UINode>& tabConten
 void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update)
 {
     CHECK_NULL_VOID(tabContent);
+    ACE_UINODE_TRACE(tabContent);
     auto tabContentId = tabContent->GetId();
 
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContent);

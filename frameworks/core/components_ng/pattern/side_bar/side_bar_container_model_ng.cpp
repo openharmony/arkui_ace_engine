@@ -53,6 +53,7 @@ void SideBarContainerModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", SIDE_BAR_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto sideBarContainerNode = FrameNode::GetOrCreateFrameNode(
         SIDE_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SideBarContainerPattern>(); });
 

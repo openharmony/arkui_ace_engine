@@ -24,7 +24,7 @@ import { PeerNode } from "./PeerNode"
 import { ArkMarqueePeer, MarqueeAttribute } from "./component/marquee"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
-import { ResourceColor, Length } from "./component/units"
+import { ResourceColor, Length, ResourceStr } from "./component/units"
 import { Color, FontWeight, MarqueeUpdateStrategy } from "./component/enums"
 import { Resource } from "global.resource"
 export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttribute,AttributeModifier<MarqueeAttribute> {
@@ -46,7 +46,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
     _allowScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _allowScale_0_0value?: boolean | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: string | Resource | undefined
     _marqueeUpdateStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -119,7 +119,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -129,7 +129,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -275,7 +275,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -381,7 +381,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         }
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

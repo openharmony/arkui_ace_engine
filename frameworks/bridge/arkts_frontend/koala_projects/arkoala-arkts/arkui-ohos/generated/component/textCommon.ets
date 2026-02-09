@@ -33,7 +33,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
 import { default as text } from "@ohos.graphics.text"
-import { LengthMetrics } from "arkui.Graphics"
+import { LengthMetrics, LengthMetrics_serializer } from "arkui.Graphics"
 import { ArkThemeScopeManager } from "#arktheme"
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
@@ -1204,6 +1204,68 @@ export class TextMenuOptions_serializer {
         }
         const showModeTmpResult : TextMenuShowMode | undefined = showModeTmpBuf
         let value : TextMenuOptions = ({showMode: showModeTmpResult} as TextMenuOptions)
+        return value
+    }
+}
+export class TextLayoutOptions_serializer {
+    public static write(buffer: SerializerBase, value: TextLayoutOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForConstraintWidth = value.constraintWidth!
+        if (valueHolderForConstraintWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForConstraintWidthTmpValue = (valueHolderForConstraintWidth as LengthMetrics)
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): TextLayoutOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const constraintWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let constraintWidthTmpBuf : LengthMetrics | undefined = undefined
+        if ((constraintWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            constraintWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const constraintWidthTmpResult : LengthMetrics | undefined = constraintWidthTmpBuf
+        let value : TextLayoutOptions = ({ constraintWidth: constraintWidthTmpResult } as TextLayoutOptions)
+        return value
+    }
+}
+export class KeyboardAppearanceConfig_serializer {
+    public static write(buffer: SerializerBase, value: KeyboardAppearanceConfig): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForGradientMode = value.gradientMode
+        if (valueHolderForGradientMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGradientModeTmpValue = (valueHolderForGradientMode as KeyboardGradientMode)
+            valueSerializer.writeInt32(valueHolderForGradientModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFluidLightMode = value.fluidLightMode
+        if (valueHolderForFluidLightMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFluidLightModeTmpValue = (valueHolderForFluidLightMode as KeyboardFluidLightMode)
+            valueSerializer.writeInt32(valueHolderForFluidLightModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): KeyboardAppearanceConfig {
+        let valueDeserializer : DeserializerBase = buffer
+        const gradientModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let gradientModeTmpBuf : KeyboardGradientMode | undefined = undefined
+        if ((gradientModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            gradientModeTmpBuf = KeyboardGradientMode.fromValue(valueDeserializer.readInt32())
+        }
+        const gradientModeTmpResult : KeyboardGradientMode | undefined = gradientModeTmpBuf
+        const fluidLightModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fluidLightModeTmpBuf : KeyboardFluidLightMode | undefined = undefined
+        if ((fluidLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fluidLightModeTmpBuf = KeyboardFluidLightMode.fromValue(valueDeserializer.readInt32())
+        }
+        const fluidLightModeTmpResult : KeyboardFluidLightMode | undefined = fluidLightModeTmpBuf
+        let value : KeyboardAppearanceConfig = ({ gradientMode: gradientModeTmpResult, fluidLightMode: fluidLightModeTmpResult } as KeyboardAppearanceConfig)
         return value
     }
 }

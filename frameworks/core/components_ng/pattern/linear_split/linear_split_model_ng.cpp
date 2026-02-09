@@ -25,6 +25,7 @@ void LinearSplitModelNG::Create(SplitType splitType)
     std::string tag = splitType == SplitType::ROW_SPLIT ? ROW_SPLIT_ETS_TAG : COLUMN_SPLIT_ETS_TAG;
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         tag, nodeId, [splitType]() { return AceType::MakeRefPtr<LinearSplitPattern>(splitType); });
@@ -42,6 +43,7 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ColumnSplitDi
     if (SystemProperties::ConfigChangePerform()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
+        ACE_UINODE_TRACE(frameNode);
         auto pattern = frameNode->GetPattern<LinearSplitPattern>();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
@@ -79,6 +81,7 @@ void LinearSplitModelNG::SetResizable(FrameNode* frameNode, NG::SplitType splitT
 void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ColumnSplitDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern<LinearSplitPattern>();
         CHECK_NULL_VOID(pattern);

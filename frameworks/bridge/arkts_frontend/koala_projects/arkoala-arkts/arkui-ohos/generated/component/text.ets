@@ -26,7 +26,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { LengthMetrics_serializer } from "./../Graphics"
-import { Font_serializer, ResourceColor, Length, Font, VoidCallback } from "./units"
+import { Font_serializer, ResourceColor, Length, Font, ResourceStr, VoidCallback } from "./units"
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from "./richEditor"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -1014,7 +1014,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): void {
+    setFontWeightAttribute(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (weight !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1027,10 +1027,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const weightTmpValueForIdx1  = weightTmpValue as FontWeight
                 thisSerializer.writeInt32(weightTmpValueForIdx1.valueOf())
-            } else if (weightTmpValue instanceof string) {
+            } else if (weightTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((2).toByte())
-                const weightTmpValueForIdx2  = weightTmpValue as string
-                thisSerializer.writeString(weightTmpValueForIdx2)
+                const weightTmpValueForIdx2  = weightTmpValue as ResourceStr
+                if (weightTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const weightTmpValueForIdx2ForIdx0  = weightTmpValueForIdx2 as string
+                    thisSerializer.writeString(weightTmpValueForIdx2ForIdx0)
+                } else if (weightTmpValueForIdx2 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const weightTmpValueForIdx2ForIdx1  = weightTmpValueForIdx2 as Resource
+                    Resource_serializer.write(thisSerializer, weightTmpValueForIdx2ForIdx1)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1271,7 +1279,7 @@ export interface TextAttribute extends CommonMethod {
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method font")
     }
-    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method fontWeight")
     }
     selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
@@ -1512,7 +1520,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
-    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
         return this
     }
     selection(selectionStart: int32 | undefined, selectionEnd: int32 | undefined): this {
@@ -2032,9 +2040,9 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    public fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("fontWeight")) {
-            const weight_casted = weight as (int32 | FontWeight | string | undefined)
+            const weight_casted = weight as (int32 | FontWeight | ResourceStr | undefined)
             const options_casted = options as (FontSettingOptions | undefined)
             this.getPeer()?.setFontWeightAttribute(weight_casted, options_casted)
             return this

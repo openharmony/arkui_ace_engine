@@ -52,16 +52,19 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<NavigationLayoutProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<NavigationEventHub>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         auto layoutAlgorithm = MakeRefPtr<NavigationLayoutAlgorithm>();
         layoutAlgorithm->SetRealNavBarWidth(realNavBarWidth_);
         layoutAlgorithm->SetIfNeedInit(ifNeedInit_);

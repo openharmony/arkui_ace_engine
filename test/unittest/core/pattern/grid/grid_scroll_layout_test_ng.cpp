@@ -976,4 +976,49 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationWithReload, TestSize.Level1)
     FlushUITasks();
     EXPECT_GE(pattern_->info_.currentOffset_, 0.0);
 }
+
+/**
+ * @tc.name: IsAtBottom
+ * @tc.desc: Test IsAtBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsAtBottom, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(3);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedHeightItems(10, 100);
+    CreateFixedHeightItems(1, 0);
+    CreateFixedHeightItems(1, 0);
+    CreateDone();
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    // mock the scroll up
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    // start animation
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
 } // namespace OHOS::Ace::NG

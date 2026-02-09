@@ -15,10 +15,12 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 component_modules = [
+  "dynamiclayout",
   "counter",
   "data_panel",
   "gauge",
   "hyperlink",
+  "text_clock",
   "checkbox",
   "patternlock",
   "qrcode",
@@ -27,6 +29,7 @@ component_modules = [
   "linear_split",
   "side_bar",
   "marquee",
+  "search",
   "stepper",
   "radio",
   "slider",
@@ -34,6 +37,8 @@ component_modules = [
   "calendar_picker",
   "indexer",
   "symbol",
+  "rich_editor",
+  "menu",
 ]
 
 if (!ace_engine_feature_wearable) { 

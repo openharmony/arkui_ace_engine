@@ -1283,7 +1283,15 @@ void UpdateFocusRectToRenderContext(
     CHECK_NULL_VOID(parentRenderContext);
     parentRenderContext->UpdateAccessibilityFocusRect(rectInt);
 }
-            
+
+void CheckAndReConnectA11ySA()
+{
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_VOID(client);
+    CHECK_NE_VOID(client->NeedToConnect(), true);
+    client->ConnectAndInit();
+}
+
 } // namespace
 
 
@@ -9394,5 +9402,13 @@ int32_t JsAccessibilityManager::GetTreeId(int32_t instanceId)
         return 0;
     }
     return treeId_;
+}
+
+void JsAccessibilityManager::AccessibilityOnShowHide(bool isOnShow,
+    [[maybe_unused]] const WeakPtr<PipelineBase>& context)
+{
+    if (isOnShow) {
+        CheckAndReConnectA11ySA();
+    }
 }
 } // namespace OHOS::Ace::Framework

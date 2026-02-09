@@ -106,6 +106,9 @@ bool CustomPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t 
     CHECK_NULL_RETURN(pipeline, false);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_RETURN(accessibilityManager, false);
+    if (pipeline->IsSubPipeline()) {
+        windowId = pipeline->GetRealHostWindowId();
+    }
 
     if (accessibilityProvider_ == nullptr) {
         accessibilityProvider_ = AceType::MakeRefPtr<CustomAccessibilityProvider>(WeakClaim(this));

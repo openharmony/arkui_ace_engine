@@ -1641,10 +1641,197 @@ class RelativeContainerModifier extends ArkRelativeContainerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class RichEditorModifier extends ArkRichEditorComponent {
+class LazyArkRichEditorComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkRichEditorComponent.module === undefined) {
+      LazyArkRichEditorComponent.module = globalThis.requireNapi('arkui.components.arkricheditor');
+    }
+    this.lazyComponent = LazyArkRichEditorComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkRichEditorComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  enableDataDetector(value) {
+    this.lazyComponent.enableDataDetector(value);
+    return this;
+  }
+  dataDetectorConfig(config) {
+    this.lazyComponent.dataDetectorConfig(config);
+    return this;
+  }
+  copyOptions(value) {
+    this.lazyComponent.copyOptions(value);
+    return this;
+  }
+
+  caretColor(value) {
+    this.lazyComponent.caretColor(value);
+    return this;
+  }
+
+  onSelectionChange(callback) {
+    this.lazyComponent.onSelectionChange(callback);
+    return this;
+  }
+
+  selectedBackgroundColor(value) {
+    this.lazyComponent.selectedBackgroundColor(value);
+    return this;
+  }
+
+  enterKeyType(value) {
+    this.lazyComponent.enterKeyType(value);
+    return this;
+  }
+
+  onPaste(callback) {
+    this.lazyComponent.onPaste(callback);
+    return this;
+  }
+  onReady(callback) {
+    this.lazyComponent.onReady(callback);
+    return this;
+  }
+  onSelect(callback) {
+    this.lazyComponent.onSelect(callback);
+    return this;
+  }
+  onSubmit(callback) {
+    this.lazyComponent.onSubmit(callback);
+    return this;
+  }
+  aboutToIMEInput(callback) {
+    this.lazyComponent.aboutToIMEInput(callback);
+    return this;
+  }
+  onIMEInputComplete(callback) {
+    this.lazyComponent.onIMEInputComplete(callback);
+    return this;
+  }
+  onWillChange(callback) {
+    this.lazyComponent.onWillChange(callback);
+    return this;
+  }
+  onDidChange(callback) {
+    this.lazyComponent.onDidChange(callback);
+    return this;
+  }
+  placeholder(value, style) {
+    this.lazyComponent.placeholder(value, style);
+    return this;
+  }
+  aboutToDelete(callback) {
+    this.lazyComponent.aboutToDelete(callback);
+    return this;
+  }
+  onDeleteComplete(callback) {
+    this.lazyComponent.onDeleteComplete(callback);
+    return this;
+  }
+  bindSelectionMenu(spanType, content, responseType, options) {
+    throw new Error('Method not implemented.');
+  }
+  customKeyboard(value, options) {
+    this.lazyComponent.customKeyboard(value, options);
+    return this;
+  }
+  onEditingChange(callback) {
+    this.lazyComponent.onEditingChange(callback);
+    return this;
+  }
+  onCut(callback) {
+    this.lazyComponent.onCut(callback);
+    return this;
+  }
+  onCopy(callback) {
+    this.lazyComponent.onCopy(callback);
+    return this;
+  }
+  enableKeyboardOnFocus(value) {
+    this.lazyComponent.enableKeyboardOnFocus(value);
+    return this;
+  }
+  enablePreviewText(value) {
+    this.lazyComponent.enablePreviewText(value);
+    return this;
+  }
+  editMenuOptions(value) {
+    this.lazyComponent.editMenuOptions(value);
+    return this;
+  }
+  barState(value) {
+    this.lazyComponent.barState(value);
+    return this;
+  }
+  maxLength(value) {
+    this.lazyComponent.maxLength(value);
+    return this;
+  }
+  maxLines(value) {
+    this.lazyComponent.maxLines(value);
+    return this;
+  }
+  stopBackPress(value) {
+    this.lazyComponent.stopBackPress(value);
+    return this;
+  }
+  keyboardAppearance(value) {
+    this.lazyComponent.keyboardAppearance(value);
+    return this;
+  }
+  onDidIMEInput(callback) {
+    this.lazyComponent.onDidIMEInput(callback);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    this.lazyComponent.onWillAttachIME(callback);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    this.lazyComponent.enableHapticFeedback(value);
+    return this;
+  }
+  enableAutoSpacing(enable) {
+    this.lazyComponent.enableAutoSpacing(enable);
+    return this;
+  }
+  compressLeadingPunctuation(enable) {
+    this.lazyComponent.compressLeadingPunctuation(enable);
+    return this;
+  }
+  undoStyle(style) {
+    this.lazyComponent.undoStyle(style);
+    return this;
+  }
+  scrollBarColor(style) {
+    this.lazyComponent.scrollBarColor(style);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    this.lazyComponent.selectedDragPreviewStyle(value);
+    return this;
+  }
+  includeFontPadding(enable) {
+    this.lazyComponent.includeFontPadding(enable);
+    return this;
+  }
+  fallbackLineSpacing(enable) {
+    this.lazyComponent.fallbackLineSpacing(enable);
+    return this;
+  }
+  singleLine(value) {
+    this.lazyComponent.singleLine(value);
+    return this;
+  }
+}
+class RichEditorModifier extends LazyArkRichEditorComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1703,10 +1890,272 @@ class ScrollModifier extends ArkScrollComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class SearchModifier extends ArkSearchComponent {
+class LazyArkSearchComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkSearchComponent.module === undefined) {
+      LazyArkSearchComponent.module = globalThis.requireNapi('arkui.components.arksearch');
+    }
+    this.lazyComponent = LazyArkSearchComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  searchButton(value, option) {
+    this.lazyComponent.searchButton(value, option);
+    return this;
+  }
+  searchIcon(value) {
+    this.lazyComponent.searchIcon(value);
+    return this;
+  }
+  cancelButton(value) {
+    this.lazyComponent.cancelButton(value);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  caretStyle(value) {
+    this.lazyComponent.caretStyle(value);
+    return this;
+  }
+  placeholderColor(value) {
+    this.lazyComponent.placeholderColor(value);
+    return this;
+  }
+  placeholderFont(value) {
+    this.lazyComponent.placeholderFont(value);
+    return this;
+  }
+  textFont(value) {
+    this.lazyComponent.textFont(value);
+    return this;
+  }
+  textAlign(value) {
+    this.lazyComponent.textAlign(value);
+    return this;
+  }
+  textDirection(direction) {
+    this.lazyComponent.textDirection(direction);
+    return this;
+  }
+  onSubmit(callback) {
+    this.lazyComponent.onSubmit(callback);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  onTextSelectionChange(callback) {
+    this.lazyComponent.onTextSelectionChange(callback);
+    return this;
+  }
+  onContentScroll(callback) {
+    this.lazyComponent.onContentScroll(callback);
+    return this;
+  }
+  height(value) {
+    this.lazyComponent.height(value);
+    return this;
+  }
+  enableKeyboardOnFocus(value) {
+    this.lazyComponent.enableKeyboardOnFocus(value);
+    return this;
+  }
+  onCopy(callback) {
+    this.lazyComponent.onCopy(callback);
+    return this;
+  }
+  onCut(callback) {
+    this.lazyComponent.onCut(callback);
+    return this;
+  }
+  onPaste(callback) {
+    this.lazyComponent.onPaste(callback);
+    return this;
+  }
+  copyOption(value) {
+    this.lazyComponent.copyOption(value);
+    return this;
+  }
+  selectionMenuHidden(value) {
+    this.lazyComponent.selectionMenuHidden(value);
+    return this;
+  }
+  customKeyboard(value, options) {
+    this.lazyComponent.customKeyboard(value, options);
+    return this;
+  }
+  enterKeyType(value) {
+    this.lazyComponent.enterKeyType(value);
+    return this;
+  }
+  maxLength(value) {
+    this.lazyComponent.maxLength(value);
+    return this;
+  }
+  type(value) {
+    this.lazyComponent.type(value);
+    return this;
+  }
+  editMenuOptions(editMenu) {
+    this.lazyComponent.editMenuOptions(editMenu);
+    return this;
+  }
+  strokeWidth(width) {
+    this.lazyComponent.strokeWidth(width);
+    return this;
+  }
+  strokeColor(color) {
+    this.lazyComponent.strokeColor(color);
+    return this;
+  }
+  margin(value) {
+    this.lazyComponent.margin(value);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    this.lazyComponent.selectedDragPreviewStyle(value);
+    return this;
+  }
+  decoration(value) {
+    this.lazyComponent.decoration(value);
+    return this;
+  }
+  minFontSize(value) {
+    this.lazyComponent.minFontSize(value);
+    return this;
+  }
+  maxFontSize(value) {
+    this.lazyComponent.maxFontSize(value);
+    return this;
+  }
+  minFontScale(scale) {
+    this.lazyComponent.minFontScale(scale);
+    return this;
+  }
+  maxFontScale(scale) {
+    this.lazyComponent.maxFontScale(scale);
+    return this;
+  }
+  dividerColor(color) {
+    this.lazyComponent.dividerColor(color);
+    return this;
+  }
+  letterSpacing(value) {
+    this.lazyComponent.letterSpacing(value);
+    return this;
+  }
+  lineHeight(value) {
+    this.lazyComponent.lineHeight(value);
+    return this;
+  }
+  halfLeading(halfLeading) {
+    this.lazyComponent.halfLeading(halfLeading);
+    return this;
+  }
+  fontFeature(value) {
+    this.lazyComponent.fontFeature(value);
+    return this;
+  }
+  id(value) {
+    this.lazyComponent.id(value);
+    return this;
+  }
+  key(value) {
+    this.lazyComponent.key(value);
+    return this;
+  }
+  selectedBackgroundColor(value) {
+    this.lazyComponent.selectedBackgroundColor(value);
+    return this;
+  }
+  inputFilter(value, error) {
+    this.lazyComponent.inputFilter(value, error);
+    return this;
+  }
+  onEditChange(callback) {
+    this.lazyComponent.onEditChange(callback);
+    return this;
+  }
+  textIndent(value) {
+    this.lazyComponent.textIndent(value);
+    return this;
+  }
+  onWillInsert(callback) {
+    this.lazyComponent.onWillInsert(callback);
+    return this;
+  }
+  onDidInsert(callback) {
+    this.lazyComponent.onDidInsert(callback);
+    return this;
+  }
+  onWillDelete(callback) {
+    this.lazyComponent.onWillDelete(callback);
+    return this;
+  }
+  onDidDelete(callback) {
+    this.lazyComponent.onDidDelete(callback);
+    return this;
+  }
+  enablePreviewText(enable) {
+    this.lazyComponent.enablePreviewText(enable);
+    return this;
+  }
+  enableHapticFeedback(isEnabled) {
+    this.lazyComponent.enableHapticFeedback(isEnabled);
+    return this;
+  }
+  autoCapitalizationMode(mode) {
+    this.lazyComponent.autoCapitalizationMode(mode);
+    return this;
+  }
+  stopBackPress(isStopped) {
+    this.lazyComponent.stopBackPress(isStopped);
+    return this;
+  }
+  keyboardAppearance(appearance) {
+    this.lazyComponent.keyboardAppearance(appearance);
+    return this;
+  }
+  onWillChange(callback) {
+    this.lazyComponent.onWillChange(callback);
+    return this;
+  }
+  enableAutoSpacing(enabled) {
+    this.lazyComponent.enableAutoSpacing(enabled);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    this.lazyComponent.onWillAttachIME(callback);
+    return this;
+  }
+  enableSelectedDataDetector(enable) {
+    this.lazyComponent.enableSelectedDataDetector(enable);
+    return this;
+  }
+  compressLeadingPunctuation(enabled) {
+    this.lazyComponent.compressLeadingPunctuation(enabled);
+    return this;
+  }
+  includeFontPadding(include) {
+    this.lazyComponent.includeFontPadding(include);
+    return this;
+  }
+  fallbackLineSpacing(enabled) {
+    this.lazyComponent.fallbackLineSpacing(enabled);
+    return this;
+  }
+}
+class SearchModifier extends LazyArkSearchComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -2043,10 +2492,75 @@ class TextModifier extends ArkTextComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class TextClockModifier extends ArkTextClockComponent {
+
+class LazyArkTextClockComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkTextClockComponent.module === undefined) {
+      LazyArkTextClockComponent.module = globalThis.requireNapi('arkui.components.arktextclock');
+    }
+    this.lazyComponent = LazyArkTextClockComponent.module.createComponent(nativePtr, classType);
+    console.log("LazyArkTextClockComponent lazyload nativeModule")
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  value(value) {
+    this.lazyComponent.value(value);
+    return this;
+  }
+  format(value) {
+    this.lazyComponent.format(value);
+    return this;
+  }
+  onDateChange(event) {
+    this.lazyComponent.onDateChange(event);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  fontSize(value) {
+    this.lazyComponent.fontSize(value);
+    return this;
+  }
+  fontStyle(value) {
+    this.lazyComponent.fontStyle(value);
+    return this;
+  }
+  fontWeight(value) {
+    this.lazyComponent.fontWeight(value);
+    return this;
+  }
+  fontFamily(value) {
+    this.lazyComponent.fontFamily(value);
+    return this;
+  }
+  textShadow(value) {
+    this.lazyComponent.textShadow(value);
+    return this;
+  }
+  fontFeature(value) {
+    this.lazyComponent.fontFeature(value);
+    return this;
+  }
+  contentModifier(modifier) {
+    this.lazyComponent.contentModifier(modifier);
+    return this;
+  }
+  dateTimeOptions(dateTimeOptions) {
+    this.lazyComponent.dateTimeOptions(dateTimeOptions);
+    return this;
+  }
+}
+
+class TextClockModifier extends LazyArkTextClockComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

@@ -33,6 +33,8 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
         if (!dividerModifier_) {
             dividerModifier_ = AceType::MakeRefPtr<DividerModifier>();
         }
@@ -42,16 +44,22 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
         return MakeRefPtr<DividerLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
         return MakeRefPtr<DividerLayoutAlgorithm>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
         return MakeRefPtr<DividerRenderProperty>();
     }
 

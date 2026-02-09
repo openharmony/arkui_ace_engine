@@ -87,7 +87,7 @@ public:
 
     void RemoveResource(const std::string& key);
 
-    void ReloadResources();
+    ACE_FORCE_EXPORT void ReloadResources();
 
     bool Empty();
 

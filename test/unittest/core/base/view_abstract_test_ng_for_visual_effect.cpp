@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
-#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#define private public
+#define protected public
+
+#include "test/mock/base/mock_system_properties.h"
 #include "core/components/common/properties/ui_material.h"
 
 using namespace testing;

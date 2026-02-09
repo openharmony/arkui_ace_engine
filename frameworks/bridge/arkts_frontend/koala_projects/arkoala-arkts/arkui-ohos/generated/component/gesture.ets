@@ -367,6 +367,8 @@ export interface EventLocationInfo {
     windowY: double;
     displayX: double;
     displayY: double;
+    globalDisplayX?: double;
+    globalDisplayY?: double;
 }
 export interface FingerInfo {
     id: int32;
@@ -590,6 +592,22 @@ export class EventLocationInfo_serializer {
         valueSerializer.writeFloat64(valueHolderForDisplayX)
         const valueHolderForDisplayY  = value.displayY
         valueSerializer.writeFloat64(valueHolderForDisplayY)
+        const valueHolderForGlobalDisplayX  = value.globalDisplayX
+        if (valueHolderForGlobalDisplayX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayXTmpValue  = valueHolderForGlobalDisplayX!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGlobalDisplayY  = value.globalDisplayY
+        if (valueHolderForGlobalDisplayY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayYTmpValue  = valueHolderForGlobalDisplayY!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EventLocationInfo {
         let valueDeserializer : DeserializerBase = buffer
@@ -599,7 +617,19 @@ export class EventLocationInfo_serializer {
         const windowYTmpResult : double = valueDeserializer.readFloat64()
         const displayXTmpResult : double = valueDeserializer.readFloat64()
         const displayYTmpResult : double = valueDeserializer.readFloat64()
-        let value : EventLocationInfo = ({x: xTmpResult, y: yTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult} as EventLocationInfo)
+        const globalDisplayXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayXTmpBuf : double | undefined = undefined
+        if ((globalDisplayXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayXTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayXTmpResult : double | undefined = globalDisplayXTmpBuf
+        const globalDisplayYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayYTmpBuf : double | undefined = undefined
+        if ((globalDisplayYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayYTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayYTmpResult : double | undefined = globalDisplayYTmpBuf
+        let value : EventLocationInfo = ({x: xTmpResult, y: yTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult} as EventLocationInfo)
         return value
     }
 }

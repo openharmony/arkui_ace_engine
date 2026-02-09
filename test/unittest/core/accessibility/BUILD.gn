@@ -140,6 +140,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "focus_move/accessibility_focus_strategy_test.cpp",
     "hidumper/accessibitlity_hidumper_osal_test.cpp",
     "hidumper/accessibitlity_hidumper_test.cpp",
+    "js_accessibility_manager_test_two.cpp",
     "js_accessibitlity_manager_test.cpp",
     "js_third_accessibility_hover_ng_test.cpp",
     "js_third_provider_interaction_operation_test.cpp",

@@ -35,7 +35,7 @@ import { TextMenuOptions } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { default as mediaquery } from '@ohos.mediaquery';
+import { default as mediaquery } from '@ohos/mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
@@ -1156,7 +1156,7 @@ export class UIObserver {
         }
     }
 
-    public onTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+    public onTextChange(callback: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTextChange(callback);
         }
@@ -1167,15 +1167,15 @@ export class UIObserver {
         }
     }
     public onTextChange(
-        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        identity: uiObserver.ObserverOptions, callback: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
-            this.observerImpl!.onTextChange(callback);
+            this.observerImpl!.onTextChange(identity, callback);
         }
     }
     public offTextChange(
         identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
-            this.observerImpl!.offTextChange(callback);
+            this.observerImpl!.offTextChange(identity, callback);
         }
     }
 
@@ -1308,6 +1308,25 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
     readonly type: SwiperDynamicSyncSceneType;
     nodePtr: KPointer;
     constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
+    }
+}
+
+export const enum MarqueeDynamicSyncSceneType {
+  ANIMATION = 1
+}
+
+export class MarqueeDynamicSyncScene extends DynamicSyncScene {
+    readonly type: MarqueeDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: MarqueeDynamicSyncSceneType, nodePtr: KPointer) {
         super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
         this.type = type;
         this.nodePtr = nodePtr;

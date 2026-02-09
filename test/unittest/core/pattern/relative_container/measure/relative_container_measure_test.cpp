@@ -793,7 +793,8 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest2, TestSize.Level0)
  * @tc.number: InsertToVerticalReliedOnMapTest_001
  * @tc.desc  : 测试当节点不存在时,InsertToVerticalReliedOnMap 应该插入新的节点到 map 中
  */
-HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_01, TestSize.Level0) {
+HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_01, TestSize.Level0)
+{
     std::string anchorName = "anchor1";
     std::string nodeName = "node1";
     RelativeContainerLayoutAlgorithm algorithm;
@@ -812,7 +813,8 @@ HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_01, TestSize.
  * @tc.number: InsertToVerticalReliedOnMapTest_002
  * @tc.desc  : 测试当节点已存在时,InsertToVerticalReliedOnMap 应该将 anchor 插入到已存在的节点中
  */
-HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_02, TestSize.Level0) {
+HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_02, TestSize.Level0)
+{
     std::string anchorName1 = "anchor1";
     std::string anchorName2 = "anchor2";
     std::string nodeName = "node1";

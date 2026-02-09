@@ -84,8 +84,8 @@ ACE_FORCE_EXPORT bool IsFloat(const std::string& s);
 void ReplaceSpace(std::string& data);
 void ReplaceTabAndNewLine(std::string& data);
 
-std::string RestoreEscape(const std::string& src);
-std::string RestoreBackslash(const std::string& src);
+ACE_FORCE_EXPORT std::string RestoreEscape(const std::string& src);
+ACE_FORCE_EXPORT std::string RestoreBackslash(const std::string& src);
 
 ACE_FORCE_EXPORT int32_t StringToInt(const std::string& value, int64_t defaultErr = 0);
 ACE_FORCE_EXPORT int64_t StringToLongInt(const std::string& value, int64_t defaultErr = 0);

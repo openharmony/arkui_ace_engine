@@ -3861,7 +3861,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6881,7 +6881,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* weight,
+                           const Opt_Union_I32_FontWeight_ResourceStr* weight,
                            const Opt_FontSettingOptions* options)
     {
     }
@@ -6945,7 +6945,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7344,7 +7344,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -15391,6 +15391,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // IndicatorComponentControllerAccessor
     namespace IUIContextAccessor {
+    void DestroyPeerImpl(Ark_IUIContext peer)
+    {
+        auto peerImpl = reinterpret_cast<IUIContextPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_IUIContext ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -15446,6 +15461,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
     {
+    }
+    Ark_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+    {
+        return {};
     }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
@@ -16105,6 +16124,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LongPressRecognizerAccessor
+    namespace MagnifierAccessor {
+    void DestroyPeerImpl(Ark_Magnifier peer)
+    {
+        auto peerImpl = reinterpret_cast<MagnifierPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_Magnifier ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void BindImpl(Ark_Magnifier peer,
+                  const Ark_String* id)
+    {
+    }
+    void ShowImpl(Ark_Magnifier peer,
+                  Ark_Float64 x,
+                  Ark_Float64 y)
+    {
+    }
+    void UnbindImpl(Ark_Magnifier peer)
+    {
+    }
+    } // MagnifierAccessor
     namespace Matrix2DAccessor {
     void DestroyPeerImpl(Ark_Matrix2D peer)
     {
@@ -22577,6 +22625,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::DestroyPeerImpl,
+            IUIContextAccessor::ConstructImpl,
+            IUIContextAccessor::GetFinalizerImpl,
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
             IUIContextAccessor::OpenBindSheetImpl,
@@ -22587,9 +22638,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::GetMagnifierImpl,
         };
         return &IUIContextAccessorImpl;
     }
+     struct IUIContextPeer {
+        virtual ~IUIContextPeer() = default;
+    };
 
     const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     {
@@ -22921,6 +22976,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LongPressRecognizerPeer {
         virtual ~LongPressRecognizerPeer() = default;
     };
+
+    const GENERATED_ArkUIMagnifierAccessor* GetMagnifierAccessor()
+    {
+        static const GENERATED_ArkUIMagnifierAccessor MagnifierAccessorImpl {
+            MagnifierAccessor::DestroyPeerImpl,
+            MagnifierAccessor::ConstructImpl,
+            MagnifierAccessor::GetFinalizerImpl,
+            MagnifierAccessor::BindImpl,
+            MagnifierAccessor::ShowImpl,
+            MagnifierAccessor::UnbindImpl,
+        };
+        return &MagnifierAccessorImpl;
+    }
+
+    struct MagnifierPeer {
+        virtual ~MagnifierPeer() = default;
+    };
+
     const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     {
         static const GENERATED_ArkUIMatrix2DAccessor Matrix2DAccessorImpl {
@@ -25111,6 +25184,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetListScrollerAccessor,
             GetLongPressGestureEventAccessor,
             GetLongPressRecognizerAccessor,
+            GetMagnifierAccessor,
             GetMatrix2DAccessor,
             GetMeasurableAccessor,
             GetMenuItemConfigurationAccessor,

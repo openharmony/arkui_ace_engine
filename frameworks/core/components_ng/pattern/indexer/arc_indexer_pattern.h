@@ -32,6 +32,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        ACE_UINODE_TRACE(GetHost());
         if (!contentModifier_) {
             contentModifier_ = AceType::MakeRefPtr<ArcIndexerContentModifier>();
         }
@@ -41,27 +42,32 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<IndexerEventHub>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<ArcIndexerLayoutProperty>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<ArcIndexerPaintProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         auto arcindexerLayoutAlgorithm = MakeRefPtr<ArcIndexerLayoutAlgorithm>(itemCount_, fullCount_);
         return arcindexerLayoutAlgorithm;
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         auto property = MakeRefPtr<IndexerAccessibilityProperty>();
         CHECK_NULL_RETURN(property, nullptr);
         property->SetAccessibilityHoverConsume([weak = WeakClaim(this)](const NG::PointF& point) -> bool {

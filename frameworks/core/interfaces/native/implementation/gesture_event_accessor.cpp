@@ -305,7 +305,8 @@ Ark_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
         tapLocation = {
             fingerList.back().localLocation_,
             fingerList.back().screenLocation_,
-            fingerList.back().globalLocation_
+            fingerList.back().globalLocation_,
+            fingerList.back().globalDisplayLocation_
         };
     }
     return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation, Converter::FC);

@@ -618,6 +618,82 @@ uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
     CHECK_NULL_RETURN(config, -1);
     return config->color.value;
 }
+
+OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontWeightConfigs_Create()
+{
+    OH_ArkUI_FontWeightConfigs* option = new OH_ArkUI_FontWeightConfigs();
+    option->enableVariableFontWeight = false;
+    option->enableDeviceFontWeightCategory = true;
+    option->isEnableVariableFontWeightSet = false;
+    option->isEnableDeviceFontWeightCategorySet = false;
+    return option;
+}
+
+void OH_ArkUI_FontWeightConfigs_Destroy(OH_ArkUI_FontWeightConfigs* option)
+{
+    if (!option) {
+        return;
+    }
+    delete option;
+}
+
+void OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(OH_ArkUI_FontWeightConfigs* option, bool enable)
+{
+    CHECK_NULL_VOID(option);
+    option->enableVariableFontWeight = enable;
+    option->isEnableVariableFontWeightSet = true;
+}
+
+bool OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(OH_ArkUI_FontWeightConfigs* option)
+{
+    CHECK_NULL_RETURN(option, false);
+    return option->enableVariableFontWeight;
+}
+
+void OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory(OH_ArkUI_FontWeightConfigs* option, bool start)
+{
+    CHECK_NULL_VOID(option);
+    option->enableDeviceFontWeightCategory = start;
+    option->isEnableDeviceFontWeightCategorySet = true;
+}
+
+bool OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(OH_ArkUI_FontWeightConfigs* option)
+{
+    CHECK_NULL_RETURN(option, true);
+    return option->enableDeviceFontWeightCategory;
+}
+
+OH_ArkUI_FontConfigs* OH_ArkUI_FontConfigs_Create()
+{
+    OH_ArkUI_FontConfigs* option = new OH_ArkUI_FontConfigs();
+    option->fontWeightConfigs = nullptr;
+    return option;
+}
+
+void OH_ArkUI_FontConfigs_Destroy(OH_ArkUI_FontConfigs* option)
+{
+    if (!option) {
+        return;
+    }
+    if (option->fontWeightConfigs) {
+        OH_ArkUI_FontWeightConfigs_Destroy(option->fontWeightConfigs);
+        option->fontWeightConfigs = nullptr;
+    }
+    delete option;
+}
+
+void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option, OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
+{
+    CHECK_NULL_VOID(option);
+    option->fontWeightConfigs = fontWeightConfigs;
+}
+
+OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontConfigs_GetFontWeightConfigs(OH_ArkUI_FontConfigs* option)
+{
+    CHECK_NULL_RETURN(option, nullptr);
+    return option->fontWeightConfigs;
+}
+
 #ifdef __cplusplus
 }
 #endif

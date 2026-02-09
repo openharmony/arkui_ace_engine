@@ -29,11 +29,7 @@ export default namespace mediaquery {
            this.media = media;
         }
     }
-    export interface MediaQueryListener {
-        onChange(callback: Callback<MediaQueryResult>): void;
-        offChange(callback?: Callback<MediaQueryResult>): void
-    }
-    class Mediaquery implements MediaQueryListener {
+    export class MediaQueryListener {
         private nativeSerializerResult:long = 0;
         constructor(serializerResult:long) {
             if(this.nativeSerializerResult == 0){

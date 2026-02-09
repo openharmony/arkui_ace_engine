@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -47,7 +48,6 @@
 #include "frameworks/base/utils/measure_util.h"
 
 namespace OHOS::Ace::NG {
-
 /**
  * The structure of menu is designed as follows :
  * |--menuWrapper(size is same as root)
@@ -97,7 +97,7 @@ void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& p
     CHECK_NULL_VOID(manager);
     auto gatherNode = manager->GetGatherNode();
     CHECK_NULL_VOID(gatherNode);
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
     textNode->MountToParent(wrapperNode);
@@ -161,12 +161,12 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     MenuType type = MenuType::MENU)
 {
     // use wrapper to detect click events outside menu
-    auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+    auto wrapperNode = FrameNode::CreateFrameNode(MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId, targetTag));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
-        V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
+        MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, targetTag, type));
 
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
@@ -197,7 +197,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
 void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
 {
     auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(textNode);
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
@@ -232,7 +232,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
 RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 {
     auto scroll = FrameNode::CreateFrameNode(
-        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
     CHECK_NULL_RETURN(scroll, nullptr);
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
@@ -765,7 +765,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     auto imageOffset = GetFloatImageOffset(target);
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto imageNode = FrameNode::GetOrCreateFrameNode(IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
@@ -815,7 +815,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
 static RefPtr<FrameNode> CreateFilterColumnNode()
 {
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto columnNode = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
     auto layoutProperty = columnNode->GetLayoutProperty();
@@ -922,7 +922,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     CHECK_NULL_VOID(gestureEventHub);
     auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub) && !gestureEventHub->GetTextDraggable();
     auto isLiftingDisabled = targetNode->GetDragPreviewOption().isLiftingDisabled;
-    if (targetNode->GetTag() == V2::TEXT_ETS_TAG && targetNode->IsDraggable() && !targetNode->IsCustomerSet()) {
+    if (targetNode->GetTag() == TEXT_ETS_TAG && targetNode->IsDraggable() && !targetNode->IsCustomerSet()) {
         auto textPattern = targetNode->GetPattern<TextPattern>();
         if (textPattern && textPattern->GetCopyOptions() == CopyOptions::None) {
             isAllowedDrag = false;
@@ -1322,7 +1322,7 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
 
     auto preview = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(preview);
-    auto imageNode = preview->GetTag() == V2::FLEX_ETS_TAG ? menuWrapperPattern->GetHoverImagePreview() : preview;
+    auto imageNode = preview->GetTag() == FLEX_ETS_TAG ? menuWrapperPattern->GetHoverImagePreview() : preview;
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -1356,11 +1356,11 @@ void MenuView::GetMenuPixelMap(
     CHECK_NULL_VOID(wrapperNode);
     MenuType type = MenuType::MENU;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+    auto previewNode = FrameNode::CreateFrameNode(MENU_PREVIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
     CHECK_NULL_VOID(previewNode);
     auto menuNode = FrameNode::CreateFrameNode(
-        V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), type));
+        MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), type));
     CHECK_NULL_VOID(menuNode);
     ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
     MountTextNode(wrapperNode, nullptr);
@@ -1374,7 +1374,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
     ReloadMenuParam(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
-    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto column = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
@@ -1470,12 +1470,12 @@ void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, co
     const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     // stack to put image and custom preview and control visible area when hoverImage api is using
-    auto hoverImageStackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+    auto hoverImageStackNode = FrameNode::GetOrCreateFrameNode(STACK_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
     CHECK_NULL_VOID(hoverImageStackNode);
 
     // flex  to control visible area position
-    auto hoverImagePosNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG,
+    auto hoverImagePosNode = FrameNode::CreateFrameNode(FLEX_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<FlexLayoutPattern>(false));
     CHECK_NULL_VOID(hoverImagePosNode);
 
@@ -1509,7 +1509,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
     // create previewNode
-    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+    auto previewNode = FrameNode::CreateFrameNode(MENU_PREVIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
     CHECK_NULL_RETURN(previewNode, nullptr);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
@@ -1653,7 +1653,7 @@ RefPtr<FrameNode> MenuView::Create(
     const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag, bool autoWrapFlag)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag);
-    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto column = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
     SetMenuFocusRule(menuNode);
@@ -1905,7 +1905,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
 {
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
@@ -1937,7 +1937,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
 {
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
@@ -2073,7 +2073,7 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child,
     const std::optional<Dimension>& symbolUserDefinedIdealFontSize)
 {
-    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto iconNode = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
@@ -2109,7 +2109,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
 {
     // create child text node
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
 
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -2166,7 +2166,7 @@ RefPtr<FrameNode> MenuView::CreateIcon(const std::string& icon, const RefPtr<Fra
     const RefPtr<FrameNode>& child)
 {
     auto iconNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     auto pipeline = parent->GetContext();
@@ -2193,7 +2193,7 @@ RefPtr<FrameNode> MenuView::CreateIcon(const std::string& icon, const RefPtr<Fra
 RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t index, bool autoWrapFlag)
 {
     auto option = Create(index);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto row = FrameNode::CreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<MenuItemRowPattern>());
     row->MountToParent(option);
 
@@ -2295,8 +2295,8 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
 RefPtr<FrameNode> MenuView::Create(int32_t index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::OPTION_ETS_TAG, Id);
-    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<MenuItemPattern>(true, index));
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", OPTION_ETS_TAG, Id);
+    auto node = FrameNode::CreateFrameNode(OPTION_ETS_TAG, Id, AceType::MakeRefPtr<MenuItemPattern>(true, index));
     CHECK_NULL_RETURN(node, nullptr);
 
     // set border radius

@@ -515,6 +515,69 @@ public:
             holder.begin(), holder.end(), [env, cb](ani_ref cb1) { return AniEqual(env, cb, cb1); }), holder.end());
     }
 
+    void RegisterTextChangeCallback(ani_ref& cb)
+    {
+        if (std::find(unspecifiedTextChangeListeners_.begin(), unspecifiedTextChangeListeners_.end(), cb) !=
+            unspecifiedTextChangeListeners_.end()) {
+            return;
+        }
+        hasSetTextChangeCallback_ = true;
+        unspecifiedTextChangeListeners_.emplace_back(cb);
+    }
+
+    void UnRegisterTextChangeCallback(ani_env* env, ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            for (auto& callback : unspecifiedTextChangeListeners_) {
+                env->GlobalReference_Delete(callback);
+            }
+            unspecifiedTextChangeListeners_.clear();
+            return;
+        }
+
+        unspecifiedTextChangeListeners_.erase(
+            std::remove_if(unspecifiedTextChangeListeners_.begin(), unspecifiedTextChangeListeners_.end(),
+                [env, cb, this](ani_ref cb1) {
+                    auto result = AniEqual(env, cb, cb1);
+                    if (result) {
+                        env->GlobalReference_Delete(cb1);
+                    }
+                    return result;
+                }),
+            unspecifiedTextChangeListeners_.end());
+    }
+
+    void RegisterTextChangeCallback(std::string id, ani_ref& cb)
+    {
+        auto iter = specifiedTextChangeListeners_.find(id);
+        if (iter == specifiedTextChangeListeners_.end()) {
+            hasSetTextChangeCallback_ = true;
+            specifiedTextChangeListeners_.emplace(id, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterTextChangeCallback(ani_env* env, std::string id, ani_ref& cb)
+    {
+        auto iter = specifiedTextChangeListeners_.find(id);
+        if (iter == specifiedTextChangeListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+            holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
     void RegisterTabChangeCallback(ani_ref& cb)
     {
         if (std::find(unspecifiedTabChangeListeners_.begin(), unspecifiedTabChangeListeners_.end(), cb) !=
@@ -1064,6 +1127,39 @@ public:
         }
     }
 
+    void HandleTextChange(ani_env* env, const NG::TextChangeEventInfo& info)
+    {
+        if (!hasSetTextChangeCallback_) {
+            return;
+        }
+        auto unspecifiedHolder = unspecifiedTextChangeListeners_;
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateTextChangeEventInfo(env, info, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : unspecifiedHolder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+
+        auto iter = specifiedTextChangeListeners_.find(info.id);
+        if (iter == specifiedTextChangeListeners_.end()) {
+            return;
+        }
+
+        auto holder = iter->second;
+        std::vector<ani_ref> cbParamsWithId;
+        ani_ref fnReturnValWithId;
+        ani_object resWithId;
+        CreateTextChangeEventInfo(env, info, resWithId);
+        cbParamsWithId.emplace_back(resWithId);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParamsWithId.size(), cbParamsWithId.data(), &fnReturnValWithId);
+        }
+    }
+
     static ani_boolean AniEqual(ani_env* env, ani_ref cb, ani_ref cb1)
     {
         ani_boolean isEquals = false;
@@ -1601,6 +1697,35 @@ private:
         SetLastIndexForTabContentInfo(env, info, cls, res);
     }
 
+    void CreateTextChangeEventInfo(ani_env* env, const NG::TextChangeEventInfo& info, ani_object& res)
+    {
+        static const char* className = "@ohos.arkui.observer.uiObserver.TextChangeEventInfoImpl";
+        ani_class cls;
+        if (ANI_OK != env->FindClass(className, &cls)) {
+            LOGE("failed to find class");
+            return;
+        }
+
+        ani_method ctor;
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) {
+            LOGE("failed to find constructor");
+            return;
+        }
+
+        if (ANI_OK != env->Object_New(cls, ctor, &res)) {
+            LOGE("failed to create object");
+            return;
+        }
+
+        ani_string id {};
+        env->String_NewUTF8(info.id.c_str(), info.id.size(), &id);
+        env->Object_SetPropertyByName_Ref(res, "id", id);
+        env->Object_SetPropertyByName_Int(res, "uniqueId", static_cast<ani_int>(info.uniqueId));
+        ani_string content {};
+        env->String_NewUTF8(info.content.c_str(), info.content.size(), &content);
+        env->Object_SetPropertyByName_Ref(res, "content", content);
+    }
+
     int32_t id_;
     std::unordered_map<int32_t, std::list<ani_ref>> densityCbMap_;
 
@@ -1630,6 +1755,10 @@ private:
     static std::list<ani_ref> unspecifiedNavDestinationSizeChangeListeners_;
     static std::unordered_map<int32_t, std::list<ani_ref>> specifiedNavDestinationSizeChangeListeners_;
     static std::unordered_map<int32_t, std::list<ani_ref>> specifiedWindowSizeBreakpointListeners_;
+
+    bool hasSetTextChangeCallback_ = false;
+    std::list<ani_ref> unspecifiedTextChangeListeners_;
+    std::unordered_map<std::string, std::list<ani_ref>> specifiedTextChangeListeners_;
 };
 
 std::list<ani_ref> UiObserver::unspecifiedNavigationListeners_;
@@ -2575,6 +2704,78 @@ static void OffTabChangeWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     observer->UnRegisterTabChangeCallback(env, tabsId, fnObjGlobalRef);
 }
 
+static void OnTextChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+
+    observer->RegisterTextChangeCallback(fnObjGlobalRef);
+}
+
+static void OffTextChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+
+    observer->UnRegisterTextChangeCallback(env, fnObjGlobalRef);
+}
+
+static void OnTextChangeWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref id;
+    env->Object_GetPropertyByName_Ref(options, "id", &id);
+    std::string textId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(id));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterTextChangeCallback(textId, fnObjGlobalRef);
+}
+
+static void OffTextChangeWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_object options, ani_fn_object fnObj)
+{
+    if (!fnObj) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (!observer) {
+        return;
+    }
+    ani_ref id;
+    env->Object_GetPropertyByName_Ref(options, "id", &id);
+    std::string textId = ANIUtils_ANIStringToStdString(env, reinterpret_cast<ani_string>(id));
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->UnRegisterTextChangeCallback(env, textId, fnObjGlobalRef);
+}
+
 static void OnScrollEventType([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
@@ -2829,6 +3030,10 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleTabChange(env, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleTabChangeFuncForAni(tabChangeCallback);
+    auto textChangeCallback = [observer, env](const NG::TextChangeEventInfo& info) {
+        observer->HandleTextChange(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetHandleTextChangeEventFuncForAni(std::move(textChangeCallback));
 
     auto routerPageInfoChangeCallback = [observer, env](
                                             NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
@@ -3001,6 +3206,16 @@ bool ANI_ConstructorForAni(ani_env* env)
             "onTabChange", TAB_CHANGE_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OnTabChangeWithId) },
         ani_native_function {
             "offTabChange", TAB_CHANGE_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OffTabChangeWithId) },
+        ani_native_function { "onTextChange",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::OnTextChange) },
+        ani_native_function { "offTextChange",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::OffTextChange) },
+        ani_native_function { "onTextChange",
+            "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnTextChangeWithId) },
+        ani_native_function { "offTextChange",
+            "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffTextChangeWithId) },
         ani_native_function { "onTabContentUpdate",
             ANI_TABCONTENT_WITH_OPTIONS_CLS, reinterpret_cast<void*>(OHOS::Ace::OnTabContentUpdateWithOptions) },
         ani_native_function { "offTabContentUpdate",

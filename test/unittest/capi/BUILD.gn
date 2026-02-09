@@ -155,6 +155,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/ellipse_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/line_layout_algorithm.cpp",
@@ -213,6 +214,13 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/indexer/bridge/indexer_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/patternlock/bridge/patternlock_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/bridge/menu/menu_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/bridge/menu_item/menu_item_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/bridge/menu_item_group/menu_item_group_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/bridge/menu/menu_dynamic_modifier.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/menu_modifier.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/menu_item_modifier.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/menu_item_group_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources

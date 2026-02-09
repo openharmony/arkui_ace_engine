@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -788,9 +788,14 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Hyperlink", "arkui.components.arkhyperlink" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
         { "Marquee", "arkui.components.arkmarquee" },
+        { "Menu", "arkui.components.arkmenu" },
+        { "MenuItem", "arkui.components.arkmenuitem" },
+        { "MenuItemGroup", "arkui.components.arkmenuitemgroup" },
         { "Radio", "arkui.components.arkradio" },
         { "Rating", "arkui.components.arkrating" },
+        { "Richeditor", "arkui.components.arkricheditor" },
         { "RowSplit", "arkui.components.arkrowsplit" },
+        { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },
         { "Slider", "arkui.components.arkslider" },
         { "Stepper", "arkui.components.arkstepper" },

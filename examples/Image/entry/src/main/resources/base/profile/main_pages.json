@@ -18,6 +18,23 @@
     "pages/testcase/ImageTestcase005",
     "pages/testcase/ImageTestcase006",
     "pages/testcase/ImageTestcase007",
-    "pages/testcase/ImageTestcase008"
+    "pages/testcase/ImageTestcase008",
+    "pages/SVG/Index",
+    "pages/SVG/svgExample001",
+    "pages/SVG/svgExample002",
+    "pages/SVG/svgExample003",
+    "pages/SVG/svgExample004",
+    "pages/SVG/svgExample005",
+    "pages/SVG/svgExample006",
+    "pages/SVG/svgExample007",
+    "pages/SVG/svgExample008",
+    "pages/SVG/svgExample009",
+    "pages/SVG/svgExample010",
+    "pages/SVG/svgExample011",
+    "pages/SVG/svgExample012",
+    "pages/SVG/svgExample013",
+    "pages/SVG/svgExample014",
+    "pages/SVG/svgExample015",
+    "pages/SVG/svgExample016"
   ]
 }

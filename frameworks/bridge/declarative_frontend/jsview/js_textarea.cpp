@@ -23,6 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -183,6 +184,6 @@ void JSTextArea::SetMinLines(const JSCallbackInfo& info)
 void JSTextAreaController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Declare("TextAreaController");
-    JSTextEditableController::JSBind(globalObj);
+    JSTextEditableControllerBinding::JSBind(globalObj);
 }
 } // namespace OHOS::Ace::Framework
