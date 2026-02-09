@@ -3479,42 +3479,26 @@ void NavigationPattern::DealTransitionVisibility(const RefPtr<FrameNode>& node, 
     });
 }
 
-void NavigationPattern::AddToDumpManager()
+void NavigationPattern::AttachToManager()
 {
-    auto node = GetHost();
-    auto context = PipelineContext::GetCurrentContext();
-    if (!node || !context) {
-        return;
-    }
+    auto node = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
     auto mgr = context->GetNavigationManager();
-    if (!mgr) {
-        return;
-    }
-    auto callback = [weakPattern = WeakClaim(this)](int depth) {
-        auto pattern = weakPattern.Upgrade();
-        if (!pattern) {
-            return;
-        }
-        const auto& stack = pattern->GetNavigationStack();
-        if (!stack) {
-            return;
-        }
-        auto infos = stack->DumpStackInfo();
-    };
-    mgr->AddNavigationDumpCallback(node, callback);
+    CHECK_NULL_VOID(mgr);
+    mgr->AttachNavigation(node);
 }
 
-void NavigationPattern::RemoveFromDumpManager()
+void NavigationPattern::DetachFromManager()
 {
-    auto node = GetHost();
-    auto context = PipelineContext::GetCurrentContext();
-    if (!node || !context) {
-        return;
-    }
+    auto node = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
     auto mgr = context->GetNavigationManager();
-    if (mgr) {
-        mgr->RemoveNavigationDumpCallback(node->GetId(), node->GetDepth());
-    }
+    CHECK_NULL_VOID(mgr);
+    mgr->DetachNavigation(node);
 }
 
 void NavigationPattern::FireInterceptionBeforeLifeCycleEvent(

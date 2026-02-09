@@ -1422,7 +1422,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* 
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->DetachNavigationStackFromParent();
-        pattern->RemoveFromDumpManager();
+        pattern->DetachFromManager();
     }
     GroupNode::OnDetachFromMainTree(recursive, context);
     CHECK_NULL_VOID(context);
@@ -1460,7 +1460,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->AttachNavigationStackToParent();
-        pattern->AddToDumpManager();
+        pattern->AttachToManager();
     }
     RefPtr<UINode> parentCustomNode;
     bool findParentNode = false;
