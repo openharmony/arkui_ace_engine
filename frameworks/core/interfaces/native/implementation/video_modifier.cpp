@@ -135,6 +135,7 @@ void SetVideoOptionsImpl(Ark_NativePointer node,
     if (options.videoController) {
         VideoModelStatic::SetVideoController(frameNode, options.videoController);
     }
+    LOGE("ARKOALA VideoInterface::SetVideoOptionsImpl -> imageAIOptions is not supported.");
 }
 } // VideoInterfaceModifier
 namespace VideoAttributeModifier {

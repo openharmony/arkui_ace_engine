@@ -445,7 +445,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
         ReturnPromise(info, promise);
         return;
     }
-
+    
     ScopeRAII scopeRaii(env);
     panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;

@@ -40,7 +40,6 @@
 #include "frameworks/core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
-
 #ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/common/ace_view.h"
 #endif
@@ -973,7 +972,7 @@ void VideoPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
+ 
 #ifdef RENDER_EXTRACT_SUPPORTED
     CHECK_NULL_VOID(renderSurface_);
     auto contextType = renderSurface_->IsTexture() ?

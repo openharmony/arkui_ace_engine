@@ -48,9 +48,6 @@ class VideoAutoPlayModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoControlsModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('videoControls');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -64,9 +61,6 @@ class VideoControlsModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoLoopModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('videoLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -80,9 +74,6 @@ class VideoLoopModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoMutedModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('videoMuted');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
