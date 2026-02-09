@@ -174,7 +174,9 @@ HWTEST_F(LayoutAlgorithmOverflowTestNg, LayoutAlgorithmIsContentOverflowStackCom
  * @tc.desc: Test IsContentOverflow with Flex component that has overflowing children
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutAlgorithmOverflowTestNg, LayoutAlgorithmIsContentOverflowStackComponentWithOverflowTest002, TestSize.Level0)
+HWTEST_F(LayoutAlgorithmOverflowTestNg,
+         LayoutAlgorithmIsContentOverflowStackComponentWithOverflowTest002,
+         TestSize.Level0)
 {
     // Create Flex which has FlexLayoutPattern
     auto flex = CreateFlex([](FlexModelNG model) {
