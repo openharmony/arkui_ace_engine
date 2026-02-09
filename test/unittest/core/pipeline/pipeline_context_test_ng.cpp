@@ -2667,16 +2667,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Tes
      * @tc.expected: Functions should handle null pointer gracefully
      */
     ASSERT_NE(context_, nullptr);
-    
+
     // 保存原始的touchOptimizer
     auto originalTouchOptimizer = std::move(context_->touchOptimizer_);
-    
+
     // 设置touchOptimizer为nullptr
     context_->touchOptimizer_ = nullptr;
-    
+
     // 测试FlushVsync中touchOptimizer_为null的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     // 测试OnTouchEvent中touchOptimizer_为null的情况
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2684,15 +2684,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Tes
     touchEvent.x = 100.0f;
     touchEvent.y = 100.0f;
     context_->OnTouchEvent(touchEvent, false);
-    
+
     // 测试ConsumeTouchEventsInterpolation中touchOptimizer_为null的情况
     std::unordered_set<int32_t> ids = {1};
     std::map<int32_t, int32_t> timestampToIds = {{0, 1}};
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
     std::unordered_map<int, TouchEvent> idToTouchPoints;
-    
+
     context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
-    
+
     // 恢复原始的touchOptimizer
     context_->touchOptimizer_ = std::move(originalTouchOptimizer);
 }

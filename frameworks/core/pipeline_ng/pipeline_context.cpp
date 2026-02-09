@@ -4808,6 +4808,7 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent)
 
 bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
+    ContainerScope scope(instanceId_);
     return eventManager_->OnNonPointerEvent(event);
 }
 
