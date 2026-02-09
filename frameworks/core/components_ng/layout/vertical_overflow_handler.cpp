@@ -218,6 +218,7 @@ bool VerticalOverflowHandler::IsVerticalOverflow() const
 
 bool VerticalOverflowHandler::IsOverflow() const
 {
+    // Consider overflow calculation for pixel rounding
     return GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top() + MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
         LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom() - MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
         GreatNotEqual(contentRect_.Left(), totalChildFrameRect_.Left() + MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||

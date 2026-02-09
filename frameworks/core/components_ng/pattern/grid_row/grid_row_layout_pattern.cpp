@@ -43,7 +43,7 @@ void GridRowLayoutPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CHECK_NULL_VOID(node);
     THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node); // call OnDetachFromFrameNodeMultiThread()
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (callbackId_.has_value()) {
         pipeline->UnregisterSurfaceChangedCallback(callbackId_.value_or(-1));

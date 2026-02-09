@@ -126,7 +126,7 @@ public:
     /**
      * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
      *
-     * @return The safe area insets that account for cutout areas on the screen without any judgement.
+     * @return The safe area insets that account for cutout areas without any judgement.
      */
     SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
 

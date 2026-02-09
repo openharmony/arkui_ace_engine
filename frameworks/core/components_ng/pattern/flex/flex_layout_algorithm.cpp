@@ -1285,7 +1285,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         }
     }
-    if (IsContentOverflow(layoutWrapper, collector)) {
+    if (IsContentOverflow(layoutWrapper, collector)  && SystemProperties::GetDebugBoundaryEnabled()) {
         if (!isLinearLayoutFeature_) {
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_LAYOUT, "Content overflow in Flex container");
         } else {
