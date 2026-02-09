@@ -25,7 +25,7 @@
 #endif
 
 namespace OHOS::Ace {
-class InputMethodManager final {
+class ACE_FORCE_EXPORT InputMethodManager final {
 
 public:
     static InputMethodManager* GetInstance();
