@@ -21082,8 +21082,8 @@ typedef struct Opt_ColorMetricsStop {
 } Opt_ColorMetricsStop;
 typedef struct Ark_ColorStop {
     /* kind: Interface */
-    Opt_ResourceColor color;
-    Opt_Length offset;
+    Ark_ResourceColor color;
+    Ark_Length offset;
 } Ark_ColorStop;
 typedef struct Opt_ColorStop {
     Ark_Tag tag;
