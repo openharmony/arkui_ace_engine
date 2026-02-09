@@ -47,6 +47,7 @@ private:
     void TryStopCollect();
 
     int64_t beginTime_ = 0;
+    int64_t lastLoadComponent = 0;
     int32_t nodeNum_ = 0;
     std::string pageUrl_;
     std::unordered_set<int32_t> nodeSet_;
