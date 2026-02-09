@@ -31,9 +31,6 @@ class BrightnessBlender;
 namespace OHOS::Ace {
 class ResourceWrapper;
 }
-namespace OHOS::Ace {
-class ResourceWrapper;
-}
 
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
@@ -264,6 +261,7 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors);
     static void ParseGradientAngle(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ConvertPixmap(const Local<panda::ObjectRef>& obj, const EcmaVM* vm, const RefPtr<PixelMap>& pixelMap);
     template <class T>
     static bool ParseArray(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
         std::function<T(const EcmaVM *, const Local<JSValueRef> &)> getValue)
@@ -355,6 +353,10 @@ public:
         ArkUI_Float32* values, int32_t* units, uint32_t length);
     static bool HandleCallbackJobs(
         const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
+    static bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm);
+    static bool IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm);
+    static void SetSymbolOptionApply(
+        EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const Local<JSValueRef> modifierObj);
     template<typename T>
     static RefPtr<T> GetTheme()
     {
@@ -417,10 +419,11 @@ public:
     static bool ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm,
         NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
         NG::OnPrepareMenuCallback& onPrepareMenuCallback);
-    static void ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode,
-        const Local<JSValueRef>& jsValueOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& jsValueOnCreateMenu,
+        NG::OnCreateMenuCallback& onCreateMenuCallback, bool isJsView = false);
     static void ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
-        const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback);
+        const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback,
+        bool isJsView = false);
     static Local<panda::ArrayRef> CreateJsSystemMenuItems(
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
@@ -430,7 +433,8 @@ public:
     static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
         const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
-        const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
+        const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+        bool isJsView = false);
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
@@ -504,10 +508,20 @@ public:
     static bool HasProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
     static Local<JSValueRef> GetProperty(
         const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
+    static void GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object,
+        CalcDimension& radius, RefPtr<ResourceObject>& resObj);
+    static void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
+        const RefPtr<ResourceObject>& topLeftResObj, const RefPtr<ResourceObject>& topRightResObj,
+        const RefPtr<ResourceObject>& bottomLeftResObj, const RefPtr<ResourceObject>& bottomRightResObj);
     static Local<JSValueRef> GetProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, int32_t propertyIndex);
     static bool CheckJavaScriptScope(const EcmaVM* vm);
     static void ParseStepOptionsMap(const EcmaVM* vm, const Local<JSValueRef>& optionsArg, StepOptions& optionsMap);
     static ACE_FORCE_EXPORT RefPtr<BasicShape> GetJSBasicShape(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static DragPreviewOption ParseDragPreviewOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm);
+    static void ParseDragInteractionOptions(
+        ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& previewOption);
+    static void SetDragNumberBadge(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& option);
+    static void SetDragPreviewOptionApply(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& option);
 
     template<typename T>
     static Local<JSValueRef> ToJsValueWithVM(const EcmaVM* vm, T val);

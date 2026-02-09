@@ -64,7 +64,7 @@ import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../
 import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
 import { ToggleConfiguration_serializer, ToggleConfiguration } from "./../../component/toggle"
 import { FrameNode_serializer } from "./../../FrameNode"
-import { registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer, runtimeType } from "@koalaui/interop"
+import { registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer, runtimeType, resourceFinalizerRegister } from "@koalaui/interop"
 import { int32, float32, int64 } from "@koalaui/common"
 import { CallbackTransformer } from "./../../CallbackTransformer"
 import { extractors } from "#handwritten"
@@ -100,7 +100,7 @@ export function deserializeAndCallAccessibilityActionInterceptCallback(thisDeser
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: AccessibilityActionInterceptResult) => void) = (value: AccessibilityActionInterceptResult):void => {
+    const continuationBufferClosure  = (value: AccessibilityActionInterceptResult):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -110,6 +110,8 @@ export function deserializeAndCallAccessibilityActionInterceptCallback(thisDeser
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: AccessibilityActionInterceptResult) => void) = continuationBufferClosure
     const _callResult  = _call(action)
     continuationResult(_callResult)
 }
@@ -188,7 +190,7 @@ export function deserializeAndCallButtonModifierBuilder(thisDeserializer: Deseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -198,6 +200,8 @@ export function deserializeAndCallButtonModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -266,7 +270,7 @@ export function deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisD
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: TouchResult) => void) = (value: TouchResult):void => {
+    const continuationBufferClosure  = (value: TouchResult):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -276,6 +280,8 @@ export function deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisD
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: TouchResult) => void) = continuationBufferClosure
     const _callResult  = _call(value)
     continuationResult(_callResult)
 }
@@ -291,7 +297,7 @@ export function deserializeAndCallCallback_Boolean(thisDeserializer: Deserialize
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -301,6 +307,8 @@ export function deserializeAndCallCallback_Boolean(thisDeserializer: Deserialize
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call()
     continuationResult(_callResult)
 }
@@ -348,7 +356,7 @@ export function deserializeAndCallCallback_CreateItem(thisDeserializer: Deserial
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -358,6 +366,8 @@ export function deserializeAndCallCallback_CreateItem(thisDeserializer: Deserial
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(index)
     continuationResult(_callResult)
 }
@@ -374,7 +384,7 @@ export function deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: CustomSpanMetrics) => void) = (value: CustomSpanMetrics):void => {
+    const continuationBufferClosure  = (value: CustomSpanMetrics):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -384,6 +394,8 @@ export function deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: CustomSpanMetrics) => void) = continuationBufferClosure
     const _callResult  = _call(measureInfo)
     continuationResult(_callResult)
 }
@@ -412,7 +424,7 @@ export function deserializeAndCallCallback_DeleteValue_Boolean(thisDeserializer:
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -422,6 +434,8 @@ export function deserializeAndCallCallback_DeleteValue_Boolean(thisDeserializer:
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -434,7 +448,7 @@ export function deserializeAndCallCallback_DeleteValue_Void(thisDeserializer: De
 export function deserializeAndCallCallback_DismissContentCoverAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissContentCoverAction) => void))
-    let value0 : DismissContentCoverAction = DismissContentCoverAction_serializer.read(thisDeserializer)
+    let value0 : DismissContentCoverAction = (DismissContentCoverAction_serializer.read(thisDeserializer) as DismissContentCoverAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DismissDialogAction_Void(thisDeserializer: DeserializerBase): void {
@@ -452,7 +466,7 @@ export function deserializeAndCallCallback_DismissPopupAction_Void(thisDeseriali
 export function deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissSheetAction) => void))
-    let value0 : DismissSheetAction = DismissSheetAction_serializer.read(thisDeserializer)
+    let value0 : DismissSheetAction = (DismissSheetAction_serializer.read(thisDeserializer) as DismissSheetAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeserializer: DeserializerBase): void {
@@ -494,7 +508,7 @@ export function deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisD
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -504,6 +518,8 @@ export function deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisD
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -576,7 +592,7 @@ export function deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJ
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {
+    const continuationBufferClosure  = (value: GestureJudgeResult):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -586,6 +602,8 @@ export function deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJ
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: GestureJudgeResult) => void) = continuationBufferClosure
     const _callResult  = _call(gestureInfo, event)
     continuationResult(_callResult)
 }
@@ -621,7 +639,7 @@ export function deserializeAndCallCallback_I32_F64_ComputedBarAttribute(thisDese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: ComputedBarAttribute) => void) = (value: ComputedBarAttribute):void => {
+    const continuationBufferClosure  = (value: ComputedBarAttribute):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -631,6 +649,8 @@ export function deserializeAndCallCallback_I32_F64_ComputedBarAttribute(thisDese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: ComputedBarAttribute) => void) = continuationBufferClosure
     const _callResult  = _call(index, offset)
     continuationResult(_callResult)
 }
@@ -642,7 +662,7 @@ export function deserializeAndCallCallback_I32_I32_Boolean(thisDeserializer: Des
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -652,6 +672,8 @@ export function deserializeAndCallCallback_I32_I32_Boolean(thisDeserializer: Des
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(from, to)
     continuationResult(_callResult)
 }
@@ -677,7 +699,7 @@ export function deserializeAndCallCallback_I32_Tuple_I32_I32(thisDeserializer: D
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: [ int32, int32 ]) => void) = (value: [ int32, int32 ]):void => {
+    const continuationBufferClosure  = (value: [ int32, int32 ]):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -690,6 +712,8 @@ export function deserializeAndCallCallback_I32_Tuple_I32_I32(thisDeserializer: D
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: [ int32, int32 ]) => void) = continuationBufferClosure
     const _callResult  = _call(index)
     continuationResult(_callResult)
 }
@@ -700,7 +724,7 @@ export function deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisDeseria
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: [ int32, int32, int32, int32 ]) => void) = (value: [ int32, int32, int32, int32 ]):void => {
+    const continuationBufferClosure  = (value: [ int32, int32, int32, int32 ]):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -717,6 +741,8 @@ export function deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisDeseria
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: [ int32, int32, int32, int32 ]) => void) = continuationBufferClosure
     const _callResult  = _call(index)
     continuationResult(_callResult)
 }
@@ -745,7 +771,7 @@ export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer:
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -755,6 +781,8 @@ export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer:
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -801,7 +829,7 @@ export function deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer: De
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -811,6 +839,8 @@ export function deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer: De
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -826,7 +856,7 @@ export function deserializeAndCallCallback_LengthMetrics(thisDeserializer: Deser
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: LengthMetrics) => void) = (value: LengthMetrics):void => {
+    const continuationBufferClosure  = (value: LengthMetrics):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -836,6 +866,8 @@ export function deserializeAndCallCallback_LengthMetrics(thisDeserializer: Deser
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: LengthMetrics) => void) = continuationBufferClosure
     const _callResult  = _call()
     continuationResult(_callResult)
 }
@@ -956,7 +988,7 @@ export function deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -966,6 +998,8 @@ export function deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -982,7 +1016,7 @@ export function deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeser
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -992,6 +1026,8 @@ export function deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeser
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1008,7 +1044,7 @@ export function deserializeAndCallCallback_OnConfirmEvent_Boolean(thisDeserializ
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1018,6 +1054,8 @@ export function deserializeAndCallCallback_OnConfirmEvent_Boolean(thisDeserializ
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1028,7 +1066,7 @@ export function deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializ
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1038,6 +1076,8 @@ export function deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializ
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1048,7 +1088,7 @@ export function deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDe
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1058,6 +1098,8 @@ export function deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDe
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1110,7 +1152,7 @@ export function deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDe
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1120,6 +1162,8 @@ export function deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDe
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1142,7 +1186,7 @@ export function deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1152,6 +1196,8 @@ export function deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1175,7 +1221,7 @@ export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserial
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: SizeResult) => void) = (value: SizeResult):void => {
+    const continuationBufferClosure  = (value: SizeResult):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1185,6 +1231,8 @@ export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserial
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: SizeResult) => void) = continuationBufferClosure
     const _callResult  = _call(selfLayoutInfo, children, constraint)
     continuationResult(_callResult)
 }
@@ -1263,7 +1311,7 @@ export function deserializeAndCallCallback_OnPromptEvent_Boolean(thisDeserialize
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1273,6 +1321,8 @@ export function deserializeAndCallCallback_OnPromptEvent_Boolean(thisDeserialize
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1331,7 +1381,7 @@ export function deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(thisD
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1341,6 +1391,8 @@ export function deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(thisD
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1415,7 +1467,7 @@ export function deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializ
         const valueTmpBuf_BufResource : CallbackResource = thisDeserializer.readCallbackResource()
         const valueTmpBuf_BufCall : KPointer = thisDeserializer.readPointer()
         const valueTmpBuf_BufCallSync : KPointer = thisDeserializer.readPointer()
-        valueTmpBuf = ():void => {
+        const valueTmpBuf_Closure  = ():void => {
             const valueTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
             valueTmpBuf_BufArgsSerializer.writeInt32(valueTmpBuf_BufResource.resourceId);
             valueTmpBuf_BufArgsSerializer.writePointer(valueTmpBuf_BufCall);
@@ -1424,6 +1476,8 @@ export function deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializ
             valueTmpBuf_BufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(valueTmpBuf_Closure, valueTmpBuf_BufResource)
+        valueTmpBuf = valueTmpBuf_Closure
     }
     let value : CustomBuilder | undefined = valueTmpBuf
     _call(value)
@@ -1558,7 +1612,7 @@ export function deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisDes
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1568,6 +1622,8 @@ export function deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisDes
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1578,7 +1634,7 @@ export function deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisDes
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1588,6 +1644,8 @@ export function deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisDes
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1598,7 +1656,7 @@ export function deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisDes
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1608,6 +1666,8 @@ export function deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisDes
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1645,7 +1705,7 @@ export function deserializeAndCallRouter_BusinessError_Void(thisDeserializer: De
 export function deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((sheetDismiss: SheetDismiss) => void))
-    let sheetDismiss : SheetDismiss = SheetDismiss_serializer.read(thisDeserializer)
+    let sheetDismiss : SheetDismiss = (SheetDismiss_serializer.read(thisDeserializer) as SheetDismiss)
     _call(sheetDismiss)
 }
 export function deserializeAndCallCallback_SheetType_Void(thisDeserializer: DeserializerBase): void {
@@ -1711,7 +1771,7 @@ export function deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisD
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1721,6 +1781,8 @@ export function deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisD
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1906,7 +1968,7 @@ export function deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializ
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: HitTestMode) => void) = (value: HitTestMode):void => {
+    const continuationBufferClosure  = (value: HitTestMode):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1916,6 +1978,8 @@ export function deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializ
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: HitTestMode) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -1961,7 +2025,7 @@ export function deserializeAndCallCallback_Union_Boolean_I32(thisDeserializer: D
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: boolean | int32) => void) = (value: boolean | int32):void => {
+    const continuationBufferClosure  = (value: boolean | int32):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1979,6 +2043,8 @@ export function deserializeAndCallCallback_Union_Boolean_I32(thisDeserializer: D
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: boolean | int32) => void) = continuationBufferClosure
     const _callResult  = _call()
     continuationResult(_callResult)
 }
@@ -2006,7 +2072,7 @@ export function deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void
         const valueTmpBufBufUBufResource : CallbackResource = thisDeserializer.readCallbackResource()
         const valueTmpBufBufUBufCall : KPointer = thisDeserializer.readPointer()
         const valueTmpBufBufUBufCallSync : KPointer = thisDeserializer.readPointer()
-        valueTmpBuf = ():void => {
+        const valueTmpBufBufUClosure  = ():void => {
             const valueTmpBufBufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
             valueTmpBufBufUBufArgsSerializer.writeInt32(valueTmpBufBufUBufResource.resourceId);
             valueTmpBufBufUBufArgsSerializer.writePointer(valueTmpBufBufUBufCall);
@@ -2015,6 +2081,8 @@ export function deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void
             valueTmpBufBufUBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(valueTmpBufBufUClosure, valueTmpBufBufUBufResource)
+        valueTmpBuf = valueTmpBufBufUClosure
     } else if (valueTmpBufUnionSelector == (1).toChar()) {
         valueTmpBuf = DragItemInfo_serializer.read(thisDeserializer)
     } else {
@@ -2070,7 +2138,7 @@ export function deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer:
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2080,6 +2148,8 @@ export function deserializeAndCallCheckBoxGroupModifierBuilder(thisDeserializer:
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -2091,7 +2161,7 @@ export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: Dese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2101,6 +2171,8 @@ export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -2120,7 +2192,7 @@ export function deserializeAndCallContentWillScrollCallback(thisDeserializer: De
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2130,6 +2202,8 @@ export function deserializeAndCallContentWillScrollCallback(thisDeserializer: De
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(result)
     continuationResult(_callResult)
 }
@@ -2167,7 +2241,7 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2177,6 +2251,8 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode)
     continuationResult(_callResult)
 }
@@ -2188,7 +2264,7 @@ export function deserializeAndCallDataPanelModifierBuilder(thisDeserializer: Des
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2198,6 +2274,8 @@ export function deserializeAndCallDataPanelModifierBuilder(thisDeserializer: Des
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -2233,7 +2311,7 @@ export function deserializeAndCallGaugeModifierBuilder(thisDeserializer: Deseria
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2243,6 +2321,8 @@ export function deserializeAndCallGaugeModifierBuilder(thisDeserializer: Deseria
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -2271,7 +2351,7 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {
+    const continuationBufferClosure  = (value: GestureJudgeResult):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2281,6 +2361,8 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: GestureJudgeResult) => void) = continuationBufferClosure
     const _callResult  = _call(event, current, recognizers, touchRecognizers)
     continuationResult(_callResult)
 }
@@ -2298,7 +2380,7 @@ export function deserializeAndCallGetItemMainSizeByIndex(thisDeserializer: Deser
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((offset: double) => void) = (offset: double):void => {
+    const continuationBufferClosure  = (offset: double):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2308,6 +2390,8 @@ export function deserializeAndCallGetItemMainSizeByIndex(thisDeserializer: Deser
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((progress: double) => void) = continuationBufferClosure
     const _callResult  = _call(index)
     continuationResult(_callResult)
 }
@@ -2382,7 +2466,7 @@ export function deserializeAndCallLoadingProgressModifierBuilder(thisDeserialize
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2392,6 +2476,8 @@ export function deserializeAndCallLoadingProgressModifierBuilder(thisDeserialize
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -2410,7 +2496,7 @@ export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: Dese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2420,6 +2506,8 @@ export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -2442,7 +2530,7 @@ export function deserializeAndCallModifierKeyStateGetter(thisDeserializer: Deser
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2452,6 +2540,8 @@ export function deserializeAndCallModifierKeyStateGetter(thisDeserializer: Deser
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(keys)
     continuationResult(_callResult)
 }
@@ -2469,7 +2559,7 @@ export function deserializeAndCallNavDestinationTransitionDelegate(thisDeseriali
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: Array<NavDestinationTransition> | undefined) => void) = (value?: Array<NavDestinationTransition> | undefined):void => {
+    const continuationBufferClosure  = (value?: Array<NavDestinationTransition> | undefined):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2489,6 +2579,8 @@ export function deserializeAndCallNavDestinationTransitionDelegate(thisDeseriali
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: Array<NavDestinationTransition> | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(operation, isEnter)
     continuationResult(_callResult)
 }
@@ -2499,7 +2591,7 @@ export function deserializeAndCallNavExtender_CreateNavDestination(thisDeseriali
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2509,6 +2601,8 @@ export function deserializeAndCallNavExtender_CreateNavDestination(thisDeseriali
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(index)
     continuationResult(_callResult)
 }
@@ -2530,7 +2624,7 @@ export function deserializeAndCallNavExtender_PageMapNodeBuilder(thisDeserialize
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2540,6 +2634,8 @@ export function deserializeAndCallNavExtender_PageMapNodeBuilder(thisDeserialize
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(url, params)
     continuationResult(_callResult)
 }
@@ -2562,7 +2658,7 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: Array<string>) => void) = (value: Array<string>):void => {
+    const continuationBufferClosure  = (value: Array<string>):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2576,6 +2672,8 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: Array<string>) => void) = continuationBufferClosure
     const _callResult  = _call(index)
     continuationResult(_callResult)
 }
@@ -2627,7 +2725,7 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+    const continuationBufferClosure  = (value: Array<TextMenuItem>):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2641,6 +2739,8 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: Array<TextMenuItem>) => void) = continuationBufferClosure
     const _callResult  = _call(menuItems)
     continuationResult(_callResult)
 }
@@ -2733,7 +2833,7 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: CustomBuilder | undefined) => void) = (value?: CustomBuilder | undefined):void => {
+    const continuationBufferClosure  = (value?: CustomBuilder | undefined):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2749,6 +2849,8 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: CustomBuilder | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(event, itemIndex)
     continuationResult(_callResult)
 }
@@ -2781,7 +2883,7 @@ export function deserializeAndCallOnMenuItemClickCallback(thisDeserializer: Dese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2791,6 +2893,8 @@ export function deserializeAndCallOnMenuItemClickCallback(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(menuItem, range)
     continuationResult(_callResult)
 }
@@ -2832,7 +2936,7 @@ export function deserializeAndCallOnOverrideErrorPageCallback(thisDeserializer: 
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((breakpoints: string) => void) = (breakpoints: string):void => {
+    const continuationBufferClosure  = (breakpoints: string):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2842,6 +2946,8 @@ export function deserializeAndCallOnOverrideErrorPageCallback(thisDeserializer: 
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((breakpoints: string) => void) = continuationBufferClosure
     const _callResult  = _call(errorPageEvent)
     continuationResult(_callResult)
 }
@@ -2852,7 +2958,7 @@ export function deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer:
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2862,6 +2968,8 @@ export function deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer:
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(webResourceRequest)
     continuationResult(_callResult)
 }
@@ -2884,7 +2992,7 @@ export function deserializeAndCallOnPrepareMenuCallback(thisDeserializer: Deseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+    const continuationBufferClosure  = (value: Array<TextMenuItem>):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2898,6 +3006,8 @@ export function deserializeAndCallOnPrepareMenuCallback(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: Array<TextMenuItem>) => void) = continuationBufferClosure
     const _callResult  = _call(menuItems)
     continuationResult(_callResult)
 }
@@ -2951,7 +3061,7 @@ export function deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer: D
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: OnScrollFrameBeginHandlerResult) => void) = (value: OnScrollFrameBeginHandlerResult):void => {
+    const continuationBufferClosure  = (value: OnScrollFrameBeginHandlerResult):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2961,6 +3071,8 @@ export function deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer: D
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: OnScrollFrameBeginHandlerResult) => void) = continuationBufferClosure
     const _callResult  = _call(offset, state)
     continuationResult(_callResult)
 }
@@ -3045,7 +3157,7 @@ export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializ
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value0: boolean) => void) = (value0: boolean):void => {
+    const continuationBufferClosure  = (value0: boolean):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3055,6 +3167,8 @@ export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializ
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value0: boolean) => void) = continuationBufferClosure
     const _callResult  = _call(currentIndex, comingIndex)
     continuationResult(_callResult)
 }
@@ -3141,7 +3255,7 @@ export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deseria
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: ScrollResult | undefined) => void) = (value?: ScrollResult | undefined):void => {
+    const continuationBufferClosure  = (value?: ScrollResult | undefined):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3157,6 +3271,8 @@ export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deseria
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: ScrollResult | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(scrollOffset, scrollState, scrollSource)
     continuationResult(_callResult)
 }
@@ -3229,7 +3345,7 @@ export function deserializeAndCallProgressModifierBuilder(thisDeserializer: Dese
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3239,6 +3355,8 @@ export function deserializeAndCallProgressModifierBuilder(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3250,7 +3368,7 @@ export function deserializeAndCallRadioModifierBuilder(thisDeserializer: Deseria
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3260,6 +3378,8 @@ export function deserializeAndCallRadioModifierBuilder(thisDeserializer: Deseria
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3271,7 +3391,7 @@ export function deserializeAndCallRatingModifierBuilder(thisDeserializer: Deseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3281,6 +3401,8 @@ export function deserializeAndCallRatingModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3308,7 +3430,7 @@ export function deserializeAndCallReuseIdCallback(thisDeserializer: Deserializer
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((breakpoints: string) => void) = (breakpoints: string):void => {
+    const continuationBufferClosure  = (breakpoints: string):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3318,6 +3440,8 @@ export function deserializeAndCallReuseIdCallback(thisDeserializer: Deserializer
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((breakpoints: string) => void) = continuationBufferClosure
     const _callResult  = _call()
     continuationResult(_callResult)
 }
@@ -3364,7 +3488,7 @@ export function deserializeAndCallScrollOnWillScrollCallback(thisDeserializer: D
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: OffsetResult | undefined) => void) = (value?: OffsetResult | undefined):void => {
+    const continuationBufferClosure  = (value?: OffsetResult | undefined):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3380,6 +3504,8 @@ export function deserializeAndCallScrollOnWillScrollCallback(thisDeserializer: D
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: OffsetResult | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(xOffset, yOffset, scrollState, scrollSource)
     continuationResult(_callResult)
 }
@@ -3414,7 +3540,7 @@ export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(th
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: GestureRecognizer) => void) = (value: GestureRecognizer):void => {
+    const continuationBufferClosure  = (value: GestureRecognizer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3424,6 +3550,8 @@ export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(th
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: GestureRecognizer) => void) = continuationBufferClosure
     const _callResult  = _call(current, others)
     continuationResult(_callResult)
 }
@@ -3442,7 +3570,7 @@ export function deserializeAndCallSliderModifierBuilder(thisDeserializer: Deseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3452,6 +3580,8 @@ export function deserializeAndCallSliderModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3470,7 +3600,7 @@ export function deserializeAndCallStyledStringMarshallCallback(thisDeserializer:
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: ArrayBuffer) => void) = (value: ArrayBuffer):void => {
+    const continuationBufferClosure  = (value: ArrayBuffer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3480,6 +3610,8 @@ export function deserializeAndCallStyledStringMarshallCallback(thisDeserializer:
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: ArrayBuffer) => void) = continuationBufferClosure
     const _callResult  = _call(marshallableVal)
     continuationResult(_callResult)
 }
@@ -3490,7 +3622,7 @@ export function deserializeAndCallStyledStringUnmarshallCallback(thisDeserialize
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: UserDataSpan) => void) = (value: UserDataSpan):void => {
+    const continuationBufferClosure  = (value: UserDataSpan):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3501,6 +3633,8 @@ export function deserializeAndCallStyledStringUnmarshallCallback(thisDeserialize
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: UserDataSpan) => void) = continuationBufferClosure
     const _callResult  = _call(buf)
     continuationResult(_callResult)
 }
@@ -3519,7 +3653,7 @@ export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: TabContentAnimatedTransition | undefined) => void) = (value?: TabContentAnimatedTransition | undefined):void => {
+    const continuationBufferClosure  = (value?: TabContentAnimatedTransition | undefined):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3535,6 +3669,8 @@ export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: TabContentAnimatedTransition | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(from, to)
     continuationResult(_callResult)
 }
@@ -3558,7 +3694,7 @@ export function deserializeAndCallTextClockModifierBuilder(thisDeserializer: Des
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3568,6 +3704,8 @@ export function deserializeAndCallTextClockModifierBuilder(thisDeserializer: Des
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3670,7 +3808,7 @@ export function deserializeAndCallTextTimerModifierBuilder(thisDeserializer: Des
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3680,6 +3818,8 @@ export function deserializeAndCallTextTimerModifierBuilder(thisDeserializer: Des
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3698,7 +3838,7 @@ export function deserializeAndCallToggleModifierBuilder(thisDeserializer: Deseri
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: KPointer) => void) = (value: KPointer):void => {
+    const continuationBufferClosure  = (value: KPointer):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3708,6 +3848,8 @@ export function deserializeAndCallToggleModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: KPointer) => void) = continuationBufferClosure
     const _callResult  = _call(parentNode, config)
     continuationResult(_callResult)
 }
@@ -3742,7 +3884,7 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: CustomBuilder | DragItemInfo) => void) = (value: CustomBuilder | DragItemInfo):void => {
+    const continuationBufferClosure  = (value: CustomBuilder | DragItemInfo):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3760,6 +3902,8 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: CustomBuilder | DragItemInfo) => void) = continuationBufferClosure
     const _callResult  = _call(event, extraParams)
     continuationResult(_callResult)
 }
@@ -3772,7 +3916,7 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: NavigationAnimatedTransition | undefined) => void) = (value?: NavigationAnimatedTransition | undefined):void => {
+    const continuationBufferClosure  = (value?: NavigationAnimatedTransition | undefined):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3788,6 +3932,8 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: NavigationAnimatedTransition | undefined) => void) = continuationBufferClosure
     const _callResult  = _call(from, to, operation)
     continuationResult(_callResult)
 }
@@ -3798,7 +3944,7 @@ export function deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeser
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: WebResourceResponse | null) => void) = (value?: WebResourceResponse | null):void => {
+    const continuationBufferClosure  = (value?: WebResourceResponse | null):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3814,6 +3960,8 @@ export function deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeser
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: WebResourceResponse | null) => void) = continuationBufferClosure
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
@@ -3898,7 +4046,7 @@ export function deserializeAndCallWebKeyboardCallback(thisDeserializer: Deserial
     const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: WebKeyboardOptions) => void) = (value: WebKeyboardOptions):void => {
+    const continuationBufferClosure  = (value: WebKeyboardOptions):void => {
         const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -3908,6 +4056,8 @@ export function deserializeAndCallWebKeyboardCallback(thisDeserializer: Deserial
         continuationBufferBufArgsSerializer.release();
         return;
     }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult : ((value: WebKeyboardOptions) => void) = continuationBufferClosure
     const _callResult  = _call(keyboardCallbackInfo)
     continuationResult(_callResult)
 }

@@ -166,6 +166,12 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
         pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
     }
     pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_);
+
+    // Clear JS callbacks to prevent memory leaks
+    if (popupParam_) {
+        popupParam_->SetOnWillDismiss(nullptr);
+        popupParam_->SetOnStateChange(nullptr);
+    }
 }
 
 void BubblePattern::OnAttachToMainTree()
@@ -900,7 +906,11 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
     renderContext->UpdateBackBlurStyle(styleOption);
     if (needUpdateShadow) {
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        CHECK_NULL_VOID(shadowTheme);
+        Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
         renderContext->UpdateBackShadow(shadow);
     }
 }
@@ -1048,7 +1058,7 @@ void BubblePattern::UpdateWidth(const CalcDimension& dimension)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void BubblePattern::UpdateBubbleGradient(const int32_t index, const Color& result, bool isOutlineGradient)
+void BubblePattern::UpdateBubbleGradient(const uint32_t index, const Color& result, bool isOutlineGradient)
 {
     if (isOutlineGradient) {
         if (outlineLinearGradient_.gradientColors.size() > index) {

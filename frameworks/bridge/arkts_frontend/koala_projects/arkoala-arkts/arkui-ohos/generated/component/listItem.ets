@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, resourceFinalizerRegister } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -442,7 +442,7 @@ export class SwipeActionItem_serializer {
             const builderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const builderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const builderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            builderTmpBuf = ():void => {
+            const builderTmpBuf_Closure  = ():void => {
                 const builderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
@@ -451,6 +451,8 @@ export class SwipeActionItem_serializer {
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(builderTmpBuf_Closure, builderTmpBuf_BufResource)
+            builderTmpBuf = builderTmpBuf_Closure
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const builderComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -482,7 +484,7 @@ export class SwipeActionItem_serializer {
             const onActionTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onActionTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onActionTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onActionTmpBuf = ():void => {
+            const onActionTmpBuf_Closure  = ():void => {
                 const onActionTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onActionTmpBuf_BufArgsSerializer.writeInt32(onActionTmpBuf_BufResource.resourceId);
                 onActionTmpBuf_BufArgsSerializer.writePointer(onActionTmpBuf_BufCall);
@@ -491,6 +493,8 @@ export class SwipeActionItem_serializer {
                 onActionTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onActionTmpBuf_Closure, onActionTmpBuf_BufResource)
+            onActionTmpBuf = onActionTmpBuf_Closure
         }
         const onActionTmpResult : (() => void) | undefined = onActionTmpBuf
         const onEnterActionAreaTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -499,7 +503,7 @@ export class SwipeActionItem_serializer {
             const onEnterActionAreaTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onEnterActionAreaTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onEnterActionAreaTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onEnterActionAreaTmpBuf = ():void => {
+            const onEnterActionAreaTmpBuf_Closure  = ():void => {
                 const onEnterActionAreaTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onEnterActionAreaTmpBuf_BufArgsSerializer.writeInt32(onEnterActionAreaTmpBuf_BufResource.resourceId);
                 onEnterActionAreaTmpBuf_BufArgsSerializer.writePointer(onEnterActionAreaTmpBuf_BufCall);
@@ -508,6 +512,8 @@ export class SwipeActionItem_serializer {
                 onEnterActionAreaTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onEnterActionAreaTmpBuf_Closure, onEnterActionAreaTmpBuf_BufResource)
+            onEnterActionAreaTmpBuf = onEnterActionAreaTmpBuf_Closure
         }
         const onEnterActionAreaTmpResult : (() => void) | undefined = onEnterActionAreaTmpBuf
         const onExitActionAreaTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -516,7 +522,7 @@ export class SwipeActionItem_serializer {
             const onExitActionAreaTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onExitActionAreaTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onExitActionAreaTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onExitActionAreaTmpBuf = ():void => {
+            const onExitActionAreaTmpBuf_Closure  = ():void => {
                 const onExitActionAreaTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onExitActionAreaTmpBuf_BufArgsSerializer.writeInt32(onExitActionAreaTmpBuf_BufResource.resourceId);
                 onExitActionAreaTmpBuf_BufArgsSerializer.writePointer(onExitActionAreaTmpBuf_BufCall);
@@ -525,6 +531,8 @@ export class SwipeActionItem_serializer {
                 onExitActionAreaTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onExitActionAreaTmpBuf_Closure, onExitActionAreaTmpBuf_BufResource)
+            onExitActionAreaTmpBuf = onExitActionAreaTmpBuf_Closure
         }
         const onExitActionAreaTmpResult : (() => void) | undefined = onExitActionAreaTmpBuf
         const onStateChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -533,7 +541,7 @@ export class SwipeActionItem_serializer {
             const onStateChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onStateChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onStateChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onStateChangeTmpBuf = (state: SwipeActionState):void => {
+            const onStateChangeTmpBuf_Closure  = (state: SwipeActionState):void => {
                 const onStateChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onStateChangeTmpBuf_BufArgsSerializer.writeInt32(onStateChangeTmpBuf_BufResource.resourceId);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
@@ -543,6 +551,8 @@ export class SwipeActionItem_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onStateChangeTmpBuf_Closure, onStateChangeTmpBuf_BufResource)
+            onStateChangeTmpBuf = onStateChangeTmpBuf_Closure
         }
         const onStateChangeTmpResult : ((state: SwipeActionState) => void) | undefined = onStateChangeTmpBuf
         let value : SwipeActionItem = ({builder: builderTmpResult, builderComponent: builderComponentTmpResult, actionAreaDistance: actionAreaDistanceTmpResult, onAction: onActionTmpResult, onEnterActionArea: onEnterActionAreaTmpResult, onExitActionArea: onExitActionAreaTmpResult, onStateChange: onStateChangeTmpResult} as SwipeActionItem)
@@ -612,7 +622,7 @@ export class SwipeActionOptions_serializer {
                 const startTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const startTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const startTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                startTmpBuf_ = ():void => {
+                const startTmpBuf_BufUClosure  = ():void => {
                     const startTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     startTmpBuf_BufUBufArgsSerializer.writeInt32(startTmpBuf_BufUBufResource.resourceId);
                     startTmpBuf_BufUBufArgsSerializer.writePointer(startTmpBuf_BufUBufCall);
@@ -621,6 +631,8 @@ export class SwipeActionOptions_serializer {
                     startTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(startTmpBuf_BufUClosure, startTmpBuf_BufUBufResource)
+                startTmpBuf_ = startTmpBuf_BufUClosure
             } else if (startTmpBuf_UnionSelector == (1).toByte()) {
                 startTmpBuf_ = SwipeActionItem_serializer.read(valueDeserializer)
             } else {
@@ -638,7 +650,7 @@ export class SwipeActionOptions_serializer {
                 const endTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
                 const endTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
                 const endTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                endTmpBuf_ = ():void => {
+                const endTmpBuf_BufUClosure  = ():void => {
                     const endTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
                     endTmpBuf_BufUBufArgsSerializer.writeInt32(endTmpBuf_BufUBufResource.resourceId);
                     endTmpBuf_BufUBufArgsSerializer.writePointer(endTmpBuf_BufUBufCall);
@@ -647,6 +659,8 @@ export class SwipeActionOptions_serializer {
                     endTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
+                resourceFinalizerRegister(endTmpBuf_BufUClosure, endTmpBuf_BufUBufResource)
+                endTmpBuf_ = endTmpBuf_BufUClosure
             } else if (endTmpBuf_UnionSelector == (1).toByte()) {
                 endTmpBuf_ = SwipeActionItem_serializer.read(valueDeserializer)
             } else {
@@ -667,7 +681,7 @@ export class SwipeActionOptions_serializer {
             const onOffsetChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onOffsetChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onOffsetChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onOffsetChangeTmpBuf = (offset: double):void => {
+            const onOffsetChangeTmpBuf_Closure  = (offset: double):void => {
                 const onOffsetChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onOffsetChangeTmpBuf_BufArgsSerializer.writeInt32(onOffsetChangeTmpBuf_BufResource.resourceId);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCall);
@@ -677,6 +691,8 @@ export class SwipeActionOptions_serializer {
                 onOffsetChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onOffsetChangeTmpBuf_Closure, onOffsetChangeTmpBuf_BufResource)
+            onOffsetChangeTmpBuf = onOffsetChangeTmpBuf_Closure
         }
         const onOffsetChangeTmpResult : ((offset: double) => void) | undefined = onOffsetChangeTmpBuf
         let value : SwipeActionOptions = ({start: startTmpResult, end: endTmpResult, edgeEffect: edgeEffectTmpResult, onOffsetChange: onOffsetChangeTmpResult} as SwipeActionOptions)

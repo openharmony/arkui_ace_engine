@@ -28,6 +28,8 @@ struct MarqueeOptions {
     std::optional<std::string> src;
     std::optional<bool> start;
     std::optional<MarqueeDirection> direction;
+    std::optional<CalcDimension> spacing;
+    std::optional<int32_t> delay;
 };
 } // OHOS::Ace::NG
 
@@ -53,6 +55,14 @@ MarqueeOptions Convert(const Ark_MarqueeOptions& src)
     options.start = OptConvert<bool>(src.start);
     auto fromStart = OptConvert<bool>(src.fromStart);
     options.direction = fromStart.value_or(true) ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
+    auto optSpacing = OptConvert<CalcDimension>(src.spacing);
+    if (optSpacing && !optSpacing.value().IsNegative()) {
+        options.spacing = optSpacing;
+    }
+    options.delay = OptConvert<int32_t>(src.delay);
+    if (options.delay < 0) {
+        options.delay = 0;
+    }
     return options;
 }
 
@@ -140,7 +150,7 @@ void SetAllowScaleImpl(Ark_NativePointer node,
     MarqueeModelNG::SetAllowScale(frameNode, *convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

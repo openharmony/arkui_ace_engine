@@ -432,6 +432,13 @@ struct ArkUIWaterFlowSectionGap {
     float value = 0.0f;
 };
 
+struct ArkUIWaterFlowResourceParam {
+    int32_t resId = 0;
+    int32_t resType = 0;
+    const char* bundleName = nullptr;
+    const char* moduleName = nullptr;
+};
+
 struct ArkUIWaterFlowSectionPadding {
     ArkUIWaterFlowSectionGap top;
     ArkUIWaterFlowSectionGap right;
@@ -614,6 +621,7 @@ struct ArkUIAniCommonModifier {
     void(*getLastForegroundUIContext)(int32_t& instance);
     void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
+    ani_long (*getPageRootNode)();
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -661,6 +669,7 @@ struct ArkUIAniWaterFlowModifier {
     void (*resetWaterFlowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
+    bool (*parseWaterFlowSectionResourceGap)(const ArkUIWaterFlowResourceParam* param, ArkUIWaterFlowSectionGap* out);
 };
 struct ArkUIAniListModifier {
     bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);
@@ -740,6 +749,7 @@ struct ArkUIAniTextBasedModifier {
     void* (*fromTextModifierPeer)(void* ptr);
     void* (*toTextModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& textApply,
         void* textModifierAni);
+    void* (*toIMEExtraCfgPeer)(void* extraConfigPtr);
 };
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);

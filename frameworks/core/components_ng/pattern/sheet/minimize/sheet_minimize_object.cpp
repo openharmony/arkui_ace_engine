@@ -465,6 +465,7 @@ void SheetMinimizeObject::CreatePropertyCallback()
         CHECK_NULL_VOID(sheetObject);
         context->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     };
+    ACE_UINODE_TRACE(sheetPattern->GetHost());
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
 }

@@ -808,4 +808,82 @@ HWTEST_F(CanvasTestNg, CanvasPatternCacheTest, TestSize.Level1)
     EXPECT_TRUE(onReadyHasTriggered);
     EXPECT_FALSE(isNeedDrawingContext);
 }
+
+/**
+ * @tc.name: RegisterVisibleAreaChangeTest001
+ * @tc.desc: CanvasPattern::RegisterVisibleAreaChange - First registration success
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create Canvas node and setup pipeline context.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Setup mock pipeline context.
+     * @tc.expected: Pipeline context is set.
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_TRUE(pipelineContext);
+
+    /**
+     * @tc.steps3: Call RegisterVisibleAreaChange for the first time.
+     * @tc.expected: Registration flag is set to true.
+     */
+    pattern->hasRegisteredVisibleAreaChange_ = false;
+    pattern->RegisterVisibleAreaChange();
+    EXPECT_TRUE(pattern->hasRegisteredVisibleAreaChange_);
+
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: RegisterVisibleAreaChangeTest002
+ * @tc.desc: CanvasPattern::RegisterVisibleAreaChange - Duplicate registration ignored
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create Canvas node and setup pipeline context.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Setup mock pipeline context and mark as already registered.
+     * @tc.expected: hasRegisteredVisibleAreaChange_ is true.
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_TRUE(pipelineContext);
+    pattern->hasRegisteredVisibleAreaChange_ = true;
+
+    /**
+     * @tc.steps3: Call RegisterVisibleAreaChange when already registered.
+     * @tc.expected: Registration remains true (no duplicate registration).
+     */
+    pattern->RegisterVisibleAreaChange();
+    EXPECT_TRUE(pattern->hasRegisteredVisibleAreaChange_);
+
+    MockPipelineContext::TearDown();
+}
 } // namespace OHOS::Ace::NG

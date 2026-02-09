@@ -47,6 +47,7 @@ RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
     CHECK_NULL_RETURN(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SWIPER_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     RefPtr<FrameNode> swiperNode = nullptr;
     if (isCreateArc) {
         swiperNode = FrameNode::GetOrCreateFrameNode(
@@ -65,6 +66,7 @@ RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
 
 RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto swiperNode = ElementRegister::GetInstance()->GetSpecificItemById<SwiperNode>(nodeId);
     if (swiperNode) {
         if (swiperNode->GetTag() == V2::SWIPER_ETS_TAG) {
@@ -1118,6 +1120,7 @@ int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
 RefPtr<SwiperController> SwiperModelNG::GetOrCreateSwiperController(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (!pattern->GetSwiperController()) {

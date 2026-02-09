@@ -369,6 +369,7 @@ void LinearSplitPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     CHECK_NULL_VOID(inputHub);
 
     if (!mouseEvent_) {
@@ -531,6 +532,7 @@ void LinearSplitPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -566,6 +568,8 @@ bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     splitLength_ = linearSplitLayoutAlgorithm->GetSplitLength();
     splitRects_ = linearSplitLayoutAlgorithm->GetSplitRects();
     parentOffset_ = linearSplitLayoutAlgorithm->GetParentOffset();
+    auto host = GetHost();
+    ACE_UINODE_TRACE(host);
     if (dragSplitOffset_.empty()) {
         dragSplitOffset_ = std::vector<float>(splitRects_.size(), 0.0);
     }

@@ -15,6 +15,7 @@
 
 #include "core/common/window.h"
 
+#include "base/utils/layout_break_point.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 

@@ -101,6 +101,7 @@
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -155,9 +156,6 @@ constexpr int32_t EVENT_COLUMN_SLOT = -2;
 
 constexpr int32_t TRANSITION_NODE_2 = 2;
 
-const float MINIMUM_AMPLITUDE_RATION = 0.08f;
-const float PREVIEW_MINIMUM_AMPLITUDE_RATION = 0.015f;
-
 // UIExtensionComponent Transform param key
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 constexpr char WANT_PARAM_UIEXTNODE_ANGLE_KEY[] = "modalUIExtNodeAngle";
@@ -184,492 +182,6 @@ RefPtr<FrameNode> GetLastPage()
     return pageNode;
 }
 
-void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRenderContext,
-    const RefPtr<MenuTheme>& menuTheme, bool isShowHoverImage, const RefPtr<PipelineBase>& context)
-{
-    auto shadow = previewRenderContext->GetBackShadow();
-    if (!shadow.has_value()) {
-        shadow = Shadow::CreateShadow(ShadowStyle::None);
-    }
-    previewRenderContext->UpdateBackShadow(shadow.value());
-    auto disappearDuration = menuTheme->GetDisappearDuration();
-    AnimationOption previewOption;
-    if (isShowHoverImage) {
-        previewOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-        previewOption.SetDuration(MENU_ANIMATION_DURATION);
-    } else {
-        previewOption.SetCurve(Curves::SHARP);
-        previewOption.SetDuration(disappearDuration);
-    }
-    AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
-        CHECK_NULL_VOID(previewRenderContext);
-        auto color = shadow->GetColor();
-        auto newColor = Color::FromARGB(1, color.GetRed(), color.GetGreen(), color.GetBlue());
-        shadow->SetColor(newColor);
-        previewRenderContext->UpdateBackShadow(shadow.value());
-        BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(0.0_vp);
-        previewRenderContext->UpdateBorderRadius(borderRadius);
-    }, nullptr, nullptr, context);
-}
-
-void UpdateHoverImagePreviewOpacityAnimation(const RefPtr<MenuTheme>& menuTheme,
-    const RefPtr<MenuPattern>& menuPattern, RefPtr<FrameNode>& previewChild)
-{
-    CHECK_NULL_VOID(menuPattern);
-    CHECK_NULL_VOID(menuPattern->GetIsShowHoverImage());
-
-    CHECK_NULL_VOID(previewChild);
-    auto previewRenderContext = previewChild->GetRenderContext();
-    CHECK_NULL_VOID(previewRenderContext);
-
-    bool isCustomPreview = previewChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG;
-    // only update custom preview opacity
-    CHECK_NULL_VOID(isCustomPreview);
-
-    AnimationOption option;
-    option.SetDuration(menuTheme->GetHoverImagePreviewDisAppearDuration());
-    option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(
-        option, [previewRenderContext]() {
-            CHECK_NULL_VOID(previewRenderContext);
-            previewRenderContext->UpdateOpacity(0.0);
-        }, nullptr, nullptr, previewChild->GetContextRefPtr());
-}
-
-void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
-    RefPtr<FrameNode>& previewChild)
-{
-    CHECK_NULL_VOID(menuWrapperPattern);
-    CHECK_NULL_VOID(previewChild);
-    auto previewRenderContext = previewChild->GetRenderContext();
-    CHECK_NULL_VOID(previewRenderContext);
-    auto context = previewChild->GetContextRefPtr();
-    if (menuWrapperPattern->HasPreviewTransitionEffect()) {
-        auto layoutProperty = previewChild->GetLayoutProperty();
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-        return;
-    }
-
-    auto menuChild = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuChild);
-    auto menuPattern = menuChild->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto previewPosition = menuPattern->GetPreviewOriginOffset();
-
-    auto pipelineContext = previewChild->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    UpdateHoverImagePreviewOpacityAnimation(menuTheme, menuPattern, previewChild);
-
-    auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
-    auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
-    AnimationOption scaleOption;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    scaleOption.SetCurve(motion);
-    scaleOption.SetDuration(MENU_ANIMATION_DURATION);
-    float previewScale = 1.0f;
-    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE ||
-        (menuWrapperPattern->GetMenuParam().isPreviewContainScale &&
-            menuWrapperPattern->GetMenuParam().disappearScaleToTarget)) {
-        auto previewGeometryNode = previewChild->GetGeometryNode();
-        CHECK_NULL_VOID(previewGeometryNode);
-        auto previewSize = previewGeometryNode->GetFrameSize();
-        if (!NearEqual(menuPattern->GetTargetSize().Width(), previewSize.Width())) {
-            previewScale = menuPattern->GetTargetSize().Width() / previewSize.Width();
-        }
-    }
-    ShowPreviewBgDisappearAnimationProc(
-        previewRenderContext, menuTheme, menuWrapperPattern->GetIsShowHoverImage(), context);
-
-    CHECK_NULL_VOID(!menuPattern->GetIsShowHoverImage());
-    AnimationUtils::Animate(scaleOption,
-        [previewRenderContext, previewPosition, previewScale]() {
-        CHECK_NULL_VOID(previewRenderContext);
-        previewRenderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-        previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
-    }, nullptr, nullptr, context);
-}
-
-void StopHoverImageDelayAnimation(
-    const RefPtr<MenuWrapperPattern>& menuWrapperPattern, const NG::OffsetF& previewOriginOffset)
-{
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
-    CHECK_NULL_VOID(flexNode);
-    // stop delay animation for preview position
-    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0), [menuWrapperPattern, previewOriginOffset]() {
-        auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
-        CHECK_NULL_VOID(flexNode);
-        auto flexContext = flexNode->GetRenderContext();
-        CHECK_NULL_VOID(flexContext);
-        flexContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(previewOriginOffset.GetX()), Dimension(previewOriginOffset.GetY())));
-    }, nullptr, nullptr, flexNode->GetContextRefPtr());
-}
-
-AnimationOption GetHoverImageAnimationOption(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
-{
-    AnimationOption option = AnimationOption();
-    CUSTOM_PREVIEW_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(PREVIEW_MINIMUM_AMPLITUDE_RATION);
-    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    option.SetDuration(MENU_ANIMATION_DURATION);
-    option.SetOnFinishEvent([menuWrapperPattern] {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "hover Image animation finished");
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->SetOnPreviewDisappear(false);
-
-        auto menuWrapper = menuWrapperPattern->GetHost();
-        CHECK_NULL_VOID(menuWrapper);
-        auto pipeline = menuWrapper->GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        if (overlayManager->RemoveMenuInSubWindow(menuWrapper)) {
-            overlayManager->SetIsMenuShow(false);
-            overlayManager->PublishMenuStatus(false);
-        }
-    });
-
-    return option;
-}
-
-void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
-    const RefPtr<MenuPreviewPattern>& previewPattern)
-{
-    CHECK_NULL_VOID(menuWrapperPattern);
-    CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
-
-    CHECK_NULL_VOID(previewPattern);
-    // reverse scale
-    auto scaleTo = previewPattern->GetHoverImageScaleFrom();
-    auto host = previewPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleTo;
-
-    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
-    CHECK_NULL_VOID(stackNode);
-    auto stackContext = stackNode->GetRenderContext();
-    CHECK_NULL_VOID(stackContext);
-    auto context = stackNode->GetContextRefPtr();
-
-    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
-    CHECK_NULL_VOID(flexNode);
-    auto flexContext = flexNode->GetRenderContext();
-    CHECK_NULL_VOID(flexContext);
-
-    auto menuChild = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuChild);
-    auto menuPattern = menuChild->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto previewPosition = menuPattern->GetPreviewOriginOffset();
-
-    if (previewPattern->IsHoverImageScalePlaying()) {
-        menuWrapperPattern->SetIsStopHoverImageAnimation(true);
-        previewPattern->SetIsHoverImageScalePlaying(false);
-        MenuView::ShowMenuTargetScaleToOrigin(menuWrapperPattern, previewPattern);
-        StopHoverImageDelayAnimation(menuWrapperPattern, previewPosition);
-    }
-
-    auto offset = previewPattern->GetHoverImageAfterScaleOffset();
-    auto width = previewPattern->GetHoverImageAfterScaleWidth();
-    auto height = previewPattern->GetHoverImageAfterScaleHeight();
-    auto clipRect = RectF(offset.GetX(), offset.GetY(), width - offset.GetX(), height - offset.GetY());
-
-    menuWrapperPattern->SetOnPreviewDisappear(true);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "start hover Image animation");
-    AnimationOption option = GetHoverImageAnimationOption(menuWrapperPattern);
-    AnimationUtils::Animate(option, [stackContext, scaleAfter, flexContext, previewPosition, clipRect]() {
-        CHECK_NULL_VOID(stackContext);
-        stackContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
-        stackContext->ClipWithRRect(clipRect, RadiusF(EdgeF(0.0f, 0.0f)));
-
-        CHECK_NULL_VOID(flexContext);
-        flexContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-    }, option.GetOnFinishEvent(), nullptr, context);
-
-    ShowPreviewBgDisappearAnimationProc(
-        stackContext, menuTheme, menuWrapperPattern->GetHoverImageStackNode(), context);
-}
-
-void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
-{
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto previewChild = menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(previewChild);
-    ShowPreviewDisappearAnimationProc(menuWrapperPattern, previewChild);
-
-    CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
-    auto hoverImagePreview = menuWrapperPattern->GetHoverImagePreview();
-    CHECK_NULL_VOID(hoverImagePreview);
-    ShowPreviewDisappearAnimationProc(menuWrapperPattern, hoverImagePreview);
-
-    auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
-    CHECK_NULL_VOID(previewPattern);
-    UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
-}
-
-void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset,
-    float menuScale)
-{
-    CHECK_NULL_VOID(menu);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuChild = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuChild);
-    auto menuRenderContext = menuChild->GetRenderContext();
-    CHECK_NULL_VOID(menuRenderContext);
-    auto menuPattern = menuChild->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto menuPosition = menuChild->GetGeometryNode()->GetFrameOffset();
-    menuPosition += offset;
-    menuChild->GetGeometryNode()->SetFrameOffset(menuPosition);
-    menuPattern->SetEndOffset(menuPosition);
-
-    auto pipelineContext = menu->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    auto scaleAfter = LessNotEqual(menuScale, 0.0) ? 1.0f : menuScale;
-    auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
-    auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
-    AnimationOption positionOption;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    positionOption.SetCurve(motion);
-    AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition, scaleAfter]() {
-        CHECK_NULL_VOID(menuRenderContext);
-        menuRenderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        // menuScale default value is 1.0f, only update menu scale with not the default value
-        if (scaleAfter != 1.0f) {
-            menuRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
-        }
-    }, nullptr, nullptr, menuChild->GetContextRefPtr());
-}
-
-void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>& dragPreviewContext,
-    const RefPtr<RenderContext>& previewRenderContext, const RefPtr<FrameNode>& previewChild,
-    const NG::OffsetF& offset, int32_t duration)
-{
-    CHECK_NULL_VOID(previewChild);
-    auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
-    CHECK_NULL_VOID(previewPattern);
-    CHECK_NULL_VOID(previewPattern->GetIsShowHoverImage());
-
-    CHECK_NULL_VOID(dragPreviewContext);
-    auto width = dragPreviewContext->GetPaintRectWithTransform().Width();
-    auto height = dragPreviewContext->GetPaintRectWithTransform().Height();
-
-    CHECK_NULL_VOID(previewRenderContext);
-    auto previewWidth = previewPattern->GetCustomPreviewWidth();
-    auto previewHeight = previewPattern->GetCustomPreviewHeight();
-
-    // reverse scale
-    float scaleTo = 1.0f;
-    if (previewWidth - width < previewHeight - height) {
-        CHECK_EQUAL_VOID(previewWidth, 0);
-        scaleTo = width / previewWidth;
-    } else {
-        CHECK_EQUAL_VOID(previewHeight, 0);
-        scaleTo = height / previewHeight;
-    }
-    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? 1.0f : scaleTo;
-    AnimationOption option = AnimationOption();
-    option.SetDuration(duration);
-    option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(
-        option,
-        [previewRenderContext, dragPreviewContext, scaleAfter, offset]() {
-            CHECK_NULL_VOID(previewRenderContext);
-            previewRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
-            previewRenderContext->UpdateTransformTranslate({ offset.GetX(), offset.GetY(), 0.0f });
-
-            CHECK_NULL_VOID(dragPreviewContext);
-            dragPreviewContext->UpdateTransformTranslate({ offset.GetX(), offset.GetY(), 0.0f });
-        }, nullptr, nullptr, previewChild->GetContextRefPtr());
-}
-
-void UpdateContextMenuSwitchDragPreviewBefore(const RefPtr<FrameNode>& menu)
-{
-    CHECK_NULL_VOID(menu);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern && menuWrapperPattern->GetIsShowHoverImage());
-    auto previewChild = menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(previewChild);
-    auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
-    CHECK_NULL_VOID(previewPattern);
-
-    if (previewPattern->IsHoverImagePreviewScalePlaying()) {
-        auto previewRenderContext = previewChild->GetRenderContext();
-        CHECK_NULL_VOID(previewRenderContext);
-        previewRenderContext->UpdateOpacity(0.0);
-    }
-}
-
-void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
-    const RefPtr<NG::FrameNode>& dragPreviewNode, const NG::OffsetF& offset)
-{
-    CHECK_NULL_VOID(dragPreviewNode && menu);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern && menuWrapperPattern->GetIsShowHoverImage());
-
-    auto pipelineContext = menu->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    // consistent with the menu disappear duration
-    auto duration = menuTheme->GetDisappearDuration();
-
-    auto previewChild = menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(previewChild);
-    auto previewRenderContext = previewChild->GetRenderContext();
-    CHECK_NULL_VOID(previewRenderContext);
-    auto dragPreviewContext = dragPreviewNode->GetRenderContext();
-    CHECK_NULL_VOID(dragPreviewContext);
-
-    // update custom preview scale and position
-    ContextMenuSwitchDragPreviewScaleAnimationProc(dragPreviewContext, previewRenderContext, previewChild, offset,
-        duration);
-
-    // custom preview and drag preview update Opacity
-    CHECK_NULL_VOID(!menuWrapperPattern->GetIsShowHoverImagePreviewStartDrag());
-    menuWrapperPattern->SetIsShowHoverImagePreviewStartDrag(true);
-    auto imageNode = menuWrapperPattern->GetHoverImagePreview();
-    CHECK_NULL_VOID(imageNode);
-    auto imageContext = imageNode->GetRenderContext();
-    CHECK_NULL_VOID(imageContext);
-    imageContext->UpdateOpacity(0.0);
-
-    previewRenderContext->UpdateOpacity(1.0);
-    dragPreviewContext->UpdateOpacity(0.0);
-    AnimationOption option;
-    option.SetDuration(duration);
-    option.SetCurve(Curves::FRICTION);
-    option.SetOnFinishEvent(
-        [id = Container::CurrentId(), menuWrapperPattern] {
-            ContainerScope scope(id);
-            menuWrapperPattern->SetIsShowHoverImagePreviewStartDrag(false);
-        });
-    AnimationUtils::Animate(
-        option, [previewRenderContext, dragPreviewContext]() mutable {
-            CHECK_NULL_VOID(previewRenderContext);
-            previewRenderContext->UpdateOpacity(0.0);
-
-            BorderRadiusProperty borderRadius;
-            borderRadius.SetRadius(0.0_vp);
-            previewRenderContext->UpdateBorderRadius(borderRadius);
-
-            CHECK_NULL_VOID(dragPreviewContext);
-            dragPreviewContext->UpdateOpacity(1.0);
-        },
-        option.GetOnFinishEvent(), nullptr, previewChild->GetContextRefPtr());
-}
-
-void CancelMenuTransformScaleAnimation(const RefPtr<FrameNode>& menuNode, float scale)
-{
-    CHECK_NULL_VOID(menuNode);
-    auto renderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    AnimationOption cancelOption = AnimationOption(Curves::FAST_OUT_LINEAR_IN, 0);
-    AnimationUtils::Animate(cancelOption, [renderContext, scale]() {
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateTransformScale({ scale, scale });
-    }, nullptr, nullptr, menuNode->GetContextRefPtr());
-}
-
-void ShowContextMenuDisappearAnimation(
-    AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern, bool startDrag = false)
-{
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuChild = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuChild);
-    auto menuRenderContext = menuChild->GetRenderContext();
-    CHECK_NULL_VOID(menuRenderContext);
-    auto menuPattern = menuChild->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
-    auto isPreviewNone = menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE;
-    auto menuPosition =
-        (hasTransition || isPreviewNone) ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
-    menuWrapperPattern->ClearAllSubMenu();
-
-    auto pipelineContext = menuChild->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    if (startDrag) {
-        CancelMenuTransformScaleAnimation(menuChild, menuTheme->GetMenuDragAnimationScale());
-    }
-    auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
-    auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
-    AnimationOption positionOption;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    positionOption.SetCurve(motion);
-    positionOption.SetDuration(MENU_ANIMATION_DURATION);
-    AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
-        CHECK_NULL_VOID(menuRenderContext);
-        menuRenderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-    }, nullptr, nullptr, menuChild->GetContextRefPtr());
-
-    auto disappearDuration = menuTheme->GetDisappearDuration();
-    auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
-    AnimationOption scaleOption = AnimationOption(Curves::FAST_OUT_LINEAR_IN, disappearDuration);
-    AnimationUtils::Animate(scaleOption, [menuRenderContext, menuAnimationScale]() {
-        CHECK_NULL_VOID(menuRenderContext);
-        menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
-    }, nullptr, nullptr, menuChild->GetContextRefPtr());
-
-    option.SetDuration(disappearDuration);
-    option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(
-        option,
-        [menuRenderContext]() {
-            CHECK_NULL_VOID(menuRenderContext);
-            menuRenderContext->UpdateOpacity(0.0);
-        },
-        option.GetOnFinishEvent(), nullptr, menuChild->GetContextRefPtr());
-}
-
-void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
-{
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuNode = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuNode);
-    auto menuRenderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(menuRenderContext);
-    auto pipelineContext = menuNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetMenuAnimationDuration()) {
-        option.SetDuration(menuTheme->GetMenuAnimationDuration());
-        option.SetCurve(menuTheme->GetMenuAnimationCurve());
-    } else {
-        MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
-        option.SetCurve(MENU_ANIMATION_CURVE);
-    }
-    AnimationUtils::Animate(
-        option,
-        [menuRenderContext, menuTheme]() {
-            if (menuRenderContext) {
-                CHECK_NULL_VOID(menuTheme);
-                menuRenderContext->UpdateTransformScale(
-                    VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
-                menuRenderContext->UpdateOpacity(0.0f);
-            }
-        },
-        option.GetOnFinishEvent(), nullptr, menuNode->GetContextRefPtr());
-}
-
 static RefPtr<PipelineContext> GetPipeContextByWeakPtr(const WeakPtr<FrameNode>& weakPtr)
 {
     auto frameNode = weakPtr.Upgrade();
@@ -682,32 +194,16 @@ static RefPtr<PipelineContext> GetPipeContextByWeakPtr(const WeakPtr<FrameNode>&
 
     return context;
 }
-
-// when one process not suppose handle other page event, firstly add, then remove
-static void HandleAccessibilityPageEventControl(const RefPtr<FrameNode>& node, bool isAdd)
-{
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        return;
-    }
-    CHECK_NULL_VOID(node);
-    auto pipelineContext = node->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto frontend = pipelineContext->GetFrontend();
-    CHECK_NULL_VOID(frontend);
-    auto accessibilityManager = frontend->GetAccessibilityManager();
-    CHECK_NULL_VOID(accessibilityManager);
-    if (isAdd) {
-        accessibilityManager->AddToPageEventController(node);
-    } else {
-        accessibilityManager->ReleasePageEvent(node, true, true);
-    }
-}
 } // namespace
 
 OverlayManager::OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode)
 {
     if (rootNode) {
         context_ = rootNode->GetContext();
+        const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+        if (modifier != nullptr) {
+            menuManager_ = modifier->getMenuManager(rootNode);
+        }
     }
 }
 
@@ -723,102 +219,31 @@ OverlayManager::~OverlayManager()
 void OverlayManager::UpdateContextMenuDisappearPosition(
     const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
-    auto pipelineContext = GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    if (isRedragStart) {
-        overlayManager->ResetContextMenuRestartDragVector();
-    }
-
-    if (menuMap_.empty()) {
-        return;
-    }
-
-    RefPtr<FrameNode> menuWrapper = nullptr;
-    for (auto [targetId, node] : menuMap_) {
-        if (node && node->GetId() == menuWrapperId) {
-            menuWrapper = node;
-        }
-    }
-
-    CHECK_NULL_VOID(menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG);
-    overlayManager->UpdateDragMoveVector(offset);
-
-    if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
-        return;
-    }
-
-    UpdateContextMenuDisappearPositionAnimation(menuWrapper, overlayManager->GetUpdateDragMoveVector(), menuScale);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->updateContextMenuDisappearPosition(menuManager_, offset, menuScale, isRedragStart, menuWrapperId);
 }
 
 OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset)
 {
-    CHECK_NULL_RETURN(menuWrapperNode, OffsetF(0.0f, 0.0f));
-    if (IsContextMenuDragHideFinished()) {
-        return OffsetF(0.0f, 0.0f);
-    }
-    auto updateOffset = DragDropFuncWrapper::GetPointRelativeToMainWindow({offset.GetX(), offset.GetY()});
-    UpdateDragMoveVector(updateOffset);
-    if (menuMap_.empty() || IsOriginDragMoveVector() || !IsUpdateDragMoveVector()) {
-        return OffsetF(0.0f, 0.0f);
-    }
-
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(menuWrapperPattern, OffsetF(0.0f, 0.0f));
-    auto menuNode = menuWrapperPattern->GetMenu();
-    CHECK_NULL_RETURN(menuNode, OffsetF(0.0f, 0.0f));
-    auto menuOffset = GetUpdateDragMoveVector();
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, OffsetF(0.0f, 0.0f));
-    auto menuGeometryNode = menuNode->GetGeometryNode();
-    CHECK_NULL_RETURN(menuGeometryNode, OffsetF(0.0f, 0.0f));
-    auto menuPosition = menuGeometryNode->GetFrameOffset();
-    menuPosition += menuOffset;
-    menuGeometryNode->SetFrameOffset(menuPosition);
-    menuPattern->SetEndOffset(menuPosition);
-    return menuPosition;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, OffsetF(0.0f, 0.0f));
+    return modifier->calculateMenuPosition(menuManager_, menuWrapperNode, AceType::Claim(this), offset);
 }
 
 bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
 {
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, false);
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            auto menuWarpperPattern = node->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_RETURN(menuWarpperPattern, false);
-            auto previewChild = menuWarpperPattern->GetPreview();
-            CHECK_NULL_RETURN(previewChild, false);
-            auto geometryNode = previewChild->GetGeometryNode();
-            if (geometryNode && geometryNode->GetFrameRect().IsEmpty()) {
-                return false;
-            }
-            auto previewOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(previewChild);
-            offset.SetX(previewOffset.GetX());
-            offset.SetY(previewOffset.GetY());
-            return true;
-        }
-    }
-    return false;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->getMenuPreviewCenter(menuManager_, offset);
 }
 
 void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
     const NG::OffsetF& offset)
 {
-    CHECK_NULL_VOID(dragPreviewNode);
-    if (menuMap_.empty()) {
-        return;
-    }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            UpdateContextMenuSwitchDragPreviewBefore(node);
-            ContextMenuSwitchDragPreviewAnimationProc(node, dragPreviewNode, offset);
-        }
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contextMenuSwitchDragPreviewAnimation(menuManager_, dragPreviewNode, offset);
 }
 
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
@@ -1314,442 +739,6 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
     pipeline->SetCloseButtonStatus(isEnabled);
 }
 
-void OverlayManager::UpdateMenuVisibility(const RefPtr<FrameNode>& menu)
-{
-    CHECK_NULL_VOID(menu);
-    auto layoutProperty = menu->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-}
-
-void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
-    int32_t instanceId)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu animation finished");
-    auto menu = menuWK.Upgrade();
-    auto overlayManager = weak.Upgrade();
-    CHECK_NULL_VOID(menu && overlayManager);
-    ContainerScope scope(instanceId);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-    CHECK_NULL_VOID(menuNode);
-    auto menuLayoutProp = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProp);
-    auto levelOrder = GetLevelOrder(menu);
-    if (!menuLayoutProp->GetIsRectInTargetValue(false) && IsTopOrder(levelOrder)) {
-        overlayManager->FocusOverlayNode(menu);
-    }
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    menuWrapperPattern->CallMenuAppearCallback();
-    menuWrapperPattern->CallMenuOnDidAppearCallback();
-    if (!menuWrapperPattern->IsHide()) {
-        menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
-    }
-    ContentChangeReport(menu, true);
-}
-
-void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
-{
-    CHECK_NULL_VOID(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    auto previewChild = wrapperPattern->GetPreview();
-    CHECK_NULL_VOID(previewChild);
-    auto previewPattern = AceType::DynamicCast<MenuPreviewPattern>(previewChild->GetPattern());
-    CHECK_NULL_VOID(previewPattern);
-    previewPattern->SetFirstShow();
-    ContentChangeReport(menu, true);
-}
-
-void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu animation enter");
-    CHECK_NULL_VOID(menu);
-    BlurLowerNode(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    // delay until end of target hoverScale for interruption
-    if (!wrapperPattern->GetHoverScaleInterruption()) {
-        wrapperPattern->CallMenuAboutToAppearCallback();
-    }
-
-    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
-    SetIsMenuShow(true, menu);
-    PublishMenuStatus(true, menu);
-    ResetContextMenuDragHideFinished();
-    if (wrapperPattern->HasTransitionEffect()) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu animation with transition effect");
-        UpdateMenuVisibility(menu);
-        auto renderContext = menu->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->SetTransitionInCallback(
-            [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
-                overlayManager->SendToAccessibility(menuWK, true);
-            });
-        if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
-            SetPreviewFirstShow(menu);
-        }
-        SetPatternFirstShow(menu);
-        return;
-    }
-    AnimationOption option;
-    UpdateMenuAnimationOptions(menu, option);
-    if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
-        auto pipelineContext = GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        option.SetDuration(menuTheme->GetContextMenuAppearDuration());
-        SetPreviewFirstShow(menu);
-    }
-    wrapperPattern->SetAniamtinOption(option);
-    SetPatternFirstShow(menu);
-}
-
-void OverlayManager::UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option)
-{
-    CHECK_NULL_VOID(menu);
-    auto pipelineContext = menu->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetMenuAnimationDuration()) {
-        option.SetDuration(menuTheme->GetMenuAnimationDuration());
-    } else {
-        option.SetDuration(MENU_ANIMATION_DURATION);
-    }
-    option.SetCurve(menuTheme->GetMenuAnimationCurve());
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent(
-        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = pipelineContext->GetInstanceId()] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
-            overlayManager->SendToAccessibility(menuWK, true);
-        });
-}
-
-void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow)
-{
-    auto menuWrapper = node.Upgrade();
-    CHECK_NULL_VOID(menuWrapper);
-    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    auto menu = wrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityIsShow(isShow);
-    if (isShow) {
-        auto levelOrder = GetLevelOrder(menuWrapper);
-        if (IsTopOrder(levelOrder)) {
-            menu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
-                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-                static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
-        }
-    } else {
-        HandleAccessibilityPageEventControl(menu, false);
-        menu->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-            static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
-    }
-}
-
-void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
-{
-    CHECK_NULL_VOID(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    wrapperPattern->SetFirstShow();
-    auto menuChild = wrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menuChild);
-    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetFirstShow();
-    menuPattern->SetMenuShow();
-}
-
-void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
-    const WeakPtr<OverlayManager> weak, int32_t instanceId)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "close menu animation finished");
-    auto menu = menuWK.Upgrade();
-    CHECK_NULL_VOID(menu);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-    CHECK_NULL_VOID(menuNode);
-    auto eventHub = menuNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabledInternal(true);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto overlayManager = weak.Upgrade();
-    CHECK_NULL_VOID(overlayManager);
-
-    overlayManager->SetContextMenuDragHideFinished(true);
-    overlayManager->ContentChangeReport(menu, false);
-    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT &&
-        menuWrapperPattern->GetMenuStatus() != MenuStatus::HIDE) {
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    }
-    HandleMenuDisappearCallback(menu);
-    // clear contextMenu then return
-    auto pipeline = GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProp);
-    bool isShowInSubWindow = menuLayoutProp->GetShowInSubWindowValue(true);
-    auto targetId = menuWrapperPattern->GetTargetId();
-    overlayManager->EraseMenuInfo(targetId);
-    if ((menuWrapperPattern->IsContextMenu() ||
-            (isShowInSubWindow && (expandDisplay || menuWrapperPattern->GetIsOpenMenu()))) &&
-        (!menuPattern->IsSelectMenu())) {
-        if (overlayManager->RemoveMenuInSubWindow(menu)) {
-            overlayManager->SetIsMenuShow(false);
-        }
-        return;
-    }
-    if (CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay)) {
-        return;
-    }
-    overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
-    overlayManager->SetIsMenuShow(false);
-}
-
-void OverlayManager::HandleMenuDisappearCallback(const RefPtr<FrameNode>& menu)
-{
-    CHECK_NULL_VOID(menu);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
-    menuWrapperPattern->SetOnMenuDisappear(false);
-    menuWrapperPattern->CallMenuStateChangeCallback("false");
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
-        ContainerScope scope(mainPipeline->GetInstanceId());
-        mainPipeline->FlushPipelineImmediately();
-    }
-}
-
-bool OverlayManager::CheckSelectSubWindowToClose(
-    const RefPtr<FrameNode>& menu, const RefPtr<OverlayManager>& overlayManager, bool expandDisplay)
-{
-    CHECK_NULL_RETURN(menu, false);
-    CHECK_NULL_RETURN(overlayManager, false);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-    CHECK_NULL_RETURN(menuNode, false);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, false);
-    auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(menuLayoutProp, false);
-    if (expandDisplay && !menuPattern->IsSelectMenu() &&
-        menuLayoutProp->GetShowInSubWindowValue(false)) {
-        auto subWindowManager = SubwindowManager::GetInstance();
-        CHECK_NULL_RETURN(subWindowManager, false);
-        auto context = menu->GetContextRefPtr();
-        CHECK_NULL_RETURN(context, false);
-        auto containerid = context->GetInstanceId();
-        auto subwindow = subWindowManager->GetSubwindowByType(containerid, SubwindowType::TYPE_MENU);
-        if (subWindowManager->IsSubwindowExist(subwindow)) {
-            if (overlayManager->RemoveMenuInSubWindow(menu)) {
-                overlayManager->SetIsMenuShow(false);
-                overlayManager->PublishMenuStatus(false);
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "pop menu animation enter");
-    CHECK_NULL_VOID(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-
-    if (wrapperPattern->IsHide()) {
-        return;
-    }
-
-    PublishMenuStatus(false);
-    ResetLowerNodeFocusable(menu);
-    ResetContextMenuDragHideFinished();
-    RemoveMenuBadgeNode(menu);
-
-    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-    CHECK_NULL_VOID(menuNode);
-    auto eventHub = menuNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabledInternal(false);
-
-    if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT &&
-        wrapperPattern->GetMenuStatus() != MenuStatus::HIDE) {
-        wrapperPattern->CallMenuAboutToDisappearCallback();
-        wrapperPattern->CallMenuOnWillDisappearCallback();
-    }
-
-    wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
-    wrapperPattern->SetOnMenuDisappear(true);
-    if (wrapperPattern->HasTransitionEffect() || wrapperPattern->HasFoldModeChangedTransition()) {
-        ShowMenuDisappearTransition(menu);
-        return;
-    }
-
-    AnimationOption option;
-    auto pipelineContext = menu->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetMenuAnimationDuration()) {
-        option.SetDuration(menuTheme->GetMenuAnimationDuration());
-    } else {
-        option.SetDuration(MENU_ANIMATION_DURATION);
-    }
-    option.SetCurve(menuTheme->GetMenuAnimationCurve());
-    option.SetFillMode(FillMode::FORWARDS);
-    if (!startDrag) {
-        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED);
-    }
-    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
-                                weak = WeakClaim(this)] {
-        ContainerScope scope(id);
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->SendToAccessibility(menuWK, false);
-        overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
-    });
-    HandleAccessibilityPageEventControl(menu, true);
-    ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
-}
-
-void OverlayManager::ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu disappear transition enter");
-    CHECK_NULL_VOID(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-
-    if (wrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-        ShowPreviewDisappearAnimation(wrapperPattern);
-    }
-    auto layoutProperty = menu->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    auto renderContext = menu->GetRenderContext();
-
-    if (wrapperPattern->HasFoldModeChangedTransition()) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Close menu when foldMode is changed, disappear transiton is %{public}d",
-            renderContext->HasDisappearTransition());
-    }
-
-    if (renderContext->HasDisappearTransition()) {
-        HandleAccessibilityPageEventControl(menu, true);
-        renderContext->SetTransitionOutCallback([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)),
-                                                    id = Container::CurrentId(), weak = WeakClaim(this)] {
-            ContainerScope scope(id);
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->SendToAccessibility(menuWK, false);
-            overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
-        });
-    } else {
-        auto context = GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
-                weak = WeakClaim(this)] {
-                ContainerScope scope(id);
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->SendToAccessibility(menuWK, false);
-                overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
-            },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
-    }
-}
-
-void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
-    bool showPreviewAnimation, bool startDrag)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menuWrapper clear animation enter");
-    CHECK_NULL_VOID(menuWrapper);
-    auto context = menuWrapper->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto pipeline = GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
-    auto outterMenu = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(outterMenu);
-    auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(outterMenuPattern);
-    bool isShow = outterMenuPattern->GetDisappearAnimation();
-    bool isPreviewModeNone = menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE;
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    if (!isPreviewModeNone ||
-        (isPreviewModeNone && IsContextMenuBindedOnOrigNode() && !showPreviewAnimation && startDrag)) {
-        showPreviewAnimation ? ShowPreviewDisappearAnimation(menuWrapperPattern) : CleanPreviewInSubWindow();
-        ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isShow) {
-        FireMenuDisappear(option, menuWrapperPattern);
-    } else {
-        AnimationUtils::Animate(
-            option,
-            [context, menuAnimationOffset, menuTheme]() {
-                CHECK_NULL_VOID(context);
-                context->UpdateOpacity(0.0);
-                context->UpdateOffset(menuAnimationOffset);
-                CHECK_NULL_VOID(menuTheme);
-                if (menuTheme->GetMenuAnimationDuration()) {
-                    context->UpdateTransformScale(
-                        VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
-                }
-            },
-            option.GetOnFinishEvent(), nullptr, menuWrapper->GetContextRefPtr());
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-#endif
-    }
-    // start animation immediately
-    pipeline->RequestFrame();
-}
-
-// check if there is a bound menu on the current floating node on the main window
-bool OverlayManager::IsContextMenuBindedOnOrigNode()
-{
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_RETURN(mainPipeline, false);
-    auto dragDropManager = mainPipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, false);
-    auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
-    CHECK_NULL_RETURN(draggingNode, false);
-    auto eventHub = draggingNode->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    auto frameNode = eventHub->GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
-}
-
 void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
@@ -1960,6 +949,28 @@ void OverlayManager::PopToast(int32_t toastId)
     toastUnderPop->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     SendAccessibilityEventToNextOrderNode(topOrderNode);
+}
+
+void OverlayManager::RegisterMenuLifeCycleCallback(int32_t targetId,
+    const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>&& callback)
+{
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->registerMenuLifeCycleCallback(menuManager_, targetId, std::move(callback));
+}
+
+void OverlayManager::UnRegisterMenuLifeCycleCallback(int32_t targetId)
+{
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->unRegisterMenuLifeCycleCallback(menuManager_, targetId);
+}
+std::function<void(const MenuLifeCycleEvent&)>& OverlayManager::GetMenuLifeCycleCallback(int32_t targetId)
+{
+    static std::function<void(const MenuLifeCycleEvent&)> emptyFunc;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, emptyFunc);
+    return modifier->getMenuLifeCycleCallback(menuManager_, targetId);
 }
 
 void OverlayManager::ClearToastInSubwindow()
@@ -2732,36 +1743,9 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
 
 void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menu without animation enter");
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto tempMenuMap = menuMap_;
-    for (const auto& menu : tempMenuMap) {
-        auto targetId = menu.first;
-        auto menuNode = menu.second;
-        CHECK_NULL_CONTINUE(menuNode);
-        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_CONTINUE(menuWrapperPattern);
-        CallMenuDisappearWithStatus(menuNode);
-        menuWrapperPattern->SetOnMenuDisappear(false);
-        menuWrapperPattern->CallMenuStateChangeCallback("false");
-        auto containerId = menuWrapperPattern->GetContainerId();
-        RemoveChildWithService(rootNode, menuNode);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu without animation, targetId: %{public}d", targetId);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (showInSubwindow) {
-            SubwindowManager::GetInstance()->DeleteHotAreas(containerId, menuNode->GetId(), SubwindowType::TYPE_MENU);
-        }
-        RemoveMenuFilter(menuNode, false);
-        EraseMenuInfo(targetId);
-        SetIsMenuShow(false);
-        PublishMenuStatus(false);
-        auto pipeline = menuNode->GetContext();
-        CHECK_NULL_CONTINUE(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_CONTINUE(overlayManager);
-        overlayManager->ContentChangeReport(menuNode, false);
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->hideAllMenusWithoutAnimation(menuManager_, AceType::Claim(this), showInSubwindow);
 }
 
 void OverlayManager::ErasePopup(int32_t targetId)
@@ -2822,368 +1806,98 @@ PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& nod
     return popupInfoError;
 }
 
-void OverlayManager::ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper)
-{
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->SetHasFoldModeChangedTransition(false);
-    auto layoutProperty = menuWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-}
-
-bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
-{
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu helper enter");
-    if (!menu) {
-        // get existing menuNode
-        auto it = menuMap_.find(targetId);
-        if (it != menuMap_.end()) {
-            menu = it->second;
-        }
-    } else {
-        // creating new menu
-        menuMap_[targetId] = menu;
-    }
-    CHECK_NULL_RETURN(menu, false);
-    ResetMenuWrapperVisibility(menu);
-    RefPtr<FrameNode> menuFrameNode = menu;
-    if (menu->GetTag() != V2::MENU_ETS_TAG) {
-        auto menuChild = menu->GetChildAtIndex(0);
-        CHECK_NULL_RETURN(menuChild, false);
-        menuFrameNode = DynamicCast<FrameNode>(menuChild);
-    }
-    CHECK_NULL_RETURN(menuFrameNode, false);
-    auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(props, false);
-    props->UpdateMenuOffset(offset);
-    menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    return true;
-}
-
 void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu enter");
-    if (!ShowMenuHelper(menu, targetId, offset)) {
-        TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
-        return;
-    }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    auto container = Container::Current();
-    if (container && container->IsSceneBoardWindow()) {
-        auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
-        CHECK_NULL_VOID(wrapperPattern);
-        auto menuChild = wrapperPattern->GetMenu();
-        CHECK_NULL_VOID(menuChild);
-        auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
-        CHECK_NULL_VOID(menuPattern);
-        rootNode = FindWindowScene(FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId()));
-    }
-    CHECK_NULL_VOID(rootNode);
-    auto rootChildren = rootNode->GetChildren();
-    auto iter = std::find(rootChildren.begin(), rootChildren.end(), menu);
-    // menuNode already showing
-    if (iter == rootChildren.end()) {
-        auto levelOrder = GetLevelOrder(menu);
-        MountToParentWithService(rootNode, menu, levelOrder);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        ShowMenuAnimation(menu);
-        menu->MarkModifyDone();
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->showMenu(menuManager_, AceType::Claim(this), targetId, offset, menu);
 }
 
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu insubwindow enter");
-    if (!ShowMenuHelper(menu, targetId, offset)) {
-        TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
-        return;
-    }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto pipeline = rootNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    RemoveMenuWrapperNode(rootNode, pipeline);
-
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    if ((menuWrapperPattern->IsContextMenu() || menuWrapperPattern->GetIsOpenMenu()) &&
-        (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE || menuWrapperPattern->GetMenuMaskEnable())) {
-        auto filterNode = menuWrapperPattern->GetFilterColumnNode();
-        if (filterNode && menuWrapperPattern->GetIsFilterInSubwindow()) {
-            SetHasFilter(true);
-            SetFilterColumnNode(filterNode);
-            filterNode->MountToParent(rootNode);
-            ShowFilterAnimation(filterNode, menuWrapperPattern->GetHost());
-            filterNode->MarkModifyDone();
-        }
-    }
-    menu->MountToParent(rootNode);
-    ShowMenuAnimation(menu);
-    menu->MarkModifyDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    pipeline->FlushUITasks();
-
-    // set subwindow container id in menu.
-    auto menuPattern = menu->GetPattern<PopupBasePattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetContainerId(Container::CurrentId());
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->showMenuInSubWindow(menuManager_, AceType::Claim(this), targetId, offset, menu);
 }
 
 void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter, id: %{public}d", menu ? menu->GetId() : -1);
-    CHECK_NULL_VOID(menu);
-    if (menu && menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-        auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(wrapperPattern);
-        wrapperPattern->UpdateMenuAnimation(menu);
-    }
-    PopMenuAnimation(menu);
-    RemoveMenuFilter(menu);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->hideMenuInSubWindow(menuManager_, menu, AceType::Claim(this), targetId);
 }
 
 void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter");
-    if (menuMap_.empty()) {
-        return;
-    }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto children = rootNode->GetChildren();
-    for (const auto& child : children) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            PopMenuAnimation(node, showPreviewAnimation, startDrag);
-            RemoveMenuFilter(node);
-        }
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->hideMenuInSubWindowIsStartDrag(menuManager_, AceType::Claim(this), showPreviewAnimation, startDrag);
 }
 
 RefPtr<FrameNode> OverlayManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
 {
-    CHECK_NULL_RETURN(node, nullptr);
-    auto iter = menuMap_.begin();
-    while (iter != menuMap_.end()) {
-        auto menuNode = (*iter).second;
-        CHECK_NULL_RETURN(menuNode, nullptr);
-        auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-        CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
-        auto menu = menuWrapperPattern->GetMenu();
-        CHECK_NULL_RETURN(menu, nullptr);
-        auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
-        CHECK_NULL_RETURN(menuPattern, nullptr);
-        if (menuPattern->GetCustomNode() == node) {
-            return menuNode;
-        }
-        iter++;
-    }
-    return nullptr;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->getMenuNodeWithExistContent(menuManager_, node);
 }
 
 RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 {
-    auto it = menuMap_.find(targetId);
-    if (it != menuMap_.end()) {
-        return it->second;
-    }
-    return nullptr;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->getMenuNode(menuManager_, targetId);
 }
 
 void OverlayManager::HideMenu(
     const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch, const HideMenuType& reason)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter %{public}d", reason);
-    CHECK_NULL_VOID(menu);
-    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    auto maskEnable = wrapperPattern->GetMenuMaskEnable();
-    auto menuPreviewMode = wrapperPattern->GetPreviewMode();
-    PopMenuAnimation(menu);
-    RemoveEventColumn();
-    if (isMenuOnTouch) {
-        RemovePixelMap();
-        RemoveGatherNode();
-    } else {
-        RemovePixelMapAnimation(false, 0, 0);
-        RemoveGatherNodeWithAnimation();
-    }
-    if (maskEnable || menuPreviewMode != MenuPreviewMode::NONE) {
-        RemoveMenuFilter(menu);
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    HideMenuParam hideMenuParam = {targetId, isMenuOnTouch};
+    modifier->hideMenu(menuManager_, menu, AceType::Claim(this), hideMenuParam, reason);
 }
 
 void OverlayManager::HideAllMenus()
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide all menus enter");
-    auto container = Container::Current();
-    if (container && container->IsSceneBoardWindow()) {
-        for (const auto& windowScene : windowSceneSet_) {
-            if (!windowScene.Upgrade()) {
-                continue;
-            }
-            for (const auto& child : windowScene.Upgrade()->GetChildren()) {
-                auto node = DynamicCast<FrameNode>(child);
-                if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-                    TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
-                    PopMenuAnimation(node);
-                }
-            }
-        }
-        return;
-    }
-
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            auto wrapperPattern = node->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(wrapperPattern);
-            wrapperPattern->UpdateMenuAnimation(node);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
-            PopMenuAnimation(node);
-        }
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->hideAllMenus(menuManager_, AceType::Claim(this));
 }
 
 void OverlayManager::DeleteMenu(int32_t targetId)
 {
-    auto it = menuMap_.find(targetId);
-    if (it == menuMap_.end()) {
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "delete menu enter");
-    auto node = AceType::DynamicCast<FrameNode>(it->second);
-    CHECK_NULL_VOID(node);
-    if (node->GetParent()) {
-        auto id = Container::CurrentId();
-        SubwindowManager::GetInstance()->ClearMenu();
-        SubwindowManager::GetInstance()->ClearMenuNG(id, targetId);
-        RemoveEventColumn();
-        CallMenuDisappearOnlyNewLifeCycle(node);
-        RemoveMenuNotInSubWindow(WeakClaim(RawPtr(node)), rootNodeWeak_, WeakClaim(this));
-    }
-    EraseMenuInfo(targetId);
-    SetIsMenuShow(false);
-    PublishMenuStatus(false);
-    ContentChangeReport(node, false);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->deleteMenu(menuManager_, targetId, AceType::Claim(this));
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow with animation enter");
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    RefPtr<FrameNode> menu;
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            menu = node;
-            break;
-        }
-    }
-    CHECK_NULL_VOID(menu);
-    if (menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-        auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(wrapperPattern);
-        wrapperPattern->UpdateMenuAnimation(menu);
-    }
-    PopMenuAnimation(menu);
-    RemoveMenuFilter(menu);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->cleanMenuInSubWindowWithAnimation(menuManager_, AceType::Claim(this));
 }
 
 void OverlayManager::CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode)
 {
-    CHECK_NULL_VOID(flexNode && flexNode->GetTag() == V2::FLEX_ETS_TAG);
-    for (const auto& child : flexNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(node && node->GetTag() == V2::STACK_ETS_TAG);
-
-        auto previewNode = node->GetLastChild();
-        if (previewNode && previewNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
-            node->RemoveChild(previewNode);
-        }
-
-        auto imageNode = node->GetFirstChild();
-        if (imageNode && imageNode->GetTag() == V2::IMAGE_ETS_TAG) {
-            node->RemoveChild(imageNode);
-        }
-
-        flexNode->RemoveChild(node);
-        flexNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        break;
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->cleanHoverImagePreviewInSubWindow(menuManager_, flexNode);
 }
 
 void OverlayManager::CleanPreviewInSubWindow()
 {
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            for (auto& childNode : node->GetChildren()) {
-                auto frameNode = DynamicCast<FrameNode>(childNode);
-                if (frameNode && (frameNode->GetTag() == V2::FLEX_ETS_TAG ||
-                    frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
-                    CleanHoverImagePreviewInSubWindow(frameNode);
-                    auto imagelayoutProperty = frameNode->GetLayoutProperty();
-                    if (imagelayoutProperty) {
-                        imagelayoutProperty->UpdateVisibility(VisibleType::GONE);
-                    } else {
-                        TAG_LOGW(AceLogTag::ACE_OVERLAY, "Preview image failed to set invisible.");
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->cleanPreviewInSubWindow(menuManager_);
 }
 
 void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "clean menu insubwindow enter");
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        CHECK_NULL_CONTINUE(node);
-        if (node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
-            continue;
-        }
-
-        auto menuWrapperPattern = node->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        if (menuWrapperPattern->GetTargetId() != targetId) {
-            continue;
-        }
-
-        for (auto& childNode : node->GetChildren()) {
-            auto frameNode = DynamicCast<FrameNode>(childNode);
-            if (frameNode && (frameNode->GetTag() == V2::FLEX_ETS_TAG ||
-                frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
-                CleanHoverImagePreviewInSubWindow(frameNode);
-                node->RemoveChild(frameNode);
-                break;
-            }
-        }
-        CallMenuDisappearOnlyNewLifeCycle(node);
-        rootNode->RemoveChild(node);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        SetIsMenuShow(false);
-        PublishMenuStatus(false);
-        auto subwindowMgr = SubwindowManager::GetInstance();
-        subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId(), SubwindowType::TYPE_MENU);
-        RemoveMenuFilter(node, false);
-        break;
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->cleanMenuInSubWindow(menuManager_, targetId);
 }
 
 void OverlayManager::CleanPopupInSubWindow(bool isForceClear)
@@ -3445,6 +2159,13 @@ void OverlayManager::ReloadBuilderNodeConfig()
         }
         iter++;
     }
+}
+
+bool OverlayManager::IsMenuShow()
+{
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->isMenuShow(menuManager_);
 }
 
 void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
@@ -4287,13 +3008,9 @@ bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 
 bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove menu enter");
-    CHECK_NULL_RETURN(overlay, false);
-    auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(menuWrapperPattern, false);
-    menuWrapperPattern->UpdateMenuAnimation(overlay);
-    menuWrapperPattern->HideMenu(HideMenuType::REMOVE_MENU);
-    return true;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->removeMenu(menuManager_, overlay);
 }
 
 bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
@@ -4311,27 +3028,16 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
 
 void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
 {
-    // notify drag manager the menu show status
-    if (!menuNode) {
-        DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow);
-        SelectableUtils::GetInstance().PublishMenuStatus(isMenuShow, menuNode);
-        return;
-    }
-    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menu = menuWrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto targetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
-    CHECK_NULL_VOID(targetNode);
-    DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow, targetNode);
-    SelectableUtils::GetInstance().PublishMenuStatus(isMenuShow, targetNode);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->publishMenuStatus(menuManager_, isMenuShow, menuNode);
 }
 
 void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
 {
-    isMenuShow_ = isMenuShow;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setIsMenuShow(menuManager_, isMenuShow, menuNode);
 }
 
 int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
@@ -7389,27 +6095,9 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
 
 void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool hasAnimation)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove filter enter, hasAnimation: %{public}d", hasAnimation);
-    CHECK_NULL_VOID(menuWrapper);
-    auto warpperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(warpperPattern);
-    auto filterNode = warpperPattern->GetFilterColumnNode();
-    CHECK_NULL_VOID(filterNode);
-    auto pipeline = filterNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    if (!hasAnimation) {
-        overlayManager->RemoveFilterWithNode(filterNode);
-        return;
-    }
-
-    if (overlayManager->IsFilterOnDisappear(filterNode->GetId())) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter is already disappearing, filterId: %{public}d", filterNode->GetId());
-        return;
-    }
-    overlayManager->ShowFilterDisappearAnimation(filterNode);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->removeMenuFilter(menuManager_, menuWrapper, hasAnimation);
 }
 
 void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode)
@@ -7774,112 +6462,32 @@ void OverlayManager::UpdateModalUIExtensionConfig(
 RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(
     const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "build AI entity menu enter");
-    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU));
-    CHECK_NULL_RETURN(menuNode, nullptr);
-    for (const auto& menuOption : menuOptions) {
-        MenuItemGroupView::Create();
-        auto menuItemGroupNode = DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-        CHECK_NULL_RETURN(menuItemGroupNode, nullptr);
-        MenuItemProperties menuItemProperties;
-        menuItemProperties.content = menuOption.first;
-        MenuItemModelNG menuItemModel;
-        menuItemModel.Create(menuItemProperties);
-        auto menuItemNode = DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-        CHECK_NULL_RETURN(menuItemNode, nullptr);
-        auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
-        CHECK_NULL_RETURN(menuItemPattern, nullptr);
-        menuItemPattern->SetOnClickAIMenuItem(menuOption.second);
-        menuItemNode->MountToParent(menuItemGroupNode);
-        menuItemGroupNode->MountToParent(menuNode);
-    }
-    return menuNode;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->buildAIEntityMenu(menuManager_, menuOptions);
 }
 
 RefPtr<FrameNode> OverlayManager::CreateAIEntityMenu(
     const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions, const RefPtr<FrameNode>& targetNode)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "create AI entity menu enter");
-    CHECK_NULL_RETURN(targetNode, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    MenuParam menuParam;
-    menuParam.type = MenuType::MENU;
-    menuParam.placement = Placement::BOTTOM_LEFT;
-    auto menuWrapperNode =
-        MenuView::Create(BuildAIEntityMenu(menuOptions), targetNode->GetId(), targetNode->GetTag(), menuParam, true);
-    return menuWrapperNode;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createAIEntityMenu(menuManager_, menuOptions, targetNode);
 }
 
 bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
     const RectF& aiRect, const RefPtr<FrameNode>& targetNode)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show AI entity menu enter");
-    CHECK_NULL_RETURN(targetNode, false);
-    auto menuWrapperNode = CreateAIEntityMenu(menuOptions, targetNode);
-    CHECK_NULL_RETURN(menuWrapperNode, false);
-    menuWrapperNode->GetOrCreateFocusHub()->SetFocusable(false);
-    auto wrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(wrapperPattern, false);
-    auto pipeline = targetNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, false);
-    auto targetId = targetNode->GetId();
-    wrapperPattern->RegisterMenuAppearCallback([overlayWk = WeakClaim(this),
-        safeAreaWK = WeakClaim(RawPtr(safeAreaManager)), targetId, containerId = Container::CurrentId()]() {
-            ContainerScope scope(containerId);
-            auto safeAreaManager = safeAreaWK.Upgrade();
-            CHECK_NULL_VOID(safeAreaManager);
-            safeAreaManager->AddKeyboardChangeCallbackConsideringUIExt(targetId, [overlayWk, targetId, containerId]() {
-                    ContainerScope scope(containerId);
-                    auto overlayManager = overlayWk.Upgrade();
-                    CHECK_NULL_VOID(overlayManager);
-                    overlayManager->CloseAIEntityMenu(targetId);
-                });
-        });
-    wrapperPattern->RegisterMenuDisappearCallback(
-        [safeAreaWK = WeakClaim(RawPtr(safeAreaManager)), targetId, containerId = Container::CurrentId()]() {
-            ContainerScope scope(containerId);
-            auto safeAreaManager = safeAreaWK.Upgrade();
-            CHECK_NULL_VOID(safeAreaManager);
-            safeAreaManager->RemoveKeyboardChangeCallbackConsideringUIExt(targetId);
-        });
-    auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
-    CHECK_NULL_RETURN(menuNode, false);
-    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(menuLayoutProperty, false);
-    menuLayoutProperty->UpdateIsRectInTarget(true);
-    menuLayoutProperty->UpdateTargetSize(aiRect.GetSize());
-
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    if (theme->GetExpandDisplay()) {
-        MenuParam menuParam {};
-        SubwindowManager::GetInstance()->ShowMenuNG(menuWrapperNode, menuParam, targetNode, aiRect.GetOffset());
-    } else {
-        menuLayoutProperty->UpdateShowInSubWindow(false);
-        ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
-    }
-    return true;
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->showAIEntityMenu(menuManager_, menuOptions, aiRect, targetNode, AceType::Claim(this));
 }
 
 void OverlayManager::CloseAIEntityMenu(int32_t targetId)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay) {
-        SubwindowManager::GetInstance()->ClearMenu();
-        SubwindowManager::GetInstance()->ClearMenuNG(Container::CurrentId(), targetId);
-    } else {
-        auto menuNode = GetMenuNode(targetId);
-        CHECK_NULL_VOID(menuNode);
-        HideMenu(menuNode, targetId, false, HideMenuType::CLOSE_AI_MENU);
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    return modifier->closeAIEntityMenu(menuManager_, AceType::Claim(this), targetId);
 }
 
 void OverlayManager::CreateOverlayNode()
@@ -8489,16 +7097,25 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
     return textNode;
 }
 
+bool OverlayManager::IsGatherWithMenu()
+{
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->isGatherWithMenu(menuManager_);
+}
+
+void OverlayManager::SetIsGatherWithMenu(bool isGatherWithMenu)
+{
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->setIsGatherWithMenu(menuManager_, isGatherWithMenu);
+}
+
 void OverlayManager::RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode)
 {
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto badgeNode = pattern->GetBadgeNode();
-    CHECK_NULL_VOID(badgeNode);
-    menuWrapperNode->RemoveChild(badgeNode);
-    menuWrapperNode->RebuildRenderContextTree();
-    menuWrapperNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    return modifier->removeMenuBadgeNode(menuManager_, menuWrapperNode);
 }
 
 void OverlayManager::RemovePreviewBadgeNode()
@@ -8524,125 +7141,23 @@ const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
 
 void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
-    CHECK_NULL_VOID(columnNode);
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto pipelineContext = menuWrapperNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto hoverDelay = menuWrapperPattern->GetHoverScaleInterruption();
-    auto delay = hoverDelay ? menuTheme->GetHoverImageDelayDuration(true) : 0;
-    if (delay > 0) {
-        previewFilterTask_.Reset([weak = WeakClaim(this), columnWeak = WeakClaim(RawPtr(columnNode)),
-                                     wrapperWeak = WeakClaim(RawPtr(menuWrapperNode))]() {
-            auto columnNode = columnWeak.Upgrade();
-            auto menuWrapperNode = wrapperWeak.Upgrade();
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->ExecuteFilterAnimation(columnNode, menuWrapperNode);
-        });
-        auto taskExecutor = pipelineContext->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(
-            previewFilterTask_, TaskExecutor::TaskType::UI, delay, "ArkUIShowFilterDelayTask");
-    } else {
-        ExecuteFilterAnimation(columnNode, menuWrapperNode);
-    }
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->showFilterAnimation(menuManager_, columnNode, menuWrapperNode, AceType::Claim(this));
 }
 
-void OverlayManager::ExecuteFilterAnimation(
-    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
+void OverlayManager::EraseMenuInfo(int32_t targetId)
 {
-    CHECK_NULL_VOID(columnNode);
-
-    auto filterRenderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(filterRenderContext);
-
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto pipelineContext = menuWrapperNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto maskEnable = menuWrapperPattern->GetMenuMaskEnable();
-    auto maskColor = maskEnable ? menuWrapperPattern->GetMenuMaskColor() : menuTheme->GetPreviewMenuMaskColor();
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = maskEnable ? menuWrapperPattern->GetMenuMaskBlurStyle() : BlurStyle::BACKGROUND_THIN;
-    styleOption.colorMode = ThemeColorMode::SYSTEM;
-
-    AnimationOption option;
-    option.SetDuration(menuTheme->GetFilterAnimationDuration());
-    option.SetCurve(Curves::SHARP);
-    option.SetOnFinishEvent([weak = WeakClaim(this), filterId = columnNode->GetId()] {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "show filter animation finish");
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->SetFilterActive(false);
-    });
-    filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
-    if (maskEnable || !menuTheme->GetHasBackBlur()) {
-        filterRenderContext->UpdateBackgroundColor(maskColor.ChangeOpacity(0.0f));
-    }
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "start show filter animation");
-    AnimationUtils::Animate(
-        option,
-        [filterRenderContext, styleOption, maskColor, menuTheme, maskEnable]() {
-            CHECK_NULL_VOID(filterRenderContext);
-            if (maskEnable) {
-                filterRenderContext->UpdateBackBlurStyle(styleOption);
-                filterRenderContext->UpdateBackgroundColor(maskColor);
-            } else if (menuTheme->GetHasBackBlur()) {
-                filterRenderContext->UpdateBackBlurStyle(styleOption);
-            } else {
-                filterRenderContext->UpdateBackgroundColor(maskColor);
-            }
-        },
-        option.GetOnFinishEvent(), nullptr, columnNode->GetContextRefPtr());
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->eraseMenuInfo(menuManager_, targetId);
 }
 
 bool OverlayManager::RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper)
 {
-    CHECK_NULL_RETURN(menuWrapper, false);
-    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_RETURN(wrapperPattern, false);
-    auto onHoverImageDisappear = wrapperPattern->GetIsShowHoverImage() &&
-                                 (wrapperPattern->GetOnMenuDisappear() || wrapperPattern->GetOnPreviewDisappear());
-    if (onHoverImageDisappear) {
-        return false;
-    }
-
-    auto pipeline = menuWrapper->GetContextRefPtr();
-    auto instanceId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
-    SubwindowManager::GetInstance()->ClearMenuNG(instanceId, wrapperPattern->GetTargetId());
-    ResetContextMenuDragHideFinished();
-    return true;
-}
-
-void OverlayManager::RemoveMenuNotInSubWindow(
-    const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak)
-{
-    auto menu = menuWK.Upgrade();
-    CHECK_NULL_VOID(menu);
-    auto rootNode = rootWeak.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto overlayManager = overlayWeak.Upgrade();
-    CHECK_NULL_VOID(overlayManager);
-
-    auto container = Container::Current();
-    if (container && container->IsSceneBoardWindow()) {
-        rootNode = overlayManager->FindWindowScene(menu);
-    }
-    CHECK_NULL_VOID(rootNode);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
-        SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
-            menuWrapperPattern->GetContainerId(), menu->GetId());
-    }
-    RemoveChildWithService(rootNode, menu);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->removeMenuInSubWindow(menuManager_, menuWrapper, AceType::Claim(this));
 }
 
 void OverlayManager::DumpOverlayInfo() const
@@ -8657,9 +7172,6 @@ void OverlayManager::DumpOverlayInfo() const
 
     DumpLog::GetInstance().Print("----------PopupMapInfo----------");
     DumpPopupMapInfo();
-
-    DumpLog::GetInstance().Print("----------MenuMapInfo----------");
-    DumpMapInfo(menuMap_, "MenuMap");
 
     DumpLog::GetInstance().Print("----------DialogMapInfo----------");
     DumpMapInfo(dialogMap_, "DialogMap", false);
@@ -8951,76 +7463,6 @@ bool OverlayManager::IsRootExpansive() const
     return opts && opts->Expansive();
 }
 
-void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline)
-{
-    CHECK_NULL_VOID(rootNode);
-    CHECK_NULL_VOID(pipeline);
-    std::vector<int32_t> idsNeedClean;
-    bool needCallOldLifeCycle = IsSceneBoardWindow();
-    auto children = rootNode->GetChildren();
-    for (const auto& child : children) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (!node || node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
-            continue;
-        }
-        idsNeedClean.push_back(child->GetId());
-        if (needCallOldLifeCycle) {
-            CallMenuDisappearWithStatus(node);
-        } else {
-            CallMenuDisappearOnlyNewLifeCycle(node);
-        }
-        EraseMenuInfoFromWrapper(node);
-        rootNode->RemoveChild(node);
-    }
-    CHECK_EQUAL_VOID(idsNeedClean.empty(), true);
-    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = pipeline->GetInstanceId()] {
-        auto subwindowMgr = SubwindowManager::GetInstance();
-        for (auto child : idsNeedClean) {
-            subwindowMgr->DeleteHotAreas(containerId, child, SubwindowType::TYPE_MENU);
-        }
-    });
-}
-
-void OverlayManager::CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode)
-{
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
-        // When the menu is forcibly removed during the disappearing process, the onDidDisappear life cycle needs to be
-        // called back to the user.
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    } else if (menuWrapperPattern->IsShow()) {
-        // When the menu is forcibly removed during display, the life cycle of onWillDisappear and
-        // onDidDisappear needs to be called back to the user.
-        menuWrapperPattern->CallMenuOnWillDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    }
-    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
-}
-
-void OverlayManager::CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode)
-{
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    
-    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
-        // When the menu is forcibly removed during the disappearing process, the onDisappear life cycle needs to be
-        // called back to the user.
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    } else if (menuWrapperPattern->IsShow()) {
-        // When the menu is forcibly removed during display, the life cycle of aboutToDisappear and
-        // onDisappear needs to be called back to the user.
-        menuWrapperPattern->CallMenuAboutToDisappearCallback();
-        menuWrapperPattern->CallMenuOnWillDisappearCallback();
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->CallMenuOnDidDisappearCallback();
-    }
-    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
-}
-
 void OverlayManager::SetDragNodeNeedClean(bool needClean)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -9230,17 +7672,23 @@ int32_t OverlayManager::RemoveOverlayManagerNode()
 
 void OverlayManager::SkipMenuShow(int32_t targetId)
 {
-    skipTargetIds_.insert(targetId);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->skipMenuShow(menuManager_, targetId);
 }
 
 void OverlayManager::ResumeMenuShow(int32_t targetId)
 {
-    skipTargetIds_.erase(targetId);
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resumeMenuShow(menuManager_, targetId);
 }
 
 bool OverlayManager::CheckSkipMenuShow(int32_t targetId)
 {
-    return skipTargetIds_.find(targetId) != skipTargetIds_.end();
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->checkSkipMenuShow(menuManager_, targetId);
 }
 
 void OverlayManager::AddFilterOnDisappear(int32_t filterId)
@@ -9327,21 +7775,6 @@ bool OverlayManager::IsSceneBoardWindow()
         }
     }
     return container->IsSceneBoardWindow();
-}
-
-void OverlayManager::EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapperNode)
-{
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto targetId = pattern->GetTargetId();
-    auto currentMenuWrapper = menuMap_[targetId];
-    CHECK_NULL_VOID(currentMenuWrapper);
-    // When a menu is displayed for multiple times, if a menu is squeezed out, it is necessary to check whether the menu
-    // is the current recorded menu
-    if (currentMenuWrapper->GetId() == menuWrapperNode->GetId()) {
-        EraseMenuInfo(targetId);
-    }
 }
 
 void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow)

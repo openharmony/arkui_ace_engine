@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -660,7 +660,7 @@ export class ButtonConfiguration_serializer {
         const triggerClickTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerClickTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerClickTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerClickTmpResult : ButtonTriggerClickCallback = (xPos: double, yPos: double):void => {
+        const triggerClickTmpBufClosure  = (xPos: double, yPos: double):void => {
             const triggerClickTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerClickTmpBufBufArgsSerializer.writeInt32(triggerClickTmpBufBufResource.resourceId);
             triggerClickTmpBufBufArgsSerializer.writePointer(triggerClickTmpBufBufCall);
@@ -671,6 +671,8 @@ export class ButtonConfiguration_serializer {
             triggerClickTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerClickTmpBufClosure, triggerClickTmpBufBufResource)
+        const triggerClickTmpResult : ButtonTriggerClickCallback = triggerClickTmpBufClosure
         let value : ButtonConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, label: labelTmpResult, pressed: pressedTmpResult, triggerClick: triggerClickTmpResult} as ButtonConfiguration)
         return value
     }

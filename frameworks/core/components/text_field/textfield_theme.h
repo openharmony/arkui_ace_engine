@@ -58,6 +58,7 @@ public:
             theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->micSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.mic");
             theme->autoFillSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.security_shield");
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle || !theme) {
@@ -478,6 +479,26 @@ public:
         return cancelSymbolId_;
     }
 
+    uint32_t GetMicSymbolId() const
+    {
+        return micSymbolId_;
+    }
+
+    const Dimension& GetMicSize() const
+    {
+        return micSize_;
+    }
+
+    const Dimension& GetMicPadding() const
+    {
+        return micPadding_;
+    }
+
+    const Dimension& GetMicIconSize() const
+    {
+        return micIconSize_;
+    }
+
     bool ShowEllipsis() const
     {
         return showEllipsis_;
@@ -707,6 +728,11 @@ public:
     const std::string& GetCancelButton() const
     {
         return cancelButton_;
+    }
+
+    const std::string& GetVoiceButton() const
+    {
+        return voiceButtonText_;
     }
 
     const std::string& GetCancelImageText() const
@@ -1034,6 +1060,10 @@ private:
     uint32_t hideSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
     uint32_t autoFillSymbolId_ = 0;
+    uint32_t micSymbolId_ = 0;
+    Dimension micSize_ = 32.0_vp;
+    Dimension micPadding_ = 4.0_vp;
+    Dimension micIconSize_ = 20.0_vp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 
@@ -1089,6 +1119,7 @@ private:
     std::string aiWriteAbilityName_;
     std::string aiWriteIsSupport_;
     std::string cancelImageText_;
+    std::string voiceButtonText_;
     bool needFocusBox_ = false;
     Dimension focusPadding_;
     Color autoFillIconPrimaryColor_;

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ShadowConfig {
+class ACE_FORCE_EXPORT ShadowConfig {
 public:
     ShadowConfig() = delete;
     ~ShadowConfig() = default;

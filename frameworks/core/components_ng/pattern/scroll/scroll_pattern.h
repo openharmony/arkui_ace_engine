@@ -450,8 +450,6 @@ private:
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void ReportOnItemScrollEvent(const std::string& event);
     int32_t OnInjectionEvent(const std::string& command) override;
-    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
-    void ScrollHandle(float distance, int32_t reportEventId);
 
     double currentOffset_ = 0.0;
     double lastOffset_ = 0.0;

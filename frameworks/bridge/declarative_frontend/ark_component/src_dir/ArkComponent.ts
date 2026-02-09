@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,59 +15,13 @@
 
 /// <reference path="../types/index.d.ts" />
 /// <reference path="../types/ArkUINativeModule.d.ts" />
+/// <reference path="./CommonUtils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
     return arkUINativeModule;
   }
   return arkUINativeModule;
-}
-
-const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
-type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
-const isString = (val: basicType): boolean => typeof val === 'string';
-const isNumber = (val: basicType): boolean => typeof val === 'number';
-const isBigint = (val: basicType): boolean => typeof val === 'bigint';
-const isBoolean = (val: basicType): boolean => typeof val === 'boolean';
-const isSymbol = (val: basicType): boolean => typeof val === 'symbol';
-const isUndefined = (val: basicType): boolean => typeof val === 'undefined';
-const isObject = (val: basicType): boolean => typeof val === 'object';
-const isFunction = (val: basicType): boolean => typeof val === 'function';
-const isLengthType = (val: any): boolean => typeof val === 'string' || typeof val === 'number';
-const isNull = (val: any) => typeof val === 'object' && val === null;
-const isArray = (val: any) => Array.isArray(val);
-const isDate = (val: any) => val instanceof Date;
-const isRegExp = (val: any) => val instanceof RegExp;
-const isError = (val: any) => val instanceof Error;
-const isFloat = (val: any) => Number.isFinite(val) && !Number.isInteger(val);
-const isInteger = (val: any) => Number.isInteger(val);
-const isNonEmptyMap = (val: any) => val instanceof Map && val.size > 0;
-const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '';
-
-function isResource(variable: any): variable is Resource {
-  return (variable as Resource)?.bundleName !== undefined;
-}
-
-function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
-  if (!isResource(stageValue) && !isResource(value)) {
-    return (stageValue === value);
-  }
-  return false;
-}
-
-function deepCompareArrays(arr1: Array<any>, arr2: Array<any>): boolean {
-  return (
-    Array.isArray(arr1) &&
-    Array.isArray(arr2) &&
-    arr1.length === arr2.length &&
-    arr1.every((value, index) => {
-      if (Array.isArray(value) && Array.isArray(arr2[index])) {
-        return deepCompareArrays(value, arr2[index]);
-      } else {
-        return value === arr2[index];
-      }
-    })
-  );
 }
 
 class ModifierWithKey<T extends number | string | boolean | object | Function> {
@@ -585,8 +539,8 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ArkShadowStyle> {
     if (reset) {
       getUINativeModule().common.resetShadow(node);
     } else {
-      if (isNumber(this.value.shadowStyle)) {
-        getUINativeModule().common.setShadow(node, this.value.shadowStyle, undefined, undefined, undefined, undefined, undefined, undefined);
+      if (isNumber((this.value as ShadowOptions).shadowStyle)) {
+        getUINativeModule().common.setShadow(node, (this.value as ShadowOptions).shadowStyle, undefined, undefined, undefined, undefined, undefined, undefined);
       } else {
         getUINativeModule().common.setShadow(node, undefined,
           (this.value as ShadowOptions).radius,
@@ -600,7 +554,7 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ArkShadowStyle> {
   }
 
   checkObjectDiff(): boolean {
-    if (isNumber(this.value.shadowStyle)) {
+    if (isNumber((this.value as ShadowOptions).shadowStyle)) {
       return true;
     }
     const stageValue = this.stageValue as ShadowOptions;
@@ -1138,6 +1092,838 @@ class OutlineColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
         (this.stageValue as EdgeColors).bottom === (this.value as EdgeColors).bottom);
     } else {
       return true;
+    }
+  }
+}
+
+class OutlineRadiusModifier extends ModifierWithKey<Dimension | OutlineRadiuses> {
+  constructor(value: Dimension | OutlineRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('outlineRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOutlineRadius(node);
+    } else {
+      const valueType: string = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().common.setOutlineRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().common.setOutlineRadius(node, (this.value as OutlineRadiuses).topLeft,
+          (this.value as OutlineRadiuses).topRight, (this.value as OutlineRadiuses).bottomLeft,
+          (this.value as OutlineRadiuses).bottomRight);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
+
+class OutlineStyleModifier extends ModifierWithKey<OutlineStyle | EdgeOutlineStyles> {
+  constructor(value: OutlineStyle | EdgeOutlineStyles) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('outlineStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOutlineStyle(node);
+    } else {
+      if (isNumber(this.value)) {
+        getUINativeModule().common.setOutlineStyle(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().common.setOutlineStyle(node,
+          (this.value as EdgeOutlineStyles).top,
+          (this.value as EdgeOutlineStyles).right,
+          (this.value as EdgeOutlineStyles).bottom,
+          (this.value as EdgeOutlineStyles).left);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.value as EdgeOutlineStyles).top === (this.stageValue as EdgeOutlineStyles).top &&
+      (this.value as EdgeOutlineStyles).right === (this.stageValue as EdgeOutlineStyles).right &&
+      (this.value as EdgeOutlineStyles).bottom === (this.stageValue as EdgeOutlineStyles).bottom &&
+      (this.value as EdgeOutlineStyles).left === (this.stageValue as EdgeOutlineStyles).left);
+  }
+}
+
+class OutlineWidthModifier extends ModifierWithKey<Dimension | EdgeOutlineWidths> {
+  constructor(value: Dimension | EdgeOutlineWidths) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('outlineWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOutlineWidth(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().common.setOutlineWidth(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().common.setOutlineWidth(node,
+          (this.value as EdgeOutlineWidths).left,
+          (this.value as EdgeOutlineWidths).right,
+          (this.value as EdgeOutlineWidths).top,
+          (this.value as EdgeOutlineWidths).bottom);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as EdgeOutlineWidths).left === (this.value as EdgeOutlineWidths).left &&
+        (this.stageValue as EdgeOutlineWidths).right === (this.value as EdgeOutlineWidths).right &&
+        (this.stageValue as EdgeOutlineWidths).top === (this.value as EdgeOutlineWidths).top &&
+        (this.stageValue as EdgeOutlineWidths).bottom === (this.value as EdgeOutlineWidths).bottom);
+    } else {
+      return true;
+    }
+  }
+}
+
+class OutlineModifier extends ModifierWithKey<OutlineOptions> {
+  constructor(value: OutlineOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('outline');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOutline(node);
+    } else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        } else {
+          widthLeft = (this.value.width as EdgeOutlineWidths).left;
+          widthRight = (this.value.width as EdgeOutlineWidths).right;
+          widthTop = (this.value.width as EdgeOutlineWidths).top;
+          widthBottom = (this.value.width as EdgeOutlineWidths).bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        } else {
+          const localizedEdgeColors = this.value.color as LocalizedEdgeColors;
+          if (localizedEdgeColors.start || localizedEdgeColors.end) {
+            leftColor = localizedEdgeColors.start;
+            rightColor = localizedEdgeColors.end;
+            topColor = localizedEdgeColors.top;
+            bottomColor = localizedEdgeColors.bottom;
+          } else {
+            const edgeColors = this.value.color as EdgeColors;
+            leftColor = edgeColors.left;
+            rightColor = edgeColors.right;
+            topColor = edgeColors.top;
+            bottomColor = edgeColors.bottom;
+          }
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        } else {
+          topLeft = (this.value.radius as OutlineRadiuses).topLeft;
+          topRight = (this.value.radius as OutlineRadiuses).topRight;
+          bottomLeft = (this.value.radius as OutlineRadiuses).bottomLeft;
+          bottomRight = (this.value.radius as OutlineRadiuses).bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        } else {
+          styleTop = (this.value.style as EdgeOutlineStyles).top;
+          styleRight = (this.value.style as EdgeOutlineStyles).right;
+          styleBottom = (this.value.style as EdgeOutlineStyles).bottom;
+          styleLeft = (this.value.style as EdgeOutlineStyles).left;
+        }
+      }
+      getUINativeModule().common.setOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor,
+        topLeft, topRight, bottomLeft, bottomRight,
+        styleTop, styleRight, styleBottom, styleLeft);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
+  }
+}
+
+class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle> {
+  constructor(value: ArkForegroundBlurStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('foregroundBlurStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundBlurStyle(node);
+    } else {
+      getUINativeModule().common.setForegroundBlurStyle(node,
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment> {
+  constructor(value: Position | Alignment) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImagePosition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImagePosition(node);
+    } else {
+      if (isNumber(this.value)) {
+        getUINativeModule().common.setBackgroundImagePosition(node, this.value, undefined, undefined);
+      } else {
+        getUINativeModule().common.setBackgroundImagePosition(node, undefined, (this.value as Position)?.x, (this.value as Position)?.y);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.value as Position)?.x === (this.stageValue as Position)?.x &&
+      (this.value as Position)?.y === (this.stageValue as Position)?.y);
+  }
+}
+
+class BackgroundImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImageResizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      let sliceRight: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice as EdgeWidths;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class LinearGradientBlurModifier extends ModifierWithKey<ArkLinearGradientBlur> {
+  constructor(value: ArkLinearGradientBlur) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('linearGradientBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetLinearGradientBlur(node);
+    } else {
+      getUINativeModule().common.setLinearGradientBlur(node,
+        this.value.blurRadius, this.value.fractionStops, this.value.direction);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+
+class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage> {
+  constructor(value: ArkBackgroundImage) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImage');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImage(node);
+    } else {
+      getUINativeModule().common.setBackgroundImage(node, this.value.src, this.value.repeat);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as ArkBackgroundImage).src === (this.value as ArkBackgroundImage).src &&
+      (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat);
+  }
+}
+
+class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
+  constructor(value: ArkBackgroundBlurStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundBlurStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundBlurStyle(node);
+    } else {
+      getUINativeModule().common.setBackgroundBlurStyle(node,
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale, this.value.policy, this.value.inactiveColor, this.value.type);
+    }
+  }
+}
+
+class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize> {
+  constructor(value: SizeOptions | ImageSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImageSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageSize(node);
+    } else {
+      if (isNumber(this.value)) {
+        getUINativeModule().common.setBackgroundImageSize(node, this.value, undefined, undefined);
+      } else {
+        getUINativeModule().common.setBackgroundImageSize(node, undefined, (this.value as SizeOptions)?.width, (this.value as SizeOptions)?.height);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.value as SizeOptions).width === (this.stageValue as SizeOptions).width &&
+      (this.value as SizeOptions).height === (this.stageValue as SizeOptions).height);
+  }
+}
+
+class TranslateModifier extends ModifierWithKey<TranslateOptions> {
+  constructor(value: TranslateOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('translate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetTranslate(node);
+    } else {
+      getUINativeModule().common.setTranslate(node, this.value.x, this.value.y, this.value.z);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.value.x === this.stageValue.x &&
+      this.value.y === this.stageValue.y &&
+      this.value.z === this.stageValue.z);
+  }
+}
+
+class ScaleModifier extends ModifierWithKey<ScaleOptions> {
+  constructor(value: ScaleOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetScale(node);
+    } else {
+      getUINativeModule().common.setScale(node, this.value.x, this.value.y, this.value.z, this.value.centerX, this.value.centerY);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(
+      this.value.x === this.stageValue.x &&
+      this.value.y === this.stageValue.y &&
+      this.value.z === this.stageValue.z &&
+      this.value.centerX === this.stageValue.centerX &&
+      this.value.centerY === this.stageValue.centerY
+    );
+  }
+}
+
+class RotateModifier extends ModifierWithKey<RotateOptions | RotateAngleOptions> {
+  constructor(value: RotateOptions | RotateAngleOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('rotate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetRotate(node);
+    } else {
+      if ('angle' in this.value) {
+        getUINativeModule().common.setRotate(
+          node,
+          this.value.x,
+          this.value.y,
+          this.value.z,
+          this.value.angle,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      } else {
+        getUINativeModule().common.setRotateAngle(
+          node,
+          this.value.angleX,
+          this.value.angleY,
+          this.value.angleZ,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if ('angle' in this.value) {
+      return !(
+      this.value.x === this.stageValue.x &&
+      this.value.y === this.stageValue.y &&
+      this.value.z === this.stageValue.z &&
+      this.value.angle === this.stageValue.angle &&
+      this.value.centerX === this.stageValue.centerX &&
+      this.value.centerY === this.stageValue.centerY &&
+      this.value.centerZ === this.stageValue.centerZ &&
+      this.value.perspective === this.stageValue.perspective
+      );
+    } else {
+      return !(
+        this.value.angleX === this.stageValue.angleX &&
+        this.value.angleY === this.stageValue.angleY &&
+        this.value.angleZ === this.stageValue.angleZ &&
+        this.value.centerX === (this.stageValue.centerX) &&
+        this.value.centerY === (this.stageValue.centerY) &&
+        this.value.centerZ === (this.stageValue.centerZ) &&
+        this.value.perspective === this.stageValue.perspective
+      );
+    }
+  }
+}
+
+class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> {
+  constructor(value: ArkGeometryTransition) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('geometryTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetGeometryTransition(node);
+    } else {
+      getUINativeModule().common.setGeometryTransition(node, this.value.id,
+        (this.value.options as GeometryTransitionOptions)?.follow,
+        (this.value.options as GeometryTransitionOptions)?.hierarchyStrategy);
+    }
+  }
+}
+
+class AdvancedBlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('advancedBlendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    } else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
+class BlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('blendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBlendMode(node);
+    } else {
+      getUINativeModule().common.setBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
+class ClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('clip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClip(node);
+    } else {
+      getUINativeModule().common.setClip(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class ClipShapeModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('clipShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipShape(node);
+    } else {
+      getUINativeModule().common.setClipShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class MaskModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('mask');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMask(node);
+    } else {
+      getUINativeModule().common.setMask(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class MaskShapeModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('maskShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMaskShape(node);
+    } else {
+      getUINativeModule().common.setMaskShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
+  constructor(value: PixelStretchEffectOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pixelStretchEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPixelStretchEffect(node);
+    } else {
+      getUINativeModule().common.setPixelStretchEffect(node,
+        this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
+      (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
+      (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
+      (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
+  }
+}
+
+class LightUpEffectModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('lightUpEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetLightUpEffect(node);
+    } else {
+      getUINativeModule().common.setLightUpEffect(node, this.value);
+    }
+  }
+}
+
+class SphericalEffectModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sphericalEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSphericalEffect(node);
+    } else {
+      getUINativeModule().common.setSphericalEffect(node, this.value);
+    }
+  }
+}
+
+class RenderGroupModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('renderGroup');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetRenderGroup(node);
+    } else {
+      getUINativeModule().common.setRenderGroup(node, this.value);
+    }
+  }
+}
+
+class ExcludeFromRenderGroupModifier extends ModifierWithKey<boolean|undefined> {
+  constructor(value: boolean|undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('excludeFromRenderGroup');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetExcludeFromRenderGroup(node);
+    } else {
+      getUINativeModule().common.setExcludeFromRenderGroup(node, this.value);
+    }
+  }
+}
+
+class RenderFitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('renderFit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetRenderFit(node);
+    } else {
+      getUINativeModule().common.setRenderFit(node, this.value);
+    }
+  }
+}
+
+class UseEffectModifier extends ModifierWithKey<ArkUseEffect> {
+  constructor(value: ArkUseEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('useEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetUseEffect(node);
+    } else {
+      getUINativeModule().common.setUseEffect(node, this.value.useEffect, this.value.effectType);
+    }
+  }
+}
+
+class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
+  constructor(value: ResourceColor | ColoringStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('foregroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundColor(node);
+    } else {
+      getUINativeModule().common.setForegroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+declare type ClickCallback = (event: ClickEvent) => void;
+class OnClickModifier extends ModifierWithKey<ClickCallback> {
+  constructor(value: ClickCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onClick');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnClick(node);
+    } else {
+      getUINativeModule().common.setOnClick(node, this.value);
+    }
+  }
+}
+
+declare type DragStartCallback = (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo;
+class DragStartModifier extends ModifierWithKey<DragStartCallback> {
+  constructor(value: DragStartCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragStart(node);
+    } else {
+      getUINativeModule().common.setOnDragStart(node, this.value);
+    }
+  }
+}
+
+declare type DragEnterCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragEnterModifier extends ModifierWithKey<DragEnterCallback> {
+  constructor(value: DragEnterCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragEnter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnter(node);
+    } else {
+      getUINativeModule().common.setOnDragEnter(node, this.value);
+    }
+  }
+}
+
+class DragSpringLoadingModifier extends ModifierWithKey<ArkDragSpringLoading> {
+  constructor(value: ArkDragSpringLoading) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragSpringLoading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragSpringLoading(node);
+    } else {
+      getUINativeModule().common.setOnDragSpringLoading(node, this.value.callback, this.value.configuration);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+
+declare type DragMoveCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragMoveModifier extends ModifierWithKey<DragMoveCallback> {
+  constructor(value: DragMoveCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragMove(node);
+    } else {
+      getUINativeModule().common.setOnDragMove(node, this.value);
+    }
+  }
+}
+
+declare type DragLeaveCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
+  constructor(value: DragLeaveCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragLeave');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragLeave(node);
+    } else {
+      getUINativeModule().common.setOnDragLeave(node, this.value);
+    }
+  }
+}
+
+class DropModifier extends ModifierWithKey<ArkOnDrop> {
+  constructor(value: ArkOnDrop) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDrop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDrop(node);
+    } else {
+      getUINativeModule().common.setOnDrop(node, this.value.event, this.value.disableDataPrefetch);
+    }
+  }
+}
+
+declare type DragEndCallback = (event?: DragEvent, extraParams?: string) => void;
+class DragEndModifier extends ModifierWithKey<DragEndCallback> {
+  constructor(value: DragEndCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDragEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDragEnd(node);
+    } else {
+      getUINativeModule().common.setOnDragEnd(node, this.value);
+    }
+  }
+}
+
+declare type TouchCallback = (event: TouchEvent) => void;
+class OnTouchModifier extends ModifierWithKey<TouchCallback> {
+  constructor(value: TouchCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouch');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnTouch(node);
+    } else {
+      getUINativeModule().common.setOnTouch(node, this.value);
+    }
+  }
+}
+
+declare type VoidCallback = () => void;
+class OnAppearModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAppear');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAppear(node);
+    } else {
+      getUINativeModule().common.setOnAppear(node, this.value);
     }
   }
 }

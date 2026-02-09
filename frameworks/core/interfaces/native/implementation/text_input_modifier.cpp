@@ -355,7 +355,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetFontStyle(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1067,19 +1067,15 @@ void SetOnWillAttachIMEImpl(Ark_NativePointer node,
         TextFieldModelNG::SetOnWillAttachIME(frameNode, nullptr);
         return;
     }
-    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](const IMEClient& value) {
+    auto onWillAttachIME = [callback = CallbackHelper(*optValue)](IMEClient& value) {
         Converter::ConvContext ctx;
         auto imeClientPeer = PeerUtils::CreatePeer<IMEClientPeer>();
-        if (imeClientPeer != nullptr) {
-            imeClientPeer->nodeId = value.nodeId;
-            imeClientPeer->extraInfo = reinterpret_cast<void*>(
-                const_cast<RefPtr<IMEExtraInfo>&>(value.extraInfo).GetRawPtr());
-        }
+        CHECK_NULL_VOID(imeClientPeer);
+        imeClientPeer->nodeId = value.nodeId;
         Ark_IMEClient arkIMEClient = reinterpret_cast<Ark_IMEClient>(imeClientPeer);
         callback.InvokeSync(arkIMEClient);
-        if (imeClientPeer) {
-            PeerUtils::DestroyPeer(imeClientPeer);
-        }
+        value.extraInfo = imeClientPeer->extraInfo;
+        PeerUtils::DestroyPeer(imeClientPeer);
     };
     TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(onWillAttachIME));
 }

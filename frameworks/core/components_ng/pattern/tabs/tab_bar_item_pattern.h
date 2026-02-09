@@ -33,6 +33,7 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<TabBarItemAccessibilityProperty>();
     }
 

@@ -41,7 +41,9 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
+        auto paintProperty = paintWrapper->GetPaintProperty();
+        CHECK_NULL_RETURN(paintProperty, nullptr);
+        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
         CHECK_NULL_RETURN(shapePaintProperty, nullptr);
 
         if (propertiesFromAncestor_) {

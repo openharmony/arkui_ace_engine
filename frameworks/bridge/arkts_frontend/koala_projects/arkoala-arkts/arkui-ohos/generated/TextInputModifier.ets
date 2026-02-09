@@ -80,7 +80,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -528,7 +528,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -538,7 +538,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -1946,7 +1946,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -3000,7 +3000,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

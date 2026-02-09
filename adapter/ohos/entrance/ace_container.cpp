@@ -27,6 +27,7 @@
 #include "wm_common.h"
 #include "form_ashmem.h"
 
+#include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
@@ -70,6 +71,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -96,7 +98,7 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
-const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
+
 std::mutex g_mutexFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
@@ -1711,6 +1713,10 @@ UIContentErrorCode AceContainer::RunPage(
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
 
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+    // The page fault occurs when an SO is loaded due to componentization.
+    DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad(); // Manually triggered PageFault here.To be modifier
+#endif
     if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter && isStageModel &&
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
@@ -3396,7 +3402,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 {
     auto context = runtimeContext_.lock();
     CHECK_NULL_RETURN(context, nullptr);
-    if (!isFormRender_ && !bundle.empty() && !module.empty()) {
+    bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    if ((!isFormRender_ || isDynamicUIContent) && !bundle.empty() && !module.empty()) {
         std::string encode = EncodeBundleAndModule(bundle, module);
         if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             RecordResAdapter(encode);
@@ -3410,7 +3417,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
                 TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
         }
     }
-    return isFormRender_ ? nullptr : context->CreateModuleOrPluginContext(bundle, module);
+    return (isFormRender_ && !isDynamicUIContent)
+        ? nullptr : context->CreateModuleOrPluginContext(bundle, module);
 }
 
 void AceContainer::CheckAndSetFontFamily()
@@ -4590,7 +4598,6 @@ void AceContainer::AddWatchSystemParameter()
             ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, EnableSystemParameterDebugBoundaryCallback);
         SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, rawPtr,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
-        SystemProperties::AddWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, rawPtr, OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -4614,7 +4621,6 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
-    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, OnFocusActiveChanged);
 }
 
 void AceContainer::UpdateResourceOrientation(int32_t orientation)

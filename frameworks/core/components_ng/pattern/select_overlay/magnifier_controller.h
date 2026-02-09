@@ -48,7 +48,7 @@ public:
         return isShowMagnifier_;
     }
 
-    void SetLocalOffset(
+    ACE_FORCE_EXPORT void SetLocalOffset(
         const OffsetF& localOffset, const std::optional<OffsetF>& localOffsetWithoutTrans = std::nullopt);
 
     OffsetF GetLocalOffset() const
@@ -71,7 +71,7 @@ public:
 
     uint32_t ArgbToRgba(const uint32_t& color);
 
-    void RemoveMagnifierFrameNode();
+    ACE_FORCE_EXPORT void RemoveMagnifierFrameNode();
 
     void SetColorModeChange(const bool& colorModeChange)
     {

@@ -23,7 +23,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -39,7 +38,13 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-class MenuItemPattern;
+}
+
+namespace OHOS::Ace {
+class SelectTheme;
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG {
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -166,18 +171,7 @@ public:
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
-    FocusPattern GetFocusPattern() const override
-    {
-        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, focusPattern);
-        auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
-        CHECK_NULL_RETURN(selectTheme, focusPattern);
-        auto focusStyleType =
-            static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetSelectFocusStyleType_()));
-        focusPattern.SetStyleType(focusStyleType);
-        return focusPattern;
-    }
+    FocusPattern GetFocusPattern() const override;
 
     // update selected option props
     void UpdateSelectedProps(int32_t index);
@@ -268,13 +262,13 @@ public:
     std::function<void(WeakPtr<NG::FrameNode>)>& GetTextModifier();
     std::function<void(WeakPtr<NG::FrameNode>)>& GetArrowModifier();
     void ResetOptionToInitProps(
-        const RefPtr<MenuItemPattern>& optionPattern, const RefPtr<MenuItemPattern>& selectingOptionPattern = nullptr);
-    void ResetSelectedOptionToInitProps(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern);
-    void ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
+        const RefPtr<NG::FrameNode>& optionNode, const RefPtr<NG::FrameNode>& selectingOptionNode = nullptr);
+    void ResetSelectedOptionToInitProps(const RefPtr<NG::FrameNode>& optionNode);
+    void UpdateOptionCustomProperties(const RefPtr<NG::FrameNode>& optionNode);
+    void UpdateSelectedOptionCustomProperties(const RefPtr<NG::FrameNode>& optionNode);
+    void ResetLastSelectedOptionFlags(const RefPtr<NG::FrameNode>& optionNode);
+    void ACE_FORCE_EXPORT UpdateOptionFontFromPattern(const RefPtr<NG::FrameNode>& optionNode);
+    void ACE_FORCE_EXPORT UpdateSelectedOptionFontFromPattern(const RefPtr<NG::FrameNode>& optionNode);
     void SetMenuOutline(const MenuParam& menuParam);
     void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
     void SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);

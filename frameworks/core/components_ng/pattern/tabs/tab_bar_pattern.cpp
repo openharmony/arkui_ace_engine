@@ -1108,6 +1108,7 @@ void TabBarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -2764,6 +2765,7 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 
 RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
 {
+    ACE_UINODE_TRACE(GetHost());
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }

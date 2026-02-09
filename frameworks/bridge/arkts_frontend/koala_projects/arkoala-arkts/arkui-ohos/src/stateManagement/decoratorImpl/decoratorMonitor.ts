@@ -16,9 +16,9 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { IBindingSource } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ITrackedDecoratorRef } from '../base/mutableStateMeta';
-import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo, IVariableOwner } from '../decorator';
+import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
 
-export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor {
+export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor, IDecoratorBaseRegistry {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
     public static readonly MIN_SYNC_MONITOR_ID: RenderIdType = 0x25000000;
     public static nextWatchId_ = MonitorFunctionDecorator.MIN_MONITOR_ID;
@@ -38,6 +38,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         });
         this.decorator = '@Monitor';
         this.readInitialMonitorValues();
+        this.registerToOwningView();
     }
 
     public isFreeze(): boolean {
@@ -133,6 +134,10 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         this.values_.forEach((monitorValue: MonitorValueInternal) => {
             this.recordDependenciesForMonitorValue(false, monitorValue, true);
         });
+    }
+
+    public registerToOwningView(): void {
+        this.owningComponent_?.__registerStateVariables__Internal(this);
     }
 }
 

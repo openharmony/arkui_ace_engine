@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
 
-class ClickRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
 
 public:

@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { NavPathInfo, NavPathInfoInternal, NavPathStack, NavPathStackInternal, NavigationMenuItem_serializer, NavigationTitleOptions_serializer, NavigationMenuOptions_serializer, ToolbarItem_serializer, NavigationToolbarOptions_serializer, NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, BarStyle, MoreButtonOptions, ToolbarItemStatus } from "./navigation"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -1368,7 +1368,7 @@ export class NavDestinationTransition_serializer {
             const onTransitionEndTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onTransitionEndTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onTransitionEndTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onTransitionEndTmpBuf = ():void => {
+            const onTransitionEndTmpBuf_Closure  = ():void => {
                 const onTransitionEndTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onTransitionEndTmpBuf_BufArgsSerializer.writeInt32(onTransitionEndTmpBuf_BufResource.resourceId);
                 onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCall);
@@ -1377,6 +1377,8 @@ export class NavDestinationTransition_serializer {
                 onTransitionEndTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onTransitionEndTmpBuf_Closure, onTransitionEndTmpBuf_BufResource)
+            onTransitionEndTmpBuf = onTransitionEndTmpBuf_Closure
         }
         const onTransitionEndTmpResult : (() => void) | undefined = onTransitionEndTmpBuf
         const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1400,7 +1402,7 @@ export class NavDestinationTransition_serializer {
         const eventTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const eventTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const eventTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const eventTmpResult : (() => void) = ():void => {
+        const eventTmpBufClosure  = ():void => {
             const eventTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             eventTmpBufBufArgsSerializer.writeInt32(eventTmpBufBufResource.resourceId);
             eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCall);
@@ -1409,6 +1411,8 @@ export class NavDestinationTransition_serializer {
             eventTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(eventTmpBufClosure, eventTmpBufBufResource)
+        const eventTmpResult : (() => void) = eventTmpBufClosure
         let value : NavDestinationTransition = ({onTransitionEnd: onTransitionEndTmpResult, duration: durationTmpResult, curve: curveTmpResult, delay: delayTmpResult, event: eventTmpResult} as NavDestinationTransition)
         return value
     }
@@ -1542,7 +1546,7 @@ export class NavDestinationCustomTitle_serializer {
         const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const builderTmpResult : CustomBuilder = ():void => {
+        const builderTmpBufClosure  = ():void => {
             const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
@@ -1551,6 +1555,8 @@ export class NavDestinationCustomTitle_serializer {
             builderTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(builderTmpBufClosure, builderTmpBufBufResource)
+        const builderTmpResult : CustomBuilder = builderTmpBufClosure
         const heightTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let heightTmpBuf : TitleHeight | Length | undefined
         if (heightTmpBufUnionSelector == (0).toChar()) {

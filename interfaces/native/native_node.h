@@ -3068,6 +3068,43 @@ typedef enum {
      */
     NODE_SPAN_BASELINE_OFFSET,
     /**
+     * @brief Defines the text style attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * ?.string: font family. Optional. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1]?.i32: font weight. Optional.
+     * .value[2]?.i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}.
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>.
+     * ?.object: Optional. The font configurations. The parameter type is {@link OH_ArkUI_FontConfigs}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}.
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>.
+     * .object: the font configurations. The parameter type is {@link OH_ArkUI_FontConfigs}.\n
+     *
+     * @since 24
+     */
+    NODE_SPAN_FONT = 2003,
+
+    /**
+     * @brief Defines the font weight attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: font weight. The default value is 400.\n
+     * ?.object: Optional. The font weight configurations. The parameter type is {@link OH_ArkUI_FontWeightConfigs}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: font weight.\n
+     * .object: the font weight configurations. The parameter type is {@link OH_ArkUI_FontWeightConfigs}.\n
+     *
+     * @since 24
+     */
+    NODE_SPAN_FONT_WEIGHT = 2004,
+    /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -12576,6 +12613,21 @@ int32_t OH_ArkUI_Swiper_ShowPrevious(ArkUI_NodeHandle node);
  * @since 24
  */
 int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
+
+/**
+ * @brief Get the root node handle of the corresponding page of the Context.
+ *
+ * @param context A UIContext pointer to a page.
+ * @param rootNode The handle of target root node handle.
+ * @return Error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is
+ * successful. Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter
+ * error occurs. Returns {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI
+ * init error. Returns {@link ARKUI_ERROR_CODE_UI_CONTEXT_INVALID} if the
+ * uiContext is invalid.
+ * @since 24
+ */
+int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle context, ArkUI_NodeHandle* rootNode);
 
 #ifdef __cplusplus
 }

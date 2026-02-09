@@ -330,6 +330,11 @@ private:
      */
     void SyncOnEmptyLanes(float mainSize);
 
+	/**
+	 * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
+	 */
+    void HandleItemEnd(int32_t itemCnt, float mainSize);
+
     /**
      * @brief cache main-axis length of measured FlowItems.
      */

@@ -72,7 +72,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ClickEvent);
 };
 
-class ACE_EXPORT ClickEventActuator : public GestureEventActuator {
+class ACE_FORCE_EXPORT ClickEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(ClickEventActuator, GestureEventActuator);
 public:
     explicit ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);

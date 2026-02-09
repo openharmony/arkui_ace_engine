@@ -25,11 +25,11 @@ import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, Sel
 import { AttributeModifier, extractors, DrawModifier, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
 import { AttributeUpdaterFlag } from "./../../AttributeUpdaterFlag"
 import { AudioSessionType, BlankScreenDetectionMethod, BlurOnKeyboardHideMode, CacheMode, CameraCaptureState, CameraCaptureStateChangeInfo, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ConsoleMessageSource, ContextMenuDataMediaType, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, DetectedBlankScreenReason, EventResult, FileSelectorMode, AcceptableFileType, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, GestureFocusMode, HttpAuthHandler, JsGeolocation, JsResult, MicrophoneCaptureState, MicrophoneCaptureStateChangeInfo, MixedMode, NativeEmbedParamStatus, NativeEmbedStatus, NativeMediaPlayerConfig, NavigationPolicy, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PdfLoadResult, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, UrlRegexRule, ViewportFit, WebBypassVsyncCondition, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, WebRotateEffect, WindowFeatures, AdsBlockedDetails, BlankScreenDetails, BlankScreenDetectionConfig, EmbedOptions, FirstMeaningfulPaint, FirstScreenPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedParamItem, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, BlankScreenDetectionEventInfo, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedMouseInfo, NativeEmbedTouchInfo } from "./../../component/web"
-import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextChangeReason, TextVerticalAlign, TextDataDetectorType, TextDeleteDirection, TextDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, OnPrepareMenuCallback, TextMenuOptions, AccessibilitySpanOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig, SelectedDragPreviewStyle, ContentTransition, FlipDirection, KeyboardFluidLightMode, KeyboardGradientMode, MaxLinesMode, ShaderStyle, SuperscriptStyle, TextContentAlign, OnPrepareMenuCallback, IMEClient, LinearGradientStyle, LineSpacingOptions, MaxLinesOptions, NumericTextTransition, NumericTextTransitionOptions, ColorShaderStyle, RadialGradientStyle } from "./../../component/textCommon"
+import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextChangeReason, TextVerticalAlign, TextDataDetectorType, TextDeleteDirection, TextDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, OnPrepareMenuCallback, TextMenuOptions, AccessibilitySpanOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig, SelectedDragPreviewStyle, ContentTransition, FlipDirection, KeyboardFluidLightMode, KeyboardGradientMode, MaxLinesMode, ShaderStyle, SuperscriptStyle, TextContentAlign, OnPrepareMenuCallback, IMEClient, LinearGradientStyle, LineSpacingOptions, MaxLinesOptions, NumericTextTransition, NumericTextTransitionOptions, ColorShaderStyle, RadialGradientStyle, TextLayoutOptions, KeyboardAppearanceConfig } from "./../../component/textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, LocalizedBarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
-import { ArcDirectionInner, ArcSwiperControllerHelper, BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionF64Inner, RotateResult, ScaleResult, SizeF64Inner, TranslateResult, Vector2F64, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, EdgeF64, EdgeI32, ErrorEvent, Event, FieldRegionInner, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ArcDotIndicatorInner, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, RippleFieldOptionsInner, VelocityFieldOptionsInner, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner, InnerGestureObserverConfigs, InnerGestureTriggerInfo } from "./../../component/idlize"
+import { ArcDirectionInner, ArcSwiperControllerHelper, BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionF64Inner, RotateResult, ScaleResult, SizeF64Inner, TranslateResult, Vector2F64, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, EdgeF64, EdgeI32, ErrorEvent, Event, FieldRegionInner, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ArcDotIndicatorInner, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, RippleFieldOptionsInner, VelocityFieldOptionsInner, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner, InnerGestureObserverConfigs, InnerGestureTriggerInfo, IUIContext, Magnifier } from "./../../component/idlize"
 import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, CacheCountInfo, DirectionalEdgesT, ItemFillPolicy, VP, DividerStyleOptions, LengthConstrain, Offset, ScrollBarMargin, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
@@ -168,9 +168,9 @@ import { RenderNode } from "arkui.RenderNode"
 import { GridColColumnOption, GridColOptions } from "./../../component/gridCol"
 import { ExtensionAbilityInfo } from "bundleManager.ExtensionAbilityInfo"
 import { Metadata } from "bundleManager.Metadata"
+import { InputMethodExtraConfig, CustomValueType } from "@ohos.inputMethod.ExtraConfig"
 import { default as intl } from "@ohos.intl"
 import { LineOptions, ShapePoint } from "./../../component/line"
-import { MarqueeOptions } from "./../../component/marquee"
 import { PathOptions } from "./../../component/path"
 import { PolygonOptions } from "./../../component/polygon"
 import { PolylineOptions } from "./../../component/polyline"
@@ -184,6 +184,7 @@ import { ViewportRect } from "./../../component/shape"
 import { default as Want } from "@ohos.app.ability.Want"
 import { FlexSpaceOptions, FlexOptions } from "./../../component/flex"
 import { ImageFrameInfo } from "./../../component/imageAnimator"
+import { MarqueeOptions } from "./../../component/marquee"
 import { MeasureOptions } from "@ohos.measure"
 import { MenuItemGroupOptions } from "./../../component/menuItemGroup"
 import { MenuItemOptions } from "./../../component/menuItem"
@@ -937,7 +938,7 @@ export class TypeChecker {
     static isDisappearSymbolEffect(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DisappearSymbolEffect
     }
-    static isDismissContentCoverAction(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isDismissContentCoverAction(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DismissContentCoverAction
     }
     static isDismissDialogAction(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -949,7 +950,7 @@ export class TypeChecker {
     static isDismissReason(value: Object | string | number | undefined): boolean {
         return value instanceof DismissReason
     }
-    static isDismissSheetAction(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isDismissSheetAction(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DismissSheetAction
     }
     static isDistributionType(value: Object | string | number | undefined): boolean {
@@ -1153,7 +1154,7 @@ export class TypeChecker {
     static isEventHub(value: Object | string | number | undefined): boolean {
         return value instanceof EventHub
     }
-    static isEventLocationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isEventLocationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof EventLocationInfo
     }
     static isEventResult(value: Object | string | number | undefined): boolean {
@@ -1594,6 +1595,9 @@ export class TypeChecker {
     static isInputCounterOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof InputCounterOptions
     }
+    static isInputMethodExtraConfig(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof InputMethodExtraConfig
+    }
     static isInputType(value: Object | string | number | undefined): boolean {
         return value instanceof InputType
     }
@@ -1633,6 +1637,9 @@ export class TypeChecker {
     static isItemState(value: Object | string | number | undefined): boolean {
         return value instanceof ItemState
     }
+    static isIUIContext(value: Object | string | number | undefined): boolean {
+        return value instanceof IUIContext
+    }
     static isJavaScriptProxy(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof JavaScriptProxy
     }
@@ -1647,6 +1654,9 @@ export class TypeChecker {
     }
     static isKeyboardAvoidMode(value: Object | string | number | undefined): boolean {
         return value instanceof KeyboardAvoidMode
+    }
+    static isKeyboardAppearanceConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof KeyboardAppearanceConfig
     }
     static isKeyboardFluidLightMode(value: Object | string | number | undefined): boolean {
         return value instanceof KeyboardFluidLightMode
@@ -1876,10 +1886,13 @@ export class TypeChecker {
     static isLunarSwitchStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof LunarSwitchStyle
     }
+    static isMagnifier(value: Object | string | number | undefined): boolean {
+        return value instanceof Magnifier
+    }
     static isMarkStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof MarkStyle
     }
-    static isMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+    static isMarqueeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof MarqueeOptions
     }
     static isMarqueeStartPolicy(value: Object | string | number | undefined): boolean {
@@ -3022,7 +3035,7 @@ export class TypeChecker {
     static issharedTransitionOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof sharedTransitionOptions
     }
-    static isSheetDismiss(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isSheetDismiss(value: Object | string | number | undefined): boolean {
         return value instanceof SheetDismiss
     }
     static isSheetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
@@ -3486,6 +3499,9 @@ export class TypeChecker {
     }
     static isTextModifier(value: Object | string | number | undefined): boolean {
         return value instanceof TextModifier
+    }
+    static isTextLayoutOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof TextLayoutOptions
     }
     static isTextOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof TextOptions

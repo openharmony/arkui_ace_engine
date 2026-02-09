@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -617,7 +617,7 @@ export class WaterFlowOptions_serializer {
             const footerTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const footerTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const footerTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            footerTmpBuf = ():void => {
+            const footerTmpBuf_Closure  = ():void => {
                 const footerTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 footerTmpBuf_BufArgsSerializer.writeInt32(footerTmpBuf_BufResource.resourceId);
                 footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCall);
@@ -626,6 +626,8 @@ export class WaterFlowOptions_serializer {
                 footerTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(footerTmpBuf_Closure, footerTmpBuf_BufResource)
+            footerTmpBuf = footerTmpBuf_Closure
         }
         const footerTmpResult : CustomBuilder | undefined = footerTmpBuf
         const footerContentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -761,7 +763,7 @@ export class SectionOptions_serializer {
             const onGetItemMainSizeByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onGetItemMainSizeByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onGetItemMainSizeByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onGetItemMainSizeByIndexTmpBuf = (index: int32):double => {
+            const onGetItemMainSizeByIndexTmpBuf_Closure  = (index: int32):double => {
                 const onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetItemMainSizeByIndexTmpBuf_BufResource.resourceId);
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.writePointer(onGetItemMainSizeByIndexTmpBuf_BufCall);
@@ -776,6 +778,8 @@ export class SectionOptions_serializer {
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.release();
                 return onGetItemMainSizeByIndexTmpBuf_BufContinuationValue!.toDouble();
             }
+            resourceFinalizerRegister(onGetItemMainSizeByIndexTmpBuf_Closure, onGetItemMainSizeByIndexTmpBuf_BufResource)
+            onGetItemMainSizeByIndexTmpBuf = onGetItemMainSizeByIndexTmpBuf_Closure
         }
         const onGetItemMainSizeByIndexTmpResult : GetItemMainSizeByIndex | undefined = onGetItemMainSizeByIndexTmpBuf
         const columnsGapTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

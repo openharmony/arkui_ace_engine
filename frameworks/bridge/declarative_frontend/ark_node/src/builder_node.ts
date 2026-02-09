@@ -140,7 +140,7 @@ class JSBuilderNode extends BaseNode {
           }
           else {
             // FIXME fix for mixed V2 - V3 Hierarchies
-            throw new BusinessError(100029, 'aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+            throw new BusinessError(100029, 'aboutToReuseInternal: Reuse not implemented for ViewV2, yet');
           }
         } // if child
       });

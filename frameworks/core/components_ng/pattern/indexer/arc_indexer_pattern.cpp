@@ -34,6 +34,7 @@ void ArcIndexerPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool autoCollapseModeChanged = true;
@@ -313,7 +314,7 @@ void ArcIndexerPattern::ResetArrayValue(bool isModeChanged)
     }
 }
 
-void ArcIndexerPattern::InitTouchEvent ()
+void ArcIndexerPattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -629,6 +630,8 @@ void ArcIndexerPattern::OnTouchUp(const TouchEventInfo& info)
 
 void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
 {
+    // Tracking animation memory profiling.
+    ACE_UINODE_TRACE(GetHost());
     if (itemCount_ <= 0) {
         return;
     }
@@ -1176,6 +1179,7 @@ void ArcIndexerPattern::ShowBubble(bool isShow)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!popupNode_) {

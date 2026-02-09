@@ -424,7 +424,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fn a function to apply
      * @return new Array after map and than flat
      */
-    public override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
+    public override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.flatMap(fn);
     }

@@ -105,6 +105,7 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/utils/layout_break_point.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -1766,6 +1767,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         // arkTSCard only support "esModule" compile mode
         frontend->SetIsBundle(false);
         container->SetBundleName(bundleName_);
+        container->SetModuleName(moduleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
@@ -5461,7 +5463,14 @@ void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
     CHECK_NULL_VOID(taskExecutor);
     auto windowScale = transform.scaleX_;
     taskExecutor->PostTask(
-        [container, windowScale]() { container->SetWindowScale(windowScale); },
+        [container, windowScale]() {
+            container->SetWindowScale(windowScale);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+            CHECK_NULL_VOID(textFieldManager);
+            textFieldManager->TriggerCaretInfoUpdateOnScaleChange();
+        },
         TaskExecutor::TaskType::UI, "ArkUISetWindowScale");
 }
 
@@ -6256,7 +6265,13 @@ int32_t UIContentImpl::RegisterNavigateChangeCallback(
     CHECK_NULL_RETURN(pipeline, -1);
     auto navigationManager = pipeline->GetNavigationManager();
     CHECK_NULL_RETURN(navigationManager, -1);
-    return navigationManager->RegisterNavigateChangeCallback(std::move(callback));
+    auto callbackWrapper = [innerCallback = std::move(callback)](
+        const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter) {
+        if (innerCallback) {
+            innerCallback(from, to);
+        }
+    };
+    return navigationManager->RegisterNavigateChangeCallback(std::move(callbackWrapper));
 }
 
 void UIContentImpl::RunIntentPageIfNeeded()

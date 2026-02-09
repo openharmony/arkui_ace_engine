@@ -28,6 +28,7 @@ ace_unittest("lazy_for_each_builder_syntax_test_ng") {
   sources = [
     "lazy_for_each_builder_syntax_test_ng.cpp",
     "lazy_for_each_builder_syntax_test_ng_2.cpp",
+    "lazy_for_each_builder_syntax_test_ng_advanced.cpp",
   ]
 }
 
@@ -40,7 +41,10 @@ ace_unittest("for_each_syntax_test_ng") {
 ace_unittest("if_else_syntax_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
-  sources = [ "if_else_syntax_test_ng.cpp" ]
+  sources = [
+    "if_else_syntax_test_ng.cpp",
+    "if_else_syntax_test_ng_advanced.cpp",
+  ]
 }
 
 ace_unittest("content_slot_syntax_test_ng") {
@@ -60,13 +64,17 @@ ace_unittest("repeat_virtual_test_ng") {
     "$ace_root/frameworks/core/components_ng/syntax/repeat_node.cpp",
     "repeat_virtual_test_ng.cpp",
     "repeat_virtual_test_ng_2.cpp",
+    "repeat_virtual_scroll_syntax_test_ng_advanced.cpp",
   ]
 }
 
 ace_unittest("repeat_virtual_2_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
-  sources = [ "repeat_virtual_2_test_ng.cpp" ]
+  sources = [
+    "repeat_virtual_2_test_ng.cpp",
+    "repeat_virtual_2_syntax_test_ng_advanced.cpp",
+  ]
 }
 
 ace_unittest("syntax_arkoala_test_ng") {
@@ -76,6 +84,7 @@ ace_unittest("syntax_arkoala_test_ng") {
     "arkoala_for_each_test_ng.cpp",
     "arkoala_if_else_test_ng.cpp",
     "arkoala_lazy_test_ng.cpp",
+    "arkoala_lazy_test_ng_advanced.cpp",
   ]
 }
 

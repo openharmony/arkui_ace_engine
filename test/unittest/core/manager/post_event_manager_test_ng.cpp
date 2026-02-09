@@ -2017,4 +2017,963 @@ HWTEST_F(PostEventManagerTestNg, PostEventTest003, TestSize.Level1)
     result = postEventManager_->PostEvent(root_, touchEvent);
     EXPECT_FALSE(result);
 }
+
+
+/**
+ * @tc.name: CheckMouseEventTest001
+ * @tc.desc: test CheckMouseEvent with normal sequence PRESS -> RELEASE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test PRESS event with no previous events and verify result.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    postEventManager_->postMouseEventAction_.clear();
+    auto result = postEventManager_->CheckMouseEvent(uiNode, pressEvent, 0);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), 0);
+
+    /**
+     * @tc.steps: step3. add PRESS event to action queue.
+     */
+    PostMouseEventAction action;
+    action.targetNode = uiNode;
+    action.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step4. test MOVE event after PRESS and verify result.
+     */
+    MouseEvent moveEvent;
+    moveEvent.action = MouseAction::MOVE;
+    moveEvent.id = 1;
+    result = postEventManager_->CheckMouseEvent(uiNode, moveEvent, 0);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step5. test RELEASE event after PRESS and verify result.
+     */
+    MouseEvent releaseEvent;
+    releaseEvent.action = MouseAction::RELEASE;
+    releaseEvent.id = 1;
+    result = postEventManager_->CheckMouseEvent(uiNode, releaseEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckMouseEventTest002
+ * @tc.desc: test CheckMouseEvent with duplicate PRESS event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add first PRESS event to action queue.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    PostMouseEventAction action;
+    action.targetNode = uiNode;
+    action.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step3. test duplicate PRESS event and verify it succeeds (error is reported but returns true).
+     */
+    MouseEvent duplicatePressEvent;
+    duplicatePressEvent.action = MouseAction::PRESS;
+    duplicatePressEvent.id = 1;
+    auto result = postEventManager_->CheckMouseEvent(uiNode, duplicatePressEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckMouseEventTest003
+ * @tc.desc: test CheckMouseEvent with RELEASE without PRESS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test RELEASE event without previous PRESS and verify it fails.
+     */
+    MouseEvent releaseEvent;
+    releaseEvent.action = MouseAction::RELEASE;
+    releaseEvent.id = 1;
+    postEventManager_->postMouseEventAction_.clear();
+    auto result = postEventManager_->CheckMouseEvent(uiNode, releaseEvent, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckMouseEventTest004
+ * @tc.desc: test CheckMouseEvent with CANCEL without PRESS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test CANCEL event without previous PRESS and verify it fails.
+     */
+    MouseEvent cancelEvent;
+    cancelEvent.action = MouseAction::CANCEL;
+    cancelEvent.id = 1;
+    postEventManager_->postMouseEventAction_.clear();
+    auto result = postEventManager_->CheckMouseEvent(uiNode, cancelEvent, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckMouseEventTest005
+ * @tc.desc: test CheckMouseEvent with MOVE without PRESS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test MOVE event without previous PRESS and verify it succeeds (MOVE always returns true).
+     */
+    MouseEvent moveEvent;
+    moveEvent.action = MouseAction::MOVE;
+    moveEvent.id = 1;
+    postEventManager_->postMouseEventAction_.clear();
+    auto result = postEventManager_->CheckMouseEvent(uiNode, moveEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckMouseEventTest006
+ * @tc.desc: test CheckMouseEvent clears previous sequence on new PRESS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add complete sequence: PRESS -> RELEASE.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    PostMouseEventAction pressAction;
+    pressAction.targetNode = uiNode;
+    pressAction.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(pressAction);
+
+    MouseEvent releaseEvent;
+    releaseEvent.action = MouseAction::RELEASE;
+    releaseEvent.id = 1;
+    PostMouseEventAction releaseAction;
+    releaseAction.targetNode = uiNode;
+    releaseAction.mouseEvent = releaseEvent;
+    postEventManager_->postMouseEventAction_.push_back(releaseAction);
+
+    /**
+     * @tc.steps: step3. test new PRESS event after previous RELEASE and verify it succeeds.
+     */
+    MouseEvent newPressEvent;
+    newPressEvent.action = MouseAction::PRESS;
+    newPressEvent.id = 1;
+    auto result = postEventManager_->CheckMouseEvent(uiNode, newPressEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckMouseEventTest007
+ * @tc.desc: test CheckMouseEvent with MOVE after RELEASE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add PRESS and RELEASE events.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    PostMouseEventAction pressAction;
+    pressAction.targetNode = uiNode;
+    pressAction.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(pressAction);
+
+    MouseEvent releaseEvent;
+    releaseEvent.action = MouseAction::RELEASE;
+    releaseEvent.id = 1;
+    PostMouseEventAction releaseAction;
+    releaseAction.targetNode = uiNode;
+    releaseAction.mouseEvent = releaseEvent;
+    postEventManager_->postMouseEventAction_.push_back(releaseAction);
+
+    /**
+     * @tc.steps: step3. test MOVE after RELEASE and verify it succeeds (MOVE always returns true).
+     */
+    MouseEvent moveEvent;
+    moveEvent.action = MouseAction::MOVE;
+    moveEvent.id = 1;
+    auto result = postEventManager_->CheckMouseEvent(uiNode, moveEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest001
+ * @tc.desc: test CheckAxisEvent with normal sequence BEGIN -> UPDATE -> END.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test BEGIN event with no previous events and verify result.
+     */
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = 1;
+    postEventManager_->postAxisEventAction_.clear();
+    auto result = postEventManager_->CheckAxisEvent(uiNode, beginEvent, 0);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. add BEGIN event to action queue.
+     */
+    PostAxisEventAction action;
+    action.targetNode = uiNode;
+    action.axisEvent = beginEvent;
+    postEventManager_->postAxisEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step4. test UPDATE event after BEGIN and verify result.
+     */
+    AxisEvent updateEvent;
+    updateEvent.action = AxisAction::UPDATE;
+    updateEvent.id = 1;
+    result = postEventManager_->CheckAxisEvent(uiNode, updateEvent, 0);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step5. test END event after BEGIN and verify result.
+     */
+    AxisEvent endEvent;
+    endEvent.action = AxisAction::END;
+    endEvent.id = 1;
+    result = postEventManager_->CheckAxisEvent(uiNode, endEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest002
+ * @tc.desc: test CheckAxisEvent with duplicate BEGIN event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add first BEGIN event to action queue.
+     */
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = 1;
+    PostAxisEventAction action;
+    action.targetNode = uiNode;
+    action.axisEvent = beginEvent;
+    postEventManager_->postAxisEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step3. test duplicate BEGIN event and verify it succeeds (error is reported but returns true).
+     */
+    AxisEvent duplicateBeginEvent;
+    duplicateBeginEvent.action = AxisAction::BEGIN;
+    duplicateBeginEvent.id = 1;
+    auto result = postEventManager_->CheckAxisEvent(uiNode, duplicateBeginEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest003
+ * @tc.desc: test CheckAxisEvent with END without BEGIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test END event without previous BEGIN and verify it fails.
+     */
+    AxisEvent endEvent;
+    endEvent.action = AxisAction::END;
+    endEvent.id = 1;
+    postEventManager_->postAxisEventAction_.clear();
+    auto result = postEventManager_->CheckAxisEvent(uiNode, endEvent, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest004
+ * @tc.desc: test CheckAxisEvent with CANCEL without BEGIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test CANCEL event without previous BEGIN and verify it fails.
+     */
+    AxisEvent cancelEvent;
+    cancelEvent.action = AxisAction::CANCEL;
+    cancelEvent.id = 1;
+    postEventManager_->postAxisEventAction_.clear();
+    auto result = postEventManager_->CheckAxisEvent(uiNode, cancelEvent, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest005
+ * @tc.desc: test CheckAxisEvent with UPDATE without BEGIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. test UPDATE event without previous BEGIN and verify it fails.
+     */
+    AxisEvent updateEvent;
+    updateEvent.action = AxisAction::UPDATE;
+    updateEvent.id = 1;
+    postEventManager_->postAxisEventAction_.clear();
+    auto result = postEventManager_->CheckAxisEvent(uiNode, updateEvent, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest006
+ * @tc.desc: test CheckAxisEvent clears previous sequence on new BEGIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add complete sequence: BEGIN -> END.
+     */
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = 1;
+    PostAxisEventAction beginAction;
+    beginAction.targetNode = uiNode;
+    beginAction.axisEvent = beginEvent;
+    postEventManager_->postAxisEventAction_.push_back(beginAction);
+
+    AxisEvent endEvent;
+    endEvent.action = AxisAction::END;
+    endEvent.id = 1;
+    PostAxisEventAction endAction;
+    endAction.targetNode = uiNode;
+    endAction.axisEvent = endEvent;
+    postEventManager_->postAxisEventAction_.push_back(endAction);
+
+    /**
+     * @tc.steps: step3. test new BEGIN event after previous END and verify it succeeds.
+     */
+    AxisEvent newBeginEvent;
+    newBeginEvent.action = AxisAction::BEGIN;
+    newBeginEvent.id = 1;
+    auto result = postEventManager_->CheckAxisEvent(uiNode, newBeginEvent, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAxisEventTest007
+ * @tc.desc: test CheckAxisEvent with UPDATE after END.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add BEGIN and END events.
+     */
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = 1;
+    PostAxisEventAction beginAction;
+    beginAction.targetNode = uiNode;
+    beginAction.axisEvent = beginEvent;
+    postEventManager_->postAxisEventAction_.push_back(beginAction);
+
+    AxisEvent endEvent;
+    endEvent.action = AxisAction::END;
+    endEvent.id = 1;
+    PostAxisEventAction endAction;
+    endAction.targetNode = uiNode;
+    endAction.axisEvent = endEvent;
+    postEventManager_->postAxisEventAction_.push_back(endAction);
+
+    /**
+     * @tc.steps: step3. test UPDATE after END and verify it fails.
+     */
+    AxisEvent updateEvent;
+    updateEvent.action = AxisAction::UPDATE;
+    updateEvent.id = 1;
+    auto result = postEventManager_->CheckAxisEvent(uiNode, updateEvent, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsMouseTest001
+ * @tc.desc: test ClearPostInputActions for MOUSE type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsMouseTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add multiple mouse events with different IDs.
+     */
+    MouseEvent mouseEvent1;
+    mouseEvent1.action = MouseAction::PRESS;
+    mouseEvent1.id = 1;
+    PostMouseEventAction action1;
+    action1.targetNode = uiNode;
+    action1.mouseEvent = mouseEvent1;
+    postEventManager_->postMouseEventAction_.push_back(action1);
+
+    MouseEvent mouseEvent2;
+    mouseEvent2.action = MouseAction::PRESS;
+    mouseEvent2.id = 2;
+    PostMouseEventAction action2;
+    action2.targetNode = uiNode;
+    action2.mouseEvent = mouseEvent2;
+    postEventManager_->postMouseEventAction_.push_back(action2);
+
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), 2);
+
+    /**
+     * @tc.steps: step3. clear events with ID 1 and verify remaining count.
+     */
+    postEventManager_->ClearPostInputActions(uiNode, 1, PostInputEventType::MOUSE);
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. verify remaining event has ID 2.
+     */
+    auto remainingEvent = postEventManager_->postMouseEventAction_.front();
+    EXPECT_EQ(remainingEvent.mouseEvent.id, 2);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsAxisTest001
+ * @tc.desc: test ClearPostInputActions for AXIS type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsAxisTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add multiple axis events with different IDs.
+     */
+    AxisEvent axisEvent1;
+    axisEvent1.action = AxisAction::BEGIN;
+    axisEvent1.id = 1;
+    PostAxisEventAction action1;
+    action1.targetNode = uiNode;
+    action1.axisEvent = axisEvent1;
+    postEventManager_->postAxisEventAction_.push_back(action1);
+
+    AxisEvent axisEvent2;
+    axisEvent2.action = AxisAction::BEGIN;
+    axisEvent2.id = 2;
+    PostAxisEventAction action2;
+    action2.targetNode = uiNode;
+    action2.axisEvent = axisEvent2;
+    postEventManager_->postAxisEventAction_.push_back(action2);
+
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), 2);
+
+    /**
+     * @tc.steps: step3. clear events with ID 1 and verify remaining count.
+     */
+    postEventManager_->ClearPostInputActions(uiNode, 1, PostInputEventType::AXIS);
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. verify remaining event has ID 2.
+     */
+    auto remainingEvent = postEventManager_->postAxisEventAction_.front();
+    EXPECT_EQ(remainingEvent.axisEvent.id, 2);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsTouchTest002
+ * @tc.desc: test ClearPostInputActions for TOUCH type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTouchTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add multiple touch events with different IDs.
+     */
+    TouchEvent touchEvent1;
+    touchEvent1.type = TouchType::DOWN;
+    touchEvent1.id = 1;
+    PostEventAction action1;
+    action1.targetNode = uiNode;
+    action1.touchEvent = touchEvent1;
+    postEventManager_->postInputEventAction_.push_back(action1);
+
+    TouchEvent touchEvent2;
+    touchEvent2.type = TouchType::DOWN;
+    touchEvent2.id = 2;
+    PostEventAction action2;
+    action2.targetNode = uiNode;
+    action2.touchEvent = touchEvent2;
+    postEventManager_->postInputEventAction_.push_back(action2);
+
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 2);
+
+    /**
+     * @tc.steps: step3. clear events with ID 1 and verify remaining count.
+     */
+    postEventManager_->ClearPostInputActions(uiNode, 1, PostInputEventType::TOUCH);
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. verify remaining event has ID 2.
+     */
+    auto remainingEvent = postEventManager_->postInputEventAction_.front();
+    EXPECT_EQ(remainingEvent.touchEvent.id, 2);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsDefaultTypeTest
+ * @tc.desc: test ClearPostInputActions with default/invalid type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsDefaultTypeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add touch event.
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    PostEventAction action;
+    action.targetNode = uiNode;
+    action.touchEvent = touchEvent;
+    postEventManager_->postInputEventAction_.push_back(action);
+
+    auto sizeBefore = postEventManager_->postInputEventAction_.size();
+
+    /**
+     * @tc.steps: step3. try to clear with invalid type and verify size unchanged.
+     */
+    postEventManager_->ClearPostInputActions(uiNode, 1, static_cast<PostInputEventType>(99));
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), sizeBefore);
+}
+
+/**
+ * @tc.name: PostMouseEventFullSequenceTest
+ * @tc.desc: test PostMouseEvent with full event sequence.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventFullSequenceTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. initialize pipeline context and event manager.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    pipelineContext->eventManager_->isDragCancelPending_ = false;
+
+    /**
+     * @tc.steps: step3. test PRESS event and verify it is added to queue.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    postEventManager_->postMouseEventAction_.clear();
+    postEventManager_->PostMouseEvent(uiNode, std::move(pressEvent));
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. test MOVE event and verify it is not added to queue.
+     */
+    MouseEvent moveEvent;
+    moveEvent.action = MouseAction::MOVE;
+    moveEvent.id = 1;
+    auto sizeBeforeMove = postEventManager_->postMouseEventAction_.size();
+    postEventManager_->PostMouseEvent(uiNode, std::move(moveEvent));
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), sizeBeforeMove);
+
+    /**
+     * @tc.steps: step5. test RELEASE event and verify queue is cleared.
+     */
+    MouseEvent releaseEvent;
+    releaseEvent.action = MouseAction::RELEASE;
+    releaseEvent.id = 1;
+    postEventManager_->PostMouseEvent(uiNode, std::move(releaseEvent));
+    EXPECT_TRUE(postEventManager_->postMouseEventAction_.empty());
+}
+
+/**
+ * @tc.name: PostAxisEventFullSequenceTest
+ * @tc.desc: test PostAxisEvent with full event sequence.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventFullSequenceTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. initialize pipeline context and event manager.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+
+    /**
+     * @tc.steps: step3. test BEGIN event and verify it is added to queue.
+     */
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = 1;
+    postEventManager_->postAxisEventAction_.clear();
+    postEventManager_->PostAxisEvent(uiNode, std::move(beginEvent));
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. test UPDATE event and verify it is not added to queue.
+     */
+    AxisEvent updateEvent;
+    updateEvent.action = AxisAction::UPDATE;
+    updateEvent.id = 1;
+    auto sizeBeforeUpdate = postEventManager_->postAxisEventAction_.size();
+    postEventManager_->PostAxisEvent(uiNode, std::move(updateEvent));
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), sizeBeforeUpdate);
+
+    /**
+     * @tc.steps: step5. test END event and verify queue is cleared.
+     */
+    AxisEvent endEvent;
+    endEvent.action = AxisAction::END;
+    endEvent.id = 1;
+    postEventManager_->PostAxisEvent(uiNode, std::move(endEvent));
+    EXPECT_TRUE(postEventManager_->postAxisEventAction_.empty());
+}
+
+/**
+ * @tc.name: MouseEventDifferentNodesTest
+ * @tc.desc: test mouse events from different nodes don't interfere.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, MouseEventDifferentNodesTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct two FrameNodes with UINodes.
+     */
+    Init();
+    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode1 = AceType::DynamicCast<NG::UINode>(frameNode1);
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>("root2", -2, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode2 = AceType::DynamicCast<NG::UINode>(frameNode2);
+
+    /**
+     * @tc.steps: step2. add PRESS events for both nodes.
+     */
+    MouseEvent pressEvent1;
+    pressEvent1.action = MouseAction::PRESS;
+    pressEvent1.id = 1;
+    PostMouseEventAction action1;
+    action1.targetNode = uiNode1;
+    action1.mouseEvent = pressEvent1;
+    postEventManager_->postMouseEventAction_.push_back(action1);
+
+    MouseEvent pressEvent2;
+    pressEvent2.action = MouseAction::PRESS;
+    pressEvent2.id = 2;
+    PostMouseEventAction action2;
+    action2.targetNode = uiNode2;
+    action2.mouseEvent = pressEvent2;
+    postEventManager_->postMouseEventAction_.push_back(action2);
+
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), 2);
+
+    /**
+     * @tc.steps: step3. clear node 1 events and verify remaining count.
+     */
+    postEventManager_->ClearPostInputActions(uiNode1, 1, PostInputEventType::MOUSE);
+    EXPECT_EQ(postEventManager_->postMouseEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. verify remaining event is from node 2.
+     */
+    auto remainingEvent = postEventManager_->postMouseEventAction_.front();
+    EXPECT_EQ(remainingEvent.targetNode, uiNode2);
+    EXPECT_EQ(remainingEvent.mouseEvent.id, 2);
+}
+
+/**
+ * @tc.name: AxisEventDifferentNodesTest
+ * @tc.desc: test axis events from different nodes don't interfere.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, AxisEventDifferentNodesTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct two FrameNodes with UINodes.
+     */
+    Init();
+    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode1 = AceType::DynamicCast<NG::UINode>(frameNode1);
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>("root2", -2, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode2 = AceType::DynamicCast<NG::UINode>(frameNode2);
+
+    /**
+     * @tc.steps: step2. add BEGIN events for both nodes.
+     */
+    AxisEvent beginEvent1;
+    beginEvent1.action = AxisAction::BEGIN;
+    beginEvent1.id = 1;
+    PostAxisEventAction action1;
+    action1.targetNode = uiNode1;
+    action1.axisEvent = beginEvent1;
+    postEventManager_->postAxisEventAction_.push_back(action1);
+
+    AxisEvent beginEvent2;
+    beginEvent2.action = AxisAction::BEGIN;
+    beginEvent2.id = 2;
+    PostAxisEventAction action2;
+    action2.targetNode = uiNode2;
+    action2.axisEvent = beginEvent2;
+    postEventManager_->postAxisEventAction_.push_back(action2);
+
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), 2);
+
+    /**
+     * @tc.steps: step3. clear node 1 events and verify remaining count.
+     */
+    postEventManager_->ClearPostInputActions(uiNode1, 1, PostInputEventType::AXIS);
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), 1);
+
+    /**
+     * @tc.steps: step4. verify remaining event is from node 2.
+     */
+    auto remainingEvent = postEventManager_->postAxisEventAction_.front();
+    EXPECT_EQ(remainingEvent.targetNode, uiNode2);
+    EXPECT_EQ(remainingEvent.axisEvent.id, 2);
+}
+
+/**
+ * @tc.name: CheckMouseEventInstanceIDTest
+ * @tc.desc: test CheckMouseEvent with different instance IDs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventInstanceIDTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add PRESS event to action queue.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    PostMouseEventAction action;
+    action.targetNode = uiNode;
+    action.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step3. test duplicate PRESS with different instance IDs and verify results.
+     */
+    MouseEvent duplicatePressEvent;
+    duplicatePressEvent.action = MouseAction::PRESS;
+    duplicatePressEvent.id = 1;
+
+    auto result1 = postEventManager_->CheckMouseEvent(uiNode, duplicatePressEvent, 0);
+    EXPECT_TRUE(result1);
+
+    auto result2 = postEventManager_->CheckMouseEvent(uiNode, duplicatePressEvent, 100);
+    EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: CheckAxisEventInstanceIDTest
+ * @tc.desc: test CheckAxisEvent with different instance IDs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisEventInstanceIDTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add BEGIN event to action queue.
+     */
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = 1;
+    PostAxisEventAction action;
+    action.targetNode = uiNode;
+    action.axisEvent = beginEvent;
+    postEventManager_->postAxisEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step3. test duplicate BEGIN with different instance IDs and verify results.
+     */
+    AxisEvent duplicateBeginEvent;
+    duplicateBeginEvent.action = AxisAction::BEGIN;
+    duplicateBeginEvent.id = 1;
+
+    auto result1 = postEventManager_->CheckAxisEvent(uiNode, duplicateBeginEvent, 0);
+    EXPECT_TRUE(result1);
+
+    auto result2 = postEventManager_->CheckAxisEvent(uiNode, duplicateBeginEvent, 200);
+    EXPECT_TRUE(result2);
+}
 } // namespace OHOS::Ace::NG

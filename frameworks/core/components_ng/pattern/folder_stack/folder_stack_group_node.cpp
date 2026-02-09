@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FolderStackGroupNode> FolderStackGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = GetFrameNode(tag, nodeId);
     CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<FolderStackGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();

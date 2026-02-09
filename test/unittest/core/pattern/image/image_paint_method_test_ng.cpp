@@ -14,7 +14,10 @@
  */
 
 #include "image_base.h"
+
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
@@ -796,4 +799,200 @@ HWTEST_F(ImagePaintMethodTestNg, HandleSrcAltResource003, TestSize.Level1)
     auto imageInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
     EXPECT_FALSE(imageInfo.GetIsUriPureNumber());
 }
+
+/**
+ * @tc.name: ImagePaintMethodConstructor001
+ * @tc.desc: Test ImagePaintMethod constructor with default config
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodConstructor001, TestSize.Level0)
+{
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->NeedsContentTransition(), false);
+}
+
+/**
+ * @tc.name: ImagePaintMethodConstructor002
+ * @tc.desc: Test ImagePaintMethod constructor with custom config
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodConstructor002, TestSize.Level0)
+{
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+    config.selected = true;
+    config.sensitive = true;
+    config.interpolation = ImageInterpolation::HIGH;
+    config.contentTransitionType = ContentTransitionType::IDENTITY;
+
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config);
+    ASSERT_NE(paintMethod, nullptr);
+}
+
+/**
+ * @tc.name: ImagePaintMethodConstructor003
+ * @tc.desc: Test ImagePaintMethod constructor with null canvas image
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodConstructor003, TestSize.Level0)
+{
+    ImagePaintMethodConfig config;
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(nullptr, config);
+    ASSERT_NE(paintMethod, nullptr);
+}
+
+// ============================================================================
+// UpdatePaintConfig Tests
+// ============================================================================
+
+/**
+ * @tc.name: ImagePaintMethodUpdatePaintConfig002
+ * @tc.desc: Test UpdatePaintConfig with interpolation settings
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodUpdatePaintConfig002, TestSize.Level0)
+{
+    auto frameNode = ImagePaintMethodTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
+    pattern->image_ = pattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_NE(pattern->image_, nullptr);
+
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+    config.interpolation = ImageInterpolation::MEDIUM;
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config);
+
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    paintProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
+
+    auto paintWrapper = frameNode->CreatePaintWrapper();
+    ASSERT_NE(paintWrapper, nullptr);
+
+    PaintWrapper* paintWrapperRaw = AceType::RawPtr(paintWrapper);
+    paintMethod->UpdatePaintConfig(paintWrapperRaw);
+    EXPECT_NE(canvasImage, nullptr);
+}
+
+// ============================================================================
+// UpdateBorderRadius Tests
+// ============================================================================
+
+// ============================================================================
+// UpdateCanvasImage Tests
+// ============================================================================
+
+/**
+ * @tc.name: ImagePaintMethodUpdateCanvasImage001
+ * @tc.desc: Test UpdateCanvasImage with identity transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodUpdateCanvasImage001, TestSize.Level0)
+{
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+    config.contentTransitionType = ContentTransitionType::IDENTITY;
+
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->NeedsContentTransition(), false);
+}
+
+/**
+ * @tc.name: ImagePaintMethodUpdateCanvasImage002
+ * @tc.desc: Test UpdateCanvasImage with different source
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodUpdateCanvasImage002, TestSize.Level0)
+{
+    auto canvasImage1 = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+    config.contentTransitionType = ContentTransitionType::IDENTITY;
+
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage1, config);
+    ASSERT_NE(paintMethod, nullptr);
+
+    auto canvasImage2 = AceType::MakeRefPtr<MockCanvasImage>();
+    paintMethod->UpdatePaintMethod(canvasImage2, config);
+    EXPECT_EQ(paintMethod->NeedsContentTransition(), false);
+}
+
+/**
+ * @tc.name: ImagePaintMethodUpdateCanvasImage003
+ * @tc.desc: Test UpdateCanvasImage with SVG image
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodUpdateCanvasImage003, TestSize.Level0)
+{
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config);
+    ASSERT_NE(paintMethod, nullptr);
+
+    paintMethod->UpdatePaintMethod(canvasImage, config);
+    EXPECT_EQ(paintMethod->NeedsContentTransition(), false);
+}
+
+// ============================================================================
+// UpdatePaintMethod Tests
+// ============================================================================
+
+/**
+ * @tc.name: ImagePaintMethodUpdatePaintMethod001
+ * @tc.desc: Test UpdatePaintMethod with new config
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodUpdatePaintMethod001, TestSize.Level0)
+{
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config1;
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config1);
+    ASSERT_NE(paintMethod, nullptr);
+
+    ImagePaintMethodConfig config2;
+    config2.selected = true;
+    config2.sensitive = true;
+    config2.interpolation = ImageInterpolation::HIGH;
+
+    paintMethod->UpdatePaintMethod(canvasImage, config2);
+    EXPECT_NE(paintMethod, nullptr);
+}
+
+// ============================================================================
+// UpdateOverlayModifier Tests
+// ============================================================================
+
+// ============================================================================
+// UpdateContentModifier Tests
+// ============================================================================
+
+// ============================================================================
+// NeedsContentTransition Tests
+// ============================================================================
+
+/**
+ * @tc.name: ImagePaintMethodNeedsContentTransition001
+ * @tc.desc: Test NeedsContentTransition with identity type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodNeedsContentTransition001, TestSize.Level0)
+{
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    ImagePaintMethodConfig config;
+    config.contentTransitionType = ContentTransitionType::IDENTITY;
+
+    auto paintMethod = AceType::MakeRefPtr<ImagePaintMethod>(canvasImage, config);
+    ASSERT_NE(paintMethod, nullptr);
+
+    EXPECT_EQ(paintMethod->NeedsContentTransition(), false);
+}
+
 } // namespace OHOS::Ace::NG

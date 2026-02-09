@@ -147,10 +147,41 @@ Ark_BorderRadiuses ArkValueFromOptBorderRadius(const OHOS::Ace::NG::BorderRadius
     return arkBorder;
 }
 
+Opt_Length OptValueFromOptCalcLength(const std::optional<CalcLength>& src)
+{
+    if (!src.has_value()) {
+        Opt_Length dst;
+        dst.tag = INTEROP_TAG_UNDEFINED;
+        return dst;
+    }
+    return ArkValue<Opt_Length>(src->GetDimension().ConvertToVp());
+}
+
+Ark_Padding ArkValueFromOptPadding(const OHOS::Ace::NG::PaddingProperty& src)
+{
+    Ark_Padding arkPadding = {
+        .top = OptValueFromOptCalcLength(src.top),
+        .right = OptValueFromOptCalcLength(src.right),
+        .bottom = OptValueFromOptCalcLength(src.bottom),
+        .left = OptValueFromOptCalcLength(src.left),
+    };
+    return arkPadding;
+}
+
 void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
 {
-    dst.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(src.marginProp, ctx);
-    dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.paddingProp, ctx);
+    if (src.marginProp) {
+        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(
+            ArkValueFromOptPadding(src.marginProp.value()));
+    } else {
+        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty());
+    }
+    if (src.paddingProp) {
+        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
+            ArkValueFromOptPadding(src.paddingProp.value()));
+    } else {
+        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
+    }
     if (src.borderRadius) {
         dst.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(
             ArkValueFromOptBorderRadius(src.borderRadius.value()));

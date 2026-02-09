@@ -248,7 +248,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
-void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
         dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
@@ -308,7 +308,7 @@ void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
     dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
-void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
     dst.radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
@@ -693,7 +693,7 @@ void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src, Co
     dst = arkBorder;
 }
 
-void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
 {
     dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius, ctx);
     dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
@@ -764,7 +764,7 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
     dst.contentOffsetY = Converter::ArkValue<Ark_Float64>(src.GetContentOffsetY());
 }
 
-void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
     dst.fontSize = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(src.fontSize);
     dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(src.fontWeight);
@@ -860,7 +860,7 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
 
-void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
 {
     dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
     dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
@@ -950,7 +950,7 @@ std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const
     return borderRadius;
 }
 
-void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
     dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
     if (auto marginProp = ParseMarginString(src.margin)) {
@@ -1059,13 +1059,13 @@ Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
     };
 }
 
-void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
 {
     dst.start = Converter::ArkValue<Opt_Int32>(src.start);
     dst.end = Converter::ArkValue<Opt_Int32>(src.end);
 }
 
-void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
 {
     std::optional<int32_t> start;
     std::optional<int32_t> end;
@@ -1122,8 +1122,12 @@ void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
     dst.y =  ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
     dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetX()));
     dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.displayLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.displayLocation_.GetY()));
+    dst.globalDisplayX =
+        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
+    dst.globalDisplayY =
+        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
 }
 
 // Helper function to create Ark_GestureRecognizer from NG::NGGestureRecognizer

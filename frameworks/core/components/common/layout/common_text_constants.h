@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 
 extern const std::vector<TextCase> TEXT_CASES;
 
-extern const std::vector<TextAlign> TEXT_ALIGNS;
+ACE_FORCE_EXPORT extern const std::vector<TextAlign> TEXT_ALIGNS;
 
 extern const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS;
 

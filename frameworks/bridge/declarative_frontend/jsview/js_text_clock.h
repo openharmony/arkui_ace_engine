@@ -16,38 +16,14 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_CLOCK_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_CLOCK_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/common/container_consts.h"
 #include "frameworks/core/components/text_clock/text_clock_controller.h"
 
 namespace OHOS::Ace::Framework {
-class JSTextClock : public JSViewAbstract, public JSInteractableView {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-    static void SetFormat(const JSCallbackInfo& info);
-    static void JsOnDateChange(const JSCallbackInfo& info);
-    static void SetTextColor(const JSCallbackInfo& info);
-    static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const JSCallbackInfo& info);
-    static void SetFontStyle(int32_t value);
-    static void SetFontFamily(const JSCallbackInfo& info);
-    static void SetTextShadow(const JSCallbackInfo& info);
-    static void SetFontFeature(const JSCallbackInfo& info);
-    static void SetDateTimeOptions(const JSCallbackInfo& info);
-
-protected:
-    static void SetFontDefault();
-};
-
 class JSTextClockController final : public Referenced {
 public:
     JSTextClockController() = default;
     ~JSTextClockController() override = default;
-
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSTextClockController* scroller);
     void Start();
     void Stop();
     void AddController(const RefPtr<TextClockController>& controller)
@@ -55,7 +31,7 @@ public:
         controller_.emplace_back(controller);
     }
 
-    void removeController(const RefPtr<TextClockController>& controller);
+    ACE_FORCE_EXPORT void removeController(const RefPtr<TextClockController>& controller);
 
     void SetInstanceId(int32_t id)
     {
@@ -63,6 +39,7 @@ public:
     }
 
 private:
+    friend class JSTextClockControllerBinding;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::vector<RefPtr<TextClockController>> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextClockController);

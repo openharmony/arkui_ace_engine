@@ -50,6 +50,8 @@ public:
         value->propFontColor_ = CloneFontColor();
         value->propFontFamily_ = CloneFontFamily();
         value->propMarqueeUpdateStrategy_ = CloneMarqueeUpdateStrategy();
+        value->propMarqueeSpacing_ = CloneMarqueeSpacing();
+        value->propMarqueeDelay_ = CloneMarqueeDelay();
         return value;
     }
 
@@ -67,6 +69,8 @@ public:
         ResetFontColor();
         ResetFontFamily();
         ResetMarqueeUpdateStrategy();
+        ResetMarqueeSpacing();
+        ResetMarqueeDelay();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -102,6 +106,9 @@ public:
         json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
         json->PutExtAttr("marqueeUpdateStrategy", V2::ConvertWrapMarqueeUpdateStrategyToStirng(
             propMarqueeUpdateStrategy_.value_or(MarqueeUpdateStrategy::DEFAULT)).c_str(), filter);
+        json->PutExtAttr("spacing", propMarqueeSpacing_.has_value() ?
+            propMarqueeSpacing_.value().ToString().c_str() : "undefined", filter);
+        json->PutExtAttr("delay", propMarqueeDelay_.value_or(0), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlayerStatus, bool, PROPERTY_UPDATE_MEASURE);
@@ -115,6 +122,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarqueeUpdateStrategy, MarqueeUpdateStrategy, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarqueeSpacing, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarqueeDelay, int32_t, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutProperty);

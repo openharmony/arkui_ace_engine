@@ -72,7 +72,7 @@ struct Avoidance {
     AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
 };
 
-struct SelectParam {
+struct ACE_FORCE_EXPORT SelectParam {
     std::string text;
     std::string icon;
     std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon = nullptr;

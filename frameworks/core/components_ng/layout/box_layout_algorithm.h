@@ -19,6 +19,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 // BoxLayout is the class for box type measure, layout.

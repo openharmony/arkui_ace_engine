@@ -923,4 +923,103 @@ HWTEST_F(TextFieldManagerTestNG, CheckInRichEditor001, TestSize.Level0)
     textFieldManager->SetOnFocusTextField(textFieldPattern);
     EXPECT_TRUE(textFieldManager->CheckInRichEditor());
 }
+
+/**
+ * @tc.name: TextFieldManagerNG_TriggerCaretInfoUpdateOnScaleChange001
+ * @tc.desc: Test TriggerCaretInfoUpdateOnScaleChange when onFocusTextField is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_TriggerCaretInfoUpdateOnScaleChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldManager with null onFocusTextField
+     * @tc.expected: step1. Method should return without crash
+     */
+    TextFieldManagerNG textFieldManager;
+
+    // Verify initial state - no focused text field
+    auto onFocusTextField = textFieldManager.GetOnFocusTextField();
+    EXPECT_EQ(onFocusTextField.Upgrade(), nullptr);
+
+    // Call target method - should not crash with null focused text field
+    textFieldManager.TriggerCaretInfoUpdateOnScaleChange();
+
+    // Verify state remains unchanged
+    onFocusTextField = textFieldManager.GetOnFocusTextField();
+    EXPECT_EQ(onFocusTextField.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: TextFieldManagerNG_TriggerCaretInfoUpdateOnScaleChange002
+ * @tc.desc: Test TriggerCaretInfoUpdateOnScaleChange when focused pattern is not TextFieldPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_TriggerCaretInfoUpdateOnScaleChange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldManager with non-TextFieldPattern focused
+     * @tc.expected: step1. Method should return without crash when DynamicCast fails
+     */
+    TextFieldManagerNG textFieldManager;
+
+    // Create a basic Pattern (not TextFieldPattern)
+    auto basicPattern = AceType::MakeRefPtr<Pattern>();
+    ASSERT_NE(basicPattern, nullptr);
+
+    // Create a FrameNode with the basic pattern
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 100, basicPattern, false);
+    ASSERT_NE(frameNode, nullptr);
+    basicPattern->AttachToFrameNode(frameNode);
+
+    // Set the non-TextFieldPattern as focused
+    WeakPtr<Pattern> weakPattern(basicPattern);
+    textFieldManager.SetOnFocusTextField(weakPattern);
+
+    // Verify the pattern is set
+    auto focusedPattern = textFieldManager.GetOnFocusTextField().Upgrade();
+    EXPECT_NE(focusedPattern, nullptr);
+    auto castResult = AceType::DynamicCast<TextFieldPattern>(focusedPattern);
+    EXPECT_EQ(castResult, nullptr);
+
+    // Call target method - should not crash when DynamicCast fails
+    textFieldManager.TriggerCaretInfoUpdateOnScaleChange();
+}
+
+/**
+ * @tc.name: TextFieldManagerNG_TriggerCaretInfoUpdateOnScaleChange003
+ * @tc.desc: Test TriggerCaretInfoUpdateOnScaleChange when focused TextFieldPattern is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_TriggerCaretInfoUpdateOnScaleChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldManager with valid TextFieldPattern focused
+     * @tc.expected: step1. Method should call UpdateCaretInfoToController with forceUpdate=true
+     */
+    TextFieldManagerNG textFieldManager;
+
+    // Create a TextField node with valid TextFieldPattern
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+
+    auto textFieldPattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    // Set the TextFieldPattern as focused
+    WeakPtr<Pattern> weakPattern(textFieldPattern);
+    textFieldManager.SetOnFocusTextField(weakPattern);
+
+    // Verify the pattern is set correctly
+    auto focusedPattern = textFieldManager.GetOnFocusTextField().Upgrade();
+    EXPECT_NE(focusedPattern, nullptr);
+    auto castResult = AceType::DynamicCast<TextFieldPattern>(focusedPattern);
+    EXPECT_NE(castResult, nullptr);
+
+    // Call target method - should successfully invoke UpdateCaretInfoToController
+    textFieldManager.TriggerCaretInfoUpdateOnScaleChange();
+}
 } // namespace OHOS::Ace::NG

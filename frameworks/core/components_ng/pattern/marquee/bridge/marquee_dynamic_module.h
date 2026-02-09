@@ -29,6 +29,7 @@ public:
     const void* GetDynamicModifier() override;
     const void* GetStaticModifier() override;
     const void* GetCjModifier() override;
+    const void* GetCustomModifier(const std::string& name) override;
     // const void* GetStaticOpsAccessor() override;
     void* GetModel() override;
 };

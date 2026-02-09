@@ -118,7 +118,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
@@ -135,6 +135,7 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_text_layout.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -366,7 +367,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSToggle::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
-    JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
@@ -460,7 +460,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSAlertDialog::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
-    JSTextClock::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
     JSGesture::JSBind(globalObj);
@@ -472,10 +471,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCanvasImageData::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
-    JSSearch::JSBind(globalObj);
     JSSelect::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
-    JSTextClockController::JSBind(globalObj);
+    JSTextClockControllerBinding::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
     JSTextTimer::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);

@@ -1273,7 +1273,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" }, { "-navigation" }, { "-focuswindowscene" }, { "-focusmanager" }, { "-jsdump" }, { "-event" },
         { "-imagecache" }, { "-imagefilecache" }, { "-allelements" }, { "-default" }, { "-overlay" }, { "--stylus" },
-        { "-bindaicaller" }};
+        { "-bindaicaller" }, { "-allInfoWithParamConfigTotal" }};
     int turn = 0;
     for (; turn < params.size(); turn++) {
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
@@ -2819,7 +2819,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
-    context_->touchOptimizer_->slideAccepted_ = false; // 这将导致NeedTpFlushVsync返回true
+    context_->touchOptimizer_->slideAccept_ = false; // 这将导致NeedTpFlushVsync返回true
 
     // 创建触摸事件
     TouchEvent touchEvent;
@@ -2835,7 +2835,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
-    context_->touchOptimizer_->slideAccepted_ = true;
+    context_->touchOptimizer_->slideAccept_ = false;
 }
 
 /**

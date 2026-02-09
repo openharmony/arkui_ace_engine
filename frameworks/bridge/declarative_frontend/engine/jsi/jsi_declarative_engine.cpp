@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -405,56 +405,6 @@ std::string BuildOhmUrl(const std::string& bundleName, const std::string& module
     return tempUrl + "@" + harModuleName + "/" + newPagePath;
 }
 
-bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
-    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
-{
-    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
-    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
-    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
-        return false;
-    }
-    bundleName = jsBundleName->ToString(vm)->ToString(vm);
-    moduleName = jsModuleName->ToString(vm)->ToString(vm);
-    pagePath = jsPagePath->ToString(vm)->ToString(vm);
-    bool ohmUrlValid = false;
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
-        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
-        if (jsOhmUrl->IsString(vm)) {
-            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
-            ohmUrlValid = true;
-        } else {
-            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
-        }
-    }
-    if (!ohmUrlValid) {
-        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
-        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
-    }
-
-    std::string integratedHspName = "false";
-    // Integrated hsp adaptation
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
-        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (integratedHsp->IsString(vm)) {
-            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
-        }
-    }
-    if (integratedHspName == "true") {
-        LocalScope scope(vm);
-        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
-    }
-
-    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
-        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
-        if (pageFullPathInfo->IsString(vm)) {
-            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
-        }
-    }
-
-    return true;
-}
-
 std::string GetRealPagePath(const std::string& pagePath)
 {
     if (pagePath.empty()) {
@@ -816,39 +766,44 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
     g_declarativeRuntime = runtime;
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     PreLoadDynamicModule(arkRuntime);
 #endif
 }
 
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
 void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
-        { "Checkbox", "arkui.components.arkcheckbox" },
-        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
-        { "Gauge", "arkui.components.arkgauge" },
-        { "Rating", "arkui.components.arkrating" },
-        { "TimePicker", "arkui.components.arktimepicker" },
-        { "TimePickerDialog", "arkui.components.arktimepicker" },
-        { "WaterFlow", "arkui.components.arkwaterflow" },
-        { "FlowItem", "arkui.components.arkflowitem" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
-        { "Hyperlink", "arkui.components.arkhyperlink" },
-        { "Marquee", "arkui.components.arkmarquee" },
-        { "Stepper", "arkui.components.arkstepper" },
-        { "StepperItem", "arkui.components.arkstepperitem" },
-        { "Radio", "arkui.components.arkradio" },
-        { "Slider", "arkui.components.arkslider" },
-        { "Indexer", "arkui.components.arkalphabetindexer" },
-        { "Sidebar", "arkui.components.arksidebarcontainer" },
-        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "Checkbox", "arkui.components.arkcheckbox" },
+        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
         { "ColumnSplit", "arkui.components.arkcolumnsplit" },
-        { "RowSplit", "arkui.components.arkrowsplit" },
+        { "FlowItem", "arkui.components.arkflowitem" },
 #ifndef ARKUI_WEARABLE
         { "FolderStack", "arkui.components.arkfolderstack" },
 #endif
+        { "Gauge", "arkui.components.arkgauge" },
+        { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "Indexer", "arkui.components.arkalphabetindexer" },
+        { "Marquee", "arkui.components.arkmarquee" },
+        { "Menu", "arkui.components.arkmenu" },
+        { "MenuItem", "arkui.components.arkmenuitem" },
+        { "MenuItemGroup", "arkui.components.arkmenuitemgroup" },
+        { "Radio", "arkui.components.arkradio" },
+        { "Rating", "arkui.components.arkrating" },
+        { "Richeditor", "arkui.components.arkricheditor" },
+        { "RowSplit", "arkui.components.arkrowsplit" },
+        { "Search", "arkui.components.arksearch" },
+        { "Sidebar", "arkui.components.arksidebarcontainer" },
+        { "Slider", "arkui.components.arkslider" },
+        { "Stepper", "arkui.components.arkstepper" },
+        { "StepperItem", "arkui.components.arkstepperitem" },
+        { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "TimePicker", "arkui.components.arktimepicker" },
+        { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "WaterFlow", "arkui.components.arkwaterflow" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
@@ -1546,6 +1501,12 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
+JsiDeclarativeEngine::JsiDeclarativeEngine(int32_t instanceId, void* runtime)
+    : instanceId_(instanceId), runtime_(runtime) {}
+
+JsiDeclarativeEngine::JsiDeclarativeEngine(int32_t instanceId)
+    : instanceId_(instanceId) {}
+
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
@@ -2220,6 +2181,57 @@ int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundle
     CHECK_NULL_RETURN(runtime, false);
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     return arkRuntime->LoadDestinationFile(bundleName, moduleName, pageSourceFile, isSingleton);
+}
+
+bool JsiDeclarativeEngine::ParseNamedRouterParams(
+    const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
+    std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl)
+{
+    auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+    auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
+    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
+        return false;
+    }
+    bundleName = jsBundleName->ToString(vm)->ToString(vm);
+    moduleName = jsModuleName->ToString(vm)->ToString(vm);
+    pagePath = jsPagePath->ToString(vm)->ToString(vm);
+    bool ohmUrlValid = false;
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
+        auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
+        if (jsOhmUrl->IsString(vm)) {
+            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
+            ohmUrlValid = true;
+        } else {
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
+        }
+    }
+    if (!ohmUrlValid) {
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
+        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
+    }
+
+    std::string integratedHspName = "false";
+    // Integrated hsp adaptation
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
+        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
+        if (integratedHsp->IsString(vm)) {
+            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
+        }
+    }
+    if (integratedHspName == "true") {
+        LocalScope scope(vm);
+        bundleName = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
+    }
+
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
+        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
+        if (pageFullPathInfo->IsString(vm)) {
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
+        }
+    }
+
+    return true;
 }
 
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,

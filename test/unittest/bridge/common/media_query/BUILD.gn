@@ -19,6 +19,7 @@ ace_unittest("media_query_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/bridge/common/media_query/media_query_info.cpp",
+    "$ace_root/frameworks/bridge/common/media_query/media_queryer.cpp",
     "media_query_test.cpp",
   ]
 }

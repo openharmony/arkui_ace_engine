@@ -48,6 +48,8 @@ struct Font {
     std::optional<Color> fontColor;
     std::optional<std::vector<std::string>> fontFamiliesNG;
     std::optional<bool> enableVariableFontWeight;
+    std::optional<bool> enableDeviceFontWeightCategory;
+    std::optional<uint32_t> variableFontWeight;
     std::optional<Dimension> strokeWidth;
     std::optional<Color> strokeColor;
     std::optional<SuperscriptStyle> superscript;
@@ -60,7 +62,8 @@ struct Font {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
                     fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight &&
                     strokeWidth == other.strokeWidth && strokeColor == other.strokeColor &&
-                    superscript == other.superscript;
+                    superscript == other.superscript && variableFontWeight == other.variableFontWeight &&
+                    enableDeviceFontWeightCategory == other.enableDeviceFontWeightCategory;
         if (!flag) {
             return false;
         }
@@ -127,6 +130,21 @@ struct Font {
     std::optional<SuperscriptStyle> GetSuperscript() const
     {
         return superscript;
+    }
+
+    std::optional<bool> GetEnableVariableFontWeight() const
+    {
+        return enableVariableFontWeight;
+    }
+
+    std::optional<bool> GetEnableDeviceFontWeightCategory() const
+    {
+        return enableDeviceFontWeightCategory;
+    }
+
+    std::optional<uint32_t> GetVariableFontWeight() const
+    {
+        return variableFontWeight;
     }
 };
 
@@ -407,6 +425,7 @@ public:
     virtual void SetCancelButtonSymbol(bool isShowSymbol) = 0;
     virtual void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
+    virtual void SetIsShowVoiceButton(bool isShowButton) {};
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;

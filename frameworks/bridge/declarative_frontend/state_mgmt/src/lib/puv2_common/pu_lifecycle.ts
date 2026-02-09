@@ -183,6 +183,11 @@ class CustomComponentLifecycle {
     public removeObserver(target: CustomComponentLifecycleObserver): void {
         this.observers_ = this.observers_.filter(obs => obs !== target);
     }
+
+    public toJSON(): Object {
+        return {};
+    }
+
 }
 
 interface CustomComponentLifecycleObserver {

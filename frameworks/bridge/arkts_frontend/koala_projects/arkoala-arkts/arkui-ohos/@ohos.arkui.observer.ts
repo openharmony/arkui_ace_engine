@@ -83,10 +83,9 @@ declare namespace uiObserver {
         onNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback: Callback_<NavDestinationInfo>): void;
         offNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback?: Callback_<NavDestinationInfo>): void;
 
-        onTextChange(callback?: Callback_<TextChangeEventInfo>): void;
+        onTextChange(callback: Callback_<TextChangeEventInfo>): void;
         offTextChange(callback?: Callback_<TextChangeEventInfo>): void;
-
-        onTextChange(identity: ObserverOptions, callback?: Callback_<TextChangeEventInfo>): void;
+        onTextChange(identity: ObserverOptions, callback: Callback_<TextChangeEventInfo>): void;
         offTextChange(identity: ObserverOptions, callback?: Callback_<TextChangeEventInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
@@ -163,7 +162,7 @@ declare namespace uiObserver {
 
     export interface TextChangeEventInfo {
         id: string;
-        uniqueId: int32;
+        uniqueId: int;
         content: string;
     }
 

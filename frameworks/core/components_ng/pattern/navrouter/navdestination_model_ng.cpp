@@ -51,7 +51,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_RETURN(navDestinationNode, false);
-
+    ACE_UINODE_TRACE(navDestinationNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, false);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -257,6 +257,7 @@ void NavDestinationModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     // navDestination node
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -455,6 +456,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
     auto* stack = ViewStackProcessor::GetInstance();
     // navDestination node
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(deepRenderFunc, nullptr);
         auto parent = AceType::DynamicCast<UINode>(FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId));

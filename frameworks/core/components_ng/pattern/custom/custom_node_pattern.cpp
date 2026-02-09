@@ -23,6 +23,7 @@ bool CustomNodePattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     auto customNodeLayoutAlgorithm =
         DynamicCast<CustomNodeLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(customNodeLayoutAlgorithm, false);

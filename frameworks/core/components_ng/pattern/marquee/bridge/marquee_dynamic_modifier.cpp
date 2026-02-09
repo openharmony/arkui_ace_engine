@@ -332,6 +332,57 @@ void SetMarqueeFrameRateRange(ArkUINodeHandle node, ArkUI_Int32 minValue, ArkUI_
     MarqueeModelNG::SetMarqueeFrameRateRange(frameNode, frameRateRange, type);
 }
 
+void SetMarqueeSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    CalcDimension spacing(number, unitEnum);
+    if (number < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
+        unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+        std::optional<CalcDimension> nullSpacing = std::nullopt;
+        MarqueeModelNG::SetMarqueeSpacing(frameNode, nullSpacing);
+    } else {
+        MarqueeModelNG::SetMarqueeSpacing(frameNode, spacing);
+    }
+
+    if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
+        CHECK_NULL_VOID(resObj);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<CalcDimension>("MarqueeSpacing", resObj, spacing);
+    }
+}
+
+void ResetMarqueeSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> spacing = std::nullopt;
+    MarqueeModelNG::SetMarqueeSpacing(frameNode, spacing);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MarqueeSpacing");
+    }
+}
+
+void SetMarqueeDelay(ArkUINodeHandle node, ArkUI_Int32 delay)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetMarqueeDelay(frameNode, std::optional<int32_t>(delay));
+}
+
+void ResetMarqueeDelay(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetMarqueeDelay(frameNode);
+}
+
 #ifndef CROSS_PLATFORM
 void SetMarqueeFontSizeImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr)
 {
@@ -522,6 +573,36 @@ ArkUINodeHandle CreateMarqueeFrameNodeImpl(ArkUI_Uint32 nodeId)
     GetMarqueeModelImpl()->Create();
     return nullptr;
 }
+
+void SetMarqueeSpacingImpl(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr)
+{
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    CalcDimension spacing(number, unitEnum);
+    if (number < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
+        unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+        std::optional<CalcDimension> nullSpacing = std::nullopt;
+        GetMarqueeModelImpl()->SetMarqueeSpacing(nullSpacing);
+    } else {
+        GetMarqueeModelImpl()->SetMarqueeSpacing(spacing);
+    }
+}
+
+void ResetMarqueeSpacingImpl(ArkUINodeHandle node)
+{
+    std::optional<CalcDimension> spacing = std::nullopt;
+    GetMarqueeModelImpl()->SetMarqueeSpacing(spacing);
+}
+
+void SetMarqueeDelayImpl(ArkUINodeHandle node, ArkUI_Int32 delay)
+{
+    GetMarqueeModelImpl()->SetMarqueeDelay(delay);
+}
+
+void ResetMarqueeDelayImpl(ArkUINodeHandle node)
+{
+    std::optional<int32_t> delay = std::nullopt;
+    GetMarqueeModelImpl()->SetMarqueeDelay(delay);
+}
 #endif
 
 namespace NodeModifier {
@@ -560,6 +641,10 @@ const ArkUIMarqueeModifier* GetMarqueeDynamicModifier()
             .resetMarqueeLoop = ResetMarqueeLoopImpl,
             .setMarqueeDirection = SetMarqueeDirectionImpl,
             .resetMarqueeDirection = ResetMarqueeDirectionImpl,
+            .setMarqueeSpacing = SetMarqueeSpacingImpl,
+            .resetMarqueeSpacing = ResetMarqueeSpacingImpl,
+            .setMarqueeDelay = SetMarqueeDelayImpl,
+            .resetMarqueeDelay = ResetMarqueeDelayImpl,
             .createMarqueeFrameNode = CreateMarqueeFrameNodeImpl,
             .setMarqueeFrameRateRange = SetMarqueeFrameRateRangeImpl,
         };
@@ -597,6 +682,10 @@ const ArkUIMarqueeModifier* GetMarqueeDynamicModifier()
             .resetMarqueeLoop = ResetMarqueeLoop,
             .setMarqueeDirection = SetMarqueeDirection,
             .resetMarqueeDirection = ResetMarqueeDirection,
+            .setMarqueeSpacing = SetMarqueeSpacing,
+            .resetMarqueeSpacing = ResetMarqueeSpacing,
+            .setMarqueeDelay = SetMarqueeDelay,
+            .resetMarqueeDelay = ResetMarqueeDelay,
             .createMarqueeFrameNode = CreateMarqueeFrameNode,
             .setMarqueeFrameRateRange = SetMarqueeFrameRateRange,
         };

@@ -27,7 +27,7 @@ public:
     TextShareAdapter() = default;
     ~TextShareAdapter() = default;
 
-    static void StartTextShareTask(const int32_t containerId, const NG::RectF& contentRect,
+    ACE_FORCE_EXPORT static void StartTextShareTask(const int32_t containerId, const NG::RectF& contentRect,
         const std::string& shareText);
 
     static uint64_t GetMaxTextShareLength();

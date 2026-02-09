@@ -218,18 +218,32 @@ public:
         return hoverIconPadding_;
     }
 
+protected:
+    virtual void LoadingImageProperty();
+    virtual bool IsShowSymbol() const;
+    virtual void OnCleanNodeClicked();
+    virtual void UpdateNodeProperty(const RefPtr<LayoutProperty>& nodeProp,
+        const RefPtr<TextLayoutProperty>& symbolProperty, const RefPtr<TextFieldTheme>& theme)
+    {}
+    virtual bool IsEnableUserSymbol()
+    {
+        return true;
+    }
+    float cancelHoverSize_ = 0.0f;
+    virtual bool isVoiceButton()
+    {
+        return false;
+    }
+
 private:
     bool IsShowClean() const;
-    bool IsShowSymbol() const;
     bool IsSymbolIcon() const;
     void ReplaceNode();
     void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void SetCancelSymbolIconSize();
     CalcDimension GetSymbolDefaultSize();
-    void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();
-    void LoadingImageProperty();
     void LoadingCancelButtonColor();
     void AddIconHotZoneRect();
     ImageSourceInfo CreateImageSourceInfo();
@@ -240,7 +254,6 @@ private:
     std::string moduleName_;
     Color iconColor_;
     bool isShow_ = false;
-    float cancelHoverSize_ = 0.0f;
     float hoverIconPadding_ = 0.0f;
 };
 
@@ -262,6 +275,41 @@ public:
 
 private:
     RefPtr<FrameNode> placeholderNode_;
+};
+
+class VoiceNodeResponseArea : public CleanNodeResponseArea {
+    DECLARE_ACE_TYPE(VoiceNodeResponseArea, CleanNodeResponseArea);
+
+public:
+    VoiceNodeResponseArea(const WeakPtr<Pattern>& hostPattern) : CleanNodeResponseArea(hostPattern) {}
+    ~VoiceNodeResponseArea() = default;
+
+    void InitResponseArea() override;
+    void Refresh() override;
+    void Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth) override;
+    void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
+    void SetAccessibilityAction();
+    void InitButtonMouseEvent();
+    void UpdateVoiceButton(bool activate);
+
+protected:
+    void LoadingImageProperty() override {}
+    bool IsShowSymbol() const override
+    {
+        return true;
+    }
+    bool IsEnableUserSymbol() override
+    {
+        return false;
+    }
+    void OnCleanNodeClicked() override;
+    void UpdateNodeProperty(const RefPtr<LayoutProperty>& nodeProp, const RefPtr<TextLayoutProperty>& symbolProperty,
+        const RefPtr<TextFieldTheme>& theme) override;
+
+    bool isVoiceButton() override
+    {
+        return true;
+    }
 };
 } // namespace OHOS::Ace::NG
 

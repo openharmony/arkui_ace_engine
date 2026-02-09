@@ -123,7 +123,8 @@ void RelativeContainerBiasRulesTest::CreateInstance(const std::function<void(Rel
     layoutProperty_ = frameNode_->GetLayoutProperty<RelativeContainerLayoutProperty>();
 }
 
-void RelativeContainerBiasRulesTest::SetComponentParam(TextModelNG& textModelNG, std::string id, float width, float height)
+void RelativeContainerBiasRulesTest::SetComponentParam(
+    TextModelNG& textModelNG, std::string id, float width, float height)
 {
     textModelNG.Create(StringUtils::Str8ToStr16(id));
     ViewAbstract::SetWidth(CalcLength(width));
@@ -201,22 +202,11 @@ HWTEST_F(RelativeContainerBiasRulesTest, BiasRulesTest001, TestSize.Level0)
      * set align rules for first node
      */
     firstItemFrameNode->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
-    std::vector<std::pair<float, float>> biasPairs = {
-        std::make_pair(-1.0f, -1.0f),
-        std::make_pair(0.0f, 0.0f),
-        std::make_pair(0.3f, 0.3f),
-        std::make_pair(0.5f, 0.5f),
-        std::make_pair(1.0f, 1.0f),
-        std::make_pair(1.5f, 1.5f)
-    };
-    std::vector<OffsetF> offsets = {
-        OffsetF(75.0f, 75.0f),
-        OffsetF(0.0f, 0.0f),
-        OffsetF(45.0f, 45.0f),
-        OffsetF(75.0f, 75.0f),
-        OffsetF(150.0f, 150.0f),
-        OffsetF(225.0f, 225.0f)
-    };
+    std::vector<std::pair<float, float>> biasPairs = { std::make_pair(-1.0f, -1.0f), std::make_pair(0.0f, 0.0f),
+        std::make_pair(0.3f, 0.3f), std::make_pair(0.5f, 0.5f), std::make_pair(1.0f, 1.0f),
+        std::make_pair(1.5f, 1.5f) };
+    std::vector<OffsetF> offsets = { OffsetF(75.0f, 75.0f), OffsetF(0.0f, 0.0f), OffsetF(45.0f, 45.0f),
+        OffsetF(75.0f, 75.0f), OffsetF(150.0f, 150.0f), OffsetF(225.0f, 225.0f) };
     for (int i = 0; i < 6; i++) {
         firstItemFrameNode->GetLayoutProperty()->UpdateBias(biasPairs[i]);
         auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
@@ -278,7 +268,7 @@ HWTEST_F(RelativeContainerBiasRulesTest, BiasRulesTest002, TestSize.Level0)
 
     /**
      * add first child
-    */
+     */
     MeasureProperty layoutConstraint1;
     layoutConstraint1.selfIdealSize = CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT));
     firstFrameNode->UpdateLayoutConstraint(layoutConstraint1);
@@ -375,7 +365,7 @@ HWTEST_F(RelativeContainerBiasRulesTest, BiasRulesTest003, TestSize.Level0)
 
     /**
      * add second child, set align rules
-    */
+     */
     auto secondFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     MeasureProperty layoutConstraint2;
     layoutConstraint2.selfIdealSize = CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT));
@@ -612,35 +602,25 @@ HWTEST_F(RelativeContainerBiasRulesTest, BiasRulesTest005, TestSize.Level0)
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(300.0f, 300.0f));
 }
 
-static void AddAlignRule(const std::string& id, const AlignDirection& direction,
-    const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules)
+static void AddAlignRule(const std::string& id, const AlignDirection& direction, const HorizontalAlign& horizontalRule,
+    std::map<AlignDirection, AlignRule>& alignRules)
 {
     RelativeContainerTestUtilsNG::AddAlignRule(id, direction, horizontalRule, alignRules);
 }
 
-static void AddAlignRule(const std::string& id, const AlignDirection& direction,
-    const VerticalAlign& verticalRule, std::map<AlignDirection, AlignRule>& alignRules)
+static void AddAlignRule(const std::string& id, const AlignDirection& direction, const VerticalAlign& verticalRule,
+    std::map<AlignDirection, AlignRule>& alignRules)
 {
     RelativeContainerTestUtilsNG::AddAlignRule(id, direction, verticalRule, alignRules);
 }
 
-std::vector<std::pair<float, float>> biasPairs = {
-    std::make_pair(-1.0f, -1.0f),
-    std::make_pair(0.0f, 0.0f),
-    std::make_pair(0.3f, 0.3f),
-    std::make_pair(0.5f, 0.5f),
-    std::make_pair(1.0f, 1.0f),
-    std::make_pair(1.5f, 1.5f)
-};
+std::vector<std::pair<float, float>> biasPairs = { std::make_pair(-1.0f, -1.0f), std::make_pair(0.0f, 0.0f),
+    std::make_pair(0.3f, 0.3f), std::make_pair(0.5f, 0.5f), std::make_pair(1.0f, 1.0f), std::make_pair(1.5f, 1.5f) };
 
-std::vector<OffsetF> offsets = {
-    OffsetF(CONTAINER_WIDTH - 150.0f - 75.0f, 75.0f),
-    OffsetF(CONTAINER_WIDTH - 150.0f - 0.0f, 0.0f),
-    OffsetF(CONTAINER_WIDTH - 150.0f - 45.0f, 45.0f),
-    OffsetF(CONTAINER_WIDTH - 150.0f - 75.0f, 75.0f),
-    OffsetF(CONTAINER_WIDTH - 150.0f - 150.0f, 150.0f),
-    OffsetF(CONTAINER_WIDTH - 150.0f - 225.0f, 225.0f)
-};
+std::vector<OffsetF> offsets = { OffsetF(CONTAINER_WIDTH - 150.0f - 75.0f, 75.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 0.0f, 0.0f), OffsetF(CONTAINER_WIDTH - 150.0f - 45.0f, 45.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 75.0f, 75.0f), OffsetF(CONTAINER_WIDTH - 150.0f - 150.0f, 150.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 225.0f, 225.0f) };
 
 static void LayoutConstraint(RefPtr<LayoutWrapperNode> layoutWrapper, SizeF containerSize)
 {

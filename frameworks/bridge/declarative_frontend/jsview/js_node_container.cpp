@@ -206,7 +206,7 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
     CHECK_NULL_VOID(nodeContainerModelInstance);
 
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafely();
     RefPtr<JsFunction> jsMake = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
     nodeContainerModelInstance->SetMakeFunction(
         [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {

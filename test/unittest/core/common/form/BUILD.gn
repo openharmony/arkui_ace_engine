@@ -19,6 +19,7 @@ ohos_unittest("form_manager_test") {
   module_out_path = "$basic_test_output_path"
 
   sources = [
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",

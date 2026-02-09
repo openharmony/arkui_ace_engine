@@ -244,6 +244,7 @@ void NavigationModelNG::Create(bool useHomeDestination)
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     CHECK_NULL_VOID(navigationGroupNode);
@@ -460,6 +461,7 @@ bool NavigationModelNG::ParseCommonTitle(
     CHECK_NULL_RETURN(navigationGroupNode, false);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_RETURN(navBarNode, false);
+    ACE_UINODE_TRACE(navBarNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, false);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -808,6 +810,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    ACE_UINODE_TRACE(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
@@ -946,6 +949,7 @@ void NavigationModelNG::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlace
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UINODE_TRACE(navigationGroupNode);
     if (!navigationGroupNode->GetPlaceholderContentNode()) {
         int32_t placeholderContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto placeholderContentNode = FrameNode::GetOrCreateFrameNode(V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG,
@@ -1292,6 +1296,7 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    ACE_UINODE_TRACE(navBarNode);
     if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     } else {
@@ -1831,6 +1836,7 @@ void NavigationModelNG::SetNavigationStack()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
+    ACE_UINODE_TRACE(navigationGroupNode);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
     auto navigationStack = pattern->GetNavigationStack();
@@ -1924,6 +1930,7 @@ void NavigationModelNG::SetToolBarItems(FrameNode* frameNode, std::vector<NG::Ba
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ACE_UINODE_TRACE(navBarNode);
     CHECK_NULL_VOID(navBarNode);
     if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
@@ -2369,6 +2376,7 @@ void NavigationModelNG::SetSplitPlaceholder(FrameNode* frameNode, FrameNode* spl
 {
     CHECK_NULL_VOID(splitPlaceholder);
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     if (!navigationGroupNode->GetPlaceholderContentNode()) {
@@ -2410,6 +2418,7 @@ void NavigationModelNG::ResetSplitPlaceholder(FrameNode* frameNode)
 void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -2467,6 +2476,7 @@ void NavigationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackBut
 
 void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode)
 {
+    ACE_UINODE_TRACE(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -2772,6 +2782,7 @@ void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 
 RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
@@ -2869,6 +2880,7 @@ void NavigationModelNG::SetNavigationStack(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     auto navigationStack = pattern->GetNavigationStack();
     if (!navigationStack) {
+        ACE_UINODE_TRACE(frameNode);
         auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
         pattern->SetNavigationStack(std::move(navigationStack));
     }

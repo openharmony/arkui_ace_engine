@@ -44,6 +44,7 @@ TitleBarNode::~TitleBarNode()
 RefPtr<TitleBarNode> TitleBarNode::GetOrCreateTitleBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = GetFrameNode(tag, nodeId);
     CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<TitleBarNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();

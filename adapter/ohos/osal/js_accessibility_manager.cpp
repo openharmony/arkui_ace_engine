@@ -1283,7 +1283,15 @@ void UpdateFocusRectToRenderContext(
     CHECK_NULL_VOID(parentRenderContext);
     parentRenderContext->UpdateAccessibilityFocusRect(rectInt);
 }
-            
+
+void CheckAndReConnectA11ySA()
+{
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_VOID(client);
+    CHECK_NE_VOID(client->NeedToConnect(), true);
+    client->ConnectAndInit();
+}
+
 } // namespace
 
 
@@ -6806,6 +6814,26 @@ bool JsAccessibilityManager::ActAccessibilityAction(Accessibility::ActionType ac
     return false;
 }
 
+void JsAccessibilityManager::ClearAccessibilityFocusState()
+{
+    if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
+        auto focusNode = lastFrameNode_.Upgrade();
+        PaintAccessibilityFocusNode(focusNode, false);
+    }
+    lastFrameNode_.Reset();
+    lastElementId_ = -1;
+    currentFocusNodeId_ = -1;
+}
+
+bool JsAccessibilityManager::IsFormRender()
+{
+    auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    return ngPipeline->IsFormRender();
+}
+
 bool JsAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action, const RefPtr<PipelineBase>& context,
     int64_t uiExtensionOffset)
@@ -7586,13 +7614,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
     Register(false);
-    if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
-        auto focusNode = lastFrameNode_.Upgrade();
-        PaintAccessibilityFocusNode(focusNode, false);
-    }
-    lastFrameNode_.Reset();
-    lastElementId_ = -1;
-    currentFocusNodeId_ = -1;
+    ClearAccessibilityFocusState();
     if (parentWindowId_ == 0) {
         instance->DeregisterElementOperator(windowId);
     } else {
@@ -7856,7 +7878,12 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     CHECK_NULL_VOID(instance);
     uint32_t windowId = GetWindowId();
     Register(false);
-    currentFocusNodeId_ = -1;
+
+    // Clear focus state only for form render
+    if (IsFormRender()) {
+        ClearAccessibilityFocusState();
+    }
+
     instance->DeregisterElementOperator(windowId, treeId_);
     InitAccessibilityEnabledAndScreenReadEnabled(); // for many subtrees under the same instance
     parentElementId_ = INVALID_PARENT_ID;
@@ -9375,5 +9402,13 @@ int32_t JsAccessibilityManager::GetTreeId(int32_t instanceId)
         return 0;
     }
     return treeId_;
+}
+
+void JsAccessibilityManager::AccessibilityOnShowHide(bool isOnShow,
+    [[maybe_unused]] const WeakPtr<PipelineBase>& context)
+{
+    if (isOnShow) {
+        CheckAndReConnectA11ySA();
+    }
 }
 } // namespace OHOS::Ace::Framework

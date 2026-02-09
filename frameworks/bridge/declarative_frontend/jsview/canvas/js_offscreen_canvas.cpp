@@ -181,18 +181,24 @@ napi_value JSOffscreenCanvas::JsGetWidth(napi_env env, napi_callback_info info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    napi_value defaultWidth = nullptr;
-    napi_create_double(env, 0.0, &defaultWidth);
-    return (me != nullptr && !me->isDetached_) ? me->OnGetWidth(env) : defaultWidth;
+    if (me == nullptr || me->isDetached_) {
+        napi_value defaultWidth = nullptr;
+        napi_create_double(env, 0.0, &defaultWidth);
+        return defaultWidth;
+    }
+    return me->OnGetWidth(env);
 }
 
 napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    napi_value defaultHeight = nullptr;
-    napi_create_double(env, 0.0, &defaultHeight);
-    return (me != nullptr && !me->isDetached_) ? me->OnGetHeight(env) : defaultHeight;
+    if (me == nullptr || me->isDetached_) {
+        napi_value defaultHeight = nullptr;
+        napi_create_double(env, 0.0, &defaultHeight);
+        return defaultHeight;
+    }
+    return me->OnGetHeight(env);
 }
 
 napi_value JSOffscreenCanvas::JsSetWidth(napi_env env, napi_callback_info info)
@@ -210,26 +216,35 @@ napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callbac
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
-        JSException::Throw(ERROR_CODE_OFFSCREEN_CANVAS_HAS_DETACHED, "%s", "Failed to execute 'transferToImageBitmap'"
+        JSException::ThrowBusinessError(ERROR_CODE_OFFSCREEN_CANVAS_HAS_DETACHED,
+            "%s",
+            "Failed to execute 'transferToImageBitmap'"
             " on 'OffscreenCanvas': Cannot transfer an ImageBitmap from a detached OffscreenCanvas");
         return nullptr;
     }
-    napi_value defaultImage = nullptr;
-    napi_create_object(env, &defaultImage);
-    return (me != nullptr) ? me->onTransferToImageBitmap(env) : defaultImage;
+    if (me == nullptr) {
+        napi_value defaultImage = nullptr;
+        napi_create_object(env, &defaultImage);
+        return defaultImage;
+    }
+    return me->onTransferToImageBitmap(env);
 }
 
 napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info)
 {
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
-        JSException::Throw(ERROR_CODE_OFFSCREEN_CANVAS_HAS_DETACHED, "%s",
+        JSException::ThrowBusinessError(ERROR_CODE_OFFSCREEN_CANVAS_HAS_DETACHED,
+            "%s",
             "Failed to execute 'getContext' on 'OffscreenCanvas': OffscreenCanvas object is detached");
         return nullptr;
     }
-    napi_value defaultContext = nullptr;
-    napi_create_object(env, &defaultContext);
-    return (me != nullptr) ? me->onGetContext(env, info) : defaultContext;
+    if (me == nullptr) {
+        napi_value defaultContext = nullptr;
+        napi_create_object(env, &defaultContext);
+        return defaultContext;
+    }
+    return me->onGetContext(env, info);
 }
 
 napi_value JSOffscreenCanvas::OnGetWidth(napi_env env)
@@ -308,7 +323,6 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     napi_value renderImage = nullptr;
-    napi_create_object(env, &renderImage);
     auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
     if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return nullptr;
@@ -349,11 +363,10 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
     }
 
     size_t textLen = 0;
-    std::string contextType = "";
     napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
     std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
     napi_get_value_string_utf8(env, argv[0], text.get(), textLen + 1, &textLen);
-    contextType = text.get();
+    std::string contextType = text.get();
     if (contextType == "2d") {
         contextType_ = ContextType::CONTEXT_2D;
         auto jsInfo = reinterpret_cast<panda::JsiRuntimeCallInfo*>(info);
@@ -393,7 +406,6 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     NAPI_CALL(env, napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor));
 
     napi_value thisVal = nullptr;
-    napi_create_object(env, &thisVal);
     NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &thisVal));
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;

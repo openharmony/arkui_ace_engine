@@ -76,11 +76,22 @@ void TextTimerModelNG::SetFontSize(const Dimension& value)
 
 void TextTimerModelNG::SetTextColor(const Color& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, true);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColorByRender(value);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UpdateFontColor(value);
 }
 
 void TextTimerModelNG::SetTextColorByUser(bool isSetByUser)
@@ -209,11 +220,21 @@ void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
 
 void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, true, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColorByRender(value);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UpdateFontColor(value);
 }
 
 void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)

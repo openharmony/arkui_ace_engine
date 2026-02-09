@@ -45,7 +45,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SelectModifier } from "./../SelectModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export interface MenuItemConfiguration {
+export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfiguration> {
     value: ResourceStr
     icon?: ResourceStr | undefined
     symbolIcon?: SymbolGlyphModifier | undefined
@@ -53,7 +53,7 @@ export interface MenuItemConfiguration {
     index: int32
     triggerSelect(index: int32, value: string): void
 }
-export class MenuItemConfigurationInternal implements MaterializedBase,CommonConfiguration<MenuItemConfiguration>,MenuItemConfiguration {
+export class MenuItemConfigurationInternal implements MaterializedBase,MenuItemConfiguration {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer

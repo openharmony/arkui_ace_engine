@@ -122,6 +122,35 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
     };
     promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
+Ark_Boolean StartFakeDragImpl(Ark_SwiperController peer)
+{
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Boolean>(false));
+    bool ret = peerImpl->TriggerStartFakeDrag();
+    return Converter::ArkValue<Ark_Boolean>(ret);
+}
+Ark_Boolean FakeDragByImpl(Ark_SwiperController peer,
+                           Ark_Float32 offset)
+{
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Boolean>(false));
+    bool ret = peerImpl->TriggerFakeDragBy(offset);
+    return Converter::ArkValue<Ark_Boolean>(ret);
+}
+Ark_Boolean StopFakeDragImpl(Ark_SwiperController peer)
+{
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Boolean>(false));
+    bool ret = peerImpl->TriggerStopFakeDrag();
+    return Converter::ArkValue<Ark_Boolean>(ret);
+}
+Ark_Boolean IsFakeDraggingImpl(Ark_SwiperController peer)
+{
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Boolean>(false));
+    bool ret = peerImpl->TriggerIsFakeDragging();
+    return Converter::ArkValue<Ark_Boolean>(ret);
+}
 } // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
 {
@@ -134,6 +163,10 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
         SwiperControllerAccessor::ChangeIndexImpl,
         SwiperControllerAccessor::FinishAnimationImpl,
         SwiperControllerAccessor::PreloadItemsImpl,
+        SwiperControllerAccessor::StartFakeDragImpl,
+        SwiperControllerAccessor::FakeDragByImpl,
+        SwiperControllerAccessor::StopFakeDragImpl,
+        SwiperControllerAccessor::IsFakeDraggingImpl,
     };
     return &SwiperControllerAccessorImpl;
 }

@@ -102,6 +102,10 @@ int32_t OH_ArkUI_RenderNodeUtils_DisposeNode(ArkUI_RenderNodeHandle node)
     if (it != g_renderNodeMap.end()) {
         g_renderNodeMap.erase(it);
     }
+    impl->getNodeModifiers()->getNDKRenderNodeModifier()->deleteInnerRenderNodeStruct(node->renderNodeHandle);
+    // deleteInnerRenderNodeStruct does not set node->renderNodeHandle to nullptr
+    node->renderNodeHandle = nullptr;
+
     delete node;
     node = nullptr;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;

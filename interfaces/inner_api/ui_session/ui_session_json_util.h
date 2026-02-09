@@ -68,7 +68,7 @@ class ACE_FORCE_EXPORT InspectorJsonUtil final {
 public:
     InspectorJsonUtil() = delete;
     ~InspectorJsonUtil() = delete;
-    static std::shared_ptr<InspectorJsonValue> Create(bool isRoot = true);
+    ACE_FORCE_EXPORT static std::shared_ptr<InspectorJsonValue> Create(bool isRoot = true);
     static std::unique_ptr<InspectorJsonValue> CreateArray(bool isRoot = true);
     static std::unique_ptr<InspectorJsonValue> CreateObject(bool isRoot = true);
     static std::unique_ptr<InspectorJsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);

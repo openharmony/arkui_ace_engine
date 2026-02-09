@@ -17,6 +17,7 @@ ace_unittest("select_test_ng") {
   module_name = "DialogSet-Menu"
   type = "new"
   sources = [
+    "select_event_test_ng.cpp",
     "select_model_static_test_ng.cpp",
     "select_one_test_ng.cpp",
     "select_pattern_one_test_ng.cpp",

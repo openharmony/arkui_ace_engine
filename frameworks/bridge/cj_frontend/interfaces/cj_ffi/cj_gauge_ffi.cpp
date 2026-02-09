@@ -15,8 +15,10 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gauge_ffi.h"
 
+#include <cmath>
 #include "cj_lambda.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
@@ -28,6 +30,7 @@ using namespace OHOS::Ace;
 namespace {
 const std::string INDICATOR_DEFAULT = "default";
 const std::string INDICATOR_NULL = "null";
+constexpr double FIX_ANGLE = 720.0;
 }  // namespace
 
 namespace OHOS::Ace {
@@ -94,11 +97,18 @@ void FFICJVectorGaugeLinearGradientDelete(VecLinearGradientHandle vec)
 
 void FfiOHOSAceFrameworkGaugeCreate(double gaugeValue, double gaugeMin, double gaugeMax)
 {
-    if (gaugeMin >= gaugeMax) {
-        gaugeMin = NG::DEFAULT_MIN_VALUE;
-        gaugeMax = NG::DEFAULT_MAX_VALUE;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        if (LessNotEqual(gaugeMax, gaugeMin)) {
+            gaugeMin = NG::DEFAULT_MIN_VALUE;
+            gaugeMax = NG::DEFAULT_MAX_VALUE;
+        }
+    } else {
+        if (LessOrEqual(gaugeMax, gaugeMin)) {
+            gaugeMin = NG::DEFAULT_MIN_VALUE;
+            gaugeMax = NG::DEFAULT_MAX_VALUE;
+        }
     }
-    if (gaugeValue < gaugeMin || gaugeValue > gaugeMax) {
+    if (LessNotEqual(gaugeValue, gaugeMin) || GreatNotEqual(gaugeValue, gaugeMax)) {
         gaugeValue = gaugeMin;
     }
     GetGaugeModel()->Create(gaugeValue, gaugeMin, gaugeMax);
@@ -112,12 +122,22 @@ void FfiOHOSAceFrameworkGaugeSetValue(double value)
 
 void FfiOHOSAceFrameworkGaugeSetStartAngle(double startAngle)
 {
-    GetGaugeModel()->SetStartAngle(startAngle);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        double normalized = std::fmod(startAngle, FIX_ANGLE);
+        GetGaugeModel()->SetStartAngle(normalized);
+    } else {
+        GetGaugeModel()->SetStartAngle(startAngle);
+    }
 }
 
 void FfiOHOSAceFrameworkGaugeSetEndAngle(double endAngle)
 {
-    GetGaugeModel()->SetEndAngle(endAngle);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        double normalized = std::fmod(endAngle, FIX_ANGLE);
+        GetGaugeModel()->SetEndAngle(normalized);
+    } else {
+        GetGaugeModel()->SetEndAngle(endAngle);
+    }
 }
 
 void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
@@ -242,13 +262,14 @@ void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(VecLinearGradientHandle lin
 void FfiOHOSAceFrameworkGaugeSetShadowOptions(double radius, double offsetX, double offsetY)
 {
     NG::GaugeShadowOptions shadowOptions;
-    if (radius < 0) {
+    bool isApi23OrAbove = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE);
+    if (LessNotEqual(radius, 0.0) || (isApi23OrAbove && LessOrEqual(radius, 0.0))) {
         radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
     }
-    if (offsetX < 0) {
+    if (LessNotEqual(offsetX, 0.0) && !isApi23OrAbove) {
         offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
     }
-    if (offsetY < 0) {
+    if (LessNotEqual(offsetY, 0.0) && !isApi23OrAbove) {
         offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
     }
     shadowOptions.radius = radius;
@@ -284,6 +305,26 @@ void FfiOHOSAceFrameworkGaugeSetIndicator(const char* icon, double size)
         space = NG::INDICATOR_DISTANCE_TO_TOP;
     } else {
         space = CalcDimension(size, DimensionUnit::VP);
+    }
+    GetGaugeModel()->SetIndicatorSpace(space);
+}
+
+void FfiOHOSAceFrameworkGaugeSetIndicatorV2(const char* icon, double size, int32_t sizeUnit)
+{
+    std::string iconPath = icon;
+    if (icon == INDICATOR_NULL) {
+        GetGaugeModel()->SetIsShowIndicator(false);
+        return;
+    }
+    std::string bundleName;
+    std::string moduleName;
+    GetGaugeModel()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+
+    CalcDimension space;
+    if (size < 0) {
+        space = NG::INDICATOR_DISTANCE_TO_TOP;
+    } else {
+        space = CalcDimension(size, static_cast<DimensionUnit>(sizeUnit));
     }
     GetGaugeModel()->SetIndicatorSpace(space);
 }

@@ -33,6 +33,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "frameworks/base/utils/multi_thread.h"
+#include "interfaces/native/native_type.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -116,7 +117,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree001, Te
     std::string tag = V2::XCOMPONENT_ETS_TAG;
     AccessibilityProperty accessibilityProperty;
 
-    bool ret = accessibilityProperty.IsTagInSubTreeComponent(tag);
+    bool ret = accessibilityProperty.IsTagInSubTreeComponent(nullptr, tag);
     EXPECT_TRUE(ret);
 }
 

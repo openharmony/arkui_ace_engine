@@ -24,6 +24,7 @@ void StackModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::STACK_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
@@ -39,6 +40,7 @@ void StackModelNG::Create(Alignment alignment)
 
 RefPtr<FrameNode> StackModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
     frameNode->SetExclusiveEventForChild(true);
     return frameNode;

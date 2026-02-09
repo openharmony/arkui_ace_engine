@@ -1136,8 +1136,8 @@ ArkThemeWhiteList.whiteList = [
     'JSPatternLock',
     'JSQRCode',
     'JSRadio',
+    'JSTextClock',
     'Scroll',
     'Swiper',
     'Text',
-    'TextClock',
 ];

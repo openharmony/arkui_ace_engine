@@ -3861,7 +3861,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -6881,7 +6881,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* weight,
+                           const Opt_Union_I32_FontWeight_ResourceStr* weight,
                            const Opt_FontSettingOptions* options)
     {
     }
@@ -6945,7 +6945,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -7344,7 +7344,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetFontWeightImpl(Ark_NativePointer node,
-                           const Opt_Union_I32_FontWeight_String* value)
+                           const Opt_Union_I32_FontWeight_ResourceStr* value)
     {
     }
     void SetFontFamilyImpl(Ark_NativePointer node,
@@ -13829,6 +13829,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DisappearSymbolEffectAccessor
+    namespace DismissContentCoverActionAccessor {
+    void DestroyPeerImpl(Ark_DismissContentCoverAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissContentCoverActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissContentCoverAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissContentCoverAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissContentCoverAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissContentCoverAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissContentCoverActionAccessor
     namespace DismissDialogActionAccessor {
     void DestroyPeerImpl(Ark_DismissDialogAction peer)
     {
@@ -13885,6 +13913,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DismissPopupActionAccessor
+
+    namespace DismissSheetActionAccessor {
+    void DestroyPeerImpl(Ark_DismissSheetAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissSheetActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissSheetAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissSheetAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissSheetAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissSheetAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissSheetActionAccessor
     namespace DragEventAccessor {
     void DestroyPeerImpl(Ark_DragEvent peer)
     {
@@ -15293,7 +15350,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     void SetExtraConfigImpl(Ark_IMEClient peer,
-                            const Ark_CustomObject* config)
+                            Ark_InputMethodExtraConfig config)
     {
     }
     Ark_Int32 GetNodeIdImpl(Ark_IMEClient peer)
@@ -15334,6 +15391,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // IndicatorComponentControllerAccessor
     namespace IUIContextAccessor {
+    void DestroyPeerImpl(Ark_IUIContext peer)
+    {
+        auto peerImpl = reinterpret_cast<IUIContextPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_IUIContext ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -15389,6 +15461,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
     {
+    }
+    Ark_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+    {
+        return {};
     }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
@@ -16048,6 +16124,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // LongPressRecognizerAccessor
+    namespace MagnifierAccessor {
+    void DestroyPeerImpl(Ark_Magnifier peer)
+    {
+        auto peerImpl = reinterpret_cast<MagnifierPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_Magnifier ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void BindImpl(Ark_Magnifier peer,
+                  const Ark_String* id)
+    {
+    }
+    void ShowImpl(Ark_Magnifier peer,
+                  Ark_Float64 x,
+                  Ark_Float64 y)
+    {
+    }
+    void UnbindImpl(Ark_Magnifier peer)
+    {
+    }
+    } // MagnifierAccessor
     namespace Matrix2DAccessor {
     void DestroyPeerImpl(Ark_Matrix2D peer)
     {
@@ -18679,6 +18784,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     } // ShaderStyleAccessor
+    namespace SheetDismissAccessor {
+    void DestroyPeerImpl(Ark_SheetDismiss peer)
+    {
+        auto peerImpl = reinterpret_cast<SheetDismissPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_SheetDismiss ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_SheetDismiss peer)
+    {
+    }
+    } // SheetDismissAccessor
+
     namespace SpringMotionAccessor {
     void DestroyPeerImpl(Ark_SpringMotion peer)
     {
@@ -21800,6 +21926,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DisappearSymbolEffectPeer {
         virtual ~DisappearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIDismissContentCoverActionAccessor* GetDismissContentCoverActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissContentCoverActionAccessor dismissContentCoverActionAccessorImpl {
+            DismissContentCoverActionAccessor::DestroyPeerImpl,
+            DismissContentCoverActionAccessor::ConstructImpl,
+            DismissContentCoverActionAccessor::GetFinalizerImpl,
+            DismissContentCoverActionAccessor::DismissImpl,
+            DismissContentCoverActionAccessor::GetReasonImpl,
+            DismissContentCoverActionAccessor::SetReasonImpl,
+        };
+        return &dismissContentCoverActionAccessorImpl;
+    }
+
+    struct DismissContentCoverActionPeer {
+        virtual ~DismissContentCoverActionPeer() = default;
+    };
     const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
     {
         static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
@@ -21832,6 +21974,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+    const GENERATED_ArkUIDismissSheetActionAccessor* GetDismissSheetActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissSheetActionAccessor dismissSheetActionAccessorImpl {
+            DismissSheetActionAccessor::DestroyPeerImpl,
+            DismissSheetActionAccessor::ConstructImpl,
+            DismissSheetActionAccessor::GetFinalizerImpl,
+            DismissSheetActionAccessor::DismissImpl,
+            DismissSheetActionAccessor::GetReasonImpl,
+            DismissSheetActionAccessor::SetReasonImpl,
+        };
+        return &dismissSheetActionAccessorImpl;
+    }
+
+    struct DismissSheetActionPeer {
+        virtual ~DismissSheetActionPeer() = default;
+    };
+
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
     {
         static const GENERATED_ArkUIDragEventAccessor DragEventAccessorImpl {
@@ -22466,6 +22625,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
+            IUIContextAccessor::DestroyPeerImpl,
+            IUIContextAccessor::ConstructImpl,
+            IUIContextAccessor::GetFinalizerImpl,
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
             IUIContextAccessor::OpenBindSheetImpl,
@@ -22476,9 +22638,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+            IUIContextAccessor::GetMagnifierImpl,
         };
         return &IUIContextAccessorImpl;
     }
+     struct IUIContextPeer {
+        virtual ~IUIContextPeer() = default;
+    };
 
     const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     {
@@ -22810,6 +22976,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LongPressRecognizerPeer {
         virtual ~LongPressRecognizerPeer() = default;
     };
+
+    const GENERATED_ArkUIMagnifierAccessor* GetMagnifierAccessor()
+    {
+        static const GENERATED_ArkUIMagnifierAccessor MagnifierAccessorImpl {
+            MagnifierAccessor::DestroyPeerImpl,
+            MagnifierAccessor::ConstructImpl,
+            MagnifierAccessor::GetFinalizerImpl,
+            MagnifierAccessor::BindImpl,
+            MagnifierAccessor::ShowImpl,
+            MagnifierAccessor::UnbindImpl,
+        };
+        return &MagnifierAccessorImpl;
+    }
+
+    struct MagnifierPeer {
+        virtual ~MagnifierPeer() = default;
+    };
+
     const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     {
         static const GENERATED_ArkUIMatrix2DAccessor Matrix2DAccessorImpl {
@@ -23856,6 +24040,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct ShaderStylePeer {
         virtual ~ShaderStylePeer() = default;
+    };
+    const GENERATED_ArkUISheetDismissAccessor* GetSheetDismissAccessor()
+    {
+        static const GENERATED_ArkUISheetDismissAccessor sheetDismissAccessorImpl {
+            SheetDismissAccessor::DestroyPeerImpl,
+            SheetDismissAccessor::ConstructImpl,
+            SheetDismissAccessor::GetFinalizerImpl,
+            SheetDismissAccessor::DismissImpl,
+        };
+        return &sheetDismissAccessorImpl;
+    }
+
+    struct SheetDismissPeer {
+        virtual ~SheetDismissPeer() = default;
     };
 
     const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
@@ -24926,8 +25124,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDecorationStyleAccessor,
             GetDialogExtenderAccessor,
             GetDisappearSymbolEffectAccessor,
+            GetDismissContentCoverActionAccessor,
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissSheetActionAccessor,
             GetDragEventAccessor,
             GetDragUtilsAccessor,
             GetDrawingRenderingContextAccessor,
@@ -24984,6 +25184,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetListScrollerAccessor,
             GetLongPressGestureEventAccessor,
             GetLongPressRecognizerAccessor,
+            GetMagnifierAccessor,
             GetMatrix2DAccessor,
             GetMeasurableAccessor,
             GetMenuItemConfigurationAccessor,
@@ -25037,6 +25238,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetSearchControllerAccessor,
             GetSearchOpsAccessor,
             GetShaderStyleAccessor,
+            GetSheetDismissAccessor,
             GetSelectExtenderAccessor,
             GetSliderExtenderAccessor,
             GetSpringMotionAccessor,

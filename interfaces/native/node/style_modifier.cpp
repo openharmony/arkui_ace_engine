@@ -70,6 +70,7 @@ constexpr int NUM_31 = 31;
 constexpr int NUM_59 = 59;
 constexpr int NUM_100 = 100;
 constexpr int NUM_400 = 400;
+constexpr int DEFAULT_FONT_WEIGHT = 400;
 const int ALLOW_SIZE_1(1);
 const int ALLOW_SIZE_2(2);
 const int ALLOW_SIZE_3(3);
@@ -194,6 +195,9 @@ std::unordered_map<int32_t, bool> SPAN_ATTRIBUTES_MAP = {
     { static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW), true },
     { static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE), true },
     { static_cast<int32_t>(NODE_SPAN_BASELINE_OFFSET), true },
+    { static_cast<int32_t>(NODE_SPAN_FONT), true },
+    { static_cast<int32_t>(NODE_SPAN_FONT_WEIGHT), true },
+    { static_cast<int32_t>(NODE_ALLOW_FORCE_DARK), true },
 };
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
@@ -14305,6 +14309,105 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     return ERROR_CODE_NO_ERROR;
 }
 
+void ProcessFontWeightConfigs(ArkUI_NodeHandle node, OH_ArkUI_FontWeightConfigs* configs,
+    int32_t fontWeight)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!configs) {
+        return;
+    }
+    auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+    if (configs->isEnableVariableFontWeightSet) {
+        modifier->setSpanEnableVariableFontWeight(
+            node->uiNodeHandle, configs->enableVariableFontWeight, nullptr);
+        modifier->setSpanVariableFontWeight(node->uiNodeHandle, fontWeight, nullptr);
+    } else {
+        modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
+        modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+    }
+    if (configs->isEnableDeviceFontWeightCategorySet) {
+        modifier->setSpanEnableDeviceFontWeightCategory(
+            node->uiNodeHandle, configs->enableDeviceFontWeightCategory, nullptr);
+    } else {
+        modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
+    }
+}
+
+int32_t SetSpanFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    int32_t fontWeight = DEFAULT_FONT_WEIGHT;
+    if (item->size > 0) {
+        if (item->value[NUM_0].i32 < 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        fontWeight = item->value[NUM_0].i32;
+    }
+    fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontWeight(
+        node->uiNodeHandle, fontWeight, nullptr);
+    if (item->object) {
+        auto* configs = reinterpret_cast<OH_ArkUI_FontWeightConfigs*>(item->object);
+        ProcessFontWeightConfigs(node, configs, fontWeight);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t BuildArkUIFontStruct(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item,
+    ArkUIFontStruct& fontInfo)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fontInfo.fontSizeNumber = item->value[NUM_0].f32;
+    fontInfo.fontSizeUnit = GetDefaultUnit(node, UNIT_FP);
+    fontInfo.fontWeight = DEFAULT_FONT_WEIGHT;
+    fontInfo.fontStyle = ARKUI_FONT_STYLE_NORMAL;
+    fontInfo.fontFamilies = nullptr;
+    fontInfo.familyLength = 0;
+    if (item->size > NUM_1) {
+        if (item->value[NUM_1].i32 < 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        fontInfo.fontWeight = item->value[NUM_1].i32;
+    }
+    if (item->size > NUM_2) {
+        if (item->value[NUM_2].i32 < 0 ||
+            item->value[NUM_2].i32 > static_cast<int32_t>(ARKUI_FONT_STYLE_ITALIC)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        fontInfo.fontStyle = item->value[NUM_2].i32;
+    }
+    if (item->string) {
+        fontInfo.fontFamilies = const_cast<const char**>(&item->string);
+        fontInfo.familyLength = 1;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetSpanFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUIFontStruct fontInfo = { 0 };
+    int32_t ret = BuildArkUIFontStruct(node, item, fontInfo);
+    if (ret != ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFont(node->uiNodeHandle, &fontInfo);
+    if (item->object) {
+        auto* fontConfigs = reinterpret_cast<OH_ArkUI_FontConfigs*>(item->object);
+        if (fontConfigs->fontWeightConfigs) {
+            ProcessFontWeightConfigs(node, fontConfigs->fontWeightConfigs,
+                fontInfo.fontWeight);
+        }
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
 int32_t SetTextMarqueeOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
@@ -15665,6 +15768,26 @@ void ResetSpanTextBackgroundStyle(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getSpanModifier()->resetSpanTextBackgroundStyle(node->uiNodeHandle);
 }
 
+void ResetSpanFontWeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+    modifier->resetSpanFontWeight(node->uiNodeHandle);
+    modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+    modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
+    modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
+}
+
+void ResetSpanFont(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+    modifier->resetSpanFont(node->uiNodeHandle);
+    modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+    modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
+    modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
+}
+
 void ResetImageSpanSrc(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -16439,6 +16562,27 @@ const ArkUI_AttributeItem* GetSpanTextBackgroundStyle(ArkUI_NodeHandle node)
     g_numberValues[NUM_2].f32 = options.topRight;
     g_numberValues[NUM_3].f32 = options.bottomLeft;
     g_numberValues[NUM_4].f32 = options.bottomRight;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetSpanFontWeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getSpanModifier()->getSpanFontWeight(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetSpanFont(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto unit = GetDefaultUnit(node, UNIT_FP);
+    auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+    g_numberValues[NUM_0].f32 = modifier->getSpanFontSize(node->uiNodeHandle, unit);
+    g_numberValues[NUM_1].i32 = modifier->getSpanFontWeight(node->uiNodeHandle);
+    g_numberValues[NUM_2].i32 = modifier->getSpanFontStyle(node->uiNodeHandle);
+    g_attributeItem.string = modifier->getSpanFontFamily(node->uiNodeHandle);
+    g_attributeItem.size = NUM_3;
     return &g_attributeItem;
 }
 
@@ -20018,7 +20162,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetSpanContent, SetSpanTextBackgroundStyle, SetBaseLineOffset };
+    static Setter* setters[] = { SetSpanContent, SetSpanTextBackgroundStyle, SetBaseLineOffset, SetSpanFont, SetSpanFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -20028,7 +20172,7 @@ int32_t SetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 
 const ArkUI_AttributeItem* GetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetSpanContent, GetSpanTextBackgroundStyle, GetBaseLineOffset };
+    static Getter* getters[] = { GetSpanContent, GetSpanTextBackgroundStyle, GetBaseLineOffset, GetSpanFont, GetSpanFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -20038,7 +20182,7 @@ const ArkUI_AttributeItem* GetSpanAttribute(ArkUI_NodeHandle node, int32_t subTy
 
 void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetSpanContent, ResetSpanTextBackgroundStyle, ResetBaselineOffset };
+    static Resetter* resetters[] = { ResetSpanContent, ResetSpanTextBackgroundStyle, ResetBaselineOffset, ResetSpanFont, ResetSpanFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

@@ -57,18 +57,33 @@ template<>
 TabsItemDivider Convert(const Ark_DividerStyle& src)
 {
     auto dst = TabsItemDivider{}; // this struct is initialized by default
-    dst.strokeWidth = OptConvert<Dimension>(src.strokeWidth).value_or(dst.strokeWidth);
+    auto dividerStrokeWidth = OptConvert<Dimension>(src.strokeWidth);
+    if (dividerStrokeWidth.has_value()) {
+        dst.strokeWidth = dividerStrokeWidth.value();
+    } else {
+        dst.strokeWidth.Reset();
+    }
     auto colorOpt = OptConvert<Color>(src.color);
     if (colorOpt.has_value()) {
         dst.color = colorOpt.value();
+    } else {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, dst);
+        auto theme = pipeline->GetTheme<TabTheme>();
+        CHECK_NULL_RETURN(theme, dst);
+        dst.color = theme->GetDividerColor();
     }
     auto startMarginOpt = OptConvert<Dimension>(src.startMargin);
     if (startMarginOpt.has_value()) {
         dst.startMargin = startMarginOpt.value();
+    } else {
+        dst.startMargin.Reset();
     }
     auto endMarginOpt = OptConvert<Dimension>(src.endMargin);
     if (endMarginOpt.has_value()) {
         dst.endMargin = endMarginOpt.value();
+    } else {
+        dst.endMargin.Reset();
     }
     return dst;
 }
@@ -480,7 +495,19 @@ void SetDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto divider = Converter::OptConvertPtr<TabsItemDivider>(value);
+    CHECK_NULL_VOID(value);
+    TabsItemDivider divider;
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        divider.isNull = true;
+    } else {
+        divider = Converter::Convert<TabsItemDivider>(value->value);
+        auto colorOpt = Converter::OptConvert<Color>(value->value.color);
+        if (colorOpt.has_value()) {
+            TabsModelStatic::SetDividerColorByUser(frameNode, true);
+        } else {
+            TabsModelStatic::SetDividerColorByUser(frameNode, false);
+        }
+    }
     TabsModelStatic::SetDivider(frameNode, divider);
     TabsModelStatic::InitDivider(frameNode);
 }

@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, resourceFinalizerRegister, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ActionSheetOptions_serializer, ActionSheetOptions, DismissDialogAction, DismissDialogAction_serializer } from "./actionSheet"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -3332,7 +3332,29 @@ export class GlobalScopeUicontextTextMenu {
         return
     }
 }
-export class IUIContext {
+export class IUIContextInternal {
+    public static fromPtr(ptr: KPointer): IUIContext {
+        return new IUIContext(ptr)
+    }
+}
+export class IUIContext implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, IUIContext.getFinalizer())
+    }
+    constructor() {
+        this(IUIContext.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._IUIContext_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._IUIContext_getFinalizer()
+    }
     static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? 1 : 0)
     }
@@ -3476,6 +3498,14 @@ export class IUIContext {
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
+    public getMagnifier(): Magnifier {
+        return this.getMagnifier_serialize()
+    }
+    getMagnifier_serialize(): Magnifier {
+        const retval = ArkUIGeneratedNativeModule._IUIContext_getMagnifier(this.peer!.ptr)
+        const obj : Magnifier = MagnifierInternal.fromPtr(retval)
+        return obj
+    }
 }
 export class LazyBuild {
     static ApplyLazyBuilder_serialize(): void {
@@ -3604,6 +3634,54 @@ export class LevelOrderExtender implements MaterializedBase {
     getOrder_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._LevelOrderExtender_getOrder(this.peer!.ptr)
         return retval
+    }
+}
+export class MagnifierInternal {
+    public static fromPtr(ptr: KPointer): Magnifier {
+        return new Magnifier(ptr)
+    }
+}
+export class Magnifier implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, Magnifier.getFinalizer())
+    }
+    constructor() {
+        this(Magnifier.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._Magnifier_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._Magnifier_getFinalizer()
+    }
+    public bind(id: string): void {
+        const id_casted = id as (string)
+        this.bind_serialize(id_casted)
+        return
+    }
+    public show(x: double, y: double): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        this.show_serialize(x_casted, y_casted)
+        return
+    }
+    public unbind(): void {
+        this.unbind_serialize()
+        return
+    }
+    bind_serialize(id: string): void {
+        ArkUIGeneratedNativeModule._Magnifier_bind(this.peer!.ptr, id)
+    }
+    show_serialize(x: double, y: double): void {
+        ArkUIGeneratedNativeModule._Magnifier_show(this.peer!.ptr, x, y)
+    }
+    unbind_serialize(): void {
+        ArkUIGeneratedNativeModule._Magnifier_unbind(this.peer!.ptr)
     }
 }
 export class NavExtender {
@@ -4930,7 +5008,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (code: number):void => {
+            const buffer_Closure  = (code: number):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -4940,6 +5018,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onexit_Callback | undefined = buffer
         return returnResult
@@ -4965,7 +5045,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (ev: ErrorEvent):void => {
+            const buffer_Closure  = (ev: ErrorEvent):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -4975,6 +5055,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onerror_Callback | undefined = buffer
         return returnResult
@@ -5000,7 +5082,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (event: MessageEvents):void => {
+            const buffer_Closure  = (event: MessageEvents):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -5010,6 +5092,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
         return returnResult
@@ -5035,7 +5119,7 @@ export class RestrictedWorker implements MaterializedBase {
             const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
             const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
             const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (event: MessageEvents):void => {
+            const buffer_Closure  = (event: MessageEvents):void => {
                 const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
@@ -5045,6 +5129,8 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(buffer_Closure, buffer_BufResource)
+            buffer = buffer_Closure
         }
         const returnResult : RestrictedWorker_onmessage_Callback | undefined = buffer
         return returnResult
@@ -6753,6 +6839,17 @@ export class CustomDialogControllerExtender_serializer {
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
     }
 }
+export class IUIContext_serializer {
+    public static write(buffer: SerializerBase, value: IUIContext): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): IUIContext {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return IUIContextInternal.fromPtr(ptr)
+    }
+}
 export class LevelOrderExtender_serializer {
     public static write(buffer: SerializerBase, value: LevelOrderExtender): void {
         let valueSerializer : SerializerBase = buffer
@@ -6762,6 +6859,17 @@ export class LevelOrderExtender_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LevelOrderExtenderInternal.fromPtr(ptr)
+    }
+}
+export class Magnifier_serializer {
+    public static write(buffer: SerializerBase, value: Magnifier): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): Magnifier {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return MagnifierInternal.fromPtr(ptr)
     }
 }
 export class NodeEdgeStyles_serializer {
@@ -7202,7 +7310,7 @@ export class DoubleAnimationParam_serializer {
             const onProgressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onProgressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onProgressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onProgressTmpBuf = (value: float):void => {
+            const onProgressTmpBuf_Closure  = (value: float):void => {
                 const onProgressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onProgressTmpBuf_BufArgsSerializer.writeInt32(onProgressTmpBuf_BufResource.resourceId);
                 onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCall);
@@ -7212,6 +7320,8 @@ export class DoubleAnimationParam_serializer {
                 onProgressTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onProgressTmpBuf_Closure, onProgressTmpBuf_BufResource)
+            onProgressTmpBuf = onProgressTmpBuf_Closure
         }
         const onProgressTmpResult : Callback_Extender_OnProgress | undefined = onProgressTmpBuf
         const onFinishTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -7220,7 +7330,7 @@ export class DoubleAnimationParam_serializer {
             const onFinishTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onFinishTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onFinishTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onFinishTmpBuf = ():void => {
+            const onFinishTmpBuf_Closure  = ():void => {
                 const onFinishTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
@@ -7229,6 +7339,8 @@ export class DoubleAnimationParam_serializer {
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onFinishTmpBuf_Closure, onFinishTmpBuf_BufResource)
+            onFinishTmpBuf = onFinishTmpBuf_Closure
         }
         const onFinishTmpResult : Callback_Extender_OnFinish | undefined = onFinishTmpBuf
         let value : DoubleAnimationParam = ({propertyName: propertyNameTmpResult, startValue: startValueTmpResult, endValue: endValueTmpResult, duration: durationTmpResult, delay: delayTmpResult, curve: curveTmpResult, onProgress: onProgressTmpResult, onFinish: onFinishTmpResult} as DoubleAnimationParam)
@@ -9197,7 +9309,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
         const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const builderTmpResult : CustomBuilder = ():void => {
+        const builderTmpBufClosure  = ():void => {
             const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
@@ -9206,13 +9318,15 @@ export class CustomDialogControllerOptionsExtender_serializer {
             builderTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(builderTmpBufClosure, builderTmpBufBufResource)
+        const builderTmpResult : CustomBuilder = builderTmpBufClosure
         const cancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cancelTmpBuf : (() => void) | undefined = undefined
         if ((cancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const cancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const cancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const cancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            cancelTmpBuf = ():void => {
+            const cancelTmpBuf_Closure  = ():void => {
                 const cancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
@@ -9221,6 +9335,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 cancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(cancelTmpBuf_Closure, cancelTmpBuf_BufResource)
+            cancelTmpBuf = cancelTmpBuf_Closure
         }
         const cancelTmpResult : (() => void) | undefined = cancelTmpBuf
         const autoCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9353,7 +9469,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissDialogAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissDialogAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -9363,6 +9479,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissDialogAction) => void) | undefined = onWillDismissTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9525,7 +9643,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -9534,6 +9652,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9542,7 +9662,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -9551,6 +9671,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9559,7 +9681,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -9568,6 +9690,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -9576,7 +9700,7 @@ export class CustomDialogControllerOptionsExtender_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -9585,6 +9709,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const keyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

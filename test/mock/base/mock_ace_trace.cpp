@@ -80,6 +80,9 @@ AceAsyncScopedTrace::AceAsyncScopedTrace(const char* /* format */, ...) {}
 
 AceAsyncScopedTrace::~AceAsyncScopedTrace() = default;
 
+// Static variables to track the latest trace state for unit test verification
+static uint64_t g_lastTraceId = 0;
+
 void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId)
 {
     thread_local uint32_t gTraceType;
@@ -88,6 +91,21 @@ void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceT
     *pOldTraceId = gTraceId;
     gTraceType = traceType;
     gTraceId = traceId;
+
+    // Update static tracker for test verification only once (when value is 0)
+    if (g_lastTraceId == 0) {
+        g_lastTraceId = traceId;
+    }
+}
+
+uint64_t GetLastTraceId()
+{
+    return g_lastTraceId;
+}
+
+void ResetLastTraceId()
+{
+    g_lastTraceId = 0;
 }
 
 ResTracer::ResTracer(const char* caller, uint32_t traceType, uint64_t traceId)

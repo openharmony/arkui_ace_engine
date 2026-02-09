@@ -131,6 +131,7 @@ public:
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
     static void SetCancelButton(const JSCallbackInfo& info);
+    static void SetVoiceButton(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
@@ -163,6 +164,7 @@ public:
     static void SetIncludeFontPadding(const JSCallbackInfo& info);
     static void SetFallbackLineSpacing(const JSCallbackInfo& info);
     static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
+    static void SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

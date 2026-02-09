@@ -18,6 +18,7 @@ import { Entry, Text, BuilderParam, LaunchMode, Builder,PopInfo,NavigationInterc
 import { State, Observed, ObjectLink, Link } from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
 import hilog from '@ohos.hilog'
 import mediaquery from '@ohos.mediaquery';
+import { UIContext } from '@ohos.arkui.UIContext';
 import display from '@ohos.display';
 
 const TAG = 'DeviceHelper';
@@ -109,8 +110,8 @@ export class DeviceHelper {
 
 export class DeviceListenerManager {
   private static instance: DeviceListenerManager | undefined;
-  private portraitListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(orientation: portrait)');
-  private drawableWidthLargeListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(width >= 600vp)');
+  private portraitListener: mediaquery.MediaQueryListener | undefined = UIContext.resolveUIContext()?.getMediaQuery()?.matchMediaSync('(orientation: portrait)');
+  private drawableWidthLargeListener: mediaquery.MediaQueryListener | undefined = UIContext.resolveUIContext()?.getMediaQuery()?.matchMediaSync('(width >= 600vp)');
   private isPortrait: boolean | undefined = undefined;
   private onOrientationChange: (val:boolean | undefined) => void = (val:boolean | undefined) => {};
   private isLarge: boolean | undefined = undefined;
@@ -206,8 +207,8 @@ export class DeviceListenerManager {
 
   public initListener(): void {
     try {
-        this.portraitListener.onChange(this.onPortraitChange);
-        this.drawableWidthLargeListener.onChange(this.onDrawableWidthLargeChange);
+        this.portraitListener!.onChange(this.onPortraitChange);
+        this.drawableWidthLargeListener!.onChange(this.onDrawableWidthLargeChange);
     } catch(err) {
         console.log('multiNavigation initListener on err: ' + err);
     }
@@ -215,8 +216,8 @@ export class DeviceListenerManager {
 
   public finalizeListener() {
     try {
-        this.portraitListener.offChange(this.onPortraitChange);
-        this.drawableWidthLargeListener.offChange(this.onDrawableWidthLargeChange);
+        this.portraitListener!.offChange(this.onPortraitChange);
+        this.drawableWidthLargeListener!.offChange(this.onDrawableWidthLargeChange);
     } catch(err) {
         console.log('multiNavigation finalizeListener off err: ' + err);
     }

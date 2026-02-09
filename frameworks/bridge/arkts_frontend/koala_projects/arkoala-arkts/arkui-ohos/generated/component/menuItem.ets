@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
@@ -569,7 +569,7 @@ export class MenuItemOptions_serializer {
             const builderTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const builderTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const builderTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            builderTmpBuf = ():void => {
+            const builderTmpBuf_Closure  = ():void => {
                 const builderTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
@@ -578,6 +578,8 @@ export class MenuItemOptions_serializer {
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(builderTmpBuf_Closure, builderTmpBuf_BufResource)
+            builderTmpBuf = builderTmpBuf_Closure
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         let value : MenuItemOptions = ({startIcon: startIconTmpResult, symbolStartIcon: symbolStartIconTmpResult, content: contentTmpResult, endIcon: endIconTmpResult, symbolEndIcon: symbolEndIconTmpResult, labelInfo: labelInfoTmpResult, builder: builderTmpResult} as MenuItemOptions)

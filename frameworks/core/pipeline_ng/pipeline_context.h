@@ -69,6 +69,7 @@
 namespace OHOS::Ace::Kit {
 class UIContext;
 class UIContextImpl;
+using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
 }
 
 namespace OHOS::Rosen {
@@ -528,6 +529,10 @@ public:
     {
         return sharedTransitionManager_;
     }
+
+    RefPtr<FrameNode> GetPageRootNode();
+    // Helper functions for in-order traversal of UINode children
+    RefPtr<FrameNode> FindPageRootNodeInOrder(const RefPtr<UINode>& node);
 
 #ifdef WINDOW_SCENE_SUPPORTED
     const RefPtr<UIExtensionManager>& GetUIExtensionManager()
@@ -1553,6 +1558,8 @@ private:
     void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
     void NotifyCoastingAxisEventOnHide();
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
+
+    void OnShowHideForAccessibility(bool isOnShow);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 

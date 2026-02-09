@@ -91,6 +91,7 @@
 #include "core/interfaces/native/implementation/text_field_modifier.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "base/log/log_wrapper.h"
@@ -6023,9 +6024,9 @@ void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
     if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
         auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
         CHECK_NULL_VOID(menuFrameNode);
-        auto menuPattern = menuFrameNode->GetPattern<InnerMenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->OnModifyDone();
+        auto menuModifer = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifer);
+        menuModifer->menuOnModifyDone(menuFrameNode);
     }
 }
 void BindMenuBase(Ark_NativePointer node,
@@ -6157,7 +6158,7 @@ void BindContextMenuBase(Ark_NativePointer node,
     }
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     Converter::VisitUnion(menuOption->preview,
         [&menuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
@@ -6219,7 +6220,7 @@ void BindContextMenuBoth(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    CHECK_NULL_VOID(menuOption);
+    // menuOption: Null pointer verification is not required. Otherwise, subsequent code functions are affected
     for (auto& type : responseTypeArray) {
         auto triggerMenuParam = menuParam;
         Converter::VisitUnion(menuOption->preview,

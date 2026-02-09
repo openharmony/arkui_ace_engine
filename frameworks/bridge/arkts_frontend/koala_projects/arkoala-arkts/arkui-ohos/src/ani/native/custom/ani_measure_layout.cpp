@@ -262,7 +262,7 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
     return edgeWidths_obj;
 }
 
-ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& edgeNative, TextDirection direction)
+ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyF& edgeNative, TextDirection direction)
 {
     ani_object edges_obj;
     ani_class cls;

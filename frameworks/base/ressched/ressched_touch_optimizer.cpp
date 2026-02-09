@@ -94,9 +94,9 @@ ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
  * Parameters:
  *     accept [in] Whether the slide is accepted.
  */
-void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
+void ResSchedTouchOptimizer::SetSlideAccept(bool accept)
 {
-    slideAccepted_ = accept;
+    slideAccept_ = accept;
 }
 
 /*
@@ -155,10 +155,11 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     if (touchEvent.sourceTool != SourceTool::FINGER) {
         return false;
     }
-    // If slide is not accepted, trigger TP flush for the first frame
-    if (!slideAccepted_) {
+    // If slide is accepted, TPflush first frame
+    if (slideAccept_) {
         TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
         ACE_SCOPED_TRACE("TpFlush first frame");
+        slideAccept_ = false;
         return true;
     }
     // If last frame was TP triggered and current Vsync count differs,

@@ -47,7 +47,7 @@ public:
     static ArkUINativeModuleValue SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarqueeFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
+    static ArkUINativeModuleValue GetPageRootNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     // ArkTSCard start
     static ArkUINativeModuleValue GetArkUINativeModuleForm(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void RegisterArkUINativeModuleFormLite(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -74,9 +74,6 @@ private:
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -93,7 +90,6 @@ private:
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

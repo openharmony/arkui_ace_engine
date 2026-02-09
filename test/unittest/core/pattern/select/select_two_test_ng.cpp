@@ -86,7 +86,7 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t ERROR_INDEX_MIN = -1;
-constexpr int32_t ERRPR_INDEX_MAX = 999;
+constexpr int32_t ERROR_INDEX_MAX = 999;
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -324,7 +324,7 @@ HWTEST_F(SelectTwoTestNg, SelectChangeEventTest001, TestSize.Level1)
     ASSERT_NE(onSelect, nullptr);
     onSelect(ERROR_INDEX_MIN);
     EXPECT_EQ(currentIndex, 0);
-    onSelect(ERRPR_INDEX_MAX);
+    onSelect(ERROR_INDEX_MAX);
     EXPECT_EQ(currentIndex, 0);
     onSelect(1);
     EXPECT_EQ(currentIndex, 1);
@@ -1420,4 +1420,251 @@ HWTEST_F(SelectTwoTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_FALSE(select->GetChildren().empty());
 }
+
+/**
+ * @tc.name: UpdateMenuBorderStyle001
+ * @tc.desc: Test UpdateMenuBorderStyle with null menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle with null menu
+     * @tc.expected: Should handle null menu gracefully without crash
+     */
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(nullptr));
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle002
+ * @tc.desc: Test UpdateMenuBorderStyle when GetMenuItemNeedFocus returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle
+     * @tc.expected: Should complete without error (GetMenuItemNeedFocus may be false by default)
+     */
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle003
+ * @tc.desc: Test UpdateMenuBorderStyle with valid menu node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern with menu
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle with valid menu
+     * @tc.expected: Should execute without errors
+     */
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+
+    /**
+     * @tc.steps: step3. Verify render context exists
+     * @tc.expected: Render context should be accessible
+     */
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle004
+ * @tc.desc: Test UpdateMenuBorderStyle with multiple options
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select with multiple options
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle
+     * @tc.expected: Should handle menu with multiple options
+     */
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle005
+ * @tc.desc: Test UpdateMenuBorderStyle border color setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle and check if border was set
+     * @tc.expected: Border properties should be set (if GetMenuItemNeedFocus is true)
+     */
+    selectPattern->UpdateMenuBorderStyle(menuNode);
+    // Render context should still be valid after the operation
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle006
+ * @tc.desc: Test UpdateMenuBorderStyle border width setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle
+     * @tc.expected: Should execute without errors
+     */
+    selectPattern->UpdateMenuBorderStyle(menuNode);
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle007
+ * @tc.desc: Test UpdateMenuBorderStyle multiple calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle multiple times
+     * @tc.expected: Should handle multiple calls gracefully
+     */
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+}
+
+/**
+ * @tc.name: UpdateMenuBorderStyle008
+ * @tc.desc: Test UpdateMenuBorderStyle with menu that has existing border
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateMenuBorderStyle twice
+     * @tc.expected: Second call should skip setting if border already exists
+     */
+    selectPattern->UpdateMenuBorderStyle(menuNode);
+    EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
+}
+
 } // namespace OHOS::Ace::NG

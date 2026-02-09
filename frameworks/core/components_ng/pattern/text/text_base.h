@@ -265,13 +265,14 @@ public:
     static int32_t GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev = false);
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
-    static float GetSelectedBlankLineWidth();
-    static void CalculateSelectedRectEx(std::vector<RectF>& selectedRect, float lastLineBottom,
+    ACE_FORCE_EXPORT static float GetSelectedBlankLineWidth();
+    ACE_FORCE_EXPORT static void CalculateSelectedRectEx(std::vector<RectF>& selectedRect, float lastLineBottom,
         const std::optional<TextDirection>& direction = std::nullopt);
-    static bool UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAlign textAlign, float longestLine);
+    ACE_FORCE_EXPORT static bool UpdateSelectedBlankLineRect(
+        RectF& rect, float blankWidth, TextAlign textAlign, float longestLine);
     static void SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect,
         std::map<float, std::pair<RectF, std::vector<RectF>>>& lineGroup);
-    static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction,
+    ACE_FORCE_EXPORT static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction,
         TextDirection textDirection = TextDirection::INHERIT);
 
     static void RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point);
@@ -285,9 +286,9 @@ public:
     {
         return (sourceTool == SourceTool::MOUSE || sourceTool == SourceTool::TOUCHPAD);
     }
-    std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
-    size_t CountUtf16Chars(const std::u16string& s);
-    std::pair<std::string, std::string> DetectTextDiff(const std::string& latestContent);
+    ACE_FORCE_EXPORT std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
+    ACE_FORCE_EXPORT size_t CountUtf16Chars(const std::u16string& s);
+    ACE_FORCE_EXPORT std::pair<std::string, std::string> DetectTextDiff(const std::string& latestContent);
     static LayoutCalPolicy GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal);
     static float GetConstraintMaxLength(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal);

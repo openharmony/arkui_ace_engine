@@ -92,6 +92,23 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtCreator002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomNodeExtCreator003
+ * @tc.desc: Test the create of CustomNodeExt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeExtTestNg, CustomNodeExtCreator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNodeExt Create function.
+     * @tc.expected: Create CustomNodeExt.
+     */
+    RenderContext::ContextParam param;
+    param.type = RenderContext::ContextType::EFFECT;
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNodeWithParam(TEST_TAG, param);
+    ASSERT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: CustomNodeExtSetMeasureCallback001
  * @tc.desc: Test the set of MeasureCallback in CustomNodeExt.
  * @tc.type: FUNC

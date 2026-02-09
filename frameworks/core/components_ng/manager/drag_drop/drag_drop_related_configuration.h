@@ -37,7 +37,7 @@ public:
     int32_t updateToFinishInterval = DEFAULT_UPDATE_TO_FINISH_INTERVAL;
 };
 
-class DragDropRelatedConfigurations : public AceType {
+class ACE_FORCE_EXPORT DragDropRelatedConfigurations : public AceType {
     DECLARE_ACE_TYPE(DragDropRelatedConfigurations, AceType);
 
 public:
@@ -46,9 +46,9 @@ public:
     void SetDragSpringLoadingConfiguration(
         const RefPtr<DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration);
     
-    DragPreviewOption GetOrCreateDragPreviewOption();
+    ACE_FORCE_EXPORT DragPreviewOption GetOrCreateDragPreviewOption();
     void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied);
-    void SetDragPreviewOption(const DragPreviewOption& previewOption, bool isResetOptions);
+    ACE_FORCE_EXPORT void SetDragPreviewOption(const DragPreviewOption& previewOption, bool isResetOptions);
 
 private:
     RefPtr<DragSpringLoadingConfiguration> dragSpringLoadingConfiguration_;

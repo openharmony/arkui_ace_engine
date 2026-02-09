@@ -9603,6 +9603,119 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetHapticFeedbackMode(
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetHapticFeedbackMode(
     ArkUI_RichEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode* mode);
+
+/**
+ * @brief Defines the font weight configuration of text.
+ *
+ * @since 24
+ */
+typedef struct OH_ArkUI_FontWeightConfigs OH_ArkUI_FontWeightConfigs;
+
+/**
+ * @brief Defines the font configuration of text.
+ *
+ * @since 24
+ */
+typedef struct OH_ArkUI_FontConfigs OH_ArkUI_FontConfigs;
+
+/**
+ * @brief Create an option object for font weight configuration of text.
+ *
+ * @return A pointer to the option object.
+ * @since 24
+ */
+OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontWeightConfigs_Create();
+
+/**
+ * @brief Destroy an option object for font weight configuration of text.
+ *
+ * @param option Pointer to the option object to be destroyed.
+ * @since 24
+ */
+void OH_ArkUI_FontWeightConfigs_Destroy(OH_ArkUI_FontWeightConfigs* option);
+
+/**
+ * @brief Sets the enableVariableFontWeight flag of an option object for font weight configuration of text.
+ * The flag defines whether VariableFontWeight is supported. The default value is false.
+ * True means enable VariableFontWeight, false means disable VariableFontWeight.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param enable enableVariableFontWeight Flag.
+ * @since 24
+ */
+void OH_ArkUI_FontWeightConfigs_SetEnableVariableFontWeight(OH_ArkUI_FontWeightConfigs* option, bool enable);
+
+/**
+ * @brief Gets the enableVariableFontWeight flag of an option object for font weight configuration of text.
+ * The flag defines whether VariableFontWeight is supported. The default value is false.
+ * True means enable VariableFontWeight, false means disable VariableFontWeight.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the enableVariableFontWeight flag.
+ * @since 24
+ */
+bool OH_ArkUI_FontWeightConfigs_GetEnableVariableFontWeight(OH_ArkUI_FontWeightConfigs* option);
+
+/**
+ * @brief Sets the enableDeviceFontWeightCategory flag of an option object for font weight configuration of text.
+ * Defines whether font weight will be automatically updated when the device's font weight category changes.
+ * The default value is true.
+ * True means font weight will be automatically updated when the device's font weight category changes.
+ * False means font weight will not be automatically updated when the device's font weight category changes.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param enable enableDeviceFontWeightCategory Flag.
+ * @since 24
+ */
+void OH_ArkUI_FontWeightConfigs_SetEnableDeviceFontWeightCategory(OH_ArkUI_FontWeightConfigs* option, bool enable);
+ 
+/**
+ * @brief Gets the enableDeviceFontWeightCategory flag of an option object for font weight configuration of text.
+ * Defines whether font weight will be automatically updated when the device's font weight category changes.
+ * The default value is true.
+ * True means font weight will be automatically updated when the device's font weight category changes.
+ * False means font weight will not be automatically updated when the device's font weight category changes.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the enableDeviceFontWeightCategory flag.
+ * @since 24
+ */
+bool OH_ArkUI_FontWeightConfigs_GetEnableDeviceFontWeightCategory(OH_ArkUI_FontWeightConfigs* option);
+
+/**
+ * @brief Create an option object for font configuration of text.
+ *
+ * @return A pointer to the option object.
+ * @since 24
+ */
+OH_ArkUI_FontConfigs* OH_ArkUI_FontConfigs_Create();
+
+/**
+ * @brief Destroy an option object for font configuration of text.
+ *
+ * @param option Pointer to the option object to be destroyed.
+ * @since 24
+ */
+void OH_ArkUI_FontConfigs_Destroy(OH_ArkUI_FontConfigs* option);
+
+/**
+ * @brief Sets the font weight configs of an option object for font configuration of text.
+ *
+ * @param option Pointer to the option object to be modified.
+ * @param fontWeightConfigs font weight configs.
+ * @since 24
+ */
+void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option, OH_ArkUI_FontWeightConfigs* fontWeightConfigs);
+ 
+/**
+ * @brief Gets the font weight configs of an option object for font configuration of text.
+ *
+ * @param option Pointer to the option object.
+ * @return Returns the font weight configs.
+ * @since 24
+ */
+OH_ArkUI_FontWeightConfigs* OH_ArkUI_FontConfigs_GetFontWeightConfigs(OH_ArkUI_FontConfigs* option);
+
 #ifdef __cplusplus
 };
 #endif

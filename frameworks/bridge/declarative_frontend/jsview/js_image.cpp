@@ -1153,8 +1153,8 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSImage>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSImage>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSImage>::StaticMethod("onComplete", &JSImage::OnComplete);
-    JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError);
+    JSClass<JSImage>::StaticMethod("onComplete", &JSImage::OnComplete); 
+    JSClass<JSImage>::StaticMethod("onError", &JSImage::OnError); 
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);

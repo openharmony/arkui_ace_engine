@@ -68,6 +68,7 @@ class InspectorFilter;
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = GetFrameNode(tag, nodeId);
     CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavigationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
@@ -109,6 +110,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     CHECK_NULL_VOID(navBar);
     auto contentNode = navBar->GetContentNode();
     if (!contentNode) {
+        ACE_UINODE_TRACE(navBar);
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -568,6 +570,7 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
 bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
 {
     auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
     if (!isOverride && !isLastChild) {
         navigationPattern->RemoveNavDestination();
         return true;
@@ -577,7 +580,7 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 
     auto mode = navigationPattern->GetNavigationMode();
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    if (isLastChild && (mode == NavigationMode::SPLIT ||
+    if (isLastChild && !navigationPattern->IsForceSplitSuccess() && (mode == NavigationMode::SPLIT ||
                            (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false)))) {
         return false;
     }
@@ -1419,7 +1422,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* 
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->DetachNavigationStackFromParent();
-        pattern->RemoveFromDumpManager();
+        pattern->DetachFromManager();
     }
     GroupNode::OnDetachFromMainTree(recursive, context);
     CHECK_NULL_VOID(context);
@@ -1457,7 +1460,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
         pattern->AttachNavigationStackToParent();
-        pattern->AddToDumpManager();
+        pattern->AttachToManager();
     }
     RefPtr<UINode> parentCustomNode;
     bool findParentNode = false;

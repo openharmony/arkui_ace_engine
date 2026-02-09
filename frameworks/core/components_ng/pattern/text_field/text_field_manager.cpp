@@ -77,7 +77,9 @@ void TextFieldManagerNG::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtens
     CHECK_NULL_VOID(prePattern);
     auto textBasePattern = AceType::DynamicCast<TextBase>(prePattern);
     CHECK_NULL_VOID(textBasePattern);
-    textBasePattern->CloseTextCustomKeyboard(nodeId, isUIExtension);
+    if (GetCustomKeyboardContinueFeature()) {
+        textBasePattern->CloseTextCustomKeyboard(nodeId, isUIExtension);
+    }
 }
 
 bool TextFieldManagerNG::OnBackPressed()
@@ -130,6 +132,15 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     return {};
+}
+
+void TextFieldManagerNG::TriggerCaretInfoUpdateOnScaleChange()
+{
+    auto pattern = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->UpdateCaretInfoToController(true);
 }
 
 RectF TextFieldManagerNG::GetFocusedNodeCaretRect()

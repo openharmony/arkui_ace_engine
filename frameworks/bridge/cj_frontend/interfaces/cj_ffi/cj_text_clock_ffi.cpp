@@ -16,13 +16,32 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_text_clock_ffi.h"
 
 #include "cj_lambda.h"
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/properties/text_style_parser.h"
 
+#include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::TextClockModelNG* GetTextClockModel()
+{
+    static NG::TextClockModelNG* model = nullptr;
+    
+    if (model == nullptr) {
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("text_clock");
+        if (module == nullptr) {
+            LOGF("Can't find text_clock dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::TextClockModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -127,8 +146,8 @@ void FFICJVectorNativeTextShadowDeleteV2(VectorNativeTextShadow vec)
 
 void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId)
 {
-    auto textClock = TextClockModel::GetInstance()->Create();
-    TextClockModel::GetInstance()->SetHoursWest(NAN);
+    auto textClock = GetTextClockModel()->Create();
+    GetTextClockModel()->SetHoursWest(NAN);
 
     auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
     if (controller != nullptr) {
@@ -140,12 +159,12 @@ void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId)
 
 void FfiOHOSAceFrameworkTextClockCreateV2(float timeZoneOffset, int64_t controllerId)
 {
-    auto textClock = TextClockModel::GetInstance()->Create();
+    auto textClock = GetTextClockModel()->Create();
     if (HoursWestIsValid_(static_cast<int32_t>(timeZoneOffset))) {
         float hourWest = GetHoursWest(timeZoneOffset);
-        TextClockModel::GetInstance()->SetHoursWest(hourWest);
+        GetTextClockModel()->SetHoursWest(hourWest);
     } else {
-        TextClockModel::GetInstance()->SetHoursWest(NAN);
+        GetTextClockModel()->SetHoursWest(NAN);
     }
 
     auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
@@ -158,12 +177,12 @@ void FfiOHOSAceFrameworkTextClockCreateV2(float timeZoneOffset, int64_t controll
 
 void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId)
 {
-    auto textClock = TextClockModel::GetInstance()->Create();
+    auto textClock = GetTextClockModel()->Create();
     if (HoursWestIsValid_(timeZoneOffset)) {
         float hourWest = GetHoursWest(static_cast<float>(timeZoneOffset));
-        TextClockModel::GetInstance()->SetHoursWest(hourWest);
+        GetTextClockModel()->SetHoursWest(hourWest);
     } else {
-        TextClockModel::GetInstance()->SetHoursWest(NAN);
+        GetTextClockModel()->SetHoursWest(NAN);
     }
 
     auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
@@ -176,7 +195,7 @@ void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controll
 
 void FfiOHOSAceFrameworkTextClockCreateSimple(int64_t controllerId)
 {
-    auto textClock = TextClockModel::GetInstance()->Create();
+    auto textClock = GetTextClockModel()->Create();
     auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
     if (controller != nullptr) {
         controller->SetController(textClock);
@@ -190,31 +209,31 @@ void FfiOHOSAceFrameworkTextClockFormat(const char* value)
     std::string format = static_cast<std::string>(value);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (format.length() == 0) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+            GetTextClockModel()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
             return;
         }
     } else {
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
         if (format.length() == 0 || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
+            GetTextClockModel()->SetFormat(DEFAULT_FORMAT_API_TEN);
             return;
         }
     }
 
-    TextClockModel::GetInstance()->SetFormat(format);
+    GetTextClockModel()->SetFormat(format);
 }
 
 void FfiOHOSAceFrameworkTextClockOnChange(void (*callback)(int64_t timeStamp))
 {
     auto lambda = [lambda = CJLambda::Create(callback)](
                       const std::string& value) -> void { lambda(std::atol(value.c_str())); };
-    TextClockModel::GetInstance()->SetOnDateChange(lambda);
+    GetTextClockModel()->SetOnDateChange(lambda);
 }
 
 void FfiOHOSAceFrameworkTextClockTextColor(uint32_t color)
 {
-    TextClockModel::GetInstance()->SetTextColor(Color(color));
+    GetTextClockModel()->SetTextColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkTextClockResetTextColor()
@@ -225,18 +244,18 @@ void FfiOHOSAceFrameworkTextClockResetTextColor()
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     textColor = theme->GetTextStyle().GetTextColor();
-    TextClockModel::GetInstance()->SetTextColor(textColor);
+    GetTextClockModel()->SetTextColor(textColor);
 }
 
 void FfiOHOSAceFrameworkTextClockFontSize(double size, int32_t unit)
 {
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    TextClockModel::GetInstance()->SetFontSize(fontSize);
+    GetTextClockModel()->SetFontSize(fontSize);
 }
 
 void FfiOHOSAceFrameworkTextClockFontWeight(const char* fontWeight)
 {
-    TextClockModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    GetTextClockModel()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void FfiOHOSAceFrameworkTextClockFontStyle(int32_t fontStyle)
@@ -245,14 +264,14 @@ void FfiOHOSAceFrameworkTextClockFontStyle(int32_t fontStyle)
         LOGE("invalid value for font style");
         return;
     }
-    TextClockModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[fontStyle]);
+    GetTextClockModel()->SetItalicFontStyle(FONT_STYLES[fontStyle]);
 }
 
 void FfiOHOSAceFrameworkTextClockFontFamily(const char* fontFamily)
 {
     std::vector<std::string> fontFamilies;
     fontFamilies = ConvertStrToFontFamilies(fontFamily);
-    TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
+    GetTextClockModel()->SetFontFamily(fontFamilies);
 }
 
 void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions)
@@ -263,7 +282,7 @@ void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions)
     } else if (hourOptions == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
         hourType = ZeroPrefixType::HIDE;
     }
-    TextClockModel::GetInstance()->SetDateTimeOptions(hourType);
+    GetTextClockModel()->SetDateTimeOptions(hourType);
 }
 
 void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
@@ -278,7 +297,7 @@ void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
         shadows[i].SetOffsetY(dOffsetY.Value());
         shadows[i].SetColor(Color(nativeTextShadowVec[i].color));
     }
-    TextClockModel::GetInstance()->SetTextShadow(shadows);
+    GetTextClockModel()->SetTextShadow(shadows);
 }
 
 void FfiOHOSAceFrameworkTextClockTextShadowV2(VectorStringPtr vecContent)
@@ -295,13 +314,13 @@ void FfiOHOSAceFrameworkTextClockTextShadowV2(VectorStringPtr vecContent)
         shadows[i].SetIsFilled(nativeTextShadowVec[i].isFilled);
         shadows[i].SetShadowType(nativeTextShadowVec[i].type == 0 ? ShadowType::COLOR : ShadowType::BLUR);
     }
-    TextClockModel::GetInstance()->SetTextShadow(shadows);
+    GetTextClockModel()->SetTextShadow(shadows);
 }
 
 void FfiOHOSAceFrameworkTextClockFontFeature(const char* fontFeature)
 {
     std::string fontFeatureSettings = fontFeature;
-    TextClockModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+    GetTextClockModel()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 int64_t FfiOHOSAceFrameworkTextClockControllerCtor()

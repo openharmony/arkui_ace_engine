@@ -42,7 +42,9 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto shapePaintProperty = DynamicCast<PolygonPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
+        auto paintProperty = paintWrapper->GetPaintProperty();
+        CHECK_NULL_RETURN(paintProperty, nullptr);
+        auto shapePaintProperty = DynamicCast<PolygonPaintProperty>(paintProperty->Clone());
         CHECK_NULL_RETURN(shapePaintProperty, nullptr);
 
         if (propertiesFromAncestor_) {

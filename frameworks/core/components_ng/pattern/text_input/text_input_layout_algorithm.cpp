@@ -114,11 +114,10 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     auto responseAreaWidth = 0.0f;
-    if (pattern->GetCleanNodeResponseArea()) {
-        responseAreaWidth += pattern->GetCleanNodeResponseArea()->GetFrameSize().Width();
-    }
-    if (pattern->GetResponseArea()) {
-        responseAreaWidth += pattern->GetResponseArea()->GetFrameSize().Width();
+    for (const auto& area : pattern->GetAllResponseArea()) {
+        if (area) {
+            responseAreaWidth += area->GetFrameSize().Width();
+        }
     }
     frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + responseAreaWidth);
 
@@ -177,26 +176,22 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
         pattern->GetPaddingTop() + pattern->GetBorderTop(border));
 
-    auto responseArea = pattern->GetResponseArea();
-    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
     auto unitNodeWidth = 0.0f;
-    if (responseArea) {
-        int32_t childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
-        responseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
-    }
-    if (cleanNodeResponseArea) {
-        int32_t childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
-        cleanNodeResponseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
+    for (const auto& area : pattern->GetAllResponseArea()) {
+        if (area) {
+            int32_t childIndex = frameNode->GetChildIndex(area->GetFrameNode());
+            area->Layout(layoutWrapper, childIndex, unitNodeWidth);
+        }
     }
 
+    float allResponseAreaWidth = pattern->GetAllResponseAreaWidth();
     UpdateContentPositionParams params = {
         .isRTL = isRTL,
         .offsetBase = offsetBase,
         .size = size,
         .contentSize = contentSize,
         .align = align,
-        .responseArea = responseArea,
-        .cleanResponseArea = cleanNodeResponseArea
+        .allResponseAreaWidth = allResponseAreaWidth
     };
     UpdateContentPosition(params, content);
 
@@ -207,9 +202,8 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .pattern = pattern,
         .contentSize = contentSize,
         .isRTL = isRTL,
-        .responseArea = responseArea,
-        .cleanResponseArea = cleanNodeResponseArea,
-        .contentOffset = content->GetRect().GetOffset()
+        .contentOffset = content->GetRect().GetOffset(),
+        .allResponseAreaWidth = allResponseAreaWidth
     };
     UpdateTextRect(updateTextRectParams);
 
@@ -232,12 +226,7 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
         params.offsetBase + Alignment::GetAlignPosition(params.size, params.contentSize, params.align);
     auto offsetBaseX = params.offsetBase.GetX();
     if (params.isRTL) {
-        if (params.responseArea) {
-            offsetBaseX += params.responseArea->GetAreaRect().Width();
-        }
-        if (params.cleanResponseArea) {
-            offsetBaseX += params.cleanResponseArea->GetAreaRect().Width();
-        }
+        offsetBaseX += params.allResponseAreaWidth;
     }
     content->SetOffset(OffsetF(offsetBaseX, contentOffset.GetY()));
 }
@@ -253,14 +242,7 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
             textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft(border);
         }
         if (params.isRTL) {
-            if (params.responseArea) {
-                RectF responseAreaRect = params.responseArea->GetAreaRect();
-                textRectOffsetX += responseAreaRect.Width();
-            }
-            if (params.cleanResponseArea) {
-                RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
-                textRectOffsetX += cleanResponseAreaRect.Width();
-            }
+            textRectOffsetX += params.allResponseAreaWidth;
             textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
         } else {
             textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
@@ -322,16 +304,12 @@ LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponse
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, contentConstraint);
 
-    auto responseArea = pattern->GetResponseArea();
-    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
     float childWidth = 0.0f;
-    if (responseArea) {
-        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
-        childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
-    }
-    if (cleanNodeResponseArea) {
-        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
-        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
+    for (const auto& area : pattern->GetAllResponseArea()) {
+        if (area) {
+            auto childIndex = frameNode->GetChildIndex(area->GetFrameNode());
+            childWidth += area->Measure(layoutWrapper, childIndex).Width();
+        }
     }
 
     auto newLayoutConstraint = contentConstraint;

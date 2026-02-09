@@ -28,6 +28,125 @@ const int32_t SECOND_CHILD = 1;
 class StackNewTestNG : public StackBaseTestNG {};
 
 /**
+ * @tc.name: CalculateStackAlignment001
+ * @tc.desc: Test CalculateStackAlignment with CENTER alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment001, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::CENTER);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    float expectedX = (500.0f - 100.0f) / 2.0f;
+    float expectedY = (500.0f - 100.0f) / 2.0f;
+    EXPECT_EQ(offset.GetX(), expectedX);
+    EXPECT_EQ(offset.GetY(), expectedY);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment002
+ * @tc.desc: Test CalculateStackAlignment with TOP_LEFT alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment002, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::TOP_LEFT);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment003
+ * @tc.desc: Test CalculateStackAlignment with BOTTOM_RIGHT alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment003, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::BOTTOM_RIGHT);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    float expectedX = 500.0f - 100.0f;
+    float expectedY = 500.0f - 100.0f;
+    EXPECT_EQ(offset.GetX(), expectedX);
+    EXPECT_EQ(offset.GetY(), expectedY);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment004
+ * @tc.desc: Test CalculateStackAlignment with TOP_CENTER alignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment004, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    Alignment align(Alignment::TOP_CENTER);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    float expectedX = (500.0f - 100.0f) / 2.0f;
+    EXPECT_EQ(offset.GetX(), expectedX);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment005
+ * @tc.desc: Test CalculateStackAlignment with child size equal to parent size
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment005, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(500.0f, 500.0f);
+
+    Alignment align(Alignment::CENTER);
+    auto offset = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align);
+
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: CalculateStackAlignment006
+ * @tc.desc: Test CalculateStackAlignment with different alignments
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, CalculateStackAlignment006, TestSize.Level0)
+{
+    SizeF parentSize(500.0f, 500.0f);
+    SizeF childSize(100.0f, 100.0f);
+
+    // Test CENTER_LEFT alignment
+    Alignment align1(Alignment::CENTER_LEFT);
+    auto offset1 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align1);
+    EXPECT_EQ(offset1.GetX(), 0.0f);
+    EXPECT_EQ(offset1.GetY(), (500.0f - 100.0f) / 2.0f);
+
+    // Test CENTER_RIGHT alignment
+    Alignment align2(Alignment::CENTER_RIGHT);
+    auto offset2 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align2);
+    EXPECT_EQ(offset2.GetX(), 500.0f - 100.0f);
+    EXPECT_EQ(offset2.GetY(), (500.0f - 100.0f) / 2.0f);
+
+    // Test BOTTOM_CENTER alignment
+    Alignment align3(Alignment::BOTTOM_CENTER);
+    auto offset3 = StackLayoutAlgorithm::CalculateStackAlignment(parentSize, childSize, align3);
+    EXPECT_EQ(offset3.GetX(), (500.0f - 100.0f) / 2.0f);
+    EXPECT_EQ(offset3.GetY(), 500.0f - 100.0f);
+}
+
+/**
  * @tc.name: Example
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: ETS
@@ -89,79 +208,6 @@ HWTEST_F(StackNewTestNG, Example, TestSize.Level0)
     // expect: textTop offset = (x, y) = (300px*0.3/2, 300px*(1-0.6)) = (45px, 120px)
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 45.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 120.0f);
-}
-/**
- * @tc.name: StackIgnoreLayoutSafeArea001
- * @tc.desc: test stack ignoreLayoutSafeArea
- * @tc.type: FUNC
- */
-HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea001, TestSize.Level0)
-{
-    RefPtr<FrameNode> text;
-
-    auto frameNode = CreateStack([this, &text](StackModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
-        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
-        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
-
-        text = CreateText(u"Text", [this](TextModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
-            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
-        });
-    });
-    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
-    text->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
-    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushUITasks(frameNode);
-    EXPECT_EQ(text->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0F));
-    EXPECT_EQ(text->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0F));
-}
-
-/**
- * @tc.name: StackIgnoreLayoutSafeArea002
- * @tc.desc: test stack ignoreLayoutSafeArea
- * @tc.type: FUNC
- */
-HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level0)
-{
-    RefPtr<FrameNode> stack1;
-    RefPtr<FrameNode> stack2;
-
-    auto frameNode = CreateStack([this, &stack1, &stack2](StackModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
-        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
-        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
-        stack1 = CreateStack([this, &stack2](StackModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
-            ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PERCENT));
-            ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
-            stack2 = CreateStack([this](StackModelNG model) {});
-        });
-    });
-    auto childLayoutProperty = stack2->GetLayoutProperty();
-    ASSERT_NE(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
-        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
-    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
-    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateAlignment(Alignment::BOTTOM_RIGHT);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushUITasks(frameNode);
-    EXPECT_EQ(stack2->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f));
-    EXPECT_EQ(stack2->GetGeometryNode()->GetFrameOffset(), OffsetF(-10.0f, -10.0f));
-    EXPECT_EQ(stack1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
-    EXPECT_EQ(stack1->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 10.0f));
 }
 
 /**
@@ -455,7 +501,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest006, TestSize.Level0)
     /* corresponding ets code:
         Stack() {
             Stack() {
-                Flex().width("300px").height("400px")
+                Stack().width("300px").height("400px")
             }
             .width(LayoutPolicy.fixAtIdealSize)
             .height(LayoutPolicy.fixAtIdealSize)
@@ -592,7 +638,7 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest008, TestSize.Level0)
 
 /**
  * @tc.name: LayoutGravityTest
- * @tc.desc: Test stack Layout with LayoutGravityTest
+ * @tc.desc: Test stack layout gravity property
  * @tc.type: FUNC
  */
 HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level0)
@@ -608,7 +654,176 @@ HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level0)
     auto textLayoutProperty = textFrameNode->GetLayoutProperty();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_NE(textLayoutProperty->GetPositionProperty(), nullptr);
-    EXPECT_EQ(textLayoutProperty->GetPositionProperty()->GetLayoutGravity().value(), Alignment::CENTER_RIGHT);
+    auto layoutGravity = textLayoutProperty->GetPositionProperty()->GetLayoutGravity();
+    ASSERT_TRUE(layoutGravity.has_value());
+    EXPECT_EQ(layoutGravity.value(), Alignment::CENTER_RIGHT);
+}
+
+/**
+ * @tc.name: StackConstraintSize001
+ * @tc.desc: Test Stack layout with constraint size
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackConstraintSize001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with constraint size.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(600.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(600.0f, DimensionUnit::PX));
+        ViewAbstract::SetMaxWidth(CalcLength(400.0f, DimensionUnit::PX));
+        ViewAbstract::SetMaxHeight(CalcLength(400.0f, DimensionUnit::PX));
+
+        CreateText(u"Large child", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(500.0f, DimensionUnit::PX));
+        });
+    });
+
+    /**
+     * @tc.expected: Stack size should be constrained by maxWidth and maxHeight.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    // Size should be limited by constraint
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(400.0f, 400.0f));
+}
+
+/**
+ * @tc.name: StackEmpty001
+ * @tc.desc: Test Stack layout with no children
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackEmpty001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with no children.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+    });
+
+    /**
+     * @tc.expected: Stack should have correct size and no children.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetChildren().size(), 0);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(300.0f, 300.0f));
+    EXPECT_EQ(geometryNode->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: StackExtremeSize001
+ * @tc.desc: Test Stack layout with extreme size values
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackExtremeSize001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with very small size.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PX));
+
+        CreateText(u"Small child", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(10.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(10.0f, DimensionUnit::PX));
+        });
+    });
+
+    /**
+     * @tc.expected: Stack should handle extreme sizes correctly.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(1.0f, 1.0f));
+}
+
+/**
+ * @tc.name: StackIgnoreLayoutSafeArea001
+ * @tc.desc: test stack ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea001, TestSize.Level0)
+{
+    RefPtr<FrameNode> text;
+
+    auto frameNode = CreateStack([this, &text](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+
+        text = CreateText(u"Text", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f, DimensionUnit::PX));
+            ViewAbstract::SetHeight(CalcLength(50.0f, DimensionUnit::PX));
+        });
+    });
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    text->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(text->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 50.0F));
+    EXPECT_EQ(text->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0F));
+}
+
+/**
+ * @tc.name: StackIgnoreLayoutSafeArea002
+ * @tc.desc: test stack ignoreLayoutSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea002, TestSize.Level0)
+{
+    RefPtr<FrameNode> stack1;
+    RefPtr<FrameNode> stack2;
+
+    auto frameNode = CreateStack([this, &stack1, &stack2](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(300.0f, DimensionUnit::PX));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+        stack1 = CreateStack([this, &stack2](StackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(1.0f, DimensionUnit::PERCENT));
+            ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+            stack2 = CreateStack([this](StackModelNG model) {});
+        });
+    });
+    auto childLayoutProperty = stack2->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateAlignment(Alignment::BOTTOM_RIGHT);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    EXPECT_EQ(stack2->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f));
+    EXPECT_EQ(stack2->GetGeometryNode()->GetFrameOffset(), OffsetF(-10.0f, -10.0f));
+    EXPECT_EQ(stack1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
+    EXPECT_EQ(stack1->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 10.0f));
 }
 
 /**
@@ -660,7 +875,7 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
     stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(stackNode);
 
-    // Excepect child's frameRect equal parent's frameRect.
+    // Expect child's frameRect equal parent's frameRect.
     EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
         << child1->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(parent1->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 500.0f))
@@ -669,6 +884,43 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
         << child1->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(parent1->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f))
         << parent1->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: StackMultipleChildren001
+ * @tc.desc: Test Stack layout with multiple children
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, StackMultipleChildren001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create stack component with 5 children.
+     */
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500.0f, DimensionUnit::PX));
+        ViewAbstract::SetHeight(CalcLength(500.0f, DimensionUnit::PX));
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER);
+
+        // Create 5 children with different sizes
+        for (int i = 0; i < 5; i++) {
+            CreateText(u"Child", [this, i](TextModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(100.0f + i * 50.0f, DimensionUnit::PX));
+                ViewAbstract::SetHeight(CalcLength(100.0f + i * 50.0f, DimensionUnit::PX));
+            });
+        }
+    });
+
+    /**
+     * @tc.expected: Stack should have 5 children.
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetChildren().size(), 5);
+    CreateLayoutTask(frameNode);
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(500.0f, 500.0f));
+    EXPECT_EQ(geometryNode->GetFrameOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -704,8 +956,8 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
     auto pattern = stackNode->GetPattern();
     ASSERT_NE(pattern, nullptr);
 
-    // beacause FeatureParam is false, use vOverflowHandler instead.
-    const auto &vOverflowHandler =
+    // because FeatureParam is false, use vOverflowHandler instead.
+    const auto& vOverflowHandler =
         pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
     ASSERT_NE(vOverflowHandler, nullptr);
     std::optional<RectF> totalChildFrameRect;
@@ -734,7 +986,7 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
 HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Create flex component and its children
+     * @tc.steps: step1. Create stack component and its children
      */
     RefPtr<FrameNode> child;
     auto stackNode = CreateStack([this, &child](StackModelNG model) {
@@ -759,8 +1011,7 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     FlushUITasks(stackNode);
     auto pattern = stackNode->GetPattern();
     ASSERT_NE(pattern, nullptr);
-    const auto &handler =
-        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
+    const auto& handler = pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
     const auto& childGeometry = child->GetGeometryNode();
     ASSERT_NE(childGeometry, nullptr);
     std::optional<RectF> totalChildFrameRect;
@@ -768,7 +1019,7 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     handler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
     handler->CreateContentRect();
     handler->HandleContentOverflow();
- 
+
     /**
      * @tc.expected: register scrollEvent and initialize
      */
@@ -782,4 +1033,5 @@ HWTEST_F(StackNewTestNG, StackOverFlow002, TestSize.Level0)
     EXPECT_EQ(handler->offsetToChildFrameBottom_, 5);
     EXPECT_EQ(childGeometry->GetMarginFrameOffset(), OffsetF(0, -45));
 }
+
 } // namespace OHOS::Ace::NG

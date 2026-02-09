@@ -496,7 +496,6 @@ void ContentModifierSliderImpl(
                 SliderModelNG::SetChangeValue(frameNode, Converter::Convert<double>(value), mode);
             });
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
 
         auto sliderNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync(

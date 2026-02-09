@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_badge_bridge.h"
 
+#include "base/utils/linear_map.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace::Framework {

@@ -826,6 +826,11 @@ void PipelineContext::ReloadNodesResource()
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 ResourceParseUtils::SetNeedReload(false);
             }
+        } else if (needReloadNode) {
+            bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
+            ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+            needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
+            ResourceParseUtils::SetNeedReload(false);
         }
     }
     needReloadResource_ = false;
@@ -4081,7 +4086,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
         rootNode_->DumpTreeByComponentName(params[1]);
         DumpLog::GetInstance().OutPutDefault();
-    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() == SIMPLIFYTREE_WITH_PARAMCONFIG) {
+    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(
@@ -5102,6 +5107,13 @@ void PipelineContext::UpdateFormLinkInfos()
     }
 }
 
+void PipelineContext::OnShowHideForAccessibility(bool isOnShow)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AccessibilityOnShowHide(isOnShow, WeakClaim(this));
+}
+
 void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
@@ -5111,6 +5123,7 @@ void PipelineContext::OnShow()
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     RequestFrame();
     FlushWindowStateChangedCallback(true);
+    OnShowHideForAccessibility(true);
     AccessibilityEvent event;
     event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
     event.type = AccessibilityEventType::PAGE_CHANGE;
@@ -7448,6 +7461,34 @@ void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipelin
 RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;
+}
+
+RefPtr<FrameNode> PipelineContext::GetPageRootNode()
+{
+    if (stageManager_ && stageManager_->GetLastPage()) {
+        return FindPageRootNodeInOrder(stageManager_->GetLastPage());
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> PipelineContext::FindPageRootNodeInOrder(const RefPtr<UINode>& node)
+{
+    // Perform in-order traversal: check current node, then recurse through all children
+    if (!node) {
+        return nullptr;
+    }
+    // Check if current node is a valid FrameNode (not PAGE_ETS_TAG)
+    if (AceType::InstanceOf<NG::FrameNode>(node) && node->GetTag() != V2::PAGE_ETS_TAG) {
+        return AceType::DynamicCast<NG::FrameNode>(node);
+    }
+    // Recursively check all children in order (not just first child)
+    for (const auto& child : node->GetChildren()) {
+        auto result = FindPageRootNodeInOrder(child);
+        if (result) {
+            return result; // Early return on first match
+        }
+    }
+    return nullptr;
 }
 
 void PipelineContext::GetStateMgmtInfo(

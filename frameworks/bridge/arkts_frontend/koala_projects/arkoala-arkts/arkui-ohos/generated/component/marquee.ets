@@ -24,7 +24,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor, Length } from "./units"
+import { ResourceColor, Length, ResourceStr } from "./units"
 import { Color, FontWeight, MarqueeUpdateStrategy } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from "#handwritten"
@@ -33,8 +33,10 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { LengthMetrics } from "arkui.Graphics"
 import { MarqueeModifier } from "./../MarqueeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { LengthMetrics_serializer } from "./../Graphics"
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
     attributeSet?: MarqueeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -118,7 +120,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MarqueeAttribute_setAllowScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -131,10 +133,18 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
-            } else if (valueTmpValue instanceof string) {
+            } else if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0  = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1  = valueTmpValueForIdx2 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -217,6 +227,8 @@ export interface MarqueeOptions {
     loop?: int32;
     fromStart?: boolean;
     src: string | undefined;
+    delay?: int32;
+    spacing?: LengthMetrics;
 }
 export interface MarqueeAttribute extends CommonMethod {
     setMarqueeOptions(options: MarqueeOptions): this {
@@ -231,7 +243,7 @@ export interface MarqueeAttribute extends CommonMethod {
     allowScale(value: boolean | undefined): this {
         throw new Error("Unimplemented method allowScale")
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -257,7 +269,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     allowScale_value?: boolean | undefined
-    fontWeight_value?: int32 | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | ResourceStr | undefined
     fontFamily_value?: string | Resource | undefined
     marqueeUpdateStrategy_value?: MarqueeUpdateStrategy | undefined
     onStart_value?: (() => void) | undefined
@@ -276,7 +288,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     allowScale(value: boolean | undefined): this {
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         return this
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -339,9 +351,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         }
         return this
     }
-    public fontWeight(value: int32 | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (int32 | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -460,6 +472,22 @@ export class MarqueeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForDelay  = value.delay
+        if (valueHolderForDelay !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDelayTmpValue  = valueHolderForDelay!
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSpacing  = value.spacing
+        if (valueHolderForSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpacingTmpValue  = valueHolderForSpacing!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): MarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -493,7 +521,19 @@ export class MarqueeOptions_serializer {
             srcTmpBuf = (valueDeserializer.readString() as string)
         }
         const srcTmpResult : string | undefined = srcTmpBuf
-        let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult} as MarqueeOptions)
+        const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let delayTmpBuf : int32 | undefined = undefined
+        if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            delayTmpBuf = valueDeserializer.readInt32()
+        }
+        const delayTmpResult : int32 | undefined = delayTmpBuf
+        const spacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spacingTmpBuf : LengthMetrics | undefined = undefined
+        if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const spacingTmpResult : LengthMetrics | undefined = spacingTmpBuf
+        let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult, delay: delayTmpResult, spacing: spacingTmpResult} as MarqueeOptions)
         return value
     }
 }

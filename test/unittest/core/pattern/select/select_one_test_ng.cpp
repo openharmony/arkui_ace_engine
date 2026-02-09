@@ -330,15 +330,27 @@ HWTEST_F(SelectOneTestNg, GetFontSizeTest001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SelectPadding001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Set minimum platform version to 11 and create select with parameters.
+     * @tc.expected: Select is created successfully.
+     */
     SelectModelNG selectModelInstance;
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get select frame node and layout property.
+     * @tc.expected: Frame node and layout property are obtained successfully.
+     */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto layoutProps = select->GetLayoutProperty();
     ASSERT_NE(layoutProps, nullptr);
+    /**
+     * @tc.steps: step3. Get padding property and verify left and right padding values.
+     * @tc.expected: Both left and right padding are 8.0 vp.
+     */
     const auto& padding = layoutProps->GetPaddingProperty();
     ASSERT_NE(padding, nullptr);
     EXPECT_EQ(padding->left.value().GetDimension().ConvertToVp(), 8.0);
@@ -381,6 +393,10 @@ HWTEST_F(SelectOneTestNg, SelectOptionHeight001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontColor001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern and FrameNode, initialize text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -389,6 +405,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontColor001, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Call SetSelectedOptionFontColor with BLACK color when no option is selected.
+     * @tc.expected: Selected index remains -1 (no selection).
+     */
     SelectModelNG::SetSelectedOptionFontColor(&frameNode, Color::BLACK);
     EXPECT_EQ(pattern->GetSelected(), -1);
 }
@@ -400,6 +420,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontColor001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontColor002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -408,6 +432,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontColor002, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Set selected index to 0 and call SetSelectedOptionFontColor with BLACK color.
+     * @tc.expected: Selected index is preserved as 0.
+     */
     pattern->selected_ = 0;
     pattern->SetSelectedOptionFontColor(Color::BLACK);
     EXPECT_EQ(pattern->GetSelected(), 0);
@@ -420,6 +448,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontColor002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontSize001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -428,6 +460,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontSize001, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Call SetSelectedOptionFontSize with 20 VP dimension.
+     * @tc.expected: Selected index remains -1 (no selection).
+     */
     SelectModelNG::SetSelectedOptionFontSize(&frameNode, Dimension(20.00, DimensionUnit::VP));
     EXPECT_EQ(pattern->GetSelected(), -1);
 }
@@ -439,6 +475,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontSize001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontSize002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -447,6 +487,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontSize002, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Set selected index to 1, add option nodes, and call SetSelectedOptionFontSize.
+     * @tc.expected: Selected option's MenuItemPattern exists.
+     */
     pattern->selected_ = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
@@ -464,6 +508,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontSize002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontWeight001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -472,6 +520,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontWeight001, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Call SetSelectedOptionFontWeight with NORMAL weight when no option is selected.
+     * @tc.expected: Selected index remains -1 (no selection).
+     */
     SelectModelNG::SetSelectedOptionFontWeight(&frameNode, FontWeight::NORMAL);
     EXPECT_EQ(pattern->GetSelected(), -1);
 }
@@ -483,6 +535,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontWeight001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontWeight002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -491,6 +547,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontWeight002, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Set selected index to 0, add option node, and call SetSelectedOptionFontWeight.
+     * @tc.expected: Selected option's MenuItemPattern exists.
+     */
     pattern->selected_ = 0;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
@@ -507,6 +567,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontWeight002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -515,6 +579,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Call SetSelectedOptionFontFamily with font family vector when no option is selected.
+     * @tc.expected: Selected index remains -1 (no selection).
+     */
     std::vector<std::string> value = { "select", "font", "family" };
     pattern->SetSelectedOptionFontFamily(value);
     EXPECT_EQ(pattern->GetSelected(), -1);
@@ -527,6 +595,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, InspectorGetSelectedFont001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG, create select with parameters, set width and height.
+     * @tc.expected: Select is created successfully.
+     */
     SelectModelNG model;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     model.Create(params);
@@ -535,6 +607,10 @@ HWTEST_F(SelectOneTestNg, InspectorGetSelectedFont001, TestSize.Level1)
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     auto pattern = frameNode->GetPattern<SelectPattern>();
+    /**
+     * @tc.steps: step2. Set frame node active, create layout task, and set font properties.
+     * @tc.expected: Font properties are set successfully.
+     */
     frameNode->SetActive();
     frameNode->isLayoutDirtyMarked_ = true;
     frameNode->CreateLayoutTask();
@@ -544,6 +620,10 @@ HWTEST_F(SelectOneTestNg, InspectorGetSelectedFont001, TestSize.Level1)
     pattern->SetSelectedOptionFontFamily(selectParams);
     pattern->SetSelectedOptionFontSize(Dimension(20.00, DimensionUnit::VP));
     pattern->SetSelectedOptionFontWeight(FontWeight::NORMAL);
+    /**
+     * @tc.steps: step3. Call InspectorGetSelectedFont and verify all font properties are set.
+     * @tc.expected: All font properties (FontStyle, FontSize, FontFamily, FontWeight) have values.
+     */
     pattern->InspectorGetSelectedFont();
     EXPECT_TRUE(pattern->selectedFont_.FontStyle.has_value());
     EXPECT_TRUE(pattern->selectedFont_.FontSize.has_value());
@@ -558,6 +638,10 @@ HWTEST_F(SelectOneTestNg, InspectorGetSelectedFont001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionFontFamily003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -566,6 +650,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontFamily003, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Set selected index to 0, add option node, and call SetSelectedOptionFontFamily.
+     * @tc.expected: Selected option's MenuItemPattern exists.
+     */
     std::vector<std::string> value = { "select", "font", "family" };
     pattern->selected_ = 0;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -583,6 +671,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionFontFamily003, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -591,6 +683,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle001, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Call SetSelectedOptionItalicFontStyle with NORMAL style when no option is selected.
+     * @tc.expected: Selected index remains -1 (no selection).
+     */
     SelectModelNG::SetSelectedOptionItalicFontStyle(&frameNode, Ace::FontStyle::NORMAL);
     EXPECT_EQ(pattern->GetSelected(), -1);
 }
@@ -602,6 +698,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -610,6 +710,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle002, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Set selected index to 0 and call SetSelectedOptionItalicFontStyle with NORMAL style.
+     * @tc.expected: Selected index is preserved as 0.
+     */
     pattern->selected_ = 0;
     pattern->SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
     EXPECT_EQ(pattern->GetSelected(), 0);
@@ -622,6 +726,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -629,6 +737,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle003, TestSize.Level1)
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Set selected index to 0, add option node, and call SetSelectedOptionItalicFontStyle.
+     * @tc.expected: Selected option's MenuItemPattern exists.
+     */
     pattern->selected_ = 0;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
@@ -645,6 +757,10 @@ HWTEST_F(SelectOneTestNg, SetSelectedOptionItalicFontStyle003, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SetOptionFontColor001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectPattern, FrameNode, and text node with layout property.
+     * @tc.expected: Pattern and frameNode are created successfully.
+     */
     RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
     FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
@@ -653,6 +769,10 @@ HWTEST_F(SelectOneTestNg, SetOptionFontColor001, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     pattern->text_ = frameNode_;
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    /**
+     * @tc.steps: step2. Call SetOptionFontColor with BLACK color.
+     * @tc.expected: Selected index remains -1 (no selection).
+     */
     SelectModelNG::SetOptionFontColor(&frameNode, Color::BLACK);
     EXPECT_EQ(pattern->GetSelected(), -1);
 }
@@ -745,6 +865,10 @@ HWTEST_F(SelectOneTestNg, SetDisabledStyle001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, UpdateLastSelectedProps001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG and FrameNode with SelectPattern.
+     * @tc.expected: Select and pattern are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -754,6 +878,10 @@ HWTEST_F(SelectOneTestNg, UpdateLastSelectedProps001, TestSize.Level1)
     auto pattern = select->GetPattern<SelectPattern>();
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
     EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. Set selected index to 1, add option node, and call UpdateLastSelectedProps with index 0.
+     * @tc.expected: Option at index 0's MenuItemPattern exists.
+     */
     pattern->selected_ = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
@@ -770,6 +898,10 @@ HWTEST_F(SelectOneTestNg, UpdateLastSelectedProps001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, UpdateLastSelectedProps002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG and get frameNode with pattern.
+     * @tc.expected: Select and pattern are obtained successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -778,6 +910,10 @@ HWTEST_F(SelectOneTestNg, UpdateLastSelectedProps002, TestSize.Level1)
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. Set selected index to 1, add option node, and call UpdateLastSelectedProps with index 3.
+     * @tc.expected: Selected option's MenuItemPattern equals 1.
+     */
     pattern->selected_ = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
@@ -795,6 +931,10 @@ HWTEST_F(SelectOneTestNg, UpdateLastSelectedProps002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, UpdateText001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG and get frameNode with pattern.
+     * @tc.expected: Select and pattern are obtained successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -803,6 +943,10 @@ HWTEST_F(SelectOneTestNg, UpdateText001, TestSize.Level1)
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. Call UpdateText with index -1 (invalid index).
+     * @tc.expected: selectValue_ is set to empty string.
+     */
     const int32_t index = -1;
     pattern->UpdateText(index);
     EXPECT_EQ(pattern->selectValue_, "");
@@ -815,6 +959,10 @@ HWTEST_F(SelectOneTestNg, UpdateText001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, UpdateText002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG, FrameNode, and text node, get pattern.
+     * @tc.expected: Select and pattern are obtained successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -825,6 +973,10 @@ HWTEST_F(SelectOneTestNg, UpdateText002, TestSize.Level1)
     pattern->text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. Add option node to options, and call UpdateText with index 1.
+     * @tc.expected: selectValue_ is set to empty string since index is out of bounds.
+     */
     const int32_t index = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
@@ -842,6 +994,10 @@ HWTEST_F(SelectOneTestNg, UpdateText002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, ToJsonValue001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG, FrameNode, and text node, get pattern.
+     * @tc.expected: Select and pattern are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -852,6 +1008,10 @@ HWTEST_F(SelectOneTestNg, ToJsonValue001, TestSize.Level1)
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
     pattern->text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step2. Create JsonValue and call ToJsonValue with empty options.
+     * @tc.expected: options_ is empty.
+     */
     std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
     ASSERT_NE(jsonValue, nullptr);
     pattern->ToJsonValue(jsonValue, filter);
@@ -865,6 +1025,10 @@ HWTEST_F(SelectOneTestNg, ToJsonValue001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, ToJsonValue002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG, FrameNode, text node, and menuWrapper.
+     * @tc.expected: Select and pattern are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -875,6 +1039,10 @@ HWTEST_F(SelectOneTestNg, ToJsonValue002, TestSize.Level1)
     pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
     pattern->text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step2. Add option node to options_, create menuWrapper, and call ToJsonValue.
+     * @tc.expected: options_ is not empty.
+     */
     std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
     ASSERT_NE(jsonValue, nullptr);
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -894,6 +1062,10 @@ HWTEST_F(SelectOneTestNg, ToJsonValue002, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, ToJsonValue003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG and get select frameNode and pattern.
+     * @tc.expected: Select and pattern are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -906,12 +1078,24 @@ HWTEST_F(SelectOneTestNg, ToJsonValue003, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
     auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(menuLayoutProps, nullptr);
+    /**
+     * @tc.steps: step2. Create JSON, call ToJsonDividerMode and verify default mode is empty.
+     * @tc.expected: dividerMode is empty string by default.
+     */
     auto json = JsonUtil::Create(true);
     pattern->ToJsonDividerMode(json);
     EXPECT_EQ(json->GetString("dividerMode", ""), "");
+    /**
+     * @tc.steps: step3. Update divider mode to FLOATING_ABOVE_MENU and verify JSON output.
+     * @tc.expected: dividerMode is "FLOATING_ABOVE_MENU".
+     */
     menuLayoutProps->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
     pattern->ToJsonDividerMode(json);
     EXPECT_EQ(json->GetString("dividerMode", ""), "FLOATING_ABOVE_MENU");
+    /**
+     * @tc.steps: step4. Update divider mode to EMBEDDED_IN_MENU and verify JSON output.
+     * @tc.expected: dividerMode is "EMBEDDED_IN_MENU".
+     */
     json->Delete("dividerMode");
     menuLayoutProps->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
     pattern->ToJsonDividerMode(json);
@@ -992,6 +1176,10 @@ HWTEST_F(SelectOneTestNg, selectMenuPatterntTest001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectParam with Symbol icon callback.
+     * @tc.expected: Symbol callback is created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params;
     SelectParam sparam_one;
@@ -1002,12 +1190,20 @@ HWTEST_F(SelectOneTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
         EXPECT_NE(node, nullptr);
     };
     sparam_one.symbolIcon = onApply;
+    /**
+     * @tc.steps: step2. Add param to list and create select.
+     * @tc.expected: Select is created successfully with Symbol icon.
+     */
     params.push_back(sparam_one);
     selectModelInstance.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step3. Get options and verify Symbol icon exists in the option's child hierarchy.
+     * @tc.expected: Options size matches params size, and icon tag is SYMBOL_ETS_TAG.
+     */
     auto options = pattern->GetOptions();
     EXPECT_EQ(options.size(), params.size());
     RefPtr<FrameNode> row =
@@ -1026,8 +1222,11 @@ HWTEST_F(SelectOneTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, SelectLayoutPropertyTest008, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG with params and create select.
+     * @tc.expected: Select is created successfully.
+     */
     SelectModelNG selectModelInstance;
-    // create select
     std::vector<SelectParam> params = { {OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE},
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
@@ -1035,7 +1234,8 @@ HWTEST_F(SelectOneTestNg, SelectLayoutPropertyTest008, TestSize.Level1)
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     /**
-     * @tc.cases: case1. verify the SetLayoutDirection function.
+     * @tc.steps: step2. Call SetLayoutDirection with RTL and verify the layout direction.
+     * @tc.expected: Layout direction is set to RTL.
      */
     selectPattern->SetLayoutDirection(TextDirection::RTL);
     auto layoutProps = selectPattern->GetLayoutProperty<LayoutProperty>();
@@ -1414,6 +1614,10 @@ HWTEST_F(SelectOneTestNg, OnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, OnModifyDone014, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG, create select, and get pattern with menu and theme.
+     * @tc.expected: Select, pattern, menu, and theme are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     selectModelInstance.Create(params);
@@ -1433,26 +1637,45 @@ HWTEST_F(SelectOneTestNg, OnModifyDone014, TestSize.Level1)
     auto eventHub = host->GetEventHub<SelectEventHub>();
     EXPECT_NE(eventHub, nullptr);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: step2. Set API version to 12, disable event hub, set TV mode true, and call OnModifyDone.
+     * @tc.expected: IsSelectMenu returns true.
+     */
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     eventHub->SetEnabled(false);
     selectTheme->isTV_ = true;
     selectPattern->OnModifyDone();
     auto val = menuPattern->IsSelectMenu();
     EXPECT_EQ(val, true);
+    /**
+     * @tc.steps: step3. Set TV mode false and call OnModifyDone.
+     * @tc.expected: IsSelectMenu returns true.
+     */
     selectTheme->isTV_ = false;
     selectPattern->OnModifyDone();
     val = menuPattern->IsSelectMenu();
     EXPECT_EQ(val, true);
-
+    /**
+     * @tc.steps: step4. Enable event hub, set TV mode true, and call OnModifyDone.
+     * @tc.expected: IsSelectMenu returns true.
+     */
     eventHub->SetEnabled(true);
     selectTheme->isTV_ = true;
     selectPattern->OnModifyDone();
     val = menuPattern->IsSelectMenu();
     EXPECT_EQ(val, true);
+    /**
+     * @tc.steps: step5. Set TV mode false and call OnModifyDone.
+     * @tc.expected: IsSelectMenu returns true.
+     */
     selectTheme->isTV_ = false;
     selectPattern->OnModifyDone();
     val = menuPattern->IsSelectMenu();
     EXPECT_EQ(val, true);
+    /**
+     * @tc.steps: step6. Restore backup API version.
+     * @tc.expected: API version is restored.
+     */
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1463,6 +1686,10 @@ HWTEST_F(SelectOneTestNg, OnModifyDone014, TestSize.Level1)
  */
 HWTEST_F(SelectOneTestNg, OnModifyDone015, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create SelectModelNG, create select, and get pattern with menu, render context, and theme.
+     * @tc.expected: Select, pattern, menu, render context, and theme are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     selectModelInstance.Create(params);
@@ -1478,6 +1705,10 @@ HWTEST_F(SelectOneTestNg, OnModifyDone015, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
     ASSERT_NE(selectTheme, nullptr);
+    /**
+     * @tc.steps: step2. Set menuItemNeedFocus to true and call OnModifyDone.
+     * @tc.expected: Menu border color and width are set from theme.
+     */
     selectTheme->menuItemNeedFocus_ = true;
     selectPattern->OnModifyDone();
     BorderColorProperty borderColor;

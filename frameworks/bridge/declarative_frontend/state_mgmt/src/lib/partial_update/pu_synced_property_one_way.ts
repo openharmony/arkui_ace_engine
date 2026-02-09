@@ -264,7 +264,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   private resetLocalValue(newObservedObjectValue: C, needCopyObject: boolean): boolean {
     // for interop
     if (InteropConfigureStateMgmt.needsInterop() && newObservedObjectValue && typeof newObservedObjectValue === 'object' && isStaticProxy(newObservedObjectValue)) {
-      throw new BusinessError(STATIC_VARIABLE_TO_PROP, `Illegal usage of Static object assignment to @Prop is not allowed.`);
+      throw new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
     }
 
     // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
@@ -408,7 +408,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     // for interop
     if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
-      throw new BusinessError(STATIC_VARIABLE_TO_PROP, `deepCopyObjectInternal: Static variable assignment to @Prop${variable} is not allowed.`);
+      throw new Error(`deepCopyObjectInternal: Static variable assignment to @Prop${variable} is not allowed.`);
     }
 
     let copiedObjects = new Map<Object, Object>();

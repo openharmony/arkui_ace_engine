@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-class SearchTextFieldPattern final : public TextFieldPattern {
+class ACE_FORCE_EXPORT SearchTextFieldPattern final : public TextFieldPattern {
     DECLARE_ACE_TYPE(SearchTextFieldPattern, TextFieldPattern);
 
 public:

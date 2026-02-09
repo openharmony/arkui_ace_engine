@@ -172,20 +172,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     CHECK_NULL_RETURN(dialogTheme, false);
     expandDisplay_ = dialogTheme->GetExpandDisplay() || IsShowInFreeMultiWindow();
     OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
-    // show in the float subwindow
-    if (IsAlignedWithHostWindow() && expandDisplay_) {
-        OffsetT<Dimension> hostWindowOffset = { Dimension(uiExtensionHostWindowRect_.GetOffset().GetX()),
-            Dimension(uiExtensionHostWindowRect_.GetOffset().GetY()) };
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast hostWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
-            hostWindowOffset.GetX().ConvertToVp(), hostWindowOffset.GetY().ConvertToVp());
-        offset += hostWindowOffset;
-    } else if (!IsSystemTopMost() && (!IsDefaultToast() && expandDisplay_)) {
-        OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
-            Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast displayWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
-            displayWindowOffset.GetX().ConvertToVp(), displayWindowOffset.GetY().ConvertToVp());
-        offset += displayWindowOffset;
-    }
+    AdjustOffsetInSubwindow(offset, context);
     auto func = [toastContext, offset]() { toastContext->UpdateOffset(offset); };
     auto toastProp = DynamicCast<ToastLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, false);
@@ -205,6 +192,32 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         func();
     }
     return true;
+}
+
+void ToastPattern::AdjustOffsetInSubwindow(OffsetT<Dimension>& offset, RefPtr<PipelineContext> context)
+{
+    // show in the float subwindow
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto currentPipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(currentPipeline);
+    auto currentWindowRectInfo = currentPipeline->GetDisplayWindowRectInfo();
+    auto currentWindowOffset = OffsetT<Dimension>(
+        Dimension(currentWindowRectInfo.GetOffset().GetX()), Dimension(currentWindowRectInfo.GetOffset().GetY()));
+    if (IsAlignedWithHostWindow() && expandDisplay_) {
+        OffsetT<Dimension> hostWindowOffset = { Dimension(uiExtensionHostWindowRect_.GetOffset().GetX()),
+            Dimension(uiExtensionHostWindowRect_.GetOffset().GetY()) };
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast hostWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
+            hostWindowOffset.GetX().ConvertToVp(), hostWindowOffset.GetY().ConvertToVp());
+        offset += (hostWindowOffset - currentWindowOffset);
+    } else if (!IsSystemTopMost() && (!IsDefaultToast() && expandDisplay_)) {
+        OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
+            Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast displayWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
+            displayWindowOffset.GetX().ConvertToVp(), displayWindowOffset.GetY().ConvertToVp());
+        offset += (displayWindowOffset - currentWindowOffset);
+    }
 }
 
 Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)

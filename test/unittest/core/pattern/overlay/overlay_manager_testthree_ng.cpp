@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -105,7 +106,9 @@ HWTEST_F(OverlayManagerTestThreeNg, CalculateMenuPosition001, TestSize.Level1)
     auto mainMenu =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
     ASSERT_NE(mainMenu, nullptr);
-    overlayManager->menuMap_.emplace(3, std::move(mainMenu));
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_.emplace(3, std::move(mainMenu));
     ret = overlayManager->CalculateMenuPosition(menuWrapperNode, MENU_OFFSET);
     EXPECT_EQ(ret.GetX(), 0.0);
     EXPECT_EQ(ret.GetY(), 0.0);
@@ -136,7 +139,9 @@ HWTEST_F(OverlayManagerTestThreeNg, RemoveMenuWrapperNode001, TestSize.Level1)
     ASSERT_NE(childTwo, nullptr);
     mainMenu->children_.push_back(childOne);
     mainMenu->children_.push_back(childTwo);
-    overlayManager->RemoveMenuWrapperNode(mainMenu, pipelineContext);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->RemoveMenuWrapperNode(mainMenu, pipelineContext);
     EXPECT_EQ(mainMenu->children_.size(), 1);
 }
 
@@ -155,15 +160,17 @@ HWTEST_F(OverlayManagerTestThreeNg, EraseMenuInfoFromWrapper001, TestSize.Level1
     auto targetId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
-    overlayManager->menuMap_[targetId] = menuWrapper;
-    overlayManager->EraseMenuInfoFromWrapper(menuWrapper);
-    EXPECT_EQ(overlayManager->menuMap_[targetId], nullptr);
-    overlayManager->menuMap_[targetId] = menuWrapper;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menuWrapper;
+    menuManager->EraseMenuInfoFromWrapper(menuWrapper);
+    EXPECT_EQ(menuManager->menuMap_[targetId], nullptr);
+    menuManager->menuMap_[targetId] = menuWrapper;
     auto menuWrapper2 = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
-    overlayManager->EraseMenuInfoFromWrapper(menuWrapper2);
-    EXPECT_NE(overlayManager->menuMap_[targetId], nullptr);
-    overlayManager->menuMap_[targetId] = nullptr;
+    menuManager->EraseMenuInfoFromWrapper(menuWrapper2);
+    EXPECT_NE(menuManager->menuMap_[targetId], nullptr);
+    menuManager->menuMap_[targetId] = nullptr;
 }
 
 /**

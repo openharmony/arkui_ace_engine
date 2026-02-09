@@ -2282,4 +2282,93 @@ HWTEST_F(ScrollEventTestNg, onDidStopDragging001, TestSize.Level1)
     EXPECT_TRUE(isDidStopDraggingCallBack);
     EXPECT_TRUE(isFlingAfterDrag);
 }
+
+/**
+ * @tc.name: OnWillStartFling001
+ * @tc.desc: Test OnWillStartFling event is triggered when drag end with high velocity
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnWillStartFling001, TestSize.Level1)
+{
+    bool isOnWillStartFlingCalled = false;
+    auto onWillStartFling = [&isOnWillStartFlingCalled]() {
+        isOnWillStartFlingCalled = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnWillStartFling(onWillStartFling);
+
+    /**
+     * @tc.steps: step1. Drag with high velocity and release
+     * @tc.expected: OnWillStartFling event should be triggered
+     */
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStartFlingCalled);
+}
+
+/**
+ * @tc.name: OnDidStopFling001
+ * @tc.desc: Test OnDidStopFling event is triggered when fling stops
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, OnDidStopFling001, TestSize.Level1)
+{
+    bool isOnDidStopFlingCalled = false;
+    auto onDidStopFling = [&isOnDidStopFlingCalled]() {
+        isOnDidStopFlingCalled = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnDidStopFling(onDidStopFling);
+
+    /**
+     * @tc.steps: step1. First drag with high velocity to trigger fling
+     * @tc.expected: Fling animation starts
+     */
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Second drag with low velocity to stop fling
+     * @tc.expected: OnDidStopFling event should be triggered
+     */
+    info.SetMainVelocity(-10.f);
+    info.SetMainDelta(-5.f);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnDidStopFlingCalled);
+}
 } // namespace OHOS::Ace::NG

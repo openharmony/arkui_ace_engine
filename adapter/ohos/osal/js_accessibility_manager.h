@@ -417,6 +417,9 @@ public:
     bool CheckHoverTransparentCallbackListEmpty(int32_t containerId) override;
 
     int64_t CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node) override;
+
+    void AccessibilityOnShowHide(bool isOnShow, const WeakPtr<PipelineBase>& context) override;
+
     void ChooseDumpEvent(const std::vector<std::string>& params,
         DumpInfoArgument& argument, uint32_t windowId, bool hasJson);
 
@@ -889,6 +892,11 @@ private:
     bool ActAccessibilityAction(Accessibility::ActionType action,
         const std::map<std::string, std::string>& actionArguments,
         RefPtr<NG::AccessibilityProperty> accessibilityProperty, const RefPtr<NG::FrameNode>& frameNode);
+
+    void ClearAccessibilityFocusState();
+
+    // Check if current pipeline context is form render
+    bool IsFormRender();
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

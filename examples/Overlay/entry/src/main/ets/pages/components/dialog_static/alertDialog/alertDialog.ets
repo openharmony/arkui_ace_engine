@@ -344,6 +344,275 @@ struct AlertDialogExample {
                   })
               }
 
+              Text(`style`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`DEFAULT`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].style = DialogButtonStyle.DEFAULT
+                    this.alertDialogParamWithOptions.buttons[1].style = DialogButtonStyle.DEFAULT
+                    this.alertDialogParamWithOptions.buttons[2].style = DialogButtonStyle.DEFAULT
+                    this.alertDialogParamWithOptions.buttons[3].style = DialogButtonStyle.DEFAULT
+                    this.alertDialogParamWithButtons.primaryButton.style = DialogButtonStyle.DEFAULT
+                    this.alertDialogParamWithButtons.secondaryButton.style = DialogButtonStyle.DEFAULT
+                  })
+                Text(`HIGHLIGHT`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].style = DialogButtonStyle.HIGHLIGHT
+                    this.alertDialogParamWithOptions.buttons[1].style = DialogButtonStyle.HIGHLIGHT
+                    this.alertDialogParamWithOptions.buttons[2].style = DialogButtonStyle.HIGHLIGHT
+                    this.alertDialogParamWithOptions.buttons[3].style = DialogButtonStyle.HIGHLIGHT
+                    this.alertDialogParamWithButtons.primaryButton.style = DialogButtonStyle.HIGHLIGHT
+                    this.alertDialogParamWithButtons.secondaryButton.style = DialogButtonStyle.HIGHLIGHT
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].style = undefined
+                    this.alertDialogParamWithOptions.buttons[1].style = undefined
+                    this.alertDialogParamWithOptions.buttons[2].style = undefined
+                    this.alertDialogParamWithOptions.buttons[3].style = undefined
+                    this.alertDialogParamWithButtons.primaryButton.style = undefined
+                    this.alertDialogParamWithButtons.secondaryButton.style = undefined
+                  })
+              }
+
+              Text(`value`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`ccc`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].value =
+                      $r("app.string.entry_desc")
+                    this.alertDialogParamWithOptions.buttons[1].value =
+                      $r("app.string.entry_desc")
+                    this.alertDialogParamWithOptions.buttons[2].value =
+                      $r("app.string.entry_desc")
+                    this.alertDialogParamWithOptions.buttons[3].value =
+                      $r("app.string.entry_desc")
+                    this.alertDialogParamWithButtons.primaryButton.value =
+                      $r("app.string.entry_desc")
+                    this.alertDialogParamWithButtons.secondaryButton.value =
+                      $r("app.string.entry_desc")
+                  })
+              }
+
+              Text(`fontColor`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`Red`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].fontColor = Color.Red
+                    this.alertDialogParamWithOptions.buttons[1].fontColor = Color.Red
+                    this.alertDialogParamWithOptions.buttons[2].fontColor = Color.Red
+                    this.alertDialogParamWithOptions.buttons[3].fontColor = Color.Red
+                    this.alertDialogParamWithButtons.primaryButton.fontColor = Color.Red
+                    this.alertDialogParamWithButtons.secondaryButton.fontColor = Color.Red
+                  })
+                Text(`Green`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].fontColor = Color.Green
+                    this.alertDialogParamWithOptions.buttons[1].fontColor = Color.Green
+                    this.alertDialogParamWithOptions.buttons[2].fontColor = Color.Green
+                    this.alertDialogParamWithOptions.buttons[3].fontColor = Color.Green
+                    this.alertDialogParamWithButtons.primaryButton.fontColor = Color.Green
+                    this.alertDialogParamWithButtons.secondaryButton.fontColor = Color.Green
+                  })
+                Text(`资源值`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].fontColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithOptions.buttons[1].fontColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithOptions.buttons[2].fontColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithOptions.buttons[3].fontColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithButtons.primaryButton.fontColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithButtons.secondaryButton.fontColor = $r("app.color.Color_pink")
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].fontColor = undefined
+                    this.alertDialogParamWithOptions.buttons[1].fontColor = undefined
+                    this.alertDialogParamWithOptions.buttons[2].fontColor = undefined
+                    this.alertDialogParamWithOptions.buttons[3].fontColor = undefined
+                    this.alertDialogParamWithButtons.primaryButton.fontColor = undefined
+                    this.alertDialogParamWithButtons.secondaryButton.fontColor = undefined
+                  })
+              }
+
+              Text(`backgroundColor`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`Red`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].backgroundColor = Color.Red
+                    this.alertDialogParamWithOptions.buttons[1].backgroundColor = Color.Red
+                    this.alertDialogParamWithOptions.buttons[2].backgroundColor = Color.Red
+                    this.alertDialogParamWithOptions.buttons[3].backgroundColor = Color.Red
+                    this.alertDialogParamWithButtons.primaryButton.backgroundColor = Color.Red
+                    this.alertDialogParamWithButtons.secondaryButton.backgroundColor = Color.Red
+                  })
+                Text(`Green`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].backgroundColor = Color.Green
+                    this.alertDialogParamWithOptions.buttons[1].backgroundColor = Color.Green
+                    this.alertDialogParamWithOptions.buttons[2].backgroundColor = Color.Green
+                    this.alertDialogParamWithOptions.buttons[3].backgroundColor = Color.Green
+                    this.alertDialogParamWithButtons.primaryButton.backgroundColor = Color.Green
+                    this.alertDialogParamWithButtons.secondaryButton.backgroundColor = Color.Green
+                  })
+                Text(`资源值`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].backgroundColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithOptions.buttons[1].backgroundColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithOptions.buttons[2].backgroundColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithOptions.buttons[3].backgroundColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithButtons.primaryButton.backgroundColor = $r("app.color.Color_pink")
+                    this.alertDialogParamWithButtons.secondaryButton.backgroundColor = $r("app.color.Color_pink")
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].backgroundColor = undefined
+                    this.alertDialogParamWithOptions.buttons[1].backgroundColor = undefined
+                    this.alertDialogParamWithOptions.buttons[2].backgroundColor = undefined
+                    this.alertDialogParamWithOptions.buttons[3].backgroundColor = undefined
+                    this.alertDialogParamWithButtons.primaryButton.backgroundColor = undefined
+                    this.alertDialogParamWithButtons.secondaryButton.backgroundColor = undefined
+                  })
+              }
+
+              Text(`action`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`shjb1`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithOptions.buttons[0].action = () => {
+                      console.info('确定1');
+                    }
+                    this.alertDialogParamWithOptions.buttons[1].action = () => {
+                      console.info('取消1');
+                    }
+                    this.alertDialogParamWithOptions.buttons[2].action = () => {
+                      console.info('确定取消1');
+                    }
+                    this.alertDialogParamWithOptions.buttons[3].action = () => {
+                      console.info('取消确定1');
+                    }
+                    this.alertDialogParamWithButtons.primaryButton.action = () => {
+                      console.info('primaryButton1');
+                    }
+                    this.alertDialogParamWithButtons.secondaryButton.action = () => {
+                      console.info('secondaryButton1');
+                    }
+                  })
+              }
+
+              Text(`AlertDialogParamWithOptions && AlertDialogParamWithButtons && AlertDialogParamWithConfirm`)
+                .fontSize(9)
+                .width("100%")
+              Text(`AlertDialogParamWithOptions && AlertDialogParamWithButtons && AlertDialogParamWithConfirm`)
+                .fontSize(9)
+                .width("100%")
+              Text(`title`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`aaa`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.title = 'aaa'
+                    this.alertDialogParamWithButtons.title = 'aaa'
+                    this.alertDialogParamWithOptions.title = 'aaa'
+                  })
+                Text(`bbb`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.title = 'bbb'
+                    this.alertDialogParamWithButtons.title = 'bbb'
+                    this.alertDialogParamWithOptions.title = 'bbb'
+                  })
+                Text(`ccc`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.title = $r("app.string.entry_desc")
+                    this.alertDialogParamWithButtons.title = $r("app.string.entry_desc")
+                    this.alertDialogParamWithOptions.title = $r("app.string.entry_desc")
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.title = undefined
+                    this.alertDialogParamWithButtons.title = undefined
+                    this.alertDialogParamWithOptions.title = undefined
+                  })
+              }
+
               Text(`subtitle`)
                 .fontSize(9)
                 .width("100%")
@@ -906,6 +1175,368 @@ struct AlertDialogExample {
                     this.alertDialogParamWithConfirm.backgroundColor = undefined
                     this.alertDialogParamWithButtons.backgroundColor = undefined
                     this.alertDialogParamWithOptions.backgroundColor = undefined
+                  })
+              }
+
+              Text(`backgroundBlurStyle`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`Thin`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.Thin
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.Thin
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.Thin
+                  })
+                Text(`Regular`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.Regular
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.Regular
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.Regular
+                  })
+                Text(`Thick`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.Thick
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.Thick
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.Thick
+                  })
+                Text(`BACKGROUND_THIN`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.BACKGROUND_THIN
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.BACKGROUND_THIN
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.BACKGROUND_THIN
+                  })
+                Text(`BACKGROUND_REGULAR`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.BACKGROUND_REGULAR
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.BACKGROUND_REGULAR
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.BACKGROUND_REGULAR
+                  })
+              }
+
+              Row() {
+                Text(`BACKGROUND_ULTRA_THICK`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.BACKGROUND_ULTRA_THICK
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.BACKGROUND_ULTRA_THICK
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.BACKGROUND_ULTRA_THICK
+                  })
+                Text(`NONE`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.NONE
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.NONE
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.NONE
+                  })
+                Text(`COMPONENT_ULTRA_THIN`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.COMPONENT_ULTRA_THIN
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.COMPONENT_ULTRA_THIN
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.COMPONENT_ULTRA_THIN
+                  })
+              }
+
+              Row() {
+                Text(`COMPONENT_THIN`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.COMPONENT_THIN
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.COMPONENT_THIN
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.COMPONENT_THIN
+                  })
+                Text(`COMPONENT_REGULAR`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.COMPONENT_REGULAR
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.COMPONENT_REGULAR
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.COMPONENT_REGULAR
+                  })
+                Text(`COMPONENT_THICK`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.COMPONENT_THICK
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.COMPONENT_THICK
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.COMPONENT_THICK
+                  })
+              }
+
+              Row() {
+                Text(`COMPONENT_ULTRA_THICK`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = BlurStyle.COMPONENT_ULTRA_THICK
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = BlurStyle.COMPONENT_ULTRA_THICK
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = BlurStyle.COMPONENT_ULTRA_THICK
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyle = undefined
+                    this.alertDialogParamWithButtons.backgroundBlurStyle = undefined
+                    this.alertDialogParamWithOptions.backgroundBlurStyle = undefined
+                  })
+              }
+
+              Text(`backgroundBlurStyleOptions`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`000`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE,
+                      inactiveColor: Color.Green,
+                      colorMode: ThemeColorMode.DARK,
+                      adaptiveColor: AdaptiveColor.DEFAULT,
+                      blurOptions: {
+                        grayscale: [127, 127]
+                      },
+                      scale: 1.0
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE,
+                      inactiveColor: Color.Green,
+                      colorMode: ThemeColorMode.DARK,
+                      adaptiveColor: AdaptiveColor.DEFAULT,
+                      blurOptions: {
+                        grayscale: [127, 127]
+                      },
+                      scale: 1.0
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE,
+                      inactiveColor: Color.Green,
+                      colorMode: ThemeColorMode.DARK,
+                      adaptiveColor: AdaptiveColor.DEFAULT,
+                      blurOptions: {
+                        grayscale: [127, 127]
+                      },
+                      scale: 1.0
+                    } as BackgroundBlurStyleOptions
+                  })
+                Text(`111`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE,
+                      inactiveColor: Color.Red,
+                      colorMode: ThemeColorMode.SYSTEM,
+                      adaptiveColor: AdaptiveColor.DEFAULT,
+                      blurOptions: {
+                        grayscale: [30.4, 30.4]
+                      },
+                      scale: 0.5
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE,
+                      inactiveColor: Color.Red,
+                      colorMode: ThemeColorMode.SYSTEM,
+                      adaptiveColor: AdaptiveColor.DEFAULT,
+                      blurOptions: {
+                        grayscale: [30.4, 30.4]
+                      },
+                      scale: 0.5
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE,
+                      inactiveColor: Color.Red,
+                      colorMode: ThemeColorMode.SYSTEM,
+                      adaptiveColor: AdaptiveColor.DEFAULT,
+                      blurOptions: {
+                        grayscale: [30.4, 30.4]
+                      },
+                      scale: 0.5
+                    } as BackgroundBlurStyleOptions
+                  })
+                Text(`222`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.ALWAYS_ACTIVE,
+                      inactiveColor: '#330be9d0',
+                      colorMode: ThemeColorMode.LIGHT,
+                      adaptiveColor: AdaptiveColor.AVERAGE,
+                      blurOptions: {
+                        grayscale: [0, 127]
+                      },
+                      scale: 0
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.ALWAYS_ACTIVE,
+                      inactiveColor: '#330be9d0',
+                      colorMode: ThemeColorMode.LIGHT,
+                      adaptiveColor: AdaptiveColor.AVERAGE,
+                      blurOptions: {
+                        grayscale: [0, 127]
+                      },
+                      scale: 0
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.ALWAYS_ACTIVE,
+                      inactiveColor: '#330be9d0',
+                      colorMode: ThemeColorMode.LIGHT,
+                      adaptiveColor: AdaptiveColor.AVERAGE,
+                      blurOptions: {
+                        grayscale: [0, 127]
+                      },
+                      scale: 0
+                    } as BackgroundBlurStyleOptions
+                  })
+                Text(`333`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.ALWAYS_INACTIVE,
+                      inactiveColor: $r('app.color.Color_pink'),
+                      colorMode: ThemeColorMode.DARK,
+                      adaptiveColor: undefined,
+                      blurOptions: {
+                        grayscale: [-100, -100]
+                      },
+                      scale: 1.0
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.ALWAYS_INACTIVE,
+                      inactiveColor: $r('app.color.Color_pink'),
+                      colorMode: ThemeColorMode.DARK,
+                      adaptiveColor: undefined,
+                      blurOptions: {
+                        grayscale: [-100, -100]
+                      },
+                      scale: 1.0
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = {
+                      policy: BlurStyleActivePolicy.ALWAYS_INACTIVE,
+                      inactiveColor: $r('app.color.Color_pink'),
+                      colorMode: ThemeColorMode.DARK,
+                      adaptiveColor: undefined,
+                      blurOptions: {
+                        grayscale: [-100, -100]
+                      },
+                      scale: 1.0
+                    } as BackgroundBlurStyleOptions
+                  })
+                Text(`444`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = {
+                      policy: undefined,
+                      inactiveColor: 'rgba(23,169,141,0.5)',
+                      colorMode: undefined,
+                      blurOptions: {
+                        grayscale: [1000, 1000]
+                      },
+                      scale: undefined
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = {
+                      policy: undefined,
+                      inactiveColor: 'rgba(23,169,141,0.5)',
+                      colorMode: undefined,
+                      blurOptions: {
+                        grayscale: [1000, 1000]
+                      },
+                      scale: undefined
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = {
+                      policy: undefined,
+                      inactiveColor: 'rgba(23,169,141,0.5)',
+                      colorMode: undefined,
+                      blurOptions: {
+                        grayscale: [1000, 1000]
+                      },
+                      scale: undefined
+                    } as BackgroundBlurStyleOptions
+                  })
+                Text(`555`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = {
+                      inactiveColor: undefined,
+                      blurOptions: undefined,
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = {
+                      inactiveColor: undefined,
+                      blurOptions: undefined,
+                    } as BackgroundBlurStyleOptions
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = {
+                      inactiveColor: undefined,
+                      blurOptions: undefined,
+                    } as BackgroundBlurStyleOptions
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.backgroundBlurStyleOptions = undefined
+                    this.alertDialogParamWithButtons.backgroundBlurStyleOptions = undefined
+                    this.alertDialogParamWithOptions.backgroundBlurStyleOptions = undefined
                   })
               }
 
@@ -1910,6 +2541,278 @@ struct AlertDialogExample {
                     this.alertDialogParamWithConfirm.enableHoverMode = undefined
                     this.alertDialogParamWithButtons.enableHoverMode = undefined
                     this.alertDialogParamWithOptions.enableHoverMode = undefined
+                  })
+              }
+
+              Text(`hoverModeArea`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`TOP_SCREEN`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.hoverModeArea = HoverModeAreaType.TOP_SCREEN
+                    this.alertDialogParamWithButtons.hoverModeArea = HoverModeAreaType.TOP_SCREEN
+                    this.alertDialogParamWithOptions.hoverModeArea = HoverModeAreaType.TOP_SCREEN
+                  })
+                Text('BOTTOM_SCREEN')
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.hoverModeArea = HoverModeAreaType.BOTTOM_SCREEN
+                    this.alertDialogParamWithButtons.hoverModeArea = HoverModeAreaType.BOTTOM_SCREEN
+                    this.alertDialogParamWithOptions.hoverModeArea = HoverModeAreaType.BOTTOM_SCREEN
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.hoverModeArea = undefined
+                    this.alertDialogParamWithButtons.hoverModeArea = undefined
+                    this.alertDialogParamWithOptions.hoverModeArea = undefined
+                  })
+              }
+
+              Text(`onWillAppear`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`onWillAppear`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onWillAppear = () => {
+                      console.info("dialog onWillAppear");
+                    }
+                    this.alertDialogParamWithButtons.onWillAppear = () => {
+                      console.info("dialog onWillAppear");
+                    }
+                    this.alertDialogParamWithOptions.onWillAppear = () => {
+                      console.info("dialog onWillAppear");
+                    }
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onWillAppear = undefined
+                    this.alertDialogParamWithButtons.onWillAppear = undefined
+                    this.alertDialogParamWithOptions.onWillAppear = undefined
+                  })
+              }
+
+              Text(`onDidAppear`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`onDidAppear`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onDidAppear = () => {
+                      console.info("dialog onDidAppear");
+                    }
+                    this.alertDialogParamWithButtons.onDidAppear =  () => {
+                      console.info("dialog onDidAppear");
+                    }
+                    this.alertDialogParamWithOptions.onDidAppear =  () => {
+                      console.info("dialog onDidAppear");
+                    }
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onDidAppear = undefined
+                    this.alertDialogParamWithButtons.onDidAppear = undefined
+                    this.alertDialogParamWithOptions.onDidAppear = undefined
+                  })
+              }
+
+              Text(`onWillDisappear`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`onWillDisappear`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onWillDisappear = () => {
+                      console.info("dialog onWillDisappear");
+                    }
+                    this.alertDialogParamWithButtons.onWillDisappear = () => {
+                      console.info("dialog onWillDisappear");
+                    }
+                    this.alertDialogParamWithOptions.onWillDisappear = () => {
+                      console.info("dialog onWillDisappear");
+                    }
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onWillDisappear = undefined
+                    this.alertDialogParamWithButtons.onWillDisappear = undefined
+                    this.alertDialogParamWithOptions.onWillDisappear = undefined
+                  })
+              }
+
+              Text(`onDidDisappear`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`onDidDisappear`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onDidDisappear = () => {
+                      console.info("dialog onDidDisappear");
+                    }
+                    this.alertDialogParamWithButtons.onDidDisappear = () => {
+                      console.info("dialog onDidDisappear");
+                    }
+                    this.alertDialogParamWithOptions.onDidDisappear = () => {
+                      console.info("dialog onDidDisappear");
+                    }
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.onDidDisappear = undefined
+                    this.alertDialogParamWithButtons.onDidDisappear = undefined
+                    this.alertDialogParamWithOptions.onDidDisappear = undefined
+                  })
+              }
+
+              Text(`levelMode`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`OVERLAY`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.levelMode = LevelMode.OVERLAY
+                    this.alertDialogParamWithButtons.levelMode = LevelMode.OVERLAY
+                    this.alertDialogParamWithOptions.levelMode = LevelMode.OVERLAY
+                  })
+                Text('EMBEDDED')
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.levelMode = LevelMode.EMBEDDED
+                    this.alertDialogParamWithButtons.levelMode = LevelMode.EMBEDDED
+                    this.alertDialogParamWithOptions.levelMode = LevelMode.EMBEDDED
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.levelMode = undefined
+                    this.alertDialogParamWithButtons.levelMode = undefined
+                    this.alertDialogParamWithOptions.levelMode = undefined
+                  })
+              }
+
+              Text(`levelUniqueId`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`11`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.levelUniqueId = 11
+                    this.alertDialogParamWithButtons.levelUniqueId = 11
+                    this.alertDialogParamWithOptions.levelUniqueId = 11
+                  })
+                Text('20')
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.levelUniqueId = 20
+                    this.alertDialogParamWithButtons.levelUniqueId = 20
+                    this.alertDialogParamWithOptions.levelUniqueId = 20
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.levelUniqueId = undefined
+                    this.alertDialogParamWithButtons.levelUniqueId = undefined
+                    this.alertDialogParamWithOptions.levelUniqueId = undefined
+                  })
+              }
+
+              Text(`immersiveMode`)
+                .fontSize(9)
+                .width("100%")
+              Row() {
+                Text(`DEFAULT`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.immersiveMode = ImmersiveMode.DEFAULT
+                    this.alertDialogParamWithButtons.immersiveMode = ImmersiveMode.DEFAULT
+                    this.alertDialogParamWithOptions.immersiveMode = ImmersiveMode.DEFAULT
+                  })
+                Text('EXTEND')
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.immersiveMode = ImmersiveMode.EXTEND
+                    this.alertDialogParamWithButtons.immersiveMode = ImmersiveMode.EXTEND
+                    this.alertDialogParamWithOptions.immersiveMode = ImmersiveMode.EXTEND
+                  })
+                Text(`undefined`)
+                  .fontSize(10)
+                  .backgroundColor(0x0000ff)
+                  .fontColor(0xffffff)
+                  .padding(5)
+                  .onClick((e: ClickEvent) => {
+                    this.alertDialogParamWithConfirm.immersiveMode = undefined
+                    this.alertDialogParamWithButtons.immersiveMode = undefined
+                    this.alertDialogParamWithOptions.immersiveMode = undefined
                   })
               }
 

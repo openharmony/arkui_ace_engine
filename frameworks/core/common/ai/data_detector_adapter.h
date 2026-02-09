@@ -92,7 +92,7 @@ public:
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos);
-    void StartAITask(bool clearAISpanMap = true, bool isSelectDetect = false);
+    ACE_FORCE_EXPORT void StartAITask(bool clearAISpanMap = true, bool isSelectDetect = false);
     void CancelAITask()
     {
         if (aiDetectDelayTask_) {
@@ -109,10 +109,10 @@ public:
         const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info);
     bool GetAiEntityMenuOptions(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info,
         std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
-    RefPtr<NG::FrameNode> CreateAIEntityMenu(
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> CreateAIEntityMenu(
         const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info);
-    void ResponseBestMatchItem(const AISpan& aiSpan);
-    void GetAIEntityMenu();
+    ACE_FORCE_EXPORT void ResponseBestMatchItem(const AISpan& aiSpan);
+    ACE_FORCE_EXPORT void GetAIEntityMenu();
     void MarkDirtyNode() const;
     void SetParseSelectAIResCallBack(std::function<void()>&& task);
     void ParseSelectAIResult();

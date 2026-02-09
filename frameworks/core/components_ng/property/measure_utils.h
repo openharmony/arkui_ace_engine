@@ -33,8 +33,9 @@
 namespace OHOS::Ace::NG {
 ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
-std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
-    float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
+ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const std::optional<CalcLength>& value,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f,
+    const std::vector<std::string>& rpnexp = std::vector<std::string>());
 
 ACE_FORCE_EXPORT std::optional<float> ConvertToPx(
     const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
@@ -89,7 +90,7 @@ ACE_FORCE_EXPORT void MinusPaddingToNonNegativeSize(const PaddingPropertyF& padd
 
 ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
+ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
 

@@ -19,6 +19,7 @@
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
@@ -85,7 +86,6 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -535,10 +535,11 @@ void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
 
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto searchModifier = nodeModifier->getSearchModifier();
+    CHECK_NULL_RETURN(searchModifier, nullptr);
+    return searchModifier->createSearchFrameNode(nodeId);
 }
 
 void* createGridRowNode(ArkUI_Int32 nodeId)
@@ -624,10 +625,9 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
 
 void* createTextClockNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto textClockModifier = NodeModifier::GetTextClockCustomModifier();
+    CHECK_NULL_RETURN(textClockModifier, nullptr);
+    return textClockModifier->createTextClockFrameNode(nodeId);
 }
 
 void* createTextTimerNode(ArkUI_Int32 nodeId)
@@ -685,6 +685,20 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
 void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
 {
     auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag), nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param)
+{
+    RenderContext::ContextParam contextParam;
+    contextParam.type = static_cast<RenderContext::ContextType>(param.type);
+    if (param.surfaceName) {
+        contextParam.surfaceName = std::string(param.surfaceName);
+    }
+    contextParam.isSkipCheckInMultiInstance = param.isSkipCheckInMultiInstance;
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNodeWithParam(std::string(tag), contextParam);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

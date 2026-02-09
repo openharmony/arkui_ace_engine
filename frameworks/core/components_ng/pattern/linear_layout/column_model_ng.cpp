@@ -25,6 +25,7 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COLUMN_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -43,6 +44,7 @@ void ColumnModelNG::Create(const RefPtr<ResourceObject>& spaceResObj, AlignDecla
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COLUMN_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -92,6 +94,7 @@ void ColumnModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension
 void ColumnModelNG::SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
     CHECK_NULL_VOID(pattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {

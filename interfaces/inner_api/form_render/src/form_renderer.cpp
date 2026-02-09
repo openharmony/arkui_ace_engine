@@ -564,9 +564,12 @@ void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
 
     std::string colorModeValue = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (!colorModeValue.empty() && formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
-        config->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        std::shared_ptr<AppExecFwk::Configuration> newConfig = std::make_shared<AppExecFwk::Configuration>(*config);
+        newConfig->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        uiContent_->UpdateConfiguration(newConfig);
+    } else {
+        uiContent_->UpdateConfiguration(config);
     }
-    uiContent_->UpdateConfiguration(config);
 }
 
 void FormRenderDelegateRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)

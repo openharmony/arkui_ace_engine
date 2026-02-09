@@ -53,6 +53,11 @@ private:
 
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
+    /**
+     * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
+     */
+    void HandleItemEnd(int32_t currentIndex);
+
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;
     Axis axis_ = Axis::VERTICAL;

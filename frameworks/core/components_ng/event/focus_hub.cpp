@@ -1516,6 +1516,10 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     }
     OnPaintFocusState(true);
 
+    if (onPaintFocusStateCallback_ && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        onPaintFocusStateCallback_();
+    }
+
     if (HasFocusStateStyle()) {
         if (isNeedStateStyles) {
             // do focus state style.

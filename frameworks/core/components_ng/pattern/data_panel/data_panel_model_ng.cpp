@@ -17,6 +17,7 @@
 
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -223,6 +224,8 @@ void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCal
 void HandleTrackBackgroundColor(
     const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
 {
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
@@ -243,6 +246,8 @@ void HandleTrackBackgroundColor(
 void HandleStrokeWidth(
     const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
 {
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
@@ -280,21 +285,23 @@ void DataPanelModelNG::CreateWithResourceObj(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     CHECK_NULL_VOID(pattern);
-    std::string key = "dataPanel." + std::to_string(static_cast<int>(jsResourceType));
-    pattern->RemoveResObj(key);
-    if (resObj) {
-        switch (jsResourceType) {
-            case DataPanelResourceType::TRACK_BACKGROUND_COLOR: {
-                HandleTrackBackgroundColor(resObj, pattern, key);
-                break;
-            }
-            case DataPanelResourceType::STROKE_WIDTH: {
-                HandleStrokeWidth(resObj, pattern, key);
-                break;
-            }
-            default:
-                break;
+    switch (jsResourceType) {
+        case DataPanelResourceType::TRACK_BACKGROUND_COLOR: {
+            HandleTrackBackgroundColor(resObj, pattern, "dataPanel.TrackBackgroundColor");
+            break;
         }
+        case DataPanelResourceType::STROKE_WIDTH: {
+            HandleStrokeWidth(resObj, pattern, "dataPanel.StrokeWidth");
+            break;
+        }
+        case DataPanelResourceType::VALUE_COLORS: {
+            if (!resObj) {
+                pattern->RemoveResObj("dataPanel.ValueColors");
+            }
+            break;
+        }
+        default:
+            break;
     }
 }
 

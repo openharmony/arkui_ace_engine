@@ -66,6 +66,7 @@ void IndexerPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
@@ -765,6 +766,7 @@ void IndexerPattern::ApplyIndexChanged(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetAdaptiveWidthValue(false)) {

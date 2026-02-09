@@ -38,6 +38,12 @@ public:
     void ResetItalicFontStyle() override {};
     void SetFontWeight(FontWeight value) override;
     void ResetFontWeight() override {};
+    void SetVariableFontWeight(int32_t value) override {};
+    void ResetVariableFontWeight() override {};
+    void SetEnableVariableFontWeight(bool value) override {};
+    void ResetEnableVariableFontWeight() override {};
+    void SetEnableDeviceFontWeightCategory(bool value) override {};
+    void ResetEnableDeviceFontWeightCategory() override {};
     void SetFontFamily(const std::vector<std::string>& value) override;
     void ResetFontFamily() override {};
     void SetTextDecoration(TextDecoration value) override;

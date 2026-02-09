@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { TextBackgroundStyle_serializer, TextBackgroundStyle } from "./span"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -1586,7 +1586,7 @@ export class GestureStyleInterface_serializer {
             const onClickTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onClickTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onClickTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onClickTmpBuf = (value0: ClickEvent):void => {
+            const onClickTmpBuf_Closure  = (value0: ClickEvent):void => {
                 const onClickTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onClickTmpBuf_BufArgsSerializer.writeInt32(onClickTmpBuf_BufResource.resourceId);
                 onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCall);
@@ -1596,6 +1596,8 @@ export class GestureStyleInterface_serializer {
                 onClickTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onClickTmpBuf_Closure, onClickTmpBuf_BufResource)
+            onClickTmpBuf = onClickTmpBuf_Closure
         }
         const onClickTmpResult : ((value0: ClickEvent) => void) | undefined = onClickTmpBuf
         const onLongPressTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1604,7 +1606,7 @@ export class GestureStyleInterface_serializer {
             const onLongPressTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onLongPressTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onLongPressTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onLongPressTmpBuf = (value0: GestureEvent):void => {
+            const onLongPressTmpBuf_Closure  = (value0: GestureEvent):void => {
                 const onLongPressTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onLongPressTmpBuf_BufArgsSerializer.writeInt32(onLongPressTmpBuf_BufResource.resourceId);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
@@ -1614,6 +1616,8 @@ export class GestureStyleInterface_serializer {
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onLongPressTmpBuf_Closure, onLongPressTmpBuf_BufResource)
+            onLongPressTmpBuf = onLongPressTmpBuf_Closure
         }
         const onLongPressTmpResult : ((value0: GestureEvent) => void) | undefined = onLongPressTmpBuf
         const onTouchTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1622,7 +1626,7 @@ export class GestureStyleInterface_serializer {
             const onTouchTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onTouchTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onTouchTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onTouchTmpBuf = (value0: TouchEvent):void => {
+            const onTouchTmpBuf_Closure  = (value0: TouchEvent):void => {
                 const onTouchTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onTouchTmpBuf_BufArgsSerializer.writeInt32(onTouchTmpBuf_BufResource.resourceId);
                 onTouchTmpBuf_BufArgsSerializer.writePointer(onTouchTmpBuf_BufCall);
@@ -1632,6 +1636,8 @@ export class GestureStyleInterface_serializer {
                 onTouchTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onTouchTmpBuf_Closure, onTouchTmpBuf_BufResource)
+            onTouchTmpBuf = onTouchTmpBuf_Closure
         }
         const onTouchTmpResult : ((value0: TouchEvent) => void) | undefined = onTouchTmpBuf
         let value : GestureStyleInterface = ({onClick: onClickTmpResult, onLongPress: onLongPressTmpResult, onTouch: onTouchTmpResult} as GestureStyleInterface)

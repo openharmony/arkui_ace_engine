@@ -14,6 +14,7 @@
  */
 
 #include "core/components/common/layout/screen_system_manager.h"
+#include "base/utils/layout_break_point.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {

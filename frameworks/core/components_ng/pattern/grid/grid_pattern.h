@@ -326,8 +326,6 @@ private:
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
     void ReportOnItemGridEvent(const std::string& event);
     int32_t OnInjectionEvent(const std::string& command) override;
-    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
-    void HandleGridScroll(float distance, int32_t reportEventId);
 
     inline bool UseIrregularLayout() const;
 

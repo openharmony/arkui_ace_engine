@@ -101,7 +101,7 @@ public:
     void GetCurrentPageName() override;
     void SendCurrentPageName(const std::string& result) override;
     void SaveProcessId(std::string key, int32_t id) override;
-    void EraseProcessId(const std::string& key) override;
+    void EraseProcessId(const std::string& key, int32_t targetPid) override;
     void SendCurrentLanguage(std::string result) override;
     void GetWebTranslateText(std::string extraData, bool isContinued) override;
     void SendWebTextToAI(int32_t nodeId, std::string res) override;
@@ -143,6 +143,7 @@ public:
 private:
     std::mutex mutex_;
     std::shared_mutex reportObjectMutex_;
+    std::shared_mutex processMapMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
 };
 

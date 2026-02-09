@@ -24,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/symbol_modifier.h"
-#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -37,12 +36,18 @@
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 constexpr double MENU_ANIMATION_MAX_SCALE = 1.0f;
 constexpr double MENU_ANIMATION_MIN_OPACITY = 0.0f;
 constexpr double MENU_ANIMATION_MAX_OPACITY = 1.0f;
+
+namespace OHOS::Ace {
+class SelectTheme;
+}
+
 namespace OHOS::Ace::NG {
 
 struct SelectProperties {

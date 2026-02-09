@@ -1833,11 +1833,11 @@ HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -125.09299);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -91.833115);
 
     MockAnimationManager::GetInstance().TickByVelocity(-100.0f);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -125.09299);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -191.83311);
     // swipe in the opposite direction
     info.SetMainVelocity(1200.f);
     info.SetMainDelta(100.f);
@@ -1848,7 +1848,7 @@ HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -172.05814);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -55.404312);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushUITasks();
@@ -1952,11 +1952,11 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -125.09299);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -91.833115);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -62.546494);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -45.916557);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
@@ -2130,16 +2130,16 @@ HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
     scrollable->HandleDragStart(gesture);
     scrollable->HandleDragUpdate(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 53.526146);
     MockAnimationManager::GetInstance().SetTicks(2);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 153.52615);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 91.833115);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 76.763077);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 45.916557);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
@@ -2501,5 +2501,74 @@ HWTEST_F(WaterFlowSWTest, DeleteSection0LastItem001, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
     EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
     EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [3 ] }");
+}
+
+/**
+ * @tc.name: ZeroHeightScrollBehavior001
+ * @tc.desc: scroll away and back should re-trigger isAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd001, TestSize.Level1)
+{
+    int32_t reachEndCount = 0;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnReachEnd([&reachEndCount]() { reachEndCount++; });
+
+    for (int32_t i = 0; i < 20; i++) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f); // Trailing zero-height item
+    CreateDone();
+
+    // First scroll to bottom
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+    EXPECT_EQ(reachEndCount, 1);
+
+    // Scroll away from bottom
+    UpdateCurrentOffset(500.0f);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
+
+    // Scroll back to bottom - should trigger onReachEnd again
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+    EXPECT_EQ(reachEndCount, 2);
+}
+
+/**
+ * @tc.name: ZeroHeightStability001
+ * @tc.desc: isAtEnd state stability after reaching end
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    for (int32_t i = 0; i < 10; i++) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f); // Trailing zero-height item
+    CreateDone();
+
+    // Scroll to bottom
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+
+    // Verify state remains stable across multiple frames
+    for (int i = 0; i < 5; i++) {
+        FlushUITasks();
+        EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 #include "core/components/clip/clip_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/select/render_select.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/select/select_element.h"
 #include "core/components/triangle/triangle_component.h"
 
@@ -198,6 +199,16 @@ RefPtr<BoxComponent> SelectComponent::GetBoxComponent() const
     }
 
     return boxComponent_;
+}
+
+const TextStyle& SelectComponent::GetSelectStyle() const
+{
+    return theme_->GetTitleStyle();
+}
+
+void SelectComponent::SetSelectStyle(const TextStyle& style)
+{
+    theme_->SetTitleStyle(style);
 }
 
 } // namespace OHOS::Ace

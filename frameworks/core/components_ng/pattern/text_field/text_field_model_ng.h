@@ -131,6 +131,7 @@ public:
     void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) override;
     void SetCancelButtonSymbol(bool isShowSymbol) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
+    void SetIsShowVoiceButton(bool isShowButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetLetterSpacing(const Dimension& value) override;

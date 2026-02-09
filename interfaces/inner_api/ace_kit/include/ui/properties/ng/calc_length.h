@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-class CalcLength {
+class ACE_FORCE_EXPORT CalcLength {
 public:
     CalcLength() = default;
     explicit CalcLength(const std::string& value) : calcValue_(value)

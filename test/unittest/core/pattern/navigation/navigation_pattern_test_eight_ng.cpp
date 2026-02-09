@@ -22,6 +22,8 @@
 #define protected public
 #define private public
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -200,5 +202,95 @@ HWTEST_F(NavigationPatternTestEightNg, CheckNeedInitRangeCalculation, TestSize.L
     auto tepm2 = SizeF(200, 200);
     ret = pattern->CheckNeedInitRangeCalculation(tepm2);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: UpdateForceSplitHomeDestVisibility001
+ * @tc.desc: Branch: if (forceSplitSuccess_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto property = dest->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
+    pattern->forceSplitSuccess_ = true;
+    pattern->UpdateForceSplitHomeDestVisibility();
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: UpdateForceSplitHomeDestVisibility002
+ * @tc.desc: Branch: if (forceSplitSuccess_) { => false
+ *                   if (homeDest->GetIndex() < lastStandardIndex) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto property = dest->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
+    pattern->forceSplitSuccess_ = false;
+    dest->index_ = 0;
+    navNode->lastStandardIndex_ = 1;
+    pattern->UpdateForceSplitHomeDestVisibility();
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: UpdateForceSplitHomeDestVisibility003
+ * @tc.desc: Branch: if (forceSplitSuccess_) { => false
+ *                   if (homeDest->GetIndex() < lastStandardIndex) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto property = dest->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    pattern->forceSplitHomeDest_ = WeakPtr(dest);
+    pattern->forceSplitSuccess_ = false;
+    dest->index_ = 1;
+    navNode->lastStandardIndex_ = 0;
+    pattern->UpdateForceSplitHomeDestVisibility();
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+
+    // Test with equal values
+    dest->index_ = 1;
+    navNode->lastStandardIndex_ = 1;
+    pattern->UpdateForceSplitHomeDestVisibility();
+    EXPECT_EQ(property->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

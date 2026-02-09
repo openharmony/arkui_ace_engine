@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -66,6 +67,8 @@ constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
 constexpr int32_t HOVER_DURATION = 250;
 constexpr int32_t TOUCH_DURATION = 250;
+const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
+const char IMAGE_ETS_TAG[] = "Image";
 
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
@@ -122,7 +125,7 @@ void SearchPattern::UpdateChangeEvent(const std::u16string& textValue, int16_t s
     imageHost->MarkModifyDone();
     buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    if (imageHost->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (imageHost->GetTag() == SYMBOL_ETS_TAG) {
         auto textLayoutProperty = imageHost->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
@@ -165,7 +168,7 @@ void SearchPattern::UpdateCancelButtonStatus(const std::u16string& textValue, in
         buttonLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     }
-    if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
+    if (imageHost->GetTag() == IMAGE_ETS_TAG) {
         auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
         CHECK_NULL_VOID(imageEvent);
         imageEvent->SetEnabled(isEventEnabled);
@@ -1657,7 +1660,14 @@ void SearchPattern::HandleFocusEvent(bool forwardFocusMovement, bool backwardFoc
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->SetIsFocusedBeforeClick(true);
-    textFieldPattern->OnFocusCustomKeyboardChange();
+
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    if (textFieldManager->GetCustomKeyboardContinueFeature()) {
+        textFieldPattern->OnFocusCustomKeyboardChange();
+    }
 
     focusChoice_ = FocusChoice::SEARCH;
     if (forwardFocusMovement || backwardFocusMovement) { // Don't update focus if no factical focus movement
@@ -1917,7 +1927,7 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, c
     auto searchIconSize = searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize)).ConvertToPx();
     searchIconJson->Put("size", Dimension(searchIconSize, DimensionUnit::PX).ToString().c_str());
 
-    if (searchIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (searchIconFrameNode->GetTag() == SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = searchIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         // icon color
@@ -1973,7 +1983,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json,
     auto cancelIconSize =
         searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize)).ConvertToPx();
     cancelIconJson->Put("size", Dimension(cancelIconSize, DimensionUnit::PX).ToString().c_str());
-    if (cancelImageFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (cancelImageFrameNode->GetTag() == SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = cancelImageFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         // icon color & right icon src path
@@ -2158,14 +2168,12 @@ void SearchPattern::OnIconColorConfigrationUpdate(const RefPtr<SearchTheme>& sea
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(cancelIconFrameNode);
 
-    auto searchIconColor =
-        Color(searchIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG ? searchTheme->GetSymbolIconColor()
-                                                                  : searchTheme->GetSearchIconColor());
+    auto searchIconColor = Color(searchIconFrameNode->GetTag() == SYMBOL_ETS_TAG ? searchTheme->GetSymbolIconColor()
+                                                                                 : searchTheme->GetSearchIconColor());
     OnSearchColorConfigrationUpdate(searchIconFrameNode, searchIconColor);
 
-    auto cancelIconColor =
-        Color(cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG ? searchTheme->GetSymbolIconColor()
-                                                                  : searchTheme->GetSearchIconColor());
+    auto cancelIconColor = Color(cancelIconFrameNode->GetTag() == SYMBOL_ETS_TAG ? searchTheme->GetSymbolIconColor()
+                                                                                 : searchTheme->GetSearchIconColor());
     OnCancelColorConfigrationUpdate(cancelIconFrameNode, cancelIconColor);
 }
 
@@ -2176,7 +2184,7 @@ void SearchPattern::OnSearchColorConfigrationUpdate(const RefPtr<FrameNode>& fra
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (frameNode->GetTag() == SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         CHECK_NULL_VOID(!symbolLayoutProperty->GetTextColorFlagByUserValue(false));
@@ -2210,7 +2218,7 @@ void SearchPattern::OnCancelColorConfigrationUpdate(const RefPtr<FrameNode>& fra
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (frameNode->GetTag() == SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         CHECK_NULL_VOID(!symbolLayoutProperty->GetTextColorFlagByUserValue(false));
@@ -2511,8 +2519,8 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
-    auto iconFrameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto iconFrameNode =
+        FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto layoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateSymbolSourceInfo(index == SEARCH_IMAGE_INDEX
                                                ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
@@ -2562,8 +2570,7 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto iconFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
+    auto iconFrameNode = FrameNode::GetOrCreateFrameNode(IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     UpdateImageIconProperties(iconFrameNode, index);
     if (isCreateNode) {
@@ -2610,7 +2617,7 @@ void SearchPattern::SetSearchIconColor(const Color& color)
     CHECK_NULL_VOID(frameNode);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(SEARCH_IMAGE_INDEX));
     CHECK_NULL_VOID(iconFrameNode);
-    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (iconFrameNode->GetTag() == SYMBOL_ETS_TAG) {
         GetSearchNode()->SetSearchSymbolIconColor(Color(color));
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
@@ -2684,7 +2691,7 @@ void SearchPattern::SetCancelIconColor(const Color& color)
     CHECK_NULL_VOID(frameNode);
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(cancelIconFrameNode);
-    if (cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (cancelIconFrameNode->GetTag() == SYMBOL_ETS_TAG) {
         GetSearchNode()->SetCancelSymbolIconColor(Color(color));
         auto symbolLayoutProperty = cancelIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
@@ -2750,7 +2757,7 @@ Color SearchPattern::GetDefaultIconColor(int32_t index)
     CHECK_NULL_RETURN(GetSearchNode(), defaultIconColor);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
     CHECK_NULL_RETURN(iconFrameNode, defaultIconColor);
-    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (iconFrameNode->GetTag() == SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(symbolLayoutProperty, defaultIconColor);
         std::vector<Color> symbolColorList = symbolLayoutProperty->GetSymbolColorListValue({ normalIconColor });
@@ -2841,7 +2848,7 @@ void SearchPattern::UpdateSymbolIconNode(int32_t index)
 void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, int32_t index)
 {
     CHECK_NULL_VOID(iconFrameNode);
-    if (iconFrameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+    if (iconFrameNode->GetTag() == IMAGE_ETS_TAG) {
         auto iconOptions = index == SEARCH_IMAGE_INDEX ? GetSearchNode()->GetSearchImageIconOptions()
                                                 : GetSearchNode()->GetCancelImageIconOptions();
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -2939,7 +2946,7 @@ bool SearchPattern::IsSymbolIcon(int32_t index)
     CHECK_NULL_RETURN(frameNode, false);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
     CHECK_NULL_RETURN(iconFrameNode, false);
-    return iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG;
+    return iconFrameNode->GetTag() == SYMBOL_ETS_TAG;
 }
 
 void SearchPattern::UpdateIconChangeEvent()

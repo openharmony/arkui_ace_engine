@@ -550,6 +550,7 @@ public:
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
+    virtual void OnPreBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
     virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
     virtual void SetColorGamut(uint32_t colorGamut) {}
@@ -626,6 +627,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ExcludeFromRenderGroup, bool);
@@ -665,6 +667,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBackShadow, Shadow);
+
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -673,6 +677,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PreBorderColor, BorderColorProperty);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
@@ -910,8 +917,10 @@ protected:
     virtual void OnBorderSourceFromImageUpdate(bool sourceFromImage) {}
 
     virtual void OnBorderWidthUpdate(const BorderWidthProperty& value) {}
+    virtual void OnPreBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
+    virtual void OnPreBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnDashGapUpdate(const BorderWidthProperty& value) {}
     virtual void OnDashWidthUpdate(const BorderWidthProperty& value) {}
@@ -962,6 +971,7 @@ protected:
     virtual void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}
     virtual void OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
+    virtual void OnPreBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
     virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}
 

@@ -1698,11 +1698,11 @@ bool WebSelectOverlay::MenuPositionCanReset(MenuAvoidStrategyMember& member)
     if (!member.info->isNewAvoid && !GreatNotEqual(member.menuAboveUphandle, member.menuHeight)) {
         return true;
     }
-    bool upHandleIsNotShow = GreatNotEqual(member.topArea, member.upPaint.Top()) ||
-                             GreatNotEqual(member.upPaint.Bottom(), member.bottomArea);
-    bool downHandleIsNotShow = GreatNotEqual(member.topArea, member.downPaint.Top()) ||
-                               GreatNotEqual(member.downPaint.Bottom(), member.bottomArea);
-    member.needReset = !upHandleIsNotShow || !downHandleIsNotShow;
+    bool upHandleIsNotInView = GreatNotEqual(member.topArea, member.upPaint.Bottom()) ||
+                             GreatNotEqual(member.upPaint.Top(), member.bottomArea);
+    bool downHandleIsNotInView = GreatNotEqual(member.topArea, member.downPaint.Bottom()) ||
+                               GreatNotEqual(member.downPaint.Top(), member.bottomArea);
+    member.needReset = !upHandleIsNotInView || !downHandleIsNotInView;
     return member.needReset;
 }
 

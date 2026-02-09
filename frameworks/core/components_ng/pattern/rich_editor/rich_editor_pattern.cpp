@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -3905,9 +3906,14 @@ void RichEditorPattern::HandleBlurEvent()
     firstClickResetTask_.Cancel();
     firstClickAfterWindowFocus_ = false;
     StopTwinkling();
-    bool isCloseCustomKeyboard = (reason == BlurReason::WINDOW_BLUR || reason == BlurReason::VIEW_SWITCH) &&
+
+    auto textFieldManager = GetTextFieldManager();
+    bool continueFeature = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
+    bool isNoContinueFeatureClose = !continueFeature && ((customKeyboardBuilder_ && isCustomKeyboardAttached_) ||
+                                                          reason == BlurReason::FRAME_DESTROY);
+    bool isCloseCustomKeyboard = continueFeature && (reason == BlurReason::WINDOW_BLUR || reason == BlurReason::VIEW_SWITCH) &&
                                  ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
-    if (isCloseCustomKeyboard) {
+    if (isNoContinueFeatureClose || isCloseCustomKeyboard) {
         CloseKeyboard(true);
     }
     // The pattern handles blurevent, Need to close the softkeyboard first.
@@ -3943,7 +3949,10 @@ void RichEditorPattern::HandleBlurEvent()
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent frameId:%{public}d reason:%{public}d", frameId_, focusReason);
-    OnFocusCustomKeyboardChange();
+
+    auto textFieldManager = GetTextFieldManager();
+    bool continueFeature = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
+    IF_TRUE(continueFeature, OnFocusCustomKeyboardChange());
     IF_TRUE(focusReason == FocusReason::WINDOW_FOCUS, ScheduleFirstClickResetAfterWindowFocus());
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
@@ -5789,7 +5798,6 @@ void RichEditorPattern::OnCommonColorChange()
     auto themeTextDecColor = themeTextStyle.GetTextDecorationColor();
     layoutProperty->UpdateTextColor(themeTextColor);
     layoutProperty->UpdateTextDecorationColor(themeTextDecColor);
-    layoutProperty->UpdatePlaceholderTextColor(theme->GetPlaceholderColor());
     auto themeUrlSpanColor = GetUrlSpanColor();
     layoutProperty->UpdateUrlDefualtColor(themeUrlSpanColor);
     layoutProperty->UpdateUrlHoverColor(GetUrlHoverColor());
