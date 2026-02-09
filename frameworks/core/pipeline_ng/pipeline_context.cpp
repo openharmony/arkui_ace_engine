@@ -5360,7 +5360,9 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     SetDestroyed();
-    rootNode_->DetachFromMainTree();
+    if (rootNode_) {
+        rootNode_->DetachFromMainTree();
+    }
     std::set<WeakPtr<UINode>> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);
     for (const auto& node : nodeSet) {
@@ -5369,11 +5371,15 @@ void PipelineContext::Destroy()
             illegalNode->DetachFromMainTree();
         }
     }
-    rootNode_->FireCustomDisappear();
+    if (rootNode_) {
+        rootNode_->FireCustomDisappear();
+    }
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
-    rootNode_.Reset();
+    if (rootNode_) {
+        rootNode_.Reset();
+    }
     accessibilityManagerNG_.Reset();
     stageManager_.Reset();
     if (overlayManager_) {
