@@ -444,7 +444,7 @@ public:
     void FalsifyCancelEventWithDifferentDeviceId(const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch = true);
     bool HandleAxisEventWithDifferentDeviceId(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
     void NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node = nullptr) const;
-    bool OnTouchpadInteractionBegin() const;
+    bool OnTouchpadInteractionBegin();
     void NotifyCoastingAxisEventStop() const;
     std::string GetLastHitTestNodeInfosForTouch(bool isTopMost);
     void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
@@ -559,6 +559,7 @@ private:
     TouchEvent lastTouchEvent_;
     // used to pseudo hover out event.
     MouseEvent lastMouseEvent_;
+    AxisEvent lastAxisEvent_;
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::unordered_map<int32_t, int32_t> deviceIdChecker_;

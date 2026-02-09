@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "base/utils/layout_break_point.h"
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
@@ -29,6 +30,7 @@ namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
+constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -39,6 +41,10 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 } // namespace
 
 DeviceType SystemProperties::deviceType_ = DeviceType::PHONE;
+std::string SystemProperties::paramDeviceType_ = "phone";
+std::string SystemProperties::apiVersion_ = "9";
+std::string SystemProperties::brand_ = UNDEFINED_PARAM;
+bool SystemProperties::isRound_ = false;
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
@@ -119,6 +125,7 @@ HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayout
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::isOpenYuvDecode_ = false;
+int32_t SystemProperties::previewStatus_ = 0;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -420,7 +427,7 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 
 int32_t SystemProperties::GetPreviewStatus()
 {
-    return -1;
+    return 0;
 }
 
 bool SystemProperties::GetCompatibleInputTransEnabled()
@@ -440,5 +447,64 @@ bool SystemProperties::GetTransformEnabled()
 
 void SystemProperties::ReadSystemParametersCallOnce()
 {
+}
+
+void SystemProperties::SetDeviceType(DeviceType deviceType)
+{
+    deviceType_ = deviceType;
+}
+
+void SystemProperties::SetDevicePhysicalWidth(int32_t devicePhysicalWidth)
+{
+    devicePhysicalWidth_ = devicePhysicalWidth;
+}
+
+void SystemProperties::SetDevicePhysicalHeight(int32_t devicePhysicalHeight)
+{
+    devicePhysicalHeight_ = devicePhysicalHeight;
+}
+
+void SystemProperties::SetFontWeightScale(const float fontWeightScale)
+{
+    if (fontWeightScale_ != fontWeightScale) {
+        fontWeightScale_ = fontWeightScale;
+    }
+}
+
+void SystemProperties::SetFontScale(const float fontScale)
+{
+    if (fontScale != fontScale_) {
+        fontScale_ = fontScale;
+    }
+}
+
+void SystemProperties::SetResolution(double resolution)
+{
+    resolution_ = resolution;
+}
+
+void SystemProperties::SetDeviceAccess(bool isDeviceAccess)
+{
+    isDeviceAccess_ = isDeviceAccess;
+}
+
+void SystemProperties::SetUnZipHap(bool unZipHap)
+{
+    unZipHap_.store(unZipHap);
+}
+
+void SystemProperties::SetExtSurfaceEnabled(bool extSurfaceEnabled)
+{
+    extSurfaceEnabled_ = extSurfaceEnabled;
+}
+
+void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
+{
+    stateManagerEnable_.store(stateManagerEnable);
+}
+
+void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
+{
+    faultInjectEnabled_ = faultInjectEnable;
 }
 } // namespace OHOS::Ace

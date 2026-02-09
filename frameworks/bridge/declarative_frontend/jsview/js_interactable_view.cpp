@@ -68,7 +68,7 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
         ACE_SCORING_EVENT("onTouch");
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
+        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         ACE_BENCH_MARK_TRACE("OnTouchEvent_end type:%d",
             static_cast<int32_t>(info.GetChangedTouches().size() > 0 ?

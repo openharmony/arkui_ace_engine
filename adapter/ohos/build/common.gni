@@ -23,6 +23,7 @@ declare_args() {
   ace_engine_feature_enable_accessibility = false
   ace_engine_feature_enable_web = false
   ace_engine_feature_enable_gpu = true
+  ace_engine_feature_enable_preload_dynamic_module  = true
 }
 
 js_engines = []
@@ -111,6 +112,10 @@ if (defined(video_components_support) && video_components_support) {
 
 if (defined(video_support_jsstack) && video_support_jsstack) {
   defines += [ "SUPPORT_JSSTACK" ]
+}
+
+if (ace_engine_feature_enable_preload_dynamic_module) {
+  defines += [ "ENABLE_PRELOAD_DYNAMIC_MODULE" ]
 }
 
 if (defined(is_experiment_build) && is_experiment_build) {

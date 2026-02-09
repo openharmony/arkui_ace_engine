@@ -61,11 +61,11 @@ public:
     void HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset);
     void SetHoldSelectionCallback(int32_t id, const HoldSelectionInfo& selectionInfo);
     void RemoveHoldSelectionCallback(int32_t id);
-    void MarkInfoChange(SelectOverlayDirtyFlag dirtyFlag);
+    ACE_FORCE_EXPORT void MarkInfoChange(SelectOverlayDirtyFlag dirtyFlag);
     void MarkSelectOverlayDirty(PropertyChangeFlag changeFlag);
-    bool IsMenuShow();
-    bool IsSingleHandle();
-    bool IsHandlesShow();
+    ACE_FORCE_EXPORT bool IsMenuShow();
+    ACE_FORCE_EXPORT bool IsSingleHandle();
+    ACE_FORCE_EXPORT bool IsHandlesShow();
     bool IsHandleReverse();
     void ResetSelectionRect();
     void RestartHiddenHandleTask(bool isDelay);
@@ -93,9 +93,9 @@ public:
     void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point, bool passThrough = false);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
     void UpdateViewPort();
-    void SetHandleCircleIsShow(bool isFirst, bool isShow);
-    void SetIsHandleLineShow(bool isShow);
-    void MarkHandleDirtyNode(PropertyChangeFlag flag);
+    ACE_FORCE_EXPORT void SetHandleCircleIsShow(bool isFirst, bool isShow);
+    ACE_FORCE_EXPORT void SetIsHandleLineShow(bool isShow);
+    ACE_FORCE_EXPORT void MarkHandleDirtyNode(PropertyChangeFlag flag);
     bool IsHiddenHandle();
     void ConvertHandleRelativeToParent(SelectHandleInfo& info);
     void ConvertRectRelativeToParent(RectF& rect);

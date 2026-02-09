@@ -1466,6 +1466,31 @@ HWTEST_F(UIExtensionComponentTestTwoNg, InitBusinessDataHandleCallback001, TestS
     EXPECT_GT(pattern->businessDataUECConsumeCallbacks_.count(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST), 0);
 }
 
+/**
+ * @tc.name: AddExtraInfoWithParamConfig001
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, AddExtraInfoWithParamConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    pattern->AddExtraInfoWithParamConfig(json, config);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
+}
+
 HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
 {
     auto uiExtensionNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();

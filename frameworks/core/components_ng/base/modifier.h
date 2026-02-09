@@ -406,11 +406,11 @@ private:
 using FinishCallback = std::function<void()>;
 
 template<typename T, typename S>
-class NodeAnimatableProperty : public NodeAnimatablePropertyBase {
+class ACE_FORCE_EXPORT NodeAnimatableProperty : public NodeAnimatablePropertyBase {
     DECLARE_ACE_TYPE(NodeAnimatableProperty, NodeAnimatablePropertyBase);
 
 public:
-    NodeAnimatableProperty(const T& value, std::function<void(const T&)>&& updateCallback)
+    ACE_FORCE_EXPORT NodeAnimatableProperty(const T& value, std::function<void(const T&)>&& updateCallback)
     {
         auto property = AceType::MakeRefPtr<S>(value);
         property->SetUpdateCallback(std::move(updateCallback));
@@ -418,7 +418,7 @@ public:
     }
     ~NodeAnimatableProperty() override = default;
 
-    void Set(const T& value)
+    ACE_FORCE_EXPORT void Set(const T& value)
     {
         auto property = AceType::DynamicCast<S>(GetProperty());
         if (property) {

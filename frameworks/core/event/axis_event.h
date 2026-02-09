@@ -65,6 +65,7 @@ struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
 
     int32_t scrollStep = 0;
     uint32_t axes = 0;
+    bool isFalsifyCancel = false;
 
     AxisEvent()
     {
@@ -112,6 +113,7 @@ public:
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
     int32_t GetScrollStep() const;
+    void SetScrollStep(int32_t scrollStep);
     void SetRotateAxisAngle(float angle);
     float GetRotateAxisAngle() const;
     void SetIsRotationEvent(bool rotationFlag);

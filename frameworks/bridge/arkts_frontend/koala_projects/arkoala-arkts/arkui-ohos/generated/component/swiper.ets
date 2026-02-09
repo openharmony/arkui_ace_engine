@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { VoidCallback, ItemFillPolicy_serializer, ItemFillPolicy, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
@@ -441,6 +441,20 @@ export class SwiperController implements MaterializedBase {
         const indices_casted = indices as (Array<int32> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
+    public startFakeDrag(): boolean {
+        console.info('hzq swiperets');
+        return this.startFakeDrag_serialize()
+    }
+    public fakeDragBy(offset: float): boolean {
+        const offset_casted = offset as (float)
+        return this.fakeDragBy_serialize(offset_casted)
+    }
+    public stopFakeDrag(): boolean {
+        return this.stopFakeDrag_serialize()
+    }
+    public isFakeDragging(): boolean {
+        return this.isFakeDragging_serialize()
+    }
     showNext_serialize(): void {
         ArkUIGeneratedNativeModule._SwiperController_showNext(this.peer!.ptr)
     }
@@ -502,6 +516,22 @@ export class SwiperController implements MaterializedBase {
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._SwiperController_preloadItems(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+        return retval
+    }
+    startFakeDrag_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_startFakeDrag(this.peer!.ptr)
+        return retval
+    }
+    fakeDragBy_serialize(offset: float): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_fakeDragBy(this.peer!.ptr, offset)
+        return retval
+    }
+    stopFakeDrag_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_stopFakeDrag(this.peer!.ptr)
+        return retval
+    }
+    isFakeDragging_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_isFakeDragging(this.peer!.ptr)
         return retval
     }
 }
@@ -1771,7 +1801,7 @@ export class SwiperContentAnimatedTransition_serializer {
         const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const transitionTmpResult : ((value0: SwiperContentTransitionProxy) => void) = (value0: SwiperContentTransitionProxy):void => {
+        const transitionTmpBufClosure  = (value0: SwiperContentTransitionProxy):void => {
             const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
@@ -1781,6 +1811,8 @@ export class SwiperContentAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(transitionTmpBufClosure, transitionTmpBufBufResource)
+        const transitionTmpResult : ((value0: SwiperContentTransitionProxy) => void) = transitionTmpBufClosure
         let value : SwiperContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as SwiperContentAnimatedTransition)
         return value
     }

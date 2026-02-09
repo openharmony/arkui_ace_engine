@@ -662,8 +662,6 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
-    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
-    void HandleListScroll(float distance, int32_t reportEventId);
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;

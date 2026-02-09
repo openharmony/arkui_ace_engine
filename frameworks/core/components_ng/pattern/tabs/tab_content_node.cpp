@@ -78,6 +78,7 @@ void TabContentNode::ProcessTabBarItem()
 RefPtr<TabContentNode> TabContentNode::GetOrCreateTabContentNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = GetFrameNode(tag, nodeId);
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(node);
 

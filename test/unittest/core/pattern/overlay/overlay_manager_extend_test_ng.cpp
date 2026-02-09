@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -586,14 +587,16 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest013, TestSize.Level
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
     auto dragPreviewNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 2, AceType::MakeRefPtr<RootPattern>());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
     overlayManager->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, DRAG_PREVIEW_OFFSET);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(menuManager->menuMap_.empty());
     /**
      * @tc.steps: step1+. create overlayManager->menuMap_ and call ContextMenuSwitchDragPreviewAnimation.
      */
     auto menuNodeFst =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    overlayManager->menuMap_.emplace(1, AceType::RawPtr(menuNodeFst));
+    menuManager->menuMap_.emplace(1, AceType::RawPtr(menuNodeFst));
     overlayManager->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, DRAG_PREVIEW_OFFSET);
     /**
      * @tc.steps: step2. set overlayNode's child node and one of children is menuWrapper.
@@ -604,7 +607,7 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest013, TestSize.Level
     otherNode->MountToParent(overlayNode);
     wrapperNode->MountToParent(overlayNode);
     overlayManager->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, DRAG_PREVIEW_OFFSET);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(menuManager->menuMap_.empty());
     EXPECT_EQ(overlayNode->GetLastChild()->GetTag(), V2::MENU_WRAPPER_ETS_TAG);
 }
 /**

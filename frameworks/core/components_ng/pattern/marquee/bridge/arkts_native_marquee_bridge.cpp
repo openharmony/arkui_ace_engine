@@ -26,6 +26,8 @@ static const std::vector<OHOS::Ace::MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATE
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t NUM_SIX = 6;
+constexpr int32_t NUM_SEVEN = 7;
 constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 
 bool IsJsView(const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
@@ -65,6 +67,18 @@ void SetMarqueeLoop(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeH
         return;
     }
     GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeLoop(nativeNode);
+}
+
+void SetMarqueeDelay(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeHandle nativeNode)
+{
+    if (jsVal->IsNumber()) {
+        auto delay = jsVal->Int32Value(vm);
+        if (delay > 0) {
+            GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDelay(nativeNode, delay);
+            return;
+        }
+    }
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeDelay(nativeNode);
 }
 
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
@@ -141,6 +155,30 @@ void ParseSrcValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> paramO
         src = std::optional<std::string>("");
     }
 }
+
+void ParseSpacingValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> paramObj,
+    std::optional<CalcDimension>& spacing, RefPtr<ResourceObject> spacingResObj)
+{
+    auto spacingVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "spacing"));
+    CalcDimension marqueeSpacing;
+    bool spacingParseResult = spacingVal->IsNull() || spacingVal->IsUndefined() ? false :
+        ArkTSUtils::ParseJsLengthMetrics(vm, spacingVal, marqueeSpacing, spacingResObj);
+    if (spacingParseResult) {
+        spacing = std::optional<CalcDimension>(marqueeSpacing);
+    }
+}
+
+void ParseDelayValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> paramObj, std::optional<int32_t>& delay)
+{
+    auto delayVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "delay"));
+    bool isNumber = false;
+    if (delayVal->IsNumber()) {
+        int32_t delayInt = static_cast<int32_t>(delayVal->GetValueDouble(isNumber));
+        if (GreatNotEqual(delayInt, 0)) {
+            delay = std::optional<int32_t>(delayInt);
+        }
+    }
+}
 } // namespace
 
 void MarqueeBridge::RegisterMarqueeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -187,43 +225,41 @@ void ParseMarqueeAttributes(ArkUINodeHandle& nativeNode, panda::ecmascript::Ecma
     std::optional<int32_t> loop;
     std::optional<bool> fromStart = std::optional<bool>(true);
     std::optional<std::string> src;
+    std::optional<CalcDimension> spacing;
+    std::optional<int32_t> delay;
+    RefPtr<ResourceObject> spacingResObj;
+
     if (!paramObj->IsUndefined()) {
         ParseStartValue(vm, paramObj, start);
         ParseStepValue(vm, paramObj, step, isJsView);
         ParseLoopValue(vm, paramObj, loop, isJsView);
         ParseFromStartValue(vm, paramObj, fromStart);
         ParseSrcValue(vm, paramObj, src, isJsView);
+        ParseSpacingValue(vm, paramObj, spacing, spacingResObj);
+        ParseDelayValue(vm, paramObj, delay);
     }
     if (isJsView) {
         static MarqueeModelNG model;
         model.Create();
     }
-    if (start.has_value()) {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueePlayerStatus(nativeNode, start.value());
-    } else {
-        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueePlayerStatus(nativeNode);
-    }
-    if (step.has_value()) {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeScrollAmount(nativeNode, step.value());
-    } else {
-        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeScrollAmount(nativeNode);
-    }
-    if (loop.has_value()) {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeLoop(nativeNode, loop.value());
-    } else {
-        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeLoop(nativeNode);
-    }
-    if (fromStart.has_value()) {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDirection(nativeNode, fromStart.value() ?
-            static_cast<int32_t>(MarqueeDirection::LEFT) : static_cast<int32_t>(MarqueeDirection::RIGHT));
-    } else {
+    start.has_value() ? GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueePlayerStatus(nativeNode, start.value())
+                      : GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueePlayerStatus(nativeNode);
+    step.has_value() ? GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeScrollAmount(nativeNode, step.value())
+                     : GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeScrollAmount(nativeNode);
+    loop.has_value() ? GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeLoop(nativeNode, loop.value())
+                     : GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeLoop(nativeNode);
+    int32_t marqueeDirection = fromStart.value() ?
+        static_cast<int32_t>(MarqueeDirection::LEFT) : static_cast<int32_t>(MarqueeDirection::RIGHT);
+    fromStart.has_value() ?
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDirection(nativeNode, marqueeDirection) :
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeDirection(nativeNode);
-    }
-    if (src.has_value()) {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSrcValue(nativeNode, src.value().c_str());
-    } else {
-        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSrcValue(nativeNode);
-    }
+    src.has_value() ? GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSrcValue(nativeNode, src.value().c_str())
+                    : GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSrcValue(nativeNode);
+    spacing.has_value() ? GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSpacing(nativeNode,
+        spacing.value().Value(), static_cast<int>(spacing.value().Unit()), AceType::RawPtr(spacingResObj))
+                       : GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSpacing(nativeNode);
+    delay.has_value() ? GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDelay(nativeNode, delay.value())
+                      : GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeDelay(nativeNode);
 }
 
 ArkUINativeModuleValue MarqueeBridge::CreateMarquee(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -562,6 +598,8 @@ ArkUINativeModuleValue MarqueeBridge::SetInitialize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> loopVal = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> fromStartVal = runtimeCallInfo->GetCallArgRef(4);
     Local<JSValueRef> srcVal = runtimeCallInfo->GetCallArgRef(5);
+    Local<JSValueRef> spacing = runtimeCallInfo->GetCallArgRef(NUM_SIX);
+    Local<JSValueRef> delayVal = runtimeCallInfo->GetCallArgRef(NUM_SEVEN);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeVal, vm), true, panda::JSValueRef::Undefined(vm));
     bool fromStart = fromStartVal->IsBoolean() ? fromStartVal->ToBoolean(vm)->Value() : true;
@@ -577,6 +615,19 @@ ArkUINativeModuleValue MarqueeBridge::SetInitialize(ArkUIRuntimeCallInfo* runtim
     } else {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSrcValue(nativeNode);
     }
+
+    CalcDimension marqueeSpacing;
+    RefPtr<ResourceObject> spacingResObj;
+    bool spacingParseResult = (spacing->IsNull() || spacing->IsUndefined()) ? false:
+        ArkTSUtils::ParseJsLengthMetrics(vm, spacing, marqueeSpacing, spacingResObj);
+    if (spacingParseResult) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSpacing(nativeNode,
+            marqueeSpacing.Value(), static_cast<int>(marqueeSpacing.Unit()), AceType::RawPtr(spacingResObj));
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSpacing(nativeNode);
+    }
+
+    SetMarqueeDelay(vm, delayVal, nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

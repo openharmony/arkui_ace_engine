@@ -73,9 +73,9 @@ public:
         optionalPosition_ = std::nullopt;
     }
 
-    RectF GetFocusedNodeCaretRect();
+    ACE_FORCE_EXPORT RectF GetFocusedNodeCaretRect();
     
-    void TriggerAvoidOnCaretChange();
+    ACE_FORCE_EXPORT void TriggerAvoidOnCaretChange();
 
     void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
 
@@ -92,7 +92,7 @@ public:
         return onFocusTextField_;
     }
 
-    void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField);
+    ACE_FORCE_EXPORT void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField);
 
     void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
 
@@ -101,16 +101,16 @@ public:
         return isScrollableChild_;
     }
 
-    bool ScrollTextFieldToSafeArea();
+    ACE_FORCE_EXPORT bool ScrollTextFieldToSafeArea();
 
     void ClearOnFocusTextField();
 
-    void ClearOnFocusTextField(int32_t id);
+    ACE_FORCE_EXPORT void ClearOnFocusTextField(int32_t id);
 
     bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
-    void SetHeight(float height);
+    ACE_FORCE_EXPORT void SetHeight(float height);
 
     float GetHeight() const
     {
@@ -203,6 +203,8 @@ public:
         return onFocusTextFieldId_;
     }
 
+    void TriggerCaretInfoUpdateOnScaleChange();
+
     bool GetLaterAvoid() const
     {
         return laterAvoidInfo_.laterAvoid;
@@ -271,8 +273,8 @@ public:
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
-    bool NeedCloseKeyboard();
-    void ProcessCustomKeyboard(bool matched, int32_t nodeId);
+    ACE_FORCE_EXPORT bool NeedCloseKeyboard();
+    ACE_FORCE_EXPORT void ProcessCustomKeyboard(bool matched, int32_t nodeId);
     void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension);
 
     int32_t GetFocusFieldOrientation() const

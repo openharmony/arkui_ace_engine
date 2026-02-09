@@ -48,6 +48,7 @@ std::string GetPageUrl(const RefPtr<PagePattern>& pagePattern)
 void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transitionType)
 {
     CHECK_NULL_VOID(page);
+    ACE_UINODE_TRACE(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();

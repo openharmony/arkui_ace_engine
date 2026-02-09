@@ -2009,18 +2009,22 @@ class ArkLineSpacing {
 
 class ArkFontWeight {
   value: number | FontWeight | string;
-  enableVariableFontWeight: boolean;
+  enableVariableFontWeight: boolean | undefined;
+  enableDeviceFontWeightCategory: boolean | undefined;
 
   constructor() {
     this.value = undefined;
     this.enableVariableFontWeight = undefined;
+    this.enableDeviceFontWeightCategory = undefined;
   }
 
-  isEqual(another: ArkTextFont): boolean {
-    return (this.value === another.value && this.enableVariableFontWeight === another.enableVariableFontWeight);
+  isEqual(another: ArkFontWeight): boolean {
+    return (this.value === another.value &&
+      this.enableVariableFontWeight === another.enableVariableFontWeight &&
+      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory);
   }
 
-  checkObjectDiff(another: ArkTextFont): boolean {
+  checkObjectDiff(another: ArkFontWeight): boolean {
     return !this.isEqual(another);
   }
 }

@@ -414,10 +414,12 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->menuMap_[targetId];
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId];
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
-    overlayManager->menuMap_.clear();
+    menuManager->menuMap_.clear();
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 
@@ -466,7 +468,9 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu002, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->menuMap_[targetId];
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId];
     auto contentNodePipelineContext = contentNode->GetContextWithCheck();
     contentNodePipelineContext->overlayManager_ = nullptr;
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_INTERNAL_ERROR);
@@ -500,7 +504,6 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu003, TestSize.Level1)
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
-    auto targetId = targetNode->GetId();
     auto targetNodePipelineContext = targetNode->GetContextWithCheck();
     ASSERT_NE(targetNodePipelineContext, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -512,10 +515,12 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu003, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetNode->GetId()), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->menuMap_[targetId];
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetNode->GetId()];
     auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(contentNode);
     ASSERT_NE(menuWrapperNode, nullptr);
     auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
@@ -555,7 +560,6 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu004, TestSize.Level1)
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    RefPtr<FrameNode> contentNode2 = nullptr;
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ViewStackProcessor::GetInstance()->Push(targetNode);
@@ -567,7 +571,6 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu004, TestSize.Level1)
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
-    auto targetId = targetNode->GetId();
     auto targetNodePipelineContext = targetNode->GetContextWithCheck();
     ASSERT_NE(targetNodePipelineContext, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -579,10 +582,12 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu004, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetNode->GetId()), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->menuMap_[targetId];
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetNode->GetId()];
     auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(contentNode);
     ASSERT_NE(menuWrapperNode, nullptr);
     auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
@@ -646,10 +651,12 @@ HWTEST_F(ViewAbstractTestThreeNg, CloseMenu001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->menuMap_[targetId];
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId];
     EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_NO_ERROR);
     EXPECT_EQ(ViewAbstract::CloseMenu(contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
-    overlayManager->menuMap_.clear();
+    menuManager->menuMap_.clear();
     EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
 
@@ -697,7 +704,9 @@ HWTEST_F(ViewAbstractTestThreeNg, CloseMenu002, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->menuMap_[targetId];
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId];
     auto contentNodePipelineContext = contentNode->GetContextWithCheck();
     contentNodePipelineContext->overlayManager_ = nullptr;
     EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_INTERNAL_ERROR);
@@ -1204,6 +1213,9 @@ HWTEST_F(ViewAbstractTestThreeNg, ViewAbstractTestNg0055, TestSize.Level1)
 
     g_isConfigChangePerform = true;
     ViewAbstract::CreateWithOpacityResourceObj(resObj);
+    double opacity = 0.0;
+    ViewAbstract::SetOpacity(frameNode, opacity, resObj);
+    pattern->AddResCache("viewAbstract.opacity", std::to_string(opacity));
     double result;
     ResourceParseUtils::ParseResDouble(resObj, result);
     opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");

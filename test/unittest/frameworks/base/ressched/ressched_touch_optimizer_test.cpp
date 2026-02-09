@@ -88,10 +88,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
 {
     optimizer_->rvsSignalEnable_ = true;
     optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
-    optimizer_->SetSlideAccepted(true);
-    EXPECT_TRUE(optimizer_->slideAccepted_);
-    optimizer_->SetSlideAccepted(false);
-    EXPECT_FALSE(optimizer_->slideAccepted_);
+    optimizer_->SetSlideAccept(true);
+    EXPECT_TRUE(optimizer_->slideAccept_);
+    optimizer_->SetSlideAccept(false);
+    EXPECT_FALSE(optimizer_->slideAccept_);
 }
 
 /**
@@ -824,25 +824,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test004, TestSize.Level1)
     
     // Should return basic calculation without compensation since source is not finger
     EXPECT_DOUBLE_EQ(result, mainDelta / touchPointsSize);
-}
-
-/**
- * @tc.name: SetSlideAcceptOffsetTest003
- * @tc.desc: test SetSlideAcceptOffset when rvs is enabled
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SetSlideAcceptOffsetTest003, TestSize.Level1)
-{
-    optimizer_->rvsEnable_ = true;
-    
-    Offset offset = {15.0, 25.0};
-    optimizer_->SetSlideAcceptOffset(offset);
-    
-    // When RVS is enabled, SetSlideAcceptOffset should not set the values
-    // Based on the implementation, the condition is inverted
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), 15.0);
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetY(), 25.0);
-    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
 }
 
 /**

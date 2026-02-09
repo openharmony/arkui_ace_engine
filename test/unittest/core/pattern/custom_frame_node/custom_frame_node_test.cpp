@@ -679,4 +679,26 @@ HWTEST_F(CustomFrameNodeTestNg, SendThirdAccessibilityProviderTest, TestSize.Lev
     customAccessibilityProvider->SendThirdAccessibilityProvider(thirdAccessibilityManager);
     EXPECT_TRUE(customAccessibilityProvider->thirdAccessibilityManager_.lock());
 }
+
+/**
+ * @tc.name: OnAccessibilityChildTreeRegisterTest001
+ * @tc.desc: Test OnAccessibilityChildTreeRegister
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomFrameNodeTestNg, OnAccessibilityChildTreeRegisterTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Custom
+     * @tc.expected: Create Custom Successfully
+     */
+    auto testNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<CustomPattern>(), true);
+    ASSERT_NE(testNode, nullptr);
+    auto pattern = testNode->GetPattern<CustomPattern>();
+    ASSERT_TRUE(pattern);
+    PipelineContext* context = testNode->GetContext();
+    ASSERT_TRUE(context);
+    context->SetIsSubPipeline(true);
+    EXPECT_TRUE(context->IsSubPipeline());
+    EXPECT_FALSE(pattern->OnAccessibilityChildTreeRegister(1, 0));
+}
 } // namespace OHOS::Ace::NG

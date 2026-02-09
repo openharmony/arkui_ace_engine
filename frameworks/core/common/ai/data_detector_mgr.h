@@ -25,16 +25,17 @@
 namespace OHOS::Ace {
 class ACE_EXPORT DataDetectorMgr : public DataDetectorInterface {
 public:
-    static DataDetectorMgr& GetInstance();
+    ACE_FORCE_EXPORT static DataDetectorMgr& GetInstance();
 
     bool IsDataDetectorSupported() override;
     void GetAIEntityMenu(TextDataDetectResult& textDataDetectResult) override;
     void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) override;
     bool IsAskCeliaSupported() override;
 
-    void AdjustCursorPosition(int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp,
-        const TimeStamp& lastClickTimeStamp);
-    void AdjustWordSelection(int32_t& caretPos, const std::string& content, int32_t& start, int32_t& end);
+    ACE_FORCE_EXPORT void AdjustCursorPosition(int32_t& caretPos, const std::string& content,
+        TimeStamp& lastAiPosTimeStamp, const TimeStamp& lastClickTimeStamp);
+    ACE_FORCE_EXPORT void AdjustWordSelection(
+        int32_t& caretPos, const std::string& content, int32_t& start, int32_t& end);
 
     int8_t GetCursorPosition(const std::string& text, int8_t offset) override;
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;

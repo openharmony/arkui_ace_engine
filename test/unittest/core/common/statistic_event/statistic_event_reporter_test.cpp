@@ -228,6 +228,24 @@ HWTEST_F(StatisticEventReporterTest, ConvertToEventName004, TestSize.Level1)
 
 /**
  * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test ConvertToEventName of VIDEO
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, ConvertToEventName006, TestSize.Level1)
+{
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    ASSERT_TRUE(reporter != nullptr);
+    StatisticEventInfo event = reporter->ConvertToEvent(StatisticEventType::VIDEO_INVALID_PROGRESS_RATE);
+    EXPECT_EQ(event.eventName, "VIDEO");
+    EXPECT_EQ(event.subEventName, "INVALID_PROGRESS_RATE");
+
+    event = reporter->ConvertToEvent(StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE);
+    EXPECT_EQ(event.eventName, "VIDEO");
+    EXPECT_EQ(event.subEventName, "EXCEED_PROGRESS_RATE");
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
  * @tc.desc: Test SendEvent
  * @tc.type: FUNC
  */
@@ -298,7 +316,7 @@ HWTEST_F(StatisticEventReporterTest, ConvertToEvent002, TestSize.Level1)
 
     // Test CALL_SET_CACHE_RANGE
     auto event1 = reporter->ConvertToEvent(StatisticEventType::CALL_SET_CACHE_RANGE);
-    EXPECT_EQ(event1.eventName, "List");
+    EXPECT_EQ(event1.eventName, "LIST");
     EXPECT_EQ(event1.subEventName, "CALL_SET_CACHE_RANGE");
 
     // Test SEARCH_ONDIDINSERT
@@ -540,6 +558,27 @@ HWTEST_F(StatisticEventReporterTest, SetBundleName001, TestSize.Level1)
     auto reporter2 = std::make_shared<StatisticEventReporter>(1);
     ASSERT_TRUE(reporter2 != nullptr);
     EXPECT_EQ(reporter2->appInfo_.bundleName, "testContainer");
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test SetBundleName002
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, SetBundleName002, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetPackageName("test");
+    auto reporter = std::make_shared<StatisticEventReporter>(0);
+    ASSERT_TRUE(reporter != nullptr);
+    EXPECT_EQ(reporter->appInfo_.bundleName, "test");
+
+    MockContainer::SetUp();
+    auto container = Container::Current();
+    container->SetBundleName("");
+    auto reporter2 = std::make_shared<StatisticEventReporter>(1);
+    ASSERT_TRUE(reporter2 != nullptr);
+    EXPECT_EQ(reporter2->appInfo_.bundleName, "test");
     MockContainer::TearDown();
 }
 } // namespace OHOS::Ace

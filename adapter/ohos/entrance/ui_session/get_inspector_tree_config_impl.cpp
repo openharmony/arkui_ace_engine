@@ -17,12 +17,13 @@
 
 namespace OHOS::Ace {
 GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(
-    bool interactionInfo, bool accessibilityInfo, bool cacheNodes, bool withWeb)
+    bool interactionInfo, bool accessibilityInfo, bool cacheNodes, bool withWeb, bool withUIExtension)
 {
     config_.interactionInfo = interactionInfo;
     config_.accessibilityInfo = accessibilityInfo;
     config_.cacheNodes = cacheNodes;
     config_.withWeb = withWeb;
+    config_.withUIExtension = withUIExtension;
 }
 GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(const ParamConfig& config)
 {
@@ -30,6 +31,7 @@ GetInspectorTreeConfigImpl::GetInspectorTreeConfigImpl(const ParamConfig& config
     config_.accessibilityInfo = config.accessibilityInfo;
     config_.cacheNodes = config.cacheNodes;
     config_.withWeb = config.withWeb;
+    config_.withUIExtension = config.withUIExtension;
 }
 bool GetInspectorTreeConfigImpl::Marshalling(Parcel& parcel) const
 {
@@ -45,6 +47,9 @@ bool GetInspectorTreeConfigImpl::Marshalling(Parcel& parcel) const
     if (!parcel.WriteBool(config_.withWeb)) {
         return false;
     }
+    if (!parcel.WriteBool(config_.withUIExtension)) {
+        return false;
+    }
     return true;
 }
 GetInspectorTreeConfigImpl* GetInspectorTreeConfigImpl::Unmarshalling(Parcel& parcel)
@@ -53,6 +58,7 @@ GetInspectorTreeConfigImpl* GetInspectorTreeConfigImpl::Unmarshalling(Parcel& pa
     bool accessibilityInfo = false;
     bool cacheNodes = false;
     bool withWeb = false;
+    bool withUIExtension = false;
     if (!parcel.ReadBool(interactionInfo)) {
         return nullptr;
     }
@@ -65,8 +71,11 @@ GetInspectorTreeConfigImpl* GetInspectorTreeConfigImpl::Unmarshalling(Parcel& pa
     if (!parcel.ReadBool(withWeb)) {
         return nullptr;
     }
+    if (!parcel.ReadBool(withUIExtension)) {
+        return nullptr;
+    }
     GetInspectorTreeConfigImpl* configImpl =
-        new GetInspectorTreeConfigImpl(interactionInfo, accessibilityInfo, cacheNodes, withWeb);
+        new GetInspectorTreeConfigImpl(interactionInfo, accessibilityInfo, cacheNodes, withWeb, withUIExtension);
     return configImpl;
 }
 ParamConfig GetInspectorTreeConfigImpl::GetConfig() const

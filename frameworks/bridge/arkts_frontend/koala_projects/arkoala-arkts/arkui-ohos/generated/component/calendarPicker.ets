@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -301,8 +301,6 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
 export function CalendarPickerImpl(
     @memo
     style: ((attributes: CalendarPickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkCalendarPickerComponent>((): ArkCalendarPickerComponent => {
         return new ArkCalendarPickerComponent()
@@ -311,7 +309,6 @@ export function CalendarPickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -700,7 +697,7 @@ export class CalendarDialogOptions_serializer {
             const onAcceptTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAcceptTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onAcceptTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAcceptTmpBuf = (value0: Date):void => {
+            const onAcceptTmpBuf_Closure  = (value0: Date):void => {
                 const onAcceptTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onAcceptTmpBuf_BufArgsSerializer.writeInt32(onAcceptTmpBuf_BufResource.resourceId);
                 onAcceptTmpBuf_BufArgsSerializer.writePointer(onAcceptTmpBuf_BufCall);
@@ -710,6 +707,8 @@ export class CalendarDialogOptions_serializer {
                 onAcceptTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onAcceptTmpBuf_Closure, onAcceptTmpBuf_BufResource)
+            onAcceptTmpBuf = onAcceptTmpBuf_Closure
         }
         const onAcceptTmpResult : ((value0: Date) => void) | undefined = onAcceptTmpBuf
         const onCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -718,7 +717,7 @@ export class CalendarDialogOptions_serializer {
             const onCancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onCancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onCancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onCancelTmpBuf = ():void => {
+            const onCancelTmpBuf_Closure  = ():void => {
                 const onCancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onCancelTmpBuf_BufArgsSerializer.writeInt32(onCancelTmpBuf_BufResource.resourceId);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCall);
@@ -727,6 +726,8 @@ export class CalendarDialogOptions_serializer {
                 onCancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onCancelTmpBuf_Closure, onCancelTmpBuf_BufResource)
+            onCancelTmpBuf = onCancelTmpBuf_Closure
         }
         const onCancelTmpResult : VoidCallback | undefined = onCancelTmpBuf
         const onChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -735,7 +736,7 @@ export class CalendarDialogOptions_serializer {
             const onChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onChangeTmpBuf = (value0: Date):void => {
+            const onChangeTmpBuf_Closure  = (value0: Date):void => {
                 const onChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onChangeTmpBuf_BufArgsSerializer.writeInt32(onChangeTmpBuf_BufResource.resourceId);
                 onChangeTmpBuf_BufArgsSerializer.writePointer(onChangeTmpBuf_BufCall);
@@ -745,6 +746,8 @@ export class CalendarDialogOptions_serializer {
                 onChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onChangeTmpBuf_Closure, onChangeTmpBuf_BufResource)
+            onChangeTmpBuf = onChangeTmpBuf_Closure
         }
         const onChangeTmpResult : ((value0: Date) => void) | undefined = onChangeTmpBuf
         const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -802,7 +805,7 @@ export class CalendarDialogOptions_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -811,6 +814,8 @@ export class CalendarDialogOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : VoidCallback | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -819,7 +824,7 @@ export class CalendarDialogOptions_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -828,6 +833,8 @@ export class CalendarDialogOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : VoidCallback | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -836,7 +843,7 @@ export class CalendarDialogOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -845,6 +852,8 @@ export class CalendarDialogOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : VoidCallback | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -853,7 +862,7 @@ export class CalendarDialogOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -862,6 +871,8 @@ export class CalendarDialogOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : VoidCallback | undefined = onWillDisappearTmpBuf
         const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

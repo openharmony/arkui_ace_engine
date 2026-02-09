@@ -126,8 +126,12 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "FRAMEWORK", "GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO" };
         case StatisticEventType::FA_AND_DECLARATIVE_APP_START:
             return { "FRAMEWORK", "FA_AND_DECLARATIVE_APP_START" };
+        case StatisticEventType::VIDEO_INVALID_PROGRESS_RATE:
+            return { "VIDEO", "INVALID_PROGRESS_RATE" };
+        case StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE:
+            return { "VIDEO", "EXCEED_PROGRESS_RATE" };
         case StatisticEventType::CALL_SET_CACHE_RANGE:
-            return { "List", "CALL_SET_CACHE_RANGE" };
+            return { "LIST", "CALL_SET_CACHE_RANGE" };
         case StatisticEventType::SEARCH_ONDIDINSERT:
             return { "SEARCH", "ONDIDINSERT" };
         case StatisticEventType::SEARCH_ONWILLDELETE:

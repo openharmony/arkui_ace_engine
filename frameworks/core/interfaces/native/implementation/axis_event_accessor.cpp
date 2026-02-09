@@ -248,7 +248,10 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(scrollStep);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    LOGE("Arkoala method AxisEventAccessor.SetScrollStep doesn't have sense. Not implemented...");
+    auto value = Converter::OptConvertPtr<int32_t>(scrollStep);
+    if (value) {
+        info->SetScrollStep(value.value());
+    }
 }
 void PropagationImpl(Ark_AxisEvent peer)
 {

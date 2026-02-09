@@ -35,11 +35,13 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<IndicatorAccessibilityProperty>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
             return MakeRefPtr<DotIndicatorPaintProperty>();
         } else {
@@ -54,6 +56,7 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<IndicatorEventHub>();
     }
 
@@ -121,6 +124,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         if (GetBindSwiperNode()) {
             return SwiperIndicatorPattern::CreateLayoutAlgorithm();
         }
@@ -148,6 +152,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        ACE_UINODE_TRACE(GetHost());
         if (GetBindSwiperNode()) {
             return SwiperIndicatorPattern::CreateNodePaintMethod();
         }

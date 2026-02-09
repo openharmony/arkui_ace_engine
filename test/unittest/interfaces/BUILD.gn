@@ -25,6 +25,7 @@ ohos_unittest("ui_content_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
@@ -56,6 +57,41 @@ ohos_unittest("ui_content_test") {
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
+
+ohos_unittest("ui_content_tdd_test") {                                                                                                    
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",                                                                                                                           
+    "$ace_root/interfaces/inner_api/ace/ui_content.cpp",                                                                                                                              
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",                                                                                                                          
+    "ui_content_tdd_test.cpp",                                                                                                                                                        
+  ]                                                                                                                                                                                   
+  deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",                                                                                                                              
+    "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility",                                                                                                                   
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",                                                                                                                       
+    "$ace_root/test/unittest:ace_unittest_log",                                                                                                                                       
+    "$ace_root/test/unittest:ace_unittest_trace",                                                                                                                                     
+  ]                                                                                                                                                                                   
+ 
+  external_deps = [
+    "ability_runtime:abilitykit_native",                                                                                                                                              
+    "cJSON:cjson",                                                                                                                                                                    
+    "googletest:gmock_main",                                                                                                                                                          
+    "graphic_2d:librender_service_base",                                                                                                                                              
+    "graphic_2d:librender_service_client",                                                                                                                                            
+    "image_framework:image",                                                                                                                                                          
+    "input:libmmi-client",                                                                                                                                                            
+    "ipc:ipc_single",                                                                                                                                                                 
+    "window_manager:libdm",                                                                                                                                                           
+    "window_manager:libwm",                                                                                                                                                           
+    "window_manager:scene_session",                                                                                                                                                   
+    "window_manager:scene_session_manager",                                                                                                                                           
+  ]                                                                                                                                                                                   
+ 
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+} 
 
 ohos_unittest("drawable_descriptor_test") {
   module_out_path = interface_test_output_path
@@ -252,6 +288,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/node_utils.cpp",
     "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "$ace_root/interfaces/native/node/text_native_impl.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
     "native_node_two_part_test.cpp",
@@ -718,6 +755,7 @@ ohos_unittest("node_animate_test") {
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
@@ -999,6 +1037,7 @@ ohos_unittest("node_model_safely_test") {
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",

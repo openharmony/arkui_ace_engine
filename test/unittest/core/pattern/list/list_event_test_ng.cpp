@@ -1786,4 +1786,743 @@ HWTEST_F(ListEventTestNg, GetOutOfScrollableOffset002, TestSize.Level1)
 
     EXPECT_FLOAT_EQ(outOffset, -10.f);
 }
+
+/**
+ * @tc.name: HandleOnItemDragStart001
+ * @tc.desc: Test HandleOnItemDragStart with invalid item position (draggedIndex_ == -1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleOnItemDragStart001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Test with position outside of any list item
+    GestureEvent info;
+    info.SetGlobalPoint(Point(0, 0));
+    eventHub_->HandleOnItemDragStart(info);
+
+    // draggedIndex_ should be 0 when no item is found at position
+    EXPECT_EQ(eventHub_->draggedIndex_, 0);
+}
+
+/**
+ * @tc.name: HandleOnItemDragStart002
+ * @tc.desc: Test HandleOnItemDragStart with null custom node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleOnItemDragStart002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Set drag start callback that returns null (no custom node)
+    bool callbackCalled = false;
+    eventHub_->SetOnItemDragStart([&callbackCalled](const ItemDragInfo& info, int32_t index) -> RefPtr<UINode> {
+        callbackCalled = true;
+        return nullptr; // Return null custom node
+    });
+
+    GestureEvent info;
+    info.SetGlobalPoint(Point(WIDTH / 2, ITEM_MAIN_SIZE / 2));
+    eventHub_->HandleOnItemDragStart(info);
+
+    // Callback should be called but drag should not start
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: HandleOnItemDragStart003
+ * @tc.desc: Test HandleOnItemDragStart with valid custom node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleOnItemDragStart003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Set drag start callback that returns a custom node
+    eventHub_->SetOnItemDragStart([](const ItemDragInfo& info, int32_t index) -> RefPtr<UINode> {
+        // Create a simple custom node
+        auto frameNode = FrameNode::CreateFrameNode("custom_drag_node", 1, AceType::MakeRefPtr<Pattern>());
+        return frameNode;
+    });
+
+    GestureEvent info;
+    info.SetGlobalPoint(Point(WIDTH / 2, ITEM_MAIN_SIZE / 2));
+    eventHub_->HandleOnItemDragStart(info);
+}
+
+/**
+ * @tc.name: HandleOnItemDragUpdate001
+ * @tc.desc: Test HandleOnItemDragUpdate with null dragDropProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleOnItemDragUpdate001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Ensure dragDropProxy_ is null
+    eventHub_->dragDropProxy_ = nullptr;
+
+    GestureEvent info;
+    info.SetGlobalPoint(Point(WIDTH / 2, ITEM_MAIN_SIZE / 2));
+
+    // Should not crash when dragDropProxy_ is null
+    eventHub_->HandleOnItemDragUpdate(info);
+}
+
+/**
+ * @tc.name: HandleOnItemDragEnd001
+ * @tc.desc: Test HandleOnItemDragEnd with null dragDropProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleOnItemDragEnd001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Ensure dragDropProxy_ is null
+    eventHub_->dragDropProxy_ = nullptr;
+
+    GestureEvent info;
+    info.SetGlobalPoint(Point(WIDTH / 2, ITEM_MAIN_SIZE / 2));
+
+    // Should not crash when dragDropProxy_ is null
+    eventHub_->HandleOnItemDragEnd(info);
+}
+
+/**
+ * @tc.name: HandleOnItemDragCancel001
+ * @tc.desc: Test HandleOnItemDragCancel with null dragDropProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HandleOnItemDragCancel001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Ensure dragDropProxy_ is null
+    eventHub_->dragDropProxy_ = nullptr;
+
+    // Should not crash when dragDropProxy_ is null
+    eventHub_->HandleOnItemDragCancel();
+}
+
+/**
+ * @tc.name: GetListItemIndexByPosition001
+ * @tc.desc: Test GetListItemIndexByPosition with strict mode and valid item
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetListItemIndexByPosition001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Test strict mode with valid position
+    float x = WIDTH / 2;
+    float y = ITEM_MAIN_SIZE / 2;
+    int32_t index = eventHub_->GetListItemIndexByPosition(x, y, true);
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name: GetListItemIndexByPosition002
+ * @tc.desc: Test GetListItemIndexByPosition with strict mode and invalid position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetListItemIndexByPosition002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Test strict mode with position outside any item
+    float x = -100;
+    float y = -100;
+    int32_t index = eventHub_->GetListItemIndexByPosition(x, y, true);
+    EXPECT_EQ(index, -1);
+}
+
+/**
+ * @tc.name: GetListItemIndexByPosition003
+ * @tc.desc: Test GetListItemIndexByPosition with non-strict mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetListItemIndexByPosition003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Test non-strict mode (default)
+    float x = WIDTH / 2;
+    float y = ITEM_MAIN_SIZE / 2;
+    int32_t index = eventHub_->GetListItemIndexByPosition(x, y, false);
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name: GetListItemIndexByPosition004
+ * @tc.desc: Test GetListItemIndexByPosition with default strict parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetListItemIndexByPosition004, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Test with default strict parameter (false)
+    float x = WIDTH / 2;
+    float y = ITEM_MAIN_SIZE * 2.5f; // Position on third item
+    int32_t index = eventHub_->GetListItemIndexByPosition(x, y);
+    EXPECT_EQ(index, 2);
+}
+
+/**
+ * @tc.name: FireOnItemDragStart001
+ * @tc.desc: Test FireOnItemDragStart with null event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragStart001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Ensure callback is not set
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    auto result = eventHub_->FireOnItemDragStart(dragInfo, 0);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: FireOnItemDragStart002
+ * @tc.desc: Test FireOnItemDragStart with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragStart002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool callbackCalled = false;
+    eventHub_->SetOnItemDragStart([&callbackCalled](const ItemDragInfo& info, int32_t index) -> RefPtr<UINode> {
+        callbackCalled = true;
+        auto frameNode = FrameNode::CreateFrameNode("test_node", 1, AceType::MakeRefPtr<Pattern>());
+        return frameNode;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    auto result = eventHub_->FireOnItemDragStart(dragInfo, 0);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: FireOnItemDragEnter001
+ * @tc.desc: Test FireOnItemDragEnter with null event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragEnter001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Should not crash with null callback
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    eventHub_->FireOnItemDragEnter(dragInfo);
+}
+
+/**
+ * @tc.name: FireOnItemDragEnter002
+ * @tc.desc: Test FireOnItemDragEnter with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragEnter002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool callbackCalled = false;
+    eventHub_->SetOnItemDragEnter([&callbackCalled](const ItemDragInfo& info) {
+        callbackCalled = true;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: FireOnItemDragMove001
+ * @tc.desc: Test FireOnItemDragMove with null event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragMove001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Should not crash with null callback
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    eventHub_->FireOnItemDragMove(dragInfo, 0, 1);
+}
+
+/**
+ * @tc.name: FireOnItemDragMove002
+ * @tc.desc: Test FireOnItemDragMove with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragMove002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool callbackCalled = false;
+    int32_t capturedIndex = -1;
+    int32_t capturedInsertIndex = -1;
+
+    eventHub_->SetOnItemDragMove([&callbackCalled, &capturedIndex, &capturedInsertIndex](
+        const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex) {
+        callbackCalled = true;
+        capturedIndex = itemIndex;
+        capturedInsertIndex = insertIndex;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    eventHub_->FireOnItemDragMove(dragInfo, 2, 3);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(capturedIndex, 2);
+    EXPECT_EQ(capturedInsertIndex, 3);
+}
+
+/**
+ * @tc.name: FireOnItemDragLeave001
+ * @tc.desc: Test FireOnItemDragLeave with null event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragLeave001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Should not crash with null callback
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    eventHub_->FireOnItemDragLeave(dragInfo, 0);
+}
+
+/**
+ * @tc.name: FireOnItemDragLeave002
+ * @tc.desc: Test FireOnItemDragLeave with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDragLeave002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool callbackCalled = false;
+    int32_t capturedIndex = -1;
+
+    eventHub_->SetOnItemDragLeave([&callbackCalled, &capturedIndex](const ItemDragInfo& info, int32_t itemIndex) {
+        callbackCalled = true;
+        capturedIndex = itemIndex;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    eventHub_->FireOnItemDragLeave(dragInfo, 1);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(capturedIndex, 1);
+}
+
+/**
+ * @tc.name: FireOnItemDrop001
+ * @tc.desc: Test FireOnItemDrop with null event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDrop001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Should return false when callback is not set
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    bool result = eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FireOnItemDrop002
+ * @tc.desc: Test FireOnItemDrop with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDrop002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool callbackCalled = false;
+    eventHub_->SetOnItemDrop([&callbackCalled](
+        const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+        callbackCalled = true;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    bool result = eventHub_->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: FireOnItemDrop003
+ * @tc.desc: Test FireOnItemDrop with onItemMove callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDrop003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool moveCallbackCalled = false;
+    bool dropCallbackCalled = false;
+
+    eventHub_->SetOnItemMove([&moveCallbackCalled](int32_t from, int32_t to) -> bool {
+        moveCallbackCalled = true;
+        return true;
+    });
+
+    eventHub_->SetOnItemDrop([&dropCallbackCalled](
+        const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+        dropCallbackCalled = true;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    bool result = eventHub_->FireOnItemDrop(dragInfo, 2, 3, false);
+    EXPECT_TRUE(moveCallbackCalled);
+    EXPECT_TRUE(dropCallbackCalled);
+    EXPECT_TRUE(result); // isSuccess should be true from onItemMove
+}
+
+/**
+ * @tc.name: FireOnItemDrop004
+ * @tc.desc: Test FireOnItemDrop with invalid indices
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, FireOnItemDrop004, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    bool moveCallbackCalled = false;
+    bool dropCallbackCalled = false;
+
+    eventHub_->SetOnItemMove([&moveCallbackCalled](int32_t from, int32_t to) -> bool {
+        moveCallbackCalled = true;
+        return true;
+    });
+
+    eventHub_->SetOnItemDrop([&dropCallbackCalled](
+        const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+        dropCallbackCalled = true;
+    });
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(100);
+    dragInfo.SetY(100);
+
+    // Test with negative indices - onItemMove should not be called
+    bool result = eventHub_->FireOnItemDrop(dragInfo, -1, -1, false);
+    EXPECT_FALSE(moveCallbackCalled);
+    EXPECT_TRUE(dropCallbackCalled);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetDragExtraParams001
+ * @tc.desc: Test GetDragExtraParams with DROP type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetDragExtraParams001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    Point point(WIDTH / 2, ITEM_MAIN_SIZE / 2);
+    std::string result = eventHub_->GetDragExtraParams("test_extra", point, DragEventType::DROP);
+
+    // Should contain insertIndex
+    EXPECT_NE(result.find("insertIndex"), std::string::npos);
+    EXPECT_NE(result.find("test_extra"), std::string::npos);
+}
+
+/**
+ * @tc.name: GetDragExtraParams002
+ * @tc.desc: Test GetDragExtraParams with MOVE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetDragExtraParams002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    Point point(WIDTH / 2, ITEM_MAIN_SIZE / 2);
+    std::string result = eventHub_->GetDragExtraParams("", point, DragEventType::MOVE);
+
+    // Should contain insertIndex but no extraInfo
+    EXPECT_NE(result.find("insertIndex"), std::string::npos);
+    EXPECT_EQ(result.find("extraInfo"), std::string::npos);
+}
+
+/**
+ * @tc.name: GetDragExtraParams003
+ * @tc.desc: Test GetDragExtraParams with other drag types
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, GetDragExtraParams003, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    Point point(WIDTH / 2, ITEM_MAIN_SIZE / 2);
+    std::string result = eventHub_->GetDragExtraParams("test_info", point, DragEventType::START);
+
+    // Should not contain insertIndex for non-DROP/MOVE types
+    EXPECT_EQ(result.find("insertIndex"), std::string::npos);
+    EXPECT_NE(result.find("test_info"), std::string::npos);
+}
+
+/**
+ * @tc.name: HasOnItemDragMove001
+ * @tc.desc: Test HasOnItemDragMove with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HasOnItemDragMove001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    EXPECT_FALSE(eventHub_->HasOnItemDragMove());
+}
+
+/**
+ * @tc.name: HasOnItemDragMove002
+ * @tc.desc: Test HasOnItemDragMove with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HasOnItemDragMove002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    eventHub_->SetOnItemDragMove([](const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex) {});
+    EXPECT_TRUE(eventHub_->HasOnItemDragMove());
+}
+
+/**
+ * @tc.name: HasOnItemDrop001
+ * @tc.desc: Test HasOnItemDrop with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HasOnItemDrop001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    EXPECT_FALSE(eventHub_->HasOnItemDrop());
+}
+
+/**
+ * @tc.name: HasOnItemDrop002
+ * @tc.desc: Test HasOnItemDrop with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, HasOnItemDrop002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    eventHub_->SetOnItemDrop([](const ItemDragInfo& info, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {});
+    EXPECT_TRUE(eventHub_->HasOnItemDrop());
+}
+
+/**
+ * @tc.name: InitItemDragEvent001
+ * @tc.desc: Test InitItemDragEvent initialization
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, InitItemDragEvent001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Get gesture hub
+    auto gestureHub = frameNode_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    // Initialize item drag event
+    eventHub_->InitItemDragEvent(gestureHub);
+
+    // Verify drag event is set (no crash means success)
+    EXPECT_NE(gestureHub, nullptr);
+}
+
+/**
+ * @tc.name: ClearJSFrameNodeOnListScrollIndex001
+ * @tc.desc: Test ClearJSFrameNodeOnListScrollIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ClearJSFrameNodeOnListScrollIndex001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Set a callback first
+    eventHub_->SetJSFrameNodeOnListScrollIndex([](int32_t start, int32_t end, int32_t center) {});
+
+    // Verify callback is set
+    auto& callbackBefore = eventHub_->GetJSFrameNodeOnListScrollIndex();
+    EXPECT_NE(callbackBefore, nullptr);
+
+    // Clear it
+    eventHub_->ClearJSFrameNodeOnListScrollIndex();
+
+    // Verify the callback is cleared
+    auto& callbackAfter = eventHub_->GetJSFrameNodeOnListScrollIndex();
+    EXPECT_EQ(callbackAfter, nullptr);
+}
+
+/**
+ * @tc.name: ClearJSFrameNodeOnListScrollIndex002
+ * @tc.desc: Test ClearJSFrameNodeOnListScrollIndex with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ClearJSFrameNodeOnListScrollIndex002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Verify no callback is set initially
+    auto& callbackBefore = eventHub_->GetJSFrameNodeOnListScrollIndex();
+    EXPECT_EQ(callbackBefore, nullptr);
+
+    // Clear without setting - should not crash
+    eventHub_->ClearJSFrameNodeOnListScrollIndex();
+
+    // Verify still null after clearing
+    auto& callbackAfter = eventHub_->GetJSFrameNodeOnListScrollIndex();
+    EXPECT_EQ(callbackAfter, nullptr);
+}
+
+/**
+ * @tc.name: ClearJSFrameNodeOnScrollVisibleContentChange001
+ * @tc.desc: Test ClearJSFrameNodeOnScrollVisibleContentChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ClearJSFrameNodeOnScrollVisibleContentChange001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Set a callback first
+    eventHub_->SetJSFrameNodeOnScrollVisibleContentChange([](ListItemIndex start, ListItemIndex end) {});
+
+    // Verify callback is set
+    auto& callbackBefore = eventHub_->GetJSFrameNodeOnScrollVisibleContentChange();
+    EXPECT_NE(callbackBefore, nullptr);
+
+    // Clear it
+    eventHub_->ClearJSFrameNodeOnScrollVisibleContentChange();
+
+    // Verify the callback is cleared
+    auto& callbackAfter = eventHub_->GetJSFrameNodeOnScrollVisibleContentChange();
+    EXPECT_EQ(callbackAfter, nullptr);
+}
+
+/**
+ * @tc.name: ClearJSFrameNodeOnScrollVisibleContentChange002
+ * @tc.desc: Test ClearJSFrameNodeOnScrollVisibleContentChange with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ClearJSFrameNodeOnScrollVisibleContentChange002, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(5);
+    CreateDone();
+
+    // Verify no callback is set initially
+    auto& callbackBefore = eventHub_->GetJSFrameNodeOnScrollVisibleContentChange();
+    EXPECT_EQ(callbackBefore, nullptr);
+
+    // Clear without setting - should not crash
+    eventHub_->ClearJSFrameNodeOnScrollVisibleContentChange();
+
+    // Verify still null after clearing
+    auto& callbackAfter = eventHub_->GetJSFrameNodeOnScrollVisibleContentChange();
+    EXPECT_EQ(callbackAfter, nullptr);
+}
 } // namespace OHOS::Ace::NG

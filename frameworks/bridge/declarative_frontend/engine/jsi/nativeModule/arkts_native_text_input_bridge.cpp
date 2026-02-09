@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3101,10 +3101,11 @@ bool TextInputBridge::ParseLayoutPolicy(EcmaVM* vm, const Local<JSValueRef> valu
 }
 
 IMEAttachCallback TextInputBridge::ParseAndCreateIMEAttachCallback(
-    EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode)
+    EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode, bool isJsView)
 {
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    IMEAttachCallback callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](IMEClient& imeClient) {
+    IMEAttachCallback callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView](
+                                     IMEClient& imeClient) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -3115,7 +3116,10 @@ IMEAttachCallback TextInputBridge::ParseAndCreateIMEAttachCallback(
             panda::FunctionRef::New(vm, Framework::JSTextField::JsSetIMEExtraInfo));
         imeClientObj->SetNativePointerField(vm, 0, static_cast<void*>(&imeClient));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { imeClientObj };
-        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+        }
     };
     return callback;
 }

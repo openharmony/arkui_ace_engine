@@ -140,6 +140,13 @@ public:
         return overlayOffset;
     }
 
+    OffsetF GetOverlayOffsetWithDirection(const SizeF& parentSize, const SizeF& childSize)
+    {
+        CHECK_NULL_RETURN(property_, OffsetF());
+        auto overlayOptions = property_->Get().GetOverlayOptions();
+        return GetTextPosition(parentSize, childSize, overlayOptions);
+    }
+
     bool IsCustomFont()
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();

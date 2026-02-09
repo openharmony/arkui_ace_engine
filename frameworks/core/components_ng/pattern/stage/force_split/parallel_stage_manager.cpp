@@ -1373,6 +1373,20 @@ void ParallelStageManager::FireParallelPageHide(const RefPtr<UINode>& node, Page
     auto pagePattern = AceType::DynamicCast<ParallelPagePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pagePattern);
     if (!pagePattern->GetIsShow()) {
+        if (transitionType != PageTransitionType::NONE) {
+            return;
+        }
+        auto property = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+            return;
+        }
+        /**
+         * When split-mode app switch to background, only the primaryPage's onPageHide lifecycle will be triggered,
+         * the primaryPage's visibily propery still be Visible. At this time, if app switching to stack mode,
+         * we need set it's visibility to Invisible.
+         */
+        pagePattern->ProcessHideState();
         return;
     }
     StageManager::FirePageHide(node, transitionType);

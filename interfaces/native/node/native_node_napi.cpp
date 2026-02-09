@@ -213,8 +213,18 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
     CHECK_NULL_RETURN(env, ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
     auto callback = [](const char* moduleName) -> bool {
-        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext",
-            "arkui.observer", "arkui.inspector", "font", "arkui.uicontext" };
+        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext", "arkui.observer",
+            "arkui.inspector", "font", "arkui.uicontext", "arkui.components.arkgauge", "arkui.components.arkcheckbox",
+            "arkui.components.arkcheckboxgroup", "arkui.components.arkrating", "arkui.components.arkwaterflow",
+            "arkui.components.arkflowitem", "arkui.components.arkcalendarpicker", "arkui.components.arktimepicker",
+            "arkui.components.arkhyperlink", "arkui.components.arksearch", "arkui.components.arksymbolglyph",
+            "arkui.components.arkmarquee", "arkui.components.arkrowsplit", "arkui.components.arkcolumnsplit",
+            "arkui.components.arkfolderstack", "arkui.components.arkstepper", "arkui.components.arkstepperitem",
+            "arkui.components.arksidebarcontainer", "arkui.components.arkslider", "arkui.components.arkradio",
+            "arkui.components.arkmenu", "arkui.components.arkmenuitem", "arkui.components.arkmenuitemgroup",
+            "arkui.components.arkdatapanel", "arkui.components.arktextclock", "arkui.components.arkpatternlock",
+            "arkui.components.arkcounter", "arkui.components.arkqrcode", "arkui.components.arkalphabetindexer",
+            "arkui.components.arkricheditor" };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {
                 return true;

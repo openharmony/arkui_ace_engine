@@ -47,18 +47,18 @@ RefPtr<Clipboard> ClipboardProxy::GetClipboard(const RefPtr<TaskExecutor>& taskE
     return clipboard;
 }
 
-void MockClipBoard::HasData(const std::function<void(bool hasData)>& callback)
+void MockClipBoard::HasData(const std::function<void(bool hasData, bool isAutoFill)>& callback)
 {
     if (callback) {
-        callback(saveData.has_value());
+        callback(saveData.has_value(), false);
     }
 }
 
-void MockClipBoard::HasDataType(
-    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
+void MockClipBoard::HasDataType(const std::function<void(bool hasData, bool isAutoFill)>& callback,
+    const std::vector<std::string>& mimeTypes)
 {
     if (callback) {
-        callback(saveData.has_value());
+        callback(saveData.has_value(), false);
     }
 }
 

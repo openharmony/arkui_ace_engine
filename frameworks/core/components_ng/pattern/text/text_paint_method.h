@@ -29,7 +29,7 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
+class ACE_FORCE_EXPORT  TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod);
 public:
     TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,

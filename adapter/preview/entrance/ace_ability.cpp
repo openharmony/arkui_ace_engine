@@ -532,11 +532,11 @@ void AceAbility::SurfaceChanged(
     viewPtr->NotifyDensityChanged(resolution);
     viewPtr->NotifySurfaceChanged(width, height, type);
     if ((orientation != runArgs_.deviceConfig.orientation && configChanges_.watchOrientation) ||
-        (resolution != runArgs_.deviceConfig.density && configChanges_.watchDensity) ||
+        (!NearEqual(resolution, runArgs_.deviceConfig.density) && configChanges_.watchDensity) ||
         ((width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) && configChanges_.watchLayout)) {
         container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
     }
-    if (orientation != runArgs_.deviceConfig.orientation || resolution != runArgs_.deviceConfig.density) {
+    if (orientation != runArgs_.deviceConfig.orientation || !NearEqual(resolution, runArgs_.deviceConfig.density)) {
         container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
     }
     runArgs_.deviceConfig.orientation = orientation;

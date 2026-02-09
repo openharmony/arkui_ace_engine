@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 class CheckboxGroupBridge {
 public:
     static void RegisterCheckboxGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static ArkUINativeModuleValue CreateCheckboxGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCheckboxGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);

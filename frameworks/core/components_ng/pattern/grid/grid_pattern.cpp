@@ -1884,64 +1884,6 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
 
 int32_t GridPattern::OnInjectionEvent(const std::string& command)
 {
-    int reportEventId = 0;
-    float ratio = 0.0f;
-    bool isScrollByRatio = false;
-    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
-
-    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
-        return RET_FAILED;
-    }
-    if (ret == "scrollForward") {
-        if (isScrollByRatio) {
-            ScrollPageByRatio(true, ratio, reportEventId);
-        } else {
-            ScrollPage(true);
-        }
-    } else if (ret == "scrollBackward") {
-        if (isScrollByRatio) {
-            ScrollPageByRatio(false, ratio, reportEventId);
-        } else {
-            ScrollPage(false);
-        }
-    } else {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
-        return RET_FAILED;
-    }
-    return RET_SUCCESS;
-}
-
-void GridPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
-{
-    float height = GetMainContentSize();
-
-    float distance = reverse ? height : -height;
-    distance = distance * ratio;
-
-    SetIsOverScroll(false);
-    StopAnimate();
-    HandleGridScroll(distance, reportEventId);
-}
-
-void GridPattern::HandleGridScroll(float distance, int32_t reportEventId)
-{
-    if (!scrollable_) {
-        ReportScroll(false, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
-        return;
-    }
-
-    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
-        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
-        return;
-    }
-
-    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
-    if (IsAtTop()) {
-        error = ScrollError::SCROLL_TOP_ERROR;
-    } else if (IsAtBottom()) {
-        error = ScrollError::SCROLL_BOTTOM_ERROR;
-    }
-    ReportScroll(false, error, reportEventId);
+    return OnInjectionEventByRatio(command);
 }
 } // namespace OHOS::Ace::NG

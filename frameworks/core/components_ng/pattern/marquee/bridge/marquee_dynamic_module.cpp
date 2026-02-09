@@ -18,6 +18,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
+#include "frameworks/core/components_ng/pattern/marquee/bridge/marquee_custom_modifier.h"
 #include "core/components_ng/pattern/marquee/bridge/arkts_native_marquee_bridge.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -35,6 +36,10 @@ namespace NG {
 namespace NodeModifier {
 const ArkUIMarqueeModifier* GetMarqueeDynamicModifier();
 const CJUIMarqueeModifier* GetCJUIMarqueeModifier();
+}
+namespace CustomModifier {
+    constexpr const char* CUSTOM_MODIFIER = "customModifier";
+    const ArkUIMarqueeCustomModifier* GetMarqueeCustomModifier();
 }
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
@@ -65,6 +70,14 @@ const void* MarqueeDynamicModule::GetStaticModifier()
 const void* MarqueeDynamicModule::GetCjModifier()
 {
     return NG::NodeModifier::GetCJUIMarqueeModifier();
+}
+
+const void* MarqueeDynamicModule::GetCustomModifier(const std::string& name)
+{
+    if (name == NG::CustomModifier::CUSTOM_MODIFIER) {
+        return NG::CustomModifier::GetMarqueeCustomModifier();
+    }
+    return nullptr;
 }
 
 void* MarqueeDynamicModule::GetModel()

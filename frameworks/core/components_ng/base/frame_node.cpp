@@ -67,6 +67,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
+#include "core/components_ng/render/adapter/sampler_manager.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
@@ -74,6 +75,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -211,6 +213,11 @@ public:
     {
         auto frameNode = AceType::DynamicCast<FrameNode>(UiNode);
         if (frameNode) {
+            auto customNode = AceType::DynamicCast<CustomMeasureLayoutNode>(UiNode);
+            if (customNode) {
+                customNode->Render();
+            }
+
             allFrameNodeChildren.emplace_back(frameNode);
             partFrameNodeChildren[count++] = frameNode;
             return;
@@ -234,6 +241,11 @@ public:
         for (const auto& child : UiNode->GetChildren()) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             if (frameNode) {
+                auto customNode = AceType::DynamicCast<CustomMeasureLayoutNode>(frameNode);
+                if (customNode) {
+                    customNode->Render();
+                }
+
                 allFrameNodeChildren.emplace_back(frameNode);
                 partFrameNodeChildren[count++] = frameNode;
                 continue;
@@ -811,6 +823,7 @@ RefPtr<AccessibilityProperty>& FrameNode::GetOrCreateAccessibilityProperty()
     if (isAccessibilityPropertyInitialized_) {
         return accessibilityProperty_;
     }
+    CHECK_NULL_RETURN(pattern_, accessibilityProperty_);
     accessibilityProperty_ = pattern_->CreateAccessibilityProperty();
     accessibilityProperty_->SetHost(WeakClaim(this));
     isAccessibilityPropertyInitialized_ = true;
@@ -3745,9 +3758,11 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto y = ParseDimensionToPx(region.GetY(), scaleProperty, rect.Height());
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
-    if (!x.has_value() || !y.has_value()) {
-        responseRegionResult.emplace_back(rect);
-        return;
+    if (!x.has_value()) {
+        x = 0.0;
+    }
+    if (!y.has_value()) {
+        y = 0.0;
     }
     if (!width.has_value() || LessOrEqual(width.value(), 0.0)) {
         width = rect.Width();
@@ -3788,7 +3803,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         responseRegionResult.emplace_back(rect);
         return responseRegionResult;
     }
-    
+
     auto toolType = it->second;
     if (responseRegionMap.find(toolType) != responseRegionMap.end()) {
         for (const auto& region : responseRegionMap[toolType]) {
@@ -5095,6 +5110,33 @@ RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode
             return childFrameNode;
         }
         auto childFindResult = FindChildByName(childFrameNode, nodeName);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+    return nullptr;
+}
+
+void FrameNode::SetSamplerManager(const RefPtr<SamplerManager>& manager)
+{
+    samplerManager_ = manager;
+}
+
+RefPtr<SamplerManager> FrameNode::GetSamplerManager()
+{
+    return samplerManager_;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByNameUINode(const RefPtr<UINode>& parentNode, const std::string& nodeName)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    if (parentFrameNode && parentFrameNode->GetInspectorId().value_or("") == nodeName) {
+        return parentFrameNode;
+    }
+    const auto& children = parentNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFindResult = FindChildByNameUINode(child, nodeName);
         if (childFindResult) {
             return childFindResult;
         }
@@ -8011,6 +8053,10 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+        auto eventManager = pipeline->GetEventManager();
+        if (eventManager) {
+            eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
+        }
     }
 }
 
@@ -8156,5 +8202,21 @@ void FrameNode::ReportSelectedText(bool isRegister)
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->ReportSelectedText(isRegister);
+}
+
+void FrameNode::ReplacePattern(const RefPtr<Pattern>& newPattern)
+{
+    CHECK_NULL_VOID(newPattern);
+    pattern_ = newPattern;
+    layoutProperty_ = pattern_->CreateLayoutProperty();
+    if (layoutProperty_) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        layoutProperty_->SetHost(WeakClaim(this));
+    }
+    paintProperty_ = pattern_->CreatePaintProperty();
+    if (paintProperty_) {
+        paintProperty_->SetHost(WeakClaim(this));
+    }
+    InitializePatternAndContext();
 }
 } // namespace OHOS::Ace::NG

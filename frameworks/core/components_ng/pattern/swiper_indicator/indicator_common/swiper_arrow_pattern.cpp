@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 void SwiperArrowPattern::OnModifyDone()
 {
+    ACE_UINODE_TRACE(GetHost());
     Pattern::OnModifyDone();
     if (isFirstCreate_) {
         InitNavigationArrow();

@@ -395,22 +395,8 @@ void GridCustomLayoutAlgorithm::MeasureOnJump(float mainSize)
         }
     }
 
-    // 2. Check if current row is in cache
-    bool isInCache = IsTargetRowInCache(info_.jumpIndex_);
-    auto targetRow = info_.GetItemPos(info_.jumpIndex_);
-
-    float itemHeight = 0.f;
-    // 3. Handle based on cache status
-    if (!isInCache) {
-        // Not in cache, perform jump
-        itemHeight = JumpToTargetIndex(mainSize, info_.jumpIndex_);
-    } else {
-        UpdateTotalOffset(info_, targetRow.second, mainGap_);
-        info_.startMainLineIndex_ = targetRow.second;
-        info_.UpdateStartIndexByStartLine();
-        GridIrregularFiller filler(&info_, wrapper_);
-        itemHeight = filler.MeasureCurrentRow({ crossLens_, crossGap_, mainGap_ }, info_.jumpIndex_);
-    }
+    // Not in cache, perform jump
+    float itemHeight = JumpToTargetIndex(mainSize, info_.jumpIndex_);
 
     // 4. Adjust currentOffset_ based on scrollAlign, extraOffset and contentStartOffset or contentEndOffset
     info_.prevOffset_ = info_.currentOffset_;
@@ -463,7 +449,6 @@ float GridCustomLayoutAlgorithm::JumpToTargetIndex(float mainSize, int32_t targe
     ClearCache();
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     const auto& opts = *props->GetLayoutOptions();
-
     auto startLineInfo = GetStartIndexByIndex(targetIndex, opts);
     info_.startIndex_ = startLineInfo.startIndex;
     info_.startMainLineIndex_ = startLineInfo.startLine;
@@ -471,7 +456,9 @@ float GridCustomLayoutAlgorithm::JumpToTargetIndex(float mainSize, int32_t targe
     info_.totalOffset_ = startLineInfo.totalOffset;
 
     GridIrregularFiller filler(&info_, wrapper_);
-    return filler.MeasureCurrentRow({ crossLens_, crossGap_, mainGap_ }, targetIndex);
+    auto heightInRange = filler.FillMatrixFromStartIndexWithMeasure(
+        { crossLens_, crossGap_, mainGap_ }, info_.startMainLineIndex_, info_.startIndex_, targetIndex);
+    return heightInRange;
 }
 
 GridStartLineInfo GridCustomLayoutAlgorithm::GetStartIndexByIndex(int32_t index, const GridLayoutOptions& options)
@@ -682,8 +669,8 @@ bool GridCustomLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
 void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
 {
     std::list<GridPreloadItem> itemsToPreload;
-    int32_t startIndex = 0;
-    int32_t endIndex = 0;
+    int32_t startIndex = info_.startIndex_;
+    int32_t endIndex = info_.endIndex_;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
         auto itemWrapper = wrapper_->GetChildByIndex(l, true);
@@ -697,6 +684,9 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             itemsToPreload.emplace_back(r);
             endIndex = r;
         }
+    }
+    if (itemsToPreload.empty()) {
+        return;
     }
     int32_t startLine = 0;
     const auto pos = info_.GetItemPos(startIndex);

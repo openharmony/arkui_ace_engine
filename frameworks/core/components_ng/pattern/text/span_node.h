@@ -258,7 +258,7 @@ enum class ChangeFlag {
     RE_LAYOUT = 1,
 };
 
-struct SpanItem : public AceType {
+struct ACE_FORCE_EXPORT SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
 public:
@@ -652,7 +652,7 @@ private:
     bool hasTextBackgroundStyle_ = false;
 };
 
-class ACE_EXPORT SpanNode : public UINode, public BaseSpan {
+class ACE_FORCE_EXPORT SpanNode : public UINode, public BaseSpan {
     DECLARE_ACE_TYPE(SpanNode, UINode, BaseSpan);
 
 public:
@@ -810,6 +810,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableDeviceFontWeightCategory, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(LineThicknessScale, float, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
@@ -901,7 +902,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
 };
 
-struct PlaceholderSpanItem : public SpanItem {
+struct ACE_FORCE_EXPORT PlaceholderSpanItem : public SpanItem {
     DECLARE_ACE_TYPE(PlaceholderSpanItem, SpanItem);
 
 public:
@@ -1113,7 +1114,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanNode);
 };
 
-struct ImageSpanItem : public PlaceholderSpanItem {
+struct ACE_FORCE_EXPORT ImageSpanItem : public PlaceholderSpanItem {
     DECLARE_ACE_TYPE(ImageSpanItem, PlaceholderSpanItem);
 
 public:

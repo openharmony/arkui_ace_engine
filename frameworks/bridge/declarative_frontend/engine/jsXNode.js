@@ -2045,7 +2045,9 @@ const __creatorMap__ = new Map([
         }],
     ['Search', (context) => {
             return new TypedFrameNode(context, 'Search', (node, type) => {
-                return new ArkSearchComponent(node, type);
+                getUINativeModule().loadNativeModule('Search');
+                let module = globalThis.requireNapi('arkui.components.arksearch');
+                return module.createComponent(node, type);
             });
         }],
     ['Button', (context) => {
@@ -2072,7 +2074,9 @@ const __creatorMap__ = new Map([
         }],
     ['SymbolGlyph', (context) => {
             return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
-                return new ArkSymbolGlyphComponent(node, type);
+                getUINativeModule().loadNativeModule('SymbolGlyph');
+                let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+                return module.createComponent(node, type);
             });
         }],
     ['FlowItem', (context) => {
@@ -2106,7 +2110,9 @@ const __creatorMap__ = new Map([
         }],
     ['TextClock', (context) => {
             return new TypedFrameNode(context, 'TextClock', (node, type) => {
-                return new ArkTextClockComponent(node, type);
+                getUINativeModule().loadNativeModule('TextClock');
+ 	            let module = globalThis.requireNapi('arkui.components.arktextclock');
+ 	            return module.createComponent(node, type);
             });
         }],
     ['TextTimer', (context) => {

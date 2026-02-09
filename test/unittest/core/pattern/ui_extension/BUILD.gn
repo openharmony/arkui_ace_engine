@@ -69,6 +69,7 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
@@ -269,6 +270,7 @@ ace_unittest("modal_ui_extension_proxy_impl_test_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "ace_engine:ace_uicontent",
       "c_utils:utils",
@@ -937,14 +939,7 @@ group("ui_extension_component_test_ng") {
   deps = [
     ":isolated_pattern_test_ng",
     ":platform_event_proxy_test",
-    ":platform_pattern_test_ng",
-    ":preview_session_wrapper_impl_test_ng",
-    ":preview_ui_extension_compontent_test",
-    ":security_session_wrapper_impl_test_ng",
-    ":security_ui_extension_pattern_test",
-    ":session_wrapper_impl_test_new_ng",
-    ":session_wrapper_impl_test_ng",
-    ":ui_extension_manager_test",
+    ":platform_pattern_test_ng"
   ]
 
   # dynamic_component

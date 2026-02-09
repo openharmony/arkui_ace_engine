@@ -242,6 +242,8 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_005, TestSize.Level1)
 HWTEST_F(WebPatternEventTest, WebPatternTestNg_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->selectPopupMenuShowing_ = false;
+    g_webPattern->isMenuShownFromWebBeforeStartClose_ = true;
     g_webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
     EXPECT_FALSE(g_webPattern->isMenuShownFromWebBeforeStartClose_);
     EXPECT_TRUE(g_webPattern->isLastEventMenuClose_);

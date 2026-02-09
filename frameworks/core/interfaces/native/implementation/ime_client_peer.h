@@ -17,11 +17,12 @@
 
 
 #include <cstdint>
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
 struct IMEClientPeer {
     int32_t nodeId = -1;
-    void* extraInfo = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::IMEExtraInfo> extraInfo = nullptr;
 
 protected:
     virtual ~IMEClientPeer() = default;

@@ -206,7 +206,7 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
     CHECK_NULL_VOID(nodeContainerModelInstance);
 
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafely();
     RefPtr<JsFunction> jsMake = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
     nodeContainerModelInstance->SetMakeFunction(
         [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {
@@ -334,7 +334,7 @@ void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExec
     auto onTouch = [execCtx, func = std::move(jsOnTouchFunc), node = frameNode](TouchEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         PipelineContext::SetCallBackNode(node);
-        func->Execute(execCtx.vm_, info);
+        func->Execute(execCtx.vm_, info, node);
     };
     nodeContainerModelInstance->SetOnTouchEvent(std::move(onTouch));
 }

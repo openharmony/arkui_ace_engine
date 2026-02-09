@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { DialogButtonStyle, Color, WordBreak, BorderStyle } from "./enums"
@@ -304,7 +304,7 @@ export class AlertDialogButtonBaseOptions_serializer {
         const actionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const actionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const actionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const actionTmpResult : VoidCallback = ():void => {
+        const actionTmpBufClosure  = ():void => {
             const actionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             actionTmpBufBufArgsSerializer.writeInt32(actionTmpBufBufResource.resourceId);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCall);
@@ -313,6 +313,8 @@ export class AlertDialogButtonBaseOptions_serializer {
             actionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(actionTmpBufClosure, actionTmpBufBufResource)
+        const actionTmpResult : VoidCallback = actionTmpBufClosure
         let value : AlertDialogButtonBaseOptions = ({enabled: enabledTmpResult, defaultFocus: defaultFocusTmpResult, style: styleTmpResult, value: valueTmpResult, fontColor: fontColorTmpResult, backgroundColor: backgroundColorTmpResult, action: actionTmpResult} as AlertDialogButtonBaseOptions)
         return value
     }
@@ -484,7 +486,7 @@ export class AlertDialogButtonOptions_serializer {
         const actionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const actionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const actionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const actionTmpResult : VoidCallback = ():void => {
+        const actionTmpBufClosure  = ():void => {
             const actionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             actionTmpBufBufArgsSerializer.writeInt32(actionTmpBufBufResource.resourceId);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCall);
@@ -493,6 +495,8 @@ export class AlertDialogButtonOptions_serializer {
             actionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(actionTmpBufClosure, actionTmpBufBufResource)
+        const actionTmpResult : VoidCallback = actionTmpBufClosure
         const primaryTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let primaryTmpBuf : boolean | undefined = undefined
         if ((primaryTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -995,7 +999,7 @@ export class AlertDialogParamWithButtons_serializer {
             const cancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const cancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const cancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            cancelTmpBuf = ():void => {
+            const cancelTmpBuf_Closure  = ():void => {
                 const cancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
@@ -1004,6 +1008,8 @@ export class AlertDialogParamWithButtons_serializer {
                 cancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(cancelTmpBuf_Closure, cancelTmpBuf_BufResource)
+            cancelTmpBuf = cancelTmpBuf_Closure
         }
         const cancelTmpResult : VoidCallback | undefined = cancelTmpBuf
         const alignmentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1085,7 +1091,7 @@ export class AlertDialogParamWithButtons_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissDialogAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissDialogAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -1095,6 +1101,8 @@ export class AlertDialogParamWithButtons_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissDialogAction) => void) | undefined = onWillDismissTmpBuf
         const transitionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1277,7 +1285,7 @@ export class AlertDialogParamWithButtons_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -1286,6 +1294,8 @@ export class AlertDialogParamWithButtons_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1294,7 +1304,7 @@ export class AlertDialogParamWithButtons_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -1303,6 +1313,8 @@ export class AlertDialogParamWithButtons_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1311,7 +1323,7 @@ export class AlertDialogParamWithButtons_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -1320,6 +1332,8 @@ export class AlertDialogParamWithButtons_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1328,7 +1342,7 @@ export class AlertDialogParamWithButtons_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -1337,6 +1351,8 @@ export class AlertDialogParamWithButtons_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const levelModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1865,7 +1881,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const cancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const cancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const cancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            cancelTmpBuf = ():void => {
+            const cancelTmpBuf_Closure  = ():void => {
                 const cancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
@@ -1874,6 +1890,8 @@ export class AlertDialogParamWithConfirm_serializer {
                 cancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(cancelTmpBuf_Closure, cancelTmpBuf_BufResource)
+            cancelTmpBuf = cancelTmpBuf_Closure
         }
         const cancelTmpResult : VoidCallback | undefined = cancelTmpBuf
         const alignmentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -1955,7 +1973,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissDialogAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissDialogAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -1965,6 +1983,8 @@ export class AlertDialogParamWithConfirm_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissDialogAction) => void) | undefined = onWillDismissTmpBuf
         const transitionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2147,7 +2167,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -2156,6 +2176,8 @@ export class AlertDialogParamWithConfirm_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2164,7 +2186,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -2173,6 +2195,8 @@ export class AlertDialogParamWithConfirm_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2181,7 +2205,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -2190,6 +2214,8 @@ export class AlertDialogParamWithConfirm_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2198,7 +2224,7 @@ export class AlertDialogParamWithConfirm_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -2207,6 +2233,8 @@ export class AlertDialogParamWithConfirm_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const levelModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2745,7 +2773,7 @@ export class AlertDialogParamWithOptions_serializer {
             const cancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const cancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const cancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            cancelTmpBuf = ():void => {
+            const cancelTmpBuf_Closure  = ():void => {
                 const cancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
@@ -2754,6 +2782,8 @@ export class AlertDialogParamWithOptions_serializer {
                 cancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(cancelTmpBuf_Closure, cancelTmpBuf_BufResource)
+            cancelTmpBuf = cancelTmpBuf_Closure
         }
         const cancelTmpResult : VoidCallback | undefined = cancelTmpBuf
         const alignmentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -2835,7 +2865,7 @@ export class AlertDialogParamWithOptions_serializer {
             const onWillDismissTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismissTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDismissTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDismissTmpBuf = (value0: DismissDialogAction):void => {
+            const onWillDismissTmpBuf_Closure  = (value0: DismissDialogAction):void => {
                 const onWillDismissTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDismissTmpBuf_BufArgsSerializer.writeInt32(onWillDismissTmpBuf_BufResource.resourceId);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
@@ -2845,6 +2875,8 @@ export class AlertDialogParamWithOptions_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDismissTmpBuf_Closure, onWillDismissTmpBuf_BufResource)
+            onWillDismissTmpBuf = onWillDismissTmpBuf_Closure
         }
         const onWillDismissTmpResult : ((value0: DismissDialogAction) => void) | undefined = onWillDismissTmpBuf
         const transitionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3027,7 +3059,7 @@ export class AlertDialogParamWithOptions_serializer {
             const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
+            const onDidAppearTmpBuf_Closure  = ():void => {
                 const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
@@ -3036,6 +3068,8 @@ export class AlertDialogParamWithOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBuf_Closure, onDidAppearTmpBuf_BufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBuf_Closure
         }
         const onDidAppearTmpResult : (() => void) | undefined = onDidAppearTmpBuf
         const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3044,7 +3078,7 @@ export class AlertDialogParamWithOptions_serializer {
             const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
+            const onDidDisappearTmpBuf_Closure  = ():void => {
                 const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
@@ -3053,6 +3087,8 @@ export class AlertDialogParamWithOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBuf_Closure, onDidDisappearTmpBuf_BufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBuf_Closure
         }
         const onDidDisappearTmpResult : (() => void) | undefined = onDidDisappearTmpBuf
         const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3061,7 +3097,7 @@ export class AlertDialogParamWithOptions_serializer {
             const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
+            const onWillAppearTmpBuf_Closure  = ():void => {
                 const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
@@ -3070,6 +3106,8 @@ export class AlertDialogParamWithOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBuf_Closure, onWillAppearTmpBuf_BufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBuf_Closure
         }
         const onWillAppearTmpResult : (() => void) | undefined = onWillAppearTmpBuf
         const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
@@ -3078,7 +3116,7 @@ export class AlertDialogParamWithOptions_serializer {
             const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
             const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
+            const onWillDisappearTmpBuf_Closure  = ():void => {
                 const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
@@ -3087,6 +3125,8 @@ export class AlertDialogParamWithOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBuf_Closure, onWillDisappearTmpBuf_BufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBuf_Closure
         }
         const onWillDisappearTmpResult : (() => void) | undefined = onWillDisappearTmpBuf
         const levelModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()

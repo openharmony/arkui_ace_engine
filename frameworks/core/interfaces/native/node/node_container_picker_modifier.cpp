@@ -269,10 +269,12 @@ void SetContainerPickerIndicator(ArkUINodeHandle node, const struct ArkUI_Picker
     if (indicatorStyle.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         indicatorStyle.strokeWidth = Dimension(pickerIndicatorStyle->strokeWidth, DimensionUnit::VP);
         indicatorStyle.dividerColor = Color(pickerIndicatorStyle->dividerColor);
+        indicatorStyle.isDefaultDividerColor = !pickerIndicatorStyle->dividerColor;
         indicatorStyle.startMargin = Dimension(pickerIndicatorStyle->startMargin, DimensionUnit::VP);
         indicatorStyle.endMargin = Dimension(pickerIndicatorStyle->endMargin, DimensionUnit::VP);
     } else if (indicatorStyle.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
         indicatorStyle.backgroundColor = Color(pickerIndicatorStyle->backgroundColor);
+        indicatorStyle.isDefaultBackgroundColor = !pickerIndicatorStyle->backgroundColor;
         BorderRadiusProperty borderRadius;
         borderRadius.radiusTopLeft = Dimension(pickerIndicatorStyle->topLeftRadius, DimensionUnit::VP);
         borderRadius.radiusTopRight = Dimension(pickerIndicatorStyle->topRightRadius, DimensionUnit::VP);

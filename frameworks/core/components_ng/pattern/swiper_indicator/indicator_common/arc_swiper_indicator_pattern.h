@@ -32,6 +32,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<CircleDotIndicatorPaintProperty>();
     }
     bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -47,6 +48,7 @@ public:
 
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<ArcSwiperIndicatorAccessibilityProperty>();
     }
 private:

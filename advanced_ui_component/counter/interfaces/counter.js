@@ -15,7 +15,6 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
-
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const accessibility = requireNapi('accessibility');
 const intl = requireNapi('intl');
@@ -60,7 +59,6 @@ export class CounterOptions {
   }
 }
 class CounterResource {}
-// counter color
 CounterResource.BUTTON_BACKGROUD_COLOR = {
   id: -1,
   type: 10001,
@@ -96,7 +94,6 @@ CounterResource.COUNTER_BORDER_COLOR = {
   bundleName: '__harDefaultBundleName__',
   moduleName: '__harDefaultModuleName__',
 };
-// button icon
 CounterResource.BUTTON_ADD_ICON = {
   id: -1,
   type: 20000,
@@ -125,7 +122,6 @@ CounterResource.BUTTON_ARROW_DOWN = {
   bundleName: '__harDefaultBundleName__',
   moduleName: '__harDefaultModuleName__',
 };
-// counter size
 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
 CounterResource.BUTTON_BORDER_BLUR_WIDTH = '0vp';
 CounterResource.COUNTER_BORDER_WIDTH_NUMBER = 1;
@@ -359,8 +355,6 @@ export class CounterComponent extends ViewPU {
     this.controller2 = new TextInputController();
     this.controller3 = new TextInputController();
     this.initFlag = true;
-    this.increaseStrCache = undefined;
-    this.reduceStrCache = undefined;
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.finalizeConstruction();
@@ -545,12 +539,6 @@ export class CounterComponent extends ViewPU {
     }
     if (params.initFlag !== undefined) {
       this.initFlag = params.initFlag;
-    }
-    if (params.increaseStrCache !== undefined) {
-      this.increaseStrCache = params.increaseStrCache;
-    }
-    if (params.reduceStrCache !== undefined) {
-      this.reduceStrCache = params.reduceStrCache;
     }
   }
   updateStateVars(params) {
@@ -1843,16 +1831,10 @@ export class CounterComponent extends ViewPU {
     }
   }
   getIncreaseStr() {
-    if (this.increaseStrCache === undefined) {
-      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
-    }
-    return this.increaseStrCache;
+    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
   }
   getReduceStr() {
-    if (this.reduceStrCache === undefined) {
-      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
-    }
-    return this.reduceStrCache;
+    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1915,10 +1897,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.subOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Circle,
-              stateEffect: this.subBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -2100,10 +2079,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.addOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Circle,
-              stateEffect: this.addBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -2254,10 +2230,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.subOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Circle,
-              stateEffect: this.subBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -2437,10 +2410,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.addOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Circle,
-              stateEffect: this.addBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -2552,9 +2522,7 @@ export class CounterComponent extends ViewPU {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.numberStyleOptions.label);
             Text.direction(this.counterDirection);
-            Text.margin({
-              top: CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE,
-            });
+            Text.margin({ top: CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE });
             Text.fontSize(CounterResource.COUNTER_COMPACT_LABEL_SIZE);
             Text.maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
             Text.fontColor(CounterResource.COUNTER_TEXT_COLOR);
@@ -2601,14 +2569,8 @@ export class CounterComponent extends ViewPU {
                     moduleName: '__harDefaultModuleName__',
                   });
                   TextInput.alignRules({
-                    center: {
-                      anchor: '__container__',
-                      align: VerticalAlign.Center,
-                    },
-                    middle: {
-                      anchor: '__container__',
-                      align: HorizontalAlign.Center,
-                    },
+                    center: { anchor: '__container__', align: VerticalAlign.Center },
+                    middle: { anchor: '__container__', align: HorizontalAlign.Center },
                   });
                   TextInput.width(Math.min(this.getValueLength() * 9.6, this.textWidth));
                   TextInput.height('20vp');
@@ -2911,9 +2873,7 @@ export class CounterComponent extends ViewPU {
             Column.direction(this.counterDirection);
             Column.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Column.height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT);
-            Column.borderWidth({
-              start: LengthMetrics.vp(CounterResource.COUNTER_BORDER_WIDTH_NUMBER),
-            });
+            Column.borderWidth({ start: LengthMetrics.vp(CounterResource.COUNTER_BORDER_WIDTH_NUMBER) });
             Column.borderColor(CounterResource.COUNTER_BORDER_COLOR);
           }, Column);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -2951,10 +2911,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.addOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Normal,
-              stateEffect: this.addBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -3053,11 +3010,7 @@ export class CounterComponent extends ViewPU {
             ]);
             Rect.strokeWidth(this.subBtnFocusWidh);
             Rect.stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR);
-            Rect.margin({
-              top: LengthMetrics.vp(1),
-              end: LengthMetrics.vp(1),
-              bottom: LengthMetrics.vp(2),
-            });
+            Rect.margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) });
             Rect.fillOpacity(0);
           }, Rect);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3069,10 +3022,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.subOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Normal,
-              stateEffect: this.subBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -3587,9 +3537,7 @@ export class CounterComponent extends ViewPU {
             Column.direction(this.counterDirection);
             Column.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Column.height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT);
-            Column.borderWidth({
-              start: LengthMetrics.vp(CounterResource.COUNTER_BORDER_WIDTH_NUMBER),
-            });
+            Column.borderWidth({ start: LengthMetrics.vp(CounterResource.COUNTER_BORDER_WIDTH_NUMBER) });
             Column.borderColor(CounterResource.COUNTER_BORDER_COLOR);
           }, Column);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3626,10 +3574,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.addOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Normal,
-              stateEffect: this.addBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,
@@ -3704,11 +3649,7 @@ export class CounterComponent extends ViewPU {
             ]);
             Rect.strokeWidth(this.subBtnFocusWidh);
             Rect.stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR);
-            Rect.margin({
-              top: LengthMetrics.vp(1),
-              end: LengthMetrics.vp(1),
-              bottom: LengthMetrics.vp(2),
-            });
+            Rect.margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) });
             Rect.fillOpacity(0);
           }, Rect);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3720,10 +3661,7 @@ export class CounterComponent extends ViewPU {
             Image.opacity(this.subOpacity);
           }, Image);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithLabel({
-              type: ButtonType.Normal,
-              stateEffect: this.subBtnStateEffect,
-            });
+            Button.createWithLabel({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect });
             Button.accessibilityText({
               id: -1,
               type: 10003,

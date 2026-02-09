@@ -148,6 +148,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
  
     /** @memo:intrinsic */
     callStyles(): void {
+        const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
+        customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
         this.styles?.(this.instance as T)
     }
  
@@ -551,10 +553,20 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options>, HasCommonMethod, CommonMethod {
-    private __commonStyles = new Array<(instance: CommonMethod) => void>();
+    private __commonStyles: Array<(instance: CommonMethod) => void> | undefined = undefined;
+
     override __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
         return this.__commonStyles;
     }
+
+    __set__commonStyle__Internal(val: Array<(instance: CommonMethod) => void>): void {
+        this.__commonStyles = val;
+    }
+
+    override __is_CustomComponent__Internal(): boolean {
+        return true;
+    }
+
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }
@@ -582,15 +594,15 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
  
     __applyStyles(instance: CommonMethod): void {
         if (this.__hasCommonMethod) {            
-            for (let func of this.__commonStyles) {
+            for (let func of (this.__commonStyles as Array<(instance: CommonMethod) => void>)) {
                 func(instance);
             }
-            this.__commonStyles = new Array<(instance: CommonMethod) => void>();
+            this.__commonStyles = undefined;
         }
     }
 
     get __hasCommonMethod(): boolean {
-        return this.__commonStyles.length > 0;
+        return this.__commonStyles? (this.__commonStyles as Array<(instance: CommonMethod) => void>).length > 0 : false;
     }
 
     // manually override CommonMethod methods so it has no effects.

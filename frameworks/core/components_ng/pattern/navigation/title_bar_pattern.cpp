@@ -653,6 +653,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 
 RefPtr<LayoutAlgorithm> TitleBarPattern::CreateLayoutAlgorithm()
 {
+    ACE_UINODE_TRACE(GetHost());
     auto titleBarLayoutAlgorithm = MakeRefPtr<TitleBarLayoutAlgorithm>();
     titleBarLayoutAlgorithm->SetInitialTitleOffsetY(initialTitleOffsetY_);
     titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
@@ -670,6 +671,7 @@ void TitleBarPattern::OnModifyDone()
     }
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     MountBackButton(hostNode);
     MountTitle(hostNode);
     MountSubTitle(hostNode);
@@ -1560,6 +1562,7 @@ void TitleBarPattern::HandleLongPressActionEnd()
 
 void TitleBarPattern::InitBackButtonLongPressEvent(const RefPtr<FrameNode>& backButtonNode)
 {
+    ACE_UINODE_TRACE(GetHost());
     auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
@@ -1608,6 +1611,7 @@ void TitleBarPattern::OnFontScaleConfigurationUpdate()
 void TitleBarPattern::InitMenuDragAndLongPressEvent(
     const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems)
 {
+    ACE_UINODE_TRACE(GetHost());
     CHECK_NULL_VOID(menuNode);
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);

@@ -17,14 +17,14 @@
  import hilog from '@ohos.hilog';
  
  const DOMAIN_ID = 0x0000;
- const TAG = 'InspetorTreeSerializeTool';
+ const TAG = 'InspectorTreeSerializeTool';
  
  export default namespace inspector {
     loadLibrary("inspector_ani");
     
     export function getInspectorTree(): RecordData {
         let inspectorTree: string = getInspectorTreeNative();
-        return InspetorTreeSerializeTool.parseNoThrow(inspectorTree);
+        return InspectorTreeSerializeTool.parseNoThrow(inspectorTree);
     }
     
     export native function createComponentObserver(id: string | int): ComponentObserver;
@@ -109,64 +109,62 @@
     }
  }
  
- class InspetorTreeSerializeTool {
+class InspectorTreeSerializeTool {
     public static stringifyNoThrow(obj: Record<string, Object>): String {
         try {
             return JSON.stringify(obj as Object as Record<string, Any>);
         } catch (err) {
-            hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.stringify error: ${err}`);
+            hilog.error(DOMAIN_ID, TAG, `InspectorTreeSerializeTool.stringify error: ${err}`);
             return '';
         }
     }
 
     public static parseNoThrow(inspectorTree: string): RecordData {
         try {
-            let jsonValue = JSONParser.parse(inspectorTree);
-            let res = InspetorTreeSerializeTool.jsonValue2Object(jsonValue);
+            let jsonValue = JSON.parseJsonElement(inspectorTree);
+            let res = InspectorTreeSerializeTool.jsonValue2Object(jsonValue);
             if (!(res instanceof Record)) {
-                hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.parse not Record`);
+                hilog.error(DOMAIN_ID, TAG, `InspectorTreeSerializeTool.parse not Record`);
                 return new Record<string, Object>();
             }
             return res as Record<string, RecordData>;
         } catch (err) {
-            hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.parse error: ${err}`);
+            hilog.error(DOMAIN_ID, TAG, `InspectorTreeSerializeTool.parse error: ${err}`);
             return new Record<string, Object>();
         }
     }
 
-    private static jsonValue2Object(value: JSONValue): RecordData {
-        if (value instanceof JSONString) {
-            return value.value;
-        } else if (value instanceof JSONNumber) {
-            return new Double(value.value);
-        } else if (value instanceof JSONTrue) {
+    private static jsonValue2Object(value: jsonx.JsonElement): RecordData {
+        let vType: jsonx.JsonType = value.jsonType;
+        if (vType === jsonx.JsonType.JsonString) {
+            return value.asString();
+        } else if (vType === jsonx.JsonType.JsonNumber) {
+            return value.asDouble();
+        } else if (vType === jsonx.JsonType.JsonTrue) {
             return new Boolean(true);
-        } else if (value instanceof JSONFalse) {
+        } else if (vType === jsonx.JsonType.JsonFalse) {
             return new Boolean(false);
-        } else if (value instanceof JSONNull) {
+        } else if (vType === jsonx.JsonType.JsonNull) {
             return null;
-        } else if (value instanceof JSONArray) {
-            let obj = value as JSONArray;
-            let values = obj.values;
+        } else if (vType === jsonx.JsonType.JsonArray) {
+            let values: Array<jsonx.JsonElement> = value.asArray();
             let result: Array<RecordData> = new Array<RecordData>();
             for (let i: int = 0; i < values.length; i++) {
-                result.push(InspetorTreeSerializeTool.jsonValue2Object(values[i]));
+                result.push(InspectorTreeSerializeTool.jsonValue2Object(values[i]));
             }
             return result;
-        } else if (value instanceof JSONObject) {
-            let obj = value as JSONObject;
-            let keys: Array<JSONString> = obj.keys_;
-            let values: Array<JSONValue> = obj.values;
+        } else if (vType === jsonx.JsonType.JsonObject) {
+            let iterVal: IterableIterator<[string, jsonx.JsonElement]> = value.$_iterator();
             let result: Record<string, RecordData> = new Record<string, RecordData>();
-            for (let i: int = 0; i < keys.length; i++) {
-                result[keys[i].value] = InspetorTreeSerializeTool.jsonValue2Object(values[i]);
+            for (let t of iterVal) {
+                result[t[0]] = InspectorTreeSerializeTool.jsonValue2Object(t[1]);
             }
             return result;
         } else {
-            throw new TypeError('unknown JSONValue');
+            throw new TypeError('unknown JSONElement type');
         }
     }
- }
+}
  
  export const GETINSPECTORBYKEY = inspector.getInspectorByKey;
  export const GETINSPECTORTREE = inspector.sendEventByKey;

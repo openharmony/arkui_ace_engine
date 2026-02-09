@@ -1541,26 +1541,33 @@ bool DragDropManager::PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const
             if (dragDropManager) {
                 auto frameNode = nodeWeak.Upgrade();
                 event->SetResult(DragRet::DRAG_FAIL);
+                event->SetDragBehavior(DragBehavior::UNKNOWN);
+                event->UseCustomAnimation(false);
                 dragDropManager->HandleStopDrag(frameNode, pointerEvent, event, extraParams);
             }
             DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
         },
         TaskExecutor::TaskType::UI, DROP_DELAY_TIME, "ArkUIStopDragDeadlineTimer");
     return DragDropGlobalController::GetInstance().RequestDragEndCallback(event->GetRequestIdentify(),
-        event->GetResult(), GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams));
+        event->GetResult(), event->GetDragBehavior(), event->IsUseCustomAnimation(),
+        GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams));
 }
 
-std::function<void(const DragRet&)> DragDropManager::GetStopDragCallBack(const RefPtr<FrameNode>& dragFrameNode,
-    const DragPointerEvent& pointerEvent, const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
+std::function<void(const DragRet&, const DragBehavior&, const bool&)> DragDropManager::GetStopDragCallBack(
+    const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+    const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
 {
     auto callback = [id = Container::CurrentId(), pointerEvent, event, extraParams,
-        nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
-        weakManager = WeakClaim(this)] (const DragRet& dragResult) {
+                        nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
+                        weakManager = WeakClaim(this)](const DragRet& dragResult,
+                        const DragBehavior& suggestedDropOperation, const bool& disableDropAnimation) {
         ContainerScope scope(id);
         auto dragDropManager = weakManager.Upgrade();
         CHECK_NULL_VOID(dragDropManager);
         CHECK_NULL_VOID(event);
         event->SetResult(dragResult);
+        event->SetDragBehavior(suggestedDropOperation);
+        event->UseCustomAnimation(disableDropAnimation);
         auto frameNode = nodeWeak.Upgrade();
         dragDropManager->HandleStopDrag(frameNode, pointerEvent, event, extraParams);
     };

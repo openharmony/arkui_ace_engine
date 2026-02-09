@@ -167,6 +167,27 @@ HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanFontWeightReset001
+ * @tc.desc: Test ResetFontWeight resets fontWeight to default (no value)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanFontWeightReset001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    // Set a specific font weight
+    spanModelNG.SetFontWeight(FontWeight::BOLD);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLD);
+
+    // Reset font weight
+    spanModelNG.ResetFontWeight();
+    // After reset, GetFontWeight should return std::nullopt (no value set)
+    EXPECT_EQ(spanNode->GetFontWeight().has_value(), false);
+}
+
+/**
  * @tc.name: SpanItemToJsonValue001
  * @tc.desc: Test SpanItem ToJsonValue when fontStyle is nullptr.
  * @tc.type: FUNC

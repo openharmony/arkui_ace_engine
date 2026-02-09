@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/ArcButton/ArcButtonExample001",
+    "pages/ArcButton/ArcButtonExample002",
+    "pages/ArcButton/ArcButtonExample003",
+    "pages/ArcButton/ArcButtonExample004",
+    "pages/ArcButton/ArcButtonExample005"
+  ]
+}

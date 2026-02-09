@@ -17,9 +17,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
-#include "core/interfaces/native/implementation/checkbox_group_configuration_peer.h"
+#include "core/components_ng/pattern/checkboxgroup/bridge/checkbox_group_configuration_peer.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CheckBoxGroupConfigurationAccessor {

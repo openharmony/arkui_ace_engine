@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/ellipse_shape_peer.h"
@@ -716,6 +717,33 @@ std::optional<bool> ResourceConverter::ToBoolean()
         return resWrapper_->GetBoolean(id_);
     }
     return std::nullopt;
+}
+
+template<>
+void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
+{
+    constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+    const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+    const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+    ResourceConverter converter(src);
+    if (!dst) {
+        dst = SymbolData();
+    }
+    dst->symbol = converter.ToSymbol();
+    if (!dst->symbol.has_value()) {
+        return;
+    }
+    if (dst->symbol.value() > SYSTEM_SYMBOL_BOUNDARY) {
+        std::string bundleName = converter.BundleName();
+        std::string moduleName = converter.ModuleName();
+        auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
+        std::replace(customSymbolFamilyName.begin(), customSymbolFamilyName.end(), '.', '_');
+        dst->symbolType = SymbolType::CUSTOM;
+        dst->symbolFamilyName.push_back(customSymbolFamilyName);
+    } else {
+        dst->symbolType = SymbolType::SYSTEM;
+        dst->symbolFamilyName.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+    }
 }
 
 template<>
@@ -1398,6 +1426,27 @@ FontWeightInt Convert(const Ark_String& src)
 }
 
 template<>
+FontWeightInt Convert(const Ark_Resource& src)
+{
+    FontWeightInt dst = {};
+    ResourceConverter resourceConverter(src);
+    auto resourceStrOpt = resourceConverter.ToString();
+    if (resourceStrOpt.has_value()) {
+        Ark_String arkStr;
+        std::string weightStr = resourceStrOpt.value();
+        arkStr.chars = weightStr.c_str();
+        arkStr.length = static_cast<int32_t>(weightStr.length());
+        dst = Convert<FontWeightInt>(arkStr);
+    }
+    auto resourceIntOpt = resourceConverter.ToInt();
+    if (resourceIntOpt.has_value()) {
+        Ark_Int32 intVal = resourceIntOpt.value();
+        dst = Convert<FontWeightInt>(intVal);
+    }
+    return dst;
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient& value)
 {
     Gradient gradient;
@@ -1636,7 +1685,7 @@ std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 }
 
 template<>
-CaretStyle Convert(const Ark_CaretStyle& src)
+ACE_FORCE_EXPORT CaretStyle Convert(const Ark_CaretStyle& src)
 {
     CaretStyle caretStyle;
     caretStyle.color = OptConvert<Color> (src.color);
@@ -1677,7 +1726,7 @@ void AssignCast(std::optional<DateTimeType>& dst, const Ark_intl_DateTimeOptions
 }
 
 template<>
-TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
+ACE_FORCE_EXPORT TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 {
     TextDecorationOptions options;
     options.textDecoration = OptConvert<TextDecoration>(src.type);
@@ -1701,7 +1750,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
 }
 
 template<>
-void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
 {
     switch (src) {
         case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
@@ -2497,7 +2546,8 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 
     return dimension;
 }
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+    OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Float64>(
     const Ark_Union_F64_String_Resource&, DimensionUnit);
 template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(
     const Ark_Dimension&, DimensionUnit);
@@ -2762,8 +2812,10 @@ EventLocationInfo Convert(const Ark_EventLocationInfo& src)
     dst.localLocation_.SetY(Converter::Convert<double>(src.y));
     dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
     dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
-    dst.globalDisplayLocation_.SetX(Converter::Convert<double>(src.displayX));
-    dst.globalDisplayLocation_.SetY(Converter::Convert<double>(src.displayY));
+    dst.displayLocation_.SetX(Converter::Convert<double>(src.displayX));
+    dst.displayLocation_.SetY(Converter::Convert<double>(src.displayY));
+    dst.globalDisplayLocation_.SetX(Converter::OptConvert<double>(src.globalDisplayX).value_or(0.0));
+    dst.globalDisplayLocation_.SetY(Converter::OptConvert<double>(src.globalDisplayY).value_or(0.0));
     return dst;
 }
 
@@ -3870,13 +3922,27 @@ OverflowMode Convert(const Ark_MaxLinesOptions& src)
 }
 
 template<>
-SymbolShadow Convert(const Ark_ShadowOptions& src)
+KeyboardAppearanceConfig Convert(const Ark_KeyboardAppearanceConfig& src)
+{
+    KeyboardAppearanceConfig dst;
+    dst.fluidLightMode = Converter::OptConvert<KeyboardFluidLightMode>(src.fluidLightMode).value_or(
+        KeyboardFluidLightMode::NONE);
+    dst.gradientMode = Converter::OptConvert<KeyboardGradientMode>(src.gradientMode).value_or(
+        KeyboardGradientMode::NONE);
+    return dst;
+}
+
+template<>
+ACE_FORCE_EXPORT SymbolShadow Convert(const Ark_ShadowOptions& src)
 {
     SymbolShadow dst;
     dst.color = Converter::OptConvert<Color>(src.color).value_or(Color::BLACK);
-    dst.offset.first = Converter::OptConvert<float>(src.offsetX).value_or(0.0f);
-    dst.offset.second = Converter::OptConvert<float>(src.offsetY).value_or(0.0f);
-    dst.radius = Converter::OptConvert<float>(src.radius).value_or(0.0f);
+    dst.offset.first = PipelineBase::Vp2PxWithCurrentDensity(
+        Converter::OptConvert<float>(src.offsetX).value_or(0.0f));
+    dst.offset.second = PipelineBase::Vp2PxWithCurrentDensity(
+        Converter::OptConvert<float>(src.offsetY).value_or(0.0f));
+    dst.radius = PipelineBase::Vp2PxWithCurrentDensity(
+        Converter::OptConvert<float>(src.radius).value_or(0.0f));
     return dst;
 }
 

@@ -75,6 +75,9 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
@@ -90,6 +93,7 @@
 #include "core/event/touch_event.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "common_event_manager.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -100,6 +104,7 @@
 #include "web_statusbar_click.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -115,6 +120,8 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const std::string ACC_PAGE_MODE_FULL = "FULL_SILENT";
+const std::string ACC_PAGE_MODE_SEMI = "SEMI_SILENT";
 const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
@@ -1205,23 +1212,56 @@ void WebPattern::RegisterMenuLifeCycleCallback()
 
 void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d.",
-        static_cast<int>(menuLifeCycleEvent));
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web NotifyMenuLifeCycleEvent:%{public}d selectPopupMenuShowing_:%{public}d.",
+        static_cast<int>(menuLifeCycleEvent), selectPopupMenuShowing_);
+    if (selectPopupMenuShowing_) {
+        return;
+    }
     if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
         isMenuShownFromWeb_ = true;
         isLastEventMenuClose_ = false;
         isMenuShownFromWebBeforeStartClose_ = true;
-    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR) {
-       isMenuShownFromWebBeforeStartClose_ = false;
-       isLastEventMenuClose_ = true;
-       lastMenuCloseTimestamp_ = GetCurrentTimestamp();
-    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
-        isMenuShownFromWeb_ = false;
-        if (!isFocus_) {
-            CHECK_NULL_VOID(delegate_);
-            delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
-            delegate_->OnBlur();
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_APPEAR) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto overlayManager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuNode = overlayManager->GetMenuNode(host->GetId());
+        if (!menuNode) {
+            auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(pipelineContext->GetInstanceId());
+            CHECK_NULL_VOID(subWindow);
+            auto subOverlayManager = subWindow->GetOverlayManager();
+            CHECK_NULL_VOID(subOverlayManager);
+            menuNode = subOverlayManager->GetMenuNode(host->GetId());
         }
+        if (menuNode) {
+            auto menuDestroyCallback = [weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->MenuNodeDestroyCallback();
+            };
+            menuNode->PushDestroyCallbackWithTag(menuDestroyCallback, std::to_string(host->GetId()));
+        } else {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Web NotifyMenuLifeCycleEvent can not get menuNode.");
+        }
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR && isMenuShownFromWebBeforeStartClose_) {
+        isMenuShownFromWebBeforeStartClose_ = false;
+        isLastEventMenuClose_ = true;
+        lastMenuCloseTimestamp_ = GetCurrentTimestamp();
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR && isMenuShownFromWeb_) {
+        isMenuShownFromWeb_ = false;
+    }
+}
+
+void WebPattern::MenuNodeDestroyCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::MenuNodeDestroyCallback isFocus_:%{public}d.", isFocus_);
+    if (!isFocus_) {
+        CHECK_NULL_VOID(delegate_);
+        delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
+        delegate_->OnBlur();
     }
 }
 
@@ -1373,7 +1413,11 @@ void WebPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->AddToPageEventController(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!accessibilityProperty->HasAccessibilitySamePage()) {
+        accessibilityManager->AddToPageEventController(host);
+    }
 }
 
 void WebPattern::OnDetachFromMainTree()
@@ -1391,7 +1435,11 @@ void WebPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->ReleasePageEvent(host, true, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!accessibilityProperty->HasAccessibilitySamePage()) {
+        accessibilityManager->ReleasePageEvent(host, true, false);
+    }
 }
 
 void WebPattern::OnAttachToFrameNode()
@@ -5900,6 +5948,9 @@ bool WebPattern::HandleAutoFillEvent()
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
         return UpdateAutoFillPopup();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+        if (autoFillMenuType_ != WebMenuType::TYPE_UNKNOWN_MENU) {
+            return UpdateAutoFillPopup();
+        }
         return CloseAutoFillPopup();
     }
 
@@ -5933,6 +5984,9 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
+    if (triggerType == AceAutoFillTriggerType::AUTO_REQUEST) {
+        autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
@@ -6686,7 +6740,9 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         });
     }
     bool autoWrapFlag = true;
-    auto menu = MenuView::Create(selectParam, id, host->GetTag(), autoWrapFlag);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menu = menuViewModifier->createWithSelectParams(selectParam, id, host->GetTag(), autoWrapFlag);
     CHECK_NULL_VOID(menu);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -6954,25 +7010,21 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
     int32_t selectedIndex = params->GetSelectedItem();
     TAG_LOGD(AceLogTag::ACE_WEB, "InitSelectPopupMenuViewOption selectedIndex:%{public}d", selectedIndex);
 
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (auto &&option : options) {
         optionIndex++;
         CHECK_NULL_VOID(option);
-        auto optionPattern = option->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        auto optionPaintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(optionPaintProperty);
-        optionPaintProperty->SetIdealWidthForWeb(width - OPTION_MARGIN.ConvertToPx());
-        optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * dipScale));
+        menuItemModifier->setIdealWidthForWeb(option, width - OPTION_MARGIN.ConvertToPx());
+        menuItemModifier->setFontSize(option, Dimension(params->GetItemFontSize() * dipScale));
         if (selectedIndex == optionIndex) {
-            optionPattern->SetFontColor(SELECTED_OPTION_FONT_COLOR);
-            optionPattern->SetBgColor(SELECTED_OPTION_BACKGROUND_COLOR);
-            optionPattern->UpdateNextNodeDivider(false);
-            optionPaintProperty->UpdateNeedDivider(false);
+            menuItemModifier->setFontColor(option, SELECTED_OPTION_FONT_COLOR, true);
+            menuItemModifier->setBgColor(option, SELECTED_OPTION_BACKGROUND_COLOR);
+            menuItemModifier->updateNextNodeDivider(option, false);
+            menuItemModifier->updateNeedDivider(option, false);
         }
-        auto hub = option->GetEventHub<MenuItemEventHub>();
-        CHECK_NULL_VOID(hub);
         if (optionIndex >= 0 && static_cast<uint32_t>(optionIndex) < items.size()) {
-            hub->SetEnabled(items[optionIndex]->GetIsEnabled());
+            menuItemModifier->setEnabled(option, items[optionIndex]->GetIsEnabled());
             auto focusHub = option->GetFocusHub();
             if (focusHub) {
                 focusHub->SetEnabled(items[optionIndex]->GetIsEnabled());
@@ -6983,7 +7035,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
             CHECK_NULL_VOID(callback);
             callback->Continue(indices);
         };
-        hub->SetOnSelect(std::move(selectCallback));
+        menuItemModifier->setOnSelect(option, std::move(selectCallback));
         option->MarkModifyDone();
     }
 }
@@ -6996,10 +7048,10 @@ void WebPattern::InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
     CHECK_NULL_VOID(menuWrapper);
     auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
 
-    InitSelectPopupMenuViewOption(menuPattern->GetOptions(), callback, params, dipScale);
+    InitSelectPopupMenuViewOption(menuModifier->getOptions(menu), callback, params, dipScale);
 }
 
 OffsetF WebPattern::GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound)
@@ -8259,6 +8311,29 @@ void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
     }
 }
 
+bool WebPattern::IsAccessibilitySamePage()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    std::string accessibilitySamePage = accessibilityProperty->GetAccessibilitySamePage();
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::IsAccessibilitySamePage accessibilitySamePage = %{public}s",
+        accessibilitySamePage.c_str());
+    if (accessibilitySamePage == ACC_PAGE_MODE_FULL) {
+        return true;
+    } else if (accessibilitySamePage == ACC_PAGE_MODE_SEMI) {
+        if (useSemiSamePage_) {
+            return false;
+        }
+        useSemiSamePage_ = true;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
 {
     if (!accessibilityState_) {
@@ -8511,15 +8586,18 @@ void WebPattern::OnShowAutofillPopup(
     for (auto& item : menu_items) {
         selectParam.push_back({ item, "" });
     }
-    auto menu = MenuView::Create(selectParam, id, host->GetTag());
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menu = menuViewModifier->createWithSelectParams(selectParam, id, host->GetTag(), false);
     CHECK_NULL_VOID(menu);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto options = menuModifier->getOptions(menuContainer);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto &&option : options) {
         auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
             auto webPattern = weak.Upgrade();
@@ -8528,12 +8606,12 @@ void WebPattern::OnShowAutofillPopup(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
-            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-            if (!hub || !optionPattern) {
+            CHECK_NULL_CONTINUE(menuItemModifier);
+            if (!menuItemModifier->hasMenuItemEventHub(optionNode) ||
+                !menuItemModifier->hasMenuItemPattern(optionNode)) {
                 continue;
             }
-            hub->SetOnSelect(std::move(selectCallback));
+            menuItemModifier->setOnSelect(optionNode, std::move(selectCallback));
             optionNode->MarkModifyDone();
         }
     }
@@ -8566,14 +8644,17 @@ void WebPattern::OnShowAutofillPopupV2(
     menuParam.isShowInSubWindow = false;
     auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
     CHECK_NULL_VOID(dataListNode);
-    auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
-        MenuType::MENU, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menu = menuViewModifier->createWithOptionParams(
+        std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(), MenuType::MENU, menuParam);
     CHECK_NULL_VOID(menu);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto options = menuModifier->getOptions(menuContainer);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto &&option : options) {
         auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
             auto webPattern = weak.Upgrade();
@@ -8582,12 +8663,12 @@ void WebPattern::OnShowAutofillPopupV2(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
-            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-            if (!hub || !optionPattern) {
+            CHECK_NULL_CONTINUE(menuItemModifier);
+            if (!menuItemModifier->hasMenuItemEventHub(optionNode) ||
+                !menuItemModifier->hasMenuItemPattern(optionNode)) {
                 continue;
             }
-            hub->SetOnSelect(std::move(selectCallback));
+            menuItemModifier->setOnSelect(optionNode, std::move(selectCallback));
             optionNode->MarkModifyDone();
         }
     }

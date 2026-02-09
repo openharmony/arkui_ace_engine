@@ -32,7 +32,7 @@ class SpanStringBase;
 
 enum class SpanStringOperation { REPLACE = 0, INSERT, REMOVE };
 
-class ACE_EXPORT SpanString : public SpanStringBase {
+class ACE_FORCE_EXPORT SpanString : public SpanStringBase {
     DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
 public:

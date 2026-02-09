@@ -159,7 +159,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void FromJson(const std::unique_ptr<JsonValue>& json);
-    Offset GetOffset() const;
+    ACE_FORCE_EXPORT Offset GetOffset() const;
     Offset GetScreenOffset() const;
     Offset GetGlobalDisplayOffset() const;
     int32_t GetTargetDisplayId() const;

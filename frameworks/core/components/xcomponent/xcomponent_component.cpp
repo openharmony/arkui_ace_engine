@@ -15,6 +15,7 @@
 
 #include "core/components/xcomponent/xcomponent_component.h"
 
+#include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/render_xcomponent.h"
 #include "core/components/xcomponent/xcomponent_controller_impl.h"
 #include "core/components/xcomponent/xcomponent_element.h"

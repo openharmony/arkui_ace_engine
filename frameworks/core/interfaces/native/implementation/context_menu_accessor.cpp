@@ -13,32 +13,29 @@
  * limitations under the License.
  */
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ContextMenuAccessor {
-void CloseImpl()
-{
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
-#if defined(MULTIPLE_WINDOW_SUPPORTED)
-    if (Container::IsCurrentUseNewPipeline()) {
-        SubwindowManager::GetInstance()->HideMenuNG();
-    } else {
-        SubwindowManager::GetInstance()->CloseMenu();
-    }
-#endif
-}
-} // ContextMenuAccessor
 const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
 {
-    static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
-        ContextMenuAccessor::CloseImpl,
-    };
-    return &ContextMenuAccessorImpl;
+    static const GENERATED_ArkUIContextMenuAccessor* accessor = nullptr;
+    if (accessor == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Menu");
+        if (module == nullptr) {
+            LOGF("Can't find ContextMenuAccessor dynamic module");
+            abort();
+        }
+        accessor = reinterpret_cast<const GENERATED_ArkUIContextMenuAccessor*>(
+            module->GetCustomModifier("contextMenuAccessor"));
+    }
+    return accessor;
 }
 
 }

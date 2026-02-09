@@ -113,8 +113,8 @@ public:
     virtual void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const = 0;
     virtual std::string ToString() const = 0;
 
-    int32_t GetStartIndex() const;
-    int32_t GetEndIndex() const;
+    ACE_FORCE_EXPORT int32_t GetStartIndex() const;
+    ACE_FORCE_EXPORT int32_t GetEndIndex() const;
     void UpdateStartIndex(int32_t startIndex);
     void UpdateEndIndex(int32_t endIndex);
     int32_t GetLength() const;
@@ -131,8 +131,8 @@ class FontSpan : public SpanBase {
 public:
     FontSpan() = default;
     explicit FontSpan(Font font);
-    FontSpan(Font font, int32_t start, int32_t end);
-    Font GetFont() const;
+    ACE_FORCE_EXPORT FontSpan(Font font, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT Font GetFont() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
@@ -163,15 +163,15 @@ public:
     explicit DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
         std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
         std::optional<TextDecorationOptions> options, const RefPtr<ResourceObject>& colorResObj);
-    DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
+    ACE_FORCE_EXPORT DecorationSpan(const std::vector<TextDecoration>& types, std::optional<Color> color,
         std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale,
         std::optional<TextDecorationOptions> options, int32_t start, int32_t end,
         const RefPtr<ResourceObject>& colorResObj);
     TextDecoration GetTextDecorationFirst() const;
-    std::vector<TextDecoration> GetTextDecorationTypes() const;
-    void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
-    void RemoveTextDecorationType(TextDecoration value);
-    void AddTextDecorationType(TextDecoration value);
+    ACE_FORCE_EXPORT std::vector<TextDecoration> GetTextDecorationTypes() const;
+    ACE_FORCE_EXPORT void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
+    ACE_FORCE_EXPORT void RemoveTextDecorationType(TextDecoration value);
+    ACE_FORCE_EXPORT void AddTextDecorationType(TextDecoration value);
     std::optional<Color> GetColor() const;
     std::optional<TextDecorationStyle> GetTextDecorationStyle() const;
     std::optional<float> GetTextDecorationLineThicknessScale() const;
@@ -225,7 +225,7 @@ class LetterSpacingSpan : public SpanBase {
 public:
     LetterSpacingSpan() = default;
     explicit LetterSpacingSpan(Dimension letterSpacing);
-    LetterSpacingSpan(Dimension letterSpacing, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT LetterSpacingSpan(Dimension letterSpacing, int32_t start, int32_t end);
     Dimension GetLetterSpacing() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
@@ -279,7 +279,7 @@ class TextShadowSpan : public SpanBase {
 public:
     TextShadowSpan() = default;
     explicit TextShadowSpan(std::vector<Shadow> font);
-    TextShadowSpan(std::vector<Shadow> font, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT TextShadowSpan(std::vector<Shadow> font, int32_t start, int32_t end);
     std::vector<Shadow> GetTextShadow() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
@@ -299,7 +299,8 @@ class BackgroundColorSpan : public SpanBase {
 public:
     BackgroundColorSpan() = default;
     explicit BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_);
-    BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT BackgroundColorSpan(
+        std::optional<TextBackgroundStyle> textBackgroundStyle_, int32_t start, int32_t end);
     TextBackgroundStyle GetBackgroundColor() const;
     void SetBackgroundColorGroupId(int32_t groupId);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
@@ -337,7 +338,7 @@ class CustomSpan : public SpanBase {
     DECLARE_ACE_TYPE(CustomSpan, SpanBase);
 
 public:
-    CustomSpan();
+    ACE_FORCE_EXPORT CustomSpan();
     explicit CustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
         std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw);
 
@@ -347,8 +348,8 @@ public:
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
-    void SetOnMeasure(std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> onMeasure);
-    void SetOnDraw(std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw);
+    ACE_FORCE_EXPORT void SetOnMeasure(std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> onMeasure);
+    ACE_FORCE_EXPORT void SetOnDraw(std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> GetOnMeasure();
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> GetOnDraw();
     std::string ToString() const override;
@@ -367,7 +368,7 @@ class ParagraphStyleSpan : public SpanBase {
 public:
     ParagraphStyleSpan() = default;
     explicit ParagraphStyleSpan(SpanParagraphStyle paragraphStyle);
-    ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end);
     SpanParagraphStyle GetParagraphStyle() const
     {
         return paragraphStyle_;
@@ -393,7 +394,7 @@ class LineHeightSpan : public SpanBase {
 public:
     LineHeightSpan() = default;
     explicit LineHeightSpan(Dimension lineHeight);
-    LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end);
     Dimension GetLineHeight() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
@@ -414,7 +415,7 @@ class HalfLeadingSpan : public SpanBase {
 public:
     HalfLeadingSpan() = default;
     explicit HalfLeadingSpan(bool halfLeading);
-    HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end);
+    ACE_FORCE_EXPORT HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end);
     bool GetHalfLeading() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;

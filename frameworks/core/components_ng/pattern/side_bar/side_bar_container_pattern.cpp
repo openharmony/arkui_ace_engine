@@ -418,7 +418,7 @@ void SideBarContainerPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    ACE_UINODE_TRACE(host);
     CreateAndMountNodes();
 
     auto hub = host->GetEventHub<EventHub>();
@@ -762,7 +762,7 @@ void SideBarContainerPattern::CreateAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    ACE_UINODE_TRACE(host);
     if (!controller_) {
         controller_ = CREATE_ANIMATOR(host->GetContextRefPtr());
     }
@@ -1427,6 +1427,7 @@ void SideBarContainerPattern::ShowDialogWithNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto buttonNode = DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_VOID(buttonNode);
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();

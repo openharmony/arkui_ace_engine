@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 RefPtr<BarItemNode> BarItemNode::GetOrCreateBarItemNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = GetFrameNode(tag, nodeId);
     if (frameNode) {
         return AceType::DynamicCast<BarItemNode>(frameNode);

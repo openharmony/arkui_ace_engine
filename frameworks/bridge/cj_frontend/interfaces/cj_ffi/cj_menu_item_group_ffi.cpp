@@ -15,29 +15,48 @@
 
 #include "cj_menu_item_group_ffi.h"
 #include "cj_lambda.h"
+
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::MenuItemGroupView* GetMenuItemGroupModel()
+{
+    static NG::MenuItemGroupView* model = nullptr;
+    if (model == nullptr) {
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItemGroup");
+        if (module == nullptr) {
+            LOGF("Can't find MenuItem dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::MenuItemGroupView*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkMenuItemGroupCreateByString(const char* header, const char* footer)
 {
-    NG::MenuItemGroupView::Create();
+    GetMenuItemGroupModel()->CreateCJ();
     std::string headerStr = header;
     std::string footerStr = footer;
     if (!headerStr.empty()) {
-        NG::MenuItemGroupView::SetHeader(headerStr);
+        GetMenuItemGroupModel()->SetHeaderCJ(headerStr);
     }
     if (!footerStr.empty()) {
-        NG::MenuItemGroupView::SetFooter(footerStr);
+        GetMenuItemGroupModel()->SetFooterCJ(footerStr);
     }
 }
 
 void FfiOHOSAceFrameworkMenuItemGroupCreateByBuilder(void(*header)(), void(*footer)())
 {
-    NG::MenuItemGroupView::Create();
+    GetMenuItemGroupModel()->CreateCJ();
     RefPtr<NG::UINode> rheader;
     {
         auto headerBuilderFunc = CJLambda::Create(header);
@@ -47,7 +66,7 @@ void FfiOHOSAceFrameworkMenuItemGroupCreateByBuilder(void(*header)(), void(*foot
         rheader = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(rheader);
     }
-    NG::MenuItemGroupView::SetHeader(rheader);
+    GetMenuItemGroupModel()->SetHeaderCJ(rheader);
     RefPtr<NG::UINode> rfooter;
     {
         auto footerBuilderFunc = CJLambda::Create(footer);
@@ -57,6 +76,6 @@ void FfiOHOSAceFrameworkMenuItemGroupCreateByBuilder(void(*header)(), void(*foot
         rfooter = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(rfooter);
     }
-    NG::MenuItemGroupView::SetFooter(rfooter);
+    GetMenuItemGroupModel()->SetFooterCJ(rfooter);
 }
 }

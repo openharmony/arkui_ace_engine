@@ -478,6 +478,17 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
         result.entity.size(), GetHost() ? GetHost()->GetId() : -1);
     auto entityJson = JsonUtil::ParseJsonString(result.entity);
     CHECK_NULL_VOID(entityJson);
+    // Remove time entity result cache.
+    // Do not remove url (the results are accepted from other function, will lose url result)
+    auto aiSpanIterator = aiSpanMap_.begin();
+    while (aiSpanIterator != aiSpanMap_.end()) {
+        if (aiSpanIterator->second.type == TextDataDetectType::DATE_TIME &&
+            aiSpanIterator->first >= startPos && aiSpanIterator->first < startPos + AI_TEXT_MAX_LENGTH) {
+            aiSpanIterator = aiSpanMap_.erase(aiSpanIterator);
+        } else {
+            ++aiSpanIterator;
+        }
+    }
     for (const auto& type : TEXT_DETECT_MAP) {
         auto jsonValue = entityJson->GetValue(type.second);
         ParseAIJson(jsonValue, type.first, startPos);

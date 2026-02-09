@@ -529,7 +529,7 @@ HWTEST_F(TextFieldTestNgThree, PaintUnitRect001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
-    textFieldPattern->PaintUnitRect();
+    textFieldPattern->PaintFocusAreaRect();
     EXPECT_EQ(textFieldPattern->selectController_, 1);
 }
 

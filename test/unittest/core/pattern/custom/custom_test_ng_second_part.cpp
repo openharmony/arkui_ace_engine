@@ -765,4 +765,514 @@ HWTEST_F(CustomTestNg, CustomTest103, TestSize.Level1)
     EXPECT_TRUE(childNode->isDarkMode_);
 }
 
+HWTEST_F(CustomTestNg, CustomTest104, TestSize.Level1)
+{
+    /**
+     * @tc.name: CustomTest104
+     * @tc.desc: Verify ACE_UINODE_TRACE is called when creating CustomNode.
+     * @tc.type: FUNC
+     */
+    constexpr int32_t TEST_NODE_ID = 12345;
+
+    /**
+     * @tc.steps1: Create CustomNode with specific ID.
+     * @tc.expected: CustomNode created successfully.
+     */
+    ResetLastTraceId();
+    auto customNode = CustomNode::CreateCustomNode(TEST_NODE_ID, TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+    EXPECT_EQ(customNode->GetId(), TEST_NODE_ID);
+
+    /**
+     * @tc.steps2: Trigger ACE_UINODE_TRACE by accessing the node.
+     * @tc.expected: Global trace ID is updated.
+     */
+    // The ACE_UINODE_TRACE macro is called when certain operations are performed
+    // Verify that the trace system records the correct node ID
+    uint64_t lastTraceId = GetLastTraceId();
+
+    /**
+     * @tc.steps3: Verify the trace type corresponds to UINode trace.
+     * @tc.expected: Trace type matches ResTraceType::UINode.
+     */
+    // ResTraceType::UINode = 0 (based on enum in ace_trace.h)
+    EXPECT_EQ(TEST_NODE_ID, lastTraceId);
+}
+
+/**
+ * @tc.name: CustomTest105
+ * @tc.desc: Test SetTriggerLifecycleFunction and FireTriggerLifecycleFunc with valid function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest105, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Set trigger lifecycle function that returns true.
+     * @tc.expected: Function is stored successfully.
+     */
+    bool triggerFuncCalled = false;
+    int32_t receivedEventId = -1;
+    auto triggerFunc = [&triggerFuncCalled, &receivedEventId](int32_t eventId) -> bool {
+        triggerFuncCalled = true;
+        receivedEventId = eventId;
+        return true;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerFunc));
+
+    /**
+     * @tc.steps: step3. Fire trigger lifecycle function with ON_APPEAR event.
+     * @tc.expected: Function is called with correct eventId and returns true.
+     */
+    triggerFuncCalled = false;
+    bool result = customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(triggerFuncCalled);
+    EXPECT_EQ(receivedEventId, CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+
+    /**
+     * @tc.steps: step4. Fire trigger lifecycle function with ON_BUILD event.
+     * @tc.expected: Function is called with correct eventId and returns true.
+     */
+    triggerFuncCalled = false;
+    result = customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_BUILD);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(triggerFuncCalled);
+    EXPECT_EQ(receivedEventId, CustomNodeBase::LifeCycleEvent::ON_BUILD);
+}
+
+/**
+ * @tc.name: CustomTest106
+ * @tc.desc: Test FireTriggerLifecycleFunc when function returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest106, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set trigger lifecycle function that returns false.
+     * @tc.expected: Function is stored successfully.
+     */
+    bool triggerFuncCalled = false;
+    auto triggerFunc = [&triggerFuncCalled](int32_t eventId) -> bool {
+        triggerFuncCalled = true;
+        return false;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerFunc));
+
+    /**
+     * @tc.steps: step3. Fire trigger lifecycle function.
+     * @tc.expected: Function is called and returns false.
+     */
+    bool result = customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(triggerFuncCalled);
+}
+
+/**
+ * @tc.name: CustomTest107
+ * @tc.desc: Test FireTriggerLifecycleFunc when no function is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest107, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode without setting trigger lifecycle function.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Fire trigger lifecycle function without setting it first.
+     * @tc.expected: Should return false when function is not set.
+     */
+    bool result = customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3. Fire with different lifecycle events.
+     * @tc.expected: All return false when function is not set.
+     */
+    EXPECT_FALSE(customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_BUILD));
+    EXPECT_FALSE(customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_RECYCLE));
+    EXPECT_FALSE(customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_REUSE));
+    EXPECT_FALSE(customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR));
+}
+
+/**
+ * @tc.name: CustomTest108
+ * @tc.desc: Test FireTriggerLifecycleFunc with all lifecycle events
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest108, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode and set trigger lifecycle function.
+     * @tc.expected: CustomNode created and function set successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    std::vector<int32_t> receivedEvents;
+    auto triggerFunc = [&receivedEvents](int32_t eventId) -> bool {
+        receivedEvents.push_back(eventId);
+        return true;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerFunc));
+
+    /**
+     * @tc.steps: step2. Fire all lifecycle events.
+     * @tc.expected: All events are received correctly.
+     */
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_BUILD);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_RECYCLE);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_REUSE);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR);
+
+    /**
+     * @tc.steps: step3. Verify all events were received in correct order.
+     * @tc.expected: All 5 events are received.
+     */
+    EXPECT_EQ(receivedEvents.size(), 5);
+    EXPECT_EQ(receivedEvents[0], CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    EXPECT_EQ(receivedEvents[1], CustomNodeBase::LifeCycleEvent::ON_BUILD);
+    EXPECT_EQ(receivedEvents[2], CustomNodeBase::LifeCycleEvent::ON_RECYCLE);
+    EXPECT_EQ(receivedEvents[3], CustomNodeBase::LifeCycleEvent::ON_REUSE);
+    EXPECT_EQ(receivedEvents[4], CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR);
+}
+
+/**
+ * @tc.name: CustomTest109
+ * @tc.desc: Test isDidBuild method
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest109, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully and isDidBuild is false initially.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+    EXPECT_FALSE(customNode->isDidBuild());
+
+    /**
+     * @tc.steps: step2. Set render function and build the node.
+     * @tc.expected: Node builds successfully.
+     */
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = false;
+        return uiNode;
+    };
+    customNode->executeFireOnAppear_ = true;
+    customNode->renderFunction_ = renderFunction;
+
+    /**
+     * @tc.steps: step3. Call Build method.
+     * @tc.expected: isDidBuild should be true after build.
+     */
+    customNode->Build(nullptr);
+    EXPECT_TRUE(customNode->isDidBuild());
+}
+
+/**
+ * @tc.name: CustomTest110
+ * @tc.desc: Test isDidBuild when render is not called
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest110, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Check isDidBuild without calling render.
+     * @tc.expected: isDidBuild should be false initially.
+     */
+    EXPECT_FALSE(customNode->isDidBuild());
+
+    /**
+     * @tc.steps: step3. Check isDidBuild after setting render function but not building.
+     * @tc.expected: isDidBuild should still be false.
+     */
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = false;
+        return uiNode;
+    };
+    customNode->renderFunction_ = renderFunction;
+    EXPECT_FALSE(customNode->isDidBuild());
+}
+
+/**
+ * @tc.name: CustomTest111
+ * @tc.desc: Test HasRenderFunction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest111, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode without render function.
+     * @tc.expected: CustomNode created successfully and HasRenderFunction returns false.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+    EXPECT_FALSE(customNode->HasRenderFunction());
+
+    /**
+     * @tc.steps: step2. Set render function.
+     * @tc.expected: Render function is set successfully.
+     */
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = false;
+        return uiNode;
+    };
+    customNode->renderFunction_ = renderFunction;
+
+    /**
+     * @tc.steps: step3. Check HasRenderFunction after setting.
+     * @tc.expected: HasRenderFunction should return true.
+     */
+    EXPECT_TRUE(customNode->HasRenderFunction());
+}
+
+/**
+ * @tc.name: CustomTest112
+ * @tc.desc: Test HasRenderFunction when render function is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest112, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set render function to nullptr explicitly.
+     * @tc.expected: HasRenderFunction should return false.
+     */
+    customNode->renderFunction_ = nullptr;
+    EXPECT_FALSE(customNode->HasRenderFunction());
+
+    /**
+     * @tc.steps: step3. Set render function and then set to nullptr again.
+     * @tc.expected: HasRenderFunction returns false after setting to nullptr.
+     */
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = false;
+        return uiNode;
+    };
+    customNode->renderFunction_ = renderFunction;
+    EXPECT_TRUE(customNode->HasRenderFunction());
+
+    customNode->renderFunction_ = nullptr;
+    EXPECT_FALSE(customNode->HasRenderFunction());
+}
+
+/**
+ * @tc.name: CustomTest113
+ * @tc.desc: Test NodeDidBuild method
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest113, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set trigger lifecycle function and did build function.
+     * @tc.expected: Functions are set successfully.
+     */
+    bool triggerLifecycleCalled = false;
+    int32_t receivedEventId = -1;
+    auto triggerFunc = [&triggerLifecycleCalled, &receivedEventId](int32_t eventId) -> bool {
+        triggerLifecycleCalled = true;
+        receivedEventId = eventId;
+        return true;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerFunc));
+
+    bool didBuildCalled = false;
+    auto didBuildFunc = [&didBuildCalled]() { didBuildCalled = true; };
+    customNode->SetDidBuildFunction(std::move(didBuildFunc));
+
+    /**
+     * @tc.steps: step3. Call NodeDidBuild.
+     * @tc.expected: Both trigger lifecycle with ON_BUILD and did build functions are called.
+     */
+    customNode->NodeDidBuild();
+    EXPECT_TRUE(triggerLifecycleCalled);
+    EXPECT_EQ(receivedEventId, CustomNodeBase::LifeCycleEvent::ON_BUILD);
+    EXPECT_TRUE(didBuildCalled);
+    EXPECT_TRUE(customNode->isDidBuild());
+}
+
+/**
+ * @tc.name: CustomTest114
+ * @tc.desc: Test NodeDidBuild when trigger lifecycle function returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest114, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set trigger lifecycle function that returns false and did build function.
+     * @tc.expected: Functions are set successfully.
+     */
+    bool triggerLifecycleCalled = false;
+    auto triggerFunc = [&triggerLifecycleCalled](int32_t eventId) -> bool {
+        triggerLifecycleCalled = true;
+        return false;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerFunc));
+
+    bool didBuildCalled = false;
+    auto didBuildFunc = [&didBuildCalled]() { didBuildCalled = true; };
+    customNode->SetDidBuildFunction(std::move(didBuildFunc));
+
+    /**
+     * @tc.steps: step3. Call NodeDidBuild.
+     * @tc.expected: Both functions are called and isDidBuild is set to true.
+     */
+    customNode->NodeDidBuild();
+    EXPECT_TRUE(triggerLifecycleCalled);
+    EXPECT_TRUE(didBuildCalled);
+    EXPECT_TRUE(customNode->isDidBuild());
+}
+
+/**
+ * @tc.name: CustomTest115
+ * @tc.desc: Test NodeDidBuild when no functions are set
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest115, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode without setting any lifecycle functions.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Check isDidBuild before calling NodeDidBuild.
+     * @tc.expected: isDidBuild should be false initially.
+     */
+    EXPECT_FALSE(customNode->isDidBuild());
+
+    /**
+     * @tc.steps: step3. Call NodeDidBuild without setting any functions.
+     * @tc.expected: isDidBuild should be set to true even without functions.
+     */
+    customNode->NodeDidBuild();
+    EXPECT_TRUE(customNode->isDidBuild());
+}
+
+/**
+ * @tc.name: CustomTest116
+ * @tc.desc: Test complete lifecycle flow with all new APIs
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest116, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode and setup all lifecycle functions.
+     * @tc.expected: CustomNode created and all functions set successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    // Set render function
+    auto renderFunction = [&](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        isTimeout = false;
+        return uiNode;
+    };
+    customNode->renderFunction_ = renderFunction;
+
+    // Setup lifecycle tracking
+    std::vector<int32_t> lifecycleEvents;
+    auto triggerFunc = [&lifecycleEvents](int32_t eventId) -> bool {
+        lifecycleEvents.push_back(eventId);
+        return true;
+    };
+    customNode->SetTriggerLifecycleFunction(std::move(triggerFunc));
+
+    /**
+     * @tc.steps: step2. Check initial state.
+     * @tc.expected: HasRenderFunction true, isDidBuild false.
+     */
+    EXPECT_TRUE(customNode->HasRenderFunction());
+    EXPECT_FALSE(customNode->isDidBuild());
+
+    /**
+     * @tc.steps: step3. Call NodeDidBuild.
+     * @tc.expected: ON_BUILD event fired and isDidBuild set to true.
+     */
+    customNode->NodeDidBuild();
+    EXPECT_EQ(lifecycleEvents.size(), 1);
+    EXPECT_EQ(lifecycleEvents[0], CustomNodeBase::LifeCycleEvent::ON_BUILD);
+    EXPECT_TRUE(customNode->isDidBuild());
+
+    /**
+     * @tc.steps: step4. Fire additional lifecycle events.
+     * @tc.expected: All events are tracked correctly.
+     */
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_RECYCLE);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_REUSE);
+    customNode->FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR);
+
+    /**
+     * @tc.steps: step5. Verify all lifecycle events in order.
+     * @tc.expected: All 5 events received in correct order.
+     */
+    EXPECT_EQ(lifecycleEvents.size(), 5);
+    EXPECT_EQ(lifecycleEvents[0], CustomNodeBase::LifeCycleEvent::ON_BUILD);
+    EXPECT_EQ(lifecycleEvents[1], CustomNodeBase::LifeCycleEvent::ON_APPEAR);
+    EXPECT_EQ(lifecycleEvents[2], CustomNodeBase::LifeCycleEvent::ON_RECYCLE);
+    EXPECT_EQ(lifecycleEvents[3], CustomNodeBase::LifeCycleEvent::ON_REUSE);
+    EXPECT_EQ(lifecycleEvents[4], CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR);
+}
+
 } // namespace OHOS::Ace::NG

@@ -53,12 +53,12 @@ openharmony-build/
 
 **分析编译错误**：
 ```bash
-/home/sunfei/workspace/openHarmony/foundation/arkui/ace_engine/.claude/skills/openharmony-build/scripts/analyze_build_error.sh rk3568
+<ace_engine_root>/.claude/skills/openharmony-build/scripts/analyze_build_error.sh rk3568
 ```
 
 **快速查看最近错误**：
 ```bash
-/home/sunfei/workspace/openHarmony/foundation/arkui/ace_engine/.claude/skills/openharmony-build/scripts/find_recent_errors.sh rk3568
+<ace_engine_root>/.claude/skills/openharmony-build/scripts/find_recent_errors.sh rk3568
 ```
 
 ## 编译命令
@@ -102,6 +102,38 @@ cd "$(find_root)"
 ./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target ace_engine --ccache
 ```
 
+### SDK 编译（特殊场景）
+
+⚠️ **重要**：SDK 编译有特殊的输出目录结构
+
+```bash
+# 编译 OpenHarmony SDK（不指定 build-target）
+./build.sh --export-para PYCACHE_ENABLE:true --product-name ohos-sdk --ccache
+```
+
+**SDK 编译特点**：
+- **无需 `--build-target`**：不要指定编译目标
+- **输出目录**：`out/sdk/`（不是 `out/ohos-sdk/`）
+- **特殊情况**：与其他产品不同，SDK 的输出固定在 `out/sdk/` 目录
+- **用途**：构建用于应用开发的 OpenHarmony SDK
+
+**触发关键词**：
+- "编译 sdk" / "编译 SDK"
+- "build sdk" / "build SDK"
+- "编译 ohos-sdk"
+
+**示例工作流**：
+```bash
+# 导航到 OpenHarmony 根目录
+cd "$(find_root)"
+
+# 编译 SDK（不指定 target）
+./build.sh --export-para PYCACHE_ENABLE:true --product-name ohos-sdk --ccache
+
+# 检查 SDK 编译日志（注意：是 out/sdk/ 而不是 out/ohos-sdk/）
+cat "$OH_ROOT/out/sdk/build.log"
+```
+
 ### 测试编译
 
 **推荐：编译 ACE Engine 测试用例**（快速，适合 ACE Engine 开发）：
@@ -130,7 +162,7 @@ cd "$(find_root)"
 ### 常用产品名
 
 - `rk3568` - RK3568 开发板
-- `ohos-sdk` - OpenHarmony SDK
+- `ohos-sdk` - OpenHarmony SDK（⚠️ 输出目录特殊：`out/sdk/` 而非 `out/ohos-sdk/`）
 - `rk3588` - RK3588 开发板（高性能）
 
 ## 日志位置
@@ -144,15 +176,19 @@ OH_ROOT=$(find_root)
 
 ```
 $OH_ROOT/out/
-├── <product-name>/
+├── <product-name>/         # 普通产品输出目录
 │   ├── build.log          # 主编译日志
 │   ├── packages/          # 编译输出包
 │   └── logs/              # 组件日志
+└── sdk/                   # SDK 特殊输出目录（⚠️ 特例）
+    ├── build.log          # SDK 编译日志
+    └── packages/          # SDK 输出包
 ```
 
 示例：
 - `$OH_ROOT/out/rk3568/build.log` - RK3568 编译日志
 - `$OH_ROOT/out/rk3568/logs/arkui/ace_engine/` - ACE Engine 组件日志
+- `$OH_ROOT/out/sdk/build.log` - SDK 编译日志（⚠️ 特殊目录）
 
 ## 错误分析流程
 
@@ -207,18 +243,40 @@ $OH_ROOT/out/
 - "快速编译"
 - "跳过gn编译"
 - "fast-build"
-- "编译测试" (新增)
-- "编译测试用例" (新增)
-- "build ace_engine_test" (新增)
+- "编译测试"
+- "编译测试用例"
+- "build ace_engine_test"
+- "编译 sdk" / "编译 SDK" (新增)
+- "build sdk" / "build SDK" (新增)
+- "编译 ohos-sdk" (新增)
+- "编译测试列表" / "build test list" (新增)
+- "按列表编译测试" / "compile tests from list" (新增)
+- "编译指定测试" / "build specified tests" (新增)
 
 ## 开发者信息
 
 - **位置**: `ace_engine/.claude/skills/openharmony-build/`
-- **版本**: 0.1.0
+- **版本**: 0.4.0
 - **依赖**: OpenHarmony 编译环境（build.sh, hb）
 - **路径查找**: 动态查找 `.gn` 文件定位 OpenHarmony 根目录
 
 ## 更新日志
+
+### v0.4.0 (2026-02-02)
+- ✨ 新增测试目标列表编译功能
+- 📝 支持从 `unittest_targets.txt` 文件读取目标列表
+- 🎯 依次编译列表中的每个目标，使用 `--build-target=<target>` 参数
+- ⚠️ 遇到错误立即停止，不再编译后续目标
+- 🔄 优先在 ace_engine 目录搜索文件，回退到 OpenHarmony 根目录
+- 📋 新增触发关键词："编译测试列表"、"build test list"、"按列表编译测试"、"编译指定测试"
+
+### v0.3.0 (2025-02-02)
+- ✨ 新增 SDK 编译支持（ohos-sdk 产品）
+- ⚠️ 特别说明：SDK 输出目录为 `out/sdk/` 而非 `out/ohos-sdk/`
+- 📝 添加 SDK 编译专门命令和触发关键词
+- 📚 更新产品列表，标注 SDK 的特殊输出目录
+- 🎯 新增触发关键词："编译 sdk"、"编译 SDK"、"build sdk"、"build SDK"、"编译 ohos-sdk"
+- 🔧 优化日志位置说明，明确 SDK 特殊目录结构
 
 ### v0.2.0 (2025-01-23)
 - ✨ 新增 `ace_engine_test` 编译目标支持
@@ -266,7 +324,7 @@ $OH_ROOT/out/
 
 ```bash
 # 测试路径是否正确
-pwd  # 应该在: /home/sunfei/workspace/openHarmony/foundation/arkui/ace_engine
+pwd  # 应该在: <ace_engine_root>
 
 # 测试错误检查脚本
 .claude/skills/openharmony-build/scripts/find_recent_errors.sh rk3568

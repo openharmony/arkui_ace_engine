@@ -154,6 +154,8 @@ void ContentModifierRatingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(contentModifier);
+    CHECK_NULL_VOID(builder);
     auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
     RatingConfiguration config) -> RefPtr<FrameNode> {
@@ -170,7 +172,6 @@ void ContentModifierRatingImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_F64_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

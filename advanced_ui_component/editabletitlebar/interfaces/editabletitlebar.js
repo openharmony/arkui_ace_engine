@@ -936,12 +936,12 @@ class ImageMenuItem extends ViewPU {
                     return;
                 }
                 try {
-                    this.fontSize = Math.min(this.maxFontScale, config.fontSizeScale ?? 1);
+                    this.fontSize = Math.min(this.maxFontScale, config?.fontSizeScale ?? 1);
                     this.buttonGestureModifier.fontSize = this.fontSize;
                 } catch (paramError) {
                     let code = paramError?.code;
                     let message = paramError?.message;
-                    hilog.error(0x3900, 'Ace', `EditableTitleBar environmentCallback error: ${code}, ${message}`);
+                    hilog.error(0x3900, 'EditableTitleBar', `EnvironmentCallback error: ${code}, ${message}`);
                 }
             },
             onMemoryLevel: (level) => {
@@ -1108,20 +1108,28 @@ class ImageMenuItem extends ViewPU {
 
     aboutToAppear() {
         try {
-            this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+            this.callbackId =
+                this.getUIContext()?.getHostContext()?.getApplicationContext()?.on('environment', this.envCallback);
         } catch (paramError) {
             let code = paramError?.code;
             let message = paramError?.message;
-            hilog.error(0x3900, 'Ace', `EditableTitleBar Faild to get environment param error: ${code}, ${message}`);
+            hilog.error(0x3900, 'EditableTitleBar', `Failed to get environment param error: ${code}, ${message}`);
         }
         this.fontSize = this.decideFontScale();
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
 
+    aboutToDisappear() {
+        if (this.callbackId) {
+            this.getUIContext()?.getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
+            this.callbackId = null;
+        }
+    }
+
     decideFontScale() {
         try {
             let uiContent = this.getUIContext();
-            this.systemFontScale = uiContent.getHostContext()?.config?.fontSizeScale ?? 1;
+            this.systemFontScale = uiContent?.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
@@ -1130,7 +1138,7 @@ class ImageMenuItem extends ViewPU {
             let code = exception?.code;
             let message = exception?.message;
             hilog.error(0x3900, 'EditableTitleBar',
-                `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+                `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
             return 1;
         }
     }

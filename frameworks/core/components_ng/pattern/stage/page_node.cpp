@@ -19,6 +19,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<PageNode> PageNode::CreatePageNode(int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto pageNode = MakeRefPtr<PageNode>(V2::PAGE_ETS_TAG, nodeId, pattern, isRoot);
     ElementRegister::GetInstance()->AddUINode(pageNode);
     pageNode->InitializePatternAndContext();

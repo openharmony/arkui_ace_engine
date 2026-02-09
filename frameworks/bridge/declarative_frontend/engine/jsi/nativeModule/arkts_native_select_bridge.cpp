@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "core/components_ng/base/frame_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {

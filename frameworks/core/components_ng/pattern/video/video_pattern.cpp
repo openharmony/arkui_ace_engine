@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
@@ -64,6 +65,9 @@ const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
+constexpr float SPEED_0_125_X = 0.125;
+constexpr float SPEED_3_00_X = 3.00;
+
 const std::unordered_set<ImageFit> EXPORT_IMAGEFIT_SUPPORT_TYPES = {
     ImageFit::FILL,
     ImageFit::CONTAIN,
@@ -392,6 +396,21 @@ std::string StatusToString(PlaybackStatus status)
         default:
             return "Invalid";
     }
+}
+
+void SendStatisticEvent(StatisticEventType type)
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
+}
+
+bool IsValidProgressRate(double rate)
+{
+    static const std::unordered_set<double> validRates = { 0.125, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 3.0 };
+    return validRates.find(rate) != validRates.end();
 }
 } // namespace
 
@@ -876,6 +895,11 @@ void VideoPattern::UpdateSpeed()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
+            if (GreatNotEqual(progress, SPEED_3_00_X) || LessNotEqual(progress, SPEED_0_125_X)) {
+                SendStatisticEvent(StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE);
+            } else if (!IsValidProgressRate(progress)) {
+                SendStatisticEvent(StatisticEventType::VIDEO_INVALID_PROGRESS_RATE);
+            }
             }, "ArkUIVideoUpdateSpeed");
     }
 }

@@ -48,9 +48,9 @@ public:
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
-    void HasData(const std::function<void(bool hasData)>& callback) override;
-    void HasDataType(
-        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
+    void HasData(const std::function<void(bool hasData, bool isAutoFill)>& callback) override;
+    void HasDataType(const std::function<void(bool hasData, bool isAutoFill)>& callback,
+        const std::vector<std::string>& mimeTypes) override;
     void Clear() override;
     void GetSpanStringData(
         const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
@@ -119,15 +119,15 @@ public:
     MultiTypeRecordImpl() = default;
     ~MultiTypeRecordImpl() = default;
 
-    void SetPlainText(const std::string plainText);
-    void SetUri(const std::string uri);
-    void SetPixelMap(RefPtr<PixelMap> pixelMap);
-    void SetHtmlText(const std::string& htmlText);
+    ACE_FORCE_EXPORT void SetPlainText(const std::string plainText);
+    ACE_FORCE_EXPORT void SetUri(const std::string uri);
+    ACE_FORCE_EXPORT void SetPixelMap(RefPtr<PixelMap> pixelMap);
+    ACE_FORCE_EXPORT void SetHtmlText(const std::string& htmlText);
     const RefPtr<PixelMap> GetPixelMap();
     const std::string GetPlainText();
     const std::string GetUri();
     const std::string GetHtmlText();
-    std::vector<uint8_t>& GetSpanStringBuffer();
+    ACE_FORCE_EXPORT std::vector<uint8_t>& GetSpanStringBuffer();
 
 private:
     RefPtr<PixelMap> pixelMap_;

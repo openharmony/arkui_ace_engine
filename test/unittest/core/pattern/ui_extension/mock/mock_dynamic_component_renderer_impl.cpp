@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_param.h"
 
 namespace OHOS::Ace::NG {
 
@@ -21,6 +22,14 @@ RefPtr<DynamicComponentRenderer> DynamicComponentRendererImpl::DynamicComponentR
     const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo)
 {
     return AceType::MakeRefPtr<DynamicComponentRendererImpl>(host, runtime, isolatedInfo);
+}
+
+RefPtr<DynamicComponentRenderer> DynamicComponentRenderer::Create(
+    const RefPtr<FrameNode>& host, const DynamicParam& dynamicParam)
+{
+    IsolatedInfo info;
+    void* runtime = nullptr;
+    return AceType::MakeRefPtr<DynamicComponentRendererImpl>(host, runtime, info);
 }
 
 DynamicComponentRendererImpl::DynamicComponentRendererImpl(

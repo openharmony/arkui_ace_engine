@@ -13,129 +13,28 @@
  * limitations under the License.
  */
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "arkoala_api_generated.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace MenuItemConfigurationAccessor {
-void DestroyPeerImpl(Ark_MenuItemConfiguration peer)
-{
-}
-Ark_MenuItemConfiguration ConstructImpl()
-{
-    return PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-void TriggerSelectImpl(Ark_MenuItemConfiguration peer,
-                       const Ark_Int32 index,
-                       const Ark_String* value)
-{
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    CHECK_NULL_VOID(peer);
-    auto node = peer->node_;
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SelectModelNG::SetChangeValue(frameNode, index, convValue);
-}
-Ark_Boolean GetEnabledImpl(Ark_MenuItemConfiguration peer)
-{
-    auto invalid = Converter::ArkValue<Ark_Boolean>(false);
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Ark_Boolean>(peer->enabled_);
-}
-void SetEnabledImpl(Ark_MenuItemConfiguration peer,
-                    Ark_Boolean enabled)
-{
-}
-Ark_ContentModifier GetContentModifierImpl(Ark_MenuItemConfiguration peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    return peer->contentModifier_;
-}
-void SetContentModifierImpl(Ark_MenuItemConfiguration peer,
-                            const Ark_Object* contentModifier)
-{
-}
-Ark_ResourceStr GetValueImpl(Ark_MenuItemConfiguration peer)
-{
-    auto invalid = Converter::ArkUnion<Ark_ResourceStr, Ark_String>("");
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkUnion<Ark_ResourceStr, Ark_String>(peer->value_);
-}
-void SetValueImpl(Ark_MenuItemConfiguration peer,
-                  const Ark_ResourceStr* value)
-{
-}
-Opt_ResourceStr GetIconImpl(Ark_MenuItemConfiguration peer)
-{
-    auto invalid = Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty());
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkUnion<Opt_ResourceStr, Ark_String>(peer->icon_, nullptr);
-}
-void SetIconImpl(Ark_MenuItemConfiguration peer,
-                 const Opt_ResourceStr* icon)
-{
-}
-Opt_SymbolGlyphModifier GetSymbolIconImpl(Ark_MenuItemConfiguration peer)
-{
-    auto optModifier = Converter::ArkValue<Opt_SymbolGlyphModifier>();
-    return optModifier;
-}
-void SetSymbolIconImpl(Ark_MenuItemConfiguration peer,
-                       const Opt_SymbolGlyphModifier* symbolIcon)
-{
-}
-Ark_Boolean GetSelectedImpl(Ark_MenuItemConfiguration peer)
-{
-    auto invalid = Converter::ArkValue<Ark_Boolean>(false);
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Ark_Boolean>(peer->selected_);
-}
-void SetSelectedImpl(Ark_MenuItemConfiguration peer,
-                     Ark_Boolean selected)
-{
-}
-Ark_Int32 GetIndexImpl(Ark_MenuItemConfiguration peer)
-{
-    auto invalid = Converter::ArkValue<Ark_Int32>(0);
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Ark_Int32>(peer->index_);
-}
-void SetIndexImpl(Ark_MenuItemConfiguration peer,
-                  const Ark_Int32 index)
-{
-}
-} // MenuItemConfigurationAccessor
 const GENERATED_ArkUIMenuItemConfigurationAccessor* GetMenuItemConfigurationAccessor()
 {
-    static const GENERATED_ArkUIMenuItemConfigurationAccessor MenuItemConfigurationAccessorImpl {
-        MenuItemConfigurationAccessor::DestroyPeerImpl,
-        MenuItemConfigurationAccessor::ConstructImpl,
-        MenuItemConfigurationAccessor::GetFinalizerImpl,
-        MenuItemConfigurationAccessor::TriggerSelectImpl,
-        MenuItemConfigurationAccessor::GetEnabledImpl,
-        MenuItemConfigurationAccessor::SetEnabledImpl,
-        MenuItemConfigurationAccessor::GetContentModifierImpl,
-        MenuItemConfigurationAccessor::SetContentModifierImpl,
-        MenuItemConfigurationAccessor::GetValueImpl,
-        MenuItemConfigurationAccessor::SetValueImpl,
-        MenuItemConfigurationAccessor::GetIconImpl,
-        MenuItemConfigurationAccessor::SetIconImpl,
-        MenuItemConfigurationAccessor::GetSymbolIconImpl,
-        MenuItemConfigurationAccessor::SetSymbolIconImpl,
-        MenuItemConfigurationAccessor::GetSelectedImpl,
-        MenuItemConfigurationAccessor::SetSelectedImpl,
-        MenuItemConfigurationAccessor::GetIndexImpl,
-        MenuItemConfigurationAccessor::SetIndexImpl,
-    };
-    return &MenuItemConfigurationAccessorImpl;
+    static const GENERATED_ArkUIMenuItemConfigurationAccessor* accessor = nullptr;
+    if (accessor == nullptr) {
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
+        if (module == nullptr) {
+            LOGF("Can't find MenuItemConfigurationAccessor dynamic module");
+            abort();
+        }
+        accessor = reinterpret_cast<const GENERATED_ArkUIMenuItemConfigurationAccessor*>(
+            module->GetCustomModifier("configurationAccessor"));
+    }
+    return accessor;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

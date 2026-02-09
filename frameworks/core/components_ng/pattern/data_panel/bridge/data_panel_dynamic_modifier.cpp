@@ -12,19 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/data_panel/bridge/data_panel_model_impl.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
-#include "core/common/container.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
-
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
-#include "core/components_ng/base/view_stack_model.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_utils.h"
-#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
 #ifndef CROSS_PLATFORM
@@ -328,8 +327,8 @@ void AddShadowResource(const struct ArkUIShadowOptionsResource* shadowRes, NG::D
 
     auto* radiusObj = reinterpret_cast<ResourceObject*>(shadowRes->radiusRawPtr);
     auto resObjValue = AceType::Claim(radiusObj);
-    shadow.AddResource("shadow.radius", resObjValue,
-        [](const RefPtr<ResourceObject>& resRadius, NG::DataPanelShadow& shadow) {
+    shadow.AddResource(
+        "shadow.radius", resObjValue, [](const RefPtr<ResourceObject>& resRadius, NG::DataPanelShadow& shadow) {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
             double radius = theme->GetTrackShadowRadius().ConvertToVp();
             ResourceParseUtils::ParseResDouble(resRadius, radius);
@@ -344,8 +343,8 @@ void AddShadowResource(const struct ArkUIShadowOptionsResource* shadowRes, NG::D
 
     auto* offsetXObj = reinterpret_cast<ResourceObject*>(shadowRes->offsetXRawPtr);
     auto offsetXObjValue = AceType::Claim(offsetXObj);
-    shadow.AddResource("shadow.offsetX", offsetXObjValue,
-        [](const RefPtr<ResourceObject>& resOffsetX, NG::DataPanelShadow& shadow) {
+    shadow.AddResource(
+        "shadow.offsetX", offsetXObjValue, [](const RefPtr<ResourceObject>& resOffsetX, NG::DataPanelShadow& shadow) {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
             double val = theme->GetTrackShadowOffsetX().ConvertToVp();
             ResourceParseUtils::ParseResDouble(resOffsetX, val);
@@ -360,8 +359,8 @@ void AddShadowResource(const struct ArkUIShadowOptionsResource* shadowRes, NG::D
 
     auto* offsetYObj = reinterpret_cast<ResourceObject*>(shadowRes->offsetYRawPtr);
     auto offsetYObjValue = AceType::Claim(offsetYObj);
-    shadow.AddResource("shadow.offsetY", offsetYObjValue,
-        [](const RefPtr<ResourceObject>& resOffsetY, NG::DataPanelShadow& shadow) {
+    shadow.AddResource(
+        "shadow.offsetY", offsetYObjValue, [](const RefPtr<ResourceObject>& resOffsetY, NG::DataPanelShadow& shadow) {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
             double val = theme->GetTrackShadowOffsetY().ConvertToVp();
             ResourceParseUtils::ParseResDouble(resOffsetY, val);
@@ -417,6 +416,84 @@ void ResetTrackShadow(ArkUINodeHandle node)
     ConvertThemeColor(colors);
     shadow.colors = colors;
     DataPanelModelNG::SetShadowOption(frameNode, shadow);
+}
+
+void SetValueColorsNew(ArkUINodeHandle node, void* colorRawPtr, ArkUI_Int32 length, ArkUI_Bool isSetByUser)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<OHOS::Ace::NG::Gradient> valueColors(length);
+    if (colorRawPtr) {
+        valueColors = *(static_cast<std::vector<OHOS::Ace::NG::Gradient>*>(colorRawPtr));
+    }
+    DataPanelModelNG::SetValueColors(frameNode, valueColors);
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModelNG::SetValueColorsSetByUser(frameNode, isSetByUser);
+        if (!isSetByUser) {
+            DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::VALUE_COLORS, nullptr);
+        }
+    }
+}
+
+void SetTrackShadowNew(ArkUINodeHandle node, ArkUI_Int32 length, const struct ArkUIDatePanelTrackShadow* trackShadow,
+    const struct ArkUIShadowOptionsResource* shadowRes)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DataPanelShadow shadow;
+
+    std::vector<NG::Gradient> shadowColors(length);
+    if (trackShadow->colorRawPtr) {
+        shadowColors = *(static_cast<std::vector<OHOS::Ace::NG::Gradient>*>(trackShadow->colorRawPtr));
+    }
+
+    AddShadowResource(shadowRes, shadow);
+
+    shadow.radius = trackShadow->radius;
+    shadow.offsetX = trackShadow->offsetX;
+    shadow.offsetY = trackShadow->offsetY;
+    shadow.colors = shadowColors;
+    DataPanelModelNG::SetShadowOption(frameNode, shadow);
+}
+
+void SetDataPanelTrackBackgroundColorNew(
+    ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr, ArkUI_Bool isSetByUser)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    DataPanelModelNG::SetTrackBackground(frameNode, Color(value));
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        if (isSetByUser) {
+            DataPanelModelNG::CreateWithResourceObj(
+                frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, colorResObj);
+        } else {
+            DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
+        }
+        DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, isSetByUser);
+    }
+}
+
+void SetDataPanelStrokeWidthNew(
+    ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* strokeWidthRawPtr, ArkUI_Bool isSetByUser)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    DataPanelModelNG::SetStrokeWidth(frameNode, Dimension(value, unitEnum));
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* strokeWidth = reinterpret_cast<ResourceObject*>(strokeWidthRawPtr);
+        auto strokeWidthResObj = AceType::Claim(strokeWidth);
+        if (isSetByUser) {
+            DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::STROKE_WIDTH, strokeWidthResObj);
+        } else {
+            DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::STROKE_WIDTH, nullptr);
+        }
+        DataPanelModelNG::SetStrokeWidthSetByUser(frameNode, isSetByUser);
+    }
 }
 
 #ifndef CROSS_PLATFORM
@@ -663,8 +740,8 @@ void AddShadowResourceImpl(const struct ArkUIShadowOptionsResource* shadowRes, N
 
     auto* radiusObj = reinterpret_cast<ResourceObject*>(shadowRes->radiusRawPtr);
     auto resObjValue = AceType::Claim(radiusObj);
-    shadow.AddResource("shadow.radius", resObjValue,
-        [](const RefPtr<ResourceObject>& resRadius, NG::DataPanelShadow& shadow) {
+    shadow.AddResource(
+        "shadow.radius", resObjValue, [](const RefPtr<ResourceObject>& resRadius, NG::DataPanelShadow& shadow) {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
             double radius = theme->GetTrackShadowRadius().ConvertToVp();
             ResourceParseUtils::ParseResDouble(resRadius, radius);
@@ -679,8 +756,8 @@ void AddShadowResourceImpl(const struct ArkUIShadowOptionsResource* shadowRes, N
 
     auto* offsetXObj = reinterpret_cast<ResourceObject*>(shadowRes->offsetXRawPtr);
     auto offsetXObjValue = AceType::Claim(offsetXObj);
-    shadow.AddResource("shadow.offsetX", offsetXObjValue,
-        [](const RefPtr<ResourceObject>& resOffsetX, NG::DataPanelShadow& shadow) {
+    shadow.AddResource(
+        "shadow.offsetX", offsetXObjValue, [](const RefPtr<ResourceObject>& resOffsetX, NG::DataPanelShadow& shadow) {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
             double val = theme->GetTrackShadowOffsetX().ConvertToVp();
             ResourceParseUtils::ParseResDouble(resOffsetX, val);
@@ -695,8 +772,8 @@ void AddShadowResourceImpl(const struct ArkUIShadowOptionsResource* shadowRes, N
 
     auto* offsetYObj = reinterpret_cast<ResourceObject*>(shadowRes->offsetYRawPtr);
     auto offsetYObjValue = AceType::Claim(offsetYObj);
-    shadow.AddResource("shadow.offsetY", offsetYObjValue,
-        [](const RefPtr<ResourceObject>& resOffsetY, NG::DataPanelShadow& shadow) {
+    shadow.AddResource(
+        "shadow.offsetY", offsetYObjValue, [](const RefPtr<ResourceObject>& resOffsetY, NG::DataPanelShadow& shadow) {
             RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
             double val = theme->GetTrackShadowOffsetY().ConvertToVp();
             ResourceParseUtils::ParseResDouble(resOffsetY, val);
@@ -749,6 +826,20 @@ void ResetTrackShadowImpl(ArkUINodeHandle node)
     shadow.colors = colors;
     GetDataPanelModelImpl()->SetShadowOption(shadow);
 }
+
+void SetValueColorsNewImpl(ArkUINodeHandle node, void* colorRawPtr, ArkUI_Int32 length, ArkUI_Bool isSetByUser) {}
+
+void SetTrackShadowNewImpl(ArkUINodeHandle node, ArkUI_Int32 length,
+    const struct ArkUIDatePanelTrackShadow* trackShadow, const struct ArkUIShadowOptionsResource* shadowRes)
+{}
+
+void SetDataPanelTrackBackgroundColorNewImpl(
+    ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr, ArkUI_Bool isSetByUser)
+{}
+
+void SetDataPanelStrokeWidthNewImpl(
+    ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* strokeWidthRawPtr, ArkUI_Bool isSetByUser)
+{}
 #endif
 
 ArkUINodeHandle CreateFrameNode(ArkUI_Int32 nodeId)
@@ -779,6 +870,10 @@ const ArkUIDataPanelModifier* GetDataPanelDynamicModifier()
             .setTrackShadowPtr = SetTrackShadowPtrImpl,
             .setNullTrackShadow = SetNullTrackShadowImpl,
             .resetTrackShadow = ResetTrackShadowImpl,
+            .setValueColorsNew = SetValueColorsNewImpl,
+            .setTrackShadowNew = SetTrackShadowNewImpl,
+            .setDataPanelTrackBackgroundColorNew = SetDataPanelTrackBackgroundColorNewImpl,
+            .setDataPanelStrokeWidthNew = SetDataPanelStrokeWidthNewImpl,
             .createFrameNode = CreateFrameNode,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
@@ -804,6 +899,10 @@ const ArkUIDataPanelModifier* GetDataPanelDynamicModifier()
         .setTrackShadowPtr = SetTrackShadowPtr,
         .setNullTrackShadow = SetNullTrackShadow,
         .resetTrackShadow = ResetTrackShadow,
+        .setValueColorsNew = SetValueColorsNew,
+        .setTrackShadowNew = SetTrackShadowNew,
+        .setDataPanelTrackBackgroundColorNew = SetDataPanelTrackBackgroundColorNew,
+        .setDataPanelStrokeWidthNew = SetDataPanelStrokeWidthNew,
         .createFrameNode = CreateFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

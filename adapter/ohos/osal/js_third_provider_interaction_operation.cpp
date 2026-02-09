@@ -776,7 +776,7 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     CHECK_NULL_VOID(host);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     config.pageId = host->GetPageId();
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
@@ -817,6 +817,7 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
     Accessibility::AccessibilityElementInfo nodeInfo;
     std::list<Accessibility::AccessibilityElementInfo> infos;
     auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManager);
     auto accessibilityProvider = accessibilityProvider_.Upgrade();
     NodeConfig config;
     GetNodeConfig(config);
@@ -829,6 +830,7 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
             "ret %{public}d treeId %{public}d parentWindowId %{public}d requestID %{public}d",
             nodeInfo.GetAccessibilityId(), result.resultType, result.nowLevelBelongTreeId,
             result.parentWindowId, requestId);
+        jsAccessibilityManager->UpdateElementInfosTreeId(infos);
         callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
         return;
     }
@@ -851,6 +853,7 @@ void JsThirdProviderInteractionOperation::FocusMoveSearchWithCondition(
         "ret %{public}d treeId %{public}d parentWindowId %{public}d requestID %{public}d",
         nodeInfo.GetAccessibilityId(), result.resultType, result.nowLevelBelongTreeId,
         result.parentWindowId, requestId);
+    jsAccessibilityManager->UpdateElementInfosTreeId(infos);
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 

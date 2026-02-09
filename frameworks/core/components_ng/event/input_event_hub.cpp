@@ -15,23 +15,11 @@
 
 #include "core/components_ng/event/input_event_hub.h"
 
-#include "core/common/event_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 InputEventHub::InputEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
-
-InputEventHub::~InputEventHub()
-{
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto eventManager = pipeline->GetEventManager();
-    CHECK_NULL_VOID(eventManager);
-    eventManager->UnregisterTouchpadInteractionListenerInner(frameNode->GetId());
-}
 
 RefPtr<FrameNode> InputEventHub::GetFrameNode() const
 {

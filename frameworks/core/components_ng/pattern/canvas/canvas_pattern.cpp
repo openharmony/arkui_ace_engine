@@ -96,7 +96,6 @@ void CanvasPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     id_ = host->GetId();
     ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", id_);
-    TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] CanvasPattern::OnAttachToFrameNode", id_);
 #ifndef ACE_UNITTEST
     auto renderCtx = host->GetRenderContext();
     renderCtx->SetClipToBounds(false);
@@ -501,7 +500,7 @@ void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
     paintMethod_->PushTask(task);
 }
 
-void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasPattern::UpdateStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod) { paintMethod.SetStrokePatternNG(pattern); };
     paintMethod_->PushTask(task);
@@ -564,7 +563,7 @@ void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradie
     paintMethod_->PushTask(task);
 }
 
-void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasPattern::UpdateFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod) { paintMethod.SetFillPatternNG(pattern); };
     paintMethod_->PushTask(task);

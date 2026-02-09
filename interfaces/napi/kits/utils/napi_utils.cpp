@@ -740,6 +740,199 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
     return true;
 }
 
+bool MatchValueTypeLuminance(napi_env env, napi_value value, napi_valuetype targetType)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, value, &valueType);
+    if (status != napi_ok) {
+        return false;
+    }
+    return valueType == targetType;
+}
+
+bool ParseStringLuminance(napi_env env, napi_value propertyNapi, std::string& property)
+{
+    if (propertyNapi == nullptr) {
+        return false;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, propertyNapi, &valueType);
+    if (valueType == napi_undefined) {
+        return false;
+    } else if (valueType != napi_string) {
+        NapiThrow(env, "Incorrect parameters types, need string type", ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+
+    size_t buffSize = 0;
+    napi_status status = napi_get_value_string_utf8(env, propertyNapi, nullptr, 0, &buffSize);
+    if (status != napi_ok || buffSize == 0) {
+        return false;
+    }
+    std::unique_ptr<char[]> propertyString = std::make_unique<char[]>(buffSize + 1);
+    size_t retLen = 0;
+    napi_get_value_string_utf8(env, propertyNapi, propertyString.get(), buffSize + 1, &retLen);
+    property = propertyString.get();
+    return true;
+}
+
+bool ParseIntLuminance(napi_env env, napi_value propertyNapi, int32_t& property)
+{
+    if (propertyNapi == nullptr) {
+        return false;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, propertyNapi, &valueType);
+    if (valueType == napi_undefined) {
+        return false;
+    } else if (valueType != napi_number) {
+        NapiThrow(env, "Incorrect parameters types, need number type.", ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+    napi_get_value_int32(env, propertyNapi, &property);
+    return true;
+}
+
+bool ParseLengthMetricValue(napi_env env, napi_value value, CalcDimension& dimension)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, value, &type);
+
+    if (type == napi_number) {
+        double val = 0.0;
+        napi_get_value_double(env, value, &val);
+        dimension.SetValue(val);
+        dimension.SetUnit(DimensionUnit::VP);
+        return true;
+    }
+
+    if (type == napi_string) {
+        std::string str;
+        size_t len = 0;
+        napi_get_value_string_utf8(env, value, nullptr, 0, &len);
+        if (len > 0) {
+            std::unique_ptr<char[]> buffer = std::make_unique<char[]>(len + 1);
+            napi_get_value_string_utf8(env, value, buffer.get(), len + 1, &len);
+            str = buffer.get();
+            dimension = StringUtils::StringToCalcDimension(str, false, DimensionUnit::VP);
+            return true;
+        }
+        return false;
+    }
+
+    if (type == napi_object) {
+        napi_value objValue = nullptr;
+        napi_value objUnit = nullptr;
+        napi_get_named_property(env, value, "value", &objValue);
+        napi_get_named_property(env, value, "unit", &objUnit);
+
+        if (objValue != nullptr && objUnit != nullptr) {
+            double val = 0.0;
+            int32_t unit = static_cast<int32_t>(DimensionUnit::VP);
+
+            napi_valuetype valType = napi_undefined;
+            napi_valuetype unitType = napi_undefined;
+            napi_typeof(env, objValue, &valType);
+            napi_typeof(env, objUnit, &unitType);
+
+            if (valType == napi_number && unitType == napi_number &&
+                napi_get_value_double(env, objValue, &val) == napi_ok &&
+                napi_get_value_int32(env, objUnit, &unit) == napi_ok) {
+                dimension.SetValue(val);
+                dimension.SetUnit(static_cast<DimensionUnit>(unit));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    return false;
+}
+
+bool ParseTopEdge(napi_env env, napi_value obj, EdgesParam& edges)
+{
+    napi_value topValue = nullptr;
+    if (napi_get_named_property(env, obj, "top", &topValue) != napi_ok || topValue == nullptr) {
+        return false;
+    }
+
+    CalcDimension dimension;
+    if (ParseLengthMetricValue(env, topValue, dimension)) {
+        edges.SetTop(dimension);
+        return true;
+    }
+    return false;
+}
+
+bool ParseBottomEdge(napi_env env, napi_value obj, EdgesParam& edges)
+{
+    napi_value bottomValue = nullptr;
+    if (napi_get_named_property(env, obj, "bottom", &bottomValue) != napi_ok || bottomValue == nullptr) {
+        return false;
+    }
+
+    CalcDimension dimension;
+    if (ParseLengthMetricValue(env, bottomValue, dimension)) {
+        edges.SetBottom(dimension);
+        return true;
+    }
+    return false;
+}
+
+bool ParseLeftEdge(napi_env env, napi_value obj, EdgesParam& edges)
+{
+    napi_value leftValue = nullptr;
+    if (napi_get_named_property(env, obj, "left", &leftValue) != napi_ok || leftValue == nullptr) {
+        return false;
+    }
+
+    CalcDimension dimension;
+    if (ParseLengthMetricValue(env, leftValue, dimension)) {
+        edges.SetLeft(dimension);
+        return true;
+    }
+    return false;
+}
+
+bool ParseRightEdge(napi_env env, napi_value obj, EdgesParam& edges)
+{
+    napi_value rightValue = nullptr;
+    if (napi_get_named_property(env, obj, "right", &rightValue) != napi_ok || rightValue == nullptr) {
+        return false;
+    }
+
+    CalcDimension dimension;
+    if (ParseLengthMetricValue(env, rightValue, dimension)) {
+        edges.SetRight(dimension);
+        return true;
+    }
+    return false;
+}
+
+bool ParseEdgesLengthMetrics(napi_env env, napi_value value, EdgesParam& edges)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+
+    if (valueType != napi_object) {
+        return false;
+    }
+    bool hasAnyProperty = false;
+    if (ParseTopEdge(env, value, edges)) {
+        hasAnyProperty = true;
+    }
+    if (ParseBottomEdge(env, value, edges)) {
+        hasAnyProperty = true;
+    }
+    if (ParseLeftEdge(env, value, edges)) {
+        hasAnyProperty = true;
+    }
+    if (ParseRightEdge(env, value, edges)) {
+        hasAnyProperty = true;
+    }
+    return hasAnyProperty;
+}
+
 std::string DimensionToString(Dimension dimension)
 {
     static const int32_t unitsNum = 6;

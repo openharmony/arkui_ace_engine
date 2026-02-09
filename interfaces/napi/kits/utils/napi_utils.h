@@ -94,6 +94,24 @@ bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info);
 
 bool ParseString(const ResourceInfo& info, std::string& result);
 
+bool MatchValueTypeLuminance(napi_env env, napi_value value, napi_valuetype targetType);
+
+bool ParseStringLuminance(napi_env env, napi_value propertyNapi, std::string& property);
+
+bool ParseIntLuminance(napi_env env, napi_value propertyNapi, int32_t& property);
+
+bool ParseEdgesLengthMetrics(napi_env env, napi_value value, EdgesParam& edges);
+
+bool ParseRightEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseLeftEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseBottomEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseTopEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseLengthMetricValue(napi_env env, napi_value value, CalcDimension& dimension);
+
 std::string ErrorToMessage(int32_t code);
 
 bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType);

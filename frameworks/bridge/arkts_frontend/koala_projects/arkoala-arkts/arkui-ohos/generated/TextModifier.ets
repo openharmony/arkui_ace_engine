@@ -24,7 +24,7 @@ import { PeerNode } from "./PeerNode"
 import { ArkTextPeer, TextOverflowOptions, TextMarqueeOptions, MarqueeState, TextAttribute, TextSpanType, TextResponseType } from "./component/text"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
-import { ResourceColor, Length, Font } from "./component/units"
+import { ResourceColor, Length, Font, ResourceStr } from "./component/units"
 import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight } from "./component/enums"
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
@@ -163,7 +163,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _font_0_0value?: Font | undefined
     _font_0_1value?: FontSettingOptions | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
     _fontWeight_0_1value?: FontSettingOptions | undefined
     _selection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _selection_0_0value?: int32 | undefined
@@ -1189,7 +1189,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1199,7 +1199,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontSettingOptions | undefined | undefined));
                 }
             }
         }
@@ -1980,7 +1980,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as int32 | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined), (undefined as FontSettingOptions | undefined | undefined));
                 }
             }
         }
@@ -2674,7 +2674,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
-    fontWeight(weight: int32 | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: int32 | FontWeight | ResourceStr | undefined, options?: FontSettingOptions): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

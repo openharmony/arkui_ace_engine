@@ -3068,6 +3068,17 @@ uint32_t FFIGetResourceSymbolId(NativeResourceObject obj)
     return symbolId;
 }
 
+ExternalString FFIGetResourceColorString(NativeResourceObject obj)
+{
+    Color color;
+    if (!ViewAbstract::ParseCjColor(obj, color)) {
+        LOGE("Parse color failed.");
+        return ::Utils::MallocCString("");
+    }
+    std::string result = color.ToString();
+    return ::Utils::MallocCString(result);
+}
+
 uint32_t FFIGetResourceColor(NativeResourceObject obj)
 {
     Color color;

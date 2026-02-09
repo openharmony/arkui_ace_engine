@@ -25,6 +25,7 @@ void BlankModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BLANK_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     stack->Push(blankNode);
@@ -41,6 +42,7 @@ void BlankModelNG::Create()
 
 RefPtr<FrameNode> BlankModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     auto blankProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
@@ -133,6 +135,7 @@ void BlankModelNG::SetColor(FrameNode* frameNode, const Color& color)
 void BlankModelNG::SetColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto blockPattern = frameNode->GetPattern<BlankPattern>();
     CHECK_NULL_VOID(blockPattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {

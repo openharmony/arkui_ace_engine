@@ -190,7 +190,7 @@ public:
     virtual void AttachFrameNode(const WeakPtr<NG::FrameNode>& node);
     WeakPtr<NG::FrameNode> GetAttachedNode() const;
     virtual RefPtr<GestureSnapshot> Dump() const;
-    void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent);
+    ACE_FORCE_EXPORT void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent);
     RefPtr<NG::TargetComponent> GetTargetComponent();
     void SetIsPostEventResult(bool isPostEventResult);
     bool IsPostEventResult() const;

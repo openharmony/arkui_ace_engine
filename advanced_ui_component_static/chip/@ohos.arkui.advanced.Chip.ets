@@ -55,10 +55,10 @@ import {
   Curve,
   $r,
   KeyEvent,
-  SymbolGlyphModifier,
   Column,
   Row
 } from '@ohos.arkui.component';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import {
   Consume,
   Link,

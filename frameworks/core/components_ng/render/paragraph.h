@@ -289,7 +289,7 @@ class Paragraph : public virtual AceType {
 public:
     ACE_FORCE_EXPORT static RefPtr<Paragraph> Create(
         const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
-    static RefPtr<Paragraph> CreateRichEditorParagraph(
+    ACE_FORCE_EXPORT static RefPtr<Paragraph> CreateRichEditorParagraph(
         const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection, bool isSingleLineMode);
 
     static RefPtr<Paragraph> Create(void* paragraph);

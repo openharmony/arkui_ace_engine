@@ -275,6 +275,20 @@ class ObservedUtil {
 
   private static getV1TrackDecorator(proSubs: any, decorators: Array<DecoratorInfo>,
     className: string): Array<DecoratorInfo> {
+    let decoratorInfos: Array<DecoratorInfo> = decorators;
+    decoratorInfos = this.parseV1TrackDecorator(proSubs, decoratorInfos, className);
+    const puProSubs = proSubs as ObservedPropertyAbstractPU<Object>;
+    const subsRefs = puProSubs.getSubscriberRefs();
+    if (!Utils.isNull(subsRefs) && subsRefs.size > 0) {
+      subsRefs.forEach((subRef: any) => {
+        decoratorInfos = this.getV1TrackDecorator(subRef, decoratorInfos,className);
+      });
+    }
+    return decoratorInfos;
+  }
+
+  private static parseV1TrackDecorator(proSubs: any, decorators: Array<DecoratorInfo>,
+    className: string): Array<DecoratorInfo> {
     const decos: Array<DecoratorInfo> = decorators;
     const elmntMap = (proSubs as ObservedPropertyAbstractPU<Object>).getPropertyElementInfo();
     elmntMap?.forEach((value, name) => {

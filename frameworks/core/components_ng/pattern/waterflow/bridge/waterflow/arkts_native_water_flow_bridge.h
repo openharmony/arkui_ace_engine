@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 class WaterFlowBridge {
 public:
     static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static ArkUINativeModuleValue CreateWaterFlow(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetRowsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo);

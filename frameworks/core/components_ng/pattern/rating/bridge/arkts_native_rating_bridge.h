@@ -23,7 +23,6 @@ class RatingBridge {
 public:
     static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static ArkUINativeModuleValue CreateRating(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue JsCreateRating(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetStars(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetStars(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetRatingStepSize(ArkUIRuntimeCallInfo* runtimeCallInfo);

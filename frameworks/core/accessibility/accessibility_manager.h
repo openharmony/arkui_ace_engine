@@ -417,6 +417,9 @@ public:
     {
         return INVALID_ACCESSIBILITY_NODE_ID;
     }
+
+    virtual void AccessibilityOnShowHide(bool isOnShow, const WeakPtr<PipelineBase>& context) {};
+
 protected:
     int32_t treeId_ = 0;
 

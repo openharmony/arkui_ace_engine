@@ -54,6 +54,7 @@ private:
     
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<NavContentLayoutPropertyBase>(GetIsVertical());
     }
 };

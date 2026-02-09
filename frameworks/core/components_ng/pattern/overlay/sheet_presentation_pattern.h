@@ -94,6 +94,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetPresentationProperty>();
     }
 
@@ -1127,6 +1128,7 @@ protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
+    void OnAttachToMainTree() override;
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;

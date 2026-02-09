@@ -1146,8 +1146,6 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
 export function ImageImpl(
     @memo
     style: ((attributes: ImageAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkImageComponent>((): ArkImageComponent => {
         return new ArkImageComponent()
@@ -1156,7 +1154,6 @@ export function ImageImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

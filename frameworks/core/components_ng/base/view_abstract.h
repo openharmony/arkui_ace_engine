@@ -75,7 +75,7 @@ namespace OHOS::Ace::NG {
 struct AttractionEffect;
 using TransitionFinishCallback = std::function<void(bool)>;
 
-struct OptionParam {
+struct ACE_FORCE_EXPORT OptionParam {
     std::string value;
     std::string icon;
     std::string labelInfo;
@@ -1166,7 +1166,7 @@ public:
     static void UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties,
         const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
     static void AddResObjWithCallBack(std::string key, const RefPtr<ResourceObject>& resObj,
-        const int32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
+        const uint32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
     static void CheckMainThread();
     static void AllowForceDark(bool forceDarkAllowed);
     static void AllowForceDark(UINode* node, bool forceDarkAllowed);
@@ -1182,6 +1182,7 @@ private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
+    static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;

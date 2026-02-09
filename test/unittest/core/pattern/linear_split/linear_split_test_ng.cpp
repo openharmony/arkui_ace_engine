@@ -1404,4 +1404,709 @@ HWTEST_F(LinearSplitTestNg, IsDynamicComponentEnvTest, TestSize.Level0)
      */
     EXPECT_FALSE(algorithm.IsDynamicComponentEnv());
 }
+
+/**
+ * @tc.name: GetItemMinSizeTest001
+ * @tc.desc: Test GetItemMinSize with null layoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetItemMinSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create split and layoutWrapper
+     */
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+
+    /**
+     * @tc.steps: step2. Create item wrapper with null layoutProperty
+     * @tc.expected: GetItemMinSize returns theme default value
+     */
+    auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    
+    auto minSize =
+        algorithm.GetItemMinSize(itemFrameNode, AceType::RawPtr(frameNode));
+    EXPECT_GT(minSize, 0.0f);
+}
+
+/**
+ * @tc.name: GetItemMinSizeTest002
+ * @tc.desc: Test GetItemMinSize with calcConstraint minSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetItemMinSizeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create split and layoutWrapper
+     */
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+
+    /**
+     * @tc.steps: step2. Create item wrapper with calcLayoutConstraint
+     * @tc.expected: GetItemMinSize returns calc minSize
+     */
+    auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    auto itemLayoutProperty = itemFrameNode->GetLayoutProperty();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+
+    // Set calc min size using UpdateCalcMinSize
+    itemLayoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(100.0f), CalcLength(50.0f)));
+
+    // Also set layout constraint minSize
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.minSize = SizeF(100.0f, 50.0f);
+    itemLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemLayoutProperty);
+
+    auto minSize = algorithm.GetItemMinSize(itemLayoutWrapper, AceType::RawPtr(frameNode));
+    EXPECT_EQ(minSize, 100.0f); // ROW_SPLIT uses Width()
+}
+
+/**
+ * @tc.name: GetItemMinSizeTest003
+ * @tc.desc: Test GetItemMinSize with COLUMN_SPLIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetItemMinSizeTest003, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, {}, {}, false);
+
+    auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    auto itemLayoutProperty = itemFrameNode->GetLayoutProperty();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+
+    // Set calc min size using UpdateCalcMinSize
+    itemLayoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(100.0f), CalcLength(50.0f)));
+
+    // Also set layout constraint minSize
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.minSize = SizeF(100.0f, 50.0f);
+    itemLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemLayoutProperty);
+
+    auto minSize = algorithm.GetItemMinSize(itemLayoutWrapper, AceType::RawPtr(frameNode));
+    EXPECT_EQ(minSize, 50.0f); // COLUMN_SPLIT uses Height()
+}
+
+/**
+ * @tc.name: GetDividerMarginTest001
+ * @tc.desc: Test GetDividerMargin with null layoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetDividerMarginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper with null layoutProperty
+     * @tc.expected: GetDividerMargin returns empty pair
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    auto [startMargin, endMargin] = algorithm.GetDividerMargin(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(startMargin, 0.0f);
+    EXPECT_EQ(endMargin, 0.0f);
+}
+
+/**
+ * @tc.name: GetDividerMarginTest002
+ * @tc.desc: Test GetDividerMargin without divider set
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetDividerMarginTest002, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, {}, {}, false);
+
+    // HasDivider() returns false, should use default values
+    auto [startMargin, endMargin] = algorithm.GetDividerMargin(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(startMargin, 0.0f);
+    EXPECT_EQ(endMargin, 0.0f);
+}
+
+/**
+ * @tc.name: GetDividerMarginTest003
+ * @tc.desc: Test GetDividerMargin with custom divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetDividerMarginTest003, TestSize.Level1)
+{
+    LinearSplitModelNG model;
+    model.Create(SplitType::COLUMN_SPLIT);
+
+    ColumnSplitDivider divider;
+    divider.startMargin = 10.0_vp;
+    divider.endMargin = 20.0_vp;
+    model.SetDivider(SplitType::COLUMN_SPLIT, divider);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, {}, {}, false);
+
+    auto [startMargin, endMargin] = algorithm.GetDividerMargin(AceType::RawPtr(layoutWrapper));
+    EXPECT_FLOAT_EQ(startMargin, 10.0f);
+    EXPECT_FLOAT_EQ(endMargin, 20.0f);
+}
+
+/**
+ * @tc.name: GetLinearSplitChildMinSizeTest002
+ * @tc.desc: Test GetLinearSplitChildMinSize with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetLinearSplitChildMinSizeTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+
+    // Mock context is null at this point
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    auto minSize = algorithm.GetLinearSplitChildMinSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(minSize, 20.0f); // DEFAULT_MIN_CHILD_SIZE when pipeline is null
+}
+
+/**
+ * @tc.name: UpdateChildPositionWidthIgnoreLayoutSafeAreaTest001
+ * @tc.desc: Test UpdateChildPositionWidthIgnoreLayoutSafeArea with null childNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, UpdateChildPositionWidthIgnoreLayoutSafeAreaTest001, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, nullptr);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+
+    // Should not crash with null layoutProperty
+    algorithm.UpdateChildPositionWidthIgnoreLayoutSafeArea(itemLayoutWrapper, OffsetF(10.0f, 20.0f));
+}
+
+/**
+ * @tc.name: UpdateChildPositionWidthIgnoreLayoutSafeAreaTest002
+ * @tc.desc: Test UpdateChildPositionWidthIgnoreLayoutSafeArea with invalid opts
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, UpdateChildPositionWidthIgnoreLayoutSafeAreaTest002, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    auto itemLayoutProperty = itemFrameNode->GetLayoutProperty();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+
+    // IsIgnoreOptsValid() should return false by default
+    RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemLayoutProperty);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+
+    OffsetF originOffset(10.0f, 20.0f);
+    itemGeometryNode->SetMarginFrameOffset(originOffset);
+
+    algorithm.UpdateChildPositionWidthIgnoreLayoutSafeArea(itemLayoutWrapper, originOffset);
+
+    // Offset should remain unchanged when IsIgnoreOptsValid() is false
+    EXPECT_EQ(itemGeometryNode->GetMarginFrameOffset(), originOffset);
+}
+
+/**
+ * @tc.name: IsChildMatchParentTest001
+ * @tc.desc: Test IsChildMatchParent with null child
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IsChildMatchParentTest001, TestSize.Level1)
+{
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+
+    RefPtr<LayoutWrapper> child = nullptr;
+    EXPECT_FALSE(algorithm.IsChildMatchParent(child));
+}
+
+/**
+ * @tc.name: IsChildMatchParentTest002
+ * @tc.desc: Test IsChildMatchParent with null layoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IsChildMatchParentTest002, TestSize.Level1)
+{
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childFrameNode, childGeometryNode, nullptr);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    EXPECT_FALSE(algorithm.IsChildMatchParent(childLayoutWrapper));
+}
+
+/**
+ * @tc.name: DisableLayoutPolicyTest001
+ * @tc.desc: Test DisableLayoutPolicy with null child
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, DisableLayoutPolicyTest001, TestSize.Level1)
+{
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+
+    // Should not crash with null child
+    algorithm.DisableLayoutPolicy(nullptr);
+}
+
+/**
+ * @tc.name: DisableLayoutPolicyTest002
+ * @tc.desc: Test DisableLayoutPolicy with ROW_SPLIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, DisableLayoutPolicyTest002, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeometryNode->Reset();
+    auto childLayoutProperty = childFrameNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+
+    // Set widthLayoutPolicy
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childFrameNode, childGeometryNode, childLayoutProperty);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, {}, {}, false);
+    algorithm.DisableLayoutPolicy(childLayoutWrapper);
+
+    // widthLayoutPolicy should be reset to NO_MATCH
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    ASSERT_TRUE(layoutPolicy.has_value());
+    EXPECT_EQ(layoutPolicy.value().widthLayoutPolicy_, LayoutCalPolicy::NO_MATCH);
+}
+
+/**
+ * @tc.name: DisableLayoutPolicyTest003
+ * @tc.desc: Test DisableLayoutPolicy with COLUMN_SPLIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, DisableLayoutPolicyTest003, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    childGeometryNode->Reset();
+    auto childLayoutProperty = childFrameNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+
+    // Set heightLayoutPolicy
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childFrameNode, childGeometryNode, childLayoutProperty);
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, {}, {}, false);
+    algorithm.DisableLayoutPolicy(childLayoutWrapper);
+
+    // heightLayoutPolicy should be reset to NO_MATCH
+    auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+    ASSERT_TRUE(layoutPolicy.has_value());
+    EXPECT_EQ(layoutPolicy.value().heightLayoutPolicy_, LayoutCalPolicy::NO_MATCH);
+}
+
+/**
+ * @tc.name: ColumnSplitChildConstrainTest001
+ * @tc.desc: Test ColumnSplitChildConstrain with index out of bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, ColumnSplitChildConstrainTest001, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, {}, {}, false);
+    algorithm.visibleChildCount_ = 0;
+
+    // index >= childrenConstrains_.size(), should return early
+    algorithm.ColumnSplitChildConstrain(AceType::RawPtr(layoutWrapper), itemLayoutWrapper, 0);
+
+    // Should not crash and childrenConstrains_ should still be empty
+    EXPECT_TRUE(algorithm.childrenConstrains_.empty());
+}
+
+/**
+ * @tc.name: MeasureWithInvalidDragPosTest001
+ * @tc.desc: Test Measure with invalid childrenDragPos size
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, MeasureWithInvalidDragPosTest001, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
+
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {
+        model.SetResizable(SplitType::COLUMN_SPLIT, true);
+    });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    // Set invalid childrenDragPos size (size != visibleChildCount_ + 1)
+    std::vector<float> invalidDragPos = { 0.0f, 100.0f }; // Only 2 elements
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, {}, invalidDragPos, false);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    // Add children so visibleChildCount_ is 2, making childrenDragPos_ size (2) != visibleChildCount_ + 1 (3)
+    for (int32_t i = 0; i < 2; i++) {
+        auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
+        frameNode->AddChild(itemFrameNode);
+    }
+
+    // Measure should clear invalid childrenDragPos_
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: LayoutWithEmptyChildrenTest001
+ * @tc.desc: Test Layout with empty children and invalid root size in DC
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, LayoutWithEmptyChildrenTest001, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
+
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {
+        model.SetResizable(SplitType::ROW_SPLIT, true);
+    });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    // Set root size to 0
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->rootWidth_ = 0.0f;
+    context->rootHeight_ = 0.0f;
+
+    // Set dynamic component environment
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->SetIsDynamicRender(true);
+    container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
+
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    // Layout should return early when IsRootSizeUnValid() && IsDynamicComponentEnv()
+    algorithm.Layout(AceType::RawPtr(layoutWrapper));
+
+    // Reset environment
+    container->SetIsDynamicRender(false);
+    container->SetUIContentType(UIContentType::NORMA);
+}
+
+/**
+ * @tc.name: MeasureWithMatchParentTest001
+ * @tc.desc: Test Measure with MATCH_PARENT measure type
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, MeasureWithMatchParentTest001, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
+
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    // Set measure type to MATCH_PARENT
+    linearSplitLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.parentIdealSize = OptionalSizeF(RK356_WIDTH, RK356_HEIGHT);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
+
+    // Measure should use parentIdealSize
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: MeasureBeforeAPI10WithMatchParentTest001
+ * @tc.desc: Test MeasureBeforeAPI10 with MATCH_PARENT measure type
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, MeasureBeforeAPI10WithMatchParentTest001, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_9);
+
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    // Set measure type to MATCH_PARENT
+    linearSplitLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.parentIdealSize = OptionalSizeF(RK356_WIDTH, RK356_HEIGHT);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
+
+    // MeasureBeforeAPI10 should use parentIdealSize
+    algorithm.MeasureBeforeAPI10(AceType::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: MeasureWithSelfIdealSizeTest001
+ * @tc.desc: Test Measure with valid selfIdealSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, MeasureWithSelfIdealSizeTest001, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
+
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize = OptionalSizeF(RK356_WIDTH, COLUMN_HEIGHT);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
+
+    // Measure should use selfIdealSize when IsValid() returns true
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize.Width(), RK356_WIDTH);
+    EXPECT_EQ(frameSize.Height(), COLUMN_HEIGHT);
+}
+
+/**
+ * @tc.name: LayoutWithGoneChildTest001
+ * @tc.desc: Test Layout with GONE visibility child
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, LayoutWithGoneChildTest001, TestSize.Level1)
+{
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
+
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT, [](LinearSplitModelNG model) {
+        model.SetResizable(SplitType::COLUMN_SPLIT, true);
+    });
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(RK356_WIDTH), CalcLength(RK356_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+
+    // Add 3 children, make middle one GONE
+    for (int32_t i = 0; i < 3; i++) {
+        auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
+        RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeometryNode->Reset();
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+        itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+        itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(RK356_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+        if (i == 1) {
+            // Make middle child GONE
+            itemLayoutWrapper->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        }
+        auto boxLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+        itemLayoutWrapper->SetLayoutAlgorithm(
+            AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+        frameNode->AddChild(itemFrameNode);
+        layoutWrapper->AppendChild(itemLayoutWrapper);
+    }
+
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
+    LinearSplitLayoutAlgorithm algorithm(SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
+
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+    algorithm.Layout(AceType::RawPtr(layoutWrapper));
+
+    // visibleChildCount_ should be 2 (GONE child excluded)
+    EXPECT_EQ(algorithm.visibleChildCount_, 2);
+    // splitRects should have only 1 rect (between 2 visible children)
+    EXPECT_EQ(algorithm.GetSplitRects().size(), 1u);
+}
+
+/**
+ * @tc.name: GetChildConstrainWithEmptyDragPosTest001
+ * @tc.desc: Test GetChildConstrain with empty childrenDragPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, GetChildConstrainWithEmptyDragPosTest001, TestSize.Level1)
+{
+    auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [](LinearSplitModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->Reset();
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper
+        = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
+
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos; // Empty
+    LinearSplitLayoutAlgorithm algorithm(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
+    algorithm.visibleChildCount_ = 2;
+
+    LayoutConstraintF childConstrain;
+    childConstrain.maxSize = SizeF(1000.0f, 1000.0f);
+
+    // When childrenDragPos is empty, should return original constrain
+    auto result = algorithm.GetChildConstrain(AceType::RawPtr(layoutWrapper), childConstrain, 0);
+    EXPECT_EQ(result.maxSize, childConstrain.maxSize);
+}
 } // namespace OHOS::Ace::NG

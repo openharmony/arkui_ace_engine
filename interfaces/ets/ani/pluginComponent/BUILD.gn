@@ -43,6 +43,7 @@ ohos_shared_library("pluginComponent_ani") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:ani_common",
     "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

@@ -1058,6 +1058,11 @@ void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton);
 }
 
+void TextFieldModelNG::SetIsShowVoiceButton(bool isShowButton)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowVoiceButton, isShowButton);
+}
+
 void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);

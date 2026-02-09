@@ -35,12 +35,12 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CheckboxGroupModifier } from "./../CheckboxGroupModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export interface CheckBoxGroupConfiguration {
+export interface CheckBoxGroupConfiguration extends CommonConfiguration<CheckBoxGroupConfiguration> {
     name: string
     status: SelectStatus
     triggerChange(isSelect: boolean): void
 }
-export class CheckBoxGroupConfigurationInternal implements MaterializedBase,CommonConfiguration<CheckBoxGroupConfiguration>,CheckBoxGroupConfiguration {
+export class CheckBoxGroupConfigurationInternal implements MaterializedBase,CheckBoxGroupConfiguration {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer

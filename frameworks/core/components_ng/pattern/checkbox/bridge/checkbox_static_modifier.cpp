@@ -181,7 +181,10 @@ void SetOnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optCallback = Converter::GetOptPtr(value);
-    CHECK_NULL_VOID(optCallback);
+    if (!optCallback) {
+        CheckBoxModelNG::SetOnChange(frameNode, nullptr);
+        return;
+    }
     auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const bool value) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(value));
     };
@@ -222,7 +225,6 @@ void ContentModifierCheckboxImpl(
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);

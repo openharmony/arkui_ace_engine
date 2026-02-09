@@ -506,13 +506,7 @@ class ArkWaterFlowComponent extends ArkScrollable {
 
 class JSWaterFlow extends JSContainerBase {
   static create(params) {
-    getUINativeModule().waterFlow.setWaterFlowInitialize(true,
-      params === null || params === void 0 ? void 0 : params.scroller,
-      params === null || params === void 0 ? void 0 : params.sections,
-      params === null || params === void 0 ? void 0 : params.layoutMode,
-      params === null || params === void 0 ? void 0 : params.footerContent,
-      params === null || params === void 0 ? void 0 : params.footer,
-      (params !== null && typeof params === 'object') ? 'footerContent' in params : false);
+    getUINativeModule().waterFlow.create(params);
   }
   static columnsGap(value) {
     getUINativeModule().waterFlow.setJSColumnsGap(true, value);
