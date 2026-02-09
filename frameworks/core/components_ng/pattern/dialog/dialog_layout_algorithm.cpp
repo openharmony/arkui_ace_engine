@@ -143,9 +143,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() / HALF);
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(!children.empty());
     auto child = children.front();
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
