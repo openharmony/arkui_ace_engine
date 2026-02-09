@@ -19,10 +19,10 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-06）：
+**统计数据**（截至 2026-02-07）：
 
-- 总知识库文档: 32 个
-- 组件知识库: 26 个
+- 总知识库文档: 33 个
+- 组件知识库: 27 个
 - SDK API 知识库: 1 个
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
@@ -45,6 +45,16 @@ knowledge_base/
 │   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
 │   ├── calendar_picker/
 │   │   └── Calendar_Picker_Knowledge_Base.md  # CalendarPicker 组件知识库
+│   ├── counter/
+│   │   └── Counter_Knowledge_Base.md          # Counter 组件知识库
+│   ├── flex/
+│   │   └── Flex_Knowledge_Base.md             # Flex/Row/Column/Wrap 组件知识库
+│   ├── gauge/
+│   │   └── Gauge_Knowledge_Base.md             # Gauge 组件知识库
+│   ├── grid/
+│   │   └── Grid_Knowledge_Base.md          # Grid 组件知识库
+│   ├── image/
+│   │   └── Image_Knowledge_Base.md             # Image 组件知识库
 │   ├── container_picker/
 │   │   └── Container_Picker_Knowledge_Base.md # ContainerPicker 组件知识库
 │   ├── counter/
@@ -192,6 +202,37 @@ knowledge_base/
 - 测试覆盖和调试指南
 
 **适用场景**：Menu 组件开发、测试、问题排查时参考
+
+---
+
+### Grid Component Knowledge Base
+
+**位置**: `pattern/grid/Grid_Knowledge_Base_CN.md`
+
+**完整指南** - Grid 网格布局组件的开发、测试和调试参考文档
+
+**包含内容**：
+
+- **概述**: Grid 组件定位、五种布局算法模式、技术架构
+- **核心类详解**: GridPattern、GridLayoutInfo、GridModelNG 类结构与职责
+- **布局算法体系**: 自适应/静态/自定义/不规则/可滚动五种算法详解
+- **GridLayoutInfo**: 网格矩阵、行高映射、项目位置等核心数据结构
+- **GridItem 子组件**: 行列跨度、生效规则、性能优化建议
+- **完整 API 清单**: ArkTS 和 C++ API 完整列表
+- **事件系统**: 滚动事件、拖拽事件、焦点管理
+- **滚动控制**: Scroller 接口、ScrollAlign 枚举
+- **使用示例**: 5 种布局模式完整示例代码
+- **性能优化**: 虚拟滚动、行跳跃、预加载机制
+- **测试覆盖**: 测试基类、测试目录结构、运行方法
+- **调试指南**: DumpInfo、常见问题排查
+
+**适用场景**：Grid 组件开发、网格布局实现、不规则跨行列项目处理时参考
+
+**代码规模**：
+
+- 核心文件: 约 70 个
+- 核心代码: 约 25,000+ 行 C++ 代码
+- 测试文件: 约 30 个
 
 ---
 
