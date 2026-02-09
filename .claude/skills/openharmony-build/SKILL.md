@@ -1,7 +1,7 @@
 ---
 name: openharmony-build
-description: This skill should be used when the user asks to "编译 OpenHarmony", "build OpenHarmony", "编译完整代码", "执行编译", "编译 OpenHarmony 代码", "快速编译", "跳过gn编译", "fast-build", "编译测试", "编译测试用例", "build ace_engine_test", "编译 sdk", "编译 SDK", "build sdk", "build SDK", "编译 ohos-sdk", "编译测试列表", "build test list", "按列表编译测试", "编译指定测试", or mentions building the full OpenHarmony system, fast rebuild, test compilation, SDK compilation, or building tests from a target list. Handles complete build process including build execution, success verification, and failure log analysis with primary focus on out/{product}/build.log.
-version: 0.5.0
+description: This skill should be used when the user asks to "编译 OpenHarmony", "build OpenHarmony", "编译完整代码", "执行编译", "编译 OpenHarmony 代码", "快速编译", "跳过gn编译", "fast-build", "编译测试", "编译测试用例", "build ace_engine_test", "编译 sdk", "编译 SDK", "build sdk", "build SDK", "编译 ohos-sdk", "编译测试列表", "build test list", "按列表编译测试", "编译指定测试", "编译覆盖率版本", "build coverage version", "覆盖率编译", or mentions building the full OpenHarmony system, fast rebuild, test compilation, SDK compilation, building tests from a target list, or building tests with code coverage enabled. Handles complete build process including build execution, success verification, and failure log analysis with primary focus on out/{product}/build.log.
+version: 0.6.0
 ---
 
 # OpenHarmony Build Skill
@@ -131,6 +131,103 @@ cat "$OH_ROOT/out/sdk/build.log"
 - Pre-release comprehensive testing
 - When specifically required to build all tests
 
+### Build Tests with Code Coverage
+
+**IMPORTANT**: Building test suites with code coverage requires special build parameters.
+
+**Trigger keywords**:
+- "编译覆盖率版本" / "build coverage version"
+- "覆盖率编译" / "compile with coverage"
+- "测试套覆盖率" / "test suite coverage"
+
+**Scope of coverage parameter**:
+- ✅ **Valid for**: `ace_engine_test` and specific test targets within ace_engine repository
+- ⚠️ **Scope limited**: The parameter `--gn-args ace_engine_feature_enable_coverage=true` ONLY affects ace_engine repository targets
+- ✅ **Safe to use**: Even when used with global `unittest` target, the parameter only applies to ace_engine tests; other repositories are unaffected
+- 💡 **Usage**: You can safely add this parameter when building `unittest` to enable coverage for ace_engine tests only
+
+**Recommended practice**: When building ace_engine_test or ace_engine test targets, ALWAYS include `--gn-args ace_engine_feature_enable_coverage=true` to enable code coverage instrumentation.
+
+**Build ace_engine_test with coverage**:
+```bash
+# Navigate to OpenHarmony root first
+cd "$(find_root)"
+
+# Build ACE Engine test suite with coverage
+./build.sh --product-name rk3568 --build-target ace_engine_test --gn-args ace_engine_feature_enable_coverage=true
+```
+
+**Build specific ace_engine test with coverage**:
+```bash
+# Build a specific test target in ace_engine with coverage
+./build.sh --product-name rk3568 --build-target <test_target_name> --gn-args ace_engine_feature_enable_coverage=true
+```
+
+**Example: Build ui_content_stub_unittest with coverage**:
+```bash
+# Navigate to OpenHarmony root first
+cd "$(find_root)"
+
+# Build specific ace_engine test with coverage
+./build.sh --product-name rk3568 --build-target ui_content_stub_unittest --gn-args ace_engine_feature_enable_coverage=true
+```
+
+**Build global unittest with coverage (ace_engine only)**:
+```bash
+# Build global unittest - coverage parameter ONLY applies to ace_engine tests
+# Other repositories' tests are NOT affected by the coverage parameter
+./build.sh --product-name rk3568 --build-target unittest --gn-args ace_engine_feature_enable_coverage=true
+```
+
+**Note**: When using `--gn-args ace_engine_feature_enable_coverage=true` with global `unittest` target:
+- ✅ ace_engine tests will be built with coverage instrumentation
+- ✅ Other repositories' tests will be built normally (without coverage)
+- ✅ No errors or warnings will occur
+- 💡 This is the recommended approach when you want coverage for ace_engine tests within a full test build
+
+**Key parameters**:
+- `--build-target <test_target_name>` - Specify the test target name (without GN path format like `//path:target`)
+- `--gn-args ace_engine_feature_enable_coverage=true` - Enable code coverage instrumentation (ONLY for ace_engine targets)
+
+**Important notes**:
+- ✅ Use simple target name (e.g., `ui_content_stub_unittest`), NOT full GN path (`//foundation/arkui/...:target`)
+- ✅ Coverage flag ONLY affects ace_engine repository targets
+- ✅ Other repositories' tests are unaffected when coverage parameter is used
+- ✅ Safe to use with `unittest` target - enables coverage for ace_engine tests only
+- ✅ Coverage builds generate additional instrumentation data for code coverage analysis
+- ✅ Test executable location: `out/<product>/tests/ace_engine/unittest/<path>/<test_target_name>`
+
+**Common ace_engine test target examples**:
+```bash
+# UI content stub test (ace_engine repository)
+./build.sh --product-name rk3568 --build-target ui_content_stub_unittest --gn-args ace_engine_feature_enable_coverage=true
+
+# Text pattern test (ace_engine repository)
+./build.sh --product-name rk3568 --build-target text_pattern_test --gn-args ace_engine_feature_enable_coverage=true
+
+# Button pattern test (ace_engine repository)
+./build.sh --product-name rk3568 --build-target button_pattern_test --gn-args ace_engine_feature_enable_coverage=true
+```
+
+**When to use coverage builds**:
+- Measuring code coverage for ace_engine test suites
+- Validating test completeness for ace_engine components
+- Generating coverage reports for ace_engine code
+- Quality assurance and metrics collection for ACE Engine
+
+**Target compatibility**:
+| Target | Coverage Effect | Command |
+|--------|----------------|---------|
+| `ace_engine_test` | ✅ ace_engine tests with coverage | `./build.sh --product-name rk3568 --build-target ace_engine_test --gn-args ace_engine_feature_enable_coverage=true` |
+| `ui_content_stub_unittest` | ✅ ace_engine test with coverage | `./build.sh --product-name rk3568 --build-target ui_content_stub_unittest --gn-args ace_engine_feature_enable_coverage=true` |
+| `<other_ace_engine_test>` | ✅ ace_engine test with coverage | `./build.sh --product-name rk3568 --build-target <test_name> --gn-args ace_engine_feature_enable_coverage=true` |
+| `unittest` (global) | ✅ ace_engine with coverage, others normal | `./build.sh --product-name rk3568 --build-target unittest --gn-args ace_engine_feature_enable_coverage=true` |
+
+**Note**: When using `--gn-args ace_engine_feature_enable_coverage=true` with `unittest`:
+- ace_engine repository tests → built with coverage instrumentation
+- Other repositories' tests → built normally (without coverage)
+- No errors or conflicts occur
+
 ### Fast Rebuild (Skip GN Generation)
 
 When no GN files (BUILD.gn, *.gni) have been modified, use `--fast-rebuild` to skip GN generation:
@@ -168,17 +265,17 @@ Combine fast rebuild with component build for maximum speed:
 
 Combine fast rebuild with test builds for rapid iteration:
 
-**Build ACE Engine tests (fast)**:
+**Build ACE Engine tests (fast with coverage)**:
 ```bash
-./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target ace_engine_test --ccache --fast-rebuild
+./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target ace_engine_test --gn-args ace_engine_feature_enable_coverage=true --ccache --fast-rebuild
 ```
 
-**Build all unit tests**:
+**Build all unit tests (fast with ace_engine coverage)**:
 ```bash
-./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target unittest --ccache --fast-rebuild
+./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target unittest --gn-args ace_engine_feature_enable_coverage=true --ccache --fast-rebuild
 ```
 
-**Recommendation**: For ACE Engine development, prefer `ace_engine_test` with `--fast-rebuild` for fastest iteration when only test code has changed.
+**Recommendation**: For ACE Engine development, prefer `ace_engine_test` with `--gn-args ace_engine_feature_enable_coverage=true` and `--fast-rebuild` for fastest iteration when only test code has changed. Coverage instrumentation is recommended for all ace_engine test builds.
 
 ### Build Test Target List
 
@@ -531,6 +628,17 @@ error: build target not found
 ./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target ace_engine --ccache --fast-rebuild
 ```
 
+**Test development (ace_engine tests with coverage)**:
+```bash
+# Recommended: Always include coverage parameter for ace_engine tests
+./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target ace_engine_test --gn-args ace_engine_feature_enable_coverage=true --ccache --fast-rebuild
+
+# Specific ace_engine test with coverage
+./build.sh --export-para PYCACHE_ENABLE:true --product-name rk3568 --build-target <test_name> --gn-args ace_engine_feature_enable_coverage=true --ccache
+```
+
+**⭐ Recommended practice**: When building ace_engine_test or ace_engine test targets, ALWAYS include `--gn-args ace_engine_feature_enable_coverage=true` to enable code coverage instrumentation for better quality assurance.
+
 ### Dynamic Path Finding Helper
 
 Use this helper function in all scripts and commands:
@@ -555,6 +663,14 @@ cd "$OH_ROOT" || exit 1
 ```
 
 ## Version History
+
+- **0.6.0** (2026-02-10): 新增测试套件覆盖率编译支持
+  - ✨ 添加测试覆盖率编译专门命令和参数
+  - 📝 明确覆盖率编译参数：`--gn-args ace_engine_feature_enable_coverage=true`
+  - ⚠️ 强调使用简单目标名称，不带 GN 路径格式（如 `//path:target`）
+  - 📚 添加具体示例：`ui_content_stub_unittest` 覆盖率编译
+  - 🎯 新增触发关键词："编译覆盖率版本"、"build coverage version"、"覆盖率编译"
+  - 🔧 提供常用测试目标的覆盖率编译示例
 
 - **0.5.0** (2026-02-02): 新增测试列表编译磁盘空间管理策略
   - 💾 添加磁盘空间不足时的处理方案

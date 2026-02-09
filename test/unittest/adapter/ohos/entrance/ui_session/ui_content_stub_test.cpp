@@ -29,14 +29,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class UISessionStubTest : public testing::Test {};
+class UIContentStubTest : public testing::Test {};
 
 /**
- * @tc.name: UISessionStubTest001
+ * @tc.name: UIContentStubTest001
  * @tc.desc: Test UI_CONTENT_SERVICE_GET_TREE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest001, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -61,11 +61,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest002
+ * @tc.name: UIContentStubTest002
  * @tc.desc: Test UI_CONTENT_CONNECT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest002, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -90,11 +90,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest003
+ * @tc.name: UIContentStubTest003
  * @tc.desc: Test REGISTER_CLICK_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest003, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -119,11 +119,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest004
+ * @tc.name: UIContentStubTest004
  * @tc.desc: Test REGISTER_SEARCH_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest004, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -148,11 +148,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest005
+ * @tc.name: UIContentStubTest005
  * @tc.desc: Test REGISTER_TEXT_CHANGE_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest005, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -177,11 +177,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest006
+ * @tc.name: UIContentStubTest006
  * @tc.desc: Test REGISTER_ROUTER_CHANGE_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest006, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -206,11 +206,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest007
+ * @tc.name: UIContentStubTest007
  * @tc.desc: Test REGISTER_COMPONENT_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest007, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -235,11 +235,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest008
+ * @tc.name: UIContentStubTest008
  * @tc.desc: Test REGISTER_WEB_UNFOCUS_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest008, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -264,11 +264,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest009
+ * @tc.name: UIContentStubTest009
  * @tc.desc: Test REGISTER_SCROLL_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest009, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -293,11 +293,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest010
+ * @tc.name: UIContentStubTest010
  * @tc.desc: Test REGISTER_LIFE_CYCLE_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest010, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -322,11 +322,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest011
+ * @tc.name: UIContentStubTest011
  * @tc.desc: Test REGISTER_SELECT_TEXT_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest011, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -351,11 +351,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest012
+ * @tc.name: UIContentStubTest012
  * @tc.desc: Test SENDCOMMAND_ASYNC_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest012, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -380,11 +380,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest013
+ * @tc.name: UIContentStubTest013
  * @tc.desc: Test SENDCOMMAND_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest013, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -409,11 +409,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest014
+ * @tc.name: UIContentStubTest014
  * @tc.desc: Test UNREGISTER_CLICK_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest014, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -438,11 +438,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest015
+ * @tc.name: UIContentStubTest015
  * @tc.desc: Test UNREGISTER_SEARCH_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest015, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -467,11 +467,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest016
+ * @tc.name: UIContentStubTest016
  * @tc.desc: Test UNREGISTER_TEXT_CHANGE_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest016, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -496,11 +496,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest017
+ * @tc.name: UIContentStubTest017
  * @tc.desc: Test UNREGISTER_ROUTER_CHANGE_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest017, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -525,11 +525,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest018
+ * @tc.name: UIContentStubTest018
  * @tc.desc: Test UNREGISTER_COMPONENT_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest018, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -554,11 +554,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest019
+ * @tc.name: UIContentStubTest019
  * @tc.desc: Test UNREGISTER_WEB_UNFOCUS_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest019, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -583,11 +583,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest020
+ * @tc.name: UIContentStubTest020
  * @tc.desc: Test UNREGISTER_SCROLL_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest020, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -612,11 +612,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest021
+ * @tc.name: UIContentStubTest021
  * @tc.desc: Test UNREGISTER_LIFE_CYCLE_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest021, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest021, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -641,11 +641,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest022
+ * @tc.name: UIContentStubTest022
  * @tc.desc: Test UNREGISTER_SELECT_TEXT_EVENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest022, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest022, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -670,11 +670,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest023
+ * @tc.name: UIContentStubTest023
  * @tc.desc: Test RESET_ALL_TEXT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest023, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -699,11 +699,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest024
+ * @tc.name: UIContentStubTest024
  * @tc.desc: Test RESET_TEXT_BY_ID
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest024, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest024, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -728,11 +728,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest024, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest025
+ * @tc.name: UIContentStubTest025
  * @tc.desc: Test GET_WEB_VIEW_LANGUAGE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest025, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest025, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -757,11 +757,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest026
+ * @tc.name: UIContentStubTest026
  * @tc.desc: Test GET_WEB_TRANSLATE_TEXT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest026, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest026, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -786,11 +786,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest026, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest027
+ * @tc.name: UIContentStubTest027
  * @tc.desc: Test CONTINUE_GET_WEB_TEXT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest027, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest027, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -815,11 +815,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest028
+ * @tc.name: UIContentStubTest028
  * @tc.desc: Test SEND_TRANSLATE_RESULT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest028, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest028, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -844,11 +844,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest029
+ * @tc.name: UIContentStubTest029
  * @tc.desc: Test END_WEB_TRANSLATE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest029, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest029, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -873,11 +873,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest030
+ * @tc.name: UIContentStubTest030
  * @tc.desc: Test SEND_TRANSLATE_RESULT_STR
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest030, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest030, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -902,11 +902,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest031
+ * @tc.name: UIContentStubTest031
  * @tc.desc: Test GET_CURRENT_PAGE_NAME
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest031, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest031, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -931,11 +931,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest032
+ * @tc.name: UIContentStubTest032
  * @tc.desc: Test GET_CURRENT_SHOWING_IMAGE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest032, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -960,11 +960,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest032, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest033
+ * @tc.name: UIContentStubTest033
  * @tc.desc: Test GET_VISIBLE_TREE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest033, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest033, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -989,11 +989,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest033, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest034
+ * @tc.name: UIContentStubTest034
  * @tc.desc: Test SEND_COMMAND
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest034, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest034, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1018,11 +1018,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest034, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest035
+ * @tc.name: UIContentStubTest035
  * @tc.desc: Test EXE_APP_AI_FUNCTION
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest035, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest035, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1047,11 +1047,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest036
+ * @tc.name: UIContentStubTest036
  * @tc.desc: Test GET_SPECIFIED_CONTENT_OFFSETS
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest036, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest036, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1076,11 +1076,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest036, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest037
+ * @tc.name: UIContentStubTest037
  * @tc.desc: Test HIGHLIGHT_SPECIFIED_CONTENT
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest037, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest037, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1105,11 +1105,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest037, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest038
+ * @tc.name: UIContentStubTest038
  * @tc.desc: Test GET_MULTI_IMAGES_BY_ID
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest038, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest038, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1134,11 +1134,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest038, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest039
+ * @tc.name: UIContentStubTest039
  * @tc.desc: Test REGISTER_CONTENT_CHANGE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest039, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest039, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1163,11 +1163,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest039, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest040
+ * @tc.name: UIContentStubTest040
  * @tc.desc: Test UNREGISTER_CONTENT_CHANGE
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest040, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest040, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1192,11 +1192,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest040, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest041
+ * @tc.name: UIContentStubTest041
  * @tc.desc: Test GET_HIT_TEST_NODE_INFO_FOR_TOUCH
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest041, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest041, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
@@ -1221,11 +1221,11 @@ HWTEST_F(UISessionStubTest, UISessionStubTest041, TestSize.Level1)
 }
 
 /**
- * @tc.name: UISessionStubTest042
+ * @tc.name: UIContentStubTest042
  * @tc.desc: Test REQUEST_STATE_MGMT_INFO
  * @tc.type: FUNC
  */
-HWTEST_F(UISessionStubTest, UISessionStubTest042, TestSize.Level1)
+HWTEST_F(UIContentStubTest, UIContentStubTest042, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. creat UIContentServiceStubImpl and creat MessageParcel add MessageOption
