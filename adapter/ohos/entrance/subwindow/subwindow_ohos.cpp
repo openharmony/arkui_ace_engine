@@ -743,6 +743,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
     popupInfo.markNeedUpdate = true;
     ContainerScope scope(childContainerId_);
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideEventColumn();
