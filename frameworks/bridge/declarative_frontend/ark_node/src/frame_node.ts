@@ -31,6 +31,8 @@ interface InteractionEventBindingInfo {
 
 interface ArkComponentCreator {
   createSearchComponent?:(node: NodePtr, type: ModifierType) => ArkSearchComponent;
+  createMarqueeComponent?: (node: NodePtr, type: ModifierType) => ArkMarqueeComponent;
+  createSymbolGlyphComponent?: (node: NodePtr, type: ModifierType) => ArkSymbolGlyphComponent;
 }
 
 const __componentCreator__ : ArkComponentCreator = {};
@@ -1215,10 +1217,13 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
-        getUINativeModule().loadNativeModule('SymbolGlyph');
-        let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
-        return module.createComponent(node, type);
-    })
+        if (__componentCreator__.createSymbolGlyphComponent === undefined) {
+          getUINativeModule().loadNativeModule('SymbolGlyph');
+          let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+          __componentCreator__.createSymbolGlyphComponent = module.createComponent;
+        }
+        return __componentCreator__.createSymbolGlyphComponent!(node, type);
+      })
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
@@ -1263,9 +1268,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Marquee', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
-        getUINativeModule().loadNativeModule('Marquee');
-        let module = globalThis.requireNapi('arkui.components.arkmarquee');
-        return module.createComponent(node, type);
+        if (__componentCreator__.createMarqueeComponent === undefined) {
+          getUINativeModule().loadNativeModule('Marquee');
+          let module = globalThis.requireNapi('arkui.components.arkmarquee');
+          __componentCreator__.createMarqueeComponent = module.createComponent;
+        }
+        return __componentCreator__.createMarqueeComponent!(node, type);
       })
     }],
     ['TextArea', (context: UIContext): FrameNode => {

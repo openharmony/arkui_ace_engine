@@ -217,12 +217,7 @@ MarqueeUpdateStrategyModifier.identity = Symbol('marqueeUpdateStrategy');
 
 class JSMarquee extends JSViewAbstract {
     static create(params) {;
-        console.log('JSMarquee create nativeModule');
-        if (params !== undefined) {
-            getUINativeModule().marquee.create(params);
-        } else {
-            getUINativeModule().marquee.create();
-        }
+        getUINativeModule().marquee.create(params);
     }
 
     static allowScale(value) {
@@ -326,16 +321,6 @@ class MarqueeOnFinishModifier extends ModifierWithKey {
   }
 }
 MarqueeOnFinishModifier.identity = Symbol('marqueeOnFinish');
-// @ts-ignore
-if (globalThis.Marquee !== undefined) {
-  globalThis.Marquee.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkMarqueeComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.MarqueeModifier(nativePtr, classType);
-    });
-  };
-}
 
 function createComponent(nativePtr, classType) {
 	return new ArkMarqueeComponent(nativePtr, classType);
