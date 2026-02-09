@@ -139,7 +139,7 @@ void DataPanelPattern::UpdateTrackBackground(const Color& color, bool isFirstLoa
     CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateTrackBackground(color);
     }
     if (host->GetRerenderable()) {
@@ -155,7 +155,7 @@ void DataPanelPattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool 
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateStrokeWidth(strokeWidth);
     }
     if (host->GetRerenderable()) {

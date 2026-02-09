@@ -843,7 +843,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateDefaultFamilies, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         buttonModelNG.UpdateDefaultFamilies(buttonNode, fonts, ButtonStringType::LABEL);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             buttonModelNG.UpdateDefaultFamilies(buttonNode, fonts, ButtonStringType::FONT_FAMILY);
             auto ret = layout->GetFontFamily();
             ASSERT_NE(ret.has_value(), false);
@@ -887,7 +887,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentFamilies001, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         buttonModelNG.UpdateComponentFamilies(buttonNode, fonts, ButtonStringType::LABEL);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             buttonModelNG.UpdateComponentFamilies(buttonNode, fonts, ButtonStringType::FONT_FAMILY);
             auto ret = layout->GetFontFamily();
             ASSERT_NE(ret.has_value(), false);
@@ -1135,7 +1135,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentColor, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentColor(Color::RED, static_cast<ButtonColorType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             pattern->UpdateComponentColor(Color::RED, ButtonColorType::FONT_COLOR);
             auto foregroundColor = textRenderContext->GetForegroundColor();
             EXPECT_EQ(foregroundColor, Color::RED);
@@ -1181,7 +1181,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentString, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentString(value, static_cast<ButtonStringType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetContent();
             EXPECT_NE(ret.value_or(eValue), UtfUtils::Str8DebugToStr16(value));
             pattern->UpdateComponentString(value, ButtonStringType::LABEL);
@@ -1225,7 +1225,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentFamilies002, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentFamilies(fonts, static_cast<ButtonStringType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetFontFamily();
             ASSERT_NE(ret.has_value(), true);
             pattern->UpdateComponentFamilies(fonts, ButtonStringType::FONT_FAMILY);
@@ -1270,7 +1270,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentDimension, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentDimension(value, static_cast<ButtonDimensionType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetAdaptMinFontSize();
             ASSERT_NE(ret.has_value(), true);
             pattern->UpdateComponentDimension(value, ButtonDimensionType::MIN_FONT_SIZE);
@@ -1317,7 +1317,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentDouble, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentDouble(value, static_cast<ButtonDoubleType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetMinFontScale();
             ASSERT_NE(ret.has_value(), true);
             pattern->UpdateComponentDouble(value, ButtonDoubleType::MIN_FONT_SCALE);

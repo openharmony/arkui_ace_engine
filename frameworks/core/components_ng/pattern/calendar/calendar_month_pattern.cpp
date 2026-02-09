@@ -1168,7 +1168,7 @@ void CalendarMonthPattern::UpdateDayRadius(const CalcDimension& dayRadius)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateDayRadius(dayRadius);
     }
 

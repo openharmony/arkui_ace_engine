@@ -1602,7 +1602,7 @@ public:
     }
     virtual void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
-    bool IsSystmColorChange()
+    bool IsSystemColorChange()
     {
         return isSystemColorChange_;
     }

@@ -2697,7 +2697,7 @@ void ImagePattern::UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
@@ -2710,7 +2710,7 @@ void ImagePattern::UpdateImageFill(const Color& color)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto renderProperty = GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(renderProperty);
         renderProperty->UpdateSvgFillColor(color);
@@ -2727,7 +2727,7 @@ void ImagePattern::UpdateImageAlt(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateAlt(sourceInfo);

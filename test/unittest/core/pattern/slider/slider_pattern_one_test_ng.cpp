@@ -1215,7 +1215,7 @@ HWTEST_F(SliderPatternOneTestNg, UpdateSliderComponentColor001, TestSize.Level1)
     for (const auto& pair : vec) {
         pipelineContext->SetIsSystemColorChange(pair.first);
         frameNode->SetRerenderable(pair.second);
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             Gradient gradientRes;
             gradientRes.AddColor(GradientColor(Color::RED));
             pattern->UpdateSliderComponentColor(Color::RED, SliderColorType::BLOCK_COLOR, gradientRes);
@@ -1267,7 +1267,7 @@ HWTEST_F(SliderPatternOneTestNg, UpdateSliderComponentString001, TestSize.Level1
     for (const auto& pair : vec) {
         pipelineContext->SetIsSystemColorChange(pair.first);
         frameNode->SetRerenderable(pair.second);
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             pattern->UpdateSliderComponentMedia();
             pattern->UpdateSliderComponentString(true, "test");
             EXPECT_TRUE(paintProperty->GetShowTips());
