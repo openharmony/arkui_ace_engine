@@ -219,7 +219,6 @@ napi_value LuminanceSampler::CreateJSSamplerInstance(napi_env env, SamplerInstan
             SamplerInstance* samplerInstance = (SamplerInstance*)data;
             // release four references(onFunc) before releasing samplerInstance
             samplerInstance->Destroy(env);
-            delete samplerInstance;
         },
         nullptr, nullptr);
     napi_property_descriptor resultFuncs[] = {
