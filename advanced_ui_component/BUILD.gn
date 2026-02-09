@@ -14,6 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("advanced_ui_component.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 config("ace_napi_config") {
   include_dirs = [
@@ -55,7 +56,7 @@ foreach(module, advanced_ui_component_libs) {
   } else if (!is_arkui_x) {
     advanced_ui_component_lib(module) {
       # napi libs remain isolate in libace.z.so and asan version
-      if (is_asan) {
+      if (is_asan || !ace_engine_feature_enable_libace) {
         platform = "ohos"
       } else {
         platform = "ohos_ng"
