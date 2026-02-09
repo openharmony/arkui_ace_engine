@@ -82,7 +82,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isModal_ && !isShowInSubWindow_;
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
-    needAdaptForceSplitMode_ = pipeline->IsCurrentInforceSplitMode() && !IsEmbeddedDialog(hostNode);
+    needAdaptForceSplitMode_ = pipeline->IsCurrentInForceSplitMode() && !IsEmbeddedDialog(hostNode);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
@@ -139,8 +139,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     if (needAdaptForceSplitMode_) {
-        childLayoutConstraint->percentReference.SetWidth(childLayoutConstraint->percentReference.Width() / HALF);
-        childLayoutConstraint->maxSize.SetWidth(childLayoutConstraint->maxSize.Width() / HALF);
+        childLayoutConstraint.percentReference.SetWidth(childLayoutConstraint.percentReference.Width() / HALF);
+        childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() / HALF);
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
@@ -172,6 +172,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
         childLayoutConstraint.maxSize.SetWidth(widthRatio);
+        if (needAdaptForceSplitMode_) {
+            childLayoutConstraint.percentReference.SetWidth(widthRatio);
+        }
     }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
