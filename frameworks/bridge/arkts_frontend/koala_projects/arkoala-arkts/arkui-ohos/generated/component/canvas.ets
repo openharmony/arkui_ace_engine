@@ -1360,7 +1360,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     public getImageData(sx: double, sy: double, sw: double, sh: double): ImageData {
         return hookGetImageData(this, sx, sy, sw, sh)
     }
-    public getPixelMap(sx: double, sy: double, sw: double, sh: double): image.PixelMap {
+    public getPixelMap(sx: double, sy: double, sw: double, sh: double): image.PixelMap | undefined {
         const sx_casted = sx as (double)
         const sy_casted = sy as (double)
         const sw_casted = sw as (double)
@@ -1812,10 +1812,16 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
         return obj
     }
-    getPixelMap_serialize(sx: double, sy: double, sw: double, sh: double): image.PixelMap {
+    getPixelMap_serialize(sx: double, sy: double, sw: double, sh: double): image.PixelMap | undefined {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getPixelMap(this.peer!.ptr, sx, sy, sw, sh)
-        const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
-        return obj
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : image.PixelMap | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (image_PixelMap_serializer.read(retvalDeserializer) as image.PixelMap)
+        }
+        const returnResult : image.PixelMap | undefined = buffer
+        return returnResult
     }
     getLineDash_serialize(): Array<double> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
@@ -2283,7 +2289,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     set width(width: double) {
         this.setWidth(width)
     }
-    get canvas(): FrameNode {
+    get canvas(): FrameNode | null {
         return this.getCanvas()
     }
     set canvas(canvas: FrameNode) {
@@ -2391,7 +2397,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.setWidth_serialize(width_casted)
         return
     }
-    private getCanvas(): FrameNode {
+    private getCanvas(): FrameNode | null {
         return hookGetCanvas(this)
     }
     private setCanvas(canvas: FrameNode): void {

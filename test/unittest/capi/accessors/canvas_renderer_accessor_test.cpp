@@ -1518,9 +1518,10 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapXYTest, TestSize.Level1)
             auto sy = Converter::ArkValue<Ark_Float64>(actualY);
             auto sw = Converter::ArkValue<Ark_Float64>(valD);
             auto sh = Converter::ArkValue<Ark_Float64>(valD);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
-            ASSERT_NE(pixelMapPeer, nullptr);
-            EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
+            auto value = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
+            auto pixelMapValue = Converter::GetOptPtr(&value);
+            ASSERT_NE(pixelMapValue, nullptr);
+            EXPECT_EQ(Referenced::RawPtr(pixelMapValue), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.left, actualX, FLT_PRECISION);
             EXPECT_NEAR(target.top, actualY, FLT_PRECISION);
         }
@@ -1537,9 +1538,10 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapXYTest, TestSize.Level1)
             auto sy = Converter::ArkValue<Ark_Float64>(actualY);
             auto sw = Converter::ArkValue<Ark_Float64>(valD);
             auto sh = Converter::ArkValue<Ark_Float64>(valD);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
-            ASSERT_NE(pixelMapPeer, nullptr);
-            EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
+            auto value = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
+            auto pixelMapValue = Converter::GetOptPtr(&value);
+            ASSERT_NE(pixelMapValue, nullptr);
+            EXPECT_EQ(Referenced::RawPtr(pixelMapValue), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.left, actualX * density, FLT_PRECISION);
             EXPECT_NEAR(target.top, actualY * density, FLT_PRECISION);
         }
@@ -1563,9 +1565,10 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapWHTest, TestSize.Level1)
             auto sy = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
             auto sw = Converter::ArkValue<Ark_Float64>(actualW);
             auto sh = Converter::ArkValue<Ark_Float64>(actualH);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
-            ASSERT_NE(pixelMapPeer, nullptr);
-            EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
+            auto value = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
+            auto pixelMapValue = Converter::GetOptPtr(&value);
+            ASSERT_NE(pixelMapValue, nullptr);
+            EXPECT_EQ(Referenced::RawPtr(pixelMapValue), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.width, actualW, FLT_PRECISION);
             EXPECT_NEAR(target.height, actualH, FLT_PRECISION);
         }
@@ -1582,9 +1585,10 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapWHTest, TestSize.Level1)
             auto sy = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
             auto sw = Converter::ArkValue<Ark_Float64>(actualW);
             auto sh = Converter::ArkValue<Ark_Float64>(actualH);
-            Ark_PixelMap pixelMapPeer = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
-            ASSERT_NE(pixelMapPeer, nullptr);
-            EXPECT_EQ(Referenced::RawPtr(pixelMapPeer->pixelMap), Referenced::RawPtr(pixelMap));
+            auto value = accessor_->getPixelMap(peer_, sx, sy, sw, sh);
+            auto pixelMapValue = Converter::GetOptPtr(&value);
+            ASSERT_NE(pixelMapValue, nullptr);
+            EXPECT_EQ(Referenced::RawPtr(pixelMapValue), Referenced::RawPtr(pixelMap));
             EXPECT_NEAR(target.width, actualW * density, FLT_PRECISION);
             EXPECT_NEAR(target.height, actualH * density, FLT_PRECISION);
         }
@@ -1604,9 +1608,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
     auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     auto arkR = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
     auto ptr = accessor_->getPixelMap(peer_, arkD, arkR, arkD, arkR);
-    EXPECT_EQ(ptr, nullptr);
+    auto optValue = Converter::GetOptPtr(&ptr);
+    EXPECT_EQ(optValue, nullptr);
     ptr = accessor_->getPixelMap(peer_, arkR, arkD, arkR, arkD);
-    EXPECT_EQ(ptr, nullptr);
+    optValue = Converter::GetOptPtr(&ptr);
+    EXPECT_EQ(optValue, nullptr);
 }
 #endif
 
