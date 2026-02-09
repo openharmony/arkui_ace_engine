@@ -78,7 +78,8 @@ public:
     explicit TaskExecutorImpl(bool delayRun) : delayRun_(delayRun) {}
 
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        Ace::PriorityType priorityType = Ace::PriorityType::LOW) const override
+        Ace::PriorityType priorityType = Ace::PriorityType::LOW,
+        Ace::VsyncBarrierOption barrierOption = Ace::VsyncBarrierOption::NO_BARRIER) const override
     {
         CHECK_NULL_RETURN(task, false);
         if (delayRun_) {

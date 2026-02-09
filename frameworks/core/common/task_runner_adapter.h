@@ -31,7 +31,8 @@ public:
     virtual ~TaskRunnerAdapter() override = default;
 
     virtual void PostTask(
-        std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW)
+        std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER)
     {}
     virtual void PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller) {}
     virtual void PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& name,

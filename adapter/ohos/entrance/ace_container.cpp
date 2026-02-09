@@ -3780,7 +3780,8 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange",
+            PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
         return;
     }
     taskExecutor->PostTask(
@@ -3802,9 +3803,11 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                     CHECK_NULL_VOID(container);
                     container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
+                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition",
+                PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange");
+        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void AceContainer::HotReload()

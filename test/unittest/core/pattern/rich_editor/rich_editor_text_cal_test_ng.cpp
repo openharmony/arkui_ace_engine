@@ -199,7 +199,8 @@ public:
     MOCK_METHOD(void, RemoveTask, (TaskType type, const std::string& name), (override));
 
     MOCK_METHOD(bool, OnPostTask,
-        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType,
+        Ace::VsyncBarrierOption barrierOption),
         (const, override));
     MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const, override));
     MOCK_METHOD(bool, OnPostTaskWithoutTraceId,
