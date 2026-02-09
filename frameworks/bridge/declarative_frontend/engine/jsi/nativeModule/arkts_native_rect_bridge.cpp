@@ -40,7 +40,6 @@ ArkUINativeModuleValue RectBridge::SetRadiusWidth(ArkUIRuntimeCallInfo* runtimeC
     RefPtr<ResourceObject> resObj;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusWidth, resObj, isSupportPercent)) {
         GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(
         nativeNode, radiusWidth.Value(), static_cast<int32_t>(radiusWidth.Unit()), AceType::RawPtr(resObj));
@@ -69,7 +68,6 @@ ArkUINativeModuleValue RectBridge::SetRadiusHeight(ArkUIRuntimeCallInfo* runtime
     RefPtr<ResourceObject> resObj;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, radiusHeight, resObj, isSupportPercent)) {
         GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(
         nativeNode, radiusHeight.Value(), static_cast<int32_t>(radiusHeight.Unit()), AceType::RawPtr(resObj));
