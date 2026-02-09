@@ -30131,9 +30131,6 @@ class ArkXComponentComponent extends ArkComponent {
   useSizeType(value) {
     throw new BusinessError(100201, 'useSizeType Method not supportted in ArkXComponentComponent class.');
   }
-  privacySensitive(value) {
-    throw new BusinessError(100201, 'privacySensitive Method not supportted in ArkXComponentComponent class.');
-  }
   clip(value) {
     throw new BusinessError(100201, 'clip Method not supportted in ArkXComponentComponent class.');
   }
