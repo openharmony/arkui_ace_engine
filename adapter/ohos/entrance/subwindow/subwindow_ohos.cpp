@@ -211,19 +211,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
     CHECK_NULL_RETURN(parentContainer, size);
-    auto foldStatus = parentContainer->GetCurrentFoldStatus();
-    auto displayInfo = defaultDisplay->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, size);
-    auto sourceMode = displayInfo->GetDisplaySourceMode();
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d, FoldStatus: %{public}d, sourceMode: %{public}d",
-        displayId, foldStatus, sourceMode);
-    if (foldStatus == FoldStatus::EXPAND || sourceMode == Rosen::DisplaySourceMode::EXTEND) {
-        return size;
-    }
-
-    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
-    if (isCrossWindow || isSceneBoard) {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d", displayId);
+    if (parentContainer->IsNeedModifySize()) {
         auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
         finalDisplayId = DEFAULT_DISPLAY_ID;
         if (!display) {
@@ -235,9 +224,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow windowId: %{public}d isSceneBoard: %{public}d isCrossWindow: %{public}d "
-        "finalDisplayId: %{public}d  displaySize: %{public}s",
-        parentWindowId, isSceneBoard, isCrossWindow, finalDisplayId, size.ToString().c_str());
+        "parentWindow windowId: %{public}d finalDisplayId: %{public}d  displaySize: %{public}s",
+        parentWindowId, finalDisplayId, size.ToString().c_str());
     return size;
 }
 

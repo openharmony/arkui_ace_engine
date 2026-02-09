@@ -19,6 +19,15 @@
 #include "base/memory/ace_type.h"
 #include "core/common/display_info.h"
 
+namespace OHOS {
+template<typename T>
+class sptr;
+
+namespace Rosen {
+class Display;
+}
+}
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT DisplayInfoUtils : public AceType {
     DECLARE_ACE_TYPE(DisplayInfoUtils, AceType);
@@ -31,6 +40,8 @@ public:
     bool GetIsFoldable();
     FoldStatus GetCurrentFoldStatus();
     std::vector<Rect> GetCurrentFoldCreaseRegion();
+    void UpdateDisplaySourceMode(const sptr<Rosen::Display>& display);
+    DisplaySourceMode GetDisplaySourceMode();
     Rect GetDisplayAvailableRect(int32_t displayId) const;
     Rect GetFoldExpandAvailableRect() const;
 
