@@ -85,7 +85,7 @@ interface ColumnLayoutAlgorithmOption {
 }
 
 function getOptionalVal<T>(defaultVal: T, arg?: T) : T{
-  return arg ? arg : defaultVal
+  return arg !== undefined ? arg : defaultVal
 }
 
 class BaseLayoutAlgorithm {

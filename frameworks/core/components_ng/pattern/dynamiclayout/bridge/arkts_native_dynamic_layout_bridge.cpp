@@ -80,10 +80,10 @@ void ParseLinearAlgorithmOption(
     auto alignItemVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "alignItems"));
     auto spaceVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "space"));
     auto reverseVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isReverse"));
-    FlexAlign crossAxisAlign = FlexAlign::FLEX_START;
+    FlexAlign crossAxisAlign = FlexAlign::CENTER;
     FlexAlign justifyContent = FlexAlign::FLEX_START;
     CalcDimension space;
-    bool isRevserse = false;
+    bool isReverse = false;
     ParseLinearCrossAxisAlignment(vm, alignItemVal, crossAxisAlign);
     ParseLinearMainAxisAlignment(vm, justifyVal, justifyContent);
     ParseSpace(vm, spaceVal, space);
@@ -91,9 +91,9 @@ void ParseLinearAlgorithmOption(
     params->SetMainAxisAlign(justifyContent);
     params->SetCrossAxisAlign(crossAxisAlign);
     if (reverseVal->IsBoolean()) {
-        isRevserse = reverseVal->ToBoolean(vm)->Value();
+        isReverse = reverseVal->ToBoolean(vm)->Value();
     }
-    params->SetIsReverse(isRevserse);
+    params->SetIsReverse(isReverse);
 }
 
 void ParseColumnAlgorithmOption(
@@ -251,13 +251,13 @@ std::function<void(LayoutWrapper*)> PreparePlaceChildrenFunc(EcmaVM* vm, const L
     };
 }
 
-bool ParseCustomLayoutAlgorithmOption(
+void ParseCustomLayoutAlgorithmOption(
     EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, RefPtr<AlgorithmParamBase>& params)
 {
     auto jsMeasureSizeFunc = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
     auto jsOnLayoutFunc = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onLayout"));
     if (!jsMeasureSizeFunc->IsFunction(vm) && !jsOnLayoutFunc->IsFunction(vm)) {
-        return false;
+        return;
     }
     auto customParams = AceType::MakeRefPtr<CustomLayoutAlgorithmParam>();
     if (jsMeasureSizeFunc->IsFunction(vm)) {
@@ -269,7 +269,6 @@ bool ParseCustomLayoutAlgorithmOption(
         customParams->SetOnPlaceChildren(std::move(onPlaceChildrenFunc));
     }
     params = customParams;
-    return true;
 }
 
 std::unordered_map<int32_t, ParsingParamFunc> parsingParamFuncMap = {
