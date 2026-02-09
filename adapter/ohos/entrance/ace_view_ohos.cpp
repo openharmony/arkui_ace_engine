@@ -25,7 +25,6 @@ namespace OHOS::Ace::Platform {
 namespace {
 
 constexpr int32_t ROTATION_DIVISOR = 64;
-constexpr int32_t DEFAULT_MOUSE_PROCESS_TOUCH_ID = 0;
 
 bool IsMMIMouseScrollBegin(const AxisEvent& event)
 {
@@ -440,27 +439,10 @@ bool AceViewOhos::ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerE
     const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess)
 {
     if (event.button == MouseButton::LEFT_BUTTON) {
-        // Only process PRESS/MOVE/RELEASE/CANCEL event
-        switch (pointerEvent->GetPointerAction()) {
-            case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
-            case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
-            case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
-                break;
-            default:
-                return false;
+        TouchEvent touchEvent;
+        if (!ProcessMouseToTouchEvent(event, touchEvent, pointerEvent->GetPointerAction())) {
+            return false;
         }
-        TouchEvent touchEvent = event.CreateTouchPoint();
-        touchEvent.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
-        touchEvent.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
-        for (auto& item : touchEvent.pointers) {
-            item.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
-            item.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
-            item.isPressed = (touchEvent.type == TouchType::DOWN) || (touchEvent.type == TouchType::MOVE);
-        }
-        touchEvent.convertInfo.first = UIInputEventType::MOUSE;
-        touchEvent.convertInfo.second = UIInputEventType::TOUCH;
-        touchEvent.SetSourceType(SourceType::TOUCH);
         CHECK_NULL_RETURN(touchEventCallback_, false);
         touchEventCallback_(touchEvent, markProcess, node);
         return true;
