@@ -970,8 +970,11 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         ACE_SCOPED_TRACE("WindowScene::OnPreLoadStartingWindowFinished");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        CHECK_NULL_VOID(self->startingWindow_);
         CHECK_NULL_VOID(self->session_);
+        if (self->startingWindow_ == nullptr) {
+            self->session_->ResetPreloadStartingWindow();
+            return;
+        }
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
