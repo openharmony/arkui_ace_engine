@@ -1416,6 +1416,7 @@ private:
     std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
     RefPtr<TextFieldTheme> GetTheme() const;
     void GetAIWriteInfo(AIWriteInfo& info);
+    void RemoveOfflineWebWindowStateChangedCallbackIfNeed(const RefPtr<PipelineContext>& context, int32_t nodeId);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1661,6 +1662,7 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<PipelineContext> offlineWebPipelineContext_;
     bool isTextSelectionEnable_ = false;
     bool isMenuShownFromWeb_ = false;
     bool isMenuShownFromWebBeforeStartClose_ = false;

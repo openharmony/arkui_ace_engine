@@ -41,6 +41,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "arkweb_utils.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -713,6 +715,120 @@ HWTEST_F(WebPatternWebTest, OnAttachContext, TestSize.Level1)
     webPattern->renderContextForSurface_ = nullptr;
     webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContext, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_EQ(pipeline, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed001
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = true;
+    RefPtr<MockPipelineContext> pipelineContext = nullptr;
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContext, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_EQ(pipeline, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed002
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed002
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = true;
+    auto pipelineContextNew = AceType::MakeRefPtr<MockPipelineContext>();
+    ASSERT_NE(pipelineContextNew, nullptr);
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContextNew, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_EQ(pipeline, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed003
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed003
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = true;
+    auto pipelineContextCur = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContextCur, nullptr);
+    pipelineContextCur->instanceId_ = 0;
+    webPattern->offlineWebPipelineContext_ = AceType::WeakClaim(AceType::RawPtr(pipelineContextCur));
+    auto pipelineContextNew = AceType::MakeRefPtr<MockPipelineContext>();
+    ASSERT_NE(pipelineContextNew, nullptr);
+    pipelineContextNew->instanceId_ = 0;
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContextNew, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, pipelineContextNew);
+
+    pipelineContextNew->instanceId_ = 1;
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContextNew, nodeId);
+    pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_NE(pipeline, nullptr);
+    ASSERT_EQ(pipeline->GetInstanceId(), pipelineContextNew->GetInstanceId());
 #endif
 }
 
