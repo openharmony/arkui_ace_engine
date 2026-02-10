@@ -880,7 +880,7 @@ void SliderModelNG::UpdateComponentColor(FrameNode* frameNode, const SliderColor
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (sliderColorType) {
             case SliderColorType::BLOCK_COLOR:
                 ResetBlockColor(frameNode);

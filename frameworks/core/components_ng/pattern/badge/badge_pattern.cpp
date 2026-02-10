@@ -316,7 +316,7 @@ void BadgePattern::UpdateBadgeValue(const std::string& badgeValue, bool isFirstL
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeValue(badgeValue);
     }
 }
@@ -329,7 +329,7 @@ void BadgePattern::UpdateColor(const Color& color, bool isFirstLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeTextColor(color);
     }
 }
@@ -342,7 +342,7 @@ void BadgePattern::UpdateBadgeColor(const Color& badgeColor, bool isFirstLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeColor(badgeColor);
     }
 }
@@ -355,7 +355,7 @@ void BadgePattern::UpdateBorderColor(const Color& borderColor, bool isFirstLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeBorderColor(borderColor);
     }
 }
@@ -368,7 +368,7 @@ void BadgePattern::UpdateOuterBorderColor(const Color& outerBorderColor, bool is
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeOuterBorderColor(outerBorderColor);
     }
 }
@@ -381,7 +381,7 @@ void BadgePattern::UpdateFontWeight(FontWeight fontWeight, bool isFirstLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeFontWeight(fontWeight);
     }
     if (host->GetRerenderable()) {
@@ -397,7 +397,7 @@ void BadgePattern::UpdateFontSize(const CalcDimension& fontSize, bool isDefaultF
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeFontSize(fontSize);
         auto originFontSizeFlag = layoutProperty->GetFontSizeIsDefault();
         auto originBadgeSize = layoutProperty->GetBadgeSizeIsDefault();
@@ -416,7 +416,7 @@ void BadgePattern::UpdateBadgeCircleSize(
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         auto originFontSizeFlag = layoutProperty->GetFontSizeIsDefault();
         auto originBadgeSize = layoutProperty->GetBadgeSizeIsDefault();
         layoutProperty->UpdateBadgeCircleSize(badgeCircleSize);
@@ -447,7 +447,7 @@ void BadgePattern::UpdateBadgePositionX(const CalcDimension& positionX, bool isF
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgePositionX(positionX);
     }
 }
@@ -460,7 +460,7 @@ void BadgePattern::UpdateBadgePositionY(const CalcDimension& positionY, bool isF
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgePositionY(positionY);
     }
 }
@@ -473,7 +473,7 @@ void BadgePattern::UpdateBorderWidth(const CalcDimension& borderWidth, bool isFi
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeBorderWidth(borderWidth);
     }
 }
@@ -486,7 +486,7 @@ void BadgePattern::UpdateOuterBorderWidth(const CalcDimension& outerBorderWidth,
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         layoutProperty->UpdateBadgeOuterBorderWidth(outerBorderWidth);
     }
 }

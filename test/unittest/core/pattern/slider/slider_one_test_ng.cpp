@@ -1200,7 +1200,7 @@ HWTEST_F(SliderOneTestNg, UpdateComponentColorTest001, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         frameNode->SetRerenderable(pair.second);
         sliderModelNG.UpdateComponentColor(frameNode, static_cast<SliderColorType>(5));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             sliderModelNG.UpdateComponentColor(frameNode, SliderColorType::BLOCK_COLOR);
             ret = paintProperty->GetBlockColor();
             EXPECT_FALSE(ret.has_value());

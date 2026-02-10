@@ -427,7 +427,7 @@ void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<Res
         CHECK_NULL_VOID(frameNode);
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             if (!LessNotEqual(height.Value(), 0.0)) {
                 SetHeight(AceType::RawPtr(frameNode), height);
             }
@@ -455,7 +455,7 @@ void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<Reso
         CHECK_NULL_VOID(frameNode);
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             if (!LessNotEqual(width.Value(), 0.0)) {
                 SetWidth(AceType::RawPtr(frameNode), width);
             }
@@ -481,7 +481,7 @@ void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const R
             CHECK_NULL_VOID(frameNode);
             auto pipelineContext = frameNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            if (pipelineContext->IsSystmColorChange()) {
+            if (pipelineContext->IsSystemColorChange()) {
                 SetBackgroundColor(AceType::RawPtr(frameNode), color);
             }
         }
