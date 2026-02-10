@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -228,7 +229,7 @@ private:
 };
 #endif
 
-ContentChangeManager::ContentChangeManager()
+ContentChangeManager::ContentChangeManager(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor)
 {
 #ifndef IS_RELEASE_VERSION
     dumpMgr_ = std::make_shared<ContentChangeDumpManager>();
@@ -242,16 +243,37 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
         currentContentChangeConfig_->textContentRatio = DEFAULT_TEXT_CONTENT_RATIO;
     }
     if (config.minReportTime < 0) {
-        currentContentChangeConfig_->minReportTime = DEFAULT_TEXT_MIN_REPORT_TIME;
+        currentContentChangeConfig_->minReportTime = DEFAULT_COMPONENT_MIN_REPORT_TIME;
     }
     currentContentChangeConfig_->ignoreEventType = config.ignoreEventType;
-    ACE_SCOPED_TRACE("[ContentChangeManager] StartContentChangeReport: ratio:%f, minReportTime:%d",
-        currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime);
-    LOGI("[ContentChangeManager] StartContentChangeReport: ratio:%{public}f, minReportTime:%{public}d",
-        currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime);
+    if (config.minWidth < 0) {
+        currentContentChangeConfig_->minWidth = DEFAULT_IMAGE_MIN_WIDTH;
+    }
+    if (config.minHeight < 0) {
+        currentContentChangeConfig_->minHeight = DEFAULT_IMAGE_MIN_HEIGHT;
+    }
+    if (config.reportDelayTime < 0) {
+        currentContentChangeConfig_->reportDelayTime = DEFAULT_COMPONENT_REPORT_DELAY_TIME;
+    }
+    ACE_SCOPED_TRACE("[ContentChangeManager] StartContentChangeReport: ratio:%f, minReportTime:%d, "
+        "minWidth:%d, minHeight:%d, reportDelayTime:%d",
+        currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime,
+        currentContentChangeConfig_->minWidth, currentContentChangeConfig_->minHeight,
+        currentContentChangeConfig_->reportDelayTime);
+    LOGI("[ContentChangeManager] StartContentChangeReport: ratio:%{public}f, minReportTime:%{public}d, "
+        "minWidth:%{public}d, minHeight:%{public}d, reportDelayTime:%{public}d",
+        currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime,
+        currentContentChangeConfig_->minWidth, currentContentChangeConfig_->minHeight,
+        currentContentChangeConfig_->reportDelayTime);
     textContentRatio_ = currentContentChangeConfig_->textContentRatio;
-    textContentInterval_ = static_cast<uint64_t>(currentContentChangeConfig_->minReportTime) * NS_PER_MS;
+    componentReportInterval_ = static_cast<uint64_t>(currentContentChangeConfig_->minReportTime) * NS_PER_MS;
     ignoreEventMask_ = GetIgnoreEventMask(currentContentChangeConfig_->ignoreEventType);
+    imageMinWidth_ = currentContentChangeConfig_->minWidth;
+    imageMinHeight_ = currentContentChangeConfig_->minHeight;
+    componentReportDelayTime_ = static_cast<uint64_t>(currentContentChangeConfig_->reportDelayTime) * NS_PER_MS;
+    changedSwiperNodes_.clear();
+    scrollingNodes_.clear();
+    transitioningNodes_.clear();
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
@@ -305,13 +327,16 @@ void ContentChangeManager::RemoveOnContentChangeNode(WeakPtr<FrameNode> node)
 
 void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode || IsScrolling()) {
+    CHECK_NULL_VOID(keyNode);
+    OnTransitionRemoved(keyNode->GetId());
+    if (!IsContentChangeDetectEnable() || IsScrolling()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnPageTransitionEnd");
     auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
     keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
+    lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
     dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
 #endif
@@ -319,7 +344,9 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 
 void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    CHECK_NULL_VOID(keyNode);
+    if (!IsContentChangeDetectEnable()) {
+        OnScrollRemoved(keyNode->GetId());
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnScrollChangeEnd");
@@ -338,7 +365,9 @@ void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
 
 void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode || IsScrolling()) {
+    CHECK_NULL_VOID(keyNode);
+    OnTransitionRemoved(keyNode->GetId());
+    if (!IsContentChangeDetectEnable() || IsScrolling()) {
         return;
     }
 
@@ -369,7 +398,7 @@ void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, b
 void ContentChangeManager::OnTextChangeEnd(const RectF& rect, const RectF& rootRect)
 {
     if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty() ||
-        !rootRect.IsIntersectWith(rect) || IsScrolling()) {
+        !rootRect.IsIntersectWith(rect) || IsScrolling() || IsTransitioning()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OntextChange {%s}", rect.ToString().c_str());
@@ -463,6 +492,7 @@ void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode>& node, bool
     ACE_SCOPED_TRACE("[ContentChangeManager] On%sChanged Reporting", hasTabsAncestor ? "Tabs" : "Swiper");
     UiSessionManager::GetInstance()->ReportContentChangeEvent(
         hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, rootNode->ToString());
+    lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
     dumpMgr_->AddReportRecord(
         std::make_tuple(hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, node->GetId(), node->GetTag()));
@@ -476,12 +506,12 @@ bool ContentChangeManager::IsTextAABBCollecting() const
 
 void ContentChangeManager::StartTextAABBCollecting()
 {
-    if (!IsContentChangeDetectEnable() || textCollecting_ || IsScrolling()) {
+    if (!IsContentChangeDetectEnable() || textCollecting_ || IsScrolling() || IsTransitioning()) {
         return;
     }
 
     uint64_t curr = static_cast<uint64_t>(GetSysTimestamp());
-    if (curr - lastTextReportTime_ < textContentInterval_) {
+    if (curr - lastComponentReportTime_ < componentReportInterval_) {
         return;
     }
     textCollecting_ = true;
@@ -489,10 +519,10 @@ void ContentChangeManager::StartTextAABBCollecting()
 
 void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsScrolling()) {
+    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsScrolling() || IsTransitioning()) {
         return;
     }
-    if (rootRect.IsIntersectWith(textAABB_)) {
+    if (rootRect.IsIntersectWith(textAABB_) && !IsInTransitionDelayWindow()) {
         float rootSize = rootRect.Height() * rootRect.Width();
         RectF intersectRect = rootRect.IntersectRectT(textAABB_);
         float textAABBSize = intersectRect.Height() * intersectRect.Width();
@@ -500,7 +530,7 @@ void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
             intersectRect.ToString().c_str(), rootRect.ToString().c_str(), textAABBSize / rootSize);
         if (textAABBSize >= rootSize * textContentRatio_) {
             UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::TEXT, "");
-            lastTextReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
+            lastComponentReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
             float currRatio = static_cast<float>(textAABBSize) / rootSize;
             dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::TEXT, static_cast<int32_t>(currRatio * FACTOR), ""));
@@ -530,9 +560,29 @@ void ContentChangeManager::OnScrollRemoved(int32_t nodeId)
     }
 }
 
+void ContentChangeManager::OnTransitionAdded(int32_t nodeId)
+{
+    if (!IsContentChangeDetectEnable() || IsScrolling()) {
+        return;
+    }
+    transitioningNodes_.emplace(nodeId);
+}
+
+void ContentChangeManager::OnTransitionRemoved(int32_t nodeId)
+{
+    if (transitioningNodes_.count(nodeId)) {
+        transitioningNodes_.erase(nodeId);
+    }
+}
+
 bool ContentChangeManager::IsScrolling() const
 {
     return !scrollingNodes_.empty();
+}
+
+bool ContentChangeManager::IsTransitioning() const
+{
+    return !transitioningNodes_.empty();
 }
 
 uint32_t ContentChangeManager::ConvertEventStringToEnum(const std::string& type) const
@@ -570,5 +620,91 @@ uint32_t ContentChangeManager::GetIgnoreEventMask(const std::string& ignoreEvent
 bool ContentChangeManager::IsIgnoringEventType(uint32_t type) const
 {
     return (ignoreEventMask_ & type) != 0;
+}
+
+void ContentChangeManager::OnImageChangeEnd(const WeakPtr<FrameNode>& keyNode, const std::string& sourceType,
+    const RectF& rootRect)
+{
+    if (!IsContentChangeDetectEnable() || IsScrolling() || IsTransitioning()) {
+        return;
+    }
+
+    auto task = [weakNode = keyNode, sourceType, rootRect, weakMgr = WeakClaim(this)]() {
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto mgr = weakMgr.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        int32_t nodeId = node->GetId();
+        auto rect = node->GetTransformRectRelativeToWindowOnlyVisible();
+        int32_t width = static_cast<int32_t>(rect.Width());
+        int32_t height = static_cast<int32_t>(rect.Height());
+        if (width < mgr->imageMinWidth_ || height < mgr->imageMinHeight_ || !rootRect.IsIntersectWith(rect)) {
+            return;
+        }
+        ACE_SCOPED_TRACE("[ContentChangeManager] OnImageChangeEnd {%d} : %d x %d (%s)",
+            nodeId, width, height, sourceType.c_str());
+        mgr->imageChangeList_.emplace_back(nodeId, rect, sourceType);
+
+        // delay to report when beyond interval
+        mgr->RemoveImageReportTask();
+        uint64_t curr = static_cast<uint64_t>(GetSysTimestamp());
+        uint64_t elapsed = curr - mgr->lastComponentReportTime_;
+        uint32_t delay = 0;
+        if (elapsed < mgr->componentReportInterval_) {
+            delay = (mgr->componentReportInterval_ - elapsed) / mgr->NS_PER_MS;
+        }
+        mgr->PostImageReportTask(delay);
+    };
+
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, imageChangeTaskName_);
+}
+
+void ContentChangeManager::RemoveImageReportTask()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, imageReportTaskName_);
+}
+
+void ContentChangeManager::PostImageReportTask(uint32_t delay)
+{
+    auto task = [weak = WeakClaim(this)]() {
+        auto mgr = weak.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        mgr->ReportImageEvent();
+    };
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, imageReportTaskName_);
+}
+
+void ContentChangeManager::ReportImageEvent()
+{
+    std::vector<std::tuple<int32_t, RectF, std::string>> imageChangeList;
+    imageChangeList_.swap(imageChangeList);
+
+    if (imageChangeList.empty() || IsInTransitionDelayWindow()) {
+        return;
+    }
+
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    auto imagesArray = JsonUtil::CreateArray(true);
+
+    for (const auto& [nodeId, rect, sourceType] : imageChangeList) {
+        auto imageJson = JsonUtil::CreateSharedPtrJson(true);
+        imageJson->Put("$ID", nodeId);
+        imageJson->Put("$rect", rect.ToBounds().c_str());
+        imageJson->Put("sourceType", sourceType.c_str());
+        imagesArray->PutRef(std::move(imageJson));
+    }
+
+    json->PutRef("images", std::move(imagesArray));
+    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::IMAGE_LOADED, json->ToString());
+    lastComponentReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
+}
+
+bool ContentChangeManager::IsInTransitionDelayWindow() const
+{
+    uint64_t curr = static_cast<uint64_t>(GetSysTimestamp());
+    return curr < lastTransitionReportTime_ + componentReportDelayTime_;
 }
 } // namespace OHOS::Ace::NG

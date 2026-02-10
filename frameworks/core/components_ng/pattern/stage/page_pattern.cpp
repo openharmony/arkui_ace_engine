@@ -553,6 +553,9 @@ void PagePattern::FirePageTransitionStart()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_TRANSITION);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnTransitionAdded(host->GetId());
 }
 
 void PagePattern::FirePageTransitionFinish()
@@ -570,6 +573,9 @@ void PagePattern::FirePageTransitionFinish()
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
     pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 void PagePattern::StopPageTransition()
@@ -1180,6 +1186,16 @@ ScopeFocusAlgorithm PagePattern::GetScopeFocusAlgorithm()
         return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
     };
     return focusAlgorithm;
+}
+
+void PagePattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 } // namespace OHOS::Ace::NG

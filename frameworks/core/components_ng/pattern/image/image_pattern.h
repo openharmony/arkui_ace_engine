@@ -469,6 +469,7 @@ private:
     void InitFromThemeIfNeed();
     void LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceInfo);
     void ReportCompleteLoadEvent(const RefPtr<FrameNode>& host);
+    void ReportImageSuccessInfo(const RefPtr<FrameNode>& host);
 
 private:
     RefPtr<DrawableDescriptor> drawable_;

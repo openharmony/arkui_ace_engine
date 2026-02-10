@@ -75,6 +75,7 @@ public:
     void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
 
     void OnModifyDone() override;
     void OnWindowHide() override;
@@ -835,6 +836,7 @@ private:
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect();
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
+    void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode);
     void UpdatePlaceholderVisibilityIfNeeded();
 
     //-------for force split------- begin------

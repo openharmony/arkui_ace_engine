@@ -41,12 +41,16 @@ enum class ChangeType {
     DIALOG,   // developer dialog pops up
     ARKWEB_PAGE,   // WebView transition content change
     ARKWEB_TEXT,   // WebView Text change
+    IMAGE_LOADED,  // Image load complete event when using network or pixelmap
 };
 
 struct ContentChangeConfig {
     int32_t minReportTime = 100; // minimum report interval: 100 ms
     float textContentRatio = 0.15f; // ratio of a single text change bounding box area to window area: 0.15
     std::string ignoreEventType; // event type which need to be ignored when reporting, in json format
+    int32_t minWidth = 100; // minimum width of Image report event: 100px
+    int32_t minHeight = 100; // minimum height of Image report event: 100px
+    int32_t reportDelayTime = 600; // delay time for component event reporting after transition event: 600 ms
 };
 
 enum ComponentEventType : uint32_t {
