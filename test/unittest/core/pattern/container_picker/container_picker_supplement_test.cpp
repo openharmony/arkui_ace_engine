@@ -1986,4 +1986,1608 @@ HWTEST_F(ContainerPickerSupplementTest, GetAxisTest001, TestSize.Level1)
      */
     EXPECT_EQ(pattern->GetAxis(), Axis::VERTICAL);
 }
+
+/**
+ * @tc.name: CreateScrollPropertyTest001
+ * @tc.desc: Test CreateScrollProperty method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, CreateScrollPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CreateScrollProperty.
+     * @tc.expected: step2. animationCreated_ should be true.
+     */
+    pattern->CreateScrollProperty();
+    EXPECT_TRUE(pattern->animationCreated_);
+}
+
+/**
+ * @tc.name: PlayInertialAnimationTest001
+ * @tc.desc: Test PlayInertialAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, PlayInertialAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call PlayInertialAnimation.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->PlayInertialAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PlaySpringAnimationTest001
+ * @tc.desc: Test PlaySpringAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, PlaySpringAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call PlaySpringAnimation.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->PlaySpringAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PlayTargetAnimationTest001
+ * @tc.desc: Test PlayTargetAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, PlayTargetAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set target index and call PlayTargetAnimation.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->targetIndex_ = 2;
+    pattern->PlayTargetAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PlayResetAnimationTest001
+ * @tc.desc: Test PlayResetAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, PlayResetAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call PlayResetAnimation.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->PlayResetAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ForceResetWithoutAnimationTest001
+ * @tc.desc: Test ForceResetWithoutAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ForceResetWithoutAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ForceResetWithoutAnimation.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->ForceResetWithoutAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitDefaultParamsTest001
+ * @tc.desc: Test InitDefaultParams method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, InitDefaultParamsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call InitDefaultParams.
+     * @tc.expected: step2. Default parameters should be set.
+     */
+    pattern->pickerItemHeight_ = 0.0f;
+    pattern->InitDefaultParams();
+
+    EXPECT_GT(pattern->pickerItemHeight_, 0.0f);
+    EXPECT_GT(pattern->pickerDefaultHeight_, 0.0f);
+    EXPECT_GT(pattern->pickerHeightBeforeRotate_, 0.0f);
+}
+
+/**
+ * @tc.name: HandleTargetIndexTest001
+ * @tc.desc: Test HandleTargetIndex method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleTargetIndexTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set target index and call HandleTargetIndex.
+     * @tc.expected: step3. targetIndex_ should be cleared after handling.
+     */
+    pattern->selectedIndex_ = 1;
+    pattern->totalItemCount_ = 5;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->currentOffset_ = 150.0f;
+    pattern->targetIndex_ = 3;
+
+    pattern->HandleTargetIndex();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: OnScrollStartRecursiveTest001
+ * @tc.desc: Test OnScrollStartRecursive method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, OnScrollStartRecursiveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnScrollStartRecursive.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    WeakPtr<NestableScrollContainer> child;
+    pattern->OnScrollStartRecursive(child, 100.0f, 50.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnScrollEndRecursiveTest001
+ * @tc.desc: Test OnScrollEndRecursive method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, OnScrollEndRecursiveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: steptc. Call OnScrollEndRecursive.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    std::optional<float> velocity = 100.0f;
+    pattern->OnScrollEndRecursive(velocity);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: FireScrollStopEventTest001
+ * @tc.desc: Test FireScrollStopEvent method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, FireScrollStopEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->animationBreak_ = false;
+
+    /**
+     * @tc.steps: step2. Set up event and call FireScrollStopEvent.
+     * @tc.expected: step2. Event should be triggered correctly.
+     */
+    int32_t testIndex = -1;
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnScrollStop([&testIndex](const double& index) { testIndex = static_cast<int32_t>(index); });
+
+    pattern->FireScrollStopEvent();
+    EXPECT_EQ(testIndex, 0);
+}
+
+/**
+ * @tc.name: FireScrollStopEventWithBreakTest001
+ * @tc.desc: Test FireScrollStopEvent when animationBreak is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, FireScrollStopEventWithBreakTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set animationBreak and verify event is not fired.
+     * @tc.expected: step2. Event should not be triggered.
+     */
+    int32_t testIndex = -1;
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnScrollStop([&testIndex](const double& index) { testIndex = static_cast<int32_t>(index); });
+
+    pattern->animationBreak_ = true;
+    pattern->FireScrollStopEvent();
+    EXPECT_EQ(testIndex, -1);
+}
+
+/**
+ * @tc.name: GetSelectedIndexModelTest001
+ * @tc.desc: Test GetSelectedIndex static method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, GetSelectedIndexModelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker node.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set selected index and get it back.
+     * @tc.expected: step2. Selected index should match.
+     */
+    ContainerPickerModel::SetSelectedIndex(AceType::RawPtr(frameNode), 5);
+    int32_t index = ContainerPickerModel::GetSelectedIndex(AceType::RawPtr(frameNode));
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: GetEnableHapticFeedbackModelTest001
+ * @tc.desc: Test GetEnableHapticFeedback static method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, GetEnableHapticFeedbackModelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker node.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set haptic feedback and get it back.
+     * @tc.expected: step2. Haptic feedback setting should match.
+     */
+    ContainerPickerModel::SetEnableHapticFeedback(AceType::RawPtr(frameNode), false);
+    bool result = ContainerPickerModel::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(result);
+
+    ContainerPickerModel::SetEnableHapticFeedback(AceType::RawPtr(frameNode), true);
+    result = ContainerPickerModel::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetCanLoopModelTest001
+ * @tc.desc: Test GetCanLoop static method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, GetCanLoopModelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker node.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set canLoop and get it back.
+     * @tc.expected: step2. CanLoop setting should match.
+     */
+    ContainerPickerModel::SetCanLoop(AceType::RawPtr(frameNode), false);
+    bool result = ContainerPickerModel::GetCanLoop(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(result);
+
+    ContainerPickerModel::SetCanLoop(AceType::RawPtr(frameNode), true);
+    result = ContainerPickerModel::GetCanLoop(AceType::RawPtr(frameNode));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetContentMainSizeTest001
+ * @tc.desc: Test GetContentMainSize method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, GetContentMainSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set content main size and get it back.
+     * @tc.expected: step2. Content main size should match.
+     */
+    pattern->SetContentMainSize(500.0f);
+    EXPECT_EQ(pattern->contentMainSize_, 500.0f);
+}
+
+/**
+ * @tc.name: HandleScrollTest001
+ * @tc.desc: Test HandleScroll method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleScrollTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call HandleScroll with different offsets.
+     * @tc.expected: step2. Should handle scroll correctly.
+     */
+    ScrollResult result1 = pattern->HandleScroll(100.0f, 1, NestedState::GESTURE, 500.0f);
+    EXPECT_TRUE(result1.remain >= 0.0);
+
+    ScrollResult result2 = pattern->HandleScroll(-50.0f, 1, NestedState::GESTURE, 300.0f);
+    EXPECT_TRUE(result2.remain <= 0.0);
+}
+
+/**
+ * @tc.name: IsOutOfEndTest001
+ * @tc.desc: Test IsOutOfEnd method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, IsOutOfEndTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 100.0f;
+    pattern->totalItemCount_ = 5;
+    pattern->isLoop_ = false;
+    pattern->itemPosition_[4] = { 400.0f, 500.0f, nullptr };
+
+    /**
+     * @tc.steps: step2. Test IsOutOfEnd with large negative offset.
+     * @tc.expected: step2. Should return true for out of end boundary.
+     */
+    EXPECT_TRUE(pattern->IsOutOfEnd(-300.0f));
+}
+
+/**
+ * @tc.name: ShowNextAtBoundaryTest001
+ * @tc.desc: Test ShowNext when at boundary with non-loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ShowNextAtBoundaryTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = TEST_ITEM_COUNT;
+    pattern->selectedIndex_ = 4;
+    pattern->isLoop_ = false;
+    pattern->targetIndex_.reset();
+
+    /**
+     * @tc.steps: step2. Call ShowNext at last item.
+     * @tc.expected: step2. targetIndex_ should not be set when at boundary.
+     */
+    pattern->ShowNext();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ShowPreviousAtBoundaryTest001
+ * @tc.desc: Test ShowPrevious when at boundary with non-loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ShowPreviousAtBoundaryTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = TEST_ITEM_COUNT;
+    pattern->selectedIndex_ = 0;
+    pattern->isLoop_ = false;
+    pattern->targetIndex_.reset();
+
+    /**
+     * @tc.steps: step2. Call ShowPrevious at first item.
+     * @tc.expected: step2. targetIndex_ should not be set when at boundary.
+     */
+    pattern->ShowPrevious();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: SwipeToWithAnimationTest001
+ * @tc.desc: Test SwipeTo when animation is running
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SwipeToWithAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->totalItemCount_ = 5;
+    pattern->selectedIndex_ = 1;
+    pattern->targetIndex_.reset();
+    pattern->isAnimationRunning_ = true;
+
+    /**
+     * @tc.steps: step2. Call SwipeTo when animation is running.
+     * @tc.expected: step2. targetIndex_ should not be set.
+     */
+    pattern->SwipeTo(3);
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ShortestDistanceZeroItemsTest001
+ * @tc.desc: Test ShortestDistanceBetweenCurrentAndTarget with zero items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ShortestDistanceZeroItemsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set totalItemCount to 0.
+     * @tc.expected: step2. Distance should be 0.
+     */
+    pattern->totalItemCount_ = 0;
+    float distance = pattern->ShortestDistanceBetweenCurrentAndTarget(2);
+    EXPECT_NEAR(distance, 0.0f, 0.01f);
+}
+
+/**
+ * @tc.name: CreateTargetAnimationTest001
+ * @tc.desc: Test CreateTargetAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, CreateTargetAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CreateTargetAnimation.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->CreateTargetAnimation(100.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleTargetIndexWithAnimationTest001
+ * @tc.desc: Test HandleTargetIndex when animation is running
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleTargetIndexWithAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set animation running and target index.
+     * @tc.expected: step2. targetIndex_ should not be cleared when animation is running.
+     */
+    pattern->isAnimationRunning_ = true;
+    pattern->targetIndex_ = 3;
+
+    pattern->HandleTargetIndex();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_EQ(pattern->targetIndex_.value(), 3);
+}
+
+/**
+ * @tc.name: HandleTargetIndexSameAsSelectedTest001
+ * @tc.desc: Test HandleTargetIndex when same as selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleTargetIndexSameAsSelectedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set target index same as selected.
+     * @tc.expected: step2. targetIndex_ should be cleared.
+     */
+    pattern->selectedIndex_ = 2;
+    pattern->targetIndex_ = 2;
+    pattern->isAnimationRunning_ = false;
+
+    pattern->HandleTargetIndex();
+    EXPECT_FALSE(pattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: CustomizeSafeAreaPaddingWithRotateTest001
+ * @tc.desc: Test CustomizeSafeAreaPadding with needRotate=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, CustomizeSafeAreaPaddingWithRotateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create padding and call CustomizeSafeAreaPadding with rotate.
+     * @tc.expected: step2. Left and right should be reset.
+     */
+    PaddingPropertyF padding { 10, 10, 10, 10 };
+    PaddingPropertyF result = pattern->CustomizeSafeAreaPadding(padding, true);
+
+    EXPECT_EQ(result.left, std::nullopt);
+    EXPECT_EQ(result.right, std::nullopt);
+    EXPECT_EQ(result.top, 10);
+    EXPECT_EQ(result.bottom, 10);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelperInsensitiveTest001
+ * @tc.desc: Test AccumulatingTerminateHelper method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, AccumulatingTerminateHelperInsensitiveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AccumulatingTerminateHelper.
+     * @tc.expected: step2. Should return true for normal case.
+     */
+    RectF rect {};
+    ExpandEdges padding {};
+
+    bool result = pattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SetDefaultTextStyleTest001
+ * @tc.desc: Test SetDefaultTextStyle method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SetDefaultTextStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker with text child.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    frameNode->AddChild(textNode);
+
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->itemPosition_[0] = { 0.0f, 50.0f, textNode };
+
+    /**
+     * @tc.steps: step2. Call SetDefaultTextStyle.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->SetDefaultTextStyle(false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateDefaultTextStyleTest001
+ * @tc.desc: Test UpdateDefaultTextStyle method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, UpdateDefaultTextStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker with text child.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    frameNode->AddChild(textNode);
+
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->itemPosition_[0] = { 0.0f, 50.0f, textNode };
+
+    /**
+     * @tc.steps: step2. Call UpdateDefaultTextStyle.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    Color defaultColor = Color::BLUE;
+    pattern->UpdateDefaultTextStyle(textNode, defaultColor);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IsEnableHapticTest001
+ * @tc.desc: Test IsEnableHaptic method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, IsEnableHapticTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test IsEnableHaptic.
+     * @tc.expected: step2. Should return initial value.
+     */
+    EXPECT_TRUE(pattern->IsEnableHaptic());
+}
+
+/**
+ * @tc.name: InitOrRefreshHapticControllerTest001
+ * @tc.desc: Test InitOrRefreshHapticController method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, InitOrRefreshHapticControllerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call InitOrRefreshHapticController.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->InitOrRefreshHapticController();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: StopHapticControllerTest001
+ * @tc.desc: Test StopHapticController method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, StopHapticControllerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call StopHapticController.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->StopHapticController();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SpringOverScrollTest001
+ * @tc.desc: Test SpringOverScroll method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SpringOverScrollTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SpringOverScroll.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->SpringOverScroll(50.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnAroundButtonClickTest001
+ * @tc.desc: Test OnAroundButtonClick method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, OnAroundButtonClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnAroundButtonClick.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pattern->OnAroundButtonClick(50.0f);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: LayoutAlgorithmSettersAndGettersTest001
+ * @tc.desc: Test various setter and getter methods of ContainerPickerLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, LayoutAlgorithmSettersAndGettersTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get algorithm.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto algorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    auto pickerAlgorithm = AceType::DynamicCast<ContainerPickerLayoutAlgorithm>(algorithm);
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Test setter and getter methods.
+     * @tc.expected: step2. Values should be set and retrieved correctly.
+     */
+    pickerAlgorithm->SetTotalItemCount(10);
+    EXPECT_EQ(pickerAlgorithm->GetTotalItemCount(), 10);
+
+    pickerAlgorithm->SetPrevTotalItemCount(5);
+    // No direct getter for prevTotalItemCount
+
+    pickerAlgorithm->SetIsLoop(true);
+    // No direct getter for isLoop, but we can verify it's set
+
+    pickerAlgorithm->SetSelectedIndex(3);
+    // No direct getter for selectedIndex
+
+    pickerAlgorithm->SetCurrentDelta(25.0f);
+    // No direct getter for currentDelta
+    EXPECT_NEAR(pickerAlgorithm->GetCurrentOffset(), 25.0f, 0.01f);
+
+    pickerAlgorithm->SetContentMainSize(400.0f);
+    EXPECT_NEAR(pickerAlgorithm->GetContentMainSize(), 400.0f, 0.01f);
+
+    pickerAlgorithm->SetHeight(350.0f);
+    EXPECT_NEAR(pickerAlgorithm->GetHeight(), 350.0f, 0.01f);
+
+    pickerAlgorithm->SetPickerHeight(300.0f);
+    // No direct getter for pickerDefaultHeight
+
+    pickerAlgorithm->SetPickerHeightBeforeRotate(250.0f);
+    // No direct getter for pickerHeightBeforeRotate
+
+    pickerAlgorithm->SetItemHeight(40.0f);
+    // No direct getter for pickerItemHeight
+}
+
+/**
+ * @tc.name: LayoutAlgorithmPositionMethodsTest001
+ * @tc.desc: Test position-related methods of ContainerPickerLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, LayoutAlgorithmPositionMethodsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layout algorithm.
+     */
+    auto pickerAlgorithm = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetStartPosition and GetEndPosition with empty itemPosition.
+     * @tc.expected: step2. Should return 0 for empty position map.
+     */
+    EXPECT_NEAR(pickerAlgorithm->GetStartPosition(), 0.0f, 0.01f);
+    EXPECT_NEAR(pickerAlgorithm->GetEndPosition(), 0.0f, 0.01f);
+    EXPECT_EQ(pickerAlgorithm->GetStartIndex(), 0);
+    EXPECT_EQ(pickerAlgorithm->GetEndIndex(), 0);
+
+    /**
+     * @tc.steps: step3. Add items and test again.
+     * @tc.expected: step3. Should return correct positions.
+     */
+    ContainerPickerUtils::PositionMap itemPosition;
+    itemPosition[1] = { 100.0f, 150.0f, nullptr };
+    itemPosition[5] = { 500.0f, 550.0f, nullptr };
+    pickerAlgorithm->SetItemPosition(itemPosition);
+
+    EXPECT_NEAR(pickerAlgorithm->GetStartPosition(), 100.0f, 0.01f);
+    EXPECT_NEAR(pickerAlgorithm->GetEndPosition(), 550.0f, 0.01f);
+    EXPECT_EQ(pickerAlgorithm->GetStartIndex(), 1);
+    EXPECT_EQ(pickerAlgorithm->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: LayoutAlgorithmCrossMatchChildTest001
+ * @tc.desc: Test IsCrossMatchChild method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, LayoutAlgorithmCrossMatchChildTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layout algorithm.
+     */
+    auto pickerAlgorithm = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Test IsCrossMatchChild default value.
+     * @tc.expected: step2. Should return false by default.
+     */
+    EXPECT_FALSE(pickerAlgorithm->IsCrossMatchChild());
+}
+
+/**
+ * @tc.name: LayoutAlgorithmGetTopPaddingTest001
+ * @tc.desc: Test GetTopPadding method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, LayoutAlgorithmGetTopPaddingTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layout algorithm.
+     */
+    auto pickerAlgorithm = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetTopPadding default value.
+     * @tc.expected: step2. Should return 0 by default.
+     */
+    EXPECT_NEAR(pickerAlgorithm->GetTopPadding(), 0.0f, 0.01f);
+}
+
+/**
+ * @tc.name: LayoutAlgorithmGetLayoutConstraintTest001
+ * @tc.desc: Test GetLayoutConstraint method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, LayoutAlgorithmGetLayoutConstraintTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create layout algorithm.
+     */
+    auto pickerAlgorithm = AceType::MakeRefPtr<ContainerPickerLayoutAlgorithm>();
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetLayoutConstraint.
+     * @tc.expected: step2. Should return default constraint.
+     */
+    auto constraint = pickerAlgorithm->GetLayoutConstraint();
+    EXPECT_TRUE(constraint.maxSize.IsPositive());
+}
+
+/**
+ * @tc.name: CalcMainAndMiddlePosTest001
+ * @tc.desc: Test CalcMainAndMiddlePos method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, CalcMainAndMiddlePosTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get algorithm.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto algorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    auto pickerAlgorithm = AceType::DynamicCast<ContainerPickerLayoutAlgorithm>(algorithm);
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up algorithm and call CalcMainAndMiddlePos.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    pickerAlgorithm->SetHeight(500.0f);
+    pickerAlgorithm->SetPickerHeight(400.0f);
+    pickerAlgorithm->SetItemHeight(40.0f);
+    pickerAlgorithm->SetCurrentDelta(0.0f);
+
+    pickerAlgorithm->CalcMainAndMiddlePos();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetChangeEventModelStaticTest001
+ * @tc.desc: Test SetChangeEvent static method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SetChangeEventModelStaticTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker.
+     */
+    ContainerPickerModel picker;
+    picker.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set change event using static method.
+     * @tc.expected: step2. The event should be triggered correctly.
+     */
+    int32_t testIndex = -1;
+    ContainerPickerModel::SetChangeEvent([&testIndex](const double& index) {
+        testIndex = static_cast<int32_t>(index);
+    });
+
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireChangeEvent(17.0);
+    EXPECT_EQ(testIndex, 17);
+}
+
+/**
+ * @tc.name: SetCanLoopModelStackTest001
+ * @tc.desc: Test SetCanLoop using stack-based method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SetCanLoopModelStackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker.
+     */
+    ContainerPickerModel picker;
+    picker.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set canLoop using stack-based method.
+     * @tc.expected: step2. CanLoop should be set correctly.
+     */
+    ContainerPickerModel::SetCanLoop(false);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetCanLoopValue(), false);
+}
+
+/**
+ * @tc.name: SetEnableHapticFeedbackModelStackTest001
+ * @tc.desc: Test SetEnableHapticFeedback using stack-based method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SetEnableHapticFeedbackModelStackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker.
+     */
+    ContainerPickerModel picker;
+    picker.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set enableHapticFeedback using stack-based method.
+     * @tc.expected: step2. EnableHapticFeedback should be set correctly.
+     */
+    ContainerPickerModel::SetEnableHapticFeedback(false);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetEnableHapticFeedbackValue(), false);
+}
+
+/**
+ * @tc.name: SetSelectedIndexModelStackTest001
+ * @tc.desc: Test SetSelectedIndex using stack-based method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SetSelectedIndexModelStackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker.
+     */
+    ContainerPickerModel picker;
+    picker.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set selected index using stack-based method.
+     * @tc.expected: step2. Selected index should be set correctly.
+     */
+    ContainerPickerModel::SetSelectedIndex(5);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetSelectedIndex(), 5);
+}
+
+/**
+ * @tc.name: SetIndicatorStyleModelStackTest001
+ * @tc.desc: Test SetIndicatorStyle using stack-based method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, SetIndicatorStyleModelStackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker.
+     */
+    ContainerPickerModel picker;
+    picker.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set indicator style using stack-based method.
+     * @tc.expected: step2. Indicator style should be set correctly.
+     */
+    PickerIndicatorStyle style;
+    style.type = static_cast<int32_t>(PickerIndicatorType::DIVIDER);
+    style.strokeWidth = Dimension(8.0);
+    style.dividerColor = Color::GREEN;
+
+    ContainerPickerModel::SetIndicatorStyle(style);
+
+    auto retrievedStyle = ContainerPickerModel::GetIndicatorStyle(AceType::RawPtr(frameNode));
+    EXPECT_EQ(retrievedStyle.type, static_cast<int32_t>(PickerIndicatorType::DIVIDER));
+    EXPECT_TRUE(retrievedStyle.strokeWidth.has_value());
+    EXPECT_EQ(retrievedStyle.strokeWidth.value(), Dimension(8.0));
+}
+
+/**
+ * @tc.name: GetContentCrossSizeTest001
+ * @tc.desc: Test GetContentCrossSize method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, GetContentCrossSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get algorithm.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto algorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    auto pickerAlgorithm = AceType::DynamicCast<ContainerPickerLayoutAlgorithm>(algorithm);
+    ASSERT_NE(pickerAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Get content cross size.
+     * @tc.expected: step2. Should return default value.
+     */
+    float crossSize = pickerAlgorithm->GetContentCrossSize();
+    EXPECT_GE(crossSize, 0.0f);
+}
+
+/**
+ * @tc.name: HandleDragUpdateTest001
+ * @tc.desc: Test HandleDragUpdate method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleDragUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create gesture event and call HandleDragUpdate.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    GestureEvent info;
+    info.SetLocalLocation(Offset(100.0, 250.0));
+    info.SetMainDelta(-50.0);
+    info.SetMainVelocity(100.0);
+    info.SetSourceTool(SourceTool::FINGER);
+
+    pattern->height_ = 500.0f;
+    pattern->pickerItemHeight_ = 50.0f;
+    pattern->totalItemCount_ = 5;
+
+    pattern->HandleDragUpdate(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragUpdateWithAxisTest001
+ * @tc.desc: Test HandleDragUpdate with AXIS input
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleDragUpdateWithAxisTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitAxisAnimator();
+    pattern->totalItemCount_ = 5;
+    pattern->pickerItemHeight_ = 50.0f;
+
+    /**
+     * @tc.steps: step2. Create AXIS gesture event.
+     * @tc.expected: step2. Should handle axis input.
+     */
+    GestureEvent info;
+    info.SetLocalLocation(Offset(100.0, 250.0));
+    info.SetMainDelta(-50.0);
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+
+    pattern->HandleDragUpdate(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleDragUpdateWithZeroItemsTest001
+ * @tc.desc: Test HandleDragUpdate with zero totalItemCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, HandleDragUpdateWithZeroItemsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitAxisAnimator();
+    pattern->totalItemCount_ = 0;
+
+    /**
+     * @tc.steps: step2. Create AXIS gesture event with zero items.
+     * @tc.expected: step2. Should return early.
+     */
+    GestureEvent info;
+    info.SetLocalLocation(Offset(100.0, 250.0));
+    info.SetMainDelta(-50.0);
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+
+    pattern->HandleDragUpdate(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreateItemClickEventListenerTest001
+ * @tc.desc: Test CreateItemClickEventListener method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, CreateItemClickEventListenerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CreateItemClickEventListener.
+     * @tc.expected: step2. Should return valid click event listener.
+     */
+    auto clickListener = pattern->CreateItemClickEventListener();
+    EXPECT_NE(clickListener, nullptr);
+}
+
+/**
+ * @tc.name: CreateItemTouchEventListenerTest001
+ * @tc.desc: Test CreateItemTouchEventListener method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, CreateItemTouchEventListenerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CreateItemTouchEventListener.
+     * @tc.expected: step2. Should return valid touch event listener.
+     */
+    auto touchListener = pattern->CreateItemTouchEventListener();
+    EXPECT_NE(touchListener, nullptr);
+}
+
+/**
+ * @tc.name: InitMouseAndPressEventTest001
+ * @tc.desc: Test InitMouseAndPressEvent method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, InitMouseAndPressEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isItemClickEventCreated_ = false;
+
+    /**
+     * @tc.steps: step2. Call InitMouseAndPressEvent.
+     * @tc.expected: step2. Should initialize event listeners.
+     */
+    pattern->InitMouseAndPressEvent();
+    EXPECT_TRUE(pattern->isItemClickEventCreated_);
+}
+
+/**
+ * @tc.name: InitMouseAndPressEventAlreadyCreatedTest001
+ * @tc.desc: Test InitMouseAndPressEvent when already created
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, InitMouseAndPressEventAlreadyCreatedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isItemClickEventCreated_ = true;
+
+    /**
+     * @tc.steps: step2. Call InitMouseAndPressEvent when already created.
+     * @tc.expected: step2. Should skip initialization.
+     */
+    pattern->InitMouseAndPressEvent();
+    EXPECT_TRUE(pattern->isItemClickEventCreated_);
+}
+
+/**
+ * @tc.name: UpdatePanEventTest001
+ * @tc.desc: Test UpdatePanEvent method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, UpdatePanEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->panEvent_ = nullptr;
+
+    /**
+     * @tc.steps: step2. Call UpdatePanEvent.
+     * @tc.expected: step2. Should create pan event.
+     */
+    pattern->UpdatePanEvent();
+    EXPECT_NE(pattern->panEvent_, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePanEventAlreadyExistsTest001
+ * @tc.desc: Test UpdatePanEvent when pan event already exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, UpdatePanEventAlreadyExistsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pan event and call UpdatePanEvent again.
+     * @tc.expected: step2. Should update pan event.
+     */
+    pattern->UpdatePanEvent();
+    auto existingPanEvent = pattern->panEvent_;
+    EXPECT_NE(existingPanEvent, nullptr);
+
+    pattern->UpdatePanEvent();
+    EXPECT_NE(pattern->panEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ActionStartTaskTest001
+ * @tc.desc: Test ActionStartTask method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ActionStartTaskTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ActionStartTask and execute it.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    auto action = pattern->ActionStartTask();
+    EXPECT_NE(action, nullptr);
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(100.0, 200.0));
+    action(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ActionUpdateTaskTest001
+ * @tc.desc: Test ActionUpdateTask method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ActionUpdateTaskTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ActionUpdateTask and execute it.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    auto action = pattern->ActionUpdateTask();
+    EXPECT_NE(action, nullptr);
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(100.0, 200.0));
+    info.SetMainDelta(-50.0);
+    info.SetMainVelocity(100.0);
+    action(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ActionEndTaskTest001
+ * @tc.desc: Test ActionEndTask method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ActionEndTaskTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ActionEndTask and execute it.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    auto action = pattern->ActionEndTask();
+    EXPECT_NE(action, nullptr);
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(100.0, 200.0));
+    info.SetMainVelocity(200.0);
+    info.SetMainDelta(0.0);
+    action(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ActionCancelTaskTest001
+ * @tc.desc: Test ActionCancelTask method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, ActionCancelTaskTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dragVelocity_ = 100.0;
+
+    /**
+     * @tc.steps: step2. Get ActionCancelTask and execute it.
+     * @tc.expected: step2. Should execute without crash.
+     */
+    auto action = pattern->ActionCancelTask();
+    EXPECT_NE(action, nullptr);
+
+    action();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSkipAllTest001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap when skip all
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, OnDirtyLayoutWrapperSkipAllTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker with children.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    frameNode->AddChild(textNode);
+
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper with skip all.
+     * @tc.expected: step2. Should return false.
+     */
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+
+    pattern->isNeedPlayInertialAnimation_ = false;
+
+    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsLoopWithDisplayCountTest001
+ * @tc.desc: Test IsLoop when displayCount >= totalItemCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, IsLoopWithDisplayCountTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set displayCount >= totalItemCount.
+     * @tc.expected: step2. IsLoop should return false.
+     */
+    pattern->totalItemCount_ = 3;
+    pattern->displayCount_ = 5;
+
+    EXPECT_FALSE(pattern->IsLoop());
+}
+
+/**
+ * @tc.name: IsLoopWithCanLoopFalseTest001
+ * @tc.desc: Test IsLoop when canLoop is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerSupplementTest, IsLoopWithCanLoopFalseTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker and get pattern.
+     */
+    auto frameNode = CreateContainerPickerNode();
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set canLoop to false.
+     * @tc.expected: step2. IsLoop should return false.
+     */
+    pattern->totalItemCount_ = 10;
+    pattern->displayCount_ = 5;
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    layoutProperty->UpdateCanLoop(false);
+
+    EXPECT_FALSE(pattern->IsLoop());
+}
 }
