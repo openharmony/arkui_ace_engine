@@ -235,7 +235,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
-        if (session_->GetShowRecent() && CheckSnapshotWindow()) {
+        if (session_->GetShowRecent() && session_->HasPersistentSnapshot()) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             return;
@@ -248,8 +248,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_EQUAL_VOID(CheckAndHandleRestartApp(), true);
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowAboveLocked(), true);
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->HasPersistentSnapshot()) {
         if (!session_->GetShowRecent() && !session_->GetAppLockControl()) {
             DelayAddAppWindowForDmaResume(session_->GetCallingPid());
         }
@@ -284,14 +283,6 @@ void WindowPattern::OnAttachToFrameNode()
     attachToFrameNodeFlag_ = true;
 }
 
-bool WindowPattern::CheckSnapshotWindow()
-{
-    return session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->IsSavingSnapshot() ||
-        session_->GetScenePersistence()->HasSnapshot() ||
-        session_->HasSnapshot());
-}
-
 bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
 {
     CHECK_EQUAL_RETURN(session_->IsPrelaunch(), false, false);
@@ -299,7 +290,7 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
     auto host = GetHost();
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_RETURN(HasStartingPage(), false, false);
-        if (session_->GetShowRecent() && CheckSnapshotWindow()) {
+        if (session_->GetShowRecent() && session_->HasPersistentSnapshot()) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch disconnect CreateSnapshotWindow");
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
