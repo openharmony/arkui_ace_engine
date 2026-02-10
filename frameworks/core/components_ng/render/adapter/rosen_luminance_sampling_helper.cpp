@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
  
 namespace OHOS::Ace::NG {
 namespace {
@@ -28,13 +29,22 @@ std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(renderContext, nullptr);
     return renderContext->GetRSNode();
 }
+
+void RequestNextFrame(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
+}
 } // namespace
 LuminanceSamplingHelper::LuminanceSamplingHelper() {}
 
 void LuminanceSamplingHelper::SetSamplingOptions(const WeakPtr<FrameNode>& node, int32_t samplingInterval,
     int32_t brightThreshold, int32_t darkThreshold, const std::optional<EdgesParam>& region)
 {
-    auto rsNode = GetRsNode(node.Upgrade());
+    auto nodeRef = node.Upgrade();
+    auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
     std::optional<Rosen::Vector4f> setRegion = std::nullopt;
     if (region) {
@@ -53,19 +63,24 @@ void LuminanceSamplingHelper::SetSamplingOptions(const WeakPtr<FrameNode>& node,
         }
     }
     rsNode->SetColorPickerOptions(samplingInterval, std::make_pair(darkThreshold, brightThreshold), setRegion);
+    RequestNextFrame(nodeRef);
 }
 
 void LuminanceSamplingHelper::RegisterSamplingCallback(const WeakPtr<NG::FrameNode>& node, const SamplingCallback& func)
 {
-    auto rsNode = GetRsNode(node.Upgrade());
+    auto nodeRef = node.Upgrade();
+    auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
     rsNode->SetColorPickerCallback(func);
+    RequestNextFrame(nodeRef);
 }
 
 void LuminanceSamplingHelper::UnRegisterSamplingCallback(const WeakPtr<NG::FrameNode>& node)
 {
-    auto rsNode = GetRsNode(node.Upgrade());
+    auto nodeRef = node.Upgrade();
+    auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
     rsNode->UnregisterColorPickerCallback();
+    RequestNextFrame(nodeRef);
 }
 } // namespace OHOS::Ace::NG
