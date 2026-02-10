@@ -46,7 +46,7 @@ InputCompatibleManager::~InputCompatibleManager()
 
 void InputCompatibleManager::LoadProductCompatiblePolicy()
 {
-    if (transformSoLoaded_ && libraryHandle_ != nullptr && productPolicy_ != nullptr) {
+    if (libraryHandle_ != nullptr && productPolicy_ != nullptr) {
         return;
     }
     libraryHandle_ = dlopen(TRANSFORM_SO_PATH.c_str(), RTLD_LAZY);
@@ -64,8 +64,6 @@ void InputCompatibleManager::LoadProductCompatiblePolicy()
         return;
     }
     productPolicy_ = getInputCompatiblePolicyInstance();
-    transformSoLoaded_ = true;
-    Close();
     return;
 }
 
@@ -74,7 +72,6 @@ void InputCompatibleManager::UnloadProductCompatiblePolicy()
     Close();
     libraryHandle_ = nullptr;
     productPolicy_ = nullptr;
-    transformSoLoaded_ = false;
 }
 
 void InputCompatibleManager::Close()
