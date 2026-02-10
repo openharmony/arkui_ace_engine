@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,6 +88,8 @@ public:
 
     void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
         bool longPredictTask = false);
+    
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     void SetRequestLongPredict(bool requestLongPredict)
     {

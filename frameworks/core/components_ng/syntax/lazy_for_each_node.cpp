@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include "base/json/json_util.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
@@ -130,7 +131,6 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
                 node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
             }
-            ACE_SCOPED_TRACE("LazyForEach predict finish: %s", node->builder_->DumpHashKey().c_str());
         }
     });
 }
@@ -482,14 +482,13 @@ void LazyForEachNode::DoSetActiveChildRange(
         end += cacheEnd;
         builder_->SetShowCached(cacheStart, cacheEnd);
     }
-    ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
-        start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     if (builder_->SetActiveChildRange(start, end)) {
         tempChildren_.clear();
         tempChildren_.swap(children_);
         MarkNeedSyncRenderTree();
         PostIdleTask(LazyForEachIdleTaskSource::SET_ACTIVE_RANGE);
     }
+    builder_->ReorganizeOffscreenNode();
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
@@ -544,8 +543,6 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
             children_.push_back(item.second);
         }
     }
-
-    builder_->ReorganizeOffscreenNode();
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
@@ -738,6 +735,13 @@ void LazyForEachNode::DumpInfo()
 {
     if (builder_) {
         builder_->DumpInfo();
+    }
+}
+
+ void LazyForEachNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    if (builder_) {
+        builder_->DumpSimplifyInfo(json);
     }
 }
 } // namespace OHOS::Ace::NG

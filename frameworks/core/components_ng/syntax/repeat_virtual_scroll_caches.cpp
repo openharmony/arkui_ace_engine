@@ -87,12 +87,13 @@ bool RepeatVirtualScrollCaches::HasOverlapWithLastActiveRange(uint32_t from, uin
  */
 bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore)
 {
-    if (from > to) return false;
+    if (from > to) {
+        return false;
+    }
 
     if (allowFetchMore) {
         // following a key4index_/ttype4index_ purge fetch the whole range
-        const auto rangeStart = lastActiveRanges_[0].first;
-        const auto rangeEnd = lastActiveRanges_[0].second;
+        const auto [rangeStart, rangeEnd] = lastActiveRanges_[0];
 
         if (rangeStart <= rangeEnd) {
             return FetchMoreKeysTTypes(reusable_?from:rangeStart, std::max(to, rangeEnd), false);
@@ -186,7 +187,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
         // STATE_MGMT_NOTE: Can not just del like this?
         // how to fix: call to RepeatVirtualScrollNode::DropFromL1
         node4key_.erase(key.value());
-        RemoveKeyFromL1(key.value());
+        activeNodeKeysInL1_.erase(key.value());
         return nullptr;
     }
 
@@ -520,7 +521,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(const std::string& key)
         return nullptr;
     }
     auto uiNode = cacheItem4Key.value().item;
-    RemoveKeyFromL1(key);
+    activeNodeKeysInL1_.erase(key);
     return uiNode;
 }
 
