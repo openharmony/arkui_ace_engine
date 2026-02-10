@@ -92,6 +92,8 @@ import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
 import { CommonModifier } from '#generated'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
+import { CustomSpan } from "#generated";
+import { CustomSpanWrapper } from "#generated";
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -707,5 +709,17 @@ export namespace extractors {
   }
   export function fromUiEffectHdrBrightnessBlenderPtr(ptr: KPointer): uiEffect.HdrBrightnessBlender {
     throw new Error("Not implemented")
+  }
+
+  export function transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(value: CustomSpan): CustomSpanWrapper {
+      return {
+          managed: value,
+          nativeObj: value.nativeObj,
+          onDraw_callback: value.onDraw,
+          onMeasure_callback: value.onMeasure,
+      }
+  }
+  export function transform_Ark_CustomSpanWrapper_to_Ark_CustomSpan(value: CustomSpanWrapper): CustomSpan {
+      return value.managed as CustomSpan
   }
 }
