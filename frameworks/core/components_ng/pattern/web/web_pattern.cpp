@@ -3309,6 +3309,7 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
         delegate_->dragData_->ClearImageFileNames();
+        delegate_->dragData_->ClearDragData();
     }
 }
 
