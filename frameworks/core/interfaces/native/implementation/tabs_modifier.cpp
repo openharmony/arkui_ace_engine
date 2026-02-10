@@ -42,7 +42,7 @@ std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Unio
                 const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
                 CHECK_NULL_VOID(tabsInfo);
                 PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex()));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex()));
             };
             TabsModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
@@ -333,7 +333,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
             indexInt = tabsInfo->GetIndex();
         }
         auto index = Converter::ArkValue<Ark_Int32>(indexInt);
-        arkCallback.Invoke(index);
+        arkCallback.InvokeSync(index);
     };
     TabsModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
@@ -356,7 +356,7 @@ void SetOnSelectedImpl(Ark_NativePointer node,
         }
         PipelineContext::SetCallBackNode(node);
         auto index = Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex());
-        arkCallback.Invoke(index);
+        arkCallback.InvokeSync(index);
     };
     TabsModelStatic::SetOnSelected(frameNode, std::move(onSelected));
 }
@@ -377,7 +377,7 @@ void SetOnTabBarClickImpl(Ark_NativePointer node,
             indexInt = tabsInfo->GetIndex();
         }
         auto index = Converter::ArkValue<Ark_Int32>(indexInt);
-        arkCallback.Invoke(index);
+        arkCallback.InvokeSync(index);
     };
     TabsModelStatic::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
@@ -400,7 +400,7 @@ void SetOnUnselectedImpl(Ark_NativePointer node,
         }
         PipelineContext::SetCallBackNode(node);
         auto index = Converter::ArkValue<Ark_Int32>(tabsInfo->GetIndex());
-        arkCallback.Invoke(index);
+        arkCallback.InvokeSync(index);
     };
     TabsModelStatic::SetOnUnselected(frameNode, std::move(onUnselected));
 }
@@ -434,7 +434,7 @@ void SetOnAnimationStartImpl(Ark_NativePointer node,
         tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Float64>(info.currentOffset.value_or(0.00f));
         tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Float64>(info.targetOffset.value_or(0.00f));
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Float64>(info.velocity.value_or(0.00f));
-        arkCallback.Invoke(arkIndex, arkTargetIndex, tabsAnimationEvent);
+        arkCallback.InvokeSync(arkIndex, arkTargetIndex, tabsAnimationEvent);
     };
     TabsModelStatic::SetOnAnimationStart(frameNode, std::move(onAnimationStart));
 }
@@ -454,7 +454,7 @@ void SetOnAnimationEndImpl(Ark_NativePointer node,
         tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Float64>(info.currentOffset.value_or(0.00f));
         tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Float64>(info.targetOffset.value_or(0.00f));
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Float64>(info.velocity.value_or(0.00f));
-        arkCallback.Invoke(arkIndex, tabsAnimationEvent);
+        arkCallback.InvokeSync(arkIndex, tabsAnimationEvent);
     };
     TabsModelStatic::SetOnAnimationEnd(frameNode, std::move(onAnimationEnd));
 }
@@ -474,7 +474,7 @@ void SetOnGestureSwipeImpl(Ark_NativePointer node,
         tabsAnimationEvent.currentOffset = Converter::ArkValue<Ark_Float64>(info.currentOffset.value_or(0.00f));
         tabsAnimationEvent.targetOffset = Converter::ArkValue<Ark_Float64>(info.targetOffset.value_or(0.00f));
         tabsAnimationEvent.velocity = Converter::ArkValue<Ark_Float64>(info.velocity.value_or(0.00f));
-        arkCallback.Invoke(arkIndex, tabsAnimationEvent);
+        arkCallback.InvokeSync(arkIndex, tabsAnimationEvent);
     };
     TabsModelStatic::SetOnGestureSwipe(frameNode, std::move(onGestureSwipe));
 }
@@ -667,7 +667,7 @@ void SetOnContentDidScrollImpl(Ark_NativePointer node,
         auto arkIndex = Converter::ArkValue<Ark_Int32>(index);
         auto arkPosition = Converter::ArkValue<Ark_Float32>(position);
         auto arkMainAxisLength = Converter::ArkValue<Ark_Float32>(mainAxisLength);
-        arkCallback.Invoke(arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength);
+        arkCallback.InvokeSync(arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength);
     };
     TabsModelStatic::SetOnContentDidScroll(frameNode, std::move(onEvent));
 }

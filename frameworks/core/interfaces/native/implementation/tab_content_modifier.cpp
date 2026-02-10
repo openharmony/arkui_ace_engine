@@ -16,6 +16,7 @@
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -184,8 +185,12 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         [&content](const Ark_Resource& arkContent) {
             content = Converter::OptConvert<std::string>(arkContent);
         },
-        [](const Ark_ComponentContentBase& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContentBase) is not supported yet.");
+        [frameNode](const Ark_ComponentContentBase& arkContent) {
+            auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
+            CHECK_NULL_VOID(contentPeer);
+            if (auto customNode = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {
+                TabContentModelStatic::SetCustomStyleNode(frameNode, customNode);
+            }
         },
         []() {}
     );
@@ -459,8 +464,20 @@ void SetTabBarImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     Converter::VisitUnion(
         *value,
-        [](const Ark_ComponentContentBase& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContentBase is not supported yet.");
+        [frameNode](const Ark_ComponentContentBase& arkContent) {
+            auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
+            CHECK_NULL_VOID(contentPeer);
+            if (auto tabBarNode = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {
+                TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+                TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, nullptr);
+                TabContentModelStatic::SetTabBarWithContent(frameNode, AceType::RawPtr(tabBarNode));
+                TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
+            } else {
+                TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+                TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, nullptr);
+                TabContentModelStatic::SetTabBarWithContent(frameNode, nullptr);
+                TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
+            }
         },
         [frameNode](const Ark_SubTabBarStyle& style) { g_setSubTabBarStyle(frameNode, style); },
         [frameNode](const Ark_BottomTabBarStyle& style) { g_setBottomTabBarStyle(frameNode, style); },
@@ -503,7 +520,7 @@ void SetOnWillShowImpl(Ark_NativePointer node,
         return;
     }
     auto onWillShow = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     TabContentModelStatic::SetOnWillShow(frameNode, std::move(onWillShow));
 }
@@ -518,7 +535,7 @@ void SetOnWillHideImpl(Ark_NativePointer node,
         return;
     }
     auto onWillHide = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     TabContentModelStatic::SetOnWillHide(frameNode, std::move(onWillHide));
 }
