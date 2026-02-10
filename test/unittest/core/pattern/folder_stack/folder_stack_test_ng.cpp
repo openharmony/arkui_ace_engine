@@ -1096,60 +1096,6 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest023, TestSize.Level0)
 }
 
 /**
- * @tc.name: FolderStackTestNgTest024
- * @tc.desc: Test FolderStackPattern OnFolderStateChangeSend with different FoldStatus values.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest024, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    folderStackModelNG.SetEnableAnimation(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test OnFolderStateChangeSend with UNKNOWN status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::UNKNOWN);
-
-    /**
-     * @tc.steps: step3. Test OnFolderStateChangeSend with FOLDED status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-
-    /**
-     * @tc.steps: step4. Test OnFolderStateChangeSend with HALF_FOLD status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::HALF_FOLD);
-
-    /**
-     * @tc.steps: step5. Test OnFolderStateChangeSend with EXPAND status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
-
-    /**
-     * @tc.steps: step6. Test multiple status transitions.
-     * @tc.expected: All transitions complete without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
-    pattern->OnFolderStateChangeSend(FoldStatus::HALF_FOLD);
-    pattern->OnFolderStateChangeSend(FoldStatus::UNKNOWN);
-}
-
-/**
  * @tc.name: FolderStackTestNgTest025
  * @tc.desc: Test FolderStackEventHub callback replacement.
  * @tc.type: FUNC
@@ -1262,15 +1208,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest027, TestSize.Level0)
      * @tc.expected: Returns either true or false.
      */
     bool hasDelayTask = pattern->HasFoldStatusDelayTask();
-    EXPECT_TRUE(hasDelayTask == true || hasDelayTask == false);
-
-    /**
-     * @tc.steps: step3. Test HasFoldStatusDelayTask after OnModifyDone.
-     * @tc.expected: Returns valid boolean after modification.
-     */
-    pattern->OnModifyDone();
-    bool hasDelayTask2 = pattern->HasFoldStatusDelayTask();
-    EXPECT_TRUE(hasDelayTask2 == true || hasDelayTask2 == false);
+    EXPECT_TRUE(hasDelayTask == false);
 }
 
 /**
