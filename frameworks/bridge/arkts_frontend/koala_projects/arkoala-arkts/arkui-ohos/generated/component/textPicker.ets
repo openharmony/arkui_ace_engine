@@ -727,8 +727,6 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
 export function TextPickerImpl(
     @memo
     style: ((attributes: TextPickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextPickerComponent>((): ArkTextPickerComponent => {
         return new ArkTextPickerComponent()
@@ -737,7 +735,6 @@ export function TextPickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
