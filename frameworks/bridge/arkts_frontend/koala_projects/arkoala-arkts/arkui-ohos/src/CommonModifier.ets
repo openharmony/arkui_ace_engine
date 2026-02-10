@@ -74,7 +74,7 @@ export class ModifierState implements IModifierState {
         }
         try {
             this._state!.value = this._state!.value % 100 + 1;
-        } catch (e: Error) {
+        } catch (e) {
             return;
         }
     }
