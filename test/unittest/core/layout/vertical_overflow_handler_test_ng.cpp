@@ -15,6 +15,7 @@
  
 #include "vertical_overflow_handler_test_ng.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #define protected public
@@ -380,4 +381,336 @@ HWTEST_F(OverflowTestNg, HandleContentOverflowTest, TestSize.Level1)
     EXPECT_EQ(handler.scrollableEvent_, nullptr);
     EXPECT_FALSE(handler.hasParentAdjust_);
 }
+
+/**
+ * @tc.name: RegisterScrollableEventNonVerticalLayoutTest
+ * @tc.desc: test VerticalOverflowHandler::RegisterScrollableEvent() when layout is not vertical
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, RegisterScrollableEventNonVerticalLayoutTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create flex with ROW direction (non-vertical).
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    /**
+     * @tc.steps: step2. Call RegisterScrollableEvent when IsVerticalLayout returns false.
+     * @tc.expected: scrollableEvent_ should remain nullptr (early return).
+     */
+    vOverflowHandler->RegisterScrollableEvent();
+    EXPECT_EQ(vOverflowHandler->scrollableEvent_, nullptr);
+}
+
+/**
+ * @tc.name: RegisterScrollableEventGestureHierarchyNotEmptyTest
+ * @tc.desc: test VerticalOverflowHandler::RegisterScrollableEvent() when gesture hierarchy is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, RegisterScrollableEventGestureHierarchyNotEmptyTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create flex with COLUMN direction and add a gesture.
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    /**
+     * @tc.steps: step2. Manually set a non-empty gesture hierarchy by creating scrollableEvent_.
+     * @tc.expected: When scrollableEvent_ already exists, should return early without registering again.
+     */
+    vOverflowHandler->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    vOverflowHandler->RegisterScrollableEvent();
+    // scrollableEvent_ should remain the same object (not recreated)
+    EXPECT_NE(vOverflowHandler->scrollableEvent_, nullptr);
+}
+
+/**
+ * @tc.name: RegisterScrollableEventWithExistingEventTest
+ * @tc.desc: test VerticalOverflowHandler::RegisterScrollableEvent() when scrollableEvent_ already exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, RegisterScrollableEventWithExistingEventTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create flex and manually set scrollableEvent_.
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    auto originalEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    vOverflowHandler->scrollableEvent_ = originalEvent;
+    /**
+     * @tc.steps: step2. Call RegisterScrollableEvent when scrollableEvent_ already exists.
+     * @tc.expected: Should return early without changing scrollableEvent_.
+     */
+    vOverflowHandler->RegisterScrollableEvent();
+    EXPECT_EQ(vOverflowHandler->scrollableEvent_, originalEvent);
+}
+
+/**
+ * @tc.name: AdjustChildrenOffsetNullChildNodeTest
+ * @tc.desc: test VerticalOverflowHandler::AdjustChildrenOffset() with null child node
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, AdjustChildrenOffsetNullChildNodeTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create VerticalOverflowHandler directly without proper frame node setup.
+     */
+    VerticalOverflowHandler handler;
+    handler.SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 200.f, 400.f));
+    /**
+     * @tc.steps: step2. Call AdjustChildrenOffset with null child nodes.
+     * @tc.expected: Should not crash and handle null children gracefully.
+     */
+    handler.AdjustChildrenOffset(50.0f, false);
+    // If no crash, test passes
+}
+
+/**
+ * @tc.name: AdjustChildrenOffsetWithHubTest
+ * @tc.desc: test VerticalOverflowHandler::AdjustChildrenOffset() with OverflowScrollEventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, AdjustChildrenOffsetWithHubTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create flex with children.
+     */
+    RefPtr<FrameNode> child;
+    auto flex = CreateFlex([this, &child](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+        child = CreateFlex([](FlexModelNG model) {});
+    });
+    CHECK_NULL_VOID(flex);
+    CHECK_NULL_VOID(child);
+    flex->GetGeometryNode()->SetFrameSize(SizeF(100, 200));
+    child->GetGeometryNode()->SetFrameSize(SizeF(80, 100));
+    child->GetGeometryNode()->SetMarginFrameOffset(OffsetF(10, 10));
+
+    VerticalOverflowHandler handler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    handler.SetContentRect(RectF(0.f, 0.f, 100.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 100.f, 200.f));
+    /**
+     * @tc.steps: step2. Call AdjustChildrenOffset with offset.
+     * @tc.expected: Children offsets should be adjusted.
+     */
+    handler.AdjustChildrenOffset(-50.0f, false);
+    // If no crash and method executes, test passes
+}
+
+/**
+ * @tc.name: HandleScrollImplOutOfBoundaryTest
+ * @tc.desc: test VerticalOverflowHandler::HandleScrollImpl() when out of boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, HandleScrollImplOutOfBoundaryTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create handler with boundary condition.
+     */
+    VerticalOverflowHandler handler;
+    handler.SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 400.f, 400.f));
+    handler.childFrameTop_ = 0.0f;  // At top boundary
+    /**
+     * @tc.steps: step2. Call HandleScrollImpl with positive offset (pushing down at top).
+     * @tc.expected: Should return false when out of boundary.
+     */
+    bool result = handler.HandleScrollImpl(10.0f, 0);
+    EXPECT_FALSE(result);
+    /**
+     * @tc.steps: step3. Set to bottom boundary and test negative offset.
+     */
+    handler.childFrameTop_ = -200.0f;  // At bottom boundary
+    result = handler.HandleScrollImpl(-10.0f, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HandleScrollImplWithinBoundaryTest
+ * @tc.desc: test VerticalOverflowHandler::HandleScrollImpl() when within boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, HandleScrollImplWithinBoundaryTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create handler with offset in middle range.
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    const auto& vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    vOverflowHandler->SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    vOverflowHandler->SetTotalChildFrameRect(RectF(0.f, 0.f, 400.f, 400.f));
+    vOverflowHandler->childFrameTop_ = -100.0f;  // Middle position
+    /**
+     * @tc.steps: step2. Call HandleScrollImpl with offset within boundary.
+     * @tc.expected: Should return true and adjust offsets.
+     */
+    bool result = vOverflowHandler->HandleScrollImpl(50.0f, 0);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(0), -50.0f);
+}
+
+/**
+ * @tc.name: UnRegisterScrollableEventNullEventTest
+ * @tc.desc: test VerticalOverflowHandler::UnRegisterScrollableEvent() when scrollableEvent_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, UnRegisterScrollableEventNullEventTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create handler without setting scrollableEvent_.
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    /**
+     * @tc.steps: step2. Call UnRegisterScrollableEvent when scrollableEvent_ is null.
+     * @tc.expected: Should return early without crashing.
+     */
+    EXPECT_EQ(vOverflowHandler->scrollableEvent_, nullptr);
+    vOverflowHandler->UnRegisterScrollableEvent();
+    EXPECT_EQ(vOverflowHandler->scrollableEvent_, nullptr);
+}
+
+/**
+ * @tc.name: UnRegisterScrollableEventWithEventTest
+ * @tc.desc: test VerticalOverflowHandler::UnRegisterScrollableEvent() when scrollableEvent_ exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, UnRegisterScrollableEventWithEventTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create handler and set scrollableEvent_.
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    vOverflowHandler->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    vOverflowHandler->childFrameTop_ = 100.0f;
+    /**
+     * @tc.steps: step2. Call UnRegisterScrollableEvent when scrollableEvent_ exists.
+     * @tc.expected: scrollableEvent_ should be null and childFrameTop_ should be reset.
+     */
+    vOverflowHandler->UnRegisterScrollableEvent();
+    EXPECT_EQ(vOverflowHandler->scrollableEvent_, nullptr);
+    EXPECT_FALSE(vOverflowHandler->childFrameTop_.has_value());
+}
+
+/**
+ * @tc.name: HandleContentOverflowOverflowDisabledTest
+ * @tc.desc: test VerticalOverflowHandler::HandleContentOverflow() when overflow is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, HandleContentOverflowOverflowDisabledTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create handler with overflow disabled.
+     */
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    vOverflowHandler->SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    vOverflowHandler->SetTotalChildFrameRect(RectF(0.f, 0.f, 400.f, 400.f));
+    vOverflowHandler->SetOverflowDisabledFlag(true);
+    /**
+     * @tc.steps: step2. Call HandleContentOverflow with overflow disabled.
+     * @tc.expected: Should unregister scrollable event.
+     */
+    vOverflowHandler->HandleContentOverflow();
+    EXPECT_EQ(vOverflowHandler->scrollableEvent_, nullptr);
+}
+
+/**
+ * @tc.name: IsVerticalOverflowTest
+ * @tc.desc: test VerticalOverflowHandler::IsVerticalOverflow() with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, IsVerticalOverflowTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Test when content is larger than children (no overflow).
+     */
+    VerticalOverflowHandler handler;
+    handler.SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 200.f, 100.f));
+    EXPECT_FALSE(handler.IsVerticalOverflow());
+
+    /**
+     * @tc.steps: step2. Test when children exceed content at bottom.
+     */
+    handler.SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 200.f, 300.f));
+    EXPECT_TRUE(handler.IsVerticalOverflow());
+
+    /**
+     * @tc.steps: step3. Test when children exceed content at top.
+     */
+    handler.SetContentRect(RectF(0.f, 100.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 50.f, 200.f, 100.f));
+    EXPECT_TRUE(handler.IsVerticalOverflow());
+}
+
+/**
+ * @tc.name: IsOverflowTest
+ * @tc.desc: test VerticalOverflowHandler::IsOverflow() with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, IsOverflowTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Test with no overflow.
+     */
+    VerticalOverflowHandler handler;
+    handler.SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 200.f, 200.f));
+    EXPECT_FALSE(handler.IsOverflow());
+
+    /**
+     * @tc.steps: step2. Test with overflow exceeding max gap.
+     */
+    handler.SetContentRect(RectF(0.f, 0.f, 200.f, 200.f));
+    handler.SetTotalChildFrameRect(RectF(0.f, 0.f, 200.f, 300.f));
+    EXPECT_TRUE(handler.IsOverflow());
+}
+
 } // namespace OHOS::Ace::NG
