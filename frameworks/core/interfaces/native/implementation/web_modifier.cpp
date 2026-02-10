@@ -2958,7 +2958,7 @@ void SetEnableAutoFillImpl(Ark_NativePointer node,
 }
 
 void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
-                                      const Opt_Boolean* value)
+                                     const Opt_Boolean* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
