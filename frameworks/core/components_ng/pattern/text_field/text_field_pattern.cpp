@@ -655,6 +655,11 @@ void TextFieldPattern::HandleInputOperations()
                 HandleDeleteOnCounterScene();
                 break;
             }
+            case InputOperation::CARET_SET: {
+                pendingCaretInfo_ = caretMoveOperation_.front();
+                caretMoveOperation_.pop();
+                break;
+            }
             case InputOperation::CURSOR_UP: {
                 CursorMoveUpOperation();
                 break;
@@ -762,6 +767,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     AdjustTextInReasonableArea();
     UpdateCaretRect(isEditorValueChanged);
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+#if defined(CROSS_PLATFORM)
+    ProcessPendingCaretEvent();
+#endif
     UpdateCaretInfoToController();
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
@@ -6659,6 +6667,22 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void TextFieldPattern::ProcessPendingCaretEvent()
+{
+    if (!pendingCaretInfo_.has_value()) {
+        return;
+    }
+
+    auto caretInfo = pendingCaretInfo_.value();
+    pendingCaretInfo_.reset();
+    if (caretInfo.text == contentController_->GetTextValue()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ProcessPendingCaretEvent set caret to %{public}d", caretInfo.pos);
+        SetCaretPosition(caretInfo.pos);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ProcessPendingCaretEvent Not Matched abort");
+    }
+}
+
 bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
 {
 #ifdef CROSS_PLATFORM
@@ -6686,6 +6710,16 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
 #endif
 #ifdef ANDROID_PLATFORM
     if (value->appendText.empty()) {
+        // update cursor position only
+        if (value->selection.IsValid() && value->selection.GetStart() == value->selection.GetEnd() &&
+            !value->text.empty()) {
+            inputOperations_.emplace(InputOperation::CARET_SET);
+            CaretSetInfo info = { .pos = value->selection.GetEnd(), .text = value->text};
+            caretMoveOperation_.emplace(info);
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, true);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
         return true;
     }
 #endif
