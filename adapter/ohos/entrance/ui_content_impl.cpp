@@ -170,6 +170,7 @@ const std::string ACTION_PARAM = "action";
 const std::string UIEXTENSION_CONFIG_MENUBAR = "ohos.system.atomicservice.menubar.params";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
+constexpr uint32_t LOG_DELAY_TIME = 250; // 250ms
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
@@ -2923,6 +2924,8 @@ void UIContentImpl::Destroy()
             window_->UnregisterWindowRotationChangeListener(windowRotationChangeListener_);
         }
     }
+    taskTimeForComeIn_.lastTaskTime = 0;
+    taskTimeForExit_.lastTaskTime = 0;
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -3774,11 +3777,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        TAG_LOGI(ACE_LAYOUT,
-            "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
-            " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName_.c_str(),
-            moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
-            rsTransaction == nullptr, stringifiedMap.c_str(), keyboardRect.ToString().c_str());
+        auto logTask = [bundleName = bundleName_, moduleName = moduleName_, instanceId = instanceId_,
+            config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
+            TAG_LOGI(ACE_LAYOUT,
+                "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, "
+                "windowSizeChangeReason %{public}d,"
+                " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName.c_str(),
+                moduleName.c_str(), instanceId, config.ToString().c_str(), static_cast<uint32_t>(reason),
+                rsTransaction == nullptr, stringifiedMap.c_str(), keyboardRect.ToString().c_str());
+            };
+        taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithKeyboardInfo";
+        ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     } else {
         if (SystemProperties::GetSyncDebugTraceEnabled()) {
             ACE_LAYOUT_SCOPED_TRACE(
@@ -3787,11 +3796,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        TAG_LOGI(ACE_LAYOUT,
-            "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
-            " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName_.c_str(),
-            moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
-            rsTransaction == nullptr, stringifiedMap.c_str());
+        auto logTask = [bundleName = bundleName_, moduleName = moduleName_, instanceId = instanceId_,
+ 	            config, reason, rsTransaction, stringifiedMap]() {
+                TAG_LOGI(ACE_LAYOUT,
+                    "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, "
+                    "windowSizeChangeReason %{public}d,"
+                    " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName.c_str(),
+                    moduleName.c_str(), instanceId, config.ToString().c_str(), static_cast<uint32_t>(reason),
+                    rsTransaction == nullptr, stringifiedMap.c_str());
+                };
+        taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithoutKeyboardInfo";
+        ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     }
 
     if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {

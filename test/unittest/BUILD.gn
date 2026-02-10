@@ -572,6 +572,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/date_util.cpp",
+    "$ace_root/frameworks/base/utils/delay_task.cpp",
     "$ace_root/frameworks/base/utils/resource_configuration.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
