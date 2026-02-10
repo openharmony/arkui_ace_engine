@@ -26,6 +26,7 @@ ace_unittest("text_picker_test_ng") {
     "text_picker_test_update.cpp",
     "text_picker_test_update_button.cpp",
     "text_picker_tojson.cpp",
+    "textpicker_model_static_test_ng.cpp",
   ]
 }
 

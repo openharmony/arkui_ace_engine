@@ -185,7 +185,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_content_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_model_static.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/bridge/waterflow/water_flow_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/richtext_model_static.cpp",
