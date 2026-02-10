@@ -195,7 +195,7 @@ static void requestPublishFormWithSnapshot([[maybe_unused]] ani_env* env, ani_ob
     ani_boolean isUndefined;
     env->Reference_IsUndefined(callback, &isUndefined);
     auto callbackIsValid = (callback != nullptr) && (isUndefined != ANI_TRUE);
-    LOGE("errCode: %{public}d, callbackIsValid: %{public}d.", callbackIsValid, errCode);
+    LOGI("errCode: %{public}d, callbackIsValid: %{public}d.", errCode, callbackIsValid);
     if (!callbackIsValid) {
         LOGW("callback is invalid.");
         return;
