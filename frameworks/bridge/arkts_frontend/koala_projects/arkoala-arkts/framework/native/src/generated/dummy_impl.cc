@@ -11613,6 +11613,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnWillAttachIMEImpl(Ark_NativePointer node,
+                                const Opt_Callback_IMEClient_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillAttachIME(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetEditMenuOptionsImpl(Ark_NativePointer node,
                                 const Opt_EditMenuOptions* value)
     {
@@ -24297,6 +24309,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetOnDidChangeImpl,
             RichEditorAttributeModifier::SetOnCutImpl,
             RichEditorAttributeModifier::SetOnCopyImpl,
+            RichEditorAttributeModifier::SetOnWillAttachIMEImpl,
             RichEditorAttributeModifier::SetEditMenuOptionsImpl,
             RichEditorAttributeModifier::SetEnableKeyboardOnFocusImpl,
             RichEditorAttributeModifier::SetEnableHapticFeedbackImpl,

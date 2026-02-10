@@ -4806,6 +4806,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Opt_Callback_CopyEvent_Void* value)
     {
     }
+    void SetOnWillAttachIMEImpl(Ark_NativePointer node,
+                                const Opt_Callback_IMEClient_Void* value)
+    {
+    }
     void SetEditMenuOptionsImpl(Ark_NativePointer node,
                                 const Opt_EditMenuOptions* value)
     {
@@ -10046,6 +10050,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetOnDidChangeImpl,
             RichEditorAttributeModifier::SetOnCutImpl,
             RichEditorAttributeModifier::SetOnCopyImpl,
+            RichEditorAttributeModifier::SetOnWillAttachIMEImpl,
             RichEditorAttributeModifier::SetEditMenuOptionsImpl,
             RichEditorAttributeModifier::SetEnableKeyboardOnFocusImpl,
             RichEditorAttributeModifier::SetEnableHapticFeedbackImpl,
