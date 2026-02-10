@@ -488,6 +488,7 @@ export class FrameNode implements MaterializedBase {
     public getOpacity(): double {
         let opacity: double = FrameNodeExtender.getOpacity(this);
         opacity = opacity > 1.0 ? 1.0 : opacity;
+        opacity = opacity < 0.0 ? 0.0 : opacity;
         return opacity;
     }
     public getPositionToWindowWithTransform(): NodePosition {
