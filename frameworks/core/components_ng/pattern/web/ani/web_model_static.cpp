@@ -1656,4 +1656,13 @@ void WebModelStatic::SetMicrophoneCaptureStateChangedId(
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnMicrophoneCaptureStateChangedEvent(std::move(uiCallback));
 }
+
+void WebModelStatic::SetEnableDefaultContextMenu(
+    FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetEnableDefaultContextMenu(isEnabled);
+}
 } // namespace OHOS::Ace::NG

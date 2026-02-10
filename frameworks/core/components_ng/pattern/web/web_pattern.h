@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/web/web_accessibility_event_report.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
+#include "core/components_ng/pattern/web/web_context_menu_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
@@ -641,6 +642,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDefaultContextMenu, bool);
 
     bool IsFocus() const
     {
@@ -661,6 +663,16 @@ public:
     void NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent);
     void MenuNodeDestroyCallback();
     void UninitMenuLifeCycleCallback();
+    void ShowDefaultContextMenu();
+    bool IsContextMenuShow();
+    void SetEnableDefaultContextMenu(bool enable)
+    {
+        isEnableDefaultContextMenu_ = enable;
+    }
+    bool IsEnableDefaultContextMenu()
+    {
+        return isEnableDefaultContextMenu_;
+    }
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void OnQuickMenuDismissed();
@@ -1082,6 +1094,7 @@ protected:
 
 private:
     friend class WebContextSelectOverlay;
+    friend class WebContextMenuOverlay;
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
     friend class WebAccessibilityEventReport;
@@ -1205,6 +1218,7 @@ private:
     void WebRotateRenderEffect(WindowSizeChangeReason type);
     void OnForceEnableZoomUpdate(bool value);
     void OnEnableAutoFillUpdate(bool isEnabled);
+    void OnEnableDefaultContextMenuUpdate(bool isEnabled);
 
     int GetWebId();
 
@@ -1497,6 +1511,7 @@ private:
     bool isShowAutofillPopup_ = false;
     OffsetF webOffset_;
     RefPtr<WebContextSelectOverlay> contextSelectOverlay_ = nullptr;
+    RefPtr<WebContextMenuOverlay> contextMenuOverlay_ = nullptr;
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
     RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
     RectF selectArea_;
@@ -1668,6 +1683,7 @@ private:
     bool isHoverNWeb_ = false;
     bool isUpSupplementDown_ = false;
     bool isSupplementMouseLeave_ = false;
+    bool isEnableDefaultContextMenu_ = false;
     int64_t lastMenuCloseTimestamp_ = -1;
 
     OHNativeWindow* pipNativeWindow_ = nullptr;

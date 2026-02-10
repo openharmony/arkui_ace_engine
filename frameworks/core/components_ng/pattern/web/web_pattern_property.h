@@ -95,6 +95,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlankScreenDetectionConfig, BlankScreenDetectionConfig);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableImageAnalyzer, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableAutoFill, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDefaultContextMenu, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceEnableZoom, bool);

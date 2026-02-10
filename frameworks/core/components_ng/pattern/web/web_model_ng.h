@@ -272,6 +272,7 @@ public:
     void SetOnMediaCastEnter(std::function<void()>&& jsCallback) override;
     void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetEnableDefaultContextMenu(bool isEnabled) override;
 
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
@@ -429,6 +430,7 @@ public:
     static void SetMicrophoneCaptureStateChangedId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback);
     static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
