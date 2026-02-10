@@ -15,7 +15,7 @@
 
 /// <reference path='./import.ts' />
 function loadComponent() {
-  if (globalThis.__ArkComponent__ !== undefined && loadComponent.componentObj === undefined) {
+  if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkGaugeComponent extends globalThis.__ArkComponent__ {
         constructor(nativePtr, classType) {
             super(nativePtr, classType);
@@ -286,6 +286,7 @@ class JSGauge extends JSViewAbstract {
 }
 
 function createComponent(nativePtr, classType) {
+    loadComponent();
  	if (loadComponent.componentObj !== undefined) {
  	    return new loadComponent.componentObj.component(nativePtr, classType);
  	}
