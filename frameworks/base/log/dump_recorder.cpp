@@ -119,7 +119,7 @@ void DumpRecorder::Diff(int64_t timestamp)
         auto infoJson = JsonUtil::ParseJsonString(diff);
         info->PutRef("info", std::move(infoJson));
     }
-    std::string infoContent = info->ToString();
+    auto infoContent = info->ToString();
     fileSize_ += static_cast<uint32_t>(infoContent.size());
     auto infos = recordTree_->GetValue("infos");
     infos->PutRef(std::move(info));
