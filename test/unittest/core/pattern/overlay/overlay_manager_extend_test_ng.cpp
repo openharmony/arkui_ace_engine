@@ -587,6 +587,7 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest013, TestSize.Level
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
     auto dragPreviewNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 2, AceType::MakeRefPtr<RootPattern>());
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     overlayManager->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, DRAG_PREVIEW_OFFSET);

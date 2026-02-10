@@ -430,6 +430,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
     auto pipline = PipelineContext::GetMainPipelineContext();
     auto overlayManager = pipline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(webFrameNode));
     pipline->SetupRootElement();
     webFrameNode->GetOrCreateFocusHub();
     overlayManager->SetIsMenuShow(true);
@@ -498,6 +499,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     auto pipline = PipelineContext::GetMainPipelineContext();
     auto overlayManager = pipline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(buttonFrameNode));
     pipline->SetupRootElement();
     buttonFrameNode->GetOrCreateFocusHub();
     overlayManager->SetIsMenuShow(true);
@@ -696,6 +698,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     auto pipline = PipelineContext::GetMainPipelineContext();
     auto overlayManager = pipline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(webFrameNode));
     pipline->SetupRootElement();
     webFrameNode->GetOrCreateFocusHub();
     overlayManager->SetIsMenuShow(true);

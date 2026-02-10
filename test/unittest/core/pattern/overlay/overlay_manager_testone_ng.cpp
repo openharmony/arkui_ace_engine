@@ -1599,6 +1599,7 @@ HWTEST_F(OverlayManagerTestOneNG, GetMenuNode001, TestSize.Level1)
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
     overlayManager->HideMenu(overlayNode, 10, true);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_.insert({ 1, overlayNode });
@@ -1757,6 +1758,7 @@ HWTEST_F(OverlayManagerTestOneNG, ShowMenu001, TestSize.Level1)
         V2::MENU_ETS_TAG, targetId, AceType::MakeRefPtr<MenuPattern>(targetId, TEXT_TAG, MenuType::MENU));
     menuNode->MountToParent(wrapperNode);
     overlayManager->ShowMenu(targetId, OffsetF(), menuNode);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     EXPECT_TRUE(menuManager->menuMap_.find(menuNode) != menuManager->menuMap_.end());

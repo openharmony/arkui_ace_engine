@@ -414,6 +414,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -468,6 +469,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu002, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -518,6 +520,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu003, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetNode->GetId()), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetNode->GetId()];
@@ -585,6 +588,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu004, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetNode->GetId()), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetNode->GetId()];
@@ -651,6 +655,7 @@ HWTEST_F(ViewAbstractTestThreeNg, CloseMenu001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -704,6 +709,7 @@ HWTEST_F(ViewAbstractTestThreeNg, CloseMenu002, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];

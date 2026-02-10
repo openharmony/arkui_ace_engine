@@ -196,6 +196,7 @@ HWTEST_F(OverlayManagerTwoTestNg, UpdateContextMenuDisappearPosition, TestSize.L
     auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto menuNodeFst =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_.emplace(1, AceType::RawPtr(menuNodeFst));
@@ -2109,6 +2110,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuAnimation, TestSize.Level1)
     EXPECT_EQ(wrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
     auto previewChild = wrapperPattern->GetPreview();
     EXPECT_EQ(previewChild, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuAnimation(menuNode, overlayManager);
@@ -2154,6 +2156,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished, TestSize.Level1)
     const WeakPtr<OverlayManager> weakManager_(overlayManager);
     EXPECT_NE(weakManager_.Upgrade(), nullptr);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
@@ -2195,6 +2198,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished2, TestSize.Level1)
     EXPECT_NE(rootWeak.Upgrade(), nullptr);
     const WeakPtr<OverlayManager> weakManager_(overlayManager);
     EXPECT_NE(weakManager_.Upgrade(), nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
@@ -2224,6 +2228,7 @@ HWTEST_F(OverlayManagerTwoTestNg, PopMenuAnimation, TestSize.Level1)
     mainMenu->MountToParent(menuNode);
     menuNode->MountToParent(rootNode_);
     rootNode_->MarkDirtyNode();
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->PopMenuAnimation(menuNode, overlayManager, true, true);
@@ -2274,6 +2279,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuClearAnimation, TestSize.Level1)
     dragFrameNode->SetDraggable(true);
     dragFrameNode->GetOrCreateFocusHub();
     AnimationOption option;
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuClearAnimation(menuNode, option, false, true);
@@ -2343,6 +2349,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ResetDragMoveVector, TestSize.Level1)
     /**
      * @tc.steps: step3. ShowMenuAnimation
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuAnimation(menuNode, overlayManager);
