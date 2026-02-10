@@ -58,7 +58,6 @@ import { int32, int64 } from "@koalaui/common";
 import { KPointer } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
-import { TextLayoutOptions, Paragraph, StyledString } from 'arkui/framework';
 
 export class UIInspector {
     public createComponentObserver(id: string | int): inspector.ComponentObserver {
@@ -98,9 +97,6 @@ export class MeasureUtils {
     }
     public measureTextSize(options: MeasureOptions) : SizeOptions {
         throw Error("measureTextSize not implemented in MeasureUtils!")
-    }
-    public getParagraphs(styledString: StyledString, options?: TextLayoutOptions): Array<Paragraph> {
-        throw Error("getParagraphs not implemented in MeasureUtils!")
     }
 }
 
@@ -695,10 +691,6 @@ export class UIContext {
         throw Error("getOverlayManager not implemented in UIContext!")
     }
 
-    public getMagnifier(): Magnifier {
-        throw Error("getMagnifier not implemented in UIContext!")
-    }
-
     public setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
         throw Error("setOverlayManagerOptions not implemented in UIContext!")
     }
@@ -1123,29 +1115,6 @@ export class UIObserver {
         }
     }
 
-    public onTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
-        if (this.observerImpl) {
-            this.observerImpl!.onTextChange(callback);
-        }
-    }
-    public offTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
-        if (this.observerImpl) {
-            this.observerImpl!.offTextChange(callback);
-        }
-    }
-    public onTextChange(
-        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
-        if (this.observerImpl) {
-            this.observerImpl!.onTextChange(callback);
-        }
-    }
-    public offTextChange(
-        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
-        if (this.observerImpl) {
-            this.observerImpl!.offTextChange(callback);
-        }
-    }
-
     public onBeforePanStart(callback: PanListenerCallback): void {
         let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_ as int, callback);
         ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'beforePanStart', callback);
@@ -1223,12 +1192,6 @@ export interface PageInfo {
         navDestinationInfo?: uiObserver.NavDestinationInfo;
 }
 export interface ContentCoverController {}
-
-export class Magnifier {
-    bind(id: string): void {}
-    show(x: double, y: double): void {}
-    unbind(): void {}
-}
 export class DynamicSyncScene {
     private range: ExpectedFrameRateRange;
     constructor(range: ExpectedFrameRateRange) {

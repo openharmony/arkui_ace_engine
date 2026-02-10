@@ -1620,27 +1620,6 @@ void callManagedCallback_I32_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourc
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void callManagedCallback_IMEClient_Void(Ark_Int32 resourceId, Ark_IMEClient value0)
-{
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_IMEClient_Void);
-    argsSerializer.writeInt32(resourceId);
-    IMEClient_serializer::write(argsSerializer, value0);
-    enqueueCallback(10, &callbackBuffer);
-}
-void callManagedCallback_IMEClient_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_IMEClient value0)
-{
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
-    argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_Callback_IMEClient_Void);
-    argsSerializer.writeInt32(resourceId);
-    IMEClient_serializer::write(argsSerializer, value0);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-}
 void callManagedCallback_InsertValue_Boolean(Ark_Int32 resourceId, Ark_InsertValue value0, Callback_Boolean_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9341,7 +9320,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_I32_I32_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_I32_Boolean);
         case Kind_Callback_I32_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_I32_I32_Void);        
         case Kind_Callback_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_I32_Void);
-        case Kind_Callback_IMEClient_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_IMEClient_Void);
         case Kind_Callback_I32_Tuple_I32_I32: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_Tuple_I32_I32);
         case Kind_Callback_I32_Tuple_I32_I32_I32_I32: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_Tuple_I32_I32_I32_I32);       
         case Kind_Callback_I64_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I64_Void);
@@ -9698,7 +9676,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_I32_I32_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_I32_BooleanSync);
         case Kind_Callback_I32_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_I32_I32_VoidSync);
         case Kind_Callback_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_I32_VoidSync);
-        case Kind_Callback_IMEClient_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_IMEClient_VoidSync);
         case Kind_Callback_I32_Tuple_I32_I32: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_Tuple_I32_I32Sync);
         case Kind_Callback_I32_Tuple_I32_I32_I32_I32: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I32_Tuple_I32_I32_I32_I32Sync);
         case Kind_Callback_I64_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_I64_VoidSync);

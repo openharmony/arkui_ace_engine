@@ -38,7 +38,7 @@ import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
 import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, StyledStringInternal } from "./styledString"
+import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ArkThemeScopeManager } from "#arktheme"
 import { dragController_DragSpringLoadingConfiguration_serializer } from "./../framework/ohos.arkui.dragController"
 import { ComponentContent_serializer } from "./../ComponentContent"
@@ -1931,11 +1931,6 @@ export class TextContentControllerBase implements MaterializedBase {
         this.deleteBackward_serialize()
         return
     }
-    public setStyledPlaceholder(styledString: StyledString): void {
-        const styledString_casted = styledString as (StyledString)
-        this.setStyledPlaceholder_serialize(styledString_casted)
-        return
-    }
     getCaretOffset_serialize(): CaretOffset | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -2037,9 +2032,6 @@ export class TextContentControllerBase implements MaterializedBase {
     }
     deleteBackward_serialize(): void {
         ArkUIGeneratedNativeModule._TextContentControllerBase_deleteBackward(this.peer!.ptr)
-    }
-    setStyledPlaceholder_serialize(styledString: StyledString): void {
-        ArkUIGeneratedNativeModule._TextContentControllerBase_setStyledPlaceholder(this.peer!.ptr, toPeerPtr(styledString))
     }
 }
 export class TransitionEffectInternal {
@@ -6794,8 +6786,6 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
 export interface InputCounterOptions {
     thresholdPercentage?: double;
     highlightBorder?: boolean;
-    counterTextColor?: ColorMetrics;
-    counterTextOverflowColor?: ColorMetrics;
 }
 export interface TextDecorationOptions {
     type: TextDecorationType | undefined;
@@ -15330,22 +15320,6 @@ export class InputCounterOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForCounterTextColor  = value.counterTextColor
-        if (valueHolderForCounterTextColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForCounterTextColorTmpValue  = valueHolderForCounterTextColor!
-            ColorMetrics_serializer.write(valueSerializer, valueHolderForCounterTextColorTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForCounterTextOverflowColor  = value.counterTextOverflowColor
-        if (valueHolderForCounterTextOverflowColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForCounterTextOverflowColorTmpValue  = valueHolderForCounterTextOverflowColor!
-            ColorMetrics_serializer.write(valueSerializer, valueHolderForCounterTextOverflowColorTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
     }
     public static read(buffer: DeserializerBase): InputCounterOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -15361,19 +15335,7 @@ export class InputCounterOptions_serializer {
             highlightBorderTmpBuf = valueDeserializer.readBoolean()
         }
         const highlightBorderTmpResult : boolean | undefined = highlightBorderTmpBuf
-        const counterTextColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let counterTextColorTmpBuf : ColorMetrics | undefined = undefined
-        if ((counterTextColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            counterTextColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
-        }
-        const counterTextColorTmpResult : ColorMetrics | undefined = counterTextColorTmpBuf
-        const counterTextOverflowColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let counterTextOverflowColorTmpBuf : ColorMetrics | undefined = undefined
-        if ((counterTextOverflowColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            counterTextOverflowColorTmpBuf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
-        }
-        const counterTextOverflowColorTmpResult : ColorMetrics | undefined = counterTextOverflowColorTmpBuf
-        let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentageTmpResult, highlightBorder: highlightBorderTmpResult, counterTextColor: counterTextColorTmpResult, counterTextOverflowColor: counterTextOverflowColorTmpResult} as InputCounterOptions)
+        let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentageTmpResult, highlightBorder: highlightBorderTmpResult} as InputCounterOptions)
         return value
     }
 }

@@ -22,10 +22,9 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
-import { ShaderStyle_serializer, ShaderStyle } from "./textCommon"
-import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./units"
 import { Color, FontWeight } from "./enums"
@@ -241,48 +240,6 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setMaxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setShaderStyleAttribute(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (TypeChecker.isArray_Opt_ShaderStyle(valueTmpValue)) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Array<ShaderStyle | undefined>
-                thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
-                for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
-                    const valueTmpValueForIdx0TmpElement : ShaderStyle | undefined = valueTmpValueForIdx0[valueTmpValueForIdx0CounterI]
-                    if (valueTmpValueForIdx0TmpElement !== undefined) {
-                        thisSerializer.writeInt8(RuntimeType.OBJECT)
-                        const valueTmpValueForIdx0TmpElementTmpValue  = valueTmpValueForIdx0TmpElement!
-                        ShaderStyle_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElementTmpValue)
-                    } else {
-                        thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-                    }
-                }
-            } else if (valueTmpValue instanceof ShaderStyle) {
-                thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as ShaderStyle
-                ShaderStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setShaderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setSymbolShadowAttribute(value: ShadowOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            ShadowOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_setSymbolShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setSymbolEffect1Attribute(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (symbolEffect !== undefined) {
@@ -344,11 +301,6 @@ export enum EffectFillStyle {
     CUMULATIVE = 0,
     ITERATIVE = 1
 }
-export enum ReplaceEffectType {
-    SEQUENTIAL = 0,
-    CROSS_FADE = 1,
-    SLASH_OVERLAY = 2
-}
 export interface SymbolGlyphAttribute extends CommonMethod {
     setSymbolGlyphOptions(value?: Resource): this {
         throw new Error("Unimplemented method setSymbolGlyphOptions")
@@ -377,12 +329,6 @@ export interface SymbolGlyphAttribute extends CommonMethod {
     maxFontScale(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method maxFontScale")
     }
-    shaderStyle(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): this {
-        throw new Error("Unimplemented method shaderStyle")
-    }
-    symbolShadow(value: ShadowOptions | undefined): this {
-        throw new Error("Unimplemented method symbolShadow")
-    }
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
         throw new Error("Unimplemented method symbolEffect")
     }
@@ -403,8 +349,6 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
     minFontScale_value?: double | Resource | undefined
     maxFontScale_value?: double | Resource | undefined
     attributeModifier_value?: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined
-    shaderStyle_value?: Array<ShaderStyle | undefined> | ShaderStyle | undefined
-    symbolShadow_value?: ShadowOptions | undefined
     setSymbolGlyphOptions(value?: Resource): this {
         return this
     }
@@ -430,12 +374,6 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
         return this
     }
     maxFontScale(value: double | Resource | undefined): this {
-        return this
-    }
-    shaderStyle(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): this {
-        return this
-    }
-    symbolShadow(value: ShadowOptions | undefined): this {
         return this
     }
     symbolEffect(symbolEffect: SymbolEffect | undefined, isActive: boolean | undefined): this {
@@ -525,22 +463,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
         if (this.checkPriority("maxFontScale")) {
             const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public shaderStyle(value: Array<ShaderStyle | undefined> | ShaderStyle | undefined): this {
-        if (this.checkPriority("shaderStyle")) {
-            const value_casted = value as (Array<ShaderStyle | undefined> | ShaderStyle | undefined)
-            this.getPeer()?.setShaderStyleAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public symbolShadow(value: ShadowOptions | undefined): this {
-        if (this.checkPriority("symbolShadow")) {
-            const value_casted = value as (ShadowOptions | undefined)
-            this.getPeer()?.setSymbolShadowAttribute(value_casted)
             return this
         }
         return this
@@ -1016,7 +938,7 @@ export class PulseSymbolEffect extends SymbolEffect implements MaterializedBase 
 }
 export class ReplaceSymbolEffectInternal {
     public static fromPtr(ptr: KPointer): ReplaceSymbolEffect {
-        return new ReplaceSymbolEffect(false, false, ptr)
+        return new ReplaceSymbolEffect(false, ptr)
     }
 }
 export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBase {
@@ -1027,32 +949,18 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         const scope_NonNull  = (scope as EffectScope | undefined)
         this.setScope(scope_NonNull)
     }
-    get replaceType(): ReplaceEffectType | undefined {
-        return this.getReplaceType()
-    }
-    set replaceType(replaceType: ReplaceEffectType | undefined) {
-        const replaceType_NonNull  = (replaceType as ReplaceEffectType | undefined)
-        this.setReplaceType(replaceType_NonNull)
-    }
-    constructor(_0: boolean, _1: boolean, peerPtr: KPointer) {
+    constructor(_0: boolean, peerPtr: KPointer) {
         super(peerPtr)
     }
-    constructor(scope?: EffectScope, replaceType?: ReplaceEffectType) {
-        this(false, false, ReplaceSymbolEffect.construct(scope, replaceType))
+    constructor(scope?: EffectScope) {
+        this(false, ReplaceSymbolEffect.construct(scope))
     }
-    static construct(scope?: EffectScope, replaceType?: ReplaceEffectType): KPointer {
+    static construct(scope?: EffectScope): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scope !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const scopeTmpValue  = (scope as EffectScope)
             thisSerializer.writeInt32(scopeTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        if (replaceType !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const replaceTypeTmpValue  = (replaceType as ReplaceEffectType)
-            thisSerializer.writeInt32(replaceTypeTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1069,14 +977,6 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
     private setScope(scope: EffectScope | undefined): void {
         const scope_casted = scope as (EffectScope | undefined)
         this.setScope_serialize(scope_casted)
-        return
-    }
-    private getReplaceType(): ReplaceEffectType | undefined {
-        return this.getReplaceType_serialize()
-    }
-    private setReplaceType(replaceType: ReplaceEffectType | undefined): void {
-        const replaceType_casted = replaceType as (ReplaceEffectType | undefined)
-        this.setReplaceType_serialize(replaceType_casted)
         return
     }
     private getScope_serialize(): EffectScope | undefined {
@@ -1100,29 +1000,6 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ReplaceSymbolEffect_setScope(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getReplaceType_serialize(): ReplaceEffectType | undefined {
-        const retval  = ArkUIGeneratedNativeModule._ReplaceSymbolEffect_getReplaceType(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : ReplaceEffectType | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = ReplaceEffectType.fromValue(retvalDeserializer.readInt32())
-        }
-        const returnResult : ReplaceEffectType | undefined = buffer
-        return returnResult
-    }
-    private setReplaceType_serialize(replaceType: ReplaceEffectType | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (replaceType !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const replaceTypeTmpValue  = (replaceType as ReplaceEffectType)
-            thisSerializer.writeInt32(replaceTypeTmpValue.valueOf())
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._ReplaceSymbolEffect_setReplaceType(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

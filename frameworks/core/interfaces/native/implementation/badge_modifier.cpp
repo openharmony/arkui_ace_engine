@@ -35,9 +35,6 @@ struct Style {
     std::optional<Dimension> badgeCircleSize;
     std::optional<Dimension> badgeBorderWidth;
     std::optional<FontWeight> badgeFontWeight;
-    std::optional<Color> badgeOuterBorderColor;
-    std::optional<Dimension> badgeOuterBorderWidth;
-    std::optional<bool> badgeEnableAutoAvoidance;
 };
 }
 
@@ -78,16 +75,12 @@ Style Convert(const Ark_BadgeStyle& src)
     dst.badgeCircleSize = Converter::OptConvertFromF64ResourceStr(src.badgeSize, DimensionUnit::FP);
     dst.badgeBorderWidth = Converter::OptConvert<Dimension>(src.borderWidth);
     dst.badgeFontWeight = Converter::OptConvert<FontWeight>(src.fontWeight);
-    dst.badgeOuterBorderColor = Converter::OptConvert<Color>(src.outerBorderColor);
-    dst.badgeOuterBorderWidth = Converter::OptConvert<Dimension>(src.outerBorderWidth);
-    dst.badgeEnableAutoAvoidance = Converter::OptConvert<bool>(src.enableAutoAvoidance);
     Validator::ValidateNonNegative(dst.badgeFontSize);
     Validator::ValidateNonNegative(dst.badgeCircleSize);
     Validator::ValidateNonNegative(dst.badgeBorderWidth);
     Validator::ValidateNonPercent(dst.badgeFontSize);
     Validator::ValidateNonPercent(dst.badgeCircleSize);
     Validator::ValidateNonPercent(dst.badgeBorderWidth);
-    Validator::ValidateNonPercent(dst.badgeOuterBorderWidth);
     return dst;
 }
 
@@ -112,9 +105,6 @@ BadgeParameters ConverterHelper(const T& src)
     dst.badgeCircleSize = style.badgeCircleSize;
     dst.badgeBorderWidth = style.badgeBorderWidth;
     dst.badgeFontWeight = style.badgeFontWeight;
-    dst.badgeOuterBorderColor = style.badgeOuterBorderColor;
-    dst.badgeOuterBorderWidth = style.badgeOuterBorderWidth;
-    dst.isEnableAutoAvoidance = style.badgeEnableAutoAvoidance;
     return dst;
 }
 

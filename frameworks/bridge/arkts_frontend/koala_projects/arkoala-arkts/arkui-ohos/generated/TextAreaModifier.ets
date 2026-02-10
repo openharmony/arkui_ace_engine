@@ -28,11 +28,10 @@ import { ResourceColor, Font, Length, ResourceStr, Dimension } from "./component
 import { Color, TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent, ContentType } from "./component/textInput"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection, IMEClient, LineSpacingOptions, MaxLinesOptions } from "./component/textCommon"
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection } from "./component/textCommon"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
-import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
+import { LengthMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
-import { ComponentContentBase } from "arkui.ComponentContent"
 export class TextAreaModifier extends CommonMethodModifier implements TextAreaAttribute,AttributeModifier<TextAreaAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -113,7 +112,6 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxLines_0_0value?: int32 | undefined
-    _maxLines_0_1value?: MaxLinesOptions | undefined
     _wordBreak_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _wordBreak_0_0value?: WordBreak | undefined
     _lineBreakStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -124,7 +122,6 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _letterSpacing_0_0value?: double | string | Resource | undefined
     _lineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineSpacing_0_0value?: LengthMetrics | undefined
-    _lineSpacing_0_1value?: LineSpacingOptions | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineHeight_0_0value?: double | string | Resource | undefined
     _type_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -161,20 +158,6 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
-    _minLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minLines_0_0value?: int32 | undefined
-    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableAutoSpacing_0_0value?: boolean | undefined
-    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeWidth_0_0value?: LengthMetrics | undefined
-    _strokeColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeColor_0_0value?: ResourceColor | undefined
-    _onWillAttachIME_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillAttachIME_0_0value?: ((value0: IMEClient) => void) | undefined
-    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: ColorMetrics | undefined
-    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableSelectedDataDetector_0_0value?: boolean | undefined
     _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -192,7 +175,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _showCounter_0_0value?: boolean | undefined
     _showCounter_0_1value?: InputCounterOptions | undefined
     _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | ComponentContentBase | undefined
+    _customKeyboard_0_0value?: CustomBuilder | undefined
     _customKeyboard_0_1value?: KeyboardOptions | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
@@ -796,7 +779,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined), (this._maxLines_0_1value as MaxLinesOptions | undefined));
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
                     this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -806,7 +789,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMaxLinesAttribute((undefined as int32 | undefined), (undefined as MaxLinesOptions | undefined));
+                    peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
@@ -886,7 +869,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._lineSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined), (this._lineSpacing_0_1value as LineSpacingOptions | undefined));
+                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined));
                     this._lineSpacing_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -896,7 +879,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._lineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
+                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined));
                 }
             }
         }
@@ -1314,132 +1297,6 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
-        if (this._minLines_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._minLines_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMinLinesAttribute((this._minLines_0_0value as int32 | undefined));
-                    this._minLines_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._minLines_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._minLines_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMinLinesAttribute((undefined as int32 | undefined));
-                }
-            }
-        }
-        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as LengthMetrics | undefined));
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeWidthAttribute((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (this._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._strokeColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeColorAttribute((this._strokeColor_0_0value as ResourceColor | undefined));
-                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._strokeColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._strokeColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeColorAttribute((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (this._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillAttachIME_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as ((value0: IMEClient) => void) | undefined));
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnWillAttachIMEAttribute((undefined as ((value0: IMEClient) => void) | undefined));
-                }
-            }
-        }
-        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollBarColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as ColorMetrics | undefined));
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as ColorMetrics | undefined));
-                }
-            }
-        }
-        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
         if (this._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._inputFilter_0_flag) {
@@ -1480,7 +1337,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._customKeyboard_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined));
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -1490,7 +1347,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined));
+                    peer.setCustomKeyboardAttribute((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined));
                 }
             }
         }
@@ -1932,11 +1789,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             switch (modifier._maxLines_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.maxLines(modifier._maxLines_0_0value, modifier._maxLines_0_1value);
+                    this.maxLines(modifier._maxLines_0_0value);
                     break;
                 }
                 default: {
-                    this.maxLines((undefined as int32 | undefined), (undefined as MaxLinesOptions | undefined));
+                    this.maxLines((undefined as int32 | undefined));
                 }
             }
         }
@@ -1997,11 +1854,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             switch (modifier._lineSpacing_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.lineSpacing(modifier._lineSpacing_0_0value, modifier._lineSpacing_0_1value);
+                    this.lineSpacing(modifier._lineSpacing_0_0value);
                     break;
                 }
                 default: {
-                    this.lineSpacing((undefined as LengthMetrics | undefined), (undefined as LineSpacingOptions | undefined));
+                    this.lineSpacing((undefined as LengthMetrics | undefined));
                 }
             }
         }
@@ -2304,97 +2161,6 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
-        if (modifier._minLines_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._minLines_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.minLines(modifier._minLines_0_0value);
-                    break;
-                }
-                default: {
-                    this.minLines((undefined as int32 | undefined));
-                }
-            }
-        }
-        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableAutoSpacing((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._strokeWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.strokeWidth(modifier._strokeWidth_0_0value);
-                    break;
-                }
-                default: {
-                    this.strokeWidth((undefined as LengthMetrics | undefined));
-                }
-            }
-        }
-        if (modifier._strokeColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._strokeColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.strokeColor(modifier._strokeColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.strokeColor((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (modifier._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillAttachIME_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillAttachIME(modifier._onWillAttachIME_0_0value);
-                    break;
-                }
-                default: {
-                    this.onWillAttachIME((undefined as ((value0: IMEClient) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollBarColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.scrollBarColor((undefined as ColorMetrics | undefined));
-                }
-            }
-        }
-        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableSelectedDataDetector((undefined as boolean | undefined));
-                }
-            }
-        }
         if (modifier._inputFilter_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._inputFilter_0_flag) {
@@ -2430,7 +2196,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.customKeyboard((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined));
+                    this.customKeyboard((undefined as CustomBuilder | undefined), (undefined as KeyboardOptions | undefined));
                 }
             }
         }
@@ -2831,12 +2597,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    maxLines(value: int32 | undefined, options: MaxLinesOptions | undefined): this {
-        if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)) || (true))
+    maxLines(value: int32 | undefined): this {
+        if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLines_0_0value = value
-            this._maxLines_0_1value = options
             this._state.fireChange()
         } else
         {
@@ -2892,12 +2657,11 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
-        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+    lineSpacing(value: LengthMetrics | undefined): this {
+        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._lineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineSpacing_0_0value = value
-            this._lineSpacing_0_1value = options
             this._state.fireChange()
         } else
         {
@@ -3181,83 +2945,6 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    minLines(value: int32 | undefined): this {
-        if (((this._minLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minLines_0_0value) !== (value)))
-        {
-            this._minLines_0_flag = AttributeUpdaterFlag.UPDATE
-            this._minLines_0_0value = value
-        } else
-        {
-            this._minLines_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    enableAutoSpacing(value: boolean | undefined): this {
-        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableAutoSpacing_0_0value = value
-        } else
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    strokeWidth(value: LengthMetrics | undefined): this {
-        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeWidth_0_0value = value
-        } else
-        {
-            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    strokeColor(value: ResourceColor | undefined): this {
-        if (((this._strokeColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._strokeColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeColor_0_0value = value
-        } else
-        {
-            this._strokeColor_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
-        if (((this._onWillAttachIME_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onWillAttachIME_0_0value = value
-        } else
-        {
-            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    scrollBarColor(value: ColorMetrics | undefined): this {
-        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._scrollBarColor_0_0value = value
-        } else
-        {
-            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    enableSelectedDataDetector(value: boolean | undefined): this {
-        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableSelectedDataDetector_0_0value = value
-        } else
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
     inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
         if (((this._inputFilter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
@@ -3284,7 +2971,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE

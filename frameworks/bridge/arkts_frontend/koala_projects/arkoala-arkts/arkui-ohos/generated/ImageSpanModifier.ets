@@ -56,8 +56,6 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
     _onError_0_0value?: ImageErrorCallback | undefined
     _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alt_0_0value?: image.PixelMap | undefined
-    _supportSvg2_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _supportSvg2_0_0value?: boolean | undefined
     _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
     _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -171,24 +169,6 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 default: {
                     this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setAltAttribute((undefined as image.PixelMap | undefined));
-                }
-            }
-        }
-        if (this._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._supportSvg2_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSupportSvg2Attribute((this._supportSvg2_0_0value as boolean | undefined));
-                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._supportSvg2_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._supportSvg2_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSupportSvg2Attribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -310,19 +290,6 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
-        if (modifier._supportSvg2_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._supportSvg2_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.supportSvg2(modifier._supportSvg2_0_0value);
-                    break;
-                }
-                default: {
-                    this.supportSvg2((undefined as boolean | undefined));
-                }
-            }
-        }
         if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._textBackgroundStyle_0_flag) {
@@ -419,17 +386,6 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    supportSvg2(value: boolean | undefined): this {
-        if (((this._supportSvg2_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportSvg2_0_0value) !== (value)))
-        {
-            this._supportSvg2_0_flag = AttributeUpdaterFlag.UPDATE
-            this._supportSvg2_0_0value = value
-        } else
-        {
-            this._supportSvg2_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

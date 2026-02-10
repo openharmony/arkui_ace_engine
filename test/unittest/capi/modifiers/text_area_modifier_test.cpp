@@ -878,7 +878,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest2, TestSize.Level1)
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
     ASSERT_NE(modifier_->setMaxLines, nullptr);
     auto maxLines = Converter::ArkValue<Opt_Int32>(1);
-    modifier_->setMaxLines(node_, &maxLines, nullptr);
+    modifier_->setMaxLines(node_, &maxLines);
 
     auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
@@ -942,7 +942,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTest, TestSize.Level1)
     };
 
     for (const auto& [input, value, expectVal] : testPlan) {
-        modifier_->setMaxLines(node_, &value, nullptr);
+        modifier_->setMaxLines(node_, &value);
         checkVal = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkVal, expectVal) << "Input value is: " << input;
     }
@@ -1874,8 +1874,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
             actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
             CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         };
-    auto customBuilder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(
-        Converter::ArkCallback<Opt_CustomNodeBuilder>(func).value);
+    auto customBuilder = Converter::ArkCallback<Opt_CustomNodeBuilder>(func);
     KeyboardOptions keyboardOptions = { .supportAvoidance = true };
     auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 

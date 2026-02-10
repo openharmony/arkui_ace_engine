@@ -356,14 +356,12 @@ void TextModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std
 }
 
 void TextModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick,
-    const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
-        std::move(onPrepareMenuCallback));
+    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 void TextModelStatic::ResetSelectionMenuOptions(FrameNode* frameNode)
@@ -416,92 +414,5 @@ void TextModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const st
         return;
     }
     TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
-}
-
-void TextModelStatic::SetOptimizeTrailingSpace(FrameNode* frameNode, const std::optional<bool>& valueOpt)
-{
-    TextModelNG::SetOptimizeTrailingSpace(frameNode, valueOpt.value_or(false));
-}
-
-void TextModelStatic::SetEnableAutoSpacing(FrameNode* frameNode, const std::optional<bool>& valueOpt)
-{
-    TextModelNG::SetEnableAutoSpacing(frameNode, valueOpt.value_or(false));
-}
-
-void TextModelStatic::SetIsOnlyBetweenLines(FrameNode* frameNode, const std::optional<bool>& valueOpt)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IsOnlyBetweenLines, valueOpt.value_or(false), frameNode);
-}
-
-void TextModelStatic::SetTextContentAlign(FrameNode* frameNode, const std::optional<TextContentAlign>& valueOpt)
-{
-    if (valueOpt.has_value()) {
-        TextModelNG::SetTextContentAlign(frameNode, valueOpt.value());
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextContentAlign, frameNode);
-    }
-}
-
-void TextModelStatic::SetMinLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
-{
-    if (valueOpt.has_value()) {
-        TextModelNG::SetMinLines(frameNode, valueOpt.value());
-    } else {
-        TextModelNG::ResetMinLines(frameNode);
-    }
-}
-
-void TextModelStatic::SetMinimumLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
-{
-    if (valueOpt.has_value()) {
-        TextModelNG::SetMinimumLineHeight(frameNode, valueOpt.value());
-    } else {
-        TextModelNG::ResetMinimumLineHeight(frameNode);
-    }
-}
-
-void TextModelStatic::SetMaximumLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
-{
-    if (valueOpt.has_value()) {
-        TextModelNG::SetMaximumLineHeight(frameNode, valueOpt.value());
-    } else {
-        TextModelNG::ResetMaximumLineHeight(frameNode);
-    }
-}
-
-void TextModelStatic::SetLineHeightMultiply(FrameNode* frameNode, const std::optional<double>& valueOpt)
-{
-    if (valueOpt.has_value()) {
-        TextModelNG::SetLineHeightMultiply(frameNode, valueOpt.value());
-    } else {
-        TextModelNG::ResetLineHeightMultiply(frameNode);
-    }
-}
-
-void TextModelStatic::SetContentTransition(
-    FrameNode* frameNode, const std::optional<TextEffectStrategy> value,
-    const std::optional<TextFlipDirection> direction, const std::optional<bool> enableBlur)
-{
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
-            TextLayoutProperty, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
-    }
-    if (direction.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, direction.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, frameNode);
-    }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, enableBlur.value_or(false), frameNode);
-}
-
-void TextModelStatic::SetSelectDetectEnable(FrameNode* frameNode, const std::optional<bool>& value)
-{
-    if (value.has_value()) {
-        TextModelNG::SetSelectDetectEnable(frameNode, value.value());
-    } else {
-        TextModelNG::ResetSelectDetectEnable(frameNode);
-    }
 }
 } // namespace OHOS::Ace::NG

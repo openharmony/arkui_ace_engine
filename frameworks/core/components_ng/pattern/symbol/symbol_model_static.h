@@ -30,7 +30,6 @@ public:
     static void SetSymbolType(FrameNode* frameNode, const std::optional<SymbolType>& optValue);
     static void SetFontFamilies(FrameNode* frameNode, const std::optional<std::vector<std::string>>& optValue);
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
-    static void SetSymbolShadow(FrameNode* frameNode, const std::optional<SymbolShadow>& optValue);
 };
 } // namespace OHOS::Ace::NG
 

@@ -1818,7 +1818,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic028, TestSize.Level1)
         return menuParams;
     };
     NG::OnMenuItemClickCallback onMenuItemClick = [](const NG::MenuItemParam&) -> bool { return false; };
-    TextFieldModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreate), std::move(onMenuItemClick), nullptr);
+    TextFieldModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreate), std::move(onMenuItemClick));
     EXPECT_NE(textFieldPattern->selectOverlay_->onCreateMenuCallback_, nullptr);
     EXPECT_NE(textFieldPattern->selectOverlay_->onMenuItemClick_, nullptr);
 }
