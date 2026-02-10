@@ -6733,7 +6733,7 @@ typedef struct OH_ArkUI_DecorationStyleOptions OH_ArkUI_DecorationStyleOptions;
  * @since 24
  */
 typedef struct OH_ArkUI_TextDataDetectorConfig OH_ArkUI_TextDataDetectorConfig;
- 
+
 /**
  * @brief Defines the selection menu option of text editor.
  *
