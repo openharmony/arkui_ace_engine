@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
-  constructor(nativePtr: KNode, classType?: ModifierType) {
-    super(nativePtr, classType);
-  }
   allowChildCount(): number {
     return 0;
   }
@@ -54,9 +51,6 @@ class QRValueModifier extends ModifierWithKey<string> {
 }
 
 class QRColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('color');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -72,9 +66,6 @@ class QRColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class QRBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('qrBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -90,9 +81,6 @@ class QRBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class QRContentOpacityModifier extends ModifierWithKey<number | Resource> {
-  constructor(value: number | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('qrContentOpacity');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

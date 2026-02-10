@@ -97,11 +97,11 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
             HideKeyboardAcrossProcesses();
         }
     }
+
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
         curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
         CloseCustomKeyboard(true);
     }
-
     isLastFocusUIExtension_ = curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG;
     lastFocusNodeId_ = curFocusNode->GetId();
     curFocusNode_ = curFocusNode;
@@ -151,6 +151,17 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
     }
 
     // In window scene, focus change, need close keyboard.
+#ifdef ARKUI_WEARABLE
+    auto context = curFocusNode->GetContext();
+    if (context) {
+        auto textFieldManager = context->GetTextFieldManager();
+        if (textFieldManager && !textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown Or Attached, No Need to close keyboard");
+            return;
+        }
+    }
+#endif
+
     auto pattern = curFocusNode->GetPattern();
     if (!pattern->NeedSoftKeyboard()) {
         NG::WindowSceneHelper::IsCloseKeyboard(curFocusNode);

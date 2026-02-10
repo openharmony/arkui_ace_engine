@@ -1642,7 +1642,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     }
     return this;
   }
-  enableSelectedDataDetector(value) {
+  enableSelectedDataDetector(value): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputSelectDetectorEnableModifier.identity, TextInputSelectDetectorEnableModifier, value);
     return this;
   }
