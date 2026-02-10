@@ -1208,6 +1208,10 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
 {
     currentMainLineIndex_ = info_.startMainLineIndex_ - 1;
     float mainLength = info_.currentOffset_;
+    // already at start line, do not use offset for mainLength
+    if (info_.startMainLineIndex_ == 0 && GreatNotEqual(mainLength, 0)) {
+        mainLength = 0;
+    }
     UseCurrentLines(mainSize, crossSize, layoutWrapper, mainLength);
     return mainLength;
 }
