@@ -2496,6 +2496,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                                const Opt_Boolean* exposeInnerGesture)
     {
     }
+    void SetDebugLineImpl(Ark_NativePointer node,
+                          const Ark_String* sourceLine,
+                          const Opt_String* moduleName)
+    {
+    }
     } // CommonMethodModifier
     namespace CommonShapeMethodModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -9117,6 +9122,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetKeyboardShortcutImpl,
             CommonMethodModifier::SetAccessibilityGroupImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
+            CommonMethodModifier::SetDebugLineImpl,
         };
         return &ArkUICommonMethodModifierImpl;
     }

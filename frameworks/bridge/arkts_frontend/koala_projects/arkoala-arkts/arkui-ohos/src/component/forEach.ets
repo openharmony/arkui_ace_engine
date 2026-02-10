@@ -38,6 +38,9 @@ export interface ForEachAttribute<T> extends DynamicNode {
     onMove(handler?: OnMoveHandler, eventHandler?: ItemDragEventHandler): this {
         return this;
     }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
+    }
 }
 
 export class ArkForEachComponent<T> implements ForEachAttribute<T> {
@@ -66,6 +69,10 @@ export class ArkForEachComponent<T> implements ForEachAttribute<T> {
         this.arr = arr;
         this.itemGenerator = itemGenerator;
         this.keyGenerator = keyGenerator;
+        return this;
+    }
+    
+    public debugLine(sourceLine: string, moduleName?: string): this {
         return this;
     }
 }

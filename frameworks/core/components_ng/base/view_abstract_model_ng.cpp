@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
@@ -1433,6 +1434,12 @@ void ViewAbstractModelNG::SetAccessibilityStateDescription(FrameNode* frameNode,
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityStateDescription(stateDescription);
+}
+
+void ViewAbstractModelNG::SetDebugLineSta(UINode* node, const std::string& debugLine)
+{
+    CHECK_NULL_VOID(node);
+    node->SetDebugLine(debugLine);
 }
 
 std::string ViewAbstractModelNG::PopupTypeStr(const PopupType& type)

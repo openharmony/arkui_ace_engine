@@ -183,6 +183,18 @@ export class ArkSymbolSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SymbolSpanAttribute_setId(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleNameTmpValue  = moduleName!
+            thisSerializer.writeString(moduleNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface SymbolSpanAttribute {
     setSymbolSpanOptions(value: global_resource_Resource): this {
@@ -211,6 +223,9 @@ export interface SymbolSpanAttribute {
     }
     attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error('Unimplemented method debugLine')
     }
 }
 
@@ -271,6 +286,15 @@ export class ArkSymbolSpanComponent extends ComponentBase implements SymbolSpanA
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        if (this.checkPriority("debugLine")) {
+            const sourceLine_casted = sourceLine as (string)
+            const moduleName_casted = moduleName as (string | undefined)
+            this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
+            return this
+        }
+        return this
     }
 }
 

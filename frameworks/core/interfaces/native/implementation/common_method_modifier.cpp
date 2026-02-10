@@ -128,6 +128,8 @@ constexpr float MAX_ANGLE = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
+const char* DEBUG_LINE_INFO_LINE = "$line";
+const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 enum class PixelroundRule {
     NO_FORCE_ROUND,
     FORCE_FLOOR,
@@ -6603,6 +6605,23 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetOnGestureRecognizerJudgeBegin(frameNode,
         std::move(onGestureRecognizerJudgefunc), *convValue);
 }
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
+{
+    auto uiNode = static_cast<UINode *>(node);
+    CHECK_NULL_VOID(uiNode);
+    std::string debugLine = Converter::Convert<std::string>(*sourceLine);
+    auto moduleNameOpt = Converter::OptConvertPtr<std::string>(moduleName);
+    if (moduleNameOpt) {
+        auto json = JsonUtil::Create(true);
+        json->Put(DEBUG_LINE_INFO_LINE, debugLine.c_str());
+        json->Put(DEBUG_LINE_INFO_PACKAGE_NAME, moduleNameOpt.value_or("").c_str());
+        debugLine = json->ToString();
+    }
+    
+    ViewAbstractModelNG::SetDebugLineSta(uiNode, debugLine);
+}
 } // CommonMethodModifier
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
@@ -6811,6 +6830,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetKeyboardShortcutImpl,
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
+        CommonMethodModifier::SetDebugLineImpl,
     };
     return &ArkUICommonMethodModifierImpl;
 }

@@ -6055,6 +6055,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnGestureRecognizerJudgeBegin1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleNameTmpValue  = moduleName!
+            thisSerializer.writeString(moduleNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
     attributeSet?: CommonShapeMethodModifier;
@@ -10261,6 +10273,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method keyboardShortcut')
     }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.debugLine(sourceLine, moduleName));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'debugLine' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error("Unimplemented method debugLine")
+    }
     accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -11707,6 +11731,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         const callback__casted = callback_ as (GestureRecognizerJudgeBeginCallback | undefined)
         const exposeInnerGesture_casted = exposeInnerGesture as (boolean | undefined)
         this.getPeer()?.setOnGestureRecognizerJudgeBegin1Attribute(callback__casted, exposeInnerGesture_casted)
+        return this
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        if (this.checkPriority("debugLine")) {
+            const sourceLine_casted = sourceLine as (string)
+            const moduleName_casted = moduleName as (string | undefined)
+            this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
+            return this
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
