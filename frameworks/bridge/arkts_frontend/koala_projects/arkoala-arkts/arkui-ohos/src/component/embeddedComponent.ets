@@ -127,8 +127,6 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
 export function EmbeddedComponentImpl(
     @memo
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkEmbeddedComponentComponent>((): ArkEmbeddedComponentComponent => {
         return new ArkEmbeddedComponentComponent()
@@ -137,7 +135,6 @@ export function EmbeddedComponentImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
