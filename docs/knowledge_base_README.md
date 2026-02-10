@@ -23,11 +23,11 @@
 
 - 总知识库文档: 33 个
 - 组件知识库: 27 个
-- SDK API 知识库: 1 个
+- SDK API 知识库: 2 个
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
 - 覆盖组件: 26 个
-- 检索关键词: 200+ 个
+- 检索关键词: 220+ 个
 
 ---
 
@@ -39,7 +39,8 @@ knowledge_base/
 ├── cj_frontend/           # CJ Frontend 桥接层知识库
 │   └── CJ_Frontend_Guide.md                   # 综合指南
 ├── sdk/                   # SDK 相关知识库
-│   └── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
+│   ├── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
+│   └── Component_API_Knowledge_Base_CN.md     # ArkUI 组件 API 知识库
 ├── pattern/               # 组件模式知识库
 │   ├── badge/
 │   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
@@ -183,6 +184,41 @@ knowledge_base/
 **相关资源**：
 - SDK API 目录: `OpenHarmony/interface/sdk-js/api/arkui/`
 - ace_engine 实现层: `OpenHarmony/foundation/arkui/ace_engine/`
+
+---
+
+### Component API Knowledge Base
+
+**位置**: `sdk/Component_API_Knowledge_Base_CN.md`
+
+**组件 API 指南** - OpenHarmony ArkUI 组件 API (`@internal/component/ets`) 的完整分析文档
+
+**包含内容**：
+
+- **概述**：组件 API 定位、与公开 API 的区别、代码规模统计
+- **公开 API vs 组件 API**：目录结构对比、文件命名对比、使用场景对比
+- **组件 API 分类**：120+ 个组件按功能分类（基础、容器、选择器、形状、媒体等）
+- **特殊文件说明**：通用类型文件、通用 API 文件、系统组件文件
+- **类型定义规范**：JSDoc 标签说明（@since、@crossplatform、@form、@atomicservice）、版本兼容性处理
+- **使用指南**：查找组件类型定义、理解类型定义、版本兼容性检查
+- **常见问题**：公开 API 和组件 API 的关系、为什么需要组件 API、动态导入说明
+
+**统计数据**：
+- 总文件数: 137 个 `.d.ts` 文件
+- 总代码行数: 184,823 行
+- 组件类型定义: 120+ 个
+- 版本范围: API 7 - API 23
+
+**适用场景**：
+- 理解 ArkUI 框架内部的类型定义组织方式
+- 区分公开 API 与组件 API 的差异
+- 查找组件和接口的类型定义文件
+- 查询 API 从哪个版本开始支持
+- 框架内部开发和维护参考
+
+**相关资源**：
+- 组件 API 目录: `OpenHarmony/interface/sdk-js/api/@internal/component/ets/`
+- ArkUI SDK API 知识库: [ArkUI_SDK_API_Knowledge_Base.md](./sdk/ArkUI_SDK_API_Knowledge_Base.md)
 
 ---
 
