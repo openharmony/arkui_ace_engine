@@ -1209,6 +1209,7 @@ private:
     int GetWebId();
 
     void InitEvent();
+    void InitEventAfterUpdate();
     void InitConfigChangeCallback(const RefPtr<PipelineContext>& context);
     void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

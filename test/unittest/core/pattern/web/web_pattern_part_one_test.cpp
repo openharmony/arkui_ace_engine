@@ -923,6 +923,29 @@ HWTEST_F(WebPatternPartOneTest, InitEvent_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitEventAfterUpdate_001
+ * @tc.desc: InitEventAfterUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, InitEventAfterUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->InitEventAfterUpdate();
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
  * @tc.name: InitFeatureParam_001
  * @tc.desc: InitFeatureParam.
  * @tc.type: FUNC
