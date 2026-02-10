@@ -283,6 +283,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     UnRegisterResource("TextColor");
     JSRef<JSVal> args = info[0];
     if (!ParseJsColor(args, textColor, resourceObject)) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::SetTextColor ParseJsColor failed!");
         TextModel::GetInstance()->ResetTextColor();
         return;
     }
@@ -316,7 +317,7 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if(overflowValue->IsUndefined()) {
+        if (overflowValue->IsUndefined()) {
             overflow = 0;
         } else if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
             break;
@@ -522,7 +523,7 @@ void JSText::SetTextDirection(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(TEXT_DIRECTIONS.size());
     if (!isNormalValue) {
         TextModel::GetInstance()->ResetTextDirection();
         return;
@@ -814,13 +815,18 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform() && resObj) {
         RegisterResource<Color>("TextDecorationColor", resObj, result);
     }
-    auto style =
-        styleValue->IsNumber() ? styleValue->ToNumber<int32_t>() : static_cast<int32_t>(DEFAULT_TEXT_DECORATION_STYLE);
-    float lineThicknessScale = thicknessScaleValue->IsNumber() ? thicknessScaleValue->ToNumber<float>() : 1.0f;
+    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
+    if (styleValue->IsNumber()) {
+        textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    }
+    float lineThicknessScale = 1.0f;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
     lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    TextModel::GetInstance()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
+    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }
@@ -1236,11 +1242,11 @@ void JSText::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
 {
     bool state = false;
-
+    
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         state = info[0]->ToBoolean();
     }
-    
+
     TextModel::GetInstance()->SetOptimizeTrailingSpace(state);
 }
 
@@ -1409,8 +1415,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
-    JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("enableSelectedDataDetector", &JSText::SetSelectDetectEnable);
+    JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);

@@ -38,15 +38,10 @@ public:
     virtual void Create(const std::u16string& content) = 0;
     virtual void Create(const std::u16string& content, RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetFont(const Font& value) = 0;
-    virtual void ResetFont() = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
-    virtual void ResetFontSize() = 0;
     virtual void SetTextColor(const Color& value) = 0;
-    virtual void ResetTextColor() = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
-    virtual void ResetItalicFontStyle() = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
-    virtual void ResetFontWeight() = 0;
     virtual void SetVariableFontWeight(int32_t value) = 0;
     virtual void ResetVariableFontWeight() = 0;
     virtual void SetEnableVariableFontWeight(bool value) = 0;
@@ -54,7 +49,6 @@ public:
     virtual void SetEnableDeviceFontWeightCategory(bool value) = 0;
     virtual void ResetEnableDeviceFontWeightCategory() = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
-    virtual void ResetFontFamily() = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;

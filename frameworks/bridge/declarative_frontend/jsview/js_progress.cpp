@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_progress_theme.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
@@ -23,6 +24,7 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+
 
 namespace OHOS::Ace {
 
@@ -104,6 +106,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
+    JSProgressTheme::ApplyTheme(progressStyle);
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)
@@ -156,8 +159,8 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
-            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
-                                                                 : theme->GetTrackParseFailedSelectedColor();
+            colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                                 : theme->GetTrackSelectedColor();
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
                 endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
                     ? theme->GetRingProgressEndSideColor() : colorVal;
@@ -175,6 +178,7 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         if (SystemProperties::ConfigChangePerform()) {
             ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::COLOR, resObj);
         }
+
         NG::GradientColor endSideColor;
         NG::GradientColor beginSideColor;
         endSideColor.SetLinearColor(LinearColor(endColor));
@@ -221,7 +225,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         JsSetProgressStyleOptions(info);
         return;
     }
-
+    
     JsSetCommonOptions(info);
 
     switch (g_progressType) {
@@ -311,7 +315,6 @@ void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
     bool paintShadow = false;
     RefPtr<ResourceObject> shadowResObj;
     auto shadow = paramObject->GetProperty("shadow");
-
     if (shadow->IsUndefined() || shadow->IsNull()) {
         paintShadow = false;
     }
@@ -368,9 +371,9 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     if (!state) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
-        colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
-                   : (g_progressType == ProgressType::RING)  ? theme->GetRingProgressParseFailedBgColor()
-                                                             : theme->GetTrackParseFailedBgColor();
+        colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
+                   : (g_progressType == ProgressType::RING)  ? theme->GetRingProgressBgColor()
+                                                             : theme->GetTrackBgColor();
     }
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
 }
@@ -389,7 +392,6 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
         ProgressModel::GetInstance()->SetCapsuleStyle(true);
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
     ProcessCapsuleBorderWidth(paramObject);
     ProcessCapsuleBorderColor(paramObject);
 
@@ -444,6 +446,8 @@ void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
 void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     auto jsFontColor = paramObject->GetProperty("fontColor");
     Color fontColorVal;
     RefPtr<ResourceObject> fontColorResObj;
@@ -452,13 +456,15 @@ void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
         ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontColor, fontColorResObj);
     }
     if (!state) {
-        ProgressModel::GetInstance()->ResetFontColor();
-    } else {
-        ProgressModel::GetInstance()->SetFontColor(fontColorVal);
+        fontColorVal = theme->GetTextColor();
     }
+
+    ProgressModel::GetInstance()->SetFontColor(fontColorVal);
+    
     if (SystemProperties::ConfigChangePerform()) {
         ProgressModel::GetInstance()->SetCapsuleStyleFontColor(state);
     }
+
     auto textStyle = paramObject->GetProperty("font");
     if (!textStyle->IsObject()) {
         JsSetFontDefault();
@@ -567,16 +573,6 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
     }
 
     JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(param)->Unwrap<JSLinearGradient>();
-    auto proxy = param->GetLocalHandle();
-    auto vm = param->GetEcmaVM();
-    if (proxy->IsProxy(vm)) {
-        panda::Local<panda::ProxyRef> thisProxiedObj =
-            static_cast<panda::Local<panda::ProxyRef>>(proxy);
-        jsLinearGradient = static_cast<JSLinearGradient *>(
-            panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))
-                ->GetNativePointerField(vm, 0));
-    }
-
     if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {
         return false;
     }
@@ -766,6 +762,7 @@ void JSProgress::ProcessCapsuleBorderWidth(const JSRef<JSObject>& paramObject)
 
 void JSProgress::ProcessCapsuleBorderColor(const JSRef<JSObject>& paramObject)
 {
+    bool borderColorByUser = true;
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto jsBorderColor = paramObject->GetProperty("borderColor");
@@ -779,7 +776,12 @@ void JSProgress::ProcessCapsuleBorderColor(const JSRef<JSObject>& paramObject)
     if (state) {
         ProgressModel::GetInstance()->SetBorderColor(colorVal);
     } else {
-        ProgressModel::GetInstance()->ResetBorderColor();
+        colorVal = theme->GetBorderColor();
+        ProgressModel::GetInstance()->SetBorderColor(colorVal);
+        borderColorByUser = false;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ProgressModel::GetInstance()->SetBorderColorSetByUser(borderColorByUser);
     }
 }
 
