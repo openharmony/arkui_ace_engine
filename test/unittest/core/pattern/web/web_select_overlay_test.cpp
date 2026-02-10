@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3185,7 +3186,11 @@ HWTEST_F(WebSelectOverlayTest, IsShowMenuOfAutoFill_001, TestSize.Level1)
     EXPECT_EQ(isShow, true);
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
-    EXPECT_EQ(isShow, false);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(isShow, false);
+    } else {
+        EXPECT_EQ(isShow, true);
+    }
 #endif
 }
 
@@ -5491,10 +5496,18 @@ HWTEST_F(WebSelectOverlayTest, OnUpdateSelectOverlayInfo_001, TestSize.Level1)
     overlay.webSelectInfo_.isHandleLineShow = false;
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    } else {
+        EXPECT_EQ(selectInfo.isHandleLineShow, true);
+    }
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    } else {
+        EXPECT_EQ(selectInfo.isHandleLineShow, true);
+    }
 }
 
 /**

@@ -41,6 +41,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "arkweb_utils.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -437,6 +438,9 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardHide, TestSize.Level1)
 HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardShow, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        GTEST_SKIP();
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -1178,7 +1182,11 @@ HWTEST_F(WebPatternWebTest, HandleTouchUp_002, TestSize.Level1)
     info2.changedTouches_.push_back(touchInfo2);
     webPattern->isNeedInterceptedTouchEvent_ = false;
     webPattern->HandleTouchUp(info, true);
-    EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
+    } else {
+        EXPECT_NE(webPattern->showMagnifierFingerId_, -1);
+    }
 #endif
 }
 
@@ -1306,7 +1314,11 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel_002, TestSize.Level1)
     info2.changedTouches_.push_back(touchInfo2);
     webPattern->isNeedInterceptedTouchEvent_ = false;
     webPattern->HandleTouchCancel(info);
-    EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
+    } else {
+        EXPECT_NE(webPattern->showMagnifierFingerId_, -1);
+    }
 #endif
 }
 
