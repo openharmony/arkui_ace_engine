@@ -18,9 +18,6 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
-namespace OHOS::Ace {
-class Color;
-}
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CounterLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(CounterLayoutAlgorithm, LayoutAlgorithm);
@@ -34,9 +31,6 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(CounterLayoutAlgorithm);
-
-private:
-    void UpdateTextColor(const RefPtr<FrameNode>& frameNode, const Color& value);
 };
 } // namespace OHOS::Ace::NG
 

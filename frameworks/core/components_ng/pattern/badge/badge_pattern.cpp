@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,7 +58,9 @@ void BadgePattern::OnModifyDone()
     auto badgeValue = layoutProperty->GetBadgeValue();
     bool badgeVisible = false;
     if (badgeCount.has_value()) {
+        int32_t count;
         if (badgeCount.value() > 0) {
+            count = badgeCount.value();
             const int32_t maxCountNum = 99;
             auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
             auto maxCount = badgeMaxCount;
@@ -68,7 +72,12 @@ void BadgePattern::OnModifyDone()
             TAG_LOGD(AceLogTag::ACE_BADGE, "BadgeContent: %{public}s", content.c_str());
             badgeVisible = true;
         } else {
+            count = 0;
             textLayoutProperty->ResetContent();
+        }
+        if (count_ != count) {
+            count_ = count;
+            ReportComponentChangeEvent("onCountChange");
         }
     }
 
@@ -83,6 +92,10 @@ void BadgePattern::OnModifyDone()
             textLayoutProperty->UpdateContent(u" ");
         }
         badgeVisible = true;
+        if (value_ != badgeValue.value()) {
+            value_ = badgeValue.value();
+            ReportComponentChangeEvent("onValueChange");
+        }
     }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -110,6 +123,7 @@ void BadgePattern::OnModifyDone()
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(width);
     textLayoutProperty->UpdateBorderWidth(borderWidth);
+
     auto badgeColor = layoutProperty->GetBadgeColorValue(badgeTheme->GetBadgeColor());
     auto textRenderContext = lastFrameNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
@@ -306,6 +320,18 @@ void BadgePattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
     if (badgeFontSize.has_value() && badgeFontSize.value() != Dimension(0.0, badgeFontSize.value().Unit())) {
         json->Put("BadgeFontSize", badgeFontSize.value().ToString().c_str());
     }
+}
+
+void BadgePattern::ReportComponentChangeEvent(const std::string& event)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto value = InspectorJsonUtil::Create();
+    value->Put("Badge", event.data());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(), "event", value,
+        ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 void BadgePattern::UpdateBadgeValue(const std::string& badgeValue, bool isFirstLoad)
