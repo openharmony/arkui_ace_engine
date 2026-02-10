@@ -1692,18 +1692,9 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
-bool FrameNode::CheckAncestorPageShow()
-{
-    auto pageNode = GetPageNode();
-    if (!pageNode) {
-        return true;
-    }
-    return pageNode->GetPattern<PagePattern>()->IsOnShow();
-}
-
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive() || !CheckAncestorPageShow()) {
+    if (!IsActive()) {
         return;
     }
     if (eventHub_ && (eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
