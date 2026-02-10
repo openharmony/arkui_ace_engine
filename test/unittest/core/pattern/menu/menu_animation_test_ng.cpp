@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -612,7 +612,6 @@ HWTEST_F(MenuAnimationTestNg, AnimationScale001, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
 
     // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
@@ -663,7 +662,6 @@ HWTEST_F(MenuAnimationTestNg, AnimationScale002, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
 
     // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
