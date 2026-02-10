@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "security_component_method_modifier_test.h"
 
 using namespace testing;

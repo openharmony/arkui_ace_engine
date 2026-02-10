@@ -163,36 +163,6 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_String_PlaybackSpeed, d
         2.0
     },
     {
-        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_50_X",
-        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_50_X),
-        0.5
-    },
-    {
-        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_50_X",
-        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_50_X),
-        1.5
-    },
-    {
-        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_3_00_X",
-        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            ARK_PLAYBACK_SPEED_SPEED_FORWARD_3_00_X),
-        3.0
-    },
-    {
-        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_25_X",
-        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_25_X),
-        0.25
-    },
-    {
-        "ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_125_X",
-        Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_PlaybackSpeed>(
-            ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_125_X),
-        0.125
-    },
-    {
         "3.5",
         Converter::ArkUnion<Opt_Union_F64_String_PlaybackSpeed, Ark_String>("3.5"),
         3.5
@@ -969,9 +939,11 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onError, frameNode->GetId());
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnError(node_, &optCallback);
+    auto voidCallback = Converter::ArkValue<VoidCallback>(onError, frameNode->GetId());
+    auto innerUnion = Converter::ArkUnion<Ark_Union_VoidCallback_ErrorCallback_BusinessErrorInterface_Void,
+        VoidCallback>(voidCallback);
+    auto optUnion = Converter::ArkValue<Opt_Union_VoidCallback_ErrorCallback_BusinessErrorInterface_Void>(innerUnion);
+    modifier_->setOnError(node_, &optUnion);
 
     EXPECT_FALSE(checkEvent);
     eventHub->FireErrorEvent();

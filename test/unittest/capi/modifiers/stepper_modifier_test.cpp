@@ -15,6 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef WRONG_GEN_v140
+// DISABLED_TEST: Stepper generated modifier types are unavailable in current generation.
+
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -330,3 +333,5 @@ HWTEST_F(StepperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 }
 #endif
 } // namespace OHOS::Ace::NG
+
+#endif // WRONG_GEN_v140

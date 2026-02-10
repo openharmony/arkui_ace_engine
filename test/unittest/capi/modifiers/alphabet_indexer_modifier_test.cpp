@@ -1283,7 +1283,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 
     static bool wasInvoke = false;
     auto callback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Int32 index,
-        Callback_Array_String_Void cbReturn) {
+        synthetic_Callback_Array_String_Void cbReturn) {
         wasInvoke = true;
         EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
         EXPECT_EQ(Converter::Convert<int32_t>(index), expectedIndex);

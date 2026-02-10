@@ -553,16 +553,17 @@ HWTEST_F(GridRowModifierTest, DISABLED_setOnBreakpointChangeTest, TestSize.Level
         };
     };
 
-    Callback_String_Void callBackValue = {
+    synthetic_Callback_String_Void callBackValue = {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
             .release = nullptr,
         },
-        .call = onBreakpointChange
+        .call = onBreakpointChange,
+        .callSync = nullptr
     };
 
-    auto optCallBackValue = Converter::ArkValue<Opt_Callback_String_Void>(callBackValue);
+    auto optCallBackValue = Converter::ArkValue<Opt_synthetic_Callback_String_Void>(callBackValue);
     modifier_->setOnBreakpointChange(node_, &optCallBackValue);
 
     EXPECT_FALSE(checkEvent.has_value());

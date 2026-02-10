@@ -48,8 +48,19 @@ std::vector<double> NUMBER_TEST_PLAN = {
 } // namespace
 
 class Matrix2DAccessorTest
-    : public AccessorTestBase0<GENERATED_ArkUIMatrix2DAccessor,
-    &GENERATED_ArkUIAccessors::getMatrix2DAccessor, Matrix2DPeer> {};
+    : public AccessorTestBaseParent<GENERATED_ArkUIMatrix2DAccessor,
+        &GENERATED_ArkUIAccessors::getMatrix2DAccessor, Matrix2DPeer> {
+public:
+    void SetUp() override
+    {
+        ASSERT_NE(this->accessor_->construct, nullptr);
+        Opt_LengthMetricsUnit unit = Converter::ArkValue<Opt_LengthMetricsUnit>(Ark_Empty());
+        this->peer_ = static_cast<Matrix2DPeer*>(this->accessor_->construct(&unit));
+        ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<GENERATED_ArkUIMatrix2DAccessor,
+            &GENERATED_ArkUIAccessors::getMatrix2DAccessor, Matrix2DPeer>::SetUp();
+    }
+};
 
 /**
  * @tc.name: identityTest

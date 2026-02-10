@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include "arkoala_api_generated.h"
+#include "../capi_gen140_compat.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

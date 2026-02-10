@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "../capi_gen140_compat.h"
 
 using namespace testing;
 using namespace testing::ext;

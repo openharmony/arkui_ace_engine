@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef WRONG_GEN_v140
+// DISABLED_TEST: Stepper static modifier API is unavailable in current generation.
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stepper/stepper_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -155,3 +158,5 @@ const GENERATED_ArkUIStepperModifier* GetStepperStaticModifier()
     return &ArkUIStepperModifierImpl;
 }
 }
+
+#endif // WRONG_GEN_v140

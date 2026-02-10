@@ -53,6 +53,14 @@ public:
             AddResource(strid, res);
         }
     }
+
+    void SetUp() override
+    {
+        if (modifier_ == nullptr) {
+            GTEST_SKIP() << "Hyperlink modifier not available (dynamic module 'hyperlink' not loaded)";
+        }
+        ModifierTestBase::SetUp();
+    }
 };
 
 /*
@@ -97,8 +105,8 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressValidValues, TestS
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ADDRESS_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setHyperlinkOptions, attribute: address";
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: address";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
@@ -134,8 +142,8 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressInvalidValues, Tes
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ADDRESS_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ADDRESS_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setHyperlinkOptions, attribute: address";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ADDRESS_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: address";
     };
 
     // Check invalid union
@@ -168,8 +176,8 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentValidValues, TestS
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setHyperlinkOptions, attribute: content";
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: content";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
@@ -208,8 +216,8 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentInvalidValues, Tes
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, std::get<2>(Fixtures::testFixtureStringNoEmptyValidValues[0])) <<
-            "Input value is: " << input << ", method: setHyperlinkOptions, attribute: content";
+        EXPECT_EQ(resultStr, std::get<2>(Fixtures::testFixtureStringNoEmptyValidValues[0]))
+            << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: content";
     };
 
     // Check invalid union
@@ -239,15 +247,15 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Level1)
 {
-    Ark_Union_Color_I32_String_Resource initValueColor;
+    Opt_Union_Color_I32_String_Resource initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Color>(
+    initValueColor = ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Color>(
         std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](const std::string& input,
-                          const Ark_Union_Color_I32_String_Resource& value, const std::string& expectedStr) {
-        Ark_Union_Color_I32_String_Resource inputValueColor = initValueColor;
+                          const Opt_Union_Color_I32_String_Resource& value, const std::string& expectedStr) {
+        Opt_Union_Color_I32_String_Resource inputValueColor = initValueColor;
 
         inputValueColor = value;
         auto optInputValueColor = Converter::ArkValue<Opt_Union_Color_I32_String_Resource>(inputValueColor);
@@ -258,18 +266,18 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Color>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Color>(value), expected);
     }
 #ifdef WRONG_FIX
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Int32>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Int32>(value), expected);
     }
 #endif
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Resource>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_String>(value), expected);
+        checkValue(input, ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_String>(value), expected);
     }
 }
 
@@ -280,15 +288,15 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.
  */
 HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Color_I32_String_Resource initValueColor;
+    Opt_Union_Color_I32_String_Resource initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Color>(
+    initValueColor = ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Color>(
         std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
-                          const std::string& input, const Ark_Union_Color_I32_String_Resource& value) {
-        Ark_Union_Color_I32_String_Resource inputValueColor = initValueColor;
+                          const std::string& input, const Opt_Union_Color_I32_String_Resource& value) {
+        Opt_Union_Color_I32_String_Resource inputValueColor = initValueColor;
 
         auto optInputValueColor = Converter::ArkValue<Opt_Union_Color_I32_String_Resource>(inputValueColor);
         modifier_->setColor(node_, &optInputValueColor);
@@ -297,17 +305,17 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSiz
         modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Color_I32_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Color_I32_String_Resource, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG

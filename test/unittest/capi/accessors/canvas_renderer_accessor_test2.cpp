@@ -142,11 +142,11 @@ std::vector<std::tuple<Ark_Int32, Color>> STYLE_NUMBER_TEST_PLAN = {
     { Converter::ArkValue<Ark_Int32>(-1), Color() },
 };
 std::vector<std::tuple<Ark_Color, Color>> STYLE_COLOR_TEST_PLAN = {
-    { Ark_Color::ARK_COLOR_RED, Color::RED },
-    { Ark_Color::ARK_COLOR_WHITE, Color::WHITE },
-    { Ark_Color::ARK_COLOR_TRANSPARENT, Color::TRANSPARENT },
-    { Ark_Color::ARK_COLOR_BLACK, Color::BLACK },
-    { Ark_Color::ARK_COLOR_BLUE, Color::BLUE },
+    { ARK_COLOR_RED, Color::RED },
+    { ARK_COLOR_WHITE, Color::WHITE },
+    { ARK_COLOR_TRANSPARENT, Color::TRANSPARENT },
+    { ARK_COLOR_BLACK, Color::BLACK },
+    { ARK_COLOR_BLUE, Color::BLUE },
 };
 class MockPixelMap : public PixelMap {
 public:

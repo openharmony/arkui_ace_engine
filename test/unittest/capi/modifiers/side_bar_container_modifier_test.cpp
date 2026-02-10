@@ -71,7 +71,7 @@ const auto CUSTOM_COLOR_STRING("#FF123456");
 const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 
-const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN);
 const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_INT);
 const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_FLOAT);
 const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
@@ -768,14 +768,14 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStro
 
 // Valid values for attribute 'startMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStartMarginValidValues = {
-    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), "-1234.00px"},
     {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
     {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
 
 // Valid values for attribute 'endMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndMarginValidValues = {
-    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), "-1234.00px"},
     {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
     {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };

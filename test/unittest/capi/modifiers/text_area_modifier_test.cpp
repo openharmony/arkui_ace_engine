@@ -879,6 +879,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest2, TestSize.Level1)
     ASSERT_NE(modifier_->setMaxLines, nullptr);
     auto maxLines = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setMaxLines(node_, &maxLines, nullptr);
+    ///
 
     auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
@@ -1216,7 +1217,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnCopyTest, TestSize.Level1)
             auto textString = Converter::Convert<std::u16string>(value);
             g_eventTestString = textString;
         };
-    auto func = Converter::ArkCallback<Opt_Callback_String_Void>(onCopy);
+    auto func = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onCopy);
     modifier_->setOnCopy(node_, &func);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_eventTestString, CHECK_TEXT);
@@ -1240,7 +1241,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnCutTest, TestSize.Level1)
         [](Ark_Int32 nodeId, Ark_String value) {
             g_eventTestString = Converter::Convert<std::u16string>(value);
         };
-    auto func = Converter::ArkCallback<Opt_Callback_String_Void>(onCut);
+    auto func = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onCut);
     modifier_->setOnCut(node_, &func);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_eventTestString, CHECK_TEXT);
@@ -1328,7 +1329,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTestValidValues, TestSize.
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    auto optCallbackValue = Converter::ArkCallback<Opt_Callback_String_Void>(onErrorChange, frameNode->GetId());
+    auto optCallbackValue = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onErrorChange, frameNode->GetId());
     Converter::ConvContext ctx;
     auto sendResource = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT, &ctx);
     auto sendResource2 = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT2, &ctx);
@@ -1363,7 +1364,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>();
+    auto optCallbackValue = Converter::ArkValue<Opt_synthetic_Callback_String_Void>();
     Converter::ConvContext ctx;
     auto sendResource = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT, &ctx);
     auto sendResource2 = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT2, &ctx);
@@ -1874,12 +1875,16 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
             actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
             CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         };
-    auto customBuilder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(
-        Converter::ArkCallback<Opt_CustomNodeBuilder>(func).value);
+    auto customBuilder = Converter::ArkCallback<Opt_CustomNodeBuilder>(func);
+    Opt_Union_CustomBuilder_ComponentContentBase builder; 
+    Ark_Union_CustomBuilder_ComponentContentBase unionData;
+    unionData.selector = 0;
+    unionData.value0 = customBuilder.value;
+    builder.value = unionData;
     KeyboardOptions keyboardOptions = { .supportAvoidance = true };
     auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 
-    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
+    modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_EQ(actualParentNode, expectedParentNode);
@@ -1887,7 +1892,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
 
     keyboardOptions = { .supportAvoidance = false };
     optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
-    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
+    modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
     ASSERT_EQ(actualParentNode, expectedParentNode);
     ASSERT_FALSE(pattern->GetCustomKeyboardOption());
 }

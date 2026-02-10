@@ -93,9 +93,9 @@ HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 HWTEST_F(TextEditControllerExAccessorTest, SetCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setCaretOffset, nullptr);
-    auto offset = Converter::ArkValue<Ark_Number>(OFFSET);
+    auto offset = Converter::ArkValue<Ark_Int32>(OFFSET);
     EXPECT_CALL(*peer_, SetCaretOffset(OFFSET)).Times(1).WillOnce(Return(true));
-    auto caretOffset = accessor_->setCaretOffset(peer_, &offset);
+    auto caretOffset = accessor_->setCaretOffset(peer_, offset);
     auto checkValueOpt = Converter::OptConvert<bool>(caretOffset);
     ASSERT_TRUE(checkValueOpt.has_value());
     EXPECT_TRUE(*checkValueOpt);

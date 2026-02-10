@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "security_component_method_modifier_test.h"
 
 using namespace testing;

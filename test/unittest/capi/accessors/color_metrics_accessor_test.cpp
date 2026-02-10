@@ -45,7 +45,7 @@ HWTEST_F(ColorMetricsAccessorTest, NumericTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Number>(0xffffffff), 0xffffffff }, // Test max value
         { Converter::ArkValue<Ark_Number>(0x00000000), 0xff000000 }  // Test min value
     };
-    Ark_ColorMetrics resultPeer;
+    Ark_ColorMetricsExt resultPeer;
     for (auto [inputValue, expectedValue]: testPlan) {
         resultPeer = accessor_->numeric(&inputValue);
         EXPECT_EQ(resultPeer->colorValue.value, expectedValue) << "Passed value is: " << expectedValue;
@@ -75,7 +75,7 @@ HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Number>(0.f), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0x00000000 },
     };
-    Ark_ColorMetrics resultPeer;
+    Ark_ColorMetricsExt resultPeer;
     for (auto [inputAlpha, inputRed, inputGreen, inputBlue, expectedValue]: testPlan) {
         resultPeer = accessor_->rgba(&inputRed, &inputGreen, &inputBlue, &inputAlpha);
         EXPECT_EQ(resultPeer->colorValue.value, expectedValue) <<
@@ -123,8 +123,8 @@ HWTEST_F(ColorMetricsAccessorTest, BlendColorTestValidValues, TestSize.Level1)
         { 0x00000000, 0xffffffff }
     };
     peer_->colorValue.value = 0x00000000; // Test blend with a full transparent color
-    Ark_ColorMetrics overlayPeer = new ColorMetricsPeer();
-    Ark_ColorMetrics resultPeer;
+    Ark_ColorMetricsExt overlayPeer = new ColorMetricsPeer();
+    Ark_ColorMetricsExt resultPeer;
     for (auto [inputValue, expectedValue]: testPlan) {
         overlayPeer->colorValue.value = inputValue;
         resultPeer = accessor_->blendColor(peer_, overlayPeer);

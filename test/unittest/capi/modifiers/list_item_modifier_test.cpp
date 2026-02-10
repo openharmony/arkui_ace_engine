@@ -232,7 +232,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
     Ark_SwipeActionOptions  options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
         .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(Ark_Empty()),
+        .onOffsetChange = Converter::ArkValue<Opt_synthetic_Callback_F64_Void>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(V2::SwipeEdgeEffect::None)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
@@ -278,21 +278,21 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
 
     struct CheckEvent {
         int32_t resourceId;
-        double offset;
+        int32_t offset;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto checkCallback =
+    void (*checkCallback)(const Ark_Int32, const Ark_Float64) =
         [](const Ark_Int32 resourceId, const Ark_Float64 offset) {
             checkEvent = {
                 .resourceId = resourceId,
-                .offset = Converter::Convert<double>(offset)
+                .offset = Converter::Convert<int32_t>(offset)
             };
         };
 
     Ark_SwipeActionOptions arkOptions = {
-        .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(
-            Converter::ArkValue<Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1)),
+        .onOffsetChange = Converter::ArkValue<Opt_synthetic_Callback_F64_Void>(
+            Converter::ArkValue<synthetic_Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1)),
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -305,7 +305,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
     eventHub->FireOffsetChangeEvent(offsetArg);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().resourceId, TEST_RESOURCE_ID_1);
-    EXPECT_FLOAT_EQ(checkEvent.value().offset, offsetArg);
+    EXPECT_EQ(checkEvent.value().offset, offsetArg);
 }
 
 /**

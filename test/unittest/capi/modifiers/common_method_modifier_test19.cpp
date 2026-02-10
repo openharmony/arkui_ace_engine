@@ -623,7 +623,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu0Test, TestSize.Level1)
     int callsCount = 0;
     CustomNodeBuilderTestHelper<CommonMethodModifierTest19> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomBuilder,
+    auto unionCustomNodeBuilderValue = Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomNodeBuilder,
         CustomNodeBuilder>(builder);
 
     modifier_->setBindMenu0(node_, &unionCustomNodeBuilderValue, &optOptions);
@@ -649,10 +649,10 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu1Test, TestSize.Level1)
     CustomNodeBuilderTestHelper<CommonMethodModifierTest19> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     auto unionCustomNodeBuilderValue =
-        Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomBuilder, CustomNodeBuilder>(builder);
+        Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomNodeBuilder, CustomNodeBuilder>(builder);
 
-    auto show = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
-    modifier_->setBindMenu1(node_, &show, &unionCustomNodeBuilderValue, &optOptions);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
+    modifier_->setBindMenu1(node_, &arkShow, &unionCustomNodeBuilderValue, &optOptions);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
