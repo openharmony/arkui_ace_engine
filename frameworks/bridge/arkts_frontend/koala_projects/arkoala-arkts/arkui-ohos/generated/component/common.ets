@@ -7736,7 +7736,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'width' can only be set when creating a custom component.')
+                throw new Error("Common method 'width' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method width')
@@ -7748,7 +7748,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'height' can only be set when creating a custom component.')
+                throw new Error("Common method 'height' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method height')
@@ -7760,7 +7760,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'drawModifier' can only be set when creating a custom component.')
+                throw new Error("Common method 'drawModifier' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method drawModifier')
@@ -7772,7 +7772,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'responseRegion' can only be set when creating a custom component.')
+                throw new Error("Common method 'responseRegion' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method responseRegion')
@@ -7784,7 +7784,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'mouseResponseRegion' can only be set when creating a custom component.')
+                throw new Error("Common method 'mouseResponseRegion' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method mouseResponseRegion')
@@ -7796,7 +7796,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'responseRegionList' can only be set when creating a custom component.')
+                throw new Error("Common method 'responseRegionList' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method responseRegionList')
@@ -7808,7 +7808,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'size' can only be set when creating a custom component.')
+                throw new Error("Common method 'size' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method size')
@@ -7820,7 +7820,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'constraintSize' can only be set when creating a custom component.')
+                throw new Error("Common method 'constraintSize' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method constraintSize')
@@ -7832,7 +7832,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'hitTestBehavior' can only be set when creating a custom component.')
+                throw new Error("Common method 'hitTestBehavior' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method hitTestBehavior')
@@ -7844,7 +7844,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onChildTouchTest' can only be set when creating a custom component.')
+                throw new Error("Common method 'onChildTouchTest' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onChildTouchTest')
@@ -7856,7 +7856,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'layoutWeight' can only be set when creating a custom component.')
+                throw new Error("Common method 'layoutWeight' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method layoutWeight')
@@ -7868,7 +7868,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'chainWeight' can only be set when creating a custom component.')
+                throw new Error("Common method 'chainWeight' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method chainWeight')
@@ -7880,7 +7880,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'padding' can only be set when creating a custom component.')
+                throw new Error("Common method 'padding' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method padding')
@@ -7892,7 +7892,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'safeAreaPadding' can only be set when creating a custom component.')
+                throw new Error("Common method 'safeAreaPadding' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method safeAreaPadding')
@@ -7904,7 +7904,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'margin' can only be set when creating a custom component.')
+                throw new Error("Common method 'margin' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method margin')
@@ -7916,7 +7916,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundColor' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundColor' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundColor')
@@ -7928,7 +7928,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'pixelRound' can only be set when creating a custom component.')
+                throw new Error("Common method 'pixelRound' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method pixelRound')
@@ -7940,7 +7940,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundImage' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundImage' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundImage')
@@ -7952,7 +7952,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundImageSize' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundImageSize' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundImageSize')
@@ -7964,7 +7964,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundImagePosition' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundImagePosition' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundImagePosition')
@@ -7976,7 +7976,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundImageResizable' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundImageResizable' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundImageResizable')
@@ -7988,7 +7988,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'foregroundEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'foregroundEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method foregroundEffect')
@@ -8000,7 +8000,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'visualEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'visualEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method visualEffect')
@@ -8012,7 +8012,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundFilter' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundFilter' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundFilter')
@@ -8024,7 +8024,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'foregroundFilter' can only be set when creating a custom component.')
+                throw new Error("Common method 'foregroundFilter' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method foregroundFilter')
@@ -8036,7 +8036,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'compositingFilter' can only be set when creating a custom component.')
+                throw new Error("Common method 'compositingFilter' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method compositingFilter')
@@ -8048,7 +8048,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'materialFilter' can only be set when creating a custom component.')
+                throw new Error("Common method 'materialFilter' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method materialFilter')
@@ -8060,7 +8060,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'opacity' can only be set when creating a custom component.')
+                throw new Error("Common method 'opacity' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method opacity')
@@ -8072,7 +8072,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'border' can only be set when creating a custom component.')
+                throw new Error("Common method 'border' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method border')
@@ -8084,7 +8084,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'borderStyle' can only be set when creating a custom component.')
+                throw new Error("Common method 'borderStyle' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method borderStyle')
@@ -8096,7 +8096,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'borderWidth' can only be set when creating a custom component.')
+                throw new Error("Common method 'borderWidth' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method borderWidth')
@@ -8108,7 +8108,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'borderColor' can only be set when creating a custom component.')
+                throw new Error("Common method 'borderColor' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method borderColor')
@@ -8120,7 +8120,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'borderImage' can only be set when creating a custom component.')
+                throw new Error("Common method 'borderImage' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method borderImage')
@@ -8132,7 +8132,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'outline' can only be set when creating a custom component.')
+                throw new Error("Common method 'outline' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method outline')
@@ -8144,7 +8144,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'outlineStyle' can only be set when creating a custom component.')
+                throw new Error("Common method 'outlineStyle' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method outlineStyle')
@@ -8156,7 +8156,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'outlineWidth' can only be set when creating a custom component.')
+                throw new Error("Common method 'outlineWidth' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method outlineWidth')
@@ -8168,7 +8168,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'outlineColor' can only be set when creating a custom component.')
+                throw new Error("Common method 'outlineColor' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method outlineColor')
@@ -8180,7 +8180,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'outlineRadius' can only be set when creating a custom component.')
+                throw new Error("Common method 'outlineRadius' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method outlineRadius')
@@ -8192,7 +8192,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'foregroundColor' can only be set when creating a custom component.')
+                throw new Error("Common method 'foregroundColor' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method foregroundColor')
@@ -8204,7 +8204,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onClick' can only be set when creating a custom component.')
+                throw new Error("Common method 'onClick' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onClick')
@@ -8216,7 +8216,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onHover' can only be set when creating a custom component.')
+                throw new Error("Common method 'onHover' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onHover')
@@ -8228,7 +8228,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onHoverMove' can only be set when creating a custom component.')
+                throw new Error("Common method 'onHoverMove' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onHoverMove')
@@ -8240,7 +8240,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAccessibilityHover' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAccessibilityHover' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAccessibilityHover')
@@ -8252,7 +8252,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAccessibilityHoverTransparent' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAccessibilityHoverTransparent' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAccessibilityHoverTransparent')
@@ -8264,7 +8264,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'hoverEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'hoverEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method hoverEffect')
@@ -8276,7 +8276,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onMouse' can only be set when creating a custom component.')
+                throw new Error("Common method 'onMouse' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onMouse')
@@ -8288,7 +8288,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onTouch' can only be set when creating a custom component.')
+                throw new Error("Common method 'onTouch' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onTouch')
@@ -8300,7 +8300,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onKeyEvent' can only be set when creating a custom component.')
+                throw new Error("Common method 'onKeyEvent' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onKeyEvent')
@@ -8312,7 +8312,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDigitalCrown' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDigitalCrown' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDigitalCrown')
@@ -8324,7 +8324,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onKeyPreIme' can only be set when creating a custom component.')
+                throw new Error("Common method 'onKeyPreIme' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onKeyPreIme')
@@ -8336,7 +8336,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onKeyEventDispatch' can only be set when creating a custom component.')
+                throw new Error("Common method 'onKeyEventDispatch' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onKeyEventDispatch')
@@ -8348,7 +8348,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onFocusAxisEvent' can only be set when creating a custom component.')
+                throw new Error("Common method 'onFocusAxisEvent' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onFocusAxisEvent')
@@ -8360,7 +8360,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAxisEvent' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAxisEvent' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAxisEvent')
@@ -8372,7 +8372,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'focusable' can only be set when creating a custom component.')
+                throw new Error("Common method 'focusable' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method focusable')
@@ -8384,7 +8384,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'nextFocus' can only be set when creating a custom component.')
+                throw new Error("Common method 'nextFocus' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method nextFocus')
@@ -8396,7 +8396,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'tabStop' can only be set when creating a custom component.')
+                throw new Error("Common method 'tabStop' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method tabStop')
@@ -8408,7 +8408,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onFocus' can only be set when creating a custom component.')
+                throw new Error("Common method 'onFocus' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onFocus')
@@ -8420,7 +8420,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onBlur' can only be set when creating a custom component.')
+                throw new Error("Common method 'onBlur' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onBlur')
@@ -8432,7 +8432,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'tabIndex' can only be set when creating a custom component.')
+                throw new Error("Common method 'tabIndex' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method tabIndex')
@@ -8444,7 +8444,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'defaultFocus' can only be set when creating a custom component.')
+                throw new Error("Common method 'defaultFocus' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method defaultFocus')
@@ -8456,7 +8456,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'groupDefaultFocus' can only be set when creating a custom component.')
+                throw new Error("Common method 'groupDefaultFocus' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method groupDefaultFocus')
@@ -8468,7 +8468,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'focusOnTouch' can only be set when creating a custom component.')
+                throw new Error("Common method 'focusOnTouch' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method focusOnTouch')
@@ -8480,7 +8480,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'focusBox' can only be set when creating a custom component.')
+                throw new Error("Common method 'focusBox' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method focusBox')
@@ -8504,7 +8504,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'animation' can only be set when creating a custom component.')
+                throw new Error("Common method 'animation' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method animation')
@@ -8516,7 +8516,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'transition' can only be set when creating a custom component.')
+                throw new Error("Common method 'transition' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method transition')
@@ -8528,7 +8528,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'motionBlur' can only be set when creating a custom component.')
+                throw new Error("Common method 'motionBlur' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method motionBlur')
@@ -8540,7 +8540,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'brightness' can only be set when creating a custom component.')
+                throw new Error("Common method 'brightness' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method brightness')
@@ -8552,7 +8552,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'contrast' can only be set when creating a custom component.')
+                throw new Error("Common method 'contrast' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method contrast')
@@ -8564,7 +8564,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'grayscale' can only be set when creating a custom component.')
+                throw new Error("Common method 'grayscale' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method grayscale')
@@ -8576,7 +8576,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'colorBlend' can only be set when creating a custom component.')
+                throw new Error("Common method 'colorBlend' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method colorBlend')
@@ -8588,7 +8588,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'saturate' can only be set when creating a custom component.')
+                throw new Error("Common method 'saturate' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method saturate')
@@ -8600,7 +8600,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'sepia' can only be set when creating a custom component.')
+                throw new Error("Common method 'sepia' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method sepia')
@@ -8612,7 +8612,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'invert' can only be set when creating a custom component.')
+                throw new Error("Common method 'invert' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method invert')
@@ -8624,7 +8624,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'hueRotate' can only be set when creating a custom component.')
+                throw new Error("Common method 'hueRotate' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method hueRotate')
@@ -8636,7 +8636,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'useShadowBatching' can only be set when creating a custom component.')
+                throw new Error("Common method 'useShadowBatching' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method useShadowBatching')
@@ -8648,7 +8648,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'useEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'useEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method useEffect')
@@ -8660,7 +8660,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'useUnionEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'useUnionEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method useUnionEffect')
@@ -8672,7 +8672,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'renderGroup' can only be set when creating a custom component.')
+                throw new Error("Common method 'renderGroup' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method renderGroup')
@@ -8684,7 +8684,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'excludeFromRenderGroup' can only be set when creating a custom component.')
+                throw new Error("Common method 'excludeFromRenderGroup' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method excludeFromRenderGroup')
@@ -8696,7 +8696,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'freeze' can only be set when creating a custom component.')
+                throw new Error("Common method 'freeze' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method freeze')
@@ -8708,7 +8708,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'translate' can only be set when creating a custom component.')
+                throw new Error("Common method 'translate' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method translate')
@@ -8720,7 +8720,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'scale' can only be set when creating a custom component.')
+                throw new Error("Common method 'scale' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method scale')
@@ -8732,7 +8732,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'rotate' can only be set when creating a custom component.')
+                throw new Error("Common method 'rotate' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method rotate')
@@ -8744,7 +8744,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'transform' can only be set when creating a custom component.')
+                throw new Error("Common method 'transform' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method transform')
@@ -8756,7 +8756,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'transform3D' can only be set when creating a custom component.')
+                throw new Error("Common method 'transform3D' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method transform3D')
@@ -8768,7 +8768,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAppear' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAppear' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAppear')
@@ -8780,7 +8780,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDisAppear' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDisAppear' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDisAppear')
@@ -8792,7 +8792,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAttach' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAttach' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAttach')
@@ -8804,7 +8804,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDetach' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDetach' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDetach')
@@ -8816,7 +8816,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAreaChange' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAreaChange')
@@ -8828,7 +8828,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'visibility' can only be set when creating a custom component.')
+                throw new Error("Common method 'visibility' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method visibility')
@@ -8840,7 +8840,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'flexGrow' can only be set when creating a custom component.')
+                throw new Error("Common method 'flexGrow' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method flexGrow')
@@ -8852,7 +8852,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'flexShrink' can only be set when creating a custom component.')
+                throw new Error("Common method 'flexShrink' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method flexShrink')
@@ -8864,7 +8864,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'flexBasis' can only be set when creating a custom component.')
+                throw new Error("Common method 'flexBasis' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method flexBasis')
@@ -8876,7 +8876,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'alignSelf' can only be set when creating a custom component.')
+                throw new Error("Common method 'alignSelf' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method alignSelf')
@@ -8888,7 +8888,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'layoutGravity' can only be set when creating a custom component.')
+                throw new Error("Common method 'layoutGravity' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method layoutGravity')
@@ -8900,7 +8900,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'displayPriority' can only be set when creating a custom component.')
+                throw new Error("Common method 'displayPriority' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method displayPriority')
@@ -8912,7 +8912,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'zIndex' can only be set when creating a custom component.')
+                throw new Error("Common method 'zIndex' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method zIndex')
@@ -8924,7 +8924,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'direction' can only be set when creating a custom component.')
+                throw new Error("Common method 'direction' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method direction')
@@ -8936,7 +8936,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'align' can only be set when creating a custom component.')
+                throw new Error("Common method 'align' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method align')
@@ -8948,7 +8948,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'position' can only be set when creating a custom component.')
+                throw new Error("Common method 'position' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method position')
@@ -8960,7 +8960,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'markAnchor' can only be set when creating a custom component.')
+                throw new Error("Common method 'markAnchor' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method markAnchor')
@@ -8972,7 +8972,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'offset' can only be set when creating a custom component.')
+                throw new Error("Common method 'offset' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method offset')
@@ -8984,7 +8984,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'enabled' can only be set when creating a custom component.')
+                throw new Error("Common method 'enabled' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method enabled')
@@ -8996,7 +8996,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'alignRules' can only be set when creating a custom component.')
+                throw new Error("Common method 'alignRules' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method alignRules')
@@ -9008,7 +9008,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'aspectRatio' can only be set when creating a custom component.')
+                throw new Error("Common method 'aspectRatio' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method aspectRatio')
@@ -9020,7 +9020,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'clickEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'clickEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method clickEffect')
@@ -9032,7 +9032,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'enableClickSoundEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'enableClickSoundEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method enableClickSoundEffect')
@@ -9044,7 +9044,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDragStart' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDragStart' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDragStart')
@@ -9056,7 +9056,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDragEnter' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDragEnter' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDragEnter')
@@ -9068,7 +9068,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDragMove' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDragMove' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDragMove')
@@ -9080,7 +9080,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDragLeave' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDragLeave' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDragLeave')
@@ -9092,7 +9092,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDrop' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDrop' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDrop')
@@ -9104,7 +9104,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDragEnd' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDragEnd' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDragEnd')
@@ -9116,7 +9116,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'allowDrop' can only be set when creating a custom component.')
+                throw new Error("Common method 'allowDrop' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method allowDrop')
@@ -9128,7 +9128,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'draggable' can only be set when creating a custom component.')
+                throw new Error("Common method 'draggable' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method draggable')
@@ -9140,7 +9140,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onPreDrag' can only be set when creating a custom component.')
+                throw new Error("Common method 'onPreDrag' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onPreDrag')
@@ -9152,7 +9152,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'linearGradient' can only be set when creating a custom component.')
+                throw new Error("Common method 'linearGradient' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method linearGradient')
@@ -9164,7 +9164,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'sweepGradient' can only be set when creating a custom component.')
+                throw new Error("Common method 'sweepGradient' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method sweepGradient')
@@ -9176,7 +9176,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'radialGradient' can only be set when creating a custom component.')
+                throw new Error("Common method 'radialGradient' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method radialGradient')
@@ -9188,7 +9188,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'motionPath' can only be set when creating a custom component.')
+                throw new Error("Common method 'motionPath' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method motionPath')
@@ -9200,7 +9200,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'shadow' can only be set when creating a custom component.')
+                throw new Error("Common method 'shadow' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method shadow')
@@ -9212,7 +9212,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'clip' can only be set when creating a custom component.')
+                throw new Error("Common method 'clip' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method clip')
@@ -9224,7 +9224,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'clipShape' can only be set when creating a custom component.')
+                throw new Error("Common method 'clipShape' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method clipShape')
@@ -9236,7 +9236,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'mask' can only be set when creating a custom component.')
+                throw new Error("Common method 'mask' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method mask')
@@ -9248,7 +9248,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'maskShape' can only be set when creating a custom component.')
+                throw new Error("Common method 'maskShape' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method maskShape')
@@ -9260,7 +9260,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'key' can only be set when creating a custom component.')
+                throw new Error("Common method 'key' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method key')
@@ -9272,7 +9272,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'id' can only be set when creating a custom component.')
+                throw new Error("Common method 'id' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method id')
@@ -9284,7 +9284,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'stateStyles' can only be set when creating a custom component.')
+                throw new Error("Common method 'stateStyles' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method stateStyles')
@@ -9296,7 +9296,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'restoreId' can only be set when creating a custom component.')
+                throw new Error("Common method 'restoreId' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method restoreId')
@@ -9308,7 +9308,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'sphericalEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'sphericalEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method sphericalEffect')
@@ -9320,7 +9320,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'lightUpEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'lightUpEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method lightUpEffect')
@@ -9332,7 +9332,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'pixelStretchEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'pixelStretchEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method pixelStretchEffect')
@@ -9344,7 +9344,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityNextFocusId' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityNextFocusId' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityNextFocusId')
@@ -9356,7 +9356,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityDefaultFocus' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityDefaultFocus' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityDefaultFocus')
@@ -9368,7 +9368,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityUseSamePage' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityUseSamePage' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityUseSamePage')
@@ -9380,7 +9380,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityScrollTriggerable' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityScrollTriggerable' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityScrollTriggerable')
@@ -9392,7 +9392,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityText' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityText' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityText')
@@ -9404,7 +9404,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityRole' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityRole' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityRole')
@@ -9416,7 +9416,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAccessibilityFocus' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAccessibilityFocus' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAccessibilityFocus')
@@ -9428,7 +9428,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onAccessibilityActionIntercept' can only be set when creating a custom component.')
+                throw new Error("Common method 'onAccessibilityActionIntercept' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onAccessibilityActionIntercept')
@@ -9440,7 +9440,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityTextHint' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityTextHint' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityTextHint')
@@ -9452,7 +9452,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityDescription' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityDescription' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityDescription')
@@ -9464,7 +9464,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityLevel' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityLevel' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityLevel')
@@ -9476,7 +9476,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityVirtualNode' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityVirtualNode' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityVirtualNode')
@@ -9488,7 +9488,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityChecked' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityChecked' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityChecked')
@@ -9500,7 +9500,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilitySelected' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilitySelected' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilitySelected')
@@ -9512,7 +9512,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'obscured' can only be set when creating a custom component.')
+                throw new Error("Common method 'obscured' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method obscured')
@@ -9524,7 +9524,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'reuseId' can only be set when creating a custom component.')
+                throw new Error("Common method 'reuseId' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method reuseId')
@@ -9536,7 +9536,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'reuse' can only be set when creating a custom component.')
+                throw new Error("Common method 'reuse' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method reuse')
@@ -9548,7 +9548,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'renderFit' can only be set when creating a custom component.')
+                throw new Error("Common method 'renderFit' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method renderFit')
@@ -9560,7 +9560,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'gestureModifier' can only be set when creating a custom component.')
+                throw new Error("Common method 'gestureModifier' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method gestureModifier')
@@ -9572,7 +9572,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundBrightness' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundBrightness' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundBrightness')
@@ -9584,7 +9584,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onGestureJudgeBegin' can only be set when creating a custom component.')
+                throw new Error("Common method 'onGestureJudgeBegin' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onGestureJudgeBegin')
@@ -9596,7 +9596,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onGestureRecognizerJudgeBegin' can only be set when creating a custom component.')
+                throw new Error("Common method 'onGestureRecognizerJudgeBegin' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onGestureRecognizerJudgeBegin')
@@ -9608,7 +9608,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'shouldBuiltInRecognizerParallelWith' can only be set when creating a custom component.')
+                throw new Error("Common method 'shouldBuiltInRecognizerParallelWith' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method shouldBuiltInRecognizerParallelWith')
@@ -9620,7 +9620,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'monopolizeEvents' can only be set when creating a custom component.')
+                throw new Error("Common method 'monopolizeEvents' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method monopolizeEvents')
@@ -9632,7 +9632,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onTouchIntercept' can only be set when creating a custom component.')
+                throw new Error("Common method 'onTouchIntercept' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onTouchIntercept')
@@ -9644,7 +9644,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onSizeChange' can only be set when creating a custom component.')
+                throw new Error("Common method 'onSizeChange' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onSizeChange')
@@ -9656,7 +9656,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityFocusDrawLevel' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityFocusDrawLevel' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityFocusDrawLevel')
@@ -9668,7 +9668,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onTouchTestDone' can only be set when creating a custom component.')
+                throw new Error("Common method 'onTouchTestDone' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onTouchTestDone')
@@ -9680,7 +9680,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'systemMaterial' can only be set when creating a custom component.')
+                throw new Error("Common method 'systemMaterial' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method systemMaterial')
@@ -9692,7 +9692,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onNeedSoftkeyboard' can only be set when creating a custom component.')
+                throw new Error("Common method 'onNeedSoftkeyboard' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onNeedSoftkeyboard')
@@ -9704,7 +9704,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityStateDescription' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityStateDescription' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityStateDescription')
@@ -9716,7 +9716,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityActionOptions' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityActionOptions' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityActionOptions')
@@ -9728,7 +9728,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'customProperty' can only be set when creating a custom component.')
+                throw new Error("Common method 'customProperty' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method customProperty')
@@ -9740,7 +9740,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'expandSafeArea' can only be set when creating a custom component.')
+                throw new Error("Common method 'expandSafeArea' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method expandSafeArea')
@@ -9752,7 +9752,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'ignoreLayoutSafeArea' can only be set when creating a custom component.')
+                throw new Error("Common method 'ignoreLayoutSafeArea' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method ignoreLayoutSafeArea')
@@ -9764,7 +9764,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'background' can only be set when creating a custom component.')
+                throw new Error("Common method 'background' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method background')
@@ -9776,7 +9776,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundImage' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundImage' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundImage')
@@ -9788,7 +9788,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundImage' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundImage' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundImage')
@@ -9800,7 +9800,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundBlurStyle' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundBlurStyle' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundBlurStyle')
@@ -9812,7 +9812,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backgroundEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'backgroundEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backgroundEffect')
@@ -9824,7 +9824,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'foregroundBlurStyle' can only be set when creating a custom component.')
+                throw new Error("Common method 'foregroundBlurStyle' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method foregroundBlurStyle')
@@ -9836,7 +9836,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'borderRadius' can only be set when creating a custom component.')
+                throw new Error("Common method 'borderRadius' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method borderRadius')
@@ -9848,7 +9848,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onClick' can only be set when creating a custom component.')
+                throw new Error("Common method 'onClick' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onClick')
@@ -9860,7 +9860,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'focusScopeId' can only be set when creating a custom component.')
+                throw new Error("Common method 'focusScopeId' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method focusScopeId')
@@ -9872,7 +9872,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'focusScopePriority' can only be set when creating a custom component.')
+                throw new Error("Common method 'focusScopePriority' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method focusScopePriority')
@@ -9884,7 +9884,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'transition' can only be set when creating a custom component.')
+                throw new Error("Common method 'transition' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method transition')
@@ -9896,7 +9896,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'gesture' can only be set when creating a custom component.')
+                throw new Error("Common method 'gesture' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method gesture')
@@ -9908,7 +9908,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'priorityGesture' can only be set when creating a custom component.')
+                throw new Error("Common method 'priorityGesture' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method priorityGesture')
@@ -9920,7 +9920,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'parallelGesture' can only be set when creating a custom component.')
+                throw new Error("Common method 'parallelGesture' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method parallelGesture')
@@ -9932,7 +9932,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'blur' can only be set when creating a custom component.')
+                throw new Error("Common method 'blur' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method blur')
@@ -9944,7 +9944,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'linearGradientBlur' can only be set when creating a custom component.')
+                throw new Error("Common method 'linearGradientBlur' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method linearGradientBlur')
@@ -9956,7 +9956,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'systemBarEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'systemBarEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method systemBarEffect')
@@ -9968,7 +9968,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'useEffect' can only be set when creating a custom component.')
+                throw new Error("Common method 'useEffect' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method useEffect')
@@ -9980,7 +9980,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'backdropBlur' can only be set when creating a custom component.')
+                throw new Error("Common method 'backdropBlur' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method backdropBlur')
@@ -9992,7 +9992,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'sharedTransition' can only be set when creating a custom component.')
+                throw new Error("Common method 'sharedTransition' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method sharedTransition')
@@ -10004,7 +10004,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'chainMode' can only be set when creating a custom component.')
+                throw new Error("Common method 'chainMode' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method chainMode')
@@ -10016,7 +10016,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDrop' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDrop' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDrop')
@@ -10028,7 +10028,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onDragSpringLoading' can only be set when creating a custom component.')
+                throw new Error("Common method 'onDragSpringLoading' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onDragSpringLoading')
@@ -10040,7 +10040,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'dragPreview' can only be set when creating a custom component.')
+                throw new Error("Common method 'dragPreview' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method dragPreview')
@@ -10052,7 +10052,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'dragPreviewOptions' can only be set when creating a custom component.')
+                throw new Error("Common method 'dragPreviewOptions' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method dragPreviewOptions')
@@ -10064,7 +10064,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'overlay' can only be set when creating a custom component.')
+                throw new Error("Common method 'overlay' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method overlay')
@@ -10076,7 +10076,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'blendMode' can only be set when creating a custom component.')
+                throw new Error("Common method 'blendMode' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method blendMode')
@@ -10088,7 +10088,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'advancedBlendMode' can only be set when creating a custom component.')
+                throw new Error("Common method 'advancedBlendMode' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method advancedBlendMode')
@@ -10100,7 +10100,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'geometryTransition' can only be set when creating a custom component.')
+                throw new Error("Common method 'geometryTransition' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method geometryTransition')
@@ -10112,7 +10112,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindTips' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindTips' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindTips')
@@ -10124,7 +10124,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindPopup' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindPopup' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindPopup')
@@ -10136,7 +10136,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindMenu' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindMenu' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindMenu')
@@ -10148,7 +10148,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindMenu' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindMenu' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindMenu')
@@ -10160,7 +10160,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindContextMenu' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindContextMenu' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindContextMenu')
@@ -10172,7 +10172,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindContextMenuWithResponse' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindContextMenuWithResponse' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindContextMenuWithResponse')
@@ -10184,7 +10184,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindContextMenu' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindContextMenu' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindContextMenu')
@@ -10196,7 +10196,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindContentCover' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindContentCover' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindContentCover')
@@ -10208,7 +10208,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindContentCover' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindContentCover' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindContentCover')
@@ -10220,7 +10220,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'bindSheet' can only be set when creating a custom component.')
+                throw new Error("Common method 'bindSheet' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method bindSheet')
@@ -10232,7 +10232,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onVisibleAreaChange' can only be set when creating a custom component.')
+                throw new Error("Common method 'onVisibleAreaChange' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onVisibleAreaChange')
@@ -10244,7 +10244,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onVisibleAreaApproximateChange' can only be set when creating a custom component.')
+                throw new Error("Common method 'onVisibleAreaApproximateChange' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onVisibleAreaApproximateChange')
@@ -10256,7 +10256,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'keyboardShortcut' can only be set when creating a custom component.')
+                throw new Error("Common method 'keyboardShortcut' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method keyboardShortcut')
@@ -10268,7 +10268,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'accessibilityGroup' can only be set when creating a custom component.')
+                throw new Error("Common method 'accessibilityGroup' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method accessibilityGroup')
@@ -10280,7 +10280,7 @@ export interface CommonMethod {
             return this;
         } else {
             if (this.__is_CustomComponent__Internal()) {
-                throw new Error('Common method 'onGestureRecognizerJudgeBegin' can only be set when creating a custom component.')
+                throw new Error("Common method 'onGestureRecognizerJudgeBegin' can only be set when creating a custom component.")
             }
         }
         throw new Error('Unimplemented method onGestureRecognizerJudgeBegin')
