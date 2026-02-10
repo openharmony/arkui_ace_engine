@@ -70,7 +70,7 @@ inline RefPtr<FrameNode> CustomMeasureLayoutParamTestNg::CreateNode(const std::s
 
 /**
  * @tc.name: ChildMountToTreeTest001
- * @tc.desc: Test child node mounting to parent tree (孩子上树).
+ * @tc.desc: Test child node mounting to parent tree.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomMeasureLayoutParamTestNg, ChildMountToTreeTest001, TestSize.Level1)
@@ -84,7 +84,7 @@ HWTEST_F(CustomMeasureLayoutParamTestNg, ChildMountToTreeTest001, TestSize.Level
     EXPECT_TRUE(parentNode != nullptr && parentNode->GetTag() == V2::JS_VIEW_ETS_TAG);
 
     /**
-     * @tc.steps: step2. Create child nodes and mount to parent (孩子上树).
+     * @tc.steps: step2. Create child nodes and mount to parent.
      * @tc.expected: Children are mounted to parent successfully.
      */
     auto child1 = CreateNode(V2::TEXT_ETS_TAG);
@@ -164,7 +164,7 @@ HWTEST_F(CustomMeasureLayoutParamTestNg, ChildUnmountFromTreeTest002, TestSize.L
 
 /**
  * @tc.name: DynamicChildUpdateTest003
- * @tc.desc: Test dynamic child addition and removal (动态孩子更新).
+ * @tc.desc: Test dynamic child addition and removal.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomMeasureLayoutParamTestNg, DynamicChildUpdateTest003, TestSize.Level1)
