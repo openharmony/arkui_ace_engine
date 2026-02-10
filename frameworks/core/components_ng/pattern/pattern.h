@@ -897,6 +897,10 @@ public:
     virtual void OnAttachToMainRenderTree() {}
     virtual void OnOffscreenProcessResource() {}
     virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
+    virtual void OnBackgroundColorReset() {}
+    virtual void OnBorderWidthReset() {}
+    virtual void OnBorderColorReset() {}
+    virtual void OnBackShadowReset() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}
