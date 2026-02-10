@@ -824,6 +824,21 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCaretTest001
+ * @tc.desc: test textInput SetCaretPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetCaretTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected:
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->ProcessPendingCaretEvent();
+}
+
+/**
  * @tc.name: MaxLength001
  * @tc.desc: test textInput maxLength
  * @tc.type: FUNC
