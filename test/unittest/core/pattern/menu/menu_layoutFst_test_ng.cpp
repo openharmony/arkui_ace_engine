@@ -1494,7 +1494,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg037, TestSize.Level1)
      * @tc.steps: step2. call InitializeBasicProperties
      * @tc.expected: basic properties are initialized correctly
      */
-    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper);
+    auto menuTheme = layoutAlgorithm->GetMenuTheme(menuNode);
+    ASSERT_NE(menuTheme, nullptr);
+    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper, menuTheme);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->anchorPosition_, std::nullopt);
@@ -1535,7 +1537,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
 
-    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper);
+    auto menuTheme = layoutAlgorithm->GetMenuTheme(menuNode);
+    ASSERT_NE(menuTheme, nullptr);
+    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper, menuTheme);
 
     /**
      * @tc.steps: step2. call InitializePlacement
@@ -1717,7 +1721,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg042, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
 
-    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper);
+    auto menuTheme = layoutAlgorithm->GetMenuTheme(menuNode);
+    ASSERT_NE(menuTheme, nullptr);
+    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper, menuTheme);
 
     /**
      * @tc.steps: step2. call InitializePlacement with SelectOverlayExtensionMenu
@@ -1766,7 +1772,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg043, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
 
-    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper);
+    auto menuTheme = layoutAlgorithm->GetMenuTheme(menuNode);
+    ASSERT_NE(menuTheme, nullptr);
+    layoutAlgorithm->InitializeBasicProperties(&layoutWrapper, menuTheme);
 
     /**
      * @tc.steps: step2. call InitializePlacement with SubMenu

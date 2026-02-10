@@ -389,11 +389,13 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper, bool isContex
     CHECK_NULL_VOID(menuPattern);
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
+    auto menuTheme = GetMenuTheme(menuNode);
+    CHECK_NULL_VOID(menuTheme);
 
     InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty);
     dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
 
-    InitializeBasicProperties(layoutWrapper);
+    InitializeBasicProperties(layoutWrapper, menuTheme);
     InitializePlacement(layoutWrapper);
 
     if (!targetTag_.empty()) {
@@ -403,7 +405,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper, bool isContex
     CalcWrapperRectForHoverMode(menuPattern, isAvoidKeyboard);
 }
 
-void MenuLayoutAlgorithm::InitializeBasicProperties(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::InitializeBasicProperties(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& menuTheme)
 {
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
@@ -412,8 +414,6 @@ void MenuLayoutAlgorithm::InitializeBasicProperties(LayoutWrapper* layoutWrapper
     ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuTheme = GetMenuTheme(menuNode);
-    CHECK_NULL_VOID(menuTheme);
 
     auto beforeAnimationScale = menuPattern->GetPreviewBeforeAnimationScale();
     auto afterAnimationScale = menuPattern->GetPreviewAfterAnimationScale();

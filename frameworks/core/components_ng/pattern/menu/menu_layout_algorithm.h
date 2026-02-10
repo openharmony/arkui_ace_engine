@@ -145,7 +145,7 @@ private:
     };
 
     void Initialize(LayoutWrapper* layoutWrapper, bool isContextMenu = false);
-    void InitializeBasicProperties(LayoutWrapper* layoutWrapper);
+    void InitializeBasicProperties(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& menuTheme);
     void InitializePlacement(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
