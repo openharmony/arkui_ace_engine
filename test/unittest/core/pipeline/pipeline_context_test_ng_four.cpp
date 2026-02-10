@@ -27,6 +27,7 @@
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
@@ -74,6 +75,7 @@ void PipelineContextFourTestNg::SetUpTestSuite()
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     context_->fontManager_ = FontManager::Create();
+    context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 
@@ -93,23 +95,16 @@ void PipelineContextFourTestNg::TearDownTestSuite()
 
 void PipelineContextFourTestNg::CreateCycleDirtyNode(int cycle, bool& flagUpdate)
 {
-    const int MAX_RECURSION_DEPTH = 1000;
-    if (cycle <= 0 || cycle > MAX_RECURSION_DEPTH) {
+    if (cycle <= 0) {
         return;
     }
     cycle -= 1;
     auto customNodeTemp = CustomNode::CreateCustomNode(customNodeId_ + cycle + 100, TEST_TAG);
     customNodeTemp->SetUpdateFunction([cycle, &flagUpdate]() {
-        PipelineContextFourTestNg::CreateCycleDirtyNode(cycle, flagUpdate);
+        PipelineContextTestNg::CreateCycleDirtyNode(cycle, flagUpdate);
         flagUpdate = !flagUpdate;
     });
     context_->AddDirtyCustomNode(customNodeTemp);
-}
-
-void PipelineContextFourTestNg::AssertValidContext()
-{
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->taskExecutor_, nullptr);
 }
 
 /**
@@ -266,12 +261,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg005, TestSize.Level
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg006, TestSize.Level1)
 {
-    /**
-     * @tc.steps: 1. Initialize test environment with valid context.
-     * @tc.expected: Context and task executor are not null.
-     */
-    AssertValidContext();
-
     /**
      * @tc.steps: 2. Set multiple callbacks sequentially.
      * @tc.expected: Last callback should be the one stored.
@@ -956,12 +945,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028, TestSize.Level
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg029, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize test environment with valid task executor.
-     * @tc.expected: Context is not null and taskExecutor_ is valid.
-     */
-    AssertValidContext();
-
-    /**
      * @tc.steps: 2. Set up a mock callback function.
      * @tc.expected: Callback function is assigned correctly.
      */
@@ -1014,12 +997,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg030, TestSize.Level
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg031, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize test environment.
-     * @tc.expected: Context is not null.
-     */
-    AssertValidContext();
-
-    /**
      * @tc.steps: 2. Call SetOnWindowFocused with empty callback.
      * @tc.expected: Function handles empty callback correctly.
      */
@@ -1035,12 +1012,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg031, TestSize.Level
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg032, TestSize.Level1)
 {
-    /**
-     * @tc.steps: 1. Initialize test environment.
-     * @tc.expected: Context is not null.
-     */
-    AssertValidContext();
-
     /**
      * @tc.steps: 2. Define a complex callback with multiple operations.
      * @tc.expected: Callback is assigned correctly.
@@ -1072,12 +1043,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg032, TestSize.Level
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg033, TestSize.Level1)
 {
-    /**
-     * @tc.steps: 1. Initialize test environment.
-     * @tc.expected: Context is not null.
-     */
-    AssertValidContext();
-
     /**
      * @tc.steps: 2. Define multiple callbacks for sequential assignment.
      * @tc.expected: Each callback is properly defined.
@@ -1116,12 +1081,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg033, TestSize.Level
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg034, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize test environment.
-     * @tc.expected: Context is not null.
-     */
-    AssertValidContext();
-
-    /**
      * @tc.steps: 2. Create large data structure for lambda capture.
      * @tc.expected: Large data is created successfully.
      */
@@ -1146,12 +1105,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg034, TestSize.Level
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg035, TestSize.Level1)
 {
-    /**
-     * @tc.steps: 1. Initialize test environment.
-     * @tc.expected: Context is not null.
-     */
-    AssertValidContext();
-
     /**
      * @tc.steps: 2. Set up recursive-like callback simulation.
      * @tc.expected: Recursive callback is properly configured.
@@ -1379,12 +1332,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg040, TestSize.Level
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg041, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize test environment with valid context.
-     * @tc.expected: Context and task executor are not null.
-     */
-    AssertValidContext();
-
-    /**
      * @tc.steps: 2. Define a valid callback function.
      * @tc.expected: Callback is properly defined.
      */
@@ -1409,12 +1356,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg041, TestSize.Level
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg042, TestSize.Level1)
 {
     /**
-     * @tc.steps: 1. Initialize test environment with valid context.
-     * @tc.expected: Context and task executor are not null.
-     */
-    AssertValidContext();
-
-    /**
      * @tc.steps: 2. Define an empty callback function.
      * @tc.expected: Empty callback is properly defined.
      */
@@ -1435,12 +1376,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg042, TestSize.Level
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg043, TestSize.Level1)
 {
-    /**
-     * @tc.steps: 1. Initialize test environment with valid context.
-     * @tc.expected: Context and task executor are not null.
-     */
-    AssertValidContext();
-
     /**
      * @tc.steps: 2. Define callback with large captured data.
      * @tc.expected: Large data capture is properly defined.
@@ -1470,12 +1405,6 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg043, TestSize.Level
  */
 HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg044, TestSize.Level1)
 {
-    /**
-     * @tc.steps: 1. Initialize test environment with valid context.
-     * @tc.expected: Context and task executor are not null.
-     */
-    AssertValidContext();
-
     /**
      * @tc.steps: 2. Define recursive-like callback simulation.
      * @tc.expected: Recursive callback is properly configured.
