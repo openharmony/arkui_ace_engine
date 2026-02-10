@@ -8658,6 +8658,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                            const Opt_OnCameraCaptureStateChangeCallback* value)
     {
     }
+    void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
+                                         const Opt_Boolean* value)
+    {
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -11207,6 +11211,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetEnableAutoFillImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
+            WebAttributeModifier::SetEnableDefaultContextMenuImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };

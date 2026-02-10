@@ -2956,6 +2956,18 @@ void SetEnableAutoFillImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableAutoFill(frameNode, convValue.value_or(true));
 #endif // WEB_SUPPORTED
 }
+
+void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableDefaultContextMenu(frameNode, convValue.value_or(true));
+#endif // WEB_SUPPORTED
+}
+
 void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
                                            const Opt_OnMicrophoneCaptureStateChangeCallback* value)
 {
@@ -3144,6 +3156,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnFirstScreenPaintImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetEnableAutoFillImpl,
+        WebAttributeModifier::SetEnableDefaultContextMenuImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,

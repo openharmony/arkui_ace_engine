@@ -326,6 +326,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onMicrophoneCaptureStateChange_0_0value?: OnMicrophoneCaptureStateChangeCallback | undefined
     _onCameraCaptureStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onCameraCaptureStateChange_0_0value?: OnCameraCaptureStateChangeCallback | undefined
+    _enableDefaultContextMenu_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableDefaultContextMenu_0_0value?: boolean | undefined
     _registerNativeEmbedRule_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _registerNativeEmbedRule_0_0value?: string | undefined
     _registerNativeEmbedRule_0_1value?: string | undefined
@@ -2912,6 +2914,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._enableDefaultContextMenu_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableDefaultContextMenu_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableDefaultContextMenuAttribute((this._enableDefaultContextMenu_0_0value as boolean | undefined));
+                    this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableDefaultContextMenuAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._registerNativeEmbedRule_0_flag) {
@@ -4785,6 +4805,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._enableDefaultContextMenu_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableDefaultContextMenu_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableDefaultContextMenu(modifier._enableDefaultContextMenu_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableDefaultContextMenu((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._registerNativeEmbedRule_0_flag) {
@@ -6500,6 +6533,18 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._onFirstScreenPaint_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableDefaultContextMenu(value: boolean | undefined): this {
+        if ((this._enableDefaultContextMenu_0_flag == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDefaultContextMenu_0_0value) !== (value)))
+        {
+            this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableDefaultContextMenu_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

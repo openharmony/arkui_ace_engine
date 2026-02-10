@@ -236,6 +236,7 @@ public:
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
     static void OnVerifyPinRequest(const JSCallbackInfo& args);
     static void EnableAutoFill(const JSCallbackInfo& args);
+    static void EnableDefaultContextMenu(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

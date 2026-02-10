@@ -3118,6 +3118,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnCameraCaptureStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableDefaultContextMenuAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableDefaultContextMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -4195,6 +4207,9 @@ export interface WebAttribute extends CommonMethod {
     onCameraCaptureStateChange(value: OnCameraCaptureStateChangeCallback | undefined): this {
         throw new Error("Unimplemented method onCameraCaptureStateChange")
     }
+    enableDefaultContextMenu(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableDefaultContextMenu")
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error("Unimplemented method registerNativeEmbedRule")
     }
@@ -4350,6 +4365,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     onMicrophoneCaptureStateChange_value?: OnMicrophoneCaptureStateChangeCallback | undefined
     onCameraCaptureStateChange_value?: OnCameraCaptureStateChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
+    enableDefaultContextMenu_value?: boolean | undefined
     setWebOptions(value: WebOptions): this {
         return this
     }
@@ -4780,6 +4796,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onCameraCaptureStateChange(value: OnCameraCaptureStateChangeCallback | undefined): this {
+        return this
+    }
+    enableDefaultContextMenu(value: boolean | undefined): this {
         return this
     }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
@@ -5993,6 +6012,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         if (this.checkPriority("onFirstScreenPaint")) {
             const value_casted = value as (OnFirstScreenPaintCallback | undefined)
             this.getPeer()?.setOnFirstScreenPaintAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableDefaultContextMenu(value: boolean | undefined): this {
+        if (this.checkPriority("enableDefaultContextMenu")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableDefaultContextMenuAttribute(value_casted)
             return this
         }
         return this

@@ -27927,6 +27927,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value);
     void (*setOnCameraCaptureStateChange)(Ark_NativePointer node,
                                           const Opt_OnCameraCaptureStateChangeCallback* value);
+    void (*setEnableDefaultContextMenu)(Ark_NativePointer node,
+                                        const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
