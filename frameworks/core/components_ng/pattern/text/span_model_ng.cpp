@@ -105,14 +105,6 @@ void SpanModelNG::SetFont(const Font& value)
     }
 }
 
-void SpanModelNG::ResetFont()
-{
-    ResetFontSize();
-    ResetFontWeight();
-    ResetFontFamily();
-    ResetItalicFontStyle();
-}
-
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontSize, value);
@@ -128,11 +120,6 @@ void SpanModelNG::SetTextColor(const Color& value)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateSpanTextColor(value);
-}
-
-void SpanModelNG::ResetTextColor()
-{
-    ACE_RESET_SPAN_PROPERTY(TextColor);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
