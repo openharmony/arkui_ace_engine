@@ -7145,6 +7145,11 @@ struct ArkUITextClockModifier {
     void (*setTextClockTimeZoneOffset)(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset);
     void (*setTextClockOnDateChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextClockOnDateChange)(ArkUINodeHandle node);
+    void (*removeResObjByKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*initFontDefault)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createTextClockController)();
+    void (*createWithTextColorResourceObj)(ArkUINodeHandle node, void* fontColorRawPtr);
+    void (*setTextColorByUser)(ArkUINodeHandle node, ArkUI_Bool value);
 };
 
 struct ArkUITextClockControllerModifier {

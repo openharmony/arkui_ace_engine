@@ -31,9 +31,6 @@ class BrightnessBlender;
 namespace OHOS::Ace {
 class ResourceWrapper;
 }
-namespace OHOS::Ace {
-class ResourceWrapper;
-}
 
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
