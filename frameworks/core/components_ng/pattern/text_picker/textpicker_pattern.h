@@ -555,7 +555,7 @@ public:
         auto pipelineContext = host->GetContext();
         CHECK_NULL_VOID(pipelineContext);
 
-        if (pipelineContext->IsSystmColorChange() && host->GetRerenderable()) {
+        if (pipelineContext->IsSystemColorChange() && host->GetRerenderable()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     }

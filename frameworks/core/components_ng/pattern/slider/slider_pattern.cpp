@@ -890,7 +890,7 @@ void SliderPattern::UpdateSliderComponentColor(const Color& color, const SliderC
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (sliderColorType) {
             case SliderColorType::BLOCK_COLOR:
                 paintProperty->UpdateBlockColor(color);
@@ -924,7 +924,7 @@ void SliderPattern::UpdateSliderComponentMedia()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         UpdateBlock();
     }
     if (host->GetRerenderable()) {
@@ -942,7 +942,7 @@ void SliderPattern::UpdateSliderComponentString(const bool isShowTips, const std
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateShowTips(isShowTips);
         paintProperty->UpdateCustomContent(value);
     }

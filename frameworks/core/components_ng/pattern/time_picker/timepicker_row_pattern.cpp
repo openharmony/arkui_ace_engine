@@ -2405,7 +2405,7 @@ void TimePickerRowPattern::UpdateTextStyleCommon(
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
 
         Dimension fontSize = defaultTextStyle.GetFontSize();

@@ -206,7 +206,7 @@ void ButtonModelNG::UpdateDefaultFamilies(
     CHECK_NULL_VOID(buttonTheme);
     value = buttonTheme->GetTextStyle().GetFontFamilies();
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
                 SetFontFamily(frameNode, value);
@@ -227,7 +227,7 @@ void ButtonModelNG::UpdateComponentFamilies(
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
                 SetFontFamily(frameNode, value);
