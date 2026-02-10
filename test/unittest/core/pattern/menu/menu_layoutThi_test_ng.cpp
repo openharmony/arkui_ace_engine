@@ -1489,7 +1489,6 @@ HWTEST_F(MenuLayout3TestNg, Initialize002, TestSize.Level1)
         CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
     layoutAlgorithm->canExpandCurrentWindow_ = true;
     layoutAlgorithm->isExpandDisplay_ = true;
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
@@ -1524,7 +1523,6 @@ HWTEST_F(MenuLayout3TestNg, Initialize003, TestSize.Level1)
     menuPattern->isSelectMenu_ = true;
     layoutAlgorithm->canExpandCurrentWindow_ = true;
     layoutAlgorithm->isExpandDisplay_ = true;
-    layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
