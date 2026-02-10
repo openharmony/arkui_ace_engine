@@ -1111,7 +1111,6 @@ public:
 
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
-    bool CheckAncestorPageShow();
 
     void SetRemoveCustomProperties(std::function<void()> func)
     {
