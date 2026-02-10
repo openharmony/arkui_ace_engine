@@ -15,6 +15,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_texttimer_ffi.h"
 
+#include <regex>
+#include <string>
 #include "cj_lambda.h"
 #include "bridge/common/utils/utils.h"
 
@@ -52,6 +54,7 @@ void NativeTextTimerController::Reset()
 
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::string TEXT_TIMER_DEFAULT_FORMAT = "HH:mm:ss.SS";
 constexpr double MAX_COUNT_DOWN = 86400000.0;
 } // namespace
 
@@ -102,14 +105,36 @@ void FfiOHOSAceFrameworkTextTimerCreate(bool isCountDown, int64_t count, int64_t
 
 void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value)
 {
-    std::string valueString = static_cast<std::string>(value);
-    std::regex pattern(
-        R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
-    if (!std::regex_match(value, pattern)) {
-        LOGE("The arg is wrong, because of format matching error.");
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        std::string valueString(value);
+        std::regex pattern(
+            R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
+        if (!std::regex_match(value, pattern)) {
+            LOGE("The arg is wrong, because of format matching error.");
+            return;
+        }
+        TextTimerModel::GetInstance()->SetFormat(valueString);
         return;
     }
-    TextTimerModel::GetInstance()->SetFormat(valueString);
+
+    std::string format(value);
+    std::smatch result;
+    std::regex datePattern("(([YyMdD]+))");
+    if (std::regex_search(format, result, datePattern) && !result.empty()) {
+        format = TEXT_TIMER_DEFAULT_FORMAT;
+    }
+    const std::string allowedChars = "HmsS:.";
+    for (auto ch : format) {
+        if (allowedChars.find(ch) == std::string::npos) {
+            format = TEXT_TIMER_DEFAULT_FORMAT;
+            break;
+        }
+    }
+    auto pos = format.find("hh");
+    if (pos != std::string::npos) {
+        format.replace(pos, sizeof("hh") - 1, "HH");
+    }
+    TextTimerModel::GetInstance()->SetFormat(format);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetFontSize(double fontSize, int32_t unit)

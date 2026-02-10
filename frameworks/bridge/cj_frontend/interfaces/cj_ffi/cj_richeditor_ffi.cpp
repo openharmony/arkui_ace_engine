@@ -264,6 +264,9 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete12(void(*callback)(NativeRic
         NativeRichEditorTextSpanResult12 result;
         NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(textSpanResult, result);
         cjCallback(result);
+        if (result.textStyle.decoration.color) {
+            free((void*) result.textStyle.decoration.color);
+        }
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(onIMEInputCompleteFunc));
 }
