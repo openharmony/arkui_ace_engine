@@ -372,7 +372,9 @@ class JSTextClock extends JSViewAbstract {
     }
     static textShadow(value) {
         let shadow = new ArkShadowInfoToArray();
-        shadow.convertShadowOptions(value);
+        if (value !== undefined && value !== null) {
+            shadow.convertShadowOptions(value);
+        }
         getUINativeModule().textclock.setTextShadow(true, shadow.radius, shadow.type, shadow.color,
             shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
     }

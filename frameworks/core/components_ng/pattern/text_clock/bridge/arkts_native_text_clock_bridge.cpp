@@ -446,6 +446,7 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
         GetArkUINodeModifiers()->getTextClockModifier()->removeResObjByKey(
             reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode()),
             "textClock.shadow");
+        return panda::JSValueRef::Undefined(vm);
     }
     uint32_t length = lengthArg->Uint32Value(vm);
     auto radiusArray = std::make_unique<double[]>(length);
