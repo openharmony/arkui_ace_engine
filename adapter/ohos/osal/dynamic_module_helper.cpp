@@ -66,8 +66,6 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Gauge", "gauge"},
         {"PatternLock", "patternlock"},
         {"Rating", "rating"},
-        { "FlowItem", "waterflow" },
-        { "WaterFlow", "waterflow" },
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},

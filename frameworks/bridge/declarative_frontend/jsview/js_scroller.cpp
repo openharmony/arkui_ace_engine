@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
-#include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 
 #include "base/geometry/axis.h"
 #include "base/log/event_report.h"
@@ -65,67 +64,50 @@ constexpr ScrollAlign ALIGN_TABLE[] = {
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 } // namespace
 
-void JSScrollerBinding::JSBind(BindingTarget globalObj)
+void JSScroller::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScroller>::Declare("Scroller");
-    JSClass<JSScroller>::CustomMethod("scrollTo", &JSScrollerBinding::ScrollTo);
-    JSClass<JSScroller>::CustomMethod("scrollEdge", &JSScrollerBinding::ScrollEdge);
-    JSClass<JSScroller>::CustomMethod("fling", &JSScrollerBinding::Fling);
-    JSClass<JSScroller>::CustomMethod("scrollPage", &JSScrollerBinding::ScrollPage);
-    JSClass<JSScroller>::CustomMethod("currentOffset", &JSScrollerBinding::CurrentOffset);
-    JSClass<JSScroller>::CustomMethod("offset", &JSScrollerBinding::Offset);
-    JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScrollerBinding::ScrollToIndex);
-    JSClass<JSScroller>::CustomMethod("scrollBy", &JSScrollerBinding::ScrollBy);
-    JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScrollerBinding::IsAtEnd);
-    JSClass<JSScroller>::CustomMethod("getItemRect", &JSScrollerBinding::GetItemRect);
-    JSClass<JSScroller>::CustomMethod("getItemIndex", &JSScrollerBinding::GetItemIndex);
-    JSClass<JSScroller>::CustomMethod("contentSize", &JSScrollerBinding::ContentSize);
-    JSClass<JSScroller>::Bind(globalObj, JSScrollerBinding::Constructor, JSScrollerBinding::Destructor);
+    JSClass<JSScroller>::CustomMethod("scrollTo", &JSScroller::ScrollTo);
+    JSClass<JSScroller>::CustomMethod("scrollEdge", &JSScroller::ScrollEdge);
+    JSClass<JSScroller>::CustomMethod("fling", &JSScroller::Fling);
+    JSClass<JSScroller>::CustomMethod("scrollPage", &JSScroller::ScrollPage);
+    JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
+    JSClass<JSScroller>::CustomMethod("offset", &JSScroller::Offset);
+    JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
+    JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
+    JSClass<JSScroller>::CustomMethod("isAtEnd", &JSScroller::IsAtEnd);
+    JSClass<JSScroller>::CustomMethod("getItemRect", &JSScroller::GetItemRect);
+    JSClass<JSScroller>::CustomMethod("getItemIndex", &JSScroller::GetItemIndex);
+    JSClass<JSScroller>::CustomMethod("contentSize", &JSScroller::ContentSize);
+    JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
-void JSScrollerBinding::Constructor(const JSCallbackInfo& args)
+void JSScroller::Constructor(const JSCallbackInfo& args)
 {
     auto scroller = Referenced::MakeRefPtr<JSScroller>();
     scroller->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(scroller));
 }
 
-void JSScrollerBinding::Destructor(JSScroller* scroller)
+void JSScroller::Destructor(JSScroller* scroller)
 {
     if (scroller != nullptr) {
         scroller->DecRefCount();
     }
 }
 
-panda::Local<panda::ObjectRef> JSScroller::CreateRectangle(const Rect& info)
+JSRef<JSObject> JSScroller::CreateRectangle(const Rect& info)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    if (!runtime) {
-        return panda::Local<panda::ObjectRef>();
-    }
-    auto* vm = runtime->GetEcmaVm();
-    panda::Local<panda::ObjectRef> rectObj = panda::ObjectRef::New(vm);
-    auto xRef = panda::StringRef::NewFromUtf8(vm, "x");
-    rectObj->Set(vm, xRef, panda::NumberRef::New(vm, info.Left()));
-
-    auto yRef = panda::StringRef::NewFromUtf8(vm, "y");
-    rectObj->Set(vm, yRef, panda::NumberRef::New(vm, info.Top()));
-
-    auto widthRef = panda::StringRef::NewFromUtf8(vm, "width");
-    rectObj->Set(vm, widthRef, panda::NumberRef::New(vm, info.Width()));
-
-    auto heightRef = panda::StringRef::NewFromUtf8(vm, "height");
-    rectObj->Set(vm, heightRef, panda::NumberRef::New(vm, info.Height()));
-
+    JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+    rectObj->SetProperty<double>("x", info.Left());
+    rectObj->SetProperty<double>("y", info.Top());
+    rectObj->SetProperty<double>("width", info.Width());
+    rectObj->SetProperty<double>("height", info.Height());
     return rectObj;
 }
 
-void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)
+void JSScroller::ScrollTo(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
@@ -165,9 +147,9 @@ void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)
     }
     auto optionCanOverScroll = obj->GetProperty("canOverScroll");
     bool canStayOverScroll = optionCanOverScroll->IsBoolean() ? optionCanOverScroll->ToBoolean() : false;
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
     if (direction == Axis::FREE &&
         scrollController->FreeScrollTo({ .xOffset = xOffset,
@@ -183,7 +165,7 @@ void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
 }
 
-bool JSScrollerBinding::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
+bool JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
 {
     std::string curveName;
     if (ConvertFromJSValue(jsValue, curveName)) {
@@ -202,17 +184,13 @@ bool JSScrollerBinding::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal
     return false;
 }
 
-void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
+void JSScroller::ScrollEdge(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     AlignDeclaration::Edge edge = AlignDeclaration::Edge::AUTO;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], EDGE_TABLE, edge)) {
         return;
     }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
     if (scrollController->GetScrollDirection() == Axis::FREE) { // allow scrolling to left and right edges
@@ -222,7 +200,7 @@ void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
             edgeType = ScrollEdgeType::SCROLL_RIGHT;
         }
     }
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
 
     if (args.Length() > 1 && args[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[1]);
@@ -238,13 +216,9 @@ void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
     scrollController->ScrollToEdge(edgeType, true);
 }
 
-void JSScrollerBinding::Fling(const JSCallbackInfo& args)
+void JSScroller::Fling(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
@@ -258,24 +232,20 @@ void JSScrollerBinding::Fling(const JSCallbackInfo& args)
     if (NearZero(flingVelocity)) {
         return;
     }
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
     scrollController->Fling(flingVelocity);
 }
 
-void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
+void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     int32_t index = 0;
     bool smooth = false;
     ScrollAlign align = ScrollAlign::NONE;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         return;
     }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
     // 2: parameters count, 1: parameter index
     auto smoothArg = args[1];
@@ -300,16 +270,12 @@ void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
             }
         }
     }
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     scrollController->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
-void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
+void JSScroller::ScrollPage(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
@@ -324,52 +290,40 @@ void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
     if (smoothValue->IsBoolean()) {
         smooth = smoothValue->ToBoolean();
     }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     scrollController->ScrollPage(!next, smooth);
 }
 
-void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
+void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
     auto retObj = JSRef<JSObject>::New();
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     auto offset = scrollController->GetCurrentOffset();
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
 }
 
-void JSScrollerBinding::Offset(const JSCallbackInfo& args)
+void JSScroller::Offset(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         return;
     }
     auto retObj = JSRef<JSObject>::New();
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     auto offset = scrollController->GetCurrentOffset();
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
 }
 
-void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
+void JSScroller::ScrollBy(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     if (args.Length() < 2) {
         return;
     }
@@ -380,10 +334,10 @@ void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
         !ConvertFromJSValue(args[1], yOffset)) {
         return;
     }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
 
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
     auto deltaY = yOffset.Value();
     auto container = Container::Current();
@@ -405,36 +359,27 @@ void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
     scrollController->ScrollBy(deltaX, deltaY, false);
 }
 
-void JSScrollerBinding::IsAtEnd(const JSCallbackInfo& args)
+void JSScroller::IsAtEnd(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(scrollController);
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     bool isAtEnd = scrollController->IsAtEnd();
     auto retVal = JSRef<JSVal>::Make(ToJSValue(isAtEnd));
     args.SetReturnValue(retVal);
 }
 
-void JSScrollerBinding::GetItemRect(const JSCallbackInfo& args)
+void JSScroller::GetItemRect(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     int32_t index = -1;
     if (args.Length() != 1 || !ConvertFromJSValue(args[0], index)) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     if (scrollController) {
-        ContainerScope scope(jsScroller->GetInstanceId());
-        JSRef<JSObject> rectObj =
-            JSRef<JSObject>::Make(jsScroller->CreateRectangle(scrollController->GetItemRect(index)));
+        ContainerScope scope(instanceId_);
+        auto rectObj = CreateRectangle(scrollController->GetItemRect(index));
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);
     } else {
@@ -442,12 +387,8 @@ void JSScrollerBinding::GetItemRect(const JSCallbackInfo& args)
     }
 }
 
-void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
+void JSScroller::GetItemIndex(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     if (args.Length() != ARGS_LENGTH) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter length failed.");
         return;
@@ -460,13 +401,13 @@ void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
     }
 
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
     auto deltaY = yOffset.Value();
     auto container = Container::Current();
@@ -484,19 +425,15 @@ void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
     return;
 }
 
-void JSScrollerBinding::ContentSize(const JSCallbackInfo& args)
+void JSScroller::ContentSize(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
-    auto scrollController = jsScroller->GetController().Upgrade();
+    auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
     }
     auto retObj = JSRef<JSObject>::New();
-    ContainerScope scope(jsScroller->GetInstanceId());
+    ContainerScope scope(instanceId_);
     auto contentSize = scrollController->ContentSize();
     retObj->SetProperty<double>("width", Dimension(contentSize.Width(), DimensionUnit::PX).ConvertToVp());
     retObj->SetProperty<double>("height", Dimension(contentSize.Height(), DimensionUnit::PX).ConvertToVp());

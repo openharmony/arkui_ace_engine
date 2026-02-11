@@ -87,8 +87,6 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Sidebar", "sidebar"},
         {"PatternLock", "patternlock"},
         {"Rating", "rating"},
-        { "FlowItem", "waterflow" },
-        { "WaterFlow", "waterflow" },
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},

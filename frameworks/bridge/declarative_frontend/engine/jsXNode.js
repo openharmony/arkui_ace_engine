@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2065,9 +2065,7 @@ const __creatorMap__ = new Map([
         }],
     ['WaterFlow', (context) => {
             return new TypedFrameNode(context, 'WaterFlow', (node, type) => {
-                getUINativeModule().loadNativeModule('WaterFlow');
-                let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-                return module.createComponent(node, type);
+                return new ArkWaterFlowComponent(node, type);
             });
         }],
     ['SymbolGlyph', (context) => {
@@ -2077,9 +2075,7 @@ const __creatorMap__ = new Map([
         }],
     ['FlowItem', (context) => {
             return new TypedFrameNode(context, 'FlowItem', (node, type) => {
-                getUINativeModule().loadNativeModule('FlowItem');
-                let module = globalThis.requireNapi('arkui.components.arkflowitem');
-                return module.createComponent(node, type);
+                return new ArkFlowItemComponent(node, type);
             });
         }],
     ['QRCode', (context) => {
@@ -2228,9 +2224,7 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        getUINativeModule().loadNativeModule('WaterFlow');
-        let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['FlowItem', (node) => {
@@ -2240,9 +2234,7 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        getUINativeModule().loadNativeModule('FlowItem');
-        let module = globalThis.requireNapi('arkui.components.arkflowitem');
-        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Grid', (node) => {
