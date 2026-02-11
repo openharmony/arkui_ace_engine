@@ -2055,7 +2055,7 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
 
     /**
-     * @tc.steps: step3. Execute Layout
+     * @tc.steps: step2. Execute Layout
      */
     RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
     RefPtr<LayoutWrapperNode> layoutWrapper =
@@ -2068,8 +2068,8 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
     FlushUITasks(frameNode);
     /**
      * @tc.steps: step3. Get children and verify their positions
-     * Formula: offset.x = (1 + h) * (parentW - childW) / 3
-     *          offset.y = (1 + v) * (parentH - childH) / 3
+     * Formula: offset.x = (1 + h) * (parentW - childW) / 2
+     *          offset.y = (1 + v) * (parentH - childH) / 2
      * CENTER: h=0, v=0
      */
     for (const auto& childNode : frameNode->GetChildren()) {
@@ -2080,7 +2080,7 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
             auto size = geometryNode->GetMarginFrameSize();
             EXPECT_EQ(size, SizeF(100.0f, 80.0f))<<size.ToString();
             auto offset = geometryNode->GetFrameOffset();
-            // Child 1 (100x80): offset = ((400-100)/3, (300-80)/3) = (150, 110)
+            // Child 1 (100x80): offset = ((400-100)/2, (300-80)/2) = (150, 110)
             EXPECT_EQ(offset, OffsetF(150.0f, 110.0f))<<offset.ToString();
         }
     }
