@@ -118,7 +118,8 @@ private:
     inline bool IsDynamicComponent()
     {
         auto container = Container::Current();
-        return container && container->IsDynamicRender();
+        return container && container->IsDynamicRender() &&
+               container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
     // no Animatable
     RefPtr<PropertyBool> enableLoading_;
