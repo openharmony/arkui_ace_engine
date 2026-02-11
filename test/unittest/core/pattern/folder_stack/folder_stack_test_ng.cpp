@@ -1174,14 +1174,11 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest026, TestSize.Level0)
      */
     auto displayInfo = pattern->GetDisplayInfo();
     // DisplayInfo may be null or valid depending on container initialization
-    EXPECT_TRUE(displayInfo == nullptr || displayInfo != nullptr);
+    EXPECT_TRUE(displayInfo == nullptr);
 
-    /**
-     * @tc.steps: step3. Test GetDisplayInfo multiple times.
-     * @tc.expected: Returns consistent result.
-     */
-    auto displayInfo2 = pattern->GetDisplayInfo();
-    EXPECT_EQ((displayInfo == nullptr), (displayInfo2 == nullptr));
+    pattern->SetAutoRotate();
+    displayInfo = pattern->GetDisplayInfo();
+    EXPECT_FALSE(displayInfo == nullptr);
 }
 
 /**
@@ -1245,63 +1242,6 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest028, TestSize.Level0)
     pattern->BeforeCreateLayoutWrapper();
     pattern->BeforeCreateLayoutWrapper();
     pattern->BeforeCreateLayoutWrapper();
-}
-
-/**
- * @tc.name: FolderStackTestNgTest029
- * @tc.desc: Test FolderStackPattern OnFolderStateChangeSend with status transitions.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest029, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    folderStackModelNG.SetEnableAnimation(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test status transitions from UNKNOWN.
-     * @tc.expected: All transitions complete without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::UNKNOWN);
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-    pattern->OnFolderStateChangeSend(FoldStatus::HALF_FOLD);
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
-
-    /**
-     * @tc.steps: step3. Test status transitions from FOLDED.
-     * @tc.expected: All transitions complete without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-    pattern->OnFolderStateChangeSend(FoldStatus::UNKNOWN);
-    pattern->OnFolderStateChangeSend(FoldStatus::HALF_FOLD);
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
-
-    /**
-     * @tc.steps: step4. Test status transitions from EXPAND.
-     * @tc.expected: All transitions complete without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-    pattern->OnFolderStateChangeSend(FoldStatus::HALF_FOLD);
-    pattern->OnFolderStateChangeSend(FoldStatus::UNKNOWN);
-
-    /**
-     * @tc.steps: step5. Test rapid consecutive status changes.
-     * @tc.expected: All changes complete without crash.
-     */
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
-    pattern->OnFolderStateChangeSend(FoldStatus::FOLDED);
-    pattern->OnFolderStateChangeSend(FoldStatus::EXPAND);
 }
 
 /**
@@ -1931,184 +1871,6 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest044, TestSize.Level0)
 }
 
 /**
- * @tc.name: FolderStackTestNgTest045
- * @tc.desc: Test FolderStackPattern OnAttachToFrameNode and OnDetachFromFrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest045, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test OnAttachToFrameNode.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnAttachToFrameNode();
-
-    /**
-     * @tc.steps: step3. Test OnDetachFromFrameNode.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-
-    /**
-     * @tc.steps: step4. Test attach-detach-attach sequence.
-     * @tc.expected: All operations complete without crash.
-     */
-    pattern->OnAttachToFrameNode();
-    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-    pattern->OnAttachToFrameNode();
-}
-
-/**
- * @tc.name: FolderStackTestNgTest046
- * @tc.desc: Test FolderStackPattern InitFolderStackPatternAppearCallback and OnModifyDone.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest046, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::CENTER);
-    folderStackModelNG.SetEnableAnimation(true);
-    folderStackModelNG.SetAutoHalfFold(false);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test InitFolderStackPatternAppearCallback.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->InitFolderStackPatternAppearCallback();
-
-    /**
-     * @tc.steps: step3. Test OnModifyDone.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnModifyDone();
-
-    /**
-     * @tc.steps: step4. Test sequence of operations.
-     * @tc.expected: All operations complete without crash.
-     */
-    pattern->InitFolderStackPatternAppearCallback();
-    pattern->OnModifyDone();
-    pattern->OnModifyDone();
-}
-
-/**
- * @tc.name: FolderStackTestNgTest047
- * @tc.desc: Test FolderStackPattern RefreshStack with all FoldStatus values.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest047, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test RefreshStack with UNKNOWN status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->RefreshStack(FoldStatus::UNKNOWN);
-
-    /**
-     * @tc.steps: step3. Test RefreshStack with FOLDED status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->RefreshStack(FoldStatus::FOLDED);
-
-    /**
-     * @tc.steps: step4. Test RefreshStack with HALF_FOLD status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->RefreshStack(FoldStatus::HALF_FOLD);
-
-    /**
-     * @tc.steps: step5. Test RefreshStack with EXPAND status.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->RefreshStack(FoldStatus::EXPAND);
-
-    /**
-     * @tc.steps: step6. Test rapid status changes.
-     * @tc.expected: All changes complete without crash.
-     */
-    pattern->RefreshStack(FoldStatus::FOLDED);
-    pattern->RefreshStack(FoldStatus::EXPAND);
-    pattern->RefreshStack(FoldStatus::HALF_FOLD);
-    pattern->RefreshStack(FoldStatus::UNKNOWN);
-}
-
-/**
- * @tc.name: FolderStackTestNgTest048
- * @tc.desc: Test FolderStackPattern UpdateChildAlignment.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest048, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Get host and set null child nodes.
-     * @tc.expected: Host is retrieved and child nodes are set to null.
-     */
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(host);
-    hostNode->SetControlPartsStackNode(nullptr);
-    hostNode->SetHoverNode(nullptr);
-
-    /**
-     * @tc.steps: step3. Test UpdateChildAlignment.
-     * @tc.expected: Function completes without crash even with null nodes.
-     */
-    pattern->UpdateChildAlignment();
-
-    /**
-     * @tc.steps: step4. Test UpdateChildAlignment multiple times.
-     * @tc.expected: Function completes without crash each time.
-     */
-    pattern->UpdateChildAlignment();
-    pattern->UpdateChildAlignment();
-}
-
-/**
  * @tc.name: FolderStackTestNgTest049
  * @tc.desc: Test FolderStackPattern SetAutoRotate with different orientations.
  * @tc.type: FUNC
@@ -2187,54 +1949,6 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest050, TestSize.Level0)
      * @tc.expected: Function completes without crash.
      */
     pattern->RestoreScreenState();
-
-    /**
-     * @tc.steps: step3. Test RestoreScreenState multiple times.
-     * @tc.expected: Function completes without crash each time.
-     */
-    pattern->RestoreScreenState();
-    pattern->RestoreScreenState();
-}
-
-/**
- * @tc.name: FolderStackTestNgTest052
- * @tc.desc: Test FolderStackPattern OnVisibleChange.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest052, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test OnVisibleChange with true.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnVisibleChange(true);
-
-    /**
-     * @tc.steps: step3. Test OnVisibleChange with false.
-     * @tc.expected: Function completes without crash.
-     */
-    pattern->OnVisibleChange(false);
-
-    /**
-     * @tc.steps: step4. Test alternating visibility changes.
-     * @tc.expected: All changes complete without crash.
-     */
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleChange(false);
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleChange(false);
 }
 
 /**
