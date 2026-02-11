@@ -62,7 +62,12 @@ ace_unittest("drawing_layout_utils_test_ng") {
 ace_unittest("overflow_test_ng") {
   module_name = "DrawingSet-Rect"
   type = "new"
-  sources = [ "vertical_overflow_handler_test_ng.cpp" ]
+  sources = [ 
+    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_pattern.cpp",
+    "vertical_overflow_handler_test_ng.cpp" ]
 }
 
 ace_unittest("overflow_collector_test_ng") {

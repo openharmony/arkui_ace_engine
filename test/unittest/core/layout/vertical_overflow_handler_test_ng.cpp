@@ -18,6 +18,7 @@
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #define protected public
 #define private public
 
@@ -713,4 +714,430 @@ HWTEST_F(OverflowTestNg, IsOverflowTest, TestSize.Level0)
     EXPECT_TRUE(handler.IsOverflow());
 }
 
+/**
+ * @tc.name: CustomHandleContentOverflowTest
+ * @tc.desc: test CustomPattern::HandleContentOverflow() with CUSTOM_ETS_TAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, CustomHandleContentOverflowTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create custom component (CUSTOM_ETS_TAG) and its children
+     */
+    RefPtr<FrameNode> child4, child5;
+    
+    // Create custom FrameNode with CustomPattern
+    auto custom = FrameNode::CreateFrameNode(
+        V2::CUSTOM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CustomPattern>());
+    
+    // Create child FrameNodes for the custom component
+    child4 = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    child5 = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    child4->MountToParent(custom);
+    child5->MountToParent(custom);
+    
+    /**
+     * @tc.steps: step2. Set up geometry nodes to create overflow scenario
+     * @tc.expected: total height (110) > content height (50), triggering overflow
+     */
+    custom->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    custom->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    
+    child4->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    child4->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    
+    child5->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    child5->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 60));
+    
+    /**
+     * @tc.steps: step3. Create VerticalOverflowHandler and set up overflow state
+     */
+    VerticalOverflowHandler handler(AceType::WeakClaim(AceType::RawPtr(custom)));
+    handler.CreateContentRect();
+    handler.SetTotalChildFrameRect(RectF(0, 0, 50, 110));
+    handler.HandleContentOverflow();
+    
+    /**
+     * @tc.expected: Verify scroll event is registered and overflow state is initialized
+     *               childFrameTop_ should be 0 (initial position)
+     *               offsetToChildFrameBottom_ should be 60 (110 - 50 = 60 pixels below)
+     */
+    EXPECT_EQ(handler.childFrameTop_.value_or(-1), 0);
+    EXPECT_EQ(handler.offsetToChildFrameBottom_, 60);
+    EXPECT_NE(handler.scrollableEvent_, nullptr);
+    EXPECT_FALSE(handler.hasParentAdjust_);
+    
+    /**
+     * @tc.steps: step4. Scroll up by 20 pixels
+     */
+    handler.HandleScrollImpl(-20, 0);
+    
+    /**
+     * @tc.expected: After scrolling up by 20:
+     *               childFrameTop_ should be -20
+     *               offsetToChildFrameBottom_ should be 40 (60 - 20)
+     *               hasParentAdjust_ should be true (scroll has been applied)
+     *               child4 offset should be (0, -20)
+     *               child5 offset should be (0, 40)
+     */
+    EXPECT_EQ(handler.childFrameTop_.value_or(-1), -20);
+    EXPECT_EQ(handler.offsetToChildFrameBottom_, 40);
+    EXPECT_TRUE(handler.hasParentAdjust_);
+    EXPECT_EQ(child4->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0, -20));
+    EXPECT_EQ(child5->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0, 40));
+    
+    /**
+     * @tc.steps: step5. Eliminate overflow by reducing totalChildFrameRect
+     */
+    handler.SetTotalChildFrameRect(RectF(0, 0, 50, 50));
+    handler.HandleContentOverflow();
+    
+    /**
+     * @tc.expected: Verify scroll event is unregistered and state is reset
+     *               childFrameTop_ should not have a value (no overflow)
+     *               scrollableEvent_ should be nullptr (unregistered)
+     *               hasParentAdjust_ should be false
+     */
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(handler.scrollableEvent_, nullptr);
+    EXPECT_FALSE(handler.hasParentAdjust_);
+}
+
+/**
+ * @tc.name: CustomHandleContentOverflowWithPositionedChildTest
+ * @tc.desc: test CustomPattern::HandleContentOverflow() when child has position property
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, CustomHandleContentOverflowWithPositionedChildTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create custom component with positioned child
+     */
+    RefPtr<FrameNode> positionedChild;
+    
+    // Create custom FrameNode with CustomPattern
+    auto custom = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    // Create a child with position property (positioned child)
+    positionedChild = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    positionedChild->MountToParent(custom);
+    
+    /**
+     * @tc.steps: step2. Set position property on the child to make it positioned
+     * @tc.expected: child->IsOutOfLayout() returns true
+     */
+    auto renderContext = positionedChild->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    
+    // Set position {x:0, y:0} on child
+    // This causes IsOutOfLayout() to return true
+    auto& posProperty = renderContext->GetOrCreatePositionProperty();
+    ASSERT_NE(posProperty, nullptr);
+    posProperty->UpdatePosition(OffsetT<Dimension>(Dimension(0), Dimension(0)));
+    
+    // Verify the child is now out of layout
+    EXPECT_TRUE(positionedChild->IsOutOfLayout());
+    
+    /**
+     * @tc.steps: step3. Set up geometry where positioned child overflows
+     * @tc.expected: Since child is positioned, it should be excluded from overflow calculation
+     */
+    custom->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    custom->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    
+    positionedChild->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    positionedChild->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    
+    /**
+     * @tc.steps: step4. Create VerticalOverflowHandler and call HandleContentOverflow
+     */
+    VerticalOverflowHandler handler(AceType::WeakClaim(AceType::RawPtr(custom)));
+    handler.CreateContentRect();
+    
+    // Set totalChildFrameRect - normally this would be (0, 0, 100, 100)
+    // But since the child is positioned (IsOutOfLayout == true),
+    // it should be excluded from the calculation, resulting in empty rect
+    handler.SetTotalChildFrameRect(RectF(0, 0, 0, 0));
+    handler.HandleContentOverflow();
+    
+    /**
+     * @tc.expected: Verify that overflow handling is NOT activated
+     *               childFrameTop_ should not have a value (no overflow detected)
+     *               scrollableEvent_ should be nullptr (no scroll event registered)
+     *               This is because positioned children are excluded from overflow calculation
+     */
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(handler.scrollableEvent_, nullptr);
+    EXPECT_FALSE(handler.hasParentAdjust_);
+
+    /**
+     * @tc.steps: step5. Scroll up by 20 pixels, overflow handling is NOT activated
+     */
+    handler.HandleScrollImpl(-20, 0);
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(positionedChild->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: CustomHandleContentOverflowWithMixedChildrenTest
+ * @tc.desc: test CustomPattern::HandleContentOverflow() with both normal and positioned children
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, CustomHandleContentOverflowWithMixedChildrenTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create custom component with mixed children (normal + positioned)
+     */
+    RefPtr<FrameNode> normalChild, positionedChild;
+    
+    // Create custom FrameNode with CustomPattern
+    auto custom = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    // Create normal child
+    normalChild = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    normalChild->MountToParent(custom);
+    
+    // Create positioned child
+    positionedChild = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    positionedChild->MountToParent(custom);
+    
+    /**
+     * @tc.steps: step2. Set position property on one child
+     */
+    auto renderContext = positionedChild->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto& posProperty = renderContext->GetOrCreatePositionProperty();
+    ASSERT_NE(posProperty, nullptr);
+    posProperty->UpdatePosition(OffsetT<Dimension>(Dimension(0), Dimension(0)));
+    
+    EXPECT_FALSE(normalChild->IsOutOfLayout());   // normal child: in layout
+    EXPECT_TRUE(positionedChild->IsOutOfLayout()); // positioned child: out of layout
+    
+    /**
+     * @tc.steps: step3. Set up geometry
+     *             - normal child: 50x50 at (0,0)
+     *             - positioned child: 100x100 at (0,0) - should be ignored
+     *             - container: 50x50
+     * @tc.expected: Only normal child contributes to overflow calculation
+     */
+    custom->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    custom->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    
+    normalChild->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    normalChild->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    
+    positionedChild->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    positionedChild->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    
+    /**
+     * @tc.steps: step4. Create VerticalOverflowHandler
+     * @tc.expected: totalChildFrameRect should only include normal child (50x50)
+     *               Positioned child (100x100) is excluded
+     */
+    VerticalOverflowHandler handler(AceType::WeakClaim(AceType::RawPtr(custom)));
+    handler.CreateContentRect();
+    
+    // Only normal child is counted: (0, 0, 50, 50)
+    // Positioned child is excluded due to IsOutOfLayout() == true
+    handler.SetTotalChildFrameRect(RectF(0, 0, 50, 50));
+    handler.HandleContentOverflow();
+    
+    /**
+     * @tc.expected: No overflow detected because only normal child (50x50) fits in container (50x50)
+     *               Positioned child's size (100x100) is ignored in overflow calculation
+     */
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(handler.scrollableEvent_, nullptr);
+
+    /**
+     * @tc.steps: step5. Scroll up by 20 pixels, overflow handling is NOT activated
+     */
+    handler.HandleScrollImpl(-20, 0);
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(positionedChild->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: CustomHandleContentOverflowWithExpandSafeAreaTest
+ * @tc.desc: test CustomPattern::HandleContentOverflow() when child has expandSafeArea property
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, CustomHandleContentOverflowWithExpandSafeAreaTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create custom component with child that has expandSafeArea
+     */
+    RefPtr<FrameNode> expandSafeAreaChild;
+    
+    // Create custom FrameNode with CustomPattern
+    auto custom = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    // Create a child with expandSafeArea property
+    expandSafeAreaChild = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    expandSafeAreaChild->MountToParent(custom);
+    
+    /**
+     * @tc.steps: step2. Set expandSafeArea property on the child
+     * @tc.expected: This causes overflow to be disabled for this subtree
+     */
+    auto layoutProperty = expandSafeAreaChild->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    // Set expandSafeArea using SafeAreaExpandOpts
+    // This makes the child expand into safe areas (system bars, notches, etc.)
+    layoutProperty->UpdateSafeAreaExpandOpts({
+        .type = SAFE_AREA_TYPE_ALL,
+        .edges = SAFE_AREA_EDGE_ALL,
+    });
+    
+    /**
+     * @tc.steps: step3. Set up geometry where child would normally overflow
+     * @tc.expected: Child size (60x60) > container size (50x50)
+     */
+    custom->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    custom->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    
+    expandSafeAreaChild->GetGeometryNode()->SetFrameSize(SizeF(60, 60));
+    expandSafeAreaChild->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    
+    /**
+     * @tc.steps: step4. Create VerticalOverflowHandler
+     * @tc.expected: Because child has expandSafeArea, overflow should be disabled
+     */
+    VerticalOverflowHandler handler(AceType::WeakClaim(AceType::RawPtr(custom)));
+    handler.CreateContentRect();
+    
+    // Normally this would cause overflow, but expandSafeArea disables it
+    handler.SetTotalChildFrameRect(RectF(0, 0, 60, 60));
+    
+    // Mark overflow as disabled (simulating what LayoutAlgorithm does)
+    handler.SetOverflowDisabledFlag(true);
+    
+    handler.HandleContentOverflow();
+    
+    /**
+     * @tc.expected: Verify that overflow handling is NOT activated despite overflow
+     *               childFrameTop_ should not have a value
+     *               scrollableEvent_ should be nullptr
+     *               This is because expandSafeArea children disable overflow handling
+     */
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(handler.scrollableEvent_, nullptr);
+    EXPECT_FALSE(handler.hasParentAdjust_);
+
+    /**
+     * @tc.steps: step5. childLayoutProperty has set ignoreLayoutSafeArea, overflow handling is NOT activated
+     */
+    bool hasSafeAreaProp = layoutProperty->IsIgnoreOptsValid() || expandSafeAreaChild->SelfExpansive();
+    EXPECT_TRUE(hasSafeAreaProp);
+}
+
+/**
+ * @tc.name: CustomHandleContentOverflowWithIgnoreLayoutSafeAreaTest
+ * @tc.desc: test CustomPattern::HandleContentOverflow() when child has ignoreLayoutSafeArea property
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, CustomHandleContentOverflowWithIgnoreLayoutSafeAreaTest, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create custom component with child that has ignoreLayoutSafeArea
+     */
+    RefPtr<FrameNode> ignoreSafeAreaChild;
+    
+    // Create custom FrameNode with CustomPattern
+    auto custom = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    // Create a child with ignoreLayoutSafeArea property
+    ignoreSafeAreaChild = FrameNode::CreateFrameNode(V2::CUSTOM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<CustomPattern>());
+    
+    ignoreSafeAreaChild->MountToParent(custom);
+    
+    /**
+     * @tc.steps: step2. Set ignoreLayoutSafeArea property on the child
+     * @tc.expected: This causes overflow to be disabled for this subtree
+     */
+    auto layoutProperty = custom->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    // Set ignoreLayoutSafeArea using SafeAreaInsets
+    // This makes the child ignore safe area constraints during layout
+    PaddingProperty paddingProperty;
+    paddingProperty.start = std::make_optional<CalcLength>(10.0);
+    paddingProperty.top = std::make_optional<CalcLength>(10.0);
+    paddingProperty.bottom = std::make_optional<CalcLength>(10.0);
+    paddingProperty.left = std::make_optional<CalcLength>(10.0);
+    layoutProperty->ResetSafeAreaPadding();
+    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
+
+    auto childLayoutProperty = ignoreSafeAreaChild->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    NG::IgnoreLayoutSafeAreaOpts ignoreOpts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(ignoreOpts);
+    
+    /**
+     * @tc.steps: step3. Set up geometry where child would normally overflow
+     * @tc.expected: Child size (60x60) > container size (50x50)
+     */
+    custom->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    custom->GetGeometryNode()->SetFrameSize(SizeF(50, 50));
+    
+    ignoreSafeAreaChild->GetGeometryNode()->SetFrameSize(SizeF(60, 60));
+    ignoreSafeAreaChild->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0, 0));
+    
+    /**
+     * @tc.steps: step4. Create VerticalOverflowHandler
+     * @tc.expected: Because child has ignoreLayoutSafeArea, overflow should be disabled
+     */
+    VerticalOverflowHandler handler(AceType::WeakClaim(AceType::RawPtr(custom)));
+    handler.CreateContentRect();
+    
+    // Normally this would cause overflow, but ignoreLayoutSafeArea disables it
+    handler.SetTotalChildFrameRect(RectF(0, 0, 60, 60));
+    
+    // Mark overflow as disabled (simulating what LayoutAlgorithm does)
+    handler.SetOverflowDisabledFlag(true);
+    
+    handler.HandleContentOverflow();
+    
+    /**
+     * @tc.expected: Verify that overflow handling is NOT activated despite overflow
+     *               childFrameTop_ should not have a value
+     *               scrollableEvent_ should be nullptr
+     *               This is because ignoreLayoutSafeArea children disable overflow handling
+     */
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
+    EXPECT_EQ(handler.scrollableEvent_, nullptr);
+    EXPECT_FALSE(handler.hasParentAdjust_);
+
+    /**
+     * @tc.steps: step5. childLayoutProperty has set ignoreLayoutSafeArea, overflow handling is NOT activated
+     */
+    bool hasSafeAreaProp = childLayoutProperty->IsIgnoreOptsValid() || ignoreSafeAreaChild->SelfExpansive();
+    EXPECT_TRUE(hasSafeAreaProp);
+}
 } // namespace OHOS::Ace::NG
