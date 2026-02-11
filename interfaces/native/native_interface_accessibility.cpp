@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <map>
+#include <string>
 
 #include "base/utils/utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_impl.h"
@@ -510,6 +511,22 @@ int32_t OH_ArkUI_FindAccessibilityActionArgumentByKey(
     CHECK_NULL_RETURN(arguments, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     CHECK_NULL_RETURN(key, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     *value = const_cast<char*>(arguments->FindValueByKey(key));
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
+}
+
+int32_t OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(
+    ArkUI_AccessibilityElementInfo *elementInfo, const char *identifier)
+{
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(identifier, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    constexpr size_t MAX_IDENTIFIER_LEN = 1024;
+    size_t len = strnlen(identifier, MAX_IDENTIFIER_LEN + 1);
+    if (len > MAX_IDENTIFIER_LEN) {
+        std::string truncatedIdentifier(identifier, 0, MAX_IDENTIFIER_LEN);
+        elementInfo->SetComponentIdentifier(truncatedIdentifier.c_str());
+    } else {
+        elementInfo->SetComponentIdentifier(identifier);
+    }
     return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 

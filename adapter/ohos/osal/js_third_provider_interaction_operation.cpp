@@ -220,6 +220,7 @@ void AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(
     accessibilityElementInfo.SetBlur(nativeInfo.GetBlur());
     accessibilityElementInfo.SetHitTestBehavior(nativeInfo.GetHitTestBehavior());
     accessibilityElementInfo.SetAccessibilityId(nativeInfo.GetElementId());
+    accessibilityElementInfo.SetInspectorKey(nativeInfo.GetComponentIdentifier());
 }
 
 void AccessibilityThirdProviderUtils::TransformAccessbilityEventInfo(
@@ -278,7 +279,6 @@ void JsThirdProviderInteractionOperation::FillNodeConfig(
     info.SetChildTreeIdAndWinId(config.childTreeId, config.childWindowId);
     info.SetParentWindowId(config.parentWindowId);
     info.SetBundleName(config.bundleName);
-    info.SetInspectorKey(config.inspectorKey);
     int64_t splitElementId = info.GetAccessibilityId();
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(config.belongTreeId, splitElementId);
     info.SetAccessibilityId(splitElementId);
@@ -386,9 +386,30 @@ void JsThirdProviderInteractionOperation::SearchElementInfoBySpecificProperty(co
     const SpecificPropertyParam &param, const int32_t requestId,
     AccessibilityElementOperatorCallback &callback)
 {
-    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> targetInfos;
     std::list<AccessibilityElementInfo> treeInfos;
-    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+    if (param.propertyType != SEARCH_TYPE::CUSTOMID) {
+        callback.SetSearchElementInfoBySpecificPropertyResult(targetInfos, treeInfos, requestId);
+        return;
+    }
+    std::list<AccessibilityElementInfo> infos;
+    int32_t realMode = static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN);
+    bool ret = FindAccessibilityNodeInfosByIdFromProvider(-1, realMode, requestId, infos);
+    if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "SearchElementInfoBySpecificProperty failed.");
+        callback.SetSearchElementInfoBySpecificPropertyResult(targetInfos, treeInfos, requestId);
+        return;
+    }
+    for (auto& nodeInfo : infos) {
+        if (nodeInfo.GetInspectorKey() == param.propertyTarget) {
+            targetInfos.emplace_back(nodeInfo);
+            break;
+        }
+    }
+    auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->UpdateElementInfosTreeId(targetInfos);
+    callback.SetSearchElementInfoBySpecificPropertyResult(targetInfos, treeInfos, requestId);
 }
 
 void JsThirdProviderInteractionOperation::SearchElementInfosByText(
