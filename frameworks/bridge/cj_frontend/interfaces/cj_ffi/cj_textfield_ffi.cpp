@@ -245,8 +245,11 @@ void FfiOHOSAceFrameworkTextFieldResetMaxLength()
 void FfiOHOSAceFrameworkTextFieldSetFontSize(double value, int32_t unit)
 {
     Dimension size(value, static_cast<DimensionUnit>(unit));
-    if (size.IsNegative()) {
-        size.SetValue(0.0);
+    // For API versions >= 23, negative font sizes are handled by the layoutmodel.
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        if (size.IsNegative()) {
+            size.SetValue(0.0);
+        }
     }
 
     TextFieldModel::GetInstance()->SetFontSize(size);
