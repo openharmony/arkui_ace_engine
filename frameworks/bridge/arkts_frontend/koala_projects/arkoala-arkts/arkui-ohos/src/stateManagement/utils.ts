@@ -19,6 +19,26 @@ import { MonitorFunctionDecorator } from './decoratorImpl/decoratorMonitor';
 import { ExtendableComponent } from '../component/extendableComponent';
 import { BusinessError } from '@ohos.base';
 import { CustomComponentV2 } from '../component/customComponent'
+import { canBeObserved as canBeObservedImpl } from './tools/stateMgmtDFX';
+
+export interface ElementInfo {
+    elementName: string;
+    elementId: int;
+}
+
+export interface DecoratorInfo {
+    decoratorName: string;
+    stateVariableName: string;
+    owningComponentOrClassName: string;
+    owningComponentId: int;
+    dependentInfo: Array<ElementInfo>;
+}
+
+export interface ObservedResult {
+    isObserved: boolean;
+    reason: string;
+    decoratorInfo: Array<DecoratorInfo>;
+}
 
 export class UIUtils {
     static makeObserved<T>(source: T): T {
@@ -32,6 +52,17 @@ export class UIUtils {
     }
     static makeBinding<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
         return uiUtils.makeBindingMutable(getter, setter);
+    }
+
+    /**
+     * Check if an object can be observed by the state management framework.
+     * This is the public API for DFX debugging purposes.
+     *
+     * @param obj The object to check
+     * @returns ObservedResult containing observation status and related information
+     */
+    static canBeObserved(obj: Object): ObservedResult {
+        return canBeObservedImpl(obj);
     }
 
     private static readonly DEFAULT_PATH: string = 'MONITOR_';

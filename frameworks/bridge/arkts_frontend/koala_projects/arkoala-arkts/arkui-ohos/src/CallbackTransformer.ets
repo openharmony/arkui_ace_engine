@@ -27,6 +27,7 @@ import { ObserveSingleton } from './stateManagement/base/observeSingleton';
 import { ExtendableComponent } from './component/extendableComponent';
 import { ResponseType } from "./component/enums"
 import { ArkCustomComponentRootPeer } from './component/staticComponents';
+import { ElementInfo } from './stateManagement/utils';
 
 // Improve: need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
@@ -97,6 +98,13 @@ export class FreeRootNode extends PeerNode {
         this.componentRoot = undefined;
         this.context = undefined;
         super.dispose();
+    }
+    getElementInfo(): ElementInfo | undefined {
+        try {
+            return this.componentRoot ? this.componentRoot!.getElementInfo() : super.getElementInfo();
+        } catch (e) {
+            return undefined;
+        }
     }
 }
 

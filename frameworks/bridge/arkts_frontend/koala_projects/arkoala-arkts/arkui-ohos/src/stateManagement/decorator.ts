@@ -19,6 +19,7 @@ import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
+import { IncrementalNode } from '@koalaui/runtime';
 
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
@@ -116,6 +117,7 @@ export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 export interface IMutableStateMeta {
     addRef(): void;
     fireChange(): void;
+    getDependentNodeInfo(): Set<IncrementalNode> | undefined;
 }
 
 export interface IMutableKeyedStateMeta {
@@ -145,6 +147,7 @@ export interface ConsumeOptions<T> {
 
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
+    makeMutableStateMeta(observedObject: IObservedObject | undefined, propertyName: string): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
     makeLocal<T>(owningView: IVariableOwner, varName: string, initValue: T): ILocalDecoratedVariable<T>;
     makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T>;

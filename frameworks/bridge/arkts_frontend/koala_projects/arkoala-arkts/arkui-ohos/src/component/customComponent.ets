@@ -504,6 +504,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         const classPath = Class.of(this.instance).getName();
         return classPath.substring(classPath.lastIndexOf('.') + 1);
     }
+
+    getName(): string {
+        return transferTypeName(Class.of(this.instance).getName());
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(

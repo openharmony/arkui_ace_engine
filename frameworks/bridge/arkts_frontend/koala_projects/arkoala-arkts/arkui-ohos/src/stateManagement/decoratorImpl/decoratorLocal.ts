@@ -18,12 +18,15 @@ import { ILocalDecoratedVariable, IVariableOwner } from '../decorator';
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements ILocalDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Local', owningView, varName);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+
+        // Register the relationship between this Local variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     get(): T {
@@ -32,6 +35,7 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);
+            this.selfTrack();
         }
         return value;
     }
@@ -42,10 +46,24 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         if (value === newValue) {
             return;
         }
-        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+
+        // Update ObservedObjectRegistry registration before setting the new value
+        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+        this.updateObservedObjectRegistration(value, processedNewValue);
+
+        this.backing_.setNoCheck(processedNewValue);
     }
 
     resetOnReuse(newValue: T): void {
         this.set(newValue);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.backing_.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }
