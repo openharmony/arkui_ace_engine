@@ -87,13 +87,19 @@ export declare class ArkNavDestinationPeer extends ArkCommonMethodPeer {
     public setOnNewParamAttribute(value: ((value0: Object | null | undefined) => void) | undefined): void;
     public setPreferredOrientationAttribute(value: window.Orientation | undefined): void;
     public setEnableNavigationIndicatorAttribute(value: boolean | undefined): void;
-    public setTitleAttribute(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): void;
+    public setTitleAttribute(
+        value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined,
+        options?: NavigationTitleOptions): void;
     public setHideTitleBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void;
-    public setBackButtonIconAttribute(icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void;
-    public setMenusAttribute(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void;
-    public setToolbarConfigurationAttribute(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): void;
+    public setBackButtonIconAttribute(
+        icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void;
+    public setMenusAttribute(
+        items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void;
+    public setToolbarConfigurationAttribute(
+        toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): void;
     public setHideToolBarAttribute(hide: boolean | undefined, animated?: boolean): void;
-    public setIgnoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void;
+    public setIgnoreLayoutSafeAreaAttribute(
+        types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void;
     public setEnableStatusBarAttribute(enabled: boolean | undefined, animated?: boolean): void;
 }
 
