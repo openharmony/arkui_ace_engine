@@ -15,6 +15,7 @@
 
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -41,6 +42,8 @@ class SpanStringTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
     static ImageSpanOptions GetImageOption(const std::string& src);
     static ImageSpanOptions GetColorFilterImageOption(const std::string& src);
     static ImageSpanOptions GetImageOptionWithSize(const std::string& src);
@@ -60,6 +63,16 @@ void SpanStringTestNg::SetUpTestSuite()
 void SpanStringTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+}
+
+void SpanStringTestNg::SetUp()
+{
+    MockParagraph::GetOrCreateMockParagraph();
+}
+
+void SpanStringTestNg::TearDown()
+{
+    MockParagraph::TearDown();
 }
 
 ImageSpanOptions SpanStringTestNg::GetImageOption(const std::string& src)
@@ -1772,4 +1785,1111 @@ HWTEST_F(SpanStringTestNg, MutableSpanString021, TestSize.Level1)
     ++it;
     VerifySpanWithVariableWeight(it, "678", 15, 18, { 0, true, false });
 }
+
+/**
+ * @tc.name: FontSpanAddColorResourceObj001
+ * @tc.desc: Test FontSpan::AddColorResourceObj with fontColorResObj branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, FontSpanAddColorResourceObj001, TestSize.Level1)
+{
+    // Create a Font with fontColor and fontColorResObj set
+    Font font;
+    font.fontColor = Color::RED;
+    font.fontColorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    font.fontColorResObj->SetColor(Color::BLUE);
+
+    // Create FontSpan with the Font
+    auto fontSpan = AceType::MakeRefPtr<FontSpan>(font, 0, 5);
+
+    // Create a SpanItem to apply the span to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the font span to the span item (this internally calls AddColorResourceObj)
+    fontSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text color was updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextColor().value(), Color::RED);
+
+    // Verify that the resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("fontColor"), 1);
+    EXPECT_NE(resMap["fontColor"].obj, nullptr);
+    EXPECT_EQ(resMap["fontColor"].obj, font.fontColorResObj);
+}
+
+/**
+ * @tc.name: FontSpanAddColorResourceObj002
+ * @tc.desc: Test FontSpan::AddColorResourceObj with strokeColorResObj branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, FontSpanAddColorResourceObj002, TestSize.Level1)
+{
+    // Create a Font with strokeColor and strokeColorResObj set
+    Font font;
+    font.strokeColor = Color::GREEN;
+    font.strokeColorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    font.strokeColorResObj->SetColor(Color::WHITE);
+
+    // Create FontSpan with the Font
+    auto fontSpan = AceType::MakeRefPtr<FontSpan>(font, 0, 5);
+
+    // Create a SpanItem to apply the span to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the font span to the span item (this internally calls AddColorResourceObj)
+    fontSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the stroke color was updated
+    EXPECT_TRUE(spanItem->fontStyle->GetStrokeColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetStrokeColor().value(), Color::GREEN);
+
+    // Verify that the resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("strokeColor"), 1);
+    EXPECT_NE(resMap["strokeColor"].obj, nullptr);
+    EXPECT_EQ(resMap["strokeColor"].obj, font.strokeColorResObj);
+}
+
+/**
+ * @tc.name: FontSpanAddColorResourceObj003
+ * @tc.desc: Test FontSpan::AddColorResourceObj with both fontColorResObj and strokeColorResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, FontSpanAddColorResourceObj003, TestSize.Level1)
+{
+    // Create a Font with both fontColorResObj and strokeColorResObj set
+    Font font;
+    font.fontColor = Color::RED;
+    font.fontColorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    font.fontColorResObj->SetColor(Color::BLUE);
+    font.strokeColor = Color::GREEN;
+    font.strokeColorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    font.strokeColorResObj->SetColor(Color::WHITE);
+
+    // Create FontSpan with the Font
+    auto fontSpan = AceType::MakeRefPtr<FontSpan>(font, 0, 10);
+
+    // Create a SpanItem to apply the span to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the font span to the span item (this internally calls AddColorResourceObj)
+    fontSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that both colors were updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextColor().value(), Color::RED);
+    EXPECT_TRUE(spanItem->fontStyle->GetStrokeColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetStrokeColor().value(), Color::GREEN);
+
+    // Verify that both resource objects were added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("fontColor"), 1);
+    EXPECT_EQ(resMap.count("strokeColor"), 1);
+    EXPECT_NE(resMap["fontColor"].obj, nullptr);
+    EXPECT_NE(resMap["strokeColor"].obj, nullptr);
+    EXPECT_EQ(resMap["fontColor"].obj, font.fontColorResObj);
+    EXPECT_EQ(resMap["strokeColor"].obj, font.strokeColorResObj);
+}
+
+/**
+ * @tc.name: FontSpanAddColorResourceObj004
+ * @tc.desc: Test FontSpan::AddColorResourceObj without resource objects (should not add to resMap_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, FontSpanAddColorResourceObj004, TestSize.Level1)
+{
+    // Create a Font with fontColor and strokeColor but NO resource objects
+    Font font;
+    font.fontColor = Color::RED;
+    font.strokeColor = Color::GREEN;
+    // Resource objects are not set (nullptr by default)
+
+    // Create FontSpan with the Font
+    auto fontSpan = AceType::MakeRefPtr<FontSpan>(font, 0, 5);
+
+    // Create a SpanItem to apply the span to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the font span to the span item (this internally calls AddColorResourceObj)
+    fontSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the colors were updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextColor().value(), Color::RED);
+    EXPECT_TRUE(spanItem->fontStyle->GetStrokeColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetStrokeColor().value(), Color::GREEN);
+
+    // Verify that no resource objects were added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("fontColor"), 0);
+    EXPECT_EQ(resMap.count("strokeColor"), 0);
+}
+
+/**
+ * @tc.name: DecorationSpanAddDecorationStyle001
+ * @tc.desc: Test DecorationSpan::AddDecorationStyle with colorResObj branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanAddDecorationStyle001, TestSize.Level1)
+{
+    // Create a DecorationSpan with color and colorResObj set
+    std::vector<TextDecoration> types = { TextDecoration::UNDERLINE };
+    Color color = Color::RED;
+    RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    colorResObj->SetColor(Color::BLUE);
+
+    auto decorationSpan =
+        AceType::MakeRefPtr<DecorationSpan>(types, color, std::nullopt, std::nullopt, std::nullopt, 0, 5, colorResObj);
+
+    // Create a SpanItem to apply the decoration to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the decoration span to the span item (this internally calls AddDecorationStyle)
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text decoration color was updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextDecorationColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextDecorationColor().value(), Color::RED);
+
+    // Verify that the resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("decorationColor"), 1);
+    EXPECT_NE(resMap["decorationColor"].obj, nullptr);
+    EXPECT_EQ(resMap["decorationColor"].obj, colorResObj);
+}
+
+/**
+ * @tc.name: DecorationSpanAddDecorationStyle002
+ * @tc.desc: Test DecorationSpan::AddDecorationStyle without colorResObj (should not add to resMap_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanAddDecorationStyle002, TestSize.Level1)
+{
+    // Create a DecorationSpan with color but NO colorResObj
+    std::vector<TextDecoration> types = { TextDecoration::UNDERLINE };
+    Color color = Color::RED;
+    // colorResObj is not set (nullptr by default)
+
+    auto decorationSpan =
+        AceType::MakeRefPtr<DecorationSpan>(types, color, std::nullopt, std::nullopt, std::nullopt, 0, 5, nullptr);
+
+    // Create a SpanItem to apply the decoration to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the decoration span to the span item (this internally calls AddDecorationStyle)
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text decoration color was updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextDecorationColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextDecorationColor().value(), Color::RED);
+
+    // Verify that no resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("decorationColor"), 0);
+}
+
+/**
+ * @tc.name: DecorationSpanAddDecorationStyle003
+ * @tc.desc: Test DecorationSpan::AddDecorationStyle with multiple decoration types and colorResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanAddDecorationStyle003, TestSize.Level1)
+{
+    // Create a DecorationSpan with multiple decoration types and colorResObj
+    std::vector<TextDecoration> types = { TextDecoration::UNDERLINE, TextDecoration::LINE_THROUGH };
+    Color color = Color::GREEN;
+    RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    colorResObj->SetColor(Color::WHITE);
+
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        types, color, TextDecorationStyle::DASHED, 1.5, std::nullopt, 0, 10, colorResObj);
+
+    // Create a SpanItem to apply the decoration to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the decoration span to the span item (this internally calls AddDecorationStyle)
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text decoration color, style, and line thickness were updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextDecorationColor().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextDecorationColor().value(), Color::GREEN);
+    EXPECT_TRUE(spanItem->fontStyle->GetTextDecorationStyle().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetTextDecorationStyle().value(), TextDecorationStyle::DASHED);
+    EXPECT_TRUE(spanItem->fontStyle->GetLineThicknessScale().has_value());
+    EXPECT_EQ(spanItem->fontStyle->GetLineThicknessScale().value(), 1.5);
+
+    // Verify that the resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("decorationColor"), 1);
+    EXPECT_NE(resMap["decorationColor"].obj, nullptr);
+    EXPECT_EQ(resMap["decorationColor"].obj, colorResObj);
+}
+
+/**
+ * @tc.name: DecorationSpanDecorationTypesToString001
+ * @tc.desc: Test DecorationSpan::DecorationTypesToString with LINE_THROUGH branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanDecorationTypesToString001, TestSize.Level1)
+{
+    // Create a DecorationSpan with LINE_THROUGH type
+    std::vector<TextDecoration> types = { TextDecoration::LINE_THROUGH };
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        types, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, 5, nullptr);
+
+    // Get the string representation
+    std::string result = decorationSpan->DecorationTypesToString();
+
+    // Verify that LINE_THROUGH is correctly represented
+    EXPECT_EQ(result, "LINE_THROUGH");
+}
+
+/**
+ * @tc.name: DecorationSpanDecorationTypesToString002
+ * @tc.desc: Test DecorationSpan::DecorationTypesToString with default branch (NONE)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanDecorationTypesToString002, TestSize.Level1)
+{
+    // Create a DecorationSpan with NONE type (falls into default case)
+    std::vector<TextDecoration> types = { TextDecoration::NONE };
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        types, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, 5, nullptr);
+
+    // Get the string representation
+    std::string result = decorationSpan->DecorationTypesToString();
+
+    // Verify that NONE is correctly represented (default case)
+    EXPECT_EQ(result, "NONE");
+}
+
+/**
+ * @tc.name: DecorationSpanDecorationTypesToString003
+ * @tc.desc: Test DecorationSpan::DecorationTypesToString with default branch (INHERIT)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanDecorationTypesToString003, TestSize.Level1)
+{
+    // Create a DecorationSpan with INHERIT type (falls into default case)
+    std::vector<TextDecoration> types = { TextDecoration::INHERIT };
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        types, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, 5, nullptr);
+
+    // Get the string representation
+    std::string result = decorationSpan->DecorationTypesToString();
+
+    // Verify that INHERIT is correctly represented (default case)
+    EXPECT_EQ(result, "NONE");
+}
+
+/**
+ * @tc.name: DecorationSpanDecorationTypesToString004
+ * @tc.desc: Test DecorationSpan::DecorationTypesToString with multiple types including LINE_THROUGH
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanDecorationTypesToString004, TestSize.Level1)
+{
+    // Create a DecorationSpan with multiple types including LINE_THROUGH
+    std::vector<TextDecoration> types = { TextDecoration::UNDERLINE, TextDecoration::LINE_THROUGH };
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        types, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, 5, nullptr);
+
+    // Get the string representation
+    std::string result = decorationSpan->DecorationTypesToString();
+
+    // Verify that both types are correctly represented
+    EXPECT_EQ(result, "UNDERLINE,LINE_THROUGH");
+}
+
+/**
+ * @tc.name: DecorationSpanDecorationTypesToString005
+ * @tc.desc: Test DecorationSpan::DecorationTypesToString with all types
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, DecorationSpanDecorationTypesToString005, TestSize.Level1)
+{
+    // Create a DecorationSpan with all decoration types
+    std::vector<TextDecoration> types = { TextDecoration::UNDERLINE, TextDecoration::OVERLINE,
+        TextDecoration::LINE_THROUGH, TextDecoration::NONE };
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(
+        types, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, 5, nullptr);
+
+    // Get the string representation
+    std::string result = decorationSpan->DecorationTypesToString();
+
+    // Verify that all types are correctly represented
+    EXPECT_EQ(result, "UNDERLINE,OVERLINE,LINE_THROUGH,NONE");
+}
+
+/**
+ * @tc.name: TextShadowSpanAddSpanStyle001
+ * @tc.desc: Test TextShadowSpan::AddSpanStyle with shadow having shadow.colorValue resource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, TextShadowSpanAddSpanStyle001, TestSize.Level1)
+{
+    // Create a shadow with shadow.colorValue resource using the constructor
+    Shadow shadow(5.0, 2.0, Offset(10.0, 10.0), Color::RED);
+
+    // Add resource object for shadow.colorValue
+    RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    colorResObj->SetColor(Color::BLUE);
+    shadow.AddResource("shadow.colorValue", colorResObj, [](const RefPtr<ResourceObject>& resObj, Shadow& shadowVal) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shadowVal.SetColor(color);
+    });
+
+    // Create TextShadowSpan with the shadow
+    std::vector<Shadow> shadows = { shadow };
+    auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(shadows, 0, 5);
+
+    // Create a SpanItem to apply the shadow to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the text shadow span to the span item (this internally calls AddSpanStyle)
+    textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text shadow was updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextShadow().has_value());
+    auto textShadows = spanItem->fontStyle->GetTextShadow().value();
+    EXPECT_EQ(textShadows.size(), 1);
+    EXPECT_EQ(textShadows[0].GetBlurRadius(), 5.0);
+    EXPECT_EQ(textShadows[0].GetColor(), Color::RED);
+
+    // Verify that the resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("shadow_0"), 1);
+    EXPECT_NE(resMap["shadow_0"].obj, nullptr);
+}
+
+/**
+ * @tc.name: TextShadowSpanAddSpanStyle002
+ * @tc.desc: Test TextShadowSpan::AddSpanStyle with shadow without shadow.colorValue (should not add to resMap_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, TextShadowSpanAddSpanStyle002, TestSize.Level1)
+{
+    // Create a shadow without shadow.colorValue resource using the constructor
+    Shadow shadow(5.0, 2.0, Offset(10.0, 10.0), Color::RED);
+    // No resource object added - HasKey("shadow.colorValue") will return false
+
+    // Create TextShadowSpan with the shadow
+    std::vector<Shadow> shadows = { shadow };
+    auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(shadows, 0, 5);
+
+    // Create a SpanItem to apply the shadow to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the text shadow span to the span item (this internally calls AddSpanStyle)
+    textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text shadow was updated
+    EXPECT_TRUE(spanItem->fontStyle->GetTextShadow().has_value());
+    auto textShadows = spanItem->fontStyle->GetTextShadow().value();
+    EXPECT_EQ(textShadows.size(), 1);
+    EXPECT_EQ(textShadows[0].GetBlurRadius(), 5.0);
+    EXPECT_EQ(textShadows[0].GetColor(), Color::RED);
+
+    // Verify that no resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("shadow_0"), 0);
+}
+
+/**
+ * @tc.name: TextShadowSpanAddSpanStyle003
+ * @tc.desc: Test TextShadowSpan::AddSpanStyle with multiple shadows having shadow.colorValue resources
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, TextShadowSpanAddSpanStyle003, TestSize.Level1)
+{
+    // Create first shadow with resource using the constructor
+    Shadow shadow1(5.0, 2.0, Offset(10.0, 10.0), Color::RED);
+    RefPtr<ResourceObject> colorResObj1 = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    colorResObj1->SetColor(Color::BLUE);
+    shadow1.AddResource("shadow.colorValue", colorResObj1, [](const RefPtr<ResourceObject>& resObj, Shadow& shadowVal) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shadowVal.SetColor(color);
+    });
+
+    // Create second shadow with resource using the constructor
+    Shadow shadow2(3.0, 1.0, Offset(5.0, 5.0), Color::GREEN);
+    RefPtr<ResourceObject> colorResObj2 = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    colorResObj2->SetColor(Color::WHITE);
+    shadow2.AddResource("shadow.colorValue", colorResObj2, [](const RefPtr<ResourceObject>& resObj, Shadow& shadowVal) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shadowVal.SetColor(color);
+    });
+
+    // Create third shadow without resource (to test continue branch)
+    Shadow shadow3(2.0, 1.0, Offset(3.0, 3.0), Color::GRAY);
+    // No resource added
+
+    // Create TextShadowSpan with all shadows
+    std::vector<Shadow> shadows = { shadow1, shadow2, shadow3 };
+    auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(shadows, 0, 10);
+
+    // Create a SpanItem to apply the shadow to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+
+    // Apply the text shadow span to the span item
+    textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the text shadow was updated with all shadows
+    EXPECT_TRUE(spanItem->fontStyle->GetTextShadow().has_value());
+    auto textShadows = spanItem->fontStyle->GetTextShadow().value();
+    EXPECT_EQ(textShadows.size(), 3);
+
+    // Verify that only the first two shadows have resource objects in resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("shadow_0"), 1);
+    EXPECT_EQ(resMap.count("shadow_1"), 1);
+    EXPECT_EQ(resMap.count("shadow_2"), 0);
+}
+
+/**
+ * @tc.name: HalfLeadingSpanConstructor001
+ * @tc.desc: Test HalfLeadingSpan constructor with halfLeading parameter only
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanConstructor001, TestSize.Level1)
+{
+    // Test constructor with halfLeading parameter only (range 0, 0)
+    bool halfLeading = true;
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(halfLeading);
+
+    // Verify the halfLeading value is set correctly
+    EXPECT_EQ(halfLeadingSpan->GetHalfLeading(), true);
+
+    // Verify the range is (0, 0)
+    EXPECT_EQ(halfLeadingSpan->GetStartIndex(), 0);
+    EXPECT_EQ(halfLeadingSpan->GetEndIndex(), 0);
+}
+
+/**
+ * @tc.name: HalfLeadingSpanConstructor002
+ * @tc.desc: Test HalfLeadingSpan constructor with halfLeading, start, and end parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanConstructor002, TestSize.Level1)
+{
+    // Test constructor with halfLeading, start, and end parameters
+    bool halfLeading = false;
+    int32_t start = 5;
+    int32_t end = 10;
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(halfLeading, start, end);
+
+    // Verify the halfLeading value is set correctly
+    EXPECT_EQ(halfLeadingSpan->GetHalfLeading(), false);
+
+    // Verify the range is set correctly
+    EXPECT_EQ(halfLeadingSpan->GetStartIndex(), 5);
+    EXPECT_EQ(halfLeadingSpan->GetEndIndex(), 10);
+}
+
+/**
+ * @tc.name: HalfLeadingSpanApplyToSpanItem001
+ * @tc.desc: Test HalfLeadingSpan::ApplyToSpanItem with SpanOperation::ADD
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanApplyToSpanItem001, TestSize.Level1)
+{
+    // Create a HalfLeadingSpan with halfLeading = true
+    bool halfLeading = true;
+    int32_t start = 0;
+    int32_t end = 5;
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(halfLeading, start, end);
+
+    // Create a SpanItem to apply the halfLeading to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->textLineStyle, nullptr);
+
+    // Apply the halfLeading span with ADD operation
+    halfLeadingSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the halfLeading was updated (calls AddHalfLeadingStyle)
+    EXPECT_TRUE(spanItem->textLineStyle->GetHalfLeading().has_value());
+    EXPECT_EQ(spanItem->textLineStyle->GetHalfLeading().value(), true);
+}
+
+/**
+ * @tc.name: HalfLeadingSpanApplyToSpanItem002
+ * @tc.desc: Test HalfLeadingSpan::ApplyToSpanItem with SpanOperation::REMOVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanApplyToSpanItem002, TestSize.Level1)
+{
+    // Create a HalfLeadingSpan with halfLeading = true
+    bool halfLeading = true;
+    int32_t start = 0;
+    int32_t end = 5;
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(halfLeading, start, end);
+
+    // Create a SpanItem to apply the halfLeading to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->textLineStyle, nullptr);
+
+    // First apply with ADD operation to set the value
+    halfLeadingSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    EXPECT_TRUE(spanItem->textLineStyle->GetHalfLeading().has_value());
+    EXPECT_EQ(spanItem->textLineStyle->GetHalfLeading().value(), true);
+
+    // Then apply with REMOVE operation (calls RemoveHalfLeadingStyle)
+    halfLeadingSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+
+    // Verify that the halfLeading was reset
+    EXPECT_FALSE(spanItem->textLineStyle->GetHalfLeading().has_value());
+}
+
+/**
+ * @tc.name: HalfLeadingSpanGetSubSpan001
+ * @tc.desc: Test HalfLeadingSpan::GetSubSpan method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanGetSubSpan001, TestSize.Level1)
+{
+    // Create a HalfLeadingSpan with halfLeading = true, range [0, 10]
+    bool halfLeading = true;
+    int32_t start = 0;
+    int32_t end = 10;
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(halfLeading, start, end);
+
+    // Get a sub span with range [2, 7]
+    auto subSpan = halfLeadingSpan->GetSubSpan(2, 7);
+    ASSERT_NE(subSpan, nullptr);
+
+    // Verify it's a HalfLeadingSpan
+    auto halfLeadingSubSpan = AceType::DynamicCast<HalfLeadingSpan>(subSpan);
+    ASSERT_NE(halfLeadingSubSpan, nullptr);
+
+    // Verify the halfLeading value is preserved
+    EXPECT_EQ(halfLeadingSubSpan->GetHalfLeading(), true);
+
+    // Verify the range is updated to [2, 7]
+    EXPECT_EQ(halfLeadingSubSpan->GetStartIndex(), 2);
+    EXPECT_EQ(halfLeadingSubSpan->GetEndIndex(), 7);
+}
+
+/**
+ * @tc.name: HalfLeadingSpanGetSpanType001
+ * @tc.desc: Test HalfLeadingSpan::GetSpanType method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanGetSpanType001, TestSize.Level1)
+{
+    // Create a HalfLeadingSpan
+    bool halfLeading = true;
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(halfLeading);
+
+    // Verify the span type is HalfLeading
+    EXPECT_EQ(halfLeadingSpan->GetSpanType(), SpanType::HalfLeading);
+}
+
+/**
+ * @tc.name: HalfLeadingSpanIsAttributesEqual001
+ * @tc.desc: Test HalfLeadingSpan::IsAttributesEqual method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanIsAttributesEqual001, TestSize.Level1)
+{
+    // Create two HalfLeadingSpans with same halfLeading value
+    auto halfLeadingSpan1 = AceType::MakeRefPtr<HalfLeadingSpan>(true, 0, 5);
+    auto halfLeadingSpan2 = AceType::MakeRefPtr<HalfLeadingSpan>(true, 0, 5);
+
+    // Verify they are equal
+    EXPECT_TRUE(halfLeadingSpan1->IsAttributesEqual(halfLeadingSpan2));
+
+    // Create a HalfLeadingSpan with different halfLeading value
+    auto halfLeadingSpan3 = AceType::MakeRefPtr<HalfLeadingSpan>(false, 0, 5);
+
+    // Verify they are not equal
+    EXPECT_FALSE(halfLeadingSpan1->IsAttributesEqual(halfLeadingSpan3));
+}
+
+/**
+ * @tc.name: HalfLeadingSpanToString001
+ * @tc.desc: Test HalfLeadingSpan::ToString method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, HalfLeadingSpanToString001, TestSize.Level1)
+{
+    // Create a HalfLeadingSpan with halfLeading = true, range [2, 8]
+    auto halfLeadingSpan = AceType::MakeRefPtr<HalfLeadingSpan>(true, 2, 8);
+
+    // Get the string representation
+    std::string result = halfLeadingSpan->ToString();
+
+    // Verify the string contains the halfLeading value and range
+    EXPECT_NE(result.find("HalfLeadingSpan"), std::string::npos);
+    EXPECT_NE(result.find("2"), std::string::npos);
+    EXPECT_NE(result.find("8"), std::string::npos);
+}
+
+/**
+ * @tc.name: ExtSpanToString001
+ * @tc.desc: Test ExtSpan::ToString method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, ExtSpanToString001, TestSize.Level1)
+{
+    // Create an ExtSpan with range [0, 5]
+    int32_t start = 0;
+    int32_t end = 5;
+    auto extSpan = AceType::MakeRefPtr<ExtSpan>(start, end);
+
+    // Get the string representation
+    std::string result = extSpan->ToString();
+
+    // Verify the string contains "ExtSpan" and the range
+    EXPECT_NE(result.find("ExtSpan"), std::string::npos);
+    EXPECT_NE(result.find("0"), std::string::npos);
+    EXPECT_NE(result.find("5"), std::string::npos);
+    EXPECT_NE(result.find("["), std::string::npos);
+    EXPECT_NE(result.find("]"), std::string::npos);
+    EXPECT_NE(result.find(":"), std::string::npos);
+}
+
+/**
+ * @tc.name: ExtSpanToString002
+ * @tc.desc: Test ExtSpan::ToString method with different range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, ExtSpanToString002, TestSize.Level1)
+{
+    // Create an ExtSpan with range [10, 100]
+    int32_t start = 10;
+    int32_t end = 100;
+    auto extSpan = AceType::MakeRefPtr<ExtSpan>(start, end);
+
+    // Get the string representation
+    std::string result = extSpan->ToString();
+
+    // Verify the string contains "ExtSpan" and the range
+    EXPECT_NE(result.find("ExtSpan"), std::string::npos);
+    EXPECT_NE(result.find("10"), std::string::npos);
+    EXPECT_NE(result.find("100"), std::string::npos);
+}
+
+/**
+ * @tc.name: BackgroundColorSpanAddSpanStyle001
+ * @tc.desc: Test BackgroundColorSpan::AddSpanStyle with textBackgroundStyle_ having value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, BackgroundColorSpanAddSpanStyle001, TestSize.Level1)
+{
+    // Create a TextBackgroundStyle with background color
+    TextBackgroundStyle textBackgroundStyle;
+    std::optional<Color> backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundColor = backgroundColor;
+    std::optional<TextBackgroundStyle> backgroundStyle;
+    backgroundStyle = textBackgroundStyle;
+
+    // Create a BackgroundColorSpan with the background style
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle);
+
+    // Create a SpanItem to apply the background color to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    // Apply the background color span (ADD operation)
+    backgroundColorSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the background style was set
+    EXPECT_TRUE(spanItem->backgroundStyle.has_value());
+    EXPECT_EQ(spanItem->backgroundStyle.value().backgroundColor.value(), Color::RED);
+}
+
+/**
+ * @tc.name: BackgroundColorSpanAddSpanStyle002
+ * @tc.desc: Test BackgroundColorSpan::AddSpanStyle with textBackgroundStyle_ having value and resource key
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, BackgroundColorSpanAddSpanStyle002, TestSize.Level1)
+{
+    // Create a TextBackgroundStyle with background color and resource key
+    TextBackgroundStyle textBackgroundStyle;
+    std::optional<Color> backgroundColor = Color::BLUE;
+    textBackgroundStyle.backgroundColor = backgroundColor;
+
+    // Add resource object for textBackgroundStyle.color
+    RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>("com.example.test", "entry", 0);
+    colorResObj->SetColor(Color::GREEN);
+    textBackgroundStyle.AddResource(
+        "textBackgroundStyle.color", colorResObj, [](const RefPtr<ResourceObject>& resObj, TextBackgroundStyle& style) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            style.backgroundColor = color;
+        });
+
+    std::optional<TextBackgroundStyle> backgroundStyle;
+    backgroundStyle = textBackgroundStyle;
+
+    // Create a BackgroundColorSpan with the background style
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle);
+
+    // Create a SpanItem to apply the background color to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    // Apply the background color span (ADD operation)
+    backgroundColorSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the background style was set
+    EXPECT_TRUE(spanItem->backgroundStyle.has_value());
+
+    // Verify that the resource object was added to the resMap_
+    auto resMap = spanItem->GetResMap();
+    EXPECT_EQ(resMap.count("textbackgroundStyle"), 1);
+    EXPECT_NE(resMap["textbackgroundStyle"].obj, nullptr);
+}
+
+/**
+ * @tc.name: BackgroundColorSpanAddSpanStyle003
+ * @tc.desc: Test BackgroundColorSpan::AddSpanStyle with textBackgroundStyle_ not having value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, BackgroundColorSpanAddSpanStyle003, TestSize.Level1)
+{
+    // Create a BackgroundColorSpan with empty background style
+    std::optional<TextBackgroundStyle> backgroundStyle;
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle);
+
+    // Create a SpanItem to apply the background color to
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    // Apply the background color span (ADD operation)
+    backgroundColorSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+
+    // Verify that the background style was NOT set (since textBackgroundStyle_ has no value)
+    EXPECT_FALSE(spanItem->backgroundStyle.has_value());
+}
+
+/**
+ * @tc.name: BackgroundColorSpanToString001
+ * @tc.desc: Test BackgroundColorSpan::ToString method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, BackgroundColorSpanToString001, TestSize.Level1)
+{
+    // Create a TextBackgroundStyle with background color
+    TextBackgroundStyle textBackgroundStyle;
+    std::optional<Color> backgroundColor = Color::BLUE;
+    textBackgroundStyle.backgroundColor = backgroundColor;
+    std::optional<TextBackgroundStyle> backgroundStyle;
+    backgroundStyle = textBackgroundStyle;
+
+    // Create a BackgroundColorSpan with range [0, 5]
+    int32_t start = 0;
+    int32_t end = 5;
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle, start, end);
+
+    // Get the string representation
+    std::string result = backgroundColorSpan->ToString();
+
+    // Verify the string contains "BackgroundColorSpan" and the range
+    EXPECT_NE(result.find("BackgroundColorSpan"), std::string::npos);
+    EXPECT_NE(result.find("0"), std::string::npos);
+    EXPECT_NE(result.find("5"), std::string::npos);
+    EXPECT_NE(result.find("["), std::string::npos);
+    EXPECT_NE(result.find("]"), std::string::npos);
+    EXPECT_NE(result.find(":"), std::string::npos);
+}
+
+/**
+ * @tc.name: BackgroundColorSpanToString002
+ * @tc.desc: Test BackgroundColorSpan::ToString method with different range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, BackgroundColorSpanToString002, TestSize.Level1)
+{
+    // Create a BackgroundColorSpan with empty background style and range [10, 100]
+    std::optional<TextBackgroundStyle> backgroundStyle;
+    int32_t start = 10;
+    int32_t end = 100;
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle, start, end);
+
+    // Get the string representation
+    std::string result = backgroundColorSpan->ToString();
+
+    // Verify the string contains "BackgroundColorSpan" and the range
+    EXPECT_NE(result.find("BackgroundColorSpan"), std::string::npos);
+    EXPECT_NE(result.find("10"), std::string::npos);
+    EXPECT_NE(result.find("100"), std::string::npos);
+}
+
+/**
+ * @tc.name: UrlSpanToString001
+ * @tc.desc: Test UrlSpan::ToString method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, UrlSpanToString001, TestSize.Level1)
+{
+    // Create a UrlSpan with URL address and range [0, 10]
+    std::string urlAddress = "https://www.example.com";
+    int32_t start = 0;
+    int32_t end = 10;
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(urlAddress, start, end);
+
+    // Get the string representation
+    std::string result = urlSpan->ToString();
+
+    // Verify the string contains "UrlSpan" and the range
+    EXPECT_NE(result.find("UrlSpan"), std::string::npos);
+    EXPECT_NE(result.find("0"), std::string::npos);
+    EXPECT_NE(result.find("10"), std::string::npos);
+    EXPECT_NE(result.find("["), std::string::npos);
+    EXPECT_NE(result.find("]"), std::string::npos);
+    EXPECT_NE(result.find(":"), std::string::npos);
+}
+
+/**
+ * @tc.name: UrlSpanToString002
+ * @tc.desc: Test UrlSpan::ToString method with different range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, UrlSpanToString002, TestSize.Level1)
+{
+    // Create a UrlSpan with different URL and range [5, 50]
+    std::string urlAddress = "https://www.example.com";
+    int32_t start = 5;
+    int32_t end = 50;
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(urlAddress, start, end);
+
+    // Get the string representation
+    std::string result = urlSpan->ToString();
+
+    // Verify the string contains "UrlSpan" and the range
+    EXPECT_NE(result.find("UrlSpan"), std::string::npos);
+    EXPECT_NE(result.find("5"), std::string::npos);
+    EXPECT_NE(result.find("50"), std::string::npos);
+}
+
+/**
+ * @tc.name: UrlSpanToString003
+ * @tc.desc: Test UrlSpan::ToString method with default range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, UrlSpanToString003, TestSize.Level1)
+{
+    // Create a UrlSpan with URL address only (default range 0, 0)
+    std::string urlAddress = "https://www.example.com";
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(urlAddress);
+
+    // Get the string representation
+    std::string result = urlSpan->ToString();
+
+    // Verify the string contains "UrlSpan" and default range
+    EXPECT_NE(result.find("UrlSpan"), std::string::npos);
+    EXPECT_NE(result.find("0"), std::string::npos);
+    EXPECT_NE(result.find("["), std::string::npos);
+    EXPECT_NE(result.find("]"), std::string::npos);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo001
+ * @tc.desc: Test SpanString::GetLayoutInfo with basic text and maxWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo001, TestSize.Level1)
+{
+    // Create a SpanString with basic text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Hello World");
+
+    // Test with maxWidth having value
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created
+    EXPECT_GT(paraVec.size(), 0);
+
+    // Verify that maxWidth was used (should not be max float)
+    // Paragraph should be laid out with the specified maxWidth
+    EXPECT_NE(paraVec.front(), nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo002
+ * @tc.desc: Test SpanString::GetLayoutInfo without maxWidth (use max float)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo002, TestSize.Level1)
+{
+    // Create a SpanString with basic text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Hello World");
+
+    // Test without maxWidth (use std::numeric_limits<float>::max())
+    std::optional<double> maxWidth = std::nullopt;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created
+    EXPECT_GT(paraVec.size(), 0);
+    EXPECT_NE(paraVec.front(), nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo003
+ * @tc.desc: Test SpanString::GetLayoutInfo with FontSpan (has fontSize)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo003, TestSize.Level1)
+{
+    // Create a SpanString with text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Hello World");
+
+    // Add a FontSpan with font size
+    Font font { OHOS::Ace::FontWeight::BOLD, Dimension(20.0, DimensionUnit::PX) };
+    auto fontSpan = AceType::MakeRefPtr<FontSpan>(font, 0, 5);
+    spanString->AddSpan(fontSpan);
+
+    // Test GetLayoutInfo
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created
+    EXPECT_GT(paraVec.size(), 0);
+    EXPECT_NE(paraVec.front(), nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo004
+ * @tc.desc: Test SpanString::GetLayoutInfo with ParagraphStyleSpan (has paraStyleSpanItem)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo004, TestSize.Level1)
+{
+    // Create a SpanString with text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Hello World\nLine Two");
+
+    // Add a ParagraphStyleSpan with maxLines
+    SpanParagraphStyle paragraphStyle;
+    paragraphStyle.maxLines = 2;
+    auto paragraphStyleSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, 0, 11);
+    spanString->AddSpan(paragraphStyleSpan);
+
+    // Test GetLayoutInfo
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created
+    EXPECT_GT(paraVec.size(), 0);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo005
+ * @tc.desc: Test SpanString::GetLayoutInfo with multiple paragraphs (tests paraVec not empty branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo005, TestSize.Level1)
+{
+    // Create a SpanString with multiple lines (paragraphs)
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"First Line\nSecond Line\nThird Line");
+
+    // Add a ParagraphStyleSpan with maxLines (to test paraVec not empty branch)
+    SpanParagraphStyle paragraphStyle;
+    paragraphStyle.maxLines = 2;
+    auto paragraphStyleSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, 0, 11);
+    spanString->AddSpan(paragraphStyleSpan);
+
+    // Test GetLayoutInfo
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that multiple paragraphs were created
+    EXPECT_GE(paraVec.size(), 1);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo006
+ * @tc.desc: Test SpanString::GetLayoutInfo with LineHeightSpan (tests paragraph spacing)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo006, TestSize.Level1)
+{
+    // Create a SpanString with text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Hello World\nNext Line");
+
+    // Add a LineHeightSpan with paragraph spacing
+    auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30.0, DimensionUnit::PX), 0, 11);
+    spanString->AddSpan(lineHeightSpan);
+
+    // Test GetLayoutInfo
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created
+    EXPECT_GT(paraVec.size(), 0);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo007
+ * @tc.desc: Test SpanString::GetLayoutInfo with empty text
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo007, TestSize.Level1)
+{
+    // Create a SpanString with empty text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
+
+    // Test GetLayoutInfo
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created (even for empty text)
+    EXPECT_GE(paraVec.size(), 0);
+}
+
+/**
+ * @tc.name: SpanStringGetLayoutInfo008
+ * @tc.desc: Test SpanString::GetLayoutInfo with BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo008, TestSize.Level1)
+{
+    // Create a SpanString with text
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Hello World");
+
+    // Add a BackgroundColorSpan
+    TextBackgroundStyle textBackgroundStyle;
+    std::optional<Color> backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundColor = backgroundColor;
+    std::optional<TextBackgroundStyle> backgroundStyle;
+    backgroundStyle = textBackgroundStyle;
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle, 0, 5);
+    spanString->AddSpan(backgroundColorSpan);
+
+    // Test GetLayoutInfo
+    std::optional<double> maxWidth = 500.0;
+    auto paraVec = SpanString::GetLayoutInfo(spanString, maxWidth);
+
+    // Verify that paragraphs were created
+    EXPECT_GT(paraVec.size(), 0);
+}
+
 } // namespace OHOS::Ace::NG

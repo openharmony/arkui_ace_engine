@@ -730,7 +730,7 @@ void StringSplitter(const std::string& source, char delimiter, std::vector<Dimen
     StringSplitter(source, delimiter, func, out);
 }
 
-// Template function implementation
+// Template function implementation for general string types (std::string, etc.)
 template<typename T>
 ACE_FORCE_EXPORT
 void TransformStrCase(T& str, int32_t textCase)
@@ -751,9 +751,32 @@ void TransformStrCase(T& str, int32_t textCase)
     }
 }
 
-// Explicit template instantiations
+// Explicit template instantiations for std::string and std::wstring only
+// std::u16string uses the overloaded function in string_utils.h with std::towupper/std::towlower
 template void TransformStrCase(std::string& str, int32_t textCase);
 template void TransformStrCase(std::wstring& str, int32_t textCase);
-template void TransformStrCase(std::u16string& str, int32_t textCase);
+
+// Specialization for std::u16string using std::towupper/std::towlower for Unicode support
+// e.g., French 'é' (U+00E9) -> 'É' (U+00C9), 'è' (U+00E8) -> 'È' (U+00C8)
+template<>
+ACE_FORCE_EXPORT void TransformStrCase<std::u16string>(std::u16string& str, int32_t textCase)
+{
+    if (str.empty()) {
+        return;
+    }
+
+    switch (textCase) {
+        case TEXT_CASE_LOWERCASE:
+            std::transform(str.begin(), str.end(), str.begin(),
+                [](char16_t ch) { return static_cast<char16_t>(std::towlower(static_cast<wint_t>(ch))); });
+            break;
+        case TEXT_CASE_UPPERCASE:
+            std::transform(str.begin(), str.end(), str.begin(),
+                [](char16_t ch) { return static_cast<char16_t>(std::towupper(static_cast<wint_t>(ch))); });
+            break;
+        default:
+            break;
+    }
+}
 
 } // namespace OHOS::Ace::StringUtils
