@@ -861,6 +861,135 @@
       },
       "api_paths": {},
       "last_updated": "2026-02-07"
+    },
+    {
+      "name": "Gesture",
+      "name_cn": "手势系统",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "手势识别",
+        "gesture",
+        "gesture recognizer",
+        "点击",
+        "click",
+        "轻敲",
+        "tap",
+        "长按",
+        "long press",
+        "滑动",
+        "pan",
+        "快速滑动",
+        "swipe",
+        "捏合",
+        "pinch",
+        "旋转",
+        "rotation",
+        "手势组合",
+        "parallel gesture",
+        "sequence gesture",
+        "exclusive gesture",
+        "手势仲裁",
+        "gesture referee",
+        "velocity tracker",
+        "速度追踪",
+        "手势状态机",
+        "gesture state machine",
+        "手势识别器",
+        "gesture recognizer",
+        "多指手势",
+        "multi-finger gesture",
+        "手势回调",
+        "gesture callback"
+      ],
+      "aliases": [
+        "手势系统",
+        "手势识别",
+        "Gesture System",
+        "手势识别器"
+      ],
+      "file_path": "common/interaction/Gesture_Knowledge_Base_CN.md",
+      "source_paths": {
+        "gesture_base": "frameworks/core/components_ng/gestures/gesture_info.h",
+        "recognizer": "frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.h",
+        "referee": "frameworks/core/components_ng/gestures/gesture_referee.h",
+        "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.h",
+        "pan_recognizer": "frameworks/core/components_ng/gestures/recognizers/pan_recognizer.h",
+        "pinch_recognizer": "frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.h",
+        "long_press_recognizer": "frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.h",
+        "swipe_recognizer": "frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.h",
+        "rotation_recognizer": "frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.h",
+        "velocity_tracker": "frameworks/core/gestures/velocity_tracker.h",
+        "gesture_model": "frameworks/core/components_ng/pattern/gesture/gesture_model_ng.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-11",
+      "related_docs": [
+        "DragDrop"
+      ]
+    },
+    {
+      "name": "DragDrop",
+      "name_cn": "拖拽系统",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "拖拽",
+        "drag",
+        "drop",
+        "拖拽系统",
+        "drag drop",
+        "拖拽预览",
+        "drag preview",
+        "拖拽状态机",
+        "drag state machine",
+        "拖拽管理器",
+        "drag drop manager",
+        "拖拽代理",
+        "drag drop proxy",
+        "UDMF",
+        "统一数据格式",
+        "跨应用拖拽",
+        "cross-app drag",
+        "拖拽数据",
+        "drag data",
+        "拖拽动画",
+        "drag animation",
+        "Spring Loading",
+        "弹性加载",
+        "拖拽启动",
+        "drag start",
+        "拖拽移动",
+        "drag move",
+        "拖拽释放",
+        "drag drop",
+        "onDragStart",
+        "onDragMove",
+        "onDrop",
+        "draggable",
+        "拖拽预览窗口",
+        "drag overlay window"
+      ],
+      "aliases": [
+        "拖拽系统",
+        "DragDrop",
+        "拖拽功能",
+        "Drag & Drop"
+      ],
+      "file_path": "common/interaction/Drag_Drop_Knowledge_Base_CN.md",
+      "source_paths": {
+        "drag_drop_manager": "frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.h",
+        "drag_drop_proxy": "frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.h",
+        "drag_drop_state_machine": "frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h",
+        "drag_drop_spring_loading": "frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/",
+        "text_drag": "frameworks/core/components_ng/pattern/text_drag/",
+        "udmf_client": "frameworks/core/common/udmf/udmf_client.h"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-11",
+      "prerequisites": [
+        "Gesture"
+      ]
     }
   ],
   "categories": {
@@ -939,6 +1068,13 @@
       "components": [
         "ArkUI SDK API",
         "Component API"
+      ]
+    },
+    "system": {
+      "name": "系统功能",
+      "description": "ArkUI 系统级功能",
+      "components": [
+        "Gesture & DragDrop"
       ]
     }
   }
