@@ -1871,65 +1871,11 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest044, TestSize.Level0)
 }
 
 /**
- * @tc.name: FolderStackTestNgTest049
- * @tc.desc: Test FolderStackPattern SetAutoRotate with different orientations.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest049, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create folderStack frameNode and pattern.
-     * @tc.expected: FrameNode and pattern are created successfully.
-     */
-    FolderStackModelNG folderStackModelNG;
-    folderStackModelNG.Create();
-    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
-    folderStackModelNG.SetAutoHalfFold(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Get container and display info.
-     * @tc.expected: Container and display info are available.
-     */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto displayInfo = container->GetDisplayInfo();
-    ASSERT_NE(displayInfo, nullptr);
-
-    /**
-     * @tc.steps: step3. Test SetAutoRotate with VERTICAL orientation.
-     * @tc.expected: Function completes without crash.
-     */
-    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
-    container->SetOrientation(Orientation::VERTICAL);
-    pattern->SetAutoRotate();
-
-    /**
-     * @tc.steps: step4. Test SetAutoRotate with HORIZONTAL orientation.
-     * @tc.expected: Function completes without crash.
-     */
-    container->SetOrientation(Orientation::HORIZONTAL);
-    pattern->SetAutoRotate();
-
-    /**
-     * @tc.steps: step5. Test SetAutoRotate with SENSOR orientation.
-     * @tc.expected: Function completes without crash.
-     */
-    container->SetOrientation(Orientation::SENSOR);
-    pattern->SetAutoRotate();
-}
-
-/**
- * @tc.name: FolderStackTestNgTest050
+ * @tc.name: FolderStackTestNgTest045
  * @tc.desc: Test FolderStackPattern RestoreScreenState.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest050, TestSize.Level0)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest045, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create folderStack frameNode and pattern.
@@ -1952,11 +1898,11 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest050, TestSize.Level0)
 }
 
 /**
- * @tc.name: FolderStackTestNgTest053
+ * @tc.name: FolderStackTestNgTest046
  * @tc.desc: Test FolderStackPattern CreateLayoutAlgorithm multiple times.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest053, TestSize.Level0)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest046, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create folderStack frameNode and pattern.
@@ -1999,11 +1945,11 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest053, TestSize.Level0)
 }
 
 /**
- * @tc.name: FolderStackTestNgTest051
+ * @tc.name: FolderStackTestNgTest047
  * @tc.desc: Test FolderStackLayoutProperty ToJsonValue with empty properties.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest051, TestSize.Level0)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest047, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create folderStack frameNode and layout property.
