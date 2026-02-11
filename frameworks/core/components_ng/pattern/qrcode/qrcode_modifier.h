@@ -29,7 +29,6 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
-const char QRCODE_ETS_TAG[] = "QRCode";
 class QRCodeModifier : public ContentModifier {
     DECLARE_ACE_TYPE(QRCodeModifier, ContentModifier);
 

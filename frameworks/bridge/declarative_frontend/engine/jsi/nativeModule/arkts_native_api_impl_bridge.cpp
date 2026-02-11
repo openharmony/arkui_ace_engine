@@ -82,6 +82,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
+#ifdef QRCODEGEN_SUPPORT
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
+#endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
@@ -487,7 +490,6 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"Indexer"},
         {"Checkbox"},
         {"CheckboxGroup"},
-        {"QRCode"},
         {"Rating"},
         { "FlowItem" },
         { "WaterFlow" },
@@ -1991,6 +1993,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterListAttributes(object, vm);
     RegisterGridAttributes(object, vm);
     RegisterListItemGroupAttributes(object, vm);
+#ifdef QRCODEGEN_SUPPORT
+    RegisterQRCodeAttributes(object, vm);
+#endif
     RegisterLoadingProgressAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
@@ -4409,6 +4414,28 @@ void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
 
+#ifdef QRCODEGEN_SUPPORT
+void ArkUINativeModule::RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto qrcode = panda::ObjectRef::New(vm);
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setQRColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetQRColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetQRColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setQRBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRBackgroundColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetQRBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetQRBackgroundColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetContentOpacity));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetContentOpacity));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setQRValue"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRValue));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "qrcode"), qrcode);
+}
+#endif
+
 void ArkUINativeModule::RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto loadingProgress = panda::ObjectRef::New(vm);
@@ -5506,6 +5533,7 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);
     RegisterProgressAttributes(object, vm);
+    RegisterQRCodeAttributes(object, vm);
     RegisterRectAttributes(object, vm);
     RegisterRelativeContainerAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);

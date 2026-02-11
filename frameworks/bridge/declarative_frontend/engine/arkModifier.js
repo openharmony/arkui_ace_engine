@@ -1452,36 +1452,10 @@ class ProgressModifier extends ArkProgressComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class LazyArkQRCodeComponent extends ArkComponent {
-  static module = undefined;
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-    if (LazyArkQRCodeComponent.module === undefined) {
-      LazyArkQRCodeComponent.module = globalThis.requireNapi('arkui.components.arkqrcode');
-    }
-    this.lazyComponent = LazyArkQRCodeComponent.module.createComponent(nativePtr, classType);
-  }
-  setMap() {
-    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
-  }
-  color(value) {
-    this.lazyComponent.color(value);
-    return this;
-  }
-  backgroundColor(value) {
-    this.lazyComponent.backgroundColor(value);
-    return this;
-  }
-  contentOpacity(value) {
-    this.lazyComponent.contentOpacity(value);
-    return this;
-  }
-}
-class QRCodeModifier extends LazyArkQRCodeComponent {
+class QRCodeModifier extends ArkQRCodeComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

@@ -218,7 +218,7 @@
       OHOS::Ace::PatternLockModel::*;
       OHOS::Ace::PolygonModel::*;
       OHOS::Ace::ProgressModel::*;
-      OHOS::Ace::QRCodeModelNG::*;
+      OHOS::Ace::QRCodeModel::*;
       OHOS::Ace::RadioModel::*;
       OHOS::Ace::RectModel::*;
       OHOS::Ace::RefreshModel::*;
@@ -737,7 +737,6 @@
       vtable?for?OHOS::Ace::NG::TextPattern;
       vtable?for?OHOS::Ace::NG::TextSelectOverlay;
       vtable?for?OHOS::Ace::NG::ParagraphManager;
-      vtable?for?OHOS::Ace::NG::QRCodeModelNG;
 
       OHOS::Ace::NG::ColorSampler::*;
 
