@@ -50,7 +50,7 @@ ace_unittest("water_flow_test_segmented") {
   sources += COMMON_SRC
 }
 
-# ----------- Test in Sliding Window LayoutMode
+# Test in Sliding Window LayoutMode
 ace_unittest("water_flow_test_sw") {
   module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
@@ -65,10 +65,14 @@ ace_unittest("water_flow_test_sw") {
   sources += COMMON_SRC
 }
 
-ace_unittest("water_flow_static_test") {
-  module_name = "ScrollingSet-ScrollBar"
+# Test WaterFlow Model layer APIs
+ace_unittest("water_flow_test_generated") {
+  module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
   sources = [
+    "water_flow_item_model_test.cpp",
+    "water_flow_model_ng_multi_thread_test.cpp",
+    "water_flow_model_ng_test.cpp",
     "water_flow_static_test.cpp",
     "water_flow_test_ng.cpp",
   ]

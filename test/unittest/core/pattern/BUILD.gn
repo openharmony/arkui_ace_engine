@@ -126,7 +126,7 @@ group("core_pattern_unittest") {
     "union_effect_container:union_effect_container_test",
     "video:video_test_ng",
     "view_context:view_context_test_ng",
-    "waterflow:water_flow_static_test",
+    "waterflow:water_flow_test_generated",
     "waterflow:water_flow_test_original",
     "waterflow:water_flow_test_segmented",
     "waterflow:water_flow_test_sw",
