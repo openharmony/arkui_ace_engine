@@ -567,7 +567,7 @@ static void HandleAccessibilityPageEventControl(const RefPtr<FrameNode>& node, b
 }
 } // namespace
 
-MenuManager::MenuManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode)
+MenuManager::MenuManager(const RefPtr<UINode>& rootNode) : rootNodeWeak_(rootNode)
 {
     if (rootNode) {
         context_ = rootNode->GetContext();

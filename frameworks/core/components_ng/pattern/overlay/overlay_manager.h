@@ -789,6 +789,8 @@ public:
     void UpdateImageGeneratorSheetScale(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
         int32_t targetId, std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack);
     static const std::unordered_set<std::string> OVERLAY_TAGS;
+    bool CheckMenuManager();
+
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
     void SetSheetProperty(

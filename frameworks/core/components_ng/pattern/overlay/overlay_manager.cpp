@@ -203,10 +203,6 @@ OverlayManager::OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak
 {
     if (rootNode) {
         context_ = rootNode->GetContext();
-        const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
-        if (modifier != nullptr) {
-            menuManager_ = modifier->getMenuManager(rootNode);
-        }
     }
 }
 
@@ -219,9 +215,30 @@ OverlayManager::~OverlayManager()
     tipsStatusList_.clear();
 }
 
+bool OverlayManager::CheckMenuManager()
+{
+    if (menuManager_) {
+        return true;
+    }
+
+    const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+
+    menuManager_ = modifier->getMenuManager(rootNode);
+    CHECK_NULL_RETURN(menuManager_, false);
+
+    return true;
+}
+
 void OverlayManager::UpdateContextMenuDisappearPosition(
     const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->updateContextMenuDisappearPosition(menuManager_, offset, menuScale, isRedragStart, menuWrapperId);
@@ -229,6 +246,9 @@ void OverlayManager::UpdateContextMenuDisappearPosition(
 
 OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset)
 {
+    if (!CheckMenuManager()) {
+        return OffsetF(0.0f, 0.0f);
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, OffsetF(0.0f, 0.0f));
     return modifier->calculateMenuPosition(menuManager_, menuWrapperNode, AceType::Claim(this), offset);
@@ -236,6 +256,9 @@ OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapp
 
 bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->getMenuPreviewCenter(menuManager_, offset);
@@ -244,6 +267,9 @@ bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
 void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
     const NG::OffsetF& offset)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->contextMenuSwitchDragPreviewAnimation(menuManager_, dragPreviewNode, offset);
@@ -965,6 +991,9 @@ void OverlayManager::PopToast(int32_t toastId)
 void OverlayManager::RegisterMenuLifeCycleCallback(int32_t targetId,
     const std::function<void(const MenuLifeCycleEvent& menuLifeCycleEvent)>&& callback)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->registerMenuLifeCycleCallback(menuManager_, targetId, std::move(callback));
@@ -972,6 +1001,9 @@ void OverlayManager::RegisterMenuLifeCycleCallback(int32_t targetId,
 
 void OverlayManager::UnRegisterMenuLifeCycleCallback(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->unRegisterMenuLifeCycleCallback(menuManager_, targetId);
@@ -979,6 +1011,9 @@ void OverlayManager::UnRegisterMenuLifeCycleCallback(int32_t targetId)
 std::function<void(const MenuLifeCycleEvent&)>& OverlayManager::GetMenuLifeCycleCallback(int32_t targetId)
 {
     static std::function<void(const MenuLifeCycleEvent&)> emptyFunc;
+    if (!CheckMenuManager()) {
+        return emptyFunc;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, emptyFunc);
     return modifier->getMenuLifeCycleCallback(menuManager_, targetId);
@@ -1764,6 +1799,9 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
 
 void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->hideAllMenusWithoutAnimation(menuManager_, AceType::Claim(this), showInSubwindow);
@@ -1830,6 +1868,9 @@ PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& nod
 
 void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showMenu(menuManager_, AceType::Claim(this), targetId, offset, menu);
@@ -1838,6 +1879,9 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showMenuInSubWindow(menuManager_, AceType::Claim(this), targetId, offset, menu);
@@ -1845,6 +1889,9 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
 
 void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->hideMenuInSubWindow(menuManager_, menu, AceType::Claim(this), targetId);
@@ -1852,6 +1899,9 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
 
 void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->hideMenuInSubWindowIsStartDrag(menuManager_, AceType::Claim(this), showPreviewAnimation, startDrag);
@@ -1859,6 +1909,9 @@ void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDr
 
 RefPtr<FrameNode> OverlayManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
 {
+    if (!CheckMenuManager()) {
+        return nullptr;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->getMenuNodeWithExistContent(menuManager_, node);
@@ -1866,6 +1919,9 @@ RefPtr<FrameNode> OverlayManager::GetMenuNodeWithExistContent(const RefPtr<UINod
 
 RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return nullptr;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->getMenuNode(menuManager_, targetId);
@@ -1874,6 +1930,9 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 void OverlayManager::HideMenu(
     const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch, const HideMenuType& reason)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     HideMenuParam hideMenuParam = {targetId, isMenuOnTouch};
@@ -1882,6 +1941,9 @@ void OverlayManager::HideMenu(
 
 void OverlayManager::HideAllMenus()
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->hideAllMenus(menuManager_, AceType::Claim(this));
@@ -1889,6 +1951,9 @@ void OverlayManager::HideAllMenus()
 
 void OverlayManager::DeleteMenu(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->deleteMenu(menuManager_, targetId, AceType::Claim(this));
@@ -1896,6 +1961,9 @@ void OverlayManager::DeleteMenu(int32_t targetId)
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->cleanMenuInSubWindowWithAnimation(menuManager_, AceType::Claim(this));
@@ -1903,6 +1971,9 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
 
 void OverlayManager::CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->cleanHoverImagePreviewInSubWindow(menuManager_, flexNode);
@@ -1910,6 +1981,9 @@ void OverlayManager::CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& 
 
 void OverlayManager::CleanPreviewInSubWindow()
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->cleanPreviewInSubWindow(menuManager_);
@@ -1917,6 +1991,9 @@ void OverlayManager::CleanPreviewInSubWindow()
 
 void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->cleanMenuInSubWindow(menuManager_, targetId);
@@ -2189,6 +2266,9 @@ void OverlayManager::ReloadBuilderNodeConfig()
 
 bool OverlayManager::IsMenuShow()
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->isMenuShow(menuManager_);
@@ -3044,6 +3124,9 @@ bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 
 bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->removeMenu(menuManager_, overlay);
@@ -3064,6 +3147,9 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
 
 void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->publishMenuStatus(menuManager_, isMenuShow, menuNode);
@@ -3071,6 +3157,9 @@ void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>&
 
 void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->setIsMenuShow(menuManager_, isMenuShow, menuNode);
@@ -6134,6 +6223,9 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
 
 void OverlayManager::RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool hasAnimation)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->removeMenuFilter(menuManager_, menuWrapper, hasAnimation);
@@ -6501,6 +6593,9 @@ void OverlayManager::UpdateModalUIExtensionConfig(
 RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(
     const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
 {
+    if (!CheckMenuManager()) {
+        return nullptr;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->buildAIEntityMenu(menuManager_, menuOptions);
@@ -6509,6 +6604,9 @@ RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(
 RefPtr<FrameNode> OverlayManager::CreateAIEntityMenu(
     const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions, const RefPtr<FrameNode>& targetNode)
 {
+    if (!CheckMenuManager()) {
+        return nullptr;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->createAIEntityMenu(menuManager_, menuOptions, targetNode);
@@ -6517,6 +6615,9 @@ RefPtr<FrameNode> OverlayManager::CreateAIEntityMenu(
 bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
     const RectF& aiRect, const RefPtr<FrameNode>& targetNode)
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->showAIEntityMenu(menuManager_, menuOptions, aiRect, targetNode, AceType::Claim(this));
@@ -6524,6 +6625,9 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
 
 void OverlayManager::CloseAIEntityMenu(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     return modifier->closeAIEntityMenu(menuManager_, AceType::Claim(this), targetId);
@@ -7140,6 +7244,9 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
 
 bool OverlayManager::IsGatherWithMenu()
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->isGatherWithMenu(menuManager_);
@@ -7147,6 +7254,9 @@ bool OverlayManager::IsGatherWithMenu()
 
 void OverlayManager::SetIsGatherWithMenu(bool isGatherWithMenu)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->setIsGatherWithMenu(menuManager_, isGatherWithMenu);
@@ -7154,6 +7264,9 @@ void OverlayManager::SetIsGatherWithMenu(bool isGatherWithMenu)
 
 void OverlayManager::RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     return modifier->removeMenuBadgeNode(menuManager_, menuWrapperNode);
@@ -7182,6 +7295,9 @@ const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
 
 void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showFilterAnimation(menuManager_, columnNode, menuWrapperNode, AceType::Claim(this));
@@ -7189,6 +7305,9 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode, co
 
 void OverlayManager::EraseMenuInfo(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->eraseMenuInfo(menuManager_, targetId);
@@ -7196,6 +7315,9 @@ void OverlayManager::EraseMenuInfo(int32_t targetId)
 
 bool OverlayManager::RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper)
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->removeMenuInSubWindow(menuManager_, menuWrapper, AceType::Claim(this));
@@ -7693,6 +7815,9 @@ int32_t OverlayManager::RemoveOverlayManagerNode()
 
 void OverlayManager::SkipMenuShow(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->skipMenuShow(menuManager_, targetId);
@@ -7700,6 +7825,9 @@ void OverlayManager::SkipMenuShow(int32_t targetId)
 
 void OverlayManager::ResumeMenuShow(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->resumeMenuShow(menuManager_, targetId);
@@ -7707,6 +7835,9 @@ void OverlayManager::ResumeMenuShow(int32_t targetId)
 
 bool OverlayManager::CheckSkipMenuShow(int32_t targetId)
 {
+    if (!CheckMenuManager()) {
+        return false;
+    }
     const auto* modifier = NG::NodeModifier::GetMenuManagerInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->checkSkipMenuShow(menuManager_, targetId);

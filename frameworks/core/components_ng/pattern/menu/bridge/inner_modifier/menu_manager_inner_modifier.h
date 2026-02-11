@@ -112,7 +112,7 @@ struct ArkUIMenuManagerInnerModifier {
     void (*unRegisterMenuLifeCycleCallback)(const RefPtr<AceType>& menuManager, int32_t targetId);
     std::function<void(const MenuLifeCycleEvent&)>& (*getMenuLifeCycleCallback)(const RefPtr<AceType>& menuManager,
         int32_t targetId);
-    RefPtr<AceType> (*getMenuManager)(const RefPtr<FrameNode>& rootNode);
+    RefPtr<AceType> (*getMenuManager)(const RefPtr<UINode>& rootNode);
 };
 
 namespace InnerModifier {
