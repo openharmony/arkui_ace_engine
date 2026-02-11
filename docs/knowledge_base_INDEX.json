@@ -823,6 +823,44 @@
         "all": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
       },
       "last_updated": "2026-02-09"
+    },
+    {
+      "name": "ThemeManager",
+      "name_cn": "主题管理器",
+      "category": "sdk",
+      "type": "feature",
+      "keywords": [
+        "主题系统",
+        "ThemeManager",
+        "主题管理",
+        "深浅色模式",
+        "颜色模式",
+        "Token主题",
+        "ThemeWrapper",
+        "ThemeConstants",
+        "ResourceAdapter",
+        "主题缓存",
+        "主题构建器",
+        "ThemeBuilder",
+        "WithTheme",
+        "局部主题",
+        "ThemeScopeId"
+      ],
+      "aliases": [
+        "主题管理器",
+        "主题系统",
+        "ThemeManager",
+        "深浅色模式"
+      ],
+      "file_path": "architecture/ThemeManager_Architecture_CN.md",
+      "source_paths": {
+        "manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_manager_impl.cpp",
+        "constants": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_constants.h",
+        "storage": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
+        "wrapper": "OpenHarmony/interfaces/inner_api/ace_kit/include/ui/view/theme/token_theme_wrapper.h"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-07"
     }
   ],
   "categories": {
