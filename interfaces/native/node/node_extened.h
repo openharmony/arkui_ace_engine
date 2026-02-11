@@ -259,31 +259,31 @@ struct ArkUI_TextLayoutManager {
     ArkUI_NodeHandle node;
 };
 
-struct ArkUI_DecorationStyleOptions {
+struct OH_ArkUI_DecorationStyleOptions {
     ArkUI_TextDecorationType type;
     uint32_t color;
     ArkUI_TextDecorationStyle style;
     float thicknessScale;
 };
  
-struct ArkUI_TextDataDetectorConfig {
+struct OH_ArkUI_TextDataDetectorConfig {
     std::vector<ArkUI_TextDataDetectorType> types;
     void* onDetectResultUpdate;
     void* onDetectResultUpdateUserData;
     uint32_t color;
-    ArkUI_DecorationStyleOptions decoration;
+    OH_ArkUI_DecorationStyleOptions decoration;
     bool enablePreviewMenu;
 };
 
-struct ArkUI_RichEditorSelectionMenuOptions {
-    ArkUI_RichEditorSpanType richEditorSpanType;
+struct OH_ArkUI_TextEditorSelectionMenuOptions  {
+    OH_ArkUI_TextEditorSpanType richEditorSpanType;
     ArkUI_NodeHandle contentNode;
-    ArkUI_RichEditorResponseType responseType;
+    OH_ArkUI_TextEditorResponseType responseType;
     void* onMenuAppear;
     void* onMenuAppearUserData;
     void* onMenuDisappear;
     void* onMenuDisappearUserData;
-    ArkUI_TextMenuType menuType;
+    OH_ArkUI_TextMenuType menuType;
     void* onMenuShow;
     void* onMenuShowUserData;
     void* onMenuHide;
