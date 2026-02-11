@@ -655,11 +655,9 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent001, TestSize.Level0)
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     FlushUITasks(frameNode);
 
-    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
-        << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f));
     EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
-        << folder1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
 }
 
 /**
@@ -701,11 +699,9 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent002, TestSize.Level1)
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     FlushUITasks(stack);
 
-    EXPECT_EQ(folder->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
-        << folder->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
     EXPECT_EQ(folder->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 10.0f));
-    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
-        << folder1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
 }
 
 /**
@@ -2078,10 +2074,10 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
             auto geometryNode = childFrameNode->GetGeometryNode();
             ASSERT_NE(geometryNode, nullptr);
             auto size = geometryNode->GetMarginFrameSize();
-            EXPECT_EQ(size, SizeF(100.0f, 80.0f))<<size.ToString();
+            EXPECT_EQ(size, SizeF(100.0f, 80.0f));
             auto offset = geometryNode->GetFrameOffset();
             // Child 1 (100x80): offset = ((400-100)/2, (300-80)/2) = (150, 110)
-            EXPECT_EQ(offset, OffsetF(150.0f, 110.0f))<<offset.ToString();
+            EXPECT_EQ(offset, OffsetF(150.0f, 110.0f));
         }
     }
 }
