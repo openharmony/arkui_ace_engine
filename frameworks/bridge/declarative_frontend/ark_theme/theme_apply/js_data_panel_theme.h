@@ -18,8 +18,6 @@
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model.h"
-#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 class JSDataPanelTheme {
@@ -32,10 +30,6 @@ public:
             return;
         }
 
-        auto* stack = NG::ViewStackProcessor::GetInstance();
-        CHECK_NULL_VOID(stack);
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
-        CHECK_NULL_VOID(frameNode);
         std::vector<OHOS::Ace::NG::Gradient> valueColors;
         OHOS::Ace::NG::Gradient gradient;
         OHOS::Ace::NG::GradientColor gradientColorStart;
@@ -47,8 +41,8 @@ public:
         gradientColorEnd.SetDimension(Dimension(1.0));
         gradient.AddColor(gradientColorEnd);
         valueColors.emplace_back(gradient);
-        NG::DataPanelModelNG::SetValueColors(frameNode, valueColors);
-        NG::DataPanelModelNG::SetTrackBackground(frameNode, themeColors->CompBackgroundTertiary());
+        DataPanelModel::GetInstance()->SetValueColors(valueColors);
+        DataPanelModel::GetInstance()->SetTrackBackground(themeColors->CompBackgroundTertiary());
     }
 };
 } // namespace OHOS::Ace::Framework

@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
 namespace OHOS::Ace::NG {
-const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 namespace {
 void SetDefaultBorderRadius(FrameNode* frameNode)
 {
@@ -41,7 +40,7 @@ void SetDefaultBorderRadius(FrameNode* frameNode)
 RefPtr<FrameNode> DataPanelModelStatic::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::GetOrCreateFrameNode(
-        DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
+        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
 }
 
 void DataPanelModelStatic::SetTrackBackground(FrameNode* frameNode, const std::optional<Color>& trackBackgroundColor)

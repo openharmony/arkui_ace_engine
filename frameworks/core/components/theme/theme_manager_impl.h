@@ -22,7 +22,7 @@
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT ThemeManagerImpl : public ThemeManager {
+class ACE_EXPORT ThemeManagerImpl : public ThemeManager {
     DECLARE_ACE_TYPE(ThemeManagerImpl, ThemeManager);
 
 public:
