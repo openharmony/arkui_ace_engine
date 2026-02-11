@@ -270,6 +270,13 @@ void ArkoalaLazyNode::BuildAllChildren()
     for (int32_t i = 0; i < FrameCount(); i++) {
         GetFrameChildByIndex(i, true, false, false);
     }
+    children_.clear();
+    for (const auto& [index, node] : node4Index_) {
+        if (node) {
+            RemoveDisappearingChild(node);
+            children_.push_back(node);
+        }
+    }
 }
 
 void ArkoalaLazyNode::PostIdleTask()
