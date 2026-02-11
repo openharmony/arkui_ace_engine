@@ -115,7 +115,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
     auto geometryNode = host->GetGeometryNode();
 
     std::vector<double> tmpArry;
-    if (paintProperty->GetValues().value().size() > 0) {
+    if (paintProperty->GetValues() && paintProperty->GetValues().value().size() > 0) {
         for (size_t i = 0; i < paintProperty->GetValues().value().size(); i++) {
             tmpArry.push_back(paintProperty->GetValues().value()[i]);
         }
