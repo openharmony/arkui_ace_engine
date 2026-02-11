@@ -78,8 +78,7 @@ ArkUINativeModuleValue CounterBridge::CreateCounter(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    static CounterModelNG model;
-    model.Create();
+    GetArkUINodeModifiers()->getCounterModifier()->createModel();
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -355,9 +354,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterOnInc(ArkUIRuntimeCallInfo* runt
     } else {
         frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     }
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     std::function<void()> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -408,7 +405,6 @@ ArkUINativeModuleValue CounterBridge::SetCounterOnDec(ArkUIRuntimeCallInfo* runt
     } else {
         frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     }
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void()> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
