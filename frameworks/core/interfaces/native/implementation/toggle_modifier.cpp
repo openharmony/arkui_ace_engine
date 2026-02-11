@@ -77,7 +77,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 
 Ark_NativePointer buttonConstruct(Ark_Int32 id, Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::BUTTON, false);
+    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::BUTTON);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -85,7 +85,7 @@ Ark_NativePointer buttonConstruct(Ark_Int32 id, Ark_Int32 flags)
 
 Ark_NativePointer checkboxConstruct(Ark_Int32 id, Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::CHECKBOX, false);
+    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::CHECKBOX);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
