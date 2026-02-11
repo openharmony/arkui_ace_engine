@@ -34,7 +34,7 @@ HWTEST_F(FocusHubTestNg, HasForwardFocusMovementInChildren001, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
-    EXCEPT_FALSE(focusHub->HasForwardFocusMovementInChildren());
+    EXPECT_FALSE(focusHub->HasForwardFocusMovementInChildren());
 }
 
 /**
@@ -50,7 +50,7 @@ HWTEST_F(FocusHubTestNg, ClearFocusMovementFlagsInChildren001, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
-    EXCEPT_FALSE(focusHub->HasBackwardFocusMovement());
+    EXPECT_FALSE(focusHub->HasBackwardFocusMovement());
 }
 
 /**
@@ -67,7 +67,7 @@ HWTEST_F(FocusHubTestNg, SetLastWeakFocusToPreviousInFocusView001, TestSize.Leve
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
     focusHub->SetLastWeakFocusToPreviousInFocusView();
-    EXCEPT_FALSE(focusHub->lastWeakFocusNode_.Upgrade());
+    EXPECT_FALSE(focusHub->lastWeakFocusNode_.Upgrade());
 }
 
 /**
