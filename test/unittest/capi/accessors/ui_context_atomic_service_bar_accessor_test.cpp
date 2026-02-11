@@ -29,11 +29,11 @@ class UIContextAtomicServiceBarAccessorTest :
 };
 
 /**
- * @tc.name: appBarNull
+ * @tc.name: getBarRectTestAppBarNull
  * @tc.desc: Test AppBarView
  * @tc.type: FUNC
  */
-HWTEST_F(UIContextAtomicServiceBarAccessorTest, appBarNull, TestSize.Level1)
+HWTEST_F(UIContextAtomicServiceBarAccessorTest, getBarRectTestAppBarNull, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getBarRect, nullptr);
 
@@ -42,11 +42,11 @@ HWTEST_F(UIContextAtomicServiceBarAccessorTest, appBarNull, TestSize.Level1)
 }
 
 /**
- * @tc.name: getBarRect
+ * @tc.name: getBarRectTest
  * @tc.desc: Test GetAppBarRect
  * @tc.type: FUNC
  */
-HWTEST_F(UIContextAtomicServiceBarAccessorTest, getBarRect, TestSize.Level1)
+HWTEST_F(UIContextAtomicServiceBarAccessorTest, getBarRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getBarRect, nullptr);
 

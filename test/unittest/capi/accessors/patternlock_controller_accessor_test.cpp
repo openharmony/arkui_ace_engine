@@ -88,11 +88,11 @@ HWTEST_F(PatternLockControllerAccessorTest, resetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetChallengeResult
+ * @tc.name: setChallengeResultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockControllerAccessorTest, SetChallengeResult, TestSize.Level1)
+HWTEST_F(PatternLockControllerAccessorTest, setChallengeResultTest, TestSize.Level1)
 {
     auto resCorrect = V2::PatternLockChallengeResult::CORRECT;
     auto resWrong = V2::PatternLockChallengeResult::WRONG;

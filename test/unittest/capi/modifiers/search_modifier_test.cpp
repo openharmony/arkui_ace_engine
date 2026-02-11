@@ -359,12 +359,12 @@ public:
 };
 
 /**
- * @tc.name: setSearchOptionsDefault
+ * @tc.name: setSearchOptionsTestDefault
  * @tc.desc: Check the default values of setSearchOptions
  *
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setSearchOptionsTestDefault, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSearchOptions, nullptr);
     // default
@@ -378,12 +378,12 @@ HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSearchOptionsValidValues
+ * @tc.name: setSearchOptionsTestValidValues
  * @tc.desc: Check the default values of setSearchOptions
  * DISABLED because icon attribute return only default value
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setSearchOptionsValidValues, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setSearchOptionsTestValidValues, TestSize.Level1)
 {
     Ark_SearchOptions options = {};
     options.value = ArkUnion<Opt_Union_String_Bindable, Ark_String>(TEST_STRING);
@@ -429,7 +429,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setCancelButtonTestDefault, TestSize.Level
 }
 
 /*
- * @tc.name: setFontColorTestValidColorValues
+ * @tc.name: setCancelButtonTestValidColorValues
  * @tc.desc: Check the functionality of SearchModifier.setCancelButton
  * @tc.type: FUNC
  */
@@ -469,7 +469,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level
 }
 
 /*
- * @tc.name: setFontColorTestValidNumberValues
+ * @tc.name: setCancelButtonTestValidNumberValues
  * @tc.desc: Check the functionality of SearchModifier.setCancelButton
  * @tc.type: FUNC
  */
@@ -510,7 +510,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setFontColorTestValidStringValues
+ * @tc.name: setCancelButtonTestValidStringValues
  * @tc.desc: Check the functionality of SearchModifier.setCancelButton
  * @tc.type: FUNC
  */
@@ -551,11 +551,11 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setFontColorTestInvalidStringValues
+ * @tc.name: setCancelButtonTestInvalidStringValues
  * @tc.desc: Check the functionality of SearchModifier.setCancelButton
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setCancelButtonTestTestInvalidStringValues, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -803,7 +803,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchButtonTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextIndent
+ * @tc.name: setTextIndentTest
  * @tc.desc: Check the functionality of setTextIndent
  * @tc.type: FUNC
  */
@@ -915,11 +915,11 @@ HWTEST_F(SearchModifierTest, setCaretStyleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: selectedBackgroundColorTest
+ * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColor
  * @tc.desc: Check the functionality of selectedBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, DISABLED_selectedBackgroundColorTest, TestSize.Level1)
+HWTEST_F(SearchModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     // default
@@ -940,11 +940,11 @@ HWTEST_F(SearchModifierTest, DISABLED_selectedBackgroundColorTest, TestSize.Leve
 }
 
 /**
- * @tc.name: setSelectionMenuHidden
+ * @tc.name: setSelectionMenuHiddenTest
  * @tc.desc: Test Radio setSelectionMenuHidden.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, DISABLED_setSelectionMenuHidden, TestSize.Level1)
+HWTEST_F(SearchModifierTest, DISABLED_setSelectionMenuHiddenTest, TestSize.Level1)
 {
     auto fullJsonDefault = GetJsonValue(node_);
     auto checkVal = GetAttrValue<bool>(fullJsonDefault, SELECTION_MENU_HIDDEN_ATTR);
@@ -1546,7 +1546,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setFontFeatureTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setsetEnableHapticFeedbackTest
+ * @tc.name: setEnableHapticFeedbackTest
  * @tc.desc: Check the functionality of setsetEnableHapticFeedback
  * @tc.type: FUNC
  */
@@ -1569,11 +1569,11 @@ HWTEST_F(SearchModifierTest, DISABLED_setEnableHapticFeedbackTest, TestSize.Leve
 
 #ifdef WRONG_OLD_SDK
 /*
- * @tc.name: setOnChangeEventValueImpl
+ * @tc.name: set_onChangeEvent_valueTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
+HWTEST_F(SearchModifierTest, set_onChangeEvent_valueTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -1613,7 +1613,7 @@ HWTEST_F(SearchModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
 #endif
 
 /*
- * @tc.name: setMinFontScaleDefaultValues
+ * @tc.name: setMinFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1685,7 +1685,7 @@ HWTEST_F(SearchModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setMaxFontScaleDefaultValues
+ * @tc.name: setMaxFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */

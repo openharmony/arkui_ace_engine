@@ -102,11 +102,11 @@ public:
 };
 
 /**
- * @tc.name: RadioOptionsTest001
+ * @tc.name: setRadioOptionsTestVariant001
  * @tc.desc: Test Radio setRadioOptions.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioOptionsTestVariant001, TestSize.Level1)
 {
     auto groupDefault = GetStringAttribute(node_, RADIO_GROUP_ATTR);
     auto valueDefault = GetStringAttribute(node_, RADIO_VALUE_ATTR);
@@ -154,11 +154,11 @@ HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: RadioOptionsCustomBuilderTest
+ * @tc.name: setRadioOptionsTestCustomBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioOptionsTestCustomBuilder, TestSize.Level1)
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         Ark_RadioOptions radioOptions = {
@@ -183,11 +183,11 @@ HWTEST_F(RadioModifierTest, RadioOptionsCustomBuilderTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest001
+ * @tc.name: setCheckedTestVariant001
  * @tc.desc: Test Radio setChecked.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setCheckedTestVariant001, TestSize.Level1)
 {
     auto checked = GetStringAttribute(node_, CHECKED_ATTR);
     EXPECT_EQ(checked, "false");
@@ -198,11 +198,11 @@ HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioModifierTest002
+ * @tc.name: radioModifierTestDefaultColor
  * @tc.desc: Test Radio setRadioStyle default color.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTestDefaultColor, TestSize.Level1)
+HWTEST_F(RadioModifierTest, radioModifierTestDefaultColor, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto radioStyle = GetAttrValue< std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
@@ -469,11 +469,11 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level
 }
 
 /**
- * @tc.name: RadioEventTest001
+ * @tc.name: setOnChangeTestVariant001
  * @tc.desc: Test Radio onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setOnChangeTestVariant001, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
@@ -501,11 +501,11 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventCheckedImpl
+ * @tc.name: set_onChangeEvent_checkedTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, setOnChangeEventCheckedImpl, TestSize.Level1)
+HWTEST_F(RadioModifierTest, set_onChangeEvent_checkedTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();

@@ -63,7 +63,7 @@ RefPtr<PixelMap> MediaCachedImageModifierTest::CreatePixelMap(std::string& src)
 }
 
 /*
- * @tc.name: setImageOptions0TestDefaultValues
+ * @tc.name: setMediaCachedImageOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -85,7 +85,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestDefaultValu
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestPixelMap
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
@@ -110,7 +110,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestPixelMap, T
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestResource
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
@@ -147,17 +147,18 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResource, T
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestDrawableDescriptor
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
 HWTEST_F(MediaCachedImageModifierTest, DISABLED_setMediaCachedImageOptionsTestDrawableDescriptor, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setMediaCachedImageOptions, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestASTCResource
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */

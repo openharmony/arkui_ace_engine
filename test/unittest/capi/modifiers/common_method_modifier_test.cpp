@@ -466,7 +466,7 @@ HWTEST_F(CommonMethodModifierTest, setSizeTestInvalidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwiperOptionsTest
+ * @tc.name: setSharedTransitionTestId
  * @tc.desc: Check the functionality of CommonMethodModifier.setSharedTransition
  * with Id argument and nullptr Options argument
  * @tc.type: FUNC
@@ -596,7 +596,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveU
 }
 
 /**
- * @tc.name: DISABLED_setSharedTransitionTestOptionsCurveICurve
+ * @tc.name: setSharedTransitionTestOptionsCurveICurve
  * @tc.desc: Check the functionality of CommonMethodModifier.setSharedTransition
  * with Curve external callback attribute in optional argument
  * @tc.type: FUNC
@@ -841,7 +841,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidTopLengthValues, T
 }
 
 /*
- * @tc.name: setMarginTestValidRightLengthValues
+ * @tc.name: setMarginTestValidTopRightValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -895,7 +895,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setMarginTestValidBottomLengthValues
 }
 
 /*
- * @tc.name: DISABLED_setMarginTestValidLocalizedMarginValues
+ * @tc.name: setMarginTestValidLocalizedMarginValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1019,7 +1019,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidTopLengthValues, TestSize.
 }
 
 /*
- * @tc.name: setPaddingTestValidRightLengthValues
+ * @tc.name: setPaddingTestValidTopRightValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1073,7 +1073,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidBottomLengthValues, TestSi
 }
 
 /*
- * @tc.name: DISABLED_setPaddingTestValidLocalizedPaddingValues
+ * @tc.name: setPaddingTestValidLocalizedPaddingValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1380,11 +1380,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestValidValues, Te
 }
 
 /*
- * @tc.name: setRadialGradientRadiusTestValidValues
+ * @tc.name: setRadialGradientTestRadiusValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRadiusTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestRadiusValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1424,11 +1424,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRadiusTestValidValu
 }
 
 /*
- * @tc.name: setRadialGradientRadiusTestValidValues
+ * @tc.name: setRadialGradientTestRadiusInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRadiusTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestRadiusInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1468,11 +1468,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientRadiusTestInvalidVa
 }
 
 /*
- * @tc.name: setRadialGradientCenter1TestValidValues
+ * @tc.name: setRadialGradientTestCenter1ValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter1TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientTestCenter1ValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1523,11 +1523,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setRadialGradientCenter1TestValidVal
 }
 
 /*
- * @tc.name: setRadialGradientCenter2TestValidValues
+ * @tc.name: setRadialGradientTestCenter2ValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setRadialGradientTestCenter2ValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1578,11 +1578,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
 }
 
 /*
- * @tc.name: setRadialGradientRepeatingTestValidValues
+ * @tc.name: setRadialGradientTestRepeatingValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setRadialGradientTestRepeatingValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1626,11 +1626,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, Te
 }
 
 /*
- * @tc.name: setRadialGradientResourcesColorStopsTestValidValues
+ * @tc.name: setRadialGradientTestResourcesColorStopsValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setRadialGradientTestResourcesColorStopsValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_RadialGradientOptions inputValue;
@@ -1661,18 +1661,18 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
 }
 
 /*
- * @tc.name: setBackgroundImageDefaultValues
+ * @tc.name: setBackgroundImageTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImageDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_BACKGROUND_IMAGE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setBackgroundImageValidValues
+ * @tc.name: setBackgroundImage2TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1697,7 +1697,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestValidValues, 
 }
 
 /*
- * @tc.name: setBackgroundImageRepeatValidValues
+ * @tc.name: setBackgroundImage2TestRepeatValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1728,32 +1728,33 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestRepeatValidVa
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundImagePixelmapValues
+ * @tc.name: setBackgroundImage2TestPixelmapValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestPixelmapValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBackgroundImage2, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: setBackgroundImageSizeDefaultValues
+ * @tc.name: setBackgroundImageSizeTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setBackgroundImageSizeValidValues
+ * @tc.name: setBackgroundImageSizeTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_SizeOptions_ImageSize inputValue;
@@ -1799,11 +1800,11 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.L
 }
 
 /*
- * @tc.name: setBackgroundImageSizeValidEnumValues
+ * @tc.name: setBackgroundImageSizeTestValidEnumValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeValidEnumValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeTestValidEnumValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_SizeOptions_ImageSize inputValue;
@@ -1825,11 +1826,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImageSizeValidEnumValue
 }
 
 /*
- * @tc.name: setBackgroundImageSizeInvalidValues
+ * @tc.name: setBackgroundImageSizeTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_SizeOptions_ImageSize inputValue;
@@ -1886,11 +1887,11 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeInvalidValues, TestSize
 }
 
 /*
- * @tc.name: setBackgroundImagePositionDefaultValues
+ * @tc.name: setBackgroundImagePositionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_POSITION_NAME);
     auto x = GetAttrValue<double>(strResult, ATTRIBUTE_BACKGROUND_IMAGE_POSITION_X_NAME);
@@ -1900,11 +1901,11 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionDefaultValues, Test
 }
 
 /*
- * @tc.name: setBackgroundImagePositionValidValues
+ * @tc.name: setBackgroundImagePositionTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_Position_Alignment inputValue;
@@ -1949,11 +1950,11 @@ HWTEST_F(CommonMethodModifierTest, setBackgroundImagePositionValidValues, TestSi
 }
 
 /*
- * @tc.name: setBackgroundImagePositionValidAlignmentValues
+ * @tc.name: setBackgroundImagePositionTestValidAlignmentValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePositionValidAlignmentValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePositionTestValidAlignmentValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_Union_Position_Alignment inputValue;
@@ -1980,11 +1981,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePositionValidAlign
 }
 
 /*
- * @tc.name: setClipBoolValues
+ * @tc.name: setClipTestBoolValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setClipTestBoolValues, TestSize.Level1)
 {
     // default
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CLIP_NAME);
@@ -2002,32 +2003,33 @@ HWTEST_F(CommonMethodModifierTest, setClipBoolValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setClipShapeValues
+ * @tc.name: setClipTestShapeValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setClipShapeValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setClipTestShapeValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setClip, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: setScaleDefaultValues
+ * @tc.name: setScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setScaleDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setScaleTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SCALE_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_SCALE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setScaleValidXValues
+ * @tc.name: setScaleTestValidXValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidXValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleTestValidXValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_ScaleOptions inputValue;
@@ -2062,11 +2064,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidXValues, TestSize.Level
 }
 
 /*
- * @tc.name: setScaleValidYValues
+ * @tc.name: setScaleTestValidYValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidYValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleTestValidYValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_ScaleOptions inputValue;
@@ -2101,11 +2103,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidYValues, TestSize.Level
 }
 
 /*
- * @tc.name: setScaleValidCenterXValues
+ * @tc.name: setScaleTestValidCenterXValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidCenterXValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleTestValidCenterXValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_ScaleOptions inputValue;
@@ -2133,11 +2135,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidCenterXValues, TestSize
 }
 
 /*
- * @tc.name: setScaleValidCenterYValues
+ * @tc.name: setScaleTestValidCenterYValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidCenterYValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleTestValidCenterYValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_ScaleOptions inputValue;
@@ -2165,22 +2167,22 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setScaleValidCenterYValues, TestSize
 }
 
 /*
- * @tc.name: setTranslateDefaultValues
+ * @tc.name: setTranslateTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setTranslateDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setTranslateTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_TRANSLATE_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_TRANSLATE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setTranslateValidXValues
+ * @tc.name: setTranslateTestValidXValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidXValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateTestValidXValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_TranslateOptions inputValue;
@@ -2205,11 +2207,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidXValues, TestSize.L
 }
 
 /*
- * @tc.name: setTranslateValidYValues
+ * @tc.name: setTranslateTestValidYValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidYValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateTestValidYValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_TranslateOptions inputValue;
@@ -2234,11 +2236,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidYValues, TestSize.L
 }
 
 /*
- * @tc.name: setTranslateValidZValues
+ * @tc.name: setTranslateTestValidZValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidZValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateTestValidZValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_TranslateOptions inputValue;
@@ -2263,22 +2265,22 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setTranslateValidZValues, TestSize.L
 }
 
 /*
- * @tc.name: setIdDefaultValues
+ * @tc.name: setIdTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setIdDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setIdTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_ID_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_ID_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setIdValidValues
+ * @tc.name: setIdTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setIdValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setIdTestValidValues, TestSize.Level1)
 {
     auto inputValue = Converter::ArkValue<Opt_String>("custom_id");
     modifier_->setId(node_, &inputValue);
@@ -2292,11 +2294,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setIdValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setIdInvalidValues
+ * @tc.name: setIdTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, setIdInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, setIdTestInvalidValues, TestSize.Level1)
 {
     modifier_->setId(node_, nullptr);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_ID_NAME);
@@ -2364,11 +2366,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOnVisibleAreaChangeTest, TestSize
 }
 
 /*
- * @tc.name: setAnimationDefaultValues
+ * @tc.name: setAnimationTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationTestDefaultValues, TestSize.Level1)
 {
     Ark_AnimateParam param;
     Opt_AnimateParam optParam;
@@ -2402,11 +2404,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationDefaultValues, TestSize.
 }
 
 /*
- * @tc.name: setCloseAnimationValidValues
+ * @tc.name: setAnimationTestNull
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setCloseAnimationValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationTestNull, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     frameNode->MarkBuildDone();
@@ -2424,11 +2426,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setCloseAnimationValidValues, TestSi
 }
 
 /*
- * @tc.name: setOpenAnimationValidValues
+ * @tc.name: setAnimationTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setOpenAnimationValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationTestValidValues, TestSize.Level1)
 {
     Ark_AnimateParam param;
     Opt_AnimateParam optParam;
@@ -2466,11 +2468,11 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setOpenAnimationValidValues, TestSiz
 }
 
 /*
- * @tc.name: setAnimationInvalidValues
+ * @tc.name: setAnimationTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationTestInvalidValues, TestSize.Level1)
 {
     Ark_AnimateParam param;
     Opt_AnimateParam optParam;
@@ -2504,12 +2506,13 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationInvalidValues, TestSize.
 }
 
 /*
- * @tc.name: DISABLED_setAnimationOnFinishEventValues
+ * @tc.name: setAnimationTestOnFinishEventValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationOnFinishEventValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationTestOnFinishEventValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setAnimation, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 } // namespace OHOS::Ace::NG

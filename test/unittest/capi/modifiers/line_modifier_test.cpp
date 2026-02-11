@@ -80,11 +80,11 @@ Opt_LineOptions BuildLineOptions(double width, double height)
 }
 
 /**
- * @tc.name: LineModifierDefaultTest
+ * @tc.name: lineModifierTestDefaultValues
  * @tc.desc: setLineOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(LineModifierTest, LineModifierDefaultTest, TestSize.Level1)
+HWTEST_F(LineModifierTest, lineModifierTestDefaultValues, TestSize.Level1)
 {
     std::string strResult;
     strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
@@ -94,11 +94,11 @@ HWTEST_F(LineModifierTest, LineModifierDefaultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: LineModifierSetLineOptionsTest
+ * @tc.name: setLineOptionsTestLineModifierSetLineOptions
  * @tc.desc: setLineOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(LineModifierTest, LineModifierSetLineOptionsTest, TestSize.Level1)
+HWTEST_F(LineModifierTest, setLineOptionsTestLineModifierSetLineOptions, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     auto options = BuildLineOptions(WIDTH, HEIGHT);
@@ -112,11 +112,11 @@ HWTEST_F(LineModifierTest, LineModifierSetLineOptionsTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: LineModifierStartPointTest
+ * @tc.name: setStartPointTestLineModifierStartPoint
  * @tc.desc: setStartPoint test
  * @tc.type: FUNC
  */
-HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
+HWTEST_F(LineModifierTest, setStartPointTestLineModifierStartPoint, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
 
@@ -131,11 +131,11 @@ HWTEST_F(LineModifierTest, LineModifierStartPointTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: LineModifierEndPointTest
+ * @tc.name: setEndPointTestLineModifierEndPoint
  * @tc.desc: setEndPoint test
  * @tc.type: FUNC
  */
-HWTEST_F(LineModifierTest, LineModifierEndPointTest, TestSize.Level1)
+HWTEST_F(LineModifierTest, setEndPointTestLineModifierEndPoint, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
 

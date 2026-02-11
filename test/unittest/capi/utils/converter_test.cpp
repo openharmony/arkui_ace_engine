@@ -34,7 +34,7 @@ class ConvertorTest : public testing::Test {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConvertorTest, ArrayConversion, TestSize.Level1)
+HWTEST_F(ConvertorTest, arrayConversionTest, TestSize.Level1)
 {
     std::vector<std::string> testArray = { "123", "abc", "%^&" };
     Converter::ArkArrayHolder<Array_String> holder(testArray);
@@ -54,7 +54,7 @@ HWTEST_F(ConvertorTest, ArrayConversion, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConvertorTest, OptArrayConversion, TestSize.Level1)
+HWTEST_F(ConvertorTest, optArrayConversionTest, TestSize.Level1)
 {
     std::vector<uint32_t> inputArray = { 0xFF000123, 0xFF000456, 0xFF000789 };
     std::vector<std::optional<Color>> testArray;
@@ -77,7 +77,7 @@ HWTEST_F(ConvertorTest, OptArrayConversion, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConvertorTest, ListConversion, TestSize.Level1)
+HWTEST_F(ConvertorTest, listConversionTest, TestSize.Level1)
 {
     std::vector<std::string> testArray = { "123", "abc", "%^&" };
     Converter::ArkArrayHolder<Array_String> holder(testArray);
@@ -97,7 +97,7 @@ HWTEST_F(ConvertorTest, ListConversion, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConvertorTest, ListOptionalConversion, TestSize.Level1)
+HWTEST_F(ConvertorTest, listOptionalConversionTest, TestSize.Level1)
 {
     std::vector<std::string> testArray = { "123", "abc", "%^&" };
     Converter::ArkArrayHolder<Array_String> holder(testArray);
@@ -119,7 +119,7 @@ HWTEST_F(ConvertorTest, ListOptionalConversion, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConvertorTest, GetOptTestValue, TestSize.Level1)
+HWTEST_F(ConvertorTest, getOptTestValue, TestSize.Level1)
 {
     auto unionValue = Converter::ArkUnion<Ark_Union_Number_String, Ark_Float64>(5.2f);
     auto value = Converter::ArkValue<Opt_Union_Number_String>(unionValue);
@@ -135,7 +135,7 @@ HWTEST_F(ConvertorTest, GetOptTestValue, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ConvertorTest, GetOptTestEmpty, TestSize.Level1)
+HWTEST_F(ConvertorTest, getOptTestEmpty, TestSize.Level1)
 {
     auto value = Converter::ArkValue<Opt_Union_Number_String>();
     std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);

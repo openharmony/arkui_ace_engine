@@ -62,11 +62,11 @@ public:
 };
 
 /*
- * @tc.name: SetFlexOptionsTestDefaultValues
+ * @tc.name: setFlexOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, SetFlexOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest, setFlexOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -95,11 +95,11 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetFlexOptionsTestNoWrapValues
+ * @tc.name: setFlexOptionsTestNoWrapValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, SetFlexOptionsTestNoWrapValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest, setFlexOptionsTestNoWrapValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_FlexOptions inputValue;
@@ -132,11 +132,11 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestNoWrapValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetFlexOptionsTestEmptyWrapValues
+ * @tc.name: setFlexOptionsTestEmptyWrapValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, SetFlexOptionsTestEmptyWrapValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest, setFlexOptionsTestEmptyWrapValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_FlexOptions inputValue;
@@ -169,11 +169,11 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestEmptyWrapValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetFlexOptionsTestWrapValues
+ * @tc.name: setFlexOptionsTestWrapValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FlexModifierTest, SetFlexOptionsTestWrapValues, TestSize.Level1)
+HWTEST_F(FlexModifierTest, setFlexOptionsTestWrapValues, TestSize.Level1)
 {
     std::string strResult;
     Opt_FlexOptions inputValue;

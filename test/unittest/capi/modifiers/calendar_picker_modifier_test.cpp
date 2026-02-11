@@ -204,11 +204,11 @@ const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
 };
 
 /*
- * @tc.name: setTextStyleColorTest
+ * @tc.name: setTextStyleTestColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, setTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -233,11 +233,11 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTextStyleFontWeightTest
+ * @tc.name: setTextStyleTestFontWeight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleTestFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -266,11 +266,11 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSi
 }
 
 /*
- * @tc.name: setTextStyleFontSizeTest
+ * @tc.name: setTextStyleTestFontSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleTestFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -307,7 +307,7 @@ const std::vector<PickerDateOptionsStepTest> OPTIONS_TEST_PLAN = {
 };
 
 /*
- * @tc.name: setDatePickerOptionsTest
+ * @tc.name: setCalendarPickerOptionsTest
  * @tc.desc: Check the functionality of CalendarPickerModifier.SetCalendarPickerOptionsImpl
  * @tc.type: FUNC
  */

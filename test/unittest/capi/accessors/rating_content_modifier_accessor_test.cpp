@@ -44,11 +44,11 @@ static constexpr int TEST_DEFAULT_STARS = 5;
 static constexpr double TEST_DEFAULT_STEP_SIZE = 0.5;
 
 /**
- * @tc.name: RatingContentModifierHelperAccessorTest
+ * @tc.name: contentModifierRatingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RatingContentModifierHelperAccessor, RatingContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(RatingContentModifierHelperAccessor, contentModifierRatingTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierRating, nullptr);
 

@@ -60,11 +60,11 @@ public:
 };
 
 /**
- * @tc.name: ctorTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwipeRecognizerAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(SwipeRecognizerAccessorTest, constructTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);

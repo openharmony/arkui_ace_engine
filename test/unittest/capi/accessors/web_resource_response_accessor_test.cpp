@@ -83,11 +83,11 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getResponseDataEx1Test
+ * @tc.name: getResponseDataExTestVariant1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx1Test, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseDataExTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseDataEx, nullptr);
 
@@ -120,11 +120,11 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx1Test, TestSize.Level
 }
 
 /**
- * @tc.name: getResponseDataEx2Test
+ * @tc.name: getResponseDataExTestVariant2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, getResponseDataEx2Test, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, getResponseDataExTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getResponseDataEx, nullptr);
     Ark_Resource resource {
@@ -291,11 +291,11 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setResponseDataResourceTest
+ * @tc.name: setResponseDataTestResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTestResource, TestSize.Level1)
 {
     Ark_Union_String_Number_Resource_Buffer initvalueResponse;
     ASSERT_NE(accessor_->setResponseData, nullptr);
@@ -321,11 +321,11 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataResourceTest, TestSize.
 }
 
 /**
- * @tc.name: setResponseDataArrayBufferTest
+ * @tc.name: setResponseDataTestArrayBuffer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebResourceResponseAccessorTest, setResponseDataArrayBufferTest, TestSize.Level1)
+HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTestArrayBuffer, TestSize.Level1)
 {
     Ark_Union_String_Number_Resource_Buffer initvalueResponse;
     ASSERT_NE(accessor_->setResponseData, nullptr);
@@ -346,7 +346,7 @@ HWTEST_F(WebResourceResponseAccessorTest, setResponseDataArrayBufferTest, TestSi
 }
 
 /**
- * @tc.name: setResponseEncoding
+ * @tc.name: setResponseEncodingTest
  * @tc.desc:
  * @tc.type: FUNC
  */

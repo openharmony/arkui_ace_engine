@@ -34,11 +34,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestRectShapeOptions
+ * @tc.name: constructTestRectShapeOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, CtorTestRectShapeOptions, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, constructTestRectShapeOptions, TestSize.Level1)
 {
     const auto testWidth = 15.2;
     const auto testRadius = 5.;
@@ -71,11 +71,11 @@ HWTEST_F(RectShapeAccessorTest, CtorTestRectShapeOptions, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestRectShapeOptionsArray
+ * @tc.name: constructTestRectShapeOptionsArray
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, CtorTestRectShapeOptionsArray, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, constructTestRectShapeOptionsArray, TestSize.Level1)
 {
     const auto testRadius1 = 12.6;
     const auto testRadius2 = 7.4;
@@ -120,11 +120,11 @@ HWTEST_F(RectShapeAccessorTest, CtorTestRectShapeOptionsArray, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestRoundRectShapeOptions
+ * @tc.name: constructTestRoundRectShapeOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, CtorTestRoundRectShapeOptions, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, constructTestRoundRectShapeOptions, TestSize.Level1)
 {
     const auto testWidth = 17.4;
     const auto testHeight = 20.5;
@@ -411,11 +411,11 @@ HWTEST_F(RectShapeAccessorTest, radiusHeightTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadiusTestNull
+ * @tc.name: radiusTestNull
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, RadiusTestNull, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, radiusTestNull, TestSize.Level1)
 {
     ASSERT_NE(accessor_->radius, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
@@ -427,11 +427,11 @@ HWTEST_F(RectShapeAccessorTest, RadiusTestNull, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadiusTestNumber
+ * @tc.name: radiusTestNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, RadiusTestNumber, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, radiusTestNumber, TestSize.Level1)
 {
     ASSERT_NE(accessor_->radius, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
@@ -453,11 +453,11 @@ HWTEST_F(RectShapeAccessorTest, RadiusTestNumber, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadiusTestString
+ * @tc.name: radiusTestString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, RadiusTestString, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, radiusTestString, TestSize.Level1)
 {
     ASSERT_NE(accessor_->radius, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
@@ -478,11 +478,11 @@ HWTEST_F(RectShapeAccessorTest, RadiusTestString, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadiusTestArray
+ * @tc.name: radiusTestArray
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RectShapeAccessorTest, RadiusTestArray, TestSize.Level1)
+HWTEST_F(RectShapeAccessorTest, radiusTestArray, TestSize.Level1)
 {
     ASSERT_NE(accessor_->radius, nullptr);
     ASSERT_NE(peer_->shape, nullptr);

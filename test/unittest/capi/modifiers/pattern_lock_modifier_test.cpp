@@ -449,7 +449,7 @@ HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestValidValues, TestSiz
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, setOnPatternCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
@@ -500,7 +500,7 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
  * @tc.desc: Checking the callback operation for a change in breakpoint.
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, setOnDotConnectTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();

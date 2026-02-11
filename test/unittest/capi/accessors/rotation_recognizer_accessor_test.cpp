@@ -28,22 +28,22 @@ class RotationRecognizerAccessorTest : public AccessorTestBase<GENERATED_ArkUIRo
     &GENERATED_ArkUIAccessors::getRotationRecognizerAccessor, RotationRecognizerPeer> {};
 
 /**
- * @tc.name: CreatePeerTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationRecognizerAccessorTest, CreatePeerTest, TestSize.Level1)
+HWTEST_F(RotationRecognizerAccessorTest, constructTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
 }
 
 /**
- * @tc.name: GetAngleTest
+ * @tc.name: getAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationRecognizerAccessorTest, GetAngleTest, TestSize.Level1)
+HWTEST_F(RotationRecognizerAccessorTest, getAngleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getAngle, nullptr);
     ASSERT_NE(peer_, nullptr);

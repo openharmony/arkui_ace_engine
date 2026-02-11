@@ -60,11 +60,11 @@ public:
 };
 
 /*
- * @tc.name: emptyOptionsTest
+ * @tc.name: getFontStyleTestEmptyOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleAccessorTest, emptyOptionsTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontStyleTestEmptyOptions, TestSize.Level1)
 {
     // finalize base peer
     finalyzer_(peer_);

@@ -70,11 +70,11 @@ public:
 };
 
 /**
- * @tc.name: setCheckboxOnChangeTest
+ * @tc.name: setOnChangeTestSetCheckboxOnChange
  * @tc.desc: Test Checkbox setOnChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setCheckboxOnChangeTest, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, setOnChangeTestSetCheckboxOnChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -544,7 +544,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMarkTestDefaultValidValues
+ * @tc.name: setMarkTestInvalidValues
  * @tc.desc: setMark test
  * @tc.type: FUNC
  */
@@ -585,11 +585,11 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectImpl
+ * @tc.name: set_onChangeEvent_selectTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setOnChangeEventSelectImpl, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, set_onChangeEvent_selectTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();

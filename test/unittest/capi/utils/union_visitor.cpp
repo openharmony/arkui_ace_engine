@@ -33,7 +33,7 @@ class UnionVisitorTest : public testing::Test {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(UnionVisitorTest, SimpleUnionTest, TestSize.Level1)
+HWTEST_F(UnionVisitorTest, simpleUnionTest, TestSize.Level1)
 {
     static_assert(Converter::UnionLastIndex<Ark_Union_String_Resource> == 1);
     auto test1 = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>("abc");
@@ -49,7 +49,7 @@ HWTEST_F(UnionVisitorTest, SimpleUnionTest, TestSize.Level1)
     EXPECT_FALSE(calledVoid);
 }
 
-HWTEST_F(UnionVisitorTest, DefaultCaseTest, TestSize.Level1)
+HWTEST_F(UnionVisitorTest, defaultCaseTest, TestSize.Level1)
 {
     static_assert(Converter::UnionLastIndex<Ark_Union_Color_String_Resource_ColoringStrategy> == 3);
     auto test1 = Converter::ArkUnion<Ark_Union_Color_String_Resource_ColoringStrategy, Ark_String>("abc");
@@ -78,7 +78,7 @@ HWTEST_F(UnionVisitorTest, DefaultCaseTest, TestSize.Level1)
     EXPECT_FALSE(calledVoid);
 }
 
-HWTEST_F(UnionVisitorTest, EmptyCaseTest, TestSize.Level1)
+HWTEST_F(UnionVisitorTest, emptyCaseTest, TestSize.Level1)
 {
     static_assert(Converter::UnionLastIndex<Ark_Union_String_Resource> == 1);
     auto test1 = Converter::ArkUnion<Ark_Union_String_Resource, Ark_Empty>(nullptr);
@@ -94,7 +94,7 @@ HWTEST_F(UnionVisitorTest, EmptyCaseTest, TestSize.Level1)
     EXPECT_TRUE(calledVoid);
 }
 
-HWTEST_F(UnionVisitorTest, OptUnionTest, TestSize.Level1)
+HWTEST_F(UnionVisitorTest, optUnionTest, TestSize.Level1)
 {
     auto test1 = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>("abc");
     bool calledStr = false;
@@ -109,7 +109,7 @@ HWTEST_F(UnionVisitorTest, OptUnionTest, TestSize.Level1)
     EXPECT_FALSE(calledVoid);
 }
 
-HWTEST_F(UnionVisitorTest, UndefinedOptCaseTest, TestSize.Level1)
+HWTEST_F(UnionVisitorTest, undefinedOptCaseTest, TestSize.Level1)
 {
     static_assert(Converter::UnionLastIndex<Ark_Union_String_Resource> == 1);
     auto test1 = Converter::ArkUnion<Opt_Union_String_Resource>(Ark_Empty());

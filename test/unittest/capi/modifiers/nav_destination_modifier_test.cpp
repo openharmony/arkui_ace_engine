@@ -208,6 +208,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar1TestValidValues, T
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnShownTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnShown, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -218,6 +219,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnShownTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnHiddenTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnHidden, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -228,6 +230,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnHiddenTest, TestSize.Level1)
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillAppearTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnWillAppear, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -238,6 +241,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillAppearTest, TestSize.Leve
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillDisappearTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnWillDisappear, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -248,6 +252,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillDisappearTest, TestSize.L
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnWillShow, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -258,6 +263,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnWillHide, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 

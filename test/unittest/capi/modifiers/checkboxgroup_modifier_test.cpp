@@ -60,11 +60,11 @@ public:
 };
 
 /**
- * @tc.name: CheckboxGroupModifierTest001
+ * @tc.name: setSelectedColorTestVariant001
  * @tc.desc: setSelectedColor test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setSelectedColorTestVariant001, TestSize.Level1)
 {
     auto checkVal1 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal1, "#FF007DFF");
@@ -76,11 +76,11 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest002
+ * @tc.name: setUnselectedColorTestVariant002
  * @tc.desc: setUnselectedColor test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setUnselectedColorTestVariant002, TestSize.Level1)
 {
     auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal1, "#FF000000");
@@ -92,11 +92,11 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest003
+ * @tc.name: setSelectAllTestVariant003
  * @tc.desc: setSelectAll test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setSelectAllTestVariant003, TestSize.Level1)
 {
     auto checkVal1 = GetStringAttribute(node_, "selectAll");
     EXPECT_EQ(checkVal1, "false");
@@ -107,11 +107,11 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest004
+ * @tc.name: setMarkTestVariant004
  * @tc.desc: setMark test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setMarkTestVariant004, TestSize.Level1)
 {
     Ark_MarkStyle style;
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
@@ -135,11 +135,11 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest005
+ * @tc.name: setCheckboxShapeTestVariant005
  * @tc.desc: setCheckboxShape test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, DISABLED_setCheckboxShapeTestVariant005, TestSize.Level1)
 {
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
@@ -157,11 +157,11 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestS
 }
 
 /**
- * @tc.name: SetOnChangeTest
+ * @tc.name: setOnChangeTest
  * @tc.desc: onChange event test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -190,11 +190,11 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectAllImpl
+ * @tc.name: set_onChangeEvent_selectAllTestOnChangeEventSelectAllImpl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, set_onChangeEvent_selectAllTestOnChangeEventSelectAllImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();

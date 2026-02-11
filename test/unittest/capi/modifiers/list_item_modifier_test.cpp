@@ -88,11 +88,11 @@ public:
 };
 
 /*
- * @tc.name: Construct
+ * @tc.name: constructTest
  * @tc.desc: Check the functionality of ListItemModifier.Construct
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, ConstructTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, constructTest, TestSize.Level1)
 {
     const auto id = GetId();
     auto node = modifier_->construct(id, 0);
@@ -104,11 +104,11 @@ HWTEST_F(ListItemModifierTest, ConstructTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConstructWithLazy
+ * @tc.name: constructTestWithLazy
  * @tc.desc: Check the functionality of ListItemModifier.Construct
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, ConstructWithLazyTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, constructTestWithLazy, TestSize.Level1)
 {
     GeneratedModifier::LazyBuild::NeedLazyBuild();
     const auto id = GetId();
@@ -164,7 +164,7 @@ HWTEST_F(ListItemModifierTest, setSelectableTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSelectableTest
+ * @tc.name: setSelectedTest
  * @tc.desc: Check the functionality of ListItemModifier.setSelected
  * @tc.type: FUNC
  */
@@ -218,11 +218,11 @@ HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwipeActionEdgeEffectTest
+ * @tc.name: setSwipeActionTestEdgeEffect
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestEdgeEffect, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
     auto swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
@@ -268,11 +268,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwipeActionActionsTest
+ * @tc.name: setSwipeActionTestOffsetChange
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestOffsetChange, TestSize.Level1)
 {
     const int32_t offsetArg = 5;
 
@@ -309,11 +309,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwipeActionActionsTest
+ * @tc.name: setSwipeActionTestCustomBuilder
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionCustomBuilderTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestCustomBuilder, TestSize.Level1)
 {
     uiNode_1 = BlankModelNG::CreateFrameNode(NODE_ID_1);
     auto customBuilderStart = getBuilderCb(true);
@@ -344,11 +344,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionCustomBuilderTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwipeActionActionItemCustomBuilderTest
+ * @tc.name: setSwipeActionTestActionItemCustomBuilder
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemCustomBuilderTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemCustomBuilder, TestSize.Level1)
 {
     uiNode_1 = BlankModelNG::CreateFrameNode(NODE_ID_1);
     auto customBuilderStart = getBuilderCb(true);
@@ -385,11 +385,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemCustomBuilderTest, TestSi
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnActionCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnActionCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnActionCallback, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32) =
@@ -449,11 +449,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnEnterActionAreaCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnEnterActionAreaCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnEnterActionAreaCallback, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32) =
@@ -513,11 +513,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnExitActionAreaCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnExitActionAreaCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnExitActionAreaCallback, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32) =
@@ -577,11 +577,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnStateChangeCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnStateChangeCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnStateChangeCallback, TestSize.Level1)
 {
     struct CheckEvent { int32_t resourceId; std::optional<SwipeActionState> state; };
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
@@ -640,11 +640,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
 }
 
 /**
- * @tc.name: setSwipeActionActionItemActionAreaDistanceTest
+ * @tc.name: setSwipeActionTestActionItemActionAreaDistance
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistance, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -682,11 +682,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceTest, T
 }
 
 /**
- * @tc.name: setSwipeActionActionItemActionAreaDistanceNegativeTest
+ * @tc.name: setSwipeActionTestActionItemActionAreaDistanceNegative
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceNegativeTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceNegative, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -724,11 +724,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceNegativ
 }
 
 /**
- * @tc.name: setSwipeActionActionItemActionAreaDistanceOptionalTest
+ * @tc.name: setSwipeActionTestActionItemActionAreaDistanceOptional
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptionalTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceOptional, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -791,11 +791,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, set_onChangeEvent_selectedTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();

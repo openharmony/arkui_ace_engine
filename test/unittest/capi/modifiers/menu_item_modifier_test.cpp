@@ -218,11 +218,11 @@ public:
 };
 
 /*
- * @tc.name: setMenuItemOptionsCustomBuilderTest
+ * @tc.name: setMenuItemOptionsTestCustomBuilder
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestCustomBuilder, TestSize.Level1)
 {
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, CustomNodeBuilder>(getBuilderCb());
     modifier_->setMenuItemOptions(node_, &optionsOpt);
@@ -234,11 +234,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsCustomBuilderTest, TestSize.Lev
 }
 
 /*
- * @tc.name: setMenuItemOptionsStartIconStringTest
+ * @tc.name: setMenuItemOptionsTestStartIconString
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconStringTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestStartIconString, TestSize.Level1)
 {
     auto startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
     EXPECT_EQ(startIcon, "");
@@ -251,11 +251,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconStringTest, TestSize.L
 }
 
 /*
- * @tc.name: setMenuItemOptionsStartIconResourceTest
+ * @tc.name: setMenuItemOptionsTestStartIconResource
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestStartIconResource, TestSize.Level1)
 {
     auto startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
     EXPECT_EQ(startIcon, "");
@@ -268,11 +268,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconResourceTest, TestSize
 }
 
 /*
- * @tc.name: setMenuItemOptionsEndIconStringTest
+ * @tc.name: setMenuItemOptionsTestEndIconString
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconStringTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestEndIconString, TestSize.Level1)
 {
     auto endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
     EXPECT_EQ(endIcon, "");
@@ -285,11 +285,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconStringTest, TestSize.Lev
 }
 
 /*
- * @tc.name: setMenuItemOptionsEndIconResourceTest
+ * @tc.name: setMenuItemOptionsTestEndIconResource
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestEndIconResource, TestSize.Level1)
 {
     auto endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
     EXPECT_EQ(endIcon, "");
@@ -302,11 +302,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconResourceTest, TestSize.L
 }
 
 /*
- * @tc.name: setMenuItemOptionsContentStringTest
+ * @tc.name: setMenuItemOptionsTestContentString
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentStringTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestContentString, TestSize.Level1)
 {
     auto content = GetAttrValue<std::string>(node_, CONTENT_PROP);
     EXPECT_EQ(content, "");
@@ -319,11 +319,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentStringTest, TestSize.Lev
 }
 
 /*
- * @tc.name: setMenuItemOptionsContentResourceTest
+ * @tc.name: setMenuItemOptionsTestContentResource
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestContentResource, TestSize.Level1)
 {
     auto content = GetAttrValue<std::string>(node_, CONTENT_PROP);
     EXPECT_EQ(content, "");
@@ -336,11 +336,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentResourceTest, TestSize.L
 }
 
 /*
- * @tc.name: setMenuItemOptionsLabelInfoStringTest
+ * @tc.name: setMenuItemOptionsTestLabelInfoString
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoStringTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestLabelInfoString, TestSize.Level1)
 {
     auto labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
     EXPECT_EQ(labelInfo, "");
@@ -353,11 +353,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoStringTest, TestSize.L
 }
 
 /*
- * @tc.name: setMenuItemOptionsLabelInfoResourceTest
+ * @tc.name: setMenuItemOptionsTestLabelInfoResource
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestLabelInfoResource, TestSize.Level1)
 {
     auto labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
     EXPECT_EQ(labelInfo, "");
@@ -370,11 +370,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoResourceTest, TestSize
 }
 
 /*
- * @tc.name: setMenuItemOptionsSymbolStartIconTest
+ * @tc.name: setMenuItemOptionsTestSymbolStartIcon
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsSymbolStartIconTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestSymbolStartIcon, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -393,11 +393,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsSymbolStartIconTest, TestSize.L
 }
 
 /*
- * @tc.name: setMenuItemOptionsSymbolEndIconTest
+ * @tc.name: setMenuItemOptionsTestSymbolEndIcon
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsSymbolEndIconTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestSymbolEndIcon, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -416,11 +416,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsSymbolEndIconTest, TestSize.Lev
 }
 
 /*
- * @tc.name: setMenuItemOptionsMenuItemOptionsCustomBuilderTest
+ * @tc.name: setMenuItemOptionsTestMenuItemOptionsCustomBuilder
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setMenuItemOptionsMenuItemOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestMenuItemOptionsCustomBuilder, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -439,11 +439,11 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsMenuItemOptionsCustomBuilderTes
 }
 
 /*
- * @tc.name: setSelectIconSymbolTest
+ * @tc.name: setSelectIconTestSymbol
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setSelectIconSymbolTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setSelectIconTestSymbol, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -482,11 +482,11 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setSelectedTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSelectIconBoolTest
+ * @tc.name: setSelectIconTestBool
  * @tc.desc: Check the functionality of MenuItemModifier.setSelectIcon
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setSelectIconBoolTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setSelectIconTestBool, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "false");
@@ -498,11 +498,11 @@ HWTEST_F(MenuItemModifierTest, setSelectIconBoolTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSelectIconStringTest
+ * @tc.name: setSelectIconTestString
  * @tc.desc: Check the functionality of MenuItemModifier.setSelectIcon
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setSelectIconTestString, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "false");
@@ -517,11 +517,11 @@ HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSelectIconResourceTest
+ * @tc.name: setSelectIconTestResource
  * @tc.desc: Check the functionality of MenuItemModifier.setSelectIcon
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setSelectIconTestResource, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
     EXPECT_EQ(selectIcon, "false");
@@ -572,11 +572,11 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontColorTestRes, TestSize.Lev
 }
 
 /**
- * @tc.name: setContentFontColorInvalidTest
+ * @tc.name: setContentFontColorTestInvalid
  * @tc.desc: Check the functionality of MenuItemModifier.setContentFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontColorInvalidTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontColorTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "contentFontColor");
@@ -629,11 +629,11 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTestRes, TestSize.Level
 }
 
 /**
- * @tc.name: setLabelFontColorInvalidTest
+ * @tc.name: setLabelFontColorTestInvalid
  * @tc.desc: Check the functionality of MenuItemModifier.setLabelFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontColorInvalidTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontColorTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
@@ -648,11 +648,11 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setContentFontTest1
+ * @tc.name: setContentFontTestVariant1
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontTest1, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -683,11 +683,11 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: setContentFontTest2
+ * @tc.name: setContentFontTestVariant2
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontTest2, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -718,11 +718,11 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: setContentFontTest3
+ * @tc.name: setContentFontTestVariant3
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontTestVariant3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -753,11 +753,11 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: setContentFontTest4
+ * @tc.name: setContentFontTestVariant4
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setContentFontTestVariant4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -788,11 +788,11 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
 }
 
 /**
- * @tc.name: setContentFontTest5
+ * @tc.name: setContentFontTestVariant5
  * @tc.desc: Check the functionality of MenuModifier.setContentFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest5, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTestVariant5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
     Ark_Font font = {
@@ -823,11 +823,11 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest5, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLabelFontTest1
+ * @tc.name: setLabelFontTestVariant1
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontTest1, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {
@@ -858,11 +858,11 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLabelFontTest2
+ * @tc.name: setLabelFontTestVariant2
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontTest2, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {
@@ -893,11 +893,11 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLabelFontTest3
+ * @tc.name: setLabelFontTestVariant3
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {
@@ -928,11 +928,11 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLabelFontTest4
+ * @tc.name: setLabelFontTestVariant4
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {
@@ -963,11 +963,11 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLabelFontTest5
+ * @tc.name: setLabelFontTestVariant5
  * @tc.desc: Check the functionality of MenuModifier.setLabelFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTest5, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTestVariant5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
     Ark_Font font = {
@@ -1044,11 +1044,11 @@ HWTEST_F(MenuItemModifierTest, setOnChangeTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, set_onChangeEvent_selectedTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();

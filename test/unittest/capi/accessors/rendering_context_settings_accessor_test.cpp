@@ -31,27 +31,23 @@ class RenderingContextSettingsAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIRenderingContextSettingsAccessor,
         &GENERATED_ArkUIAccessors::getRenderingContextSettingsAccessor, RenderingContextSettingsPeer> {
 public:
-    RenderingContextSettingsPeer* CreatePeerInstanceT(const Opt_Boolean* value)
-    {
-        return accessor_->construct(value);
-    }
     void* CreatePeerInstance() override
     {
         auto optValue = Converter::ArkValue<Opt_Boolean>(ANTIALIAS_DEFAULT_VALUE);
-        return CreatePeerInstanceT(&optValue);
+        return accessor_->construct(&optValue);
     }
 };
 
 /**
- * @tc.name: ctorRenderingContextSettingsPeerTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerTest, TestSize.Level1)
+HWTEST_F(RenderingContextSettingsAccessorTest, constructTest, TestSize.Level1)
 {
     for (const auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
         auto optValue = Converter::ArkValue<Opt_Boolean>(value);
-        auto peer = CreatePeerInstanceT(&optValue);
+        auto peer = accessor_->construct(&optValue);
         auto result = peer->antialias;
         finalyzer_(peer);
         ASSERT_NE(result, std::nullopt);
@@ -60,13 +56,13 @@ HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerT
     }
 
     auto optValue = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    auto peer = CreatePeerInstanceT(&optValue);
+    auto peer = accessor_->construct(&optValue);
     auto result = peer->antialias;
     finalyzer_(peer);
     EXPECT_EQ(result, std::nullopt) <<
         "Input value is: empty, method: GetRepeat";
 
-    peer = CreatePeerInstanceT(nullptr);
+    peer = accessor_->construct(nullptr);
     result = peer->antialias;
     finalyzer_(peer);
     EXPECT_EQ(result, std::nullopt) <<

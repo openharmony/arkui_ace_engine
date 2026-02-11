@@ -142,7 +142,7 @@ static const std::vector<std::pair<Ark_ResourceColor, std::string>> COLOR_TEST_P
 };
 
 /*
- * @tc.name: setResizeableTestValidValues
+ * @tc.name: setFontColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */

@@ -201,11 +201,11 @@ public:
 };
 
 /**
- * @tc.name: setUseMilitaryTime
+ * @tc.name: setUseMilitaryTimeTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.UseMilitaryTimeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setUseMilitaryTime, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setUseMilitaryTimeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setUseMilitaryTime, nullptr);
 
@@ -222,11 +222,11 @@ HWTEST_F(TimePickerModifierTest, setUseMilitaryTime, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLoop
+ * @tc.name: setLoopTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.LoopImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setLoop, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setLoopTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLoop, nullptr);
 
@@ -243,11 +243,11 @@ HWTEST_F(TimePickerModifierTest, setLoop, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDisappearTextStyle
+ * @tc.name: setDisappearTextStyleTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyle, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -284,11 +284,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyle, TestSize.Level1
 }
 
 /**
- * @tc.name: setDisappearTextWeight
+ * @tc.name: setDisappearTextStyleTestWeight
  * @tc.desc: Check the functionality of TimePickerModifierTest.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextWeight, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -343,11 +343,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextWeight, TestSize.Level
 }
 
 /**
- * @tc.name: setDisappearTextFamily
+ * @tc.name: setDisappearTextStyleTestFamily
  * @tc.desc: Check the functionality of TimePickerModifierTest.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -384,11 +384,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
 }
 
 /**
- * @tc.name: setDisappearTextSize
+ * @tc.name: setDisappearTextStyleTestSize
  * @tc.desc: Check the functionality of TimePickerModifierTest.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextSize, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -425,11 +425,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDisappearTextColor
+ * @tc.name: setDisappearTextStyleTestColor
  * @tc.desc: Check the functionality of TimePickerModifierTest.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -450,11 +450,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1
 }
 
 /**
- * @tc.name: setTextStyle
+ * @tc.name: setTextStyleTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyle, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -491,11 +491,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyle, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextWeight
+ * @tc.name: setTextStyleTestWeight
  * @tc.desc: Check the functionality of TimePickerModifierTest.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setTextWeight, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -550,11 +550,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextWeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextFamily
+ * @tc.name: setTextStyleTestFamily
  * @tc.desc: Check the functionality of TimePickerModifierTest.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -591,11 +591,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextSize
+ * @tc.name: setTextStyleTestSize
  * @tc.desc: Check the functionality of TimePickerModifierTest.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setTextSize, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -632,11 +632,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextColor
+ * @tc.name: setTextStyleTestColor
  * @tc.desc: Check the functionality of TimePickerModifierTest.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -657,11 +657,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextStyle
+ * @tc.name: setSelectedTextStyleTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyle, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -698,11 +698,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyle, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextWeight
+ * @tc.name: setSelectedTextStyleTestWeight
  * @tc.desc: Check the functionality of TimePickerModifierTest.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextWeight, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -757,11 +757,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextWeight, TestSize.Level1
 }
 
 /**
- * @tc.name: setSelectedTextFamily
+ * @tc.name: setSelectedTextStyleTestFamily
  * @tc.desc: Check the functionality of TimePickerModifierTest.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -798,11 +798,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
 }
 
 /**
- * @tc.name: setSelectedTextSize
+ * @tc.name: setSelectedTextStyleTestSize
  * @tc.desc: Check the functionality of TimePickerModifierTest.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextSize, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -839,11 +839,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextColor
+ * @tc.name: setSelectedTextStyleTestColor
  * @tc.desc: Check the functionality of TimePickerModifierTest.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextColor, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -864,11 +864,11 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDateTimeOptions
+ * @tc.name: setDateTimeOptionsTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.DateTimeOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setDateTimeOptionsTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDateTimeOptions, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -900,11 +900,11 @@ HWTEST_F(TimePickerModifierTest, setDateTimeOptions, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnChange
+ * @tc.name: setOnChangeTest
  * @tc.desc: onChange event test
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setOnChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -954,11 +954,11 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: setEnableHapticFeedback
+ * @tc.name: setEnableHapticFeedbackTest
  * @tc.desc: Check the functionality of TimePickerModifierTest.EnableHapticFeedbackImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -978,11 +978,11 @@ HWTEST_F(TimePickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectedTest
+ * @tc.name: set_onChangeEvent_selectedTestOnChangeEventSelected
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, set_onChangeEvent_selectedTestOnChangeEventSelected, TestSize.Level1)
 {
     ASSERT_NE(modifier_->set_onChangeEvent_selected, nullptr);
 
@@ -1025,11 +1025,11 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 #endif
 
 /**
- * @tc.name: enableCascadeTest
+ * @tc.name: setEnableCascadeTestEnableCascade
  * @tc.desc: Check the functionality of TimePickerModifierTest.LoopImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, enableCascadeTest, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setEnableCascadeTestEnableCascade, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEnableCascade, nullptr);
 
@@ -1045,11 +1045,11 @@ HWTEST_F(TimePickerModifierTest, enableCascadeTest, TestSize.Level1)
     EXPECT_EQ(checkValue, EXPECTED_FALSE);
 }
 /**
- * @tc.name: digitalCrownSensitivity
+ * @tc.name: setDigitalCrownSensitivityTestDigitalCrownSensitivity
  * @tc.desc: Check the functionality of TimePickerModifierTest.digitalCrownSensitivity
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, digitalCrownSensitivity, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setDigitalCrownSensitivityTestDigitalCrownSensitivity, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_DIGITAL_CROWN_SENSITIVITY);
@@ -1062,11 +1062,11 @@ HWTEST_F(TimePickerModifierTest, digitalCrownSensitivity, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnEnterSelectedArea
+ * @tc.name: setOnEnterSelectedAreaTest
  * @tc.desc: onEnterSelectedArea event test
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
+HWTEST_F(TimePickerModifierTest, setOnEnterSelectedAreaTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnEnterSelectedArea, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

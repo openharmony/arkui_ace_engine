@@ -88,11 +88,11 @@ public:
 };
 
 /**
- * @tc.name: SetEnabledTest
+ * @tc.name: setEnabledTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, DISABLED_SetEnabledTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, DISABLED_setEnabledTest, TestSize.Level1)
 {
     constexpr bool enabledTrue = true;
     constexpr bool enabledFalse = false;
@@ -110,11 +110,11 @@ HWTEST_F(GestureRecognizerAccessorTest, DISABLED_SetEnabledTest, TestSize.Level1
 }
 
 /**
- * @tc.name: IsEnabledTest
+ * @tc.name: isEnabledTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, DISABLED_IsEnabledTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, DISABLED_isEnabledTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isEnabled, nullptr);
 
@@ -130,11 +130,11 @@ HWTEST_F(GestureRecognizerAccessorTest, DISABLED_IsEnabledTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetStateTest
+ * @tc.name: getStateTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, GetStateTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, getStateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getState, nullptr);
 
@@ -147,11 +147,11 @@ HWTEST_F(GestureRecognizerAccessorTest, GetStateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTypeTest
+ * @tc.name: getTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, GetTypeTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, getTypeTest, TestSize.Level1)
 {
     for (auto& [value, expected]: getTypeTestPlan) {
         mockGestureRecognizer_->SetRecognizerType(value);
@@ -161,11 +161,11 @@ HWTEST_F(GestureRecognizerAccessorTest, GetTypeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetEventTargetInfo
+ * @tc.name: getEventTargetInfoTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, getEventTargetInfoTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getEventTargetInfo, nullptr);
     auto info = accessor_->getEventTargetInfo(peer_);
@@ -213,11 +213,11 @@ HWTEST_F(GestureRecognizerAccessorTest, GetEventTargetInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsEnabledTest
+ * @tc.name: isValidTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, DISABLED_IsValidTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, DISABLED_isValidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isValid, nullptr);
 
@@ -233,11 +233,11 @@ HWTEST_F(GestureRecognizerAccessorTest, DISABLED_IsValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTagTest
+ * @tc.name: getTagTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, GetTagTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, getTagTest, TestSize.Level1)
 {
     const std::string expectedTag = "Test";
     auto info = AccessibilityManager::MakeRefPtr<GestureInfo>();
@@ -250,11 +250,11 @@ HWTEST_F(GestureRecognizerAccessorTest, GetTagTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFingerCountTest
+ * @tc.name: getFingerCountTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, GetFingerCountTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, getFingerCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFingerCount, nullptr);
 
@@ -269,11 +269,11 @@ HWTEST_F(GestureRecognizerAccessorTest, GetFingerCountTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsFingerCountLimitImplTest
+ * @tc.name: isFingerCountLimitTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureRecognizerAccessorTest, IsFingerCountLimitImplTest, TestSize.Level1)
+HWTEST_F(GestureRecognizerAccessorTest, isFingerCountLimitTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isFingerCountLimit, nullptr);
 

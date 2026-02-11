@@ -94,11 +94,11 @@ public:
 };
 
 /**
- * @tc.name: ArcTest
+ * @tc.name: arcTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_ArcTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_arcTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->arc, nullptr);
     auto x = Converter::ArkValue<Ark_Float64>(FIRST_X_VALUE);
@@ -115,11 +115,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_ArcTest, TestSize.Level1)
     accessor_->arc(peer_, x, y, radius, startAngle, endAngle, &clockwise);
 }
 /**
- * @tc.name: ArcToTest
+ * @tc.name: arcToTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_ArcToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_arcToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->arcTo, nullptr);
     auto x1 = Converter::ArkValue<Ark_Float64>(SECOND_X_VALUE);
@@ -135,11 +135,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_ArcToTest, TestSize.Level1)
     accessor_->arcTo(peer_, x1, y1, x2, y2, radius);
 }
 /**
- * @tc.name: BezierCurveToTest
+ * @tc.name: bezierCurveToTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_BezierCurveToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_bezierCurveToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->bezierCurveTo, nullptr);
     auto cp1x = Converter::ArkValue<Ark_Float64>(CPX_VALUE);
@@ -156,11 +156,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_BezierCurveToTest, TestSize.Level1)
     accessor_->bezierCurveTo(peer_, cp1x, cp1y, cp2x, cp2y, x, y);
 }
 /**
- * @tc.name:EllipseTest
+ * @tc.name:ellipseTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_EllipseTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_ellipseTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->ellipse, nullptr);
     auto x = Converter::ArkValue<Ark_Float64>(FIRST_X_VALUE);
@@ -179,11 +179,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_EllipseTest, TestSize.Level1)
     accessor_->ellipse(peer_, x, y, radiusX, radiusY, rotation, startAngle, endAngle, &clockwise);
 }
 /**
- * @tc.name: LineToTest
+ * @tc.name: lineToTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_LineToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_lineToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->lineTo, nullptr);
     auto x1 = Converter::ArkValue<Ark_Float64>(FIRST_X_VALUE);
@@ -203,11 +203,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_LineToTest, TestSize.Level1)
     accessor_->lineTo(nullptr, x3, y3);
 }
 /**
- * @tc.name: MoveToTest
+ * @tc.name: moveToTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_MoveToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_moveToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->moveTo, nullptr);
     auto x1 = Converter::ArkValue<Ark_Float64>(FIRST_X_VALUE);
@@ -227,11 +227,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_MoveToTest, TestSize.Level1)
     accessor_->moveTo(nullptr, x3, y3);
 }
 /**
- * @tc.name: QuadraticCurveToTest
+ * @tc.name: quadraticCurveToTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_QuadraticCurveToTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_quadraticCurveToTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->arcTo, nullptr);
     auto cpx = Converter::ArkValue<Ark_Float64>(CPX_VALUE);
@@ -246,11 +246,11 @@ HWTEST_F(CanvasPathAccessorTest, DISABLED_QuadraticCurveToTest, TestSize.Level1)
     accessor_->quadraticCurveTo(peer_, cpx, cpy, x, y);
 }
 /**
- * @tc.name: AddRectTest
+ * @tc.name: rectTestAddRect
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPathAccessorTest, DISABLED_AddRectTest, TestSize.Level1)
+HWTEST_F(CanvasPathAccessorTest, DISABLED_rectTestAddRect, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rect, nullptr);
     auto x = Converter::ArkValue<Ark_Float64>(FIRST_X_VALUE);

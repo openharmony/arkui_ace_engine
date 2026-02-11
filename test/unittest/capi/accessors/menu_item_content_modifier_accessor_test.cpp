@@ -53,11 +53,11 @@ static constexpr int TEST_DEFAULT_INDEX = 0;
 static void NoOpResource(InteropInt32) {}
 
 /**
- * @tc.name: menuItemContentModifierHelperAccessorTest
+ * @tc.name: contentModifierMenuItemTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierMenuItem, nullptr);
     /**

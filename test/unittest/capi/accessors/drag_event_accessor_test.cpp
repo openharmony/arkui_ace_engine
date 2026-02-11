@@ -92,11 +92,11 @@ public:
 };
 
 /**
- * @tc.name: GetWindowXTest
+ * @tc.name: getWindowXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getWindowXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetX(value);
@@ -107,11 +107,11 @@ HWTEST_F(DragEventAccessorTest, GetWindowXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetWindowYTest
+ * @tc.name: getWindowYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getWindowYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetY(value);
@@ -122,11 +122,11 @@ HWTEST_F(DragEventAccessorTest, GetWindowYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: setResultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_SetResultTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_setResultTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureEnumDragResultValues) {
         accessor_->setResult(peer_, value);
@@ -136,11 +136,11 @@ HWTEST_F(DragEventAccessorTest, DISABLED_SetResultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: getResultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getResultTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureEnumArkDragResultValues) {
         dragEvent_->SetResult(value);
@@ -150,11 +150,11 @@ HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetResultTest
+ * @tc.name: getPreviewRectTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getPreviewRectTest, TestSize.Level1)
 {
     float x = 5.f;
     float y = 8.f;
@@ -178,11 +178,11 @@ HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDataTest
+ * @tc.name: setDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, setDataTest, TestSize.Level1)
 {
     RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
@@ -193,11 +193,11 @@ HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDataTest
+ * @tc.name: getDataTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getDataTest, TestSize.Level1)
 {
     RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
@@ -213,11 +213,11 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDataInvalidTest
+ * @tc.name: getDataTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetDataInvalidTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getDataTestInvalid, TestSize.Level1)
 {
     auto dataPeerOpt = accessor_->getData(nullptr);
     auto dataPeer = Converter::GetOpt(dataPeerOpt);
@@ -225,11 +225,11 @@ HWTEST_F(DragEventAccessorTest, GetDataInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetUseCustomDropAnimationTest
+ * @tc.name: getUseCustomDropAnimationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetUseCustomDropAnimationTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getUseCustomDropAnimationTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureBooleanValues) {
         dragEvent_->UseCustomAnimation(expected);
@@ -240,11 +240,11 @@ HWTEST_F(DragEventAccessorTest, GetUseCustomDropAnimationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetUseCustomDropAnimationTest
+ * @tc.name: setUseCustomDropAnimationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, setUseCustomDropAnimationTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureBooleanValues) {
         accessor_->setUseCustomDropAnimation(peer_, value);
@@ -254,11 +254,11 @@ HWTEST_F(DragEventAccessorTest, SetUseCustomDropAnimationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayXTest
+ * @tc.name: getDisplayXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getDisplayXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetScreenX(value);
@@ -269,11 +269,11 @@ HWTEST_F(DragEventAccessorTest, GetDisplayXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayYTest
+ * @tc.name: getDisplayYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getDisplayYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         dragEvent_->SetScreenY(value);
@@ -284,11 +284,11 @@ HWTEST_F(DragEventAccessorTest, GetDisplayYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVelocityXTest
+ * @tc.name: getVelocityXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getVelocityXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         auto offset = Offset(value, 0.0);
@@ -304,11 +304,11 @@ HWTEST_F(DragEventAccessorTest, GetVelocityXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVelocityYTest
+ * @tc.name: getVelocityYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getVelocityYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureNumberFloatAnythingValidValues) {
         auto offset = Offset(0.0, value);
@@ -324,11 +324,11 @@ HWTEST_F(DragEventAccessorTest, GetVelocityYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVelocityTest
+ * @tc.name: getVelocityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getVelocityTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureVelocityValues) {
         auto offset = Offset(value, value);
@@ -341,11 +341,11 @@ HWTEST_F(DragEventAccessorTest, GetVelocityTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDragBehaviorTest
+ * @tc.name: setDragBehaviorTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, SetDragBehaviorTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, setDragBehaviorTest, TestSize.Level1)
 {
     EXPECT_EQ(OHOS::Ace::DragBehavior::UNKNOWN, dragEvent_->GetDragBehavior());
     for (auto& [input, value, expected] : testFixtureEnumDragBehaviorValues) {
@@ -356,11 +356,11 @@ HWTEST_F(DragEventAccessorTest, SetDragBehaviorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDragBehaviorTest
+ * @tc.name: getDragBehaviorTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, getDragBehaviorTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixtureEnumArkDragBehaviorValues) {
         dragEvent_->SetDragBehavior(value);
@@ -370,11 +370,11 @@ HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetModifierKeyStateTest
+ * @tc.name: getGetModifierKeyStateTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_getGetModifierKeyStateTest, TestSize.Level1)
 {
 #ifdef WRONG_GEN_v140
     // DISABLED_TEST: in gen140 DragEventAccessor has no getGetModifierKeyState, only setGetModifierKeyState
@@ -408,11 +408,11 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level
 }
 
 /**
- * @tc.name: GetSummaryTestDefault
+ * @tc.name: getSummaryTestDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestDefault, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_getSummaryTestDefault, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     ASSERT_NE(accessor_->getSummary, nullptr);
@@ -429,11 +429,11 @@ HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestDefault, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSummaryTestValid
+ * @tc.name: getSummaryTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventAccessorTest, DISABLED_GetSummaryTestValid, TestSize.Level1)
+HWTEST_F(DragEventAccessorTest, DISABLED_getSummaryTestValid, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::map<std::string, int64_t> expectedMap = {

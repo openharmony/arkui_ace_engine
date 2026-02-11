@@ -278,7 +278,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnCutTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnCutTest
+ * @tc.name: setOnPasteTestCallEvent
  * @tc.desc: Test Seacrh setOnCut event.
  * @tc.type: FUNC
  */

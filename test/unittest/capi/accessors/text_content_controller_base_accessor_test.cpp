@@ -70,11 +70,11 @@ public:
 };
 
 /**
- * @tc.name: GetTextContentLinesNumTest
+ * @tc.name: getTextContentLineCountTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, GetTextContentLinesNumTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, getTextContentLineCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTextContentLineCount, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetTextContentLinesNum()).Times(1).WillOnce(Return(LINES_NUM));
@@ -83,11 +83,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetTextContentLinesNumTest, Test
 }
 
 /**
- * @tc.name: GetCaretOffsetTest
+ * @tc.name: getCaretOffsetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, GetCaretOffsetTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, getCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetCaretPosition()).Times(1).WillOnce(Return(NG::OffsetF(0, 0)));
@@ -102,11 +102,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetCaretOffsetTest, TestSize.Lev
 }
 
 /**
- * @tc.name: GetTextContentRectTest
+ * @tc.name: getTextContentRectTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetTextContentRectTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_getTextContentRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTextContentRect, nullptr);
     EXPECT_CALL(*mockTextContentControllerBase_, GetTextContentRect()).Times(1).WillOnce(Return(Rect(0, 0, 1, 1)));
@@ -118,11 +118,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetTextContentRectTest,
 }
 
 /**
- * @tc.name: DeleteTextTest
+ * @tc.name: deleteTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_DeleteTextTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_deleteTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelection, nullptr);
     const auto defaultStart = -1;
@@ -151,11 +151,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_DeleteTextTest, TestSiz
 }
 
 /**
- * @tc.name: GetSelectionTest
+ * @tc.name: getSelectionTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, GetSelectionTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, getSelectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelection, nullptr);
     const auto start = 1;
@@ -172,11 +172,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetSelectionTest, TestSize.Level
 }
 
 /**
- * @tc.name: AddTextTest
+ * @tc.name: addTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, AddTextTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, addTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addText, nullptr);
     const auto errorValue = std::nullopt;
@@ -206,11 +206,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, AddTextTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTextTestValidValues
+ * @tc.name: getTextTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, GetTextTestValidValues, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, getTextTestValidValues, TestSize.Level1)
 {
     TextRange range = {
         .start = 2,
@@ -223,11 +223,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetTextTestValidValues, TestSize
 }
 
 /**
- * @tc.name: GetTextTestInvalidValues
+ * @tc.name: getTextTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, GetTextTestInvalidValues, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, getTextTestInvalidValues, TestSize.Level1)
 {
     auto arkRange = Converter::ArkValue<Opt_TextRange>(Ark_Empty());
     EXPECT_CALL(*mockTextContentControllerBase_, GetText()).WillOnce(Return(u"Qwerty"));
@@ -236,11 +236,11 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetTextTestInvalidValues, TestSi
 }
 
 /**
- * @tc.name: ClearPreviewTextTest
+ * @tc.name: clearPreviewTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, ClearPreviewTextTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, clearPreviewTextTest, TestSize.Level1)
 {
     EXPECT_CALL(*mockTextContentControllerBase_, ClearPreviewText()).Times(1);
     accessor_->clearPreviewText(peer_);

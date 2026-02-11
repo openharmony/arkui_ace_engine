@@ -231,11 +231,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setRichEditorOptions1Test, TestSize.Le
 }
 
 /**
- * @tc.name: setCopyOptionTest
+ * @tc.name: setCopyOptionsTestSetCopyOption
  * @tc.desc: Check the functionality of setCopyOption
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setCopyOptionTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, setCopyOptionsTestSetCopyOption, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCopyOptions, nullptr);
 

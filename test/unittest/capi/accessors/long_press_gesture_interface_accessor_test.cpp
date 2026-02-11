@@ -87,11 +87,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestFingers
+ * @tc.name: constructTestFingers
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, constructTestFingers, TestSize.Level1)
 {
     const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
         { -10, DEFAULT_FINGERS },
@@ -143,11 +143,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestRepeat
+ * @tc.name: constructTestRepeat
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestRepeat, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, constructTestRepeat, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_Boolean, bool>> TEST_PLAN = {
         { Converter::ArkValue<Ark_Boolean>(true), true },
@@ -196,11 +196,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestRepeat, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestDuration
+ * @tc.name: constructTestDuration
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestDuration, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, constructTestDuration, TestSize.Level1)
 {
     const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
         { -10, DEFAULT_DURATION },
@@ -251,11 +251,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestDuration, TestSize.Level1
 }
 
 /**
- * @tc.name: CtorTestInvalid
+ * @tc.name: constructTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, constructTestInvalid, TestSize.Level1)
 {
     auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);
@@ -272,11 +272,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionTest
+ * @tc.name: onActionTest
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionTest, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, onActionTest, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -297,11 +297,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionEndTest
+ * @tc.name: onActionEndTest
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionEndTest, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, onActionEndTest, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -322,11 +322,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionEndTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionCancel0Test
+ * @tc.name: onActionCancel0Test
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionCancel0Test, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, onActionCancel0Test, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -346,11 +346,11 @@ HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionCancel0Test, TestSize.Lev
 }
 
 /**
- * @tc.name: OnActionCancel1Test
+ * @tc.name: onActionCancel1Test
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureIntrfaceAccessorTest, OnActionCancel1Test, TestSize.Level1)
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, onActionCancel1Test, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;

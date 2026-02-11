@@ -372,11 +372,11 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setListOptionsNegativeTest
+ * @tc.name: setListOptionsTestNegative
  * @tc.desc: Check the functionality of ListModifier.setListOptions
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setListOptionsNegativeTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setListOptionsTestNegative, TestSize.Level1)
 {
 // space and index are negative
     Ark_ListOptions listOptions = {
@@ -444,11 +444,11 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLanesNegativeTest
+ * @tc.name: setLanesTestNegative
  * @tc.desc: Check the functionality of ListModifier.setLanes
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setLanesTestNegative, TestSize.Level1)
 {
     // lanes, gutter are negative
     auto optValue = Converter::ArkUnion<Opt_Union_I32_LengthConstrain_ItemFillPolicy, Ark_Int32>(-2);
@@ -513,11 +513,11 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerColorResourceTest
+ * @tc.name: setDividerTestColorResource
  * @tc.desc: Check the functionality of ListModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setDividerColorResourceTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setDividerTestColorResource, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -541,11 +541,11 @@ HWTEST_F(ListModifierTest, setDividerColorResourceTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerUndefinedTest
+ * @tc.name: setDividerTestUndefined
  * @tc.desc: Check the functionality of ListModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setDividerTestUndefined, TestSize.Level1)
 {
     // set undefined values
     Ark_ListDividerOptions dividerOptions = {
@@ -569,11 +569,11 @@ HWTEST_F(ListModifierTest, setDividerUndefinedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerColorStringTest
+ * @tc.name: setDividerTestColorString
  * @tc.desc: Check the functionality of ListModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setDividerTestColorString, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_ListDividerOptions dividerOptions = {
@@ -591,11 +591,11 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerEmptyTest
+ * @tc.name: setDividerTestEmpty
  * @tc.desc: Check the functionality of ListModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setDividerEmptyTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setDividerTestEmpty, TestSize.Level1)
 {
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>();
     modifier_->setDivider(node_, &divider);
@@ -618,15 +618,16 @@ HWTEST_F(ListModifierTest, setDividerEmptyTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, DISABLED_setChainAnimationOptionsTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setChainAnimationOptions, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /**
- * @tc.name: setMaintainVisibleContentPosition
+ * @tc.name: setMaintainVisibleContentPositionTestSetListMaintainVisibleContentPosition
  * @tc.desc: Check the functionality of ListModifier.SetMaintainVisibleContentPosition
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setListMaintainVisibleContentPositionTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setMaintainVisibleContentPositionTestSetListMaintainVisibleContentPosition, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<bool>(node_, "maintainVisibleContentPosition");
     EXPECT_FALSE(checkValue);

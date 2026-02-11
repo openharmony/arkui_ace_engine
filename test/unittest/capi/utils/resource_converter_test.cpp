@@ -13,17 +13,10 @@
  * limitations under the License.
  */
 
-#include "common_method_modifier_test.h"
-#include "test/unittest/core/base/view_abstract_test_ng.h"
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 
 #include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -32,12 +25,6 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
-using namespace Converter;
-
-namespace Converter {
-    template<>
-    void AssignArkValue(Ark_Resource& dst, const std::string& src, ConvContext *ctx);
-}
 
 class ResourceConvertorTest : public testing::Test {
 public:
@@ -47,31 +34,20 @@ public:
         themeManager_ = AceType::MakeRefPtr<::testing::NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
+        g_isResourceDecoupling = false;
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));
-        ON_CALL(*themeManager_, GetTheme(testing::_)).WillByDefault(CatchEmptyTheme1);
-        ON_CALL(*themeManager_, GetTheme(testing::_, testing::_)).WillByDefault(CatchEmptyTheme2);
 
         themeConstants_->LoadTheme(0);
         MockThemeStyle::GetInstance()->SetAttributes({});
-
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-
-        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
-        MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
     }
 
     static void TearDownTestCase()
     {
-        MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
         MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
-        MockContainer::TearDown();
         themeManager_ = nullptr;
         themeConstants_ = nullptr;
     }
@@ -91,11 +67,11 @@ public:
 };
 
 /**
- * @tc.name: ResourceConverterTest001
+ * @tc.name: resourceConverterTest001
  * @tc.desc: ResourceConverter test
  * @tc.type: FUNC
  */
-HWTEST_F(ResourceConvertorTest, ResourceConverterTest001, TestSize.Level1)
+HWTEST_F(ResourceConvertorTest, resourceConverterTest001, TestSize.Level1)
 {
     auto registerResource = [](const std::string& id, const std::string& value) -> Ark_Resource {
         // Register a resource

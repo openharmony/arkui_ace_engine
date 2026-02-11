@@ -35,22 +35,22 @@ class NavigationTransitionProxyAccessorTest : public AccessorTestBase<
 };
 
 /**
- * @tc.name: initialStateTest
+ * @tc.name: getIsInteractiveTestInitialState
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, initialStateTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, getIsInteractiveTestInitialState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
     EXPECT_EQ(Converter::GetOpt(accessor_->getIsInteractive(peer_)), std::nullopt);
 }
 
 /**
- * @tc.name: nothingHandlerStateTest
+ * @tc.name: getIsInteractiveTestNothingHandlerState
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, nothingHandlerStateTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, getIsInteractiveTestNothingHandlerState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
     peer_->SetHandler(nullptr);
@@ -58,11 +58,11 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, nothingHandlerStateTest, TestSiz
 }
 
 /**
- * @tc.name: settersGettersTest
+ * @tc.name: getIsInteractiveTestSettersGetters
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, settersGettersTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, getIsInteractiveTestSettersGetters, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
 
@@ -74,11 +74,11 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, settersGettersTest, TestSize.Lev
 }
 
 /**
- * @tc.name: finishTransactionTest
+ * @tc.name: finishTransitionTest
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, finishTransactionTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, finishTransitionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->finishTransition, nullptr);
 

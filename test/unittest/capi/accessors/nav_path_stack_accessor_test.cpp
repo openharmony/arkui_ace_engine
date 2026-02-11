@@ -105,11 +105,11 @@ public:
 };
 
 /**
- * @tc.name: bothPushPath0Pop0Test
+ * @tc.name: pushPath0Test
  * @tc.desc: Check the functionality of both NavPathStackAccessor::PushPath0Impl and Pop0Impl
  * @tc.type: FUNC
  */
-HWTEST_F(NavPathStackAccessorTest, bothPushPath0Pop0Test, TestSize.Level1)
+HWTEST_F(NavPathStackAccessorTest, pushPath0Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->pushPath0, nullptr);
     ASSERT_NE(accessor_->pop0, nullptr);
@@ -189,11 +189,11 @@ HWTEST_F(NavPathStackAccessorTest, pushPath1Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: bothPushPath1Pop1Test
+ * @tc.name: pushPath1TestParamCallback
  * @tc.desc: Check the functionality of  NavPathStackAccessor::pushPath1Impl, ::pop1Impl
  * @tc.type: FUNC
  */
-HWTEST_F(NavPathStackAccessorTest, bothPushPath1Pop1ParamCallbackTest, TestSize.Level1)
+HWTEST_F(NavPathStackAccessorTest, pushPath1TestParamCallback, TestSize.Level1)
 {
     ASSERT_NE(accessor_->pushPath1, nullptr);
     ASSERT_NE(accessor_->pop1, nullptr);

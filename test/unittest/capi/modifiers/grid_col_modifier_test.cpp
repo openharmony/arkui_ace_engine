@@ -288,11 +288,11 @@ static std::vector<std::tuple<int32_t, Ark_Union_I32_GridColColumnOption, int32_
 };
 
 /*
- * @tc.name: setOffsetTestValidValues
+ * @tc.name: setGridColOffsetTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridColModifierTest, DISABLED_setOffsetTestValidValues, TestSize.Level1)
+HWTEST_F(GridColModifierTest, DISABLED_setGridColOffsetTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
@@ -321,11 +321,11 @@ static std::vector<std::tuple<int32_t, Ark_Union_I32_GridColColumnOption, int32_
 };
 
 /*
- * @tc.name: setOffsetTestInvalidValues
+ * @tc.name: setGridColOffsetTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridColModifierTest, DISABLED_setOffsetTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridColModifierTest, DISABLED_setGridColOffsetTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};

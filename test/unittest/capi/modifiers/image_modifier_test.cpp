@@ -292,11 +292,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ObjectFit_SetFitType
+ * @tc.name: setObjectFitTestSetFitType
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setObjectFitTestSetFitType, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -320,11 +320,11 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
 }
 
 /**
- * @tc.name: ObjectFit_SetDefaultedFitType
+ * @tc.name: setObjectFitTestSetDefaultedFitType
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setObjectFitTestSetDefaultedFitType, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -341,11 +341,11 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSiz
 }
 
 /**
- * @tc.name: setImageOptions_SetResourceUrl
+ * @tc.name: setImageOptionsTestSetResourceUrl
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions_SetResourceUrl, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setImageOptionsTestSetResourceUrl, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -381,11 +381,11 @@ HWTEST_F(ImageModifierTest, setImageOptions_SetResourceUrl, testing::ext::TestSi
 }
 
 /**
- * @tc.name: setImageOptions_SetUndefinedResourceUrl
+ * @tc.name: setImageOptionsTestSetUndefinedResourceUrl
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions_SetUndefinedResourceUrl, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setImageOptionsTestSetUndefinedResourceUrl, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -406,11 +406,11 @@ HWTEST_F(ImageModifierTest, setImageOptions_SetUndefinedResourceUrl, testing::ex
 }
 
 /**
- * @tc.name: setImageOptions_SetStringUrl
+ * @tc.name: setImageOptionsTestSetStringUrl
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions_SetStringUrl, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setImageOptionsTestSetStringUrl, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -430,11 +430,11 @@ HWTEST_F(ImageModifierTest, setImageOptions_SetStringUrl, testing::ext::TestSize
 }
 
 /**
- * @tc.name: setImageOptions_NullOptions
+ * @tc.name: setImageOptionsTestNullOptions
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions_NullOptions, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setImageOptionsTestNullOptions, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -515,7 +515,7 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSourceSizeTestSourceSizeWidthValidValues
+ * @tc.name: setSourceSizeTestSourceSizeWidthValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -555,7 +555,7 @@ HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setSourceSizeTestSourceSizeHeightValidValues
+ * @tc.name: setSourceSizeTestSourceSizeHeightValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -649,11 +649,11 @@ HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setImageOptions_setImageContent_EMPTY
+ * @tc.name: setImageOptionsTestSetImageContentEMPTY
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions_setImageContent_EMPTY, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setImageOptionsTestSetImageContentEMPTY, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -672,11 +672,11 @@ HWTEST_F(ImageModifierTest, setImageOptions_setImageContent_EMPTY, testing::ext:
 }
 
 /**
- * @tc.name: setImageOptions_SetStringUrl
+ * @tc.name: setImageOptionsTestSetEmptyUrl
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setImageOptions_SetEmptyUrl, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setImageOptionsTestSetEmptyUrl, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -983,7 +983,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
     for (auto& [input, value, expected] : testFixtureColorsEnumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
-#ifdef WROG_FIX
+#ifdef WRONG_FIX
     for (auto& [input, value, expected] : testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
     }
@@ -1346,11 +1346,11 @@ HWTEST_F(ImageModifierTest, setResizableTestResizableSliceInvalidValues, TestSiz
 }
 
 /**
- * @tc.name: setEnhancedImageQualityValues
+ * @tc.name: setEnhancedImageQualityTestValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setEnhancedImageQualityValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setEnhancedImageQualityTestValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

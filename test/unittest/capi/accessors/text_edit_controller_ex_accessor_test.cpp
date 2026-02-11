@@ -57,11 +57,11 @@ public:
 };
 
 /**
- * @tc.name: IsEditingTest
+ * @tc.name: isEditingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextEditControllerExAccessorTest, IsEditingTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, isEditingTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isEditing, nullptr);
     EXPECT_CALL(*peer_, IsEditing()).Times(1).WillOnce(Return(true));
@@ -72,11 +72,11 @@ HWTEST_F(TextEditControllerExAccessorTest, IsEditingTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCaretOffsetTest
+ * @tc.name: getCaretOffsetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, getCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
     EXPECT_CALL(*peer_, GetCaretOffset()).Times(1).WillOnce(Return(OFFSET));
@@ -86,11 +86,11 @@ HWTEST_F(TextEditControllerExAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCaretOffsetTest
+ * @tc.name: setCaretOffsetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextEditControllerExAccessorTest, SetCaretOffsetTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, setCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setCaretOffset, nullptr);
     auto offset = Converter::ArkValue<Ark_Int32>(OFFSET);
@@ -102,11 +102,11 @@ HWTEST_F(TextEditControllerExAccessorTest, SetCaretOffsetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: StopEditingTest
+ * @tc.name: stopEditingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextEditControllerExAccessorTest, StopEditingTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, stopEditingTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->stopEditing, nullptr);
     EXPECT_CALL(*peer_, StopEditing()).Times(1);
@@ -114,11 +114,11 @@ HWTEST_F(TextEditControllerExAccessorTest, StopEditingTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPreviewTextTest
+ * @tc.name: getPreviewTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextEditControllerExAccessorTest, GetPreviewTextTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, getPreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviewText, nullptr);
     PreviewTextInfo previewText = {.offset = OFFSET, .value = u"info"};

@@ -419,7 +419,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeWidthTestValidValues, TestSize.
 }
 
 /*
- * @tc.name: setStrokeDashOffsetTest
+ * @tc.name: setStrokeDashOffsetTestDefault
  * @tc.desc: check work setStrokeDashOffset
  * @tc.type: FUNC
  */
@@ -475,7 +475,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1
 }
 
 /*
- * @tc.name: setStrokeMiterLimitTest
+ * @tc.name: setStrokeMiterLimitTestDefaultValue
  * @tc.desc: check work setStrokeMiterLimit
  * @tc.type: FUNC
  */
@@ -606,11 +606,11 @@ HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeDashArrayTest, TestSiz
 }
 
 /**
- * @tc.name: setStrokeDashArrayInvalidTest
+ * @tc.name: setStrokeDashArrayTestInvalid
  * @tc.desc: Check the invalid cases for setStrokeDashArray
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeDashArrayInvalidTest, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeDashArrayTestInvalid, TestSize.Level1)
 {
     const std::string propName("strokeDashArray");
     ASSERT_NE(modifier_->setStrokeDashArray, nullptr);

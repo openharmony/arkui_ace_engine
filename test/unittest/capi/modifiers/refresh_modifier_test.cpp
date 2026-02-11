@@ -306,11 +306,11 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventRefreshingImpl
+ * @tc.name: set_onChangeEvent_refreshingTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshModifierTest, setOnChangeEventRefreshingImpl, TestSize.Level1)
+HWTEST_F(RefreshModifierTest, set_onChangeEvent_refreshingTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();

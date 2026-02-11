@@ -150,7 +150,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> dividerE
  */
 HWTEST_F(ColumnSplitModifierTest, setDividerTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setResizeable, nullptr);
+    ASSERT_NE(modifier_->setDivider, nullptr);
     checkDividerLengthAttr(dividerStartMarginValidValues, ATTRIBUTE_DIVIDER_START_MARGIN);
     checkDividerLengthAttr(dividerEndMarginValidValues, ATTRIBUTE_DIVIDER_END_MARGIN);
 }

@@ -621,11 +621,11 @@ HWTEST_F(TextInputModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_CALLBACK
 /*
- * @tc.name: setOnChangeEventTextImpl
+ * @tc.name: set_onChangeEvent_textTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, set_onChangeEvent_textTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();

@@ -61,11 +61,11 @@ public:
 };
 
 /**
- * @tc.name: CloseSelectionMenuTest
+ * @tc.name: closeSelectionMenuTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextBaseControllerAccessorTest, CloseSelectionMenuTest, TestSize.Level1)
+HWTEST_F(TextBaseControllerAccessorTest, closeSelectionMenuTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->closeSelectionMenu, nullptr);
     EXPECT_CALL(*peer_, CloseSelectionMenu()).Times(1);
@@ -73,11 +73,11 @@ HWTEST_F(TextBaseControllerAccessorTest, CloseSelectionMenuTest, TestSize.Level1
 }
 
 /**
- * @tc.name: GetLayoutManagerTest
+ * @tc.name: getLayoutManagerTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Level1)
+HWTEST_F(TextBaseControllerAccessorTest, getLayoutManagerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getLayoutManager, nullptr);
     auto layoutInfo = OHOS::Ace::NG::LayoutInfoInterface();
@@ -90,11 +90,11 @@ HWTEST_F(TextBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSelectionTest
+ * @tc.name: setSelectionTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextBaseControllerAccessorTest, SetSelectionTest, TestSize.Level1)
+HWTEST_F(TextBaseControllerAccessorTest, setSelectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setSelection, nullptr);
     constexpr int32_t SELECTION_START = 1;

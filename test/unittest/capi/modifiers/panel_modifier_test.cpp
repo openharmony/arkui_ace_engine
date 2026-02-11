@@ -159,7 +159,7 @@ static std::vector<std::tuple<std::string, Opt_PanelType, std::string>> typeVali
 };
 
 /*
- * @tc.name: DISABLED_setTypeTestValidValues
+ * @tc.name: setTypeTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -298,7 +298,7 @@ HWTEST_F(PanelModifierTest, setShowTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundMaskTestDefaultValues
+ * @tc.name: setBackgroundMaskTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -322,7 +322,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> back
 };
 
 /*
- * @tc.name: DISABLED_setBackgroundMaskTestValidValues
+ * @tc.name: setBackgroundMaskTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -359,7 +359,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> back
 };
 
 /*
- * @tc.name: DISABLED_setBackgroundMaskTestInvalidValues
+ * @tc.name: setBackgroundMaskTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -425,7 +425,7 @@ HWTEST_F(PanelModifierTest, setShowCloseIconTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setMiniHeightTestDefaultValues
+ * @tc.name: setMiniHeightTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -484,7 +484,7 @@ HWTEST_F(PanelModifierTest, setMiniHeightTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setMiniHeightTestInvalidValues
+ * @tc.name: setMiniHeightTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -746,11 +746,11 @@ HWTEST_F(PanelModifierTest, DISABLED_setOnHeightChangeTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnChangeEventModeImpl
+ * @tc.name: set_onChangeEvent_modeTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanelModifierTest, setOnChangeEventModeImpl, TestSize.Level1)
+HWTEST_F(PanelModifierTest, set_onChangeEvent_modeTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();

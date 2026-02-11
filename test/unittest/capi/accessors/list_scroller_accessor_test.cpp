@@ -176,11 +176,11 @@ static std::vector<std::tuple<bool, Opt_Boolean>> smoothInvalidValues = {
 };
 
 /**
- * @tc.name: JumpToItemInGroupTestValidValuesTest
+ * @tc.name: scrollToItemInGroupTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestValidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, scrollToItemInGroupTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scrollToItemInGroup, nullptr);
 
@@ -224,11 +224,11 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestValidValuesTest, TestSiz
 }
 
 /**
- * @tc.name: JumpToItemInGroupTestIndexInvalidValuesTest
+ * @tc.name: scrollToItemInGroupTestIndexInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestIndexInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, scrollToItemInGroupTestIndexInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scrollToItemInGroup, nullptr);
 
@@ -261,11 +261,11 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestIndexInvalidValuesTest, 
 }
 
 /**
- * @tc.name: JumpToItemInGroupTestSmoothInvalidValuesTest
+ * @tc.name: scrollToItemInGroupTestSmoothInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestSmoothInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, scrollToItemInGroupTestSmoothInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scrollToItemInGroup, nullptr);
 
@@ -293,11 +293,11 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestSmoothInvalidValuesTest,
 }
 
 /**
- * @tc.name: JumpToItemInGroupTestAlignInvalidValuesTest
+ * @tc.name: scrollToItemInGroupTestAlignInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestAlignInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, scrollToItemInGroupTestAlignInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scrollToItemInGroup, nullptr);
 
@@ -325,11 +325,11 @@ HWTEST_F(ListScrollerAccessorTest, JumpToItemInGroupTestAlignInvalidValuesTest, 
 }
 
 /**
- * @tc.name: GetItemRectInGroupTestValidValuesTest
+ * @tc.name: getItemRectInGroupTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, GetItemRectInGroupTestValidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, getItemRectInGroupTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getItemRectInGroup, nullptr);
 
@@ -373,11 +373,11 @@ HWTEST_F(ListScrollerAccessorTest, GetItemRectInGroupTestValidValuesTest, TestSi
 }
 
 /**
- * @tc.name: GetItemRectInGroupTestInvalidValuesTest
+ * @tc.name: getItemRectInGroupTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, GetItemRectInGroupTestInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, getItemRectInGroupTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getItemRectInGroup, nullptr);
 
@@ -418,11 +418,11 @@ HWTEST_F(ListScrollerAccessorTest, GetItemRectInGroupTestInvalidValuesTest, Test
 }
 
 /**
- * @tc.name: GetItemIndexInGroupTestValidValuesTest
+ * @tc.name: getVisibleListContentInfoTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, GetItemIndexInGroupTestValidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, getVisibleListContentInfoTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getVisibleListContentInfo, nullptr);
 
@@ -477,11 +477,11 @@ HWTEST_F(ListScrollerAccessorTest, GetItemIndexInGroupTestValidValuesTest, TestS
 }
 
 /**
- * @tc.name: GetItemIndexInGroupTestInvalidValuesTest
+ * @tc.name: getVisibleListContentInfoTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, DISABLED_getVisibleListContentInfoTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getVisibleListContentInfo, nullptr);
     Ark_Float64 arkX = std::get<1>(indexValues[0]);
@@ -502,11 +502,11 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestInvalidValues
 }
 
 /**
- * @tc.name: CloseAllSwipeActionsImplTest
+ * @tc.name: closeAllSwipeActionsTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerAccessorTest, CloseAllSwipeActionsImplTest, TestSize.Level1)
+HWTEST_F(ListScrollerAccessorTest, closeAllSwipeActionsTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->closeAllSwipeActions, nullptr);
     const int32_t contextId = 123;

@@ -53,7 +53,7 @@ class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier
 };
 
 /*
- * @tc.name: DISABLED_setOnReadyTest
+ * @tc.name: setOnReadyTest
  * @tc.desc:  Check the functionality of CanvasModifier.OnReadyImpl
  * @tc.type: FUNC
  */

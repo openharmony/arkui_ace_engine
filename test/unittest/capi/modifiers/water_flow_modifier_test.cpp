@@ -150,7 +150,7 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCashedCountTest
+ * @tc.name: setCachedCount0Test
  * @tc.desc: test function of SetCachedCount
  * @tc.type: FUNC
  */

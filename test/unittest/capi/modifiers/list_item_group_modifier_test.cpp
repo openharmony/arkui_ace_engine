@@ -128,11 +128,11 @@ HWTEST_F(ListItemGroupModifierTest, DISABLED_setListItemGroupOptionsTest, TestSi
 }
 
 /*
- * @tc.name: setListItemGroupOptionsCustomBuilderTest
+ * @tc.name: setListItemGroupOptionsTestCustomBuilder
  * @tc.desc: Check the functionality of ListItemGroupModifier.setListItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTestCustomBuilder, TestSize.Level1)
 {
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto builder = getBuilderCb();
@@ -208,11 +208,11 @@ HWTEST_F(ListItemGroupModifierTest, setDividerTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerUndefinedTest
+ * @tc.name: setDividerTestUndefined
  * @tc.desc: Check the functionality of ListItemGroupModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemGroupModifierTest, setDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(ListItemGroupModifierTest, setDividerTestUndefined, TestSize.Level1)
 {
     // set undefined values
     Ark_ListDividerOptions dividerOptions = {
@@ -236,11 +236,11 @@ HWTEST_F(ListItemGroupModifierTest, setDividerUndefinedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerColorStringTest
+ * @tc.name: setDividerTestColorString
  * @tc.desc: Check the functionality of ListItemGroupModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
+HWTEST_F(ListItemGroupModifierTest, setDividerTestColorString, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_ListDividerOptions dividerOptions = {
@@ -258,11 +258,11 @@ HWTEST_F(ListItemGroupModifierTest, setDividerColorStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerEmptyTest
+ * @tc.name: setDividerTestEmpty
  * @tc.desc: Check the functionality of ListItemGroupModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemGroupModifierTest, setDividerEmptyTest, TestSize.Level1)
+HWTEST_F(ListItemGroupModifierTest, setDividerTestEmpty, TestSize.Level1)
 {
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>();
     modifier_->setDivider(node_, &divider);
@@ -276,15 +276,5 @@ HWTEST_F(ListItemGroupModifierTest, setDividerEmptyTest, TestSize.Level1)
     EXPECT_EQ(endMarginCheckValue, "");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "");
-}
-
-/**
- * @tc.name: setChildrenMainSizeTest
- * @tc.desc: Check the functionality of ListItemGroupModifier.setChildrenMainSize
- * @tc.type: FUNC
- */
-HWTEST_F(ListItemGroupModifierTest, DISABLED_setChildrenMainSizeTest, TestSize.Level1)
-{
-    FAIL() << "Test is not implemented yet";
 }
 } // namespace OHOS::Ace::NG

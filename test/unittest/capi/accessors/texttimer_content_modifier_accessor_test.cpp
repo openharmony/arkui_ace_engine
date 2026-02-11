@@ -44,11 +44,11 @@ static constexpr bool TEST_DEFAULT_STARTED = false;
 static constexpr int32_t TEST_DEFAULT_ELAPSED_TIME = 0;
 
 /**
- * @tc.name: TextTimerContentModifierHelperAccessor
+ * @tc.name: contentModifierTextTimerTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextTimerContentModifierHelperAccessor, TextTimerContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(TextTimerContentModifierHelperAccessor, contentModifierTextTimerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierTextTimer, nullptr);
 

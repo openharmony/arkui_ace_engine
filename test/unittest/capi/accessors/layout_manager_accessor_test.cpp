@@ -102,11 +102,11 @@ public:
 };
 
 /**
- * @tc.name: getLineCountTest01
+ * @tc.name: getLineCountTestVariant01
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutManagerAccessorTest, getLineCountTest01, TestSize.Level1)
+HWTEST_F(LayoutManagerAccessorTest, getLineCountTestVariant01, TestSize.Level1)
 {
     ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(peer_, nullptr);
@@ -117,11 +117,11 @@ HWTEST_F(LayoutManagerAccessorTest, getLineCountTest01, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetGlyphPositionAtCoordinate01
+ * @tc.name: getGlyphPositionAtCoordinateTestVariant01
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutManagerAccessorTest, GetGlyphPositionAtCoordinate01, TestSize.Level1)
+HWTEST_F(LayoutManagerAccessorTest, getGlyphPositionAtCoordinateTestVariant01, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getGlyphPositionAtCoordinate, nullptr);
 

@@ -407,11 +407,11 @@ struct AutoProgressMaskPeer {
 };
 
 /*
- * @tc.name: setMaskValidValues
+ * @tc.name: setMaskTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMask, nullptr);
     const std::vector<ProgressMaskTestPlan> validValues {
@@ -453,12 +453,12 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskValidValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setMask1PartForProgressMaskValidValues
+ * @tc.name: setMask1TestPartForProgressMaskValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 #ifdef WRONG_OVERRIDE
-HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, setMask1TestPartForProgressMaskValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMask1, nullptr);
     const std::vector<ProgressMaskTestPlan> validValues {

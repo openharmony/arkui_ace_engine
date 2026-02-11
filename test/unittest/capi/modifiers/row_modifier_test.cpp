@@ -144,12 +144,12 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setPointLightDefaultValues
+ * @tc.name: setPointLightTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 
-HWTEST_F(RowModifierTest, DISABLED_setPointLightDefaultValues, TestSize.Level1)
+HWTEST_F(RowModifierTest, DISABLED_setPointLightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -160,11 +160,11 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setIsReverseDefaultValues
+ * @tc.name: setIsReverseTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RowModifierTest, DISABLED_setIsReverseDefaultValues, TestSize.Level1)
+HWTEST_F(RowModifierTest, DISABLED_setIsReverseTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -178,11 +178,11 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> isReverseV
 };
 
 /*
- * @tc.name: setIsReverseDefaultValidValues
+ * @tc.name: setReverseTestDefaultValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RowModifierTest, DISABLED_setIsReverseDefaultValidValues, TestSize.Level1)
+HWTEST_F(RowModifierTest, DISABLED_setReverseTestDefaultValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

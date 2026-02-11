@@ -204,11 +204,11 @@ static std::vector<std::tuple<Ark_SideBarContainerType, Opt_SideBarContainerType
 };
 
 /*
- * @tc.name: sideBarContainerTypeTestValidValues
+ * @tc.name: setSideBarContainerOptionsTestValidValues
  * @tc.desc: SideBarContainer Type Valid Values
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, sideBarContainerTypeTestValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setSideBarContainerOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -498,7 +498,7 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setOnChangeTest, TestSize.Level1
 }
 
 /*
- * @tc.name: setSideBarWidth0TestDefaultValues
+ * @tc.name: setSideBarWidthTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -519,7 +519,7 @@ static std::vector<std::tuple<std::string, float, std::string>> mSideBarWidthVal
 };
 
 /*
- * @tc.name: setSideBarWidth0TestValidValues
+ * @tc.name: setSideBarWidthTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -537,7 +537,7 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestValidValues, TestSize.
 }
 
 /*
- * @tc.name: setMinSideBarWidth0TestDefaultValues
+ * @tc.name: setMinSideBarWidthTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -557,7 +557,7 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> mMinSideBar
 };
 
 /*
- * @tc.name: setMinSideBarWidth0TestValidValues
+ * @tc.name: setMinSideBarWidthTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -575,7 +575,7 @@ HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidthTestValidValues, TestSi
 }
 
 /*
- * @tc.name: setMaxSideBarWidth0TestDefaultValues
+ * @tc.name: setMaxSideBarWidthTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -596,7 +596,7 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> maxSideBarW
 };
 
 /*
- * @tc.name: setMaxSideBarWidth0TestValidValues
+ * @tc.name: setMaxSideBarWidthTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -823,11 +823,11 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setDividerTestColorValidValues, 
 
 #ifdef WRONG_OLD_SDK
 /*
- * @tc.name: setOnChangeEventSelectImpl
+ * @tc.name: set_onChangeEvent_showSideBarTestOnChangeEventSelectImpl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, setOnChangeEventSelectImpl, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, set_onChangeEvent_showSideBarTestOnChangeEventSelectImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();

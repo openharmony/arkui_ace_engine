@@ -609,11 +609,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestDefaultValues,
 }
 
 /*
- * @tc.name: setSelectedOptionBgColorTestSelectedOptionBgColorValidValues
+ * @tc.name: setSelectedOptionBgColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOptionBgColorValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueSelectedOptionBgColor;
 
@@ -648,11 +648,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
 }
 
 /*
- * @tc.name: setSelectedOptionBgColorTestSelectedOptionBgColorInvalidValues
+ * @tc.name: setSelectedOptionBgColorTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOptionBgColorInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestInvalidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueSelectedOptionBgColor;
 
@@ -715,11 +715,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestDefaultValues, TestSize.Le
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontSizeValidValues
+ * @tc.name: setSelectedOptionFontTestSizeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontSizeValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSizeValidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
@@ -752,11 +752,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontSizeVali
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontSizeInvalidValues
+ * @tc.name: setSelectedOptionFontTestSizeInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSizeInvalidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
 
@@ -793,11 +793,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontWeightValidValues
+ * @tc.name: setSelectedOptionFontTestWeightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestWeightValidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
@@ -835,11 +835,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightVa
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontWeightInvalidValues
+ * @tc.name: setSelectedOptionFontTestWeightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFontWeightInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestWeightInvalidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
@@ -877,11 +877,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontFamilyValidValues
+ * @tc.name: setSelectedOptionFontTestFamilyValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamilyValidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
@@ -917,11 +917,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyVa
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontFamilyInvalidValues
+ * @tc.name: setSelectedOptionFontTestFamilyInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamilyInvalidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
@@ -955,11 +955,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyIn
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontStyleValidValues
+ * @tc.name: setSelectedOptionFontTestStyleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyleValidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
 
@@ -994,11 +994,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleVal
 }
 
 /*
- * @tc.name: setSelectedOptionFontTestSelectedOptionFontStyleInvalidValues
+ * @tc.name: setSelectedOptionFontTestStyleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleInvalidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyleInvalidValues, TestSize.Level1)
 {
     Opt_Font initValueSelectedOptionFont;
 
@@ -1048,11 +1048,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestDefaultValue
 }
 
 /*
- * @tc.name: setSelectedOptionFontColorTestSelectedOptionFontColorValidValues
+ * @tc.name: setSelectedOptionFontColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestSelectedOptionFontColorValidValues, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestValidValues, TestSize.Level1)
 {
     Opt_ResourceColor initValueSelectedOptionFontColor;
 

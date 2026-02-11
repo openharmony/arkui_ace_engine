@@ -117,11 +117,11 @@ public:
 };
 
 /**
- * @tc.name: OnReadyCallbackTest
+ * @tc.name: setOnReadyTestCallback
  * @tc.desc: OnReadyCallbackTest test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnReadyCallbackTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnReadyTestCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -145,11 +145,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnReadyCallbackTest, TestSize
 }
 
 /**
- * @tc.name: OnSelectCallbackTest
+ * @tc.name: setOnSelectTestCallback
  * @tc.desc: setOnSelect test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnSelectTestCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -187,11 +187,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackTest, TestSiz
 }
 
 /**
- * @tc.name: OnSelectCallbackWithTextSpanTest
+ * @tc.name: setOnSelectTestCallbackWithTextSpan
  * @tc.desc: Test setOnSelect with text span data
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackWithTextSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnSelectTestCallbackWithTextSpan, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -252,11 +252,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackWithTextSpanT
 }
 
 /**
- * @tc.name: OnSelectCallbackWithImageSpanTest
+ * @tc.name: setOnSelectTestCallbackWithImageSpan
  * @tc.desc: Test setOnSelect with image span data
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackWithImageSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnSelectTestCallbackWithImageSpan, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -319,11 +319,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectCallbackWithImageSpan
 }
 
 /**
- * @tc.name: OnSelectionChange
+ * @tc.name: setOnSelectionChangeTestOnSelectionChange
  * @tc.desc: setOnSelectionChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectionChange, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnSelectionChangeTestOnSelectionChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -363,11 +363,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSelectionChange, TestSize.L
 }
 
 /**
- * @tc.name: AboutToIMEInputTest
+ * @tc.name: setAboutToIMEInputTestAboutToIMEInput
  * @tc.desc: setAboutToIMEInput test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_AboutToIMEInputTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setAboutToIMEInputTestAboutToIMEInput, TestSize.Level1)
 {
     static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -411,11 +411,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_AboutToIMEInputTest, TestSize
 }
 
 /**
- * @tc.name: OnIMEInputCompleteTest
+ * @tc.name: setOnIMEInputCompleteTestOnIMEInputComplete
  * @tc.desc: setOnIMEInputComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnIMEInputCompleteTestOnIMEInputComplete, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -459,11 +459,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestS
 }
 
 /**
- * @tc.name: OnDidIMEInputTest
+ * @tc.name: setOnDidIMEInputTestOnDidIMEInput
  * @tc.desc: setOnDidIMEInput test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnDidIMEInputTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnDidIMEInputTestOnDidIMEInput, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
@@ -501,11 +501,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnDidIMEInputTest, TestSize.L
 }
 
 /**
- * @tc.name: OnSetAboutToDeleteTest
+ * @tc.name: setAboutToDeleteTestOnSetAboutToDelete
  * @tc.desc: setAboutToDelete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetAboutToDeleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setAboutToDeleteTestOnSetAboutToDelete, TestSize.Level1)
 {
     static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -546,11 +546,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetAboutToDeleteTest, TestS
 }
 
 /**
- * @tc.name: OnSetDeleteCompleteTest
+ * @tc.name: setOnDeleteCompleteTestOnSetDeleteComplete
  * @tc.desc: setOnDeleteComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetDeleteCompleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnDeleteCompleteTestOnSetDeleteComplete, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -574,11 +574,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnSetDeleteCompleteTest, Test
 }
 
 /**
- * @tc.name: OnPasteTest
+ * @tc.name: setOnPasteTestOnPaste
  * @tc.desc: setOnDeleteComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, setOnPasteTestOnPaste, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -609,11 +609,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnEditingChangeTest
+ * @tc.name: setOnEditingChangeTestOnEditingChange
  * @tc.desc: setOnEditingChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnEditingChangeTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnEditingChangeTestOnEditingChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -640,11 +640,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnEditingChangeTest, TestSize
 }
 
 /**
- * @tc.name: OnSubmitTest
+ * @tc.name: setOnSubmitTestOnSubmit
  * @tc.desc: setOnSubmit test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, setOnSubmitTestOnSubmit, TestSize.Level1)
 {
     static const int expectedResId = 123;
     static const std::u16string testValue(u"string text");
@@ -691,11 +691,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnWillChangeTest
+ * @tc.name: setOnWillChangeTestOnWillChange
  * @tc.desc: setOnWillChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnWillChangeTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnWillChangeTestOnWillChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -739,11 +739,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnWillChangeTest, TestSize.Le
 }
 
 /**
- * @tc.name: OnWillChangeTest2
+ * @tc.name: setOnWillChangeTestVariant2
  * @tc.desc: setOnWillChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnWillChangeTest2, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnWillChangeTestVariant2, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -793,11 +793,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnWillChangeTest2, TestSize.L
 }
 
 /**
- * @tc.name: OnDidChangeTest
+ * @tc.name: setOnDidChangeTestOnDidChange
  * @tc.desc: setOnDidChange test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnDidChangeTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setOnDidChangeTestOnDidChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -839,11 +839,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnDidChangeTest, TestSize.Lev
 }
 
 /**
- * @tc.name: OnCopyTest
+ * @tc.name: setOnCopyTestOnCopy
  * @tc.desc: setOnCopy test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, setOnCopyTestOnCopy, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -873,11 +873,11 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCopyTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnCutTest
+ * @tc.name: setOnCutTestOnCut
  * @tc.desc: setOnCut test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, setOnCutTestOnCut, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

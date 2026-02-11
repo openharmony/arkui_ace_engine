@@ -30,11 +30,11 @@ class PulseSymbolEffectAccessorTest : public AccessorTestBase<GENERATED_ArkUIPul
 };
 
 /**
- * @tc.name: ctorDefaultTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PulseSymbolEffectAccessorTest, ctorDefaultTest, TestSize.Level1)
+HWTEST_F(PulseSymbolEffectAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     EXPECT_EQ(peer_->type, SymbolEffectType::PULSE);
     EXPECT_EQ(peer_->scope, std::nullopt);
