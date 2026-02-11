@@ -42,7 +42,7 @@ void BoxLayoutAlgorithm::Layout()
 std::optional<NG::SizeF> BoxLayoutAlgorithm::MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint)
 {
     auto frameNode = DynamicCast<FrameNodeImpl>(host_.Upgrade());
-    if (frameNode) {
+    if (frameNode && frameNode->GetLayoutWrapper()) {
         return NG::BoxLayoutAlgorithm::PerformMeasureContent(contentConstraint, frameNode->GetLayoutWrapper());
     }
     return std::nullopt;
