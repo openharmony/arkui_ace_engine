@@ -258,6 +258,18 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
 }
 
 /**
+ * @tc.name: ArkoalaLazyNodeTest006
+ * @tc.desc: Test ArkoalaLazyNode OnDataChange.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest006)
+{
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    EXPECT_NE(repeatNode, nullptr);
+    repeatNode->OnDataChange(0, TOTAL_COUNT, UINode::NotificationType::START_CHANGE_POSITION);
+}
+
+/**
  * @tc.name: ArkoalaLazyNodeTest007
  * @tc.desc: Test ArkoalaLazyNode SetJSViewActive.
  * @tc.type: FUNC
