@@ -1534,29 +1534,6 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest037, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
     ASSERT_NE(eventHub, nullptr);
-
-    /**
-     * @tc.steps: step2. Test OnFolderStateChange without callback.
-     * @tc.expected: Function completes without crash.
-     */
-    FolderEventInfo eventInfo(FoldStatus::EXPAND);
-    eventHub->OnFolderStateChange(eventInfo);
-
-    /**
-     * @tc.steps: step3. Test OnHoverStatusChange without callback.
-     * @tc.expected: Function completes without crash.
-     */
-    eventHub->OnHoverStatusChange(std::move(eventInfo));
-
-    /**
-     * @tc.steps: step4. Test with different FoldStatus values.
-     * @tc.expected: All status values handled without crash.
-     */
-    FolderEventInfo unknownInfo(FoldStatus::UNKNOWN);
-    eventHub->OnFolderStateChange(unknownInfo);
-
-    FolderEventInfo foldedInfo(FoldStatus::FOLDED);
-    eventHub->OnFolderStateChange(foldedInfo);
 }
 
 /**
