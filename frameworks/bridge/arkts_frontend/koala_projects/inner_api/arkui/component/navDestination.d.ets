@@ -100,8 +100,8 @@ export declare class ArkNavDestinationPeer extends ArkCommonMethodPeer {
 export interface NavDestinationAttribute extends CommonMethod {
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
     hideBackButton(value: boolean | undefined): this;
-    onShown(callback: ((reason: VisibilityChangeReason) => void) | undefined): this;
-    onHidden(callback: ((reason: VisibilityChangeReason) => void) | undefined): this;
+    onShown(callback: Callback<VisibilityChangeReason> | undefined): this;
+    onHidden(callback: Callback<VisibilityChangeReason> | undefined): this;
     onBackPressed(value: (() => boolean) | undefined): this;
     onResult(value: ((parameter: Object) => void) | undefined): this;
     mode(value: NavDestinationMode | undefined): this;
@@ -145,8 +145,8 @@ export interface NavDestinationAttribute extends CommonMethod {
     public setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo): this;
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
     public hideBackButton(value: boolean | undefined): this;
-    public onShown(callback: ((reason: VisibilityChangeReason) => void) | undefined): this;
-    public onHidden(callback: ((reason: VisibilityChangeReason) => void) | undefined): this;
+    public onShown(callback: Callback<VisibilityChangeReason> | undefined): this;
+    public onHidden(callback: Callback<VisibilityChangeReason> | undefined): this;
     public onBackPressed(value: (() => boolean) | undefined): this;
     public onResult(value: ((parameter: Object) => void) | undefined): this;
     public mode(value: NavDestinationMode | undefined): this;
