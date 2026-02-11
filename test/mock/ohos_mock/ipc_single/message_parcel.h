@@ -21,10 +21,11 @@
 
 #include "ashmem.h"
 #include "iremote_object.h"
+#include "parcel.h"
 #include "refbase.h"
 
 namespace OHOS {
-class MessageParcel {
+class MessageParcel : public Parcel {
 public:
     MessageParcel() = default;
     ~MessageParcel() = default;

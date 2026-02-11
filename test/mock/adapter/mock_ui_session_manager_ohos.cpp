@@ -13,19 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_TEST_MOCK_MOCK_IPC_SKELETON_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_TEST_MOCK_MOCK_IPC_SKELETON_H
+#include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 
-#include <cstdint>
-
-namespace OHOS {
-class IPCSkeleton {
-public:
-    IPCSkeleton() = default;
-    ~IPCSkeleton() = default;
-
-    static uint32_t GetCallingTokenID();
-    static uint32_t GetCallingRealPid();
-};
+namespace OHOS::Ace {
+void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
+{
 }
-#endif
+} // namespace OHOS::Ace
