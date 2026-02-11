@@ -132,12 +132,10 @@ export interface NavigationAttribute extends CommonMethod {
     ): this;
     hideNavBar(value: boolean | undefined): this;
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
-    hideTitleBar(hide: boolean | undefined): this;
     hideBackButton(value: boolean | undefined): this;
     titleMode(value: NavigationTitleMode | undefined): this;
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this;
     hideToolBar(hide: boolean | undefined, animated?: boolean): this;
-    hideToolBar(hide: boolean | undefined): this;
     enableToolBarAdaptation(value: boolean | undefined): this;
     onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
@@ -185,13 +183,11 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
     ): this;
     public hideNavBar(value: boolean | undefined): this;
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
-    public hideTitleBar(hide: boolean | undefined): this;
     public hideBackButton(value: boolean | undefined): this;
     public titleMode(value: NavigationTitleMode | undefined): this;
     public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this;
     public toolBar(value: CustomBuilder | undefined): this;
     public hideToolBar(hide: boolean | undefined, animated?: boolean): this;
-    public hideToolBar(hide: boolean | undefined): this;
     public enableToolBarAdaptation(value: boolean | undefined): this;
     public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
