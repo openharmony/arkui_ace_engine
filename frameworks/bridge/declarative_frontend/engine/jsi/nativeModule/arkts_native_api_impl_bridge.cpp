@@ -5831,6 +5831,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetUseUnionEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUseUnionEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetUseUnionEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNeedSoftkeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnNeedSoftkeyboard));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNeedSoftkeyboard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnNeedSoftkeyboard));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 }
 

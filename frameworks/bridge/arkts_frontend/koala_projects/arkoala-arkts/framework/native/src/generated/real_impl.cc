@@ -2219,6 +2219,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                            const Opt_AccessibilityActionOptions* value)
     {
     }
+    void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
+                                   const Opt_OnNeedSoftkeyboardCallback* value)
+    {
+    }
     void SetExpandSafeAreaImpl(Ark_NativePointer node,
                                const Opt_Array_SafeAreaType* types,
                                const Opt_Array_SafeAreaEdge* edges)
@@ -9106,6 +9110,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnTouchTestDoneImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
             CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+            CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
             CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
             CommonMethodModifier::SetBackgroundImpl,

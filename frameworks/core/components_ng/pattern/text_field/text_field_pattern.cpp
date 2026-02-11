@@ -5328,7 +5328,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(host, false);
     ACE_UINODE_TRACE(host);
     bool isFocus = HasFocus();
-    if (!showKeyBoardOnFocus_ || !isFocus) {
+    if (!showKeyBoardOnFocus_ || !isFocus || !NeedSoftKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "showKeyBoardOnFocus:%{public}d, isFocus:%{public}d", showKeyBoardOnFocus_,
             isFocus);
         return false;

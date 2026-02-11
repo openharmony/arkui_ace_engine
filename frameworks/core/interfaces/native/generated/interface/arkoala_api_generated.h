@@ -1766,6 +1766,8 @@ typedef struct OnNativeEmbedVisibilityChangeCallback OnNativeEmbedVisibilityChan
 typedef struct Opt_OnNativeEmbedVisibilityChangeCallback Opt_OnNativeEmbedVisibilityChangeCallback;
 typedef struct OnNavigationEntryCommittedCallback OnNavigationEntryCommittedCallback;
 typedef struct Opt_OnNavigationEntryCommittedCallback Opt_OnNavigationEntryCommittedCallback;
+typedef struct OnNeedSoftkeyboardCallback OnNeedSoftkeyboardCallback;
+typedef struct Opt_OnNeedSoftkeyboardCallback Opt_OnNeedSoftkeyboardCallback;
 typedef struct OnOverrideErrorPageCallback OnOverrideErrorPageCallback;
 typedef struct Opt_OnOverrideErrorPageCallback Opt_OnOverrideErrorPageCallback;
 typedef struct OnOverrideUrlLoadingCallback OnOverrideUrlLoadingCallback;
@@ -13724,6 +13726,16 @@ typedef struct Opt_OnNavigationEntryCommittedCallback {
     Ark_Tag tag;
     OnNavigationEntryCommittedCallback value;
 } Opt_OnNavigationEntryCommittedCallback;
+typedef struct OnNeedSoftkeyboardCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_Boolean_Void continuation);
+} OnNeedSoftkeyboardCallback;
+typedef struct Opt_OnNeedSoftkeyboardCallback {
+    Ark_Tag tag;
+    OnNeedSoftkeyboardCallback value;
+} Opt_OnNeedSoftkeyboardCallback;
 typedef struct OnOverrideErrorPageCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -24690,6 +24702,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                              const Opt_Union_String_Resource* value);
     void (*setAccessibilityActionOptions)(Ark_NativePointer node,
                                           const Opt_AccessibilityActionOptions* value);
+    void (*setOnNeedSoftkeyboard)(Ark_NativePointer node,
+                                  const Opt_OnNeedSoftkeyboardCallback* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);

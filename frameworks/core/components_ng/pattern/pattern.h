@@ -123,7 +123,20 @@ public:
     // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
     virtual bool NeedSoftKeyboard() const
     {
+        if (onNeedSoftkeyboardCallback_) {
+            return onNeedSoftkeyboardCallback_();
+        }
         return false;
+    }
+
+    virtual void SetOnNeedSoftKeyboard(std::function<bool()>&& onNeedSoftkeyboardCallback)
+    {
+        onNeedSoftkeyboardCallback_ = std::move(onNeedSoftkeyboardCallback);
+    }
+
+    virtual void ResetOnNeedSoftKeyboard()
+    {
+        onNeedSoftkeyboardCallback_ = nullptr;
     }
 
     virtual bool NeedToRequestKeyboardOnFocus() const
@@ -909,6 +922,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
 
+    std::function<bool()> onNeedSoftkeyboardCallback_;
 private:
     bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);

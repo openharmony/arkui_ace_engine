@@ -2097,6 +2097,19 @@ class OnFocusModifier extends ModifierWithKey {
   }
 }
 OnFocusModifier.identity = Symbol('onFocus');
+class OnNeedSoftkeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnNeedSoftkeyboard(node);
+    } else {
+      getUINativeModule().common.setOnNeedSoftkeyboard(node, this.value);
+    }
+  }
+}
+OnNeedSoftkeyboardModifier.identity = Symbol('onNeedSoftkeyboard');
 class OnBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4693,6 +4706,10 @@ class ArkComponent {
   }
   onFocus(event) {
     modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    return this;
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
     return this;
   }
   onBlur(event) {
@@ -10697,6 +10714,9 @@ class ArkSpanComponent {
   }
   onFocus(event) {
     throw new BusinessError(100201, 'onFocus function not supported in attributeModifier scenario.');
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    throw new Error('Method not implemented.');
   }
   onBlur(event) {
     throw new BusinessError(100201, 'onBlur function not supported in attributeModifier scenario.');
@@ -27336,6 +27356,12 @@ class ArkXComponentComponent extends ArkComponent {
   onFocus(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
       modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    }
+    return this;
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
     }
     return this;
   }

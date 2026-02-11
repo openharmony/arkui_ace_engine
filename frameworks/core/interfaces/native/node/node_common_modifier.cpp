@@ -12677,6 +12677,23 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
     accessibilityProperty->SetActions(onEvent);
 }
 
+void SetOnNeedSoftkeyboard(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onNeedSoftkeyboardCallback = [nodeId, extraParam]() -> bool {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_NEED_SOFTKEYBOARD;
+        SendArkUISyncEvent(&event);
+        return event.componentAsyncEvent.data[0].i32;
+    };
+    ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onNeedSoftkeyboardCallback));
+}
+
 void ResetOnAppear(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12841,6 +12858,13 @@ void ResetOnStackOverflowScroll(ArkUINodeHandle node)
         CHECK_NULL_VOID(hub);
         hub->ClearOverflowScrollEvent();
     }
+}
+
+void ResetOnNeedSoftkeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

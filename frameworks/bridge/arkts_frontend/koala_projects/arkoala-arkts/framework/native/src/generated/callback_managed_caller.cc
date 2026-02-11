@@ -7127,6 +7127,32 @@ void callManagedOnNavigationEntryCommittedCallbackSync(Ark_VMContext vmContext, 
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedOnNeedSoftkeyboardCallback(Ark_Int32 resourceId, Callback_Boolean_Void continuation)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnNeedSoftkeyboardCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedOnNeedSoftkeyboardCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Callback_Boolean_Void continuation)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_OnNeedSoftkeyboardCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedOnOverrideErrorPageCallback(Ark_Int32 resourceId, Ark_OnErrorReceiveEvent errorPageEvent, Callback_String_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9641,6 +9667,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnNativeEmbedObjectParamChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedObjectParamChangeCallback);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedVisibilityChangeCallback);
         case Kind_OnNavigationEntryCommittedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNavigationEntryCommittedCallback);
+        case Kind_OnNeedSoftkeyboardCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNeedSoftkeyboardCallback);
         case Kind_OnOverrideErrorPageCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideErrorPageCallback);
         case Kind_OnOverrideUrlLoadingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideUrlLoadingCallback);
         case Kind_OnPasteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPasteCallback);
@@ -10000,6 +10027,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnNativeEmbedObjectParamChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedObjectParamChangeCallbackSync);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNativeEmbedVisibilityChangeCallbackSync);
         case Kind_OnNavigationEntryCommittedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNavigationEntryCommittedCallbackSync);
+        case Kind_OnNeedSoftkeyboardCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnNeedSoftkeyboardCallbackSync);
         case Kind_OnOverrideErrorPageCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideErrorPageCallbackSync);
         case Kind_OnOverrideUrlLoadingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideUrlLoadingCallbackSync);
         case Kind_OnPasteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPasteCallbackSync);

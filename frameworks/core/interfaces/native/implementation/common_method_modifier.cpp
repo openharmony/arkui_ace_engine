@@ -5344,6 +5344,22 @@ void SetCustomPropertyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     LOGE("CommonMethodModifier::CustomPropertyImpl is not implemented");
 }
+void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
+                               const Opt_OnNeedSoftkeyboardCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() -> bool {
+        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>()
+            .value_or(false);
+    };
+    ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onEvent));
+}
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
                            const Opt_Array_SafeAreaEdge* edges)
@@ -6846,6 +6862,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+        CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,
