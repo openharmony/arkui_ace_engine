@@ -44,11 +44,19 @@ void AddColorStopImpl(Ark_CanvasGradient peer,
     CHECK_NULL_VOID(color);
     auto value = Converter::Convert<double>(offset);
     auto colorValue = Converter::OptConvertPtr<Color>(color);
-    if (!colorValue) {
-        peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
-        return;
-    }
-    peer->AddColorStop(value, colorValue.value());
+    Converter::VisitUnion(
+        *color,
+        [value, peer](const Ark_String& opt) {
+            auto colorValue = Converter::OptConvert<Color>(opt);
+            if (!colorValue) {
+                peer->AddColorStop(DEFAULT_NEGATIVE_OFFSET, Color::TRANSPARENT);
+            } else {
+                peer->AddColorStop(value, colorValue.value());
+            }
+        },
+        [value, peer](const Ark_ColorMetrics& opt) {
+        },
+        []() {});
 }
 } // CanvasGradientAccessor
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
