@@ -1215,6 +1215,7 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
