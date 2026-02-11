@@ -18,6 +18,14 @@ function nullOrUndef(value: unknown): boolean {
   return value === null || value === undefined;
 }
 
+function runNoThrow<T>(fn: () => T): T | undefined {
+  try {
+    return fn();
+  } catch {
+    return undefined;
+  }
+}
+
 class DataCoder {
   // Tag to detect payload format
   public static readonly FORMAT_TAG = 'JSON2';
@@ -28,7 +36,11 @@ class DataCoder {
   /**
    * Serialize an object to a JSON2
    */
-  public static stringify<T>(value: T): string {
+  public static stringify<T>(value: T, forceLegacyFormat: boolean = false): string {
+    if (forceLegacyFormat) {
+      return JSONCoder.stringify(value);
+    }
+
     const origValue = ObserveV2.IsMakeObserved(value)
       ? UIUtilsImpl.instance().getTarget(value)
       : value;
@@ -235,18 +247,18 @@ class DataCoder {
     }
 
     if (['string','number','boolean','bigint'].includes(typeof srcVal)) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
     // try to restore the Date without replacing the existing instance
     if (srcVal instanceof Date && tgtVal instanceof Date) {
-      target[targetProp].setTime(srcVal.getTime())
+      runNoThrow(() => target[targetProp].setTime(srcVal.getTime()));
       return;
     }
 
     if ([Boolean, Date, Number, String].includes(srcVal?.constructor)) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
@@ -257,7 +269,7 @@ class DataCoder {
 
     if (!nullOrUndef(srcVal) && globalThis.isSendable(srcVal)) {
       this.throwIfNotSendable(tgtVal);
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
@@ -277,19 +289,19 @@ class DataCoder {
     }
 
     if (nullOrUndef(srcVal)) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
     if (nullOrUndef(tgtVal) && opts.factory) {
       const type = opts.factory(srcVal);
-      target[targetProp] = type ? new type() : {};
+      runNoThrow(() => target[targetProp] = type ? new type() : {});
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
 
     if (tgtVal === undefined) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
@@ -299,7 +311,7 @@ class DataCoder {
 
     if (tgtVal.constructor !== srcVal.constructor && opts.factory !== undefined) {
       const type = opts.factory(srcVal)
-      target[targetProp] = type ? new type() : {};
+      runNoThrow(() => target[targetProp] = type ? new type() : {});
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
