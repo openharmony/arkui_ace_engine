@@ -28,7 +28,8 @@ class TaskRunnerAdapterImpl final : public TaskRunnerAdapter {
 public:
     TaskRunnerAdapterImpl():TaskRunnerAdapter() {};
     ~TaskRunnerAdapterImpl() = default;
-    void PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW) override;
+    void PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) override;
     void PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller) override;
     void PostDelayedTask(
         std::function<void()> task, uint32_t delay, const std::string& name, PriorityType priorityType = PriorityType::LOW) override;
@@ -38,6 +39,7 @@ public:
 
 private:
     static AppExecFwk::EventQueue::Priority ConvertPriority(PriorityType priorityType);
+    static AppExecFwk::VsyncBarrierOption ConvertBarrierOption(VsyncBarrierOption barrierOption);
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner_;
 };

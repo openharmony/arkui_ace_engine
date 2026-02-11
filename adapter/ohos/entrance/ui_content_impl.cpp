@@ -3295,7 +3295,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
@@ -3327,7 +3328,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s", instanceId,
                 bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfigurationWithResMgr");
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfigurationWithResMgr",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
