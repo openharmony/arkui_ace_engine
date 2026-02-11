@@ -40,10 +40,10 @@ constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
 constexpr int CALL_ARG_3 = 3;
 constexpr int CALL_ARG_4 = 4;
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr int PARAM_ARR_LENGTH_3 = 3;
@@ -53,6 +53,7 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 
 bool ParseLocalizedPadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
     ArkUISizeType& result)
@@ -2960,7 +2961,7 @@ ArkUINativeModuleValue TextInputBridge::SetEnableAutoSpacing(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getTextInputModifier()->setEnableAutoSpacing(nativeNode, enableAutoSpacing);
     return panda::JSValueRef::Undefined(vm);
 }
-
+ 
 ArkUINativeModuleValue TextInputBridge::ResetEnableAutoSpacing(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

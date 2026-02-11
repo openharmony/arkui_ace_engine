@@ -59,6 +59,7 @@ constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::string DEFAULT_FONT_WEIGHT = "400";
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 
 bool ParseLocalizedPadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
@@ -198,6 +199,35 @@ void SetBorderDash(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM *vm, ArkUINodeH
 }
 } // namespace
 
+ArkUINativeModuleValue TextAreaBridge::SetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> enableDataDetectorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (enableDataDetectorArg->IsNull() || enableDataDetectorArg->IsUndefined() ||
+        !enableDataDetectorArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetSelectDetectorEnable(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t enableDataDetector = enableDataDetectorArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextAreaModifier()->setSelectDetectorEnable(nativeNode, enableDataDetector);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::ResetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetSelectDetectorEnable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextAreaBridge::SetStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -229,35 +259,6 @@ ArkUINativeModuleValue TextAreaBridge::ResetStyle(ArkUIRuntimeCallInfo *runtimeC
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaStyle(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue TextAreaBridge::SetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> enableDataDetectorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (enableDataDetectorArg->IsNull() || enableDataDetectorArg->IsUndefined() ||
-        !enableDataDetectorArg->IsBoolean()) {
-        GetArkUINodeModifiers()->getTextAreaModifier()->resetSelectDetectorEnable(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    uint32_t enableDataDetector = enableDataDetectorArg->Uint32Value(vm);
-    GetArkUINodeModifiers()->getTextAreaModifier()->setSelectDetectorEnable(nativeNode, enableDataDetector);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue TextAreaBridge::ResetSelectDetectorEnable(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextAreaModifier()->resetSelectDetectorEnable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -347,12 +347,13 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     std::vector<RefPtr<ResourceObject>> colorResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
     std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
         radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),
-        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray);
+        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray, nodeInfo);
     bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_4),
         offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResObjArray);
     bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_5),
