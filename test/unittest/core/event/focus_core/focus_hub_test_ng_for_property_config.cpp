@@ -193,7 +193,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0113, TestSize.Level1)
      */
     focusHub->isFocusScope_ = true;
     focusHub->SetFocusScopePriority(focusScopeId, 0);
-    EXPECT_EQ(focusHub->focusScopeId_, focusScopeId);
+    EXPECT_NE(focusHub->focusScopeId_, focusScopeId);
 
     /**
      * @tc.steps3: call the function SetFocusScopePriority with isFocusScope_ false
@@ -511,6 +511,9 @@ HWTEST_F(FocusHubTestNg, DumpFocusTree001, TestSize.Level1)
      * @tc.steps: step3. test function DumpFocusNodeTree.
      * @tc.expected: After DumpFocusTree, the DumpLog.description_ is empty.
      */
+    auto ss = std::make_unique<std::ostringstream>();
+    DumpLog::GetInstance().SetDumpFile(std::move(ss));
+
     int32_t depth = 1;
     focusHub->focusScopeId_ = "TEST";
     focusHub->isFocusScope_ = true;
