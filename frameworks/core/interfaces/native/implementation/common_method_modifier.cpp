@@ -24,7 +24,6 @@
 #include "base/utils/time_util.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/accessibility/static/accessibility_static_utils.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/layout/grid_layout_info.h"
@@ -52,7 +51,6 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -2337,16 +2335,6 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
     CHECK_NULL_RETURN(pipelineContext, 0);
     return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
 }
-const ArkUICounterModifier* GetCounterModifier()
-{
-    static const ArkUICounterModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Counter");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const ArkUICounterModifier*>(module->GetDynamicModifier());
-    }
-    return cachedModifier;
-}
 void SetWidthInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
 {
     Validator::ValidateNonNegative(value);
@@ -2355,12 +2343,7 @@ void SetWidthInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
             // Implement Reset value
             return;
         }
-        auto arkUICounterModifier = GetCounterModifier();
-        CHECK_NULL_VOID(arkUICounterModifier);
-        auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
-        ArkUI_Float32 width = value.value().Value();
-        ArkUI_Int32 unit = static_cast<ArkUI_Int32>(value.value().Unit());
-        arkUICounterModifier->setCounterWidth(node, width, unit);
+        CounterModelNG::SetWidth(frameNode, *value);
     } else {
         if (!value) {
             ViewAbstract::ClearWidthOrHeight(frameNode, true);
@@ -2400,12 +2383,7 @@ void SetHeightInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
             // Implement Reset value
             return;
         }
-        auto arkUICounterModifier = GetCounterModifier();
-        CHECK_NULL_VOID(arkUICounterModifier);
-        auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
-        ArkUI_Float32 height = value.value().Value();
-        ArkUI_Int32 unit = static_cast<ArkUI_Int32>(value.value().Unit());
-        arkUICounterModifier->setCounterHeight(node, height, unit);
+        CounterModelNG::SetHeight(frameNode, *value);
     } else {
         if (!value) {
             ViewAbstract::ClearWidthOrHeight(frameNode, false);

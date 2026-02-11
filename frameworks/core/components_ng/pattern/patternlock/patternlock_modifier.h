@@ -33,7 +33,6 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
-constexpr const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 class PatternLockCell {
 public:
     PatternLockCell(int32_t column, int32_t row);

@@ -13,35 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/patternlock/bridge/patternlock_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/patternlock_model_impl.h"
 
 #include <utility>
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 
 namespace OHOS::Ace::Framework {
 
-namespace {
-RefPtr<V2::PatternLockTheme> GetPatternLockTheme()
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    return node ? themeManager->GetTheme<V2::PatternLockTheme>(node->GetThemeScopeId())
-                : themeManager->GetTheme<V2::PatternLockTheme>();
-}
-} // namespace
-
 RefPtr<V2::PatternLockController> PatternLockModelImpl::Create()
 {
     auto lock = AceType::MakeRefPtr<V2::PatternLockComponent>();
-    auto lockTheme = GetPatternLockTheme();
+    auto lockTheme = JSViewAbstract::GetTheme<V2::PatternLockTheme>();
     if (!lockTheme) {
         LOGE("Get PatternLock theme error");
     } else {

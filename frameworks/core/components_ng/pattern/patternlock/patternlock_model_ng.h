@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_FORCE_EXPORT PatternLockModelNG : public OHOS::Ace::PatternLockModel {
+class ACE_EXPORT PatternLockModelNG : public OHOS::Ace::PatternLockModel {
 public:
     RefPtr<V2::PatternLockController> Create() override;
     void SetPatternComplete(NG::PatternLockCompleteEvent&& onComplete) override;

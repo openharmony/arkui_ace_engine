@@ -356,7 +356,7 @@ public:
         uint32_t argNumber, ArkUIGesture* gesture);
     static void ParseLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo, int& isLocalizedBorderWidth,
         int& isLocalizedBorderColor, int& isLocalizedBorderRadius);
-    static ACE_FORCE_EXPORT LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
+    static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
     static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
         std::vector<ArkUI_Float32>& values, bool needLocalized = false);
     static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,

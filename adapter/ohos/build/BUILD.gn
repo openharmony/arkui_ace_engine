@@ -15,10 +15,8 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 component_modules = [
-  "counter",
   "gauge",
   "checkbox",
-  "patternlock",
   "rating",
   "linear_split",
   "side_bar",

@@ -31,6 +31,7 @@
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_embedded_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h"
@@ -56,6 +57,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
@@ -486,9 +488,7 @@ using RegisterModuleFunc = void (*)(Local<panda::ObjectRef>, EcmaVM*);
 ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     static const std::unordered_set<std::string> loadModuleName = {
-        {"Counter"},
         {"Gauge" },
-        {"PatternLock"},
         {"Sidebar"},
         {"Indexer"},
         {"Checkbox"},
@@ -565,6 +565,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::GetNodeType));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeAdapter"), nodeAdapter);
+
+    RegisterCounterAttributes(object, vm);
 
     auto panel = panda::ObjectRef::New(vm);
     panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCloseIcon"),
@@ -1411,6 +1413,60 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
+
+    auto patternLock = panda::ObjectRef::New(vm);
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSideLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetSideLength));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSideLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetSideLength));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoReset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetAutoReset));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoReset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetAutoReset));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPathStrokeWidth));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPathStrokeWidth));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRegularColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetRegularColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRegularColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetRegularColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPathColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPathColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActiveColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActiveColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActiveColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActiveColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCircleRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockCircleRadius));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCircleRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockCircleRadius));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockSelectedColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSelectedColor));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActivateCircleStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActivateCircleStyle));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActivateCircleStyle"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActivateCircleStyle));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSkipUnselectedPoint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockSkipUnselectedPoint));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSkipUnselectedPoint"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSkipUnselectedPoint));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPatternLockOnPatternComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockOnPatternComplete));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPatternLockOnPatternComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockOnPatternComplete));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPatternLockOnDotConnect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockOnDotConnect));
+    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPatternLockOnDotConnect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockOnDotConnect));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
+
     RegisterImageAnimatorAttributes(object, vm);
 
     auto textInput = panda::ObjectRef::New(vm);
@@ -5687,6 +5743,7 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterCanvasAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
     RegisterDataPanelAttributes(object, vm);
+    RegisterCounterAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
     RegisterGridColAttributes(object, vm);
@@ -6894,6 +6951,44 @@ void ArkUINativeModule::RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> 
     auto frameNode = frameNodeValue->ToObject(vm);
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTypedFrameNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTypedFrameNodeFormLiteSet));
+}
+
+void ArkUINativeModule::RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto counter = panda::ObjectRef::New(vm);
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableInc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableInc));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableInc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableInc));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDec"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableDec));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDec"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableDec));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterHeight));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterHeight));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterWidth));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterWidth));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterBackgroundColor));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterBackgroundColor));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterSize));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterSize));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterOnInc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterOnInc));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterOnInc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterOnInc));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterOnDec"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterOnDec));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterOnDec"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterOnDec));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
 }
 
 void ArkUINativeModule::RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

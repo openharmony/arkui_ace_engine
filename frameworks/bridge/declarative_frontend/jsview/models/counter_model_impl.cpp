@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/counter/bridge/counter_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/counter_model_impl.h"
 
 #include "core/components/counter/counter_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"

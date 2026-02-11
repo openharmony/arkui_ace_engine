@@ -874,6 +874,6 @@ bool ResourceParseUtils::ConvertFromResObj(const RefPtr<ResourceObject>& resObj,
     return false;
 }
 
-template bool ACE_FORCE_EXPORT ResourceParseUtils::ConvertFromResObjNG<Dimension>(
+template bool ResourceParseUtils::ConvertFromResObjNG<Dimension>(
     const RefPtr<ResourceObject>& resObj, Dimension& result);
 }

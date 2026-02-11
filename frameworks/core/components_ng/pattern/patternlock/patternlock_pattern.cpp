@@ -27,8 +27,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-constexpr const char COLUMN_ETS_TAG[] = "Column";
-constexpr const char TEXT_ETS_TAG[] = "Text";
 namespace {
 constexpr int32_t PATTERN_LOCK_COL_COUNT = 3;
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
@@ -154,7 +152,7 @@ bool PatternLockPattern::InitVirtualNode()
     if (!GetHandleCircleRadius(handleCircleRadius)) {
         return false;
     }
-    auto lineNode = FrameNode::CreateFrameNode(COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto lineNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto renderContext = lineNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -183,7 +181,7 @@ bool PatternLockPattern::InitVirtualNode()
 RefPtr<FrameNode> PatternLockPattern::AddTextNodeIntoVirtual(int32_t x, int32_t y, float handleCircleRadius)
 {
     auto textNode = FrameNode::CreateFrameNode(
-        TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     UpdateAccessibilityTextNode(textNode, handleCircleRadius, x, y);
     auto textAccessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityPropertyVec_.emplace_back(textAccessibilityProperty);

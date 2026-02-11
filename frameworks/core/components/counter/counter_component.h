@@ -36,7 +36,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT CounterComponent : public ComponentGroup {
+class ACE_EXPORT CounterComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(CounterComponent, ComponentGroup);
 
 public:

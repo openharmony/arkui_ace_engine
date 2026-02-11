@@ -49,6 +49,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
@@ -144,7 +145,7 @@
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
-#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #ifdef QRCODEGEN_SUPPORT
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
@@ -372,6 +373,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSScroll::JSBind(globalObj);
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
+    JSCounter::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
@@ -532,7 +534,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSQRCode::JSBind(globalObj);
 #endif
     JSRelativeContainer::JSBind(globalObj);
-    JSPatternLockControllerBinding::JSBind(globalObj);
+    JSPatternLock::JSBind(globalObj);
+    JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
     JSContextMenu::JSBind(globalObj);
