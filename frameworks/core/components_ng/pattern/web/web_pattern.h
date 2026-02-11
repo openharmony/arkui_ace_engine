@@ -45,7 +45,7 @@
 #include "core/components_ng/pattern/web/web_accessibility_event_report.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
-#include "core/components_ng/pattern/web/web_context_menu_overlay.h"
+//#include "core/components_ng/pattern/web/web_context_menu_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
