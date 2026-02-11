@@ -113,6 +113,7 @@ public:
     using PredictTask = std::function<void(int64_t, bool)>;
     using RotationEndCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
     using RawKeyboardChangedCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
+    using OnDrawChildrenInfoMap = std::unordered_map<int32_t, std::vector<int32_t>>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -381,7 +382,7 @@ public:
 
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
-    void OnDrawChildrenCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId, int32_t parentId);
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
@@ -1395,6 +1396,8 @@ public:
 
     bool IsDisplayInForceSplitMode() const override;
 
+    void SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1779,6 +1782,7 @@ private:
     std::optional<bool> isRecycledInvisibleImageMemory_ = std::nullopt;
     RefPtr<InspectorOffscreenNodesMgr> inspectorOffscreenNodesMgr_;
     bool xComponentDisplayConstraintEnabled_ = false;
+    OnDrawChildrenInfoMap onDrawChildrenInfoMap_;
 };
 
 /**

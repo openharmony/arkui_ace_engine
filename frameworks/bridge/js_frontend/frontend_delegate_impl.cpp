@@ -1333,7 +1333,8 @@ void FrontendDelegateImpl::OnLayoutCompleted(const std::string& componentId) {}
 
 void FrontendDelegateImpl::OnDrawCompleted(const std::string& componentId) {}
 
-void FrontendDelegateImpl::OnDrawChildrenCompleted(const std::string& componentId) {}
+void FrontendDelegateImpl::OnDrawChildrenCompleted(const std::string& componentId,
+    const std::vector<int32_t>& childIds) {}
 
 bool FrontendDelegateImpl::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
 {

@@ -683,6 +683,8 @@ void PipelineContext::PostTaskResponseRegion(int32_t delay) {}
 
 void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node) {}
 
+void PipelineContext::SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId) {}
+
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}

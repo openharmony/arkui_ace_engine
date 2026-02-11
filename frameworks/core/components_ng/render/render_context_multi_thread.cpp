@@ -20,36 +20,16 @@
 namespace OHOS::Ace::NG {
 void RenderContext::RequestNextFrameMultiThread(bool isOffScreenNode) const
 {
-    if (requestFrame_) {
-        requestFrame_(isOffScreenNode);
-        auto node = GetHost();
-        CHECK_NULL_VOID(node);
-        auto eventHub = node->GetEventHub<NG::EventHub>();
-        if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
-            node->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(node)]() {
-                auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-                CHECK_NULL_VOID(pipeline);
-                pipeline->SetNeedRenderNode(weak);
-            });
-        }
-        {
-            node->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(node)]() {
-                auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-                CHECK_NULL_VOID(pipeline);
-                pipeline->SetNeedRenderNodeByUniqueId(weak);
-            });
-        }
-        if (node->IsObservedByDrawChildren()) {
-            node->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(node)]() {
-                auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-                CHECK_NULL_VOID(pipeline);
-
-                auto node = weak.Upgrade();
-                CHECK_NULL_VOID(node);
-                auto frameNode = AceType::DynamicCast<FrameNode>(node->GetObserverParentForDrawChildren());
-                pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
-            });
-        }
+    if (!requestFrame_) {
+        return;
     }
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto requestFrame = requestFrame_;
+    node->PostAfterAttachMainTreeTask([requestFrame, isOffScreenNode]() {
+        if (requestFrame) {
+            requestFrame(isOffScreenNode);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

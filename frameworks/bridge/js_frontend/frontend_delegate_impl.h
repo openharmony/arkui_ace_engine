@@ -45,7 +45,8 @@ using ResetStagingPageCallback = std::function<void()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using LayoutInspectorCallback = std::function<void(const std::string& componedId)>;
 using DrawInspectorCallback = std::function<void(const std::string& componedId)>;
-using DrawChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
+using DrawChildrenInspectorCallback = std::function<void(const std::string& componedId,
+    const std::vector<int32_t>& childIds)>;
 using LayoutChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
 using IsDrawChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
 using IsLayoutChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
@@ -230,7 +231,7 @@ public:
     void OnSurfaceChanged();
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
-    void OnDrawChildrenCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds);
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
     // JsEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);

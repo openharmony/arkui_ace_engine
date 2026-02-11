@@ -149,7 +149,7 @@ public:
     void OnSurfaceChanged();
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
-    void OnDrawChildrenCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds);
     void OnLayoutChildrenCompleted(const std::string& componentId);
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
     bool IsLayoutChildrenCallbackFuncExist(const std::string& componentId);

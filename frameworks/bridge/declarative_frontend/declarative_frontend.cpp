@@ -434,12 +434,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
 
     const auto& drawChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                    const std::string& componentId) {
+                                                    const std::string& componentId,
+                                                    const std::vector<int32_t>& childIds) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
-        jsEngine->DrawChildrenInspectorCallback(componentId);
+        jsEngine->DrawChildrenInspectorCallback(componentId, childIds);
     };
 
     const auto& layoutChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -1224,10 +1225,10 @@ void DeclarativeFrontend::OnDrawCompleted(const std::string& componentId)
     }
 }
 
-void DeclarativeFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+void DeclarativeFrontend::OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds)
 {
     if (delegate_) {
-        delegate_->OnDrawChildrenCompleted(componentId);
+        delegate_->OnDrawChildrenCompleted(componentId, childIds);
     }
 }
 

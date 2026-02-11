@@ -95,7 +95,7 @@ public:
         componentId_ = componentId;
     }
 
-    void OnDrawChildrenCompleted(const std::string& componentId) override
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) override
     {
         componentId_ = componentId;
     }

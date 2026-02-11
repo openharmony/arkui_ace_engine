@@ -1110,13 +1110,14 @@ void FrontendDelegateDeclarativeNG::OnDrawCompleted(const std::string& component
         TaskExecutor::TaskType::JS, "ArkUIDrawCompleted");
 }
 
-void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& componentId)
+void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& componentId,
+    const std::vector<int32_t>& childIds)
 {
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), componentId] {
+        [weak = AceType::WeakClaim(this), componentId, childIds] {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->drawChildrenInspectorCallback_) {
-                delegate->drawChildrenInspectorCallback_(componentId);
+                delegate->drawChildrenInspectorCallback_(componentId, childIds);
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");

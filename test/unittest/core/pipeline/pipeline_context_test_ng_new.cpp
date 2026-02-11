@@ -3283,7 +3283,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg236, TestSize.Level1)
      * @tc.expected: weakFrontend_.Upgrade() is null.
      */
     ASSERT_NE(context_, nullptr);
-    context_->OnDrawChildrenCompleted(TEST_TAG);
+    context_->OnDrawChildrenCompleted(TEST_TAG, DEFAULT_INT1);
     EXPECT_EQ(context_->weakFrontend_.Upgrade(), nullptr);
 }
 
@@ -3303,12 +3303,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg237, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
     context_->weakFrontend_ = frontend;
+    context_->SetOnDrawChildrenInfoMap(DEFAULT_INT1, DEFAULT_INT3);
 
     /**
      * @tc.steps4: test the function OnDrawChildrenCompleted by TEST_TAG.
      * @tc.expected: frontend componentId_ is TEST_TAG
      */
-    context_->OnDrawChildrenCompleted(TEST_TAG);
+    context_->OnDrawChildrenCompleted(TEST_TAG, DEFAULT_INT1);
     EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
     context_->weakFrontend_.Reset();
 }

@@ -157,6 +157,7 @@ export interface LengthConstrain {
     maxLength: Length;
 }
 export type VoidCallback = () => void;
+export type ArrayIntCallback = (arr: int[]) => void;
 export type LengthMetricsUnit = arkui_Graphics_LengthMetricsUnit;
 export type LengthMetrics = arkui_Graphics_LengthMetrics;
 export type ColorMetrics = arkui_Graphics_ColorMetrics;

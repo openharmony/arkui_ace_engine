@@ -744,10 +744,10 @@ void JsFrontend::OnDrawCompleted(const std::string& componentId)
     }
 }
 
-void JsFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+void JsFrontend::OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds)
 {
     if (delegate_) {
-        delegate_->OnDrawChildrenCompleted(componentId);
+        delegate_->OnDrawChildrenCompleted(componentId, childIds);
     }
 }
 

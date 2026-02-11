@@ -1156,7 +1156,7 @@ void PipelineContext::InspectDrew()
                 continue;
             }
             if (node->GetInspectorId().has_value()) {
-                OnDrawChildrenCompleted(node->GetInspectorId().value());
+                OnDrawChildrenCompleted(node->GetInspectorId().value(), node->GetId());
             }
             OnDrawChildrenCompleted(node->GetId());
         }
@@ -2021,12 +2021,16 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId)
     }
 }
 
-void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId)
+void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId, int32_t parentId)
 {
     CHECK_RUN_ON(UI);
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
-        frontend->OnDrawChildrenCompleted(componentId);
+        auto it = onDrawChildrenInfoMap_.find(parentId);
+        if (it != onDrawChildrenInfoMap_.end()) {
+            frontend->OnDrawChildrenCompleted(componentId, it->second);
+            onDrawChildrenInfoMap_.erase(it);
+        }
     }
 }
 
@@ -2123,6 +2127,19 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform)
         }
     }
     transform_ = transform;
+}
+
+void PipelineContext::SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId)
+{
+    auto iter = onDrawChildrenInfoMap_.find(parentId);
+    if (iter != onDrawChildrenInfoMap_.end()) {
+        auto childIds = iter->second;
+        if (std::find(childIds.begin(), childIds.end(), childId) == childIds.end()) {
+            iter->second.push_back(childId);
+        }
+    } else {
+        onDrawChildrenInfoMap_.emplace(parentId, std::vector<int32_t>{childId});
+    }
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

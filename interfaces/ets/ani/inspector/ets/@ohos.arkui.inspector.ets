@@ -13,7 +13,7 @@
  * limitations under the License.
  */
  import { Callback, RecordData } from '@ohos.base';
- import { VoidCallback } from './arkui.component.units';
+ import { VoidCallback, ArrayIntCallback } from './arkui.component.units';
  import hilog from '@ohos.hilog';
  
  const DOMAIN_ID = 0x0000;
@@ -95,17 +95,27 @@
             this.off('drawChildren', callback);
         }
 
+        public onDrawChildren(callback: ArrayIntCallback): void {
+            this.on('drawChildren', callback);
+        }
+
+        public offDrawChildren(callback?: ArrayIntCallback): void {
+            this.off('drawChildren', callback);
+        }
+
         public onLayoutChildren(callback: VoidCallback): void {
             this.on('layoutChildren', callback);
         }
-        
+
         public offLayoutChildren(callback?: VoidCallback): void {
             this.off('layoutChildren', callback);
         }
-        
+
         public native on(type: string, callback: VoidCallback) : void;
+        public native on(type: string, callback: ArrayIntCallback) : void;
 
         public native off(type: string, callback?: VoidCallback) : void;
+        public native off(type: string, callback?: ArrayIntCallback) : void;
     }
  }
  

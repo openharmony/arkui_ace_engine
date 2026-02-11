@@ -171,7 +171,7 @@ public:
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void OnLayoutCompleted(const std::string& componentId) override;
     void OnDrawCompleted(const std::string& componentId) override;
-    void OnDrawChildrenCompleted(const std::string& componentId) override;
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) override;
     void OnLayoutChildrenCompleted(const std::string& componentId) override;
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override;
     bool IsLayoutChildrenCallbackFuncExist(const std::string& componentId) override;
