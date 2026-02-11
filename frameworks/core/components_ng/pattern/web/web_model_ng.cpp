@@ -2851,7 +2851,7 @@ void WebModelNG::SetEnableDefaultContextMenu(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetEnableDefaultContextMenu(isEnabled);
+    webPattern->UpdateEnableDefaultContextMenu(isEnabled);
 }
 
 void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled)
@@ -2859,6 +2859,6 @@ void WebModelNG::SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnable
     CHECK_NULL_VOID(frameNode);
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetEnableDefaultContextMenu(isEnabled);
+    webPattern->UpdateEnableDefaultContextMenu(isEnabled);
 }
 } // namespace OHOS::Ace::NG
