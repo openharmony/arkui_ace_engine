@@ -45,8 +45,10 @@ import {
     NavigationCommonTitle,
     NavigationCustomTitle,
     NavPathStack,
+    NavigationDividerStyle,
 } from 'arkui.component.navigation';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
+import { ComponentContent } from 'arkui.ComponentContent';
 import window from '@ohos.window';
 import { Length, ResourceStr, Dimension } from 'arkui.component.units';
 import { Resource } from 'global.resource';
@@ -118,6 +120,7 @@ export declare class ArkNavigationPeer extends ArkCommonMethodPeer {
 }
 
 export interface NavigationAttribute extends CommonMethod {
+    setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this;
     navBarWidth(value: Length | undefined): this;
     navBarPosition(value: NavBarPosition | undefined): this;
     navBarWidthRange(value: [Dimension, Dimension] | undefined): this;
@@ -128,13 +131,13 @@ export interface NavigationAttribute extends CommonMethod {
         accessibilityText?: ResourceStr
     ): this;
     hideNavBar(value: boolean | undefined): this;
-    subTitle(value: string | undefined): this;
     hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
+    hideTitleBar(hide: boolean | undefined): this;
     hideBackButton(value: boolean | undefined): this;
     titleMode(value: NavigationTitleMode | undefined): this;
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this;
-    toolBar(value: CustomBuilder | undefined): this;
     hideToolBar(hide: boolean | undefined, animated?: boolean): this;
+    hideToolBar(hide: boolean | undefined): this;
     enableToolBarAdaptation(value: boolean | undefined): this;
     onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
@@ -152,6 +155,7 @@ export interface NavigationAttribute extends CommonMethod {
     systemBarStyle(value: SystemBarStyle | undefined): this;
     recoverable(value: boolean | undefined): this;
     enableDragBar(value: boolean | undefined): this;
+    divider(value: NavigationDividerStyle | null): this;
     enableModeChangeAnimation(value: boolean | undefined): this;
     title(
         value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
@@ -162,83 +166,6 @@ export interface NavigationAttribute extends CommonMethod {
         options?: NavigationToolbarOptions
     ): this;
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
-}
-export declare class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
-    public navBarWidth_value?: Length | undefined;
-    public navBarPosition_value?: NavBarPosition | undefined;
-    public navBarWidthRange_value?: [Dimension, Dimension] | undefined;
-    public minContentWidth_value?: Dimension | undefined;
-    public mode_value?: NavigationMode | undefined;
-    public backButtonIcon_value?: string | PixelMap | Resource | SymbolGlyphModifier | undefined;
-    public hideNavBar_value?: boolean | undefined;
-    public subTitle_value?: string | undefined;
-    public hideTitleBar_value?: boolean | undefined;
-    public hideBackButton_value?: boolean | undefined;
-    public titleMode_value?: NavigationTitleMode | undefined;
-    public menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined;
-    public toolBar_value?: CustomBuilder | undefined;
-    public toolbarConfiguration_value?: Array<ToolbarItem> | CustomBuilder | undefined;
-    public hideToolBar_value?: boolean | undefined;
-    public enableToolBarAdaptation_value?: boolean | undefined;
-    public onTitleModeChange_value?: ((titleMode: NavigationTitleMode) => void) | undefined;
-    public onNavBarStateChange_value?: ((isVisible: boolean) => void) | undefined;
-    public onNavigationModeChange_value?: ((mode: NavigationMode) => void) | undefined;
-    public navDestination_value?: ((name: string, param: Object | undefined) => void) | undefined;
-    public customNavContentTransition_value?:
-        ((
-              from: NavContentInfo,
-              to: NavContentInfo,
-              operation: NavigationOperation
-          ) => NavigationAnimatedTransition | undefined)
-        | undefined;
-    public systemBarStyle_value?: SystemBarStyle | undefined;
-    public recoverable_value?: boolean | undefined;
-    public enableDragBar_value?: boolean | undefined;
-    public enableModeChangeAnimation_value?: boolean | undefined;
-    public navBarWidth(value: Length | undefined): this;
-    public navBarPosition(value: NavBarPosition | undefined): this;
-    public navBarWidthRange(value: [Dimension, Dimension] | undefined): this;
-    public minContentWidth(value: Dimension | undefined): this;
-    public mode(value: NavigationMode | undefined): this;
-    public backButtonIcon(
-        icon: string | PixelMap | Resource | SymbolGlyphModifier | undefined,
-        accessibilityText?: ResourceStr
-    ): this;
-    public hideNavBar(value: boolean | undefined): this;
-    public subTitle(value: string | undefined): this;
-    public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
-    public hideBackButton(value: boolean | undefined): this;
-    public titleMode(value: NavigationTitleMode | undefined): this;
-    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this;
-    public toolBar(value: CustomBuilder | undefined): this;
-    public hideToolBar(hide: boolean | undefined, animated?: boolean): this;
-    public enableToolBarAdaptation(value: boolean | undefined): this;
-    public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
-    public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
-    public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
-    navDestination(value: (PageMapBuilder | undefined)): this;
-    public customNavContentTransition(
-        value:
-            ((
-                  from: NavContentInfo,
-                  to: NavContentInfo,
-                  operation: NavigationOperation
-              ) => NavigationAnimatedTransition | undefined)
-            | undefined
-    ): this;
-    public systemBarStyle(value: SystemBarStyle | undefined): this;
-    public recoverable(value: boolean | undefined): this;
-    public enableDragBar(value: boolean | undefined): this;
-    public enableModeChangeAnimation(value: boolean | undefined): this;
-    public title(
-        value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
-        options?: NavigationTitleOptions
-    ): this;
-    public toolbarConfiguration(
-        value: Array<ToolbarItem> | CustomBuilder | undefined,
-        options?: NavigationToolbarOptions
-    ): this;
-    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
 }
 
 export declare class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
@@ -257,13 +184,14 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
         accessibilityText?: ResourceStr
     ): this;
     public hideNavBar(value: boolean | undefined): this;
-    public subTitle(value: string | undefined): this;
     public hideTitleBar(hide: boolean | undefined, animated?: boolean): this;
+    public hideTitleBar(hide: boolean | undefined): this;
     public hideBackButton(value: boolean | undefined): this;
     public titleMode(value: NavigationTitleMode | undefined): this;
     public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this;
     public toolBar(value: CustomBuilder | undefined): this;
     public hideToolBar(hide: boolean | undefined, animated?: boolean): this;
+    public hideToolBar(hide: boolean | undefined): this;
     public enableToolBarAdaptation(value: boolean | undefined): this;
     public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this;
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
@@ -281,6 +209,7 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
     public systemBarStyle(value: SystemBarStyle | undefined): this;
     public recoverable(value: boolean | undefined): this;
     public enableDragBar(value: boolean | undefined): this;
+    public divider(value: NavigationDividerStyle | null): this;
     public enableModeChangeAnimation(value: boolean | undefined): this;
     public title(
         value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
@@ -291,6 +220,8 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
         options?: NavigationToolbarOptions
     ): this;
     public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this;
+    public splitPlaceholder(placeholder: ComponentContent): this;
+    public enableVisibilityLifecycleWithContentCover(isEnabled: boolean | undefined): this;
     public applyAttributesFinish(): void;
     public updateNeedSync(needSync: boolean): void;
     public isNeedSync(): boolean;
