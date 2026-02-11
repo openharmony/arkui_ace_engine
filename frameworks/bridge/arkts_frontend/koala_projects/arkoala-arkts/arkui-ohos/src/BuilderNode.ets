@@ -16,7 +16,7 @@
 import { TouchEvent, InputEventType } from './component/common'
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer } from "@koalaui/interop"
+import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
 import { finalizerRegister, Thunk, int32 } from "@koalaui/common"
 import { ComputableState, MutableState, rememberMutableState, StateManager, memoEntry, createStateManager, GlobalStateManager, IncrementalNode } from "@koalaui/runtime"
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -250,7 +250,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             if (options?.type !== undefined) {
                 buildOptions.type = options.type!;
             }
-            this.setOptions(buildOptions);
+            try {
+                this.setOptions(buildOptions);
+            } catch (e) {
+                InteropNativeModule._NativeLog('BuilderNode Warning: ' + e?.message + ', ' + e?.stack);
+            }
         }
         this.__manager = createStateManager()!;
         let uiData = new ContextRecord();
