@@ -5392,7 +5392,7 @@ int32_t SetRichEditorCustomKeyboard(ArkUI_NodeHandle node, const ArkUI_Attribute
         supportAvoidance = static_cast<bool>(item->value[0].i32);
     }
     fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCustomKeyboard(
-        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance);
+        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance, false);
     return ERROR_CODE_NO_ERROR;
 }
  

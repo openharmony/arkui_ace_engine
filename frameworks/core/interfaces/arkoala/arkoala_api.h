@@ -7902,7 +7902,8 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance);
     ArkUI_Int32 (*getRichEditorKeyboardAppearance)(ArkUINodeHandle node);
     void (*resetRichEditorKeyboardAppearance)(ArkUINodeHandle node);
-    void (*setRichEditorCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
+    void (*setRichEditorCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance,
+        bool isJsView);
     ArkUINodeHandle (*getRichEditorCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRichEditorCustomKeyboardOption)(ArkUINodeHandle node);
     void (*setRichEditorCustomKeyboardFunc)(ArkUINodeHandle node, void* callback, ArkUI_Bool supportAvoidance);

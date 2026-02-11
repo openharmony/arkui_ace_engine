@@ -1146,12 +1146,15 @@ void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
-void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, ArkUI_Bool supportAvoidance)
+void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, ArkUI_Bool supportAvoidance,
+    bool isJsView)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
-    CHECK_NULL_VOID(customKeyboardNode);
+    if (!isJsView) {
+        CHECK_NULL_VOID(customKeyboardNode);
+    }
     RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboardNode, supportAvoidance);
 }
 
