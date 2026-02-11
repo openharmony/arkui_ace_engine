@@ -250,10 +250,15 @@ napi_value LuminanceSampler::JSGetOrCreateLuminanceSampler(napi_env& env, napi_c
     auto targetNodePtr = GetTargetFrameNode(targetInfoId);
     CHECK_NULL_RETURN(targetNodePtr, nullptr);
     auto registedInstance = targetNodePtr->GetSamplerManager();
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | registedInstance: %{public}d",
+        targetNodePtr->GetId(), targetNodePtr->GetTag().c_str(), targetNodePtr->GetInspectorId().value_or("").c_str(),
+        registedInstance ? 1 : 0);
     if (!registedInstance) {
         SamplerInstance* samplerInstance = new SamplerInstance();
         samplerInstance->IncRefCount();
         if (!samplerInstance->SetTargetNode(targetInfoId)) {
+            samplerInstance->DecRefCount();
             return nullptr;
         }
         auto newSamplerInstance = CreateJSSamplerInstance(env, samplerInstance);

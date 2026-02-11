@@ -60,8 +60,18 @@ void LuminanceSamplingHelper::SetSamplingOptions(const WeakPtr<FrameNode>& node,
             left = region->left->ConvertToPx();
             right = region->right->ConvertToPx();
             setRegion = Rosen::Vector4f(left, top, right, bottom);
+            TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+                "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | region: {%{public}f, "
+                "%{public}f, %{public}f, %{public}f}",
+                nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str(), left, top,
+                right, bottom);
         }
     }
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | samplingInterval: %{public}d | "
+        "{dark,bright}:{%{public}d, %{public}d}",
+        nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str(), samplingInterval,
+        darkThreshold, brightThreshold);
     rsNode->SetColorPickerOptions(samplingInterval, std::make_pair(darkThreshold, brightThreshold), setRegion);
     RequestNextFrame(nodeRef);
 }
@@ -71,6 +81,9 @@ void LuminanceSamplingHelper::RegisterSamplingCallback(const WeakPtr<NG::FrameNo
     auto nodeRef = node.Upgrade();
     auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | SetColorPickerCallback",
+        nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str());
     rsNode->SetColorPickerCallback(func);
     RequestNextFrame(nodeRef);
 }
@@ -80,6 +93,9 @@ void LuminanceSamplingHelper::UnRegisterSamplingCallback(const WeakPtr<NG::Frame
     auto nodeRef = node.Upgrade();
     auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | UnregisterColorPickerCallback",
+        nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str());
     rsNode->UnregisterColorPickerCallback();
     RequestNextFrame(nodeRef);
 }
