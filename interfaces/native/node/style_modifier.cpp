@@ -14783,16 +14783,29 @@ int32_t SetImageMatrix(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = GetFullImpl();
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_SIXTEEN_PARAM);
-    if (actualSize < 0) {
+    auto isObject = CheckAttributeObject(item);
+    if (!isObject && actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
     std::vector<float> matrixArray;
-    for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_SIXTEEN_PARAM; i++) {
-        matrixArray.emplace_back(item->value[i].f32);
+    if (actualSize > 0) {
+        for (size_t i = 0; i < static_cast<uint32_t>(actualSize) && i < REQUIRED_SIXTEEN_PARAM; i++) {
+            matrixArray.emplace_back(item->value[i].f32);
+        }
     }
-    fullImpl->getNodeModifiers()->getImageModifier()->setImageMatrix(
-        node->uiNodeHandle, &matrixArray[0]);
+    if (isObject) {
+        ArkUI_Matrix4* matrix = reinterpret_cast<ArkUI_Matrix4*>(item->object);
+        if (!matrix) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        float elements[ALLOW_SIZE_16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+        fullImpl->getNodeModifiers()->getMatrix4Modifier()->getElements(matrix->matrix, elements);
+        for (int i = 0; i < NUM_16; i++) {
+            matrixArray.emplace_back(elements[i]);
+        }
+    }
+    fullImpl->getNodeModifiers()->getImageModifier()->setImageMatrix(node->uiNodeHandle, &matrixArray[0]);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -15073,22 +15086,26 @@ int32_t SetAlt(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 int32_t SetResizable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, NUM_4);
-    if (actualSize < 0) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    auto isObject = CheckAttributeObject(item);
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getImageModifier()->setImageResizable(
-        node->uiNodeHandle, item->value[NUM_0].f32, item->value[NUM_1].f32,
-        item->value[NUM_2].f32, item->value[NUM_3].f32);
-    return ERROR_CODE_NO_ERROR;
+    if (isObject) {
+        fullImpl->getNodeModifiers()->getImageModifier()->setResizableLattice(node->uiNodeHandle, item->object, true);
+        return ERROR_CODE_NO_ERROR;
+    }
+
+    if (actualSize > 0) {
+        fullImpl->getNodeModifiers()->getImageModifier()->setImageResizable(node->uiNodeHandle, item->value[NUM_0].f32,
+             item->value[NUM_1].f32, item->value[NUM_2].f32, item->value[NUM_3].f32);
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_PARAM_INVALID;
 }
 
 void ResetResizable(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getImageModifier()->setImageResizable(
-        node->uiNodeHandle, 0.0f, 0.0f,
-        0.0f, 0.0f);
+    fullImpl->getNodeModifiers()->getImageModifier()->resetResizable(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getImageModifier()->resetResizableLattice(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetResizable(ArkUI_NodeHandle node)

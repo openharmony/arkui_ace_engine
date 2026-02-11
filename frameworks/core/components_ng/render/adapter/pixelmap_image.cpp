@@ -22,8 +22,9 @@
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_lattice_impl.h"
+#include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/pipeline/pipeline_base.h"
@@ -195,11 +196,10 @@ bool PixelMapImage::StretchImageWithLattice(
 {
     auto pixmap = GetPixelMap();
     const auto& config = GetPaintConfig();
-    auto drawingLattice = config.resizableLattice_;
+    auto drawingLattice = AceType::DynamicCast<DrawingLatticeImpl>(config.resizableLattice_);
     CHECK_NULL_RETURN(drawingLattice, false);
-    auto latticeSptrAddr =
-        static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
-    CHECK_NULL_RETURN((latticeSptrAddr && (*latticeSptrAddr)), false);
+    auto* lattice = drawingLattice->GetLattice();
+    CHECK_NULL_RETURN(lattice, false);
     RSBrush brush;
     if (config.antiAlias_) {
         brush.SetAntiAlias(true);
@@ -223,18 +223,16 @@ bool PixelMapImage::StretchImageWithLattice(
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
     RSPoint pointRadius[BORDER_RADIUS_ARRAY_SIZE] = {};
-    ImagePainterUtils::ClipAdaptiveRRect(
-        recordingCanvas, radii, config.antiAlias_, pointRadius);
+    ImagePainterUtils::ClipAdaptiveRRect(recordingCanvas, radii, config.antiAlias_, pointRadius);
     std::shared_ptr<RSImage> rsImage = DrawingImage::MakeRSImageFromPixmap(pixmap);
     CHECK_NULL_RETURN(rsImage, false);
-    auto lattice = *(*latticeSptrAddr);
     if (SystemProperties::GetDebugEnabled()) {
-        PrintDrawingLatticeConfig(lattice, dstRect);
+        PrintDrawingLatticeConfig(*lattice, dstRect);
     }
     recordingCanvas.AttachBrush(brush);
     auto dfxConfig = GetImageDfxConfig();
     NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
-    recordingCanvas.DrawImageLattice(rsImage.get(), lattice, dstRect, filterMode);
+    recordingCanvas.DrawImageLattice(rsImage.get(), *lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
 }

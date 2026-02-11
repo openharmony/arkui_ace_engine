@@ -16,11 +16,13 @@
 #include "core/components_ng/render/adapter/drawing_image.h"
 
 #include "include/core/SkGraphics.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
-#include "frameworks/core/image/image_cache.h"
-#include "core/pipeline/pipeline_base.h"
 #include "pipeline/rs_recording_canvas.h"
+
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/drawing_lattice_impl.h"
+#include "core/components_ng/render/adapter/image_painter_utils.h"
+#include "core/image/image_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -274,10 +276,10 @@ bool DrawingImage::DrawImageLattice(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     const auto& config = GetPaintConfig();
-    const auto& drawingLattice = config.resizableLattice_;
+    auto drawingLattice = AceType::DynamicCast<DrawingLatticeImpl>(config.resizableLattice_);
     CHECK_NULL_RETURN(drawingLattice, false);
-    auto latticeSptrAddr =
-        static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
+    auto* lattice = drawingLattice->GetLattice();
+    CHECK_NULL_RETURN(lattice, false);
     RSBrush brush;
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
@@ -303,12 +305,11 @@ bool DrawingImage::DrawImageLattice(
     RSPoint pointRadius[4] = {};
     ImagePainterUtils::ClipAdaptiveRRect(
         recordingCanvas, radii, config.antiAlias_, pointRadius);
-    auto lattice = *(*latticeSptrAddr);
     if (SystemProperties::GetDebugEnabled()) {
-        PrintDrawingLatticeConfig(lattice);
+        PrintDrawingLatticeConfig(*lattice);
     }
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawImageLattice(image_.get(), *(*latticeSptrAddr), dstRect, filterMode);
+    recordingCanvas.DrawImageLattice(image_.get(), *lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
 }

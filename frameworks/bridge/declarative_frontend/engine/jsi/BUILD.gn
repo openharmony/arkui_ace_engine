@@ -345,7 +345,10 @@ template("declarative_js_engine_ark") {
     if (is_arkui_x) {
       deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
     }
-    external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    external_deps = [ 
+      "graphic_2d:drawing_napi_impl",
+      "graphic_2d:librender_service_client"
+    ]
     if (!build_ohos_sdk && !is_arkui_x) {
       external_deps += [
         "ets_utils:console",
@@ -366,7 +369,6 @@ template("declarative_js_engine_ark") {
         deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
         external_deps += [
           "c_utils:utils",
-          "graphic_2d:librender_service_client",
         ]
       }
     }

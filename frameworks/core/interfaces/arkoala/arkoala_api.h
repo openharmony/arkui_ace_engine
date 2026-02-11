@@ -3888,7 +3888,7 @@ struct ArkUIImageModifier {
     void (*resetOnError)(ArkUINodeHandle node);
     void (*setImageOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetImageOnFinish)(ArkUINodeHandle node);
-    void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
+    void (*setResizableLattice)(ArkUINodeHandle node, void* lattice, bool isCapi);
     void (*resetResizableLattice)(ArkUINodeHandle node);
     void (*setSupportSvg2)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetSupportSvg2)(ArkUINodeHandle node);
