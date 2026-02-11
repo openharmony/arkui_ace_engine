@@ -576,6 +576,7 @@ RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
     if (children.empty()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Create gather node, has no visible selected items.");
         return nullptr;
     }
 
