@@ -1024,6 +1024,7 @@ void UIExtensionPattern::OnModifyDone()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     InitHoverEvent(inputHub);
+    InitTouchpadInteraction(inputHub);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitKeyEvent(focusHub);
@@ -1201,6 +1202,32 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
     }
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(callback));
     inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void UIExtensionPattern::InitTouchpadInteraction(const RefPtr<InputEventHub>& inputHub)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    inputHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)](PointF point) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsInComponent(point)) {
+            auto pointerEvent = pattern->lastPointerEvent_;
+            CHECK_NULL_VOID(pointerEvent);
+            pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_TOUCHPAD_ACTIVE);
+            pattern->DispatchPointerEvent(pointerEvent);
+        }
+    });
+}
+
+bool UIExtensionPattern::IsInComponent(PointF point)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto wholeRect = geometryNode->GetFrameRect();
+    return wholeRect.IsInRegion(point);
 }
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
