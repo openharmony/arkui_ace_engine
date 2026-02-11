@@ -450,7 +450,7 @@ void JSTextField::SetTextDirection(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(TEXT_DIRECTIONS.size());
     if (!isNormalValue) {
         TextFieldModel::GetInstance()->ResetTextDirection();
         return;

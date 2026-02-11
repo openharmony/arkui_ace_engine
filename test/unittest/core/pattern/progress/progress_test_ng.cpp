@@ -1409,10 +1409,6 @@ HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level0)
     modelNg.SetBackgroundColor(BG_COLOR);
     EXPECT_EQ(paintProperty->GetColorValue(), FRONT_COLOR);
     EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
-    modelNg.ResetColor();
-    modelNg.ResetBackgroundColor();
-    EXPECT_EQ(paintProperty->HasColor(), false);
-    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
 }
 
 /**
@@ -1439,10 +1435,6 @@ HWTEST_F(ProgressTestNg, ProgressModelTest002, TestSize.Level0)
     modelNg.SetBackgroundColor(BG_COLOR);
     EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
     EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
-    modelNg.ResetGradientColor();
-    modelNg.ResetBackgroundColor();
-    EXPECT_EQ(paintProperty->HasGradientColor(), false);
-    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
 }
 
 /**
@@ -1463,14 +1455,6 @@ HWTEST_F(ProgressTestNg, ProgressModelTest003, TestSize.Level0)
     EXPECT_EQ(paintProperty->GetBorderColorValue(), BORDER_COLOR);
     EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
     EXPECT_EQ(paintProperty->GetTextColorValue(BG_COLOR), FRONT_COLOR);
-    modelNg.ResetColor();
-    modelNg.ResetBorderColor();
-    modelNg.ResetBackgroundColor();
-    modelNg.ResetFontColor();
-    EXPECT_EQ(paintProperty->HasColor(), false);
-    EXPECT_EQ(paintProperty->HasBorderColor(), false);
-    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
-    EXPECT_EQ(paintProperty->HasTextColor(), false);
 }
 
 /**
@@ -1521,9 +1505,7 @@ HWTEST_F(ProgressTestNg, ProgressModelTest005, TestSize.Level0)
     modelNg.SetBackgroundColor(frameNode, BG_COLOR);
     EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
     EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
-    modelNg.ResetGradientColor(frameNode);
     modelNg.ResetBackgroundColor(frameNode);
-    EXPECT_EQ(paintProperty->HasGradientColor(), false);
     EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
 }
 
@@ -1542,13 +1524,6 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level0)
     modelNg.SetColor(FRONT_COLOR);
     modelNg.SetBackgroundColor(BG_COLOR);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.ResetColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.SetColor(FRONT_COLOR);
-    modelNg.ResetBackgroundColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
 }
 
 /**
@@ -1566,13 +1541,6 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level0)
     modelNg.SetColor(FRONT_COLOR);
     modelNg.SetBackgroundColor(BG_COLOR);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.ResetColor();
-    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.SetColor(FRONT_COLOR);
-    modelNg.ResetBackgroundColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
 }
 
 /**
@@ -1591,17 +1559,6 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level0)
     modelNg.SetBackgroundColor(BG_COLOR);
     modelNg.SetBorderColor(BORDER_COLOR);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.ResetColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.SetColor(FRONT_COLOR);
-    modelNg.ResetBackgroundColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
-
-    modelNg.SetBackgroundColor(BG_COLOR);
-    modelNg.ResetBorderColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
 }
 
 /**

@@ -130,24 +130,9 @@ void ProgressModelNG::SetColor(const Color& value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
 }
 
-void ProgressModelNG::ResetColor()
-{
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedColor(false);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
-}
-
 void ProgressModelNG::SetGradientColor(const Gradient& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, GradientColor, value);
-}
-
-void ProgressModelNG::ResetGradientColor()
-{
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, GradientColor, PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressModelNG::SetBackgroundColor(const Color& value)
@@ -163,12 +148,6 @@ void ProgressModelNG::SetBackgroundColorByUser(bool value)
     CHECK_NULL_VOID(pattern);
     pattern->SetUserInitiatedBgColor(value);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColorSetByUser, value);
-}
-
-void ProgressModelNG::ResetBackgroundColor()
-{
-    SetBackgroundColorByUser(false);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressModelNG::SetStrokeWidth(const Dimension& value)
@@ -190,13 +169,6 @@ void ProgressModelNG::SetBorderColor(const Color& value)
 {
     if (isCapsule()) {
         ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value);
-    }
-}
-
-void ProgressModelNG::ResetBorderColor()
-{
-    if (isCapsule()) {
-        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderColor, PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -234,16 +206,6 @@ void ProgressModelNG::SetFontColor(const Color& value)
     textLayoutProperty->UpdateTextColor(value);
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, TextColor, value);
-}
-
-void ProgressModelNG::ResetFontColor()
-{
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(textHost);
-    textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, TextColor, PROPERTY_UPDATE_RENDER);
 }
 
 void ProgressModelNG::SetText(const std::optional<std::string>& value)
@@ -738,11 +700,6 @@ void ProgressModelNG::ResetBackgroundColor(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->SetUserInitiatedBgColor(false);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
-}
-
-void ProgressModelNG::ResetGradientColor(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, GradientColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 bool ProgressModelNG::isCapsule() const
@@ -1394,6 +1351,11 @@ void ProgressModelNG::SetCapsuleStyleFontColor(FrameNode* frameNode, bool value)
 void ProgressModelNG::SetGradientColorByUser(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, GradientColorSetByUser, value);
+}
+
+void ProgressModelNG::SetBorderColorSetByUser(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColorSetByUser, value);
 }
 
 void ProgressModelNG::SetGradientColorByUser(FrameNode* frameNode, bool value)
