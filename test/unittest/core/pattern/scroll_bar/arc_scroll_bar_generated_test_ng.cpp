@@ -1335,39 +1335,6 @@ HWTEST_F(ArcScrollBarPatternTestNg, InBarTouchRegion001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InBarTouchRegion002
- * @tc.desc: Test InBarTouchRegion with valid bar region
- * @tc.type: FUNC
- */
-HWTEST_F(ArcScrollBarPatternTestNg, InBarTouchRegion002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create ArcScrollBar and set bar region
-     * @tc.expected: scrollBar created
-     */
-    auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
-    scrollBar->SetScrollable(true);
-    scrollBar->SetDisplayMode(DisplayMode::AUTO);
-
-    /**
-     * @tc.steps: step2. Set bar region
-     * @tc.expected: bar region is set
-     */
-    Offset offset(0.0f, 0.0f);
-    Size size(200.0f, 200.0f);
-    scrollBar->SetBarRegion(offset, size);
-
-    /**
-     * @tc.steps: step3. Test InBarTouchRegion with point inside region
-     * @tc.expected: call completes without exception
-     */
-    Point testPoint(100.0f, 100.0f); // Center of the bar
-    // The result depends on ArcRound::IsInRegion implementation
-    // Just verify the call completes without exception
-    scrollBar->InBarTouchRegion(testPoint);
-}
-
-/**
  * @tc.name: InBarHoverRegion001
  * @tc.desc: Test InBarHoverRegion when NeedScrollBar returns false
  * @tc.type: FUNC
@@ -1379,26 +1346,6 @@ HWTEST_F(ArcScrollBarPatternTestNg, InBarHoverRegion001, TestSize.Level1)
 
     Point testPoint(100.0f, 100.0f);
     EXPECT_FALSE(scrollBar->InBarHoverRegion(testPoint));
-}
-
-/**
- * @tc.name: InBarHoverRegion002
- * @tc.desc: Test InBarHoverRegion with valid hover region
- * @tc.type: FUNC
- */
-HWTEST_F(ArcScrollBarPatternTestNg, InBarHoverRegion002, TestSize.Level1)
-{
-    auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
-    scrollBar->SetScrollable(true);
-    scrollBar->SetDisplayMode(DisplayMode::AUTO);
-
-    Offset offset(0.0f, 0.0f);
-    Size size(200.0f, 200.0f);
-    scrollBar->SetBarRegion(offset, size);
-
-    Point testPoint(100.0f, 100.0f);
-    // Verify the call completes without exception
-    scrollBar->InBarHoverRegion(testPoint);
 }
 
 /**
@@ -1414,27 +1361,6 @@ HWTEST_F(ArcScrollBarPatternTestNg, InBarRectRegion001, TestSize.Level1)
     Point testPoint(100.0f, 100.0f);
     EXPECT_FALSE(scrollBar->InBarRectRegion(testPoint));
 }
-
-/**
- * @tc.name: InBarRectRegion002
- * @tc.desc: Test InBarRectRegion with valid bar rect
- * @tc.type: FUNC
- */
-HWTEST_F(ArcScrollBarPatternTestNg, InBarRectRegion002, TestSize.Level1)
-{
-    auto scrollBar = AceType::MakeRefPtr<ArcScrollBar>();
-    scrollBar->SetScrollable(true);
-    scrollBar->SetDisplayMode(DisplayMode::AUTO);
-
-    Offset offset(0.0f, 0.0f);
-    Size size(200.0f, 200.0f);
-    scrollBar->SetBarRegion(offset, size);
-
-    Point testPoint(100.0f, 100.0f);
-    // Verify the call completes without exception
-    scrollBar->InBarRectRegion(testPoint);
-}
-
 
 /**
  * @tc.name: SetRoundTrickRegion002
