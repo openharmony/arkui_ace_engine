@@ -1554,6 +1554,8 @@ private:
     void NotifyCoastingAxisEventOnHide();
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
 
+    void OnShowHideForAccessibility(bool isOnShow);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
