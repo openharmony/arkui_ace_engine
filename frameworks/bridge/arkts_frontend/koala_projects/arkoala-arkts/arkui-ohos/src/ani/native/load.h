@@ -17,9 +17,11 @@
 #define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_LOAD
 
 #include "core/interfaces/ani/ani_api.h"
+#include "core/interfaces/drawable/drawable_api.h"
 
 namespace OHOS::Ace::Ani {
 const ArkUIAniModifiers* GetNodeAniModifier();
+const ArkUIDrawableDescriptor* GetDrawableDescriptorModifier();
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_LOAD

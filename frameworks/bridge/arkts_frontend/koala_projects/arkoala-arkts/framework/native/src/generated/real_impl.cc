@@ -19263,6 +19263,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_NativePointer CreateResourceObjectImpl(const Ark_Resource* resource)
+    {
+        return {};
+    }
     } // SystemOpsAccessor
     namespace TabBarSymbolAccessor {
     void DestroyPeerImpl(Ark_TabBarSymbol peer)
@@ -24307,6 +24311,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SystemOpsAccessor::SetFrameCallbackImpl,
             SystemOpsAccessor::ColorMetricsResourceColorImpl,
             SystemOpsAccessor::ResoureToLengthMetricsImpl,
+            SystemOpsAccessor::CreateResourceObjectImpl,
         };
         return &SystemOpsAccessorImpl;
     }

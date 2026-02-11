@@ -80,6 +80,15 @@ public:
     static bool GetBigIntValue(ani_env* env, ani_object object, int64_t& longValue);
     static bool GetEnumItem(
         [[maybe_unused]] ani_env* env, ani_size index, const char* enumName, ani_enum_item& enumItem);
+    
+    static bool GetBoolParam(ani_env* env, ani_ref ref, bool& result);
+    static bool GetBoolParam(ani_env* env, ani_object object, const char* name, bool& result);
+    static bool IsArrayObject(ani_env* env, ani_object object);
+    static bool IsArrayObject(ani_env* env, ani_ref ref);
+    static bool GetArrayIntParam(ani_env* env, ani_ref ref, std::vector<int32_t>& result);
+    static bool GetArrayIntParam(ani_env* env, ani_object object, const char* name, std::vector<int32_t>& result);
+    static ani_error GetErrorObject(ani_env* env, const std::string& errMsg, int32_t code, const std::string& Tag);
+
     // Get double value from ani_ref.
     // The return value means the parse result. True means success.
     // If the ref is undefined, it will return false.

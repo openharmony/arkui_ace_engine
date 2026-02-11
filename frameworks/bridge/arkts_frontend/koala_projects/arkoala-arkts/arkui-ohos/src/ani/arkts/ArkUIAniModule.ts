@@ -32,7 +32,8 @@ import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
-import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
+import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
+import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
@@ -238,6 +239,33 @@ export class ArkUIAniModule {
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
         delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
+    
+    // for drawable
+    native static _Drawable_CreatePixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void
+    native static _Drawable_CreateLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
+        background?: image.PixelMap, mask?: image.PixelMap): void
+    native static _Drawable_CreateAnimatedDrawable(value: AnimatedDrawableDescriptor,
+        pixelMaps: Array<image.PixelMap>, options?: AnimationOptions): void
+    native static _Drawable_CreateAnimatedDrawableByResource(value: AnimatedDrawableDescriptor,
+        resourceObjectKPointer: KPointer, options?: AnimationOptions): void
+    native static _Drawable_CreateAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
+        src: string, options?: AnimationOptions): void
+    native static _Drawable_CreatePixelMap(value: DrawableDescriptor): image.PixelMap
+    native static _Drawable_CreateForeground(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_CreateBackground(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_CreateMask(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_GetMaskClipPath(): string
+    native static _Drawable_LoadSync(value: DrawableDescriptor): DrawableDescriptorLoadedResult
+    native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
+    native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
+    native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor
+    native static _Drawable_DestructDrawable(ptr: KPointer): void
+    native static _Drawable_AnimationControllerStart(value: AnimationController): void
+    native static _Drawable_AnimationControllerStop(value: AnimationController): void
+    native static _Drawable_AnimationControllerPause(value: AnimationController): void
+    native static _Drawable_AnimationControllerResume(value: AnimationController): void
+    native static _Drawable_AnimationControllerGetStatus(value: AnimationController): AnimationStatus
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,

@@ -15,6 +15,7 @@
 
 #include "interfaces/native/node/resource.h"
 
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
@@ -22,10 +23,10 @@
 #include "core/drawable/drawable_descriptor.h"
 #include "core/drawable/layered_drawable_descriptor.h"
 #include "core/drawable/pixel_map_drawable_descriptor.h"
+#include "core/interfaces/ani/ani_api.h"
 #include "core/interfaces/drawable/drawable_api.h"
 
 namespace OHOS::Ace {
-
 size_t GetDrawableType(void* object)
 {
     size_t type = 0;
@@ -48,6 +49,54 @@ void GetPixelMap(void* object, void* pixelMap)
     if (drawable && drawable->GetPixelMap()) {
         auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
         *pixelMapPtr = drawable->GetPixelMap()->GetPixelMapSharedPtr();
+    }
+}
+
+void SetPixelMapByPixelMap(void* object, void* pixelMap)
+{
+    if (object == nullptr || pixelMap == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::PixelMapDrawableDescriptor*>(object);
+    if (drawable) {
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        drawable->SetPixelMap(PixelMap::Create(*pixelMapPtr));
+    }
+}
+
+void SetLayeredForeground(void* object, void* pixelMap)
+{
+    if (object == nullptr || pixelMap == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable) {
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        drawable->SetForeground(PixelMap::Create(*pixelMapPtr));
+    }
+}
+
+void SetLayeredBackground(void* object, void* pixelMap)
+{
+    if (object == nullptr || pixelMap == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable) {
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        drawable->SetBackground(PixelMap::Create(*pixelMapPtr));
+    }
+}
+
+void SetLayeredMask(void* object, void* pixelMap)
+{
+    if (object == nullptr || pixelMap == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable) {
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        drawable->SetMask(PixelMap::Create(*pixelMapPtr));
     }
 }
 
@@ -103,6 +152,17 @@ void SetMaskPath(void* object, const char* path)
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable) {
         drawable->SetMaskPath(std::string(path));
+    }
+}
+
+void SetBlendMode(void* object, int32_t blendMode)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable) {
+        drawable->SetBlendMode(blendMode);
     }
 }
 
@@ -303,6 +363,52 @@ void LoadSyncAnimated(void* object, int32_t* width, int32_t* height, int32_t* er
     *errorCode = result.errorCode;
 }
 
+void OnComplete(std::shared_ptr<ArkUIDrawableAsync> asyncCtx)
+{
+    CHECK_NULL_VOID(asyncCtx);
+    auto instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    auto container = OHOS::Ace::AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "container is null. %{public}d", instanceId);
+        return;
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "taskExecutor is null.");
+        return;
+    }
+
+    auto callbackAsyncCtx = std::make_shared<ArkUIDrawableAsync>();
+    callbackAsyncCtx = asyncCtx;
+    taskExecutor->PostTask(
+        [asyncCtx, callbackAsyncCtx]() {
+            CHECK_NULL_VOID(asyncCtx);
+            asyncCtx->callBackJsFunction(callbackAsyncCtx);
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIDrawableParseLoadedResultCallback");
+}
+
+void LoadAsyncAnimated(void* object, const ArkUIDrawableAsync& asyncCtx)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+
+    auto jsCallBack = [asyncCtx](DrawableDescriptorLoadResult result) mutable {
+        auto asyncResult = std::make_shared<ArkUIDrawableAsync>();
+        asyncResult->imageWidth_ = result.imageWidth_;
+        asyncResult->imageHeight_ = result.imageHeight_;
+        asyncResult->errorCode = result.errorCode;
+        asyncResult->env = asyncCtx.env;
+        asyncResult->deferred = asyncCtx.deferred;
+        asyncResult->callBackJsFunction = asyncCtx.callBackJsFunction;
+        OnComplete(asyncResult);
+    };
+
+    drawable->LoadAsync(std::move(jsCallBack));
+}
+
 void* GetAnimatedController(void* object, const char* id)
 {
     if (object == nullptr || id == nullptr) {
@@ -369,11 +475,16 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
     static const ArkUIDrawableDescriptor impl {
         .getDrawableType = OHOS::Ace::GetDrawableType,
         .getPixelMap = OHOS::Ace::GetPixelMap,
+        .setPixelMapByPixelMap = OHOS::Ace::SetPixelMapByPixelMap,
+        .setLayeredForeground = OHOS::Ace::SetLayeredForeground,
+        .setLayeredBackground = OHOS::Ace::SetLayeredBackground,
+        .setLayeredMask = OHOS::Ace::SetLayeredMask,
         .setPixelRawData = OHOS::Ace::SetPixelRawData,
         .setForegroundData = OHOS::Ace::SetForegroundData,
         .setBackgroundData = OHOS::Ace::SetBackgroundData,
         .setMaskData = OHOS::Ace::SetMaskData,
         .setMaskPath = OHOS::Ace::SetMaskPath,
+        .setBlendMode = OHOS::Ace::SetBlendMode,
         .getForegroundPixelMap = OHOS::Ace::GetForegroundPixelMap,
         .getBackgroundPixelMap = OHOS::Ace::GetBackgroundPixelMap,
         .getMaskPixelMap = OHOS::Ace::GetMaskPixelMap,
@@ -391,6 +502,7 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .setAnimatedAutoPlay = OHOS::Ace::SetAnimatedAutoPlay,
         .setAnimatedDurations = OHOS::Ace::SetAnimatedDurations,
         .loadSyncAnimated = OHOS::Ace::LoadSyncAnimated,
+        .loadAsyncAnimated = OHOS::Ace::LoadAsyncAnimated,
         .getAnimatedController = OHOS::Ace::GetAnimatedController,
         .startAnimated = OHOS::Ace::StartAnimated,
         .stopAnimated = OHOS::Ace::StopAnimated,

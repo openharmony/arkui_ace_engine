@@ -46620,6 +46620,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Ark_NativePointer CreateResourceObjectImpl(const Ark_Resource* resource)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("createResourceObject(");
+        WriteToString(&out, resource);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     } // SystemOpsAccessor
     namespace TabBarSymbolAccessor {
     void DestroyPeerImpl(Ark_TabBarSymbol peer)
@@ -54590,6 +54603,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SystemOpsAccessor::SetFrameCallbackImpl,
             SystemOpsAccessor::ColorMetricsResourceColorImpl,
             SystemOpsAccessor::ResourceToLengthMetricsImpl,
+            SystemOpsAccessor::CreateResourceObjectImpl,
         };
         return &SystemOpsAccessorImpl;
     }

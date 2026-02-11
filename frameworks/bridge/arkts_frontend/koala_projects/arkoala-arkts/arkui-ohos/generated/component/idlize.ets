@@ -5749,6 +5749,13 @@ export class SystemOps {
         const returnResult : Array<number> = buffer
         return returnResult
     }
+    static createResourceObject_serialize(resource: Resource): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Resource_serializer.write(thisSerializer, resource)
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_createResourceObject(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
     public static StartFrame(): KPointer {
         return SystemOps.StartFrame_serialize()
     }
@@ -5795,6 +5802,10 @@ export class SystemOps {
         const color_casted = color as (number)
         const overlayColor_casted = overlayColor as (number)
         return SystemOps.blendColorByColorMetrics_serialize(color_casted, overlayColor_casted)
+    }
+    public static createResourceObject(resource: Resource): KPointer {
+        const resource_casted = resource as (Resource)
+        return SystemOps.createResourceObject_serialize(resource_casted)
     }
 }
 export class ThemeOps {

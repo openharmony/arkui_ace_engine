@@ -6409,6 +6409,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _SystemOps_blendColorByColorMetrics(color: number, overlayColor: number): KInteropReturnBuffer
     @ani.unsafe.Direct
+    native static _SystemOps_createResourceObject(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _TabBarSymbol_construct(): KPointer
     @ani.unsafe.Direct
     native static _TabBarSymbol_getFinalizer(): KPointer
