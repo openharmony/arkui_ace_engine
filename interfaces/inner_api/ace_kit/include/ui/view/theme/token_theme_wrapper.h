@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "ui/view/theme/token_theme.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT TokenThemeWrapper : virtual public Theme {
+class ACE_FORCE_EXPORT TokenThemeWrapper : virtual public Theme {
     DECLARE_ACE_TYPE(TokenThemeWrapper, Theme);
 public:
     TokenThemeWrapper() = default;
