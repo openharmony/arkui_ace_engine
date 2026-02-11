@@ -502,6 +502,20 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest018)
 }
 
 /**
+ * @tc.name: ArkoalaLazyNodeTest019
+ * @tc.desc: Test ArkoalaLazyNode BuildAllChildren.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest019)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    int32_t totalCount = 50;
+    CreateChildren(lazyNode, totalCount);
+    lazyNode->BuildAllChildren();
+    EXPECT_EQ(lazyNode->children_.size(), totalCount);
+}
+
+/**
  * @tc.name: ConvertFromToIndex001
  * @tc.desc: Test ArkoalaLazyNode ConvertFromToIndex and ConvertFromToIndexRevert.
  * @tc.type: FUNC
