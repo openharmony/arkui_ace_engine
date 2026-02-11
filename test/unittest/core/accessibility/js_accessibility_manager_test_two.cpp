@@ -309,7 +309,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode001, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     /**
@@ -343,7 +343,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode002, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager and set context_
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -382,7 +382,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode003, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager without setting context_
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     /**
@@ -422,7 +422,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode004, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager and set context_
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -464,7 +464,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode005, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager and set context_
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -511,7 +511,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode006, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -553,7 +553,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode007, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -598,7 +598,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode008, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -649,7 +649,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode009, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager and set context_
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
@@ -692,7 +692,7 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode010, TestSize.Level
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<JsAccessibilityManager>();
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
