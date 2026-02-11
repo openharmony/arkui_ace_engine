@@ -63,6 +63,8 @@ private:
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
     int32_t CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range);
+    int32_t HandlePrivateCommand(
+        const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand);
 
     WeakPtr<TextInputClient> pattern_;
     int32_t patternInstanceId_ = -1;
