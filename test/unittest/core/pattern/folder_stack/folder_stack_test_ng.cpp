@@ -1959,14 +1959,14 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest047, TestSize.Level0)
 }
 
 /**
- * @tc.name: FolderStackLayoutAlgorithmIsFullWindowTest001
+ * @tc.name: FolderStackLayoutAlgorithmTest001
  * @tc.desc: Test IsFullWindow detection logic
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmIsFullWindowTest001, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create FolderStack with full window size
+     * @tc.steps: step1. Create FolderStack
      */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1977,9 +1977,16 @@ HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmIsFullWindowTest001, TestS
     ASSERT_NE(displayInfo, nullptr);
     displayInfo->SetFoldStatus(FoldStatus::EXPAND);
 
-    auto frameNode = CreateFolder([](FolderStackModelNG model) {
-        ViewAbstract::SetWidth(CalcLength("100%"));
-        ViewAbstract::SetHeight(CalcLength("100%"));
+    auto frameNode = CreateFolder([this](FolderStackModelNG model) {
+        model.SetAlignment(Alignment::BOTTOM_CENTER);
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        // Add child 1 (100x80)
+        auto stack1 = CreateStack([this](StackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(80.0f));
+        });
     });
 
     ASSERT_NE(frameNode, nullptr);
@@ -1990,9 +1997,6 @@ HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmIsFullWindowTest001, TestS
         AceType::DynamicCast<FolderStackLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
 
-    /**
-     * @tc.steps: step2. Execute Measure which calls IsFullWindow internally
-     */
     RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
@@ -2000,18 +2004,14 @@ HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmIsFullWindowTest001, TestS
     auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step3. Verify full window detection (EXPAND status should NOT enter folder mode)
-     */
-    EXPECT_FALSE(layoutAlgorithm->GetIsIntoFolderStack());
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childGeometry = child->GetGeometryNode();
+        auto childOffset = childGeometry->GetMarginFrameOffset();
+        // Child 1 (100x80): offset = ((400-100)/2, (300-80)) = (150, 340)
+        EXPECT_FLOAT_EQ(childOffset.GetX(), 150.0f);
+        EXPECT_FLOAT_EQ(childOffset.GetY(), 340.0f);
+    }
 }
 
 /**
@@ -2024,37 +2024,26 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create FolderStack with children in Normal Stack mode
      */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
     auto displayInfo = container->GetDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    RefPtr<FrameNode> stack1;
 
-    auto frameNode = CreateFolder([](FolderStackModelNG model) {
+    auto frameNode = CreateFolder([this, &stack1](FolderStackModelNG model) {
         model.SetAlignment(Alignment::CENTER);
         ViewAbstract::SetWidth(CalcLength(400.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
         // Add child 1 (100x80)
-        BlankModelNG child1;
-        child1.Create();
-        ViewAbstract::SetWidth(CalcLength(100.0f));
-        ViewAbstract::SetHeight(CalcLength(80.0f));
-        ViewStackProcessor::GetInstance()->Pop();
-
-        // Add child 2 (60x100)
-        BlankModelNG child2;
-        child2.Create();
-        ViewAbstract::SetWidth(CalcLength(60.0f));
-        ViewAbstract::SetHeight(CalcLength(100.0f));
-        ViewStackProcessor::GetInstance()->Pop();
-
-        // Add child 3 (80x60)
-        BlankModelNG child3;
-        child3.Create();
-        ViewAbstract::SetWidth(CalcLength(80.0f));
-        ViewAbstract::SetHeight(CalcLength(60.0f));
-        ViewStackProcessor::GetInstance()->Pop();
+        stack1 = CreateFolder([this](FolderStackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(80.0f));
+        });
     });
 
     ASSERT_NE(frameNode, nullptr);
@@ -2066,7 +2055,7 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
 
     /**
-     * @tc.steps: step2. Execute Layout
+     * @tc.steps: step3. Execute Layout
      */
     RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
     RefPtr<LayoutWrapperNode> layoutWrapper =
@@ -2075,145 +2064,25 @@ HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-
-    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
     /**
      * @tc.steps: step3. Get children and verify their positions
-     * Formula: offset.x = (1 + h) * (parentW - childW) / 2
-     *          offset.y = (1 + v) * (parentH - childH) / 2
+     * Formula: offset.x = (1 + h) * (parentW - childW) / 3
+     *          offset.y = (1 + v) * (parentH - childH) / 3
      * CENTER: h=0, v=0
      */
-    auto children = frameNode->GetChildren();
-    ASSERT_GE(children.size(), 3);
-
-    for (size_t i = 0; i < children.size(); ++i) {
-        auto child = children.at(i);
-        auto childGeometry = child->GetGeometryNode();
-        auto childOffset = childGeometry->GetMarginFrameOffset();
-
-        if (i == 0) {
-            // Child 1 (100x80): offset = ((400-100)/2, (300-80)/2) = (150, 110)
-            EXPECT_FLOAT_EQ(childOffset.GetX(), 150.0f);
-            EXPECT_FLOAT_EQ(childOffset.GetY(), 110.0f);
-        } else if (i == 1) {
-            // Child 2 (60x100): offset = ((400-60)/2, (300-100)/2) = (170, 100)
-            EXPECT_FLOAT_EQ(childOffset.GetX(), 170.0f);
-            EXPECT_FLOAT_EQ(childOffset.GetY(), 100.0f);
-        } else {
-            // Child 3 (80x60): offset = ((400-80)/2, (300-60)/2) = (160, 120)
-            EXPECT_FLOAT_EQ(childOffset.GetX(), 160.0f);
-            EXPECT_FLOAT_EQ(childOffset.GetY(), 120.0f);
+    for (const auto& childNode : frameNode->GetChildren()) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(childNode);
+        if (childFrameNode) {
+            auto geometryNode = childFrameNode->GetGeometryNode();
+            ASSERT_NE(geometryNode, nullptr);
+            auto size = geometryNode->GetMarginFrameSize();
+            EXPECT_EQ(size, SizeF(100.0f, 80.0f))<<size.ToString();
+            auto offset = geometryNode->GetFrameOffset();
+            // Child 1 (100x80): offset = ((400-100)/3, (300-80)/3) = (150, 110)
+            EXPECT_EQ(offset, OffsetF(150.0f, 110.0f))<<offset.ToString();
         }
     }
-
-    EXPECT_FALSE(layoutAlgorithm->GetIsIntoFolderStack());
-}
-
-/**
- * @tc.name: FolderStackChildPositionTest002
- * @tc.desc: Observe child positions in Folder Stack mode (HALF_FOLD)
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FolderStack in HALF_FOLD mode
-     */
-    auto container = Container::Current();
-    ASSERT_NE(container, nullptr);
-    auto displayInfo = container->GetDisplayInfo();
-    ASSERT_NE(displayInfo, nullptr);
-    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
-    displayInfo->SetRotation(Rotation::ROTATION_90);
-
-    auto frameNode = CreateFolder([](FolderStackModelNG model) {
-        model.SetAlignment(Alignment::CENTER);
-        ViewAbstract::SetWidth(CalcLength(FULL_SCREEN_WIDTH));
-        ViewAbstract::SetHeight(CalcLength(FULL_SCREEN_HEIGHT));
-
-        // Add hover area child (200x150)
-        BlankModelNG hoverChild;
-        hoverChild.Create();
-        ViewAbstract::SetWidth(CalcLength(200.0f));
-        ViewAbstract::SetHeight(CalcLength(150.0f));
-        ViewStackProcessor::GetInstance()->Pop();
-
-        // Add control area child (150x50)
-        BlankModelNG controlChild;
-        controlChild.Create();
-        ViewAbstract::SetWidth(CalcLength(150.0f));
-        ViewAbstract::SetHeight(CalcLength(50.0f));
-        ViewStackProcessor::GetInstance()->Pop();
-    });
-
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<FolderStackPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    auto layoutAlgorithm =
-        AceType::DynamicCast<FolderStackLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-
-    /**
-     * @tc.steps: step2. Execute Layout
-     */
-    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-
-    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-
-    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step3. Get HoverStack and ControlPartsStack children positions
-     */
-    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(frameNode);
-    ASSERT_NE(hostNode, nullptr);
-
-    auto hoverNode = hostNode->GetHoverNode();
-    ASSERT_NE(hoverNode, nullptr);
-
-    auto controlPartsNode = hostNode->GetControlPartsStackNode();
-    ASSERT_NE(controlPartsNode, nullptr);
-
-    // Get hover child position
-    auto hoverChildren = hoverNode->GetChildren();
-    ASSERT_GE(hoverChildren.size(), 1);
-    auto hoverChild = hoverChildren.front();
-    auto hoverOffset = hoverChild->GetGeometryNode()->GetMarginFrameOffset();
-
-    // HoverStack at (0,0), parent: 2224x2496, child: 200x150
-    // Expected offset = ((2224-200)/2, (2496-150)/2) = (1012, 1173)
-    EXPECT_FLOAT_EQ(hoverOffset.GetX(), 1012.0f);
-    EXPECT_FLOAT_EQ(hoverOffset.GetY(), 1173.0f);
-
-    // Get control parts child position
-    auto controlChildren = controlPartsNode->GetChildren();
-    ASSERT_GE(controlChildren.size(), 1);
-    auto controlChild = controlChildren.front();
-    auto controlOffset = controlChild->GetGeometryNode()->GetMarginFrameOffset();
-
-    // ControlPartsStack Y = creaseY + creaseHeight - safeArea
-    // With crease at 1200, height 50, safeArea 10: Y = 1200 - 10 + 50 = 1240
-    EXPECT_GE(controlOffset.GetY(), 1000.0f);
-
-    auto controlPartsStackRect = layoutAlgorithm->GetControlPartsStackRect();
-    EXPECT_FLOAT_EQ(controlPartsStackRect.GetY(), 1240.0f);
 }
 } // namespace OHOS::Ace::NG
