@@ -205,7 +205,6 @@ export class BuilderNode<T = undefined> {
 }
 
 export class JSBuilderNode<T> extends BuilderNodeOps {
-    peer?: Finalizable | undefined = undefined
     private __root?: BuilderRootNode;
     private __builderRootNode?: PeerNode;
     private __builderProxyNode?: ArkBuilderProxyNodePeer;
@@ -231,9 +230,6 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder0 = undefined;
         this.__builder = undefined;
         this.__frameNode = null;
-    }
-    public getPeer(): Finalizable | undefined {
-        return this.peer
     }
     constructor(uiContext: UIContext, options?: RenderOptions) {
         super();
