@@ -544,7 +544,6 @@ HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode006, TestSize.Level
  * @tc.name: FillEventInfoWithNode007
  * @tc.desc: Test FillEventInfoWithNode with multiple rapid calls
  * @tc.type: FUNC
- * @tc.require: issueI
  */
 HWTEST_F(JsAccessibilityManagerTestTwo, FillEventInfoWithNode007, TestSize.Level1)
 {
