@@ -8586,6 +8586,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor1, TestSize.Level1)
     value[0].i32 = true;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_EDITOR_ENABLE_PREVIEW_TEXT, &item);
 
+    /**
+     * test reset node
+     */
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_ENTER_KEY_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_BAR_STATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_CARET_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
@@ -8593,6 +8596,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTestTextEditor1, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_ENABLE_DATA_DETECTOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_EDITOR_ENABLE_PREVIEW_TEXT), ARKUI_ERROR_CODE_NO_ERROR);
 
+    /**
+     * test get node
+     */
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_ENTER_KEY_TYPE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_BAR_STATE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_EDITOR_CARET_COLOR), nullptr);
