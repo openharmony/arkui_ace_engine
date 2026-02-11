@@ -15,6 +15,8 @@
 
 #include "callback_helper.h"
 
+#include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
+
 namespace OHOS::Ace::NG {
 
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
@@ -28,6 +30,23 @@ RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UI
     CHECK_NULL_RETURN(proxyNode, nullptr);
     proxyNode->AddChild(uiNode);
     return proxyNode;
+}
+
+RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyFrameNode> CreateProxyFrameNode(const RefPtr<UINode>& uiNode)
+{
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto instanceId = container->GetInstanceId();
+    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyFrameNode>(instanceId);
+    CHECK_NULL_RETURN(proxyNode, nullptr);
+    proxyNode->AddChild(uiNode);
+    return proxyNode;
+}
+#else
+RefPtr<OHOS::Ace::NG::UINode> CreateProxyFrameNode(const RefPtr<UINode>& uiNode)
+{
+    return uiNode;
 }
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 
