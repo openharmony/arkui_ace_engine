@@ -366,6 +366,7 @@ void CounterModelNG::SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc)
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
+
 void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
 {
     CHECK_NULL_VOID(frameNode);
@@ -432,7 +433,7 @@ void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<Res
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
-                            const RefPtr<ResourceObject>& resObj) {
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         Dimension height;
@@ -443,7 +444,7 @@ void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<Res
         CHECK_NULL_VOID(frameNode);
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        if (pipelineContext->IsSystemColorChange()) {
+        if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
             if (!LessNotEqual(height.Value(), 0.0)) {
                 SetHeight(AceType::RawPtr(frameNode), height);
             }
@@ -460,7 +461,7 @@ void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<Reso
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
-                            const RefPtr<ResourceObject>& resObj) {
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         Dimension width;
@@ -472,7 +473,7 @@ void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<Reso
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         if (pipelineContext->IsSystemColorChange()) {
-            if (!LessNotEqual(width.Value(), 0.0)) {
+            if (!LessNotEqual(width.Value(), 0.0) || isFirstLoad) {
                 SetWidth(AceType::RawPtr(frameNode), width);
             }
         }
@@ -488,7 +489,7 @@ void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const R
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
-                            const RefPtr<ResourceObject>& resObj) {
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         Color color;
@@ -497,7 +498,7 @@ void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const R
             CHECK_NULL_VOID(frameNode);
             auto pipelineContext = frameNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            if (pipelineContext->IsSystemColorChange()) {
+            if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
                 SetBackgroundColor(AceType::RawPtr(frameNode), color);
             }
         }
