@@ -1530,6 +1530,18 @@ void WebPattern::SetRotation(uint32_t rotation)
     delegate_->SetTransformHint(rotation);
 }
 
+void WebPattern::InitEventAfterUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    InitLightTouchEvent(inputHub);
+}
+
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
@@ -1549,7 +1561,6 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     InitHoverEvent(inputHub);
-    InitLightTouchEvent(inputHub);
 
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -4276,6 +4287,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     InitializeAccessibility();
     InitSurfaceDensityCallback(pipelineContext);
     pipeline_ = WeakClaim(context);
+    InitEventAfterUpdate();
 }
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)
