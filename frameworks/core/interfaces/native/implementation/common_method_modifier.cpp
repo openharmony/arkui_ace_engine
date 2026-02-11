@@ -98,6 +98,7 @@
 
 #include "dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
+#include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -6421,8 +6422,10 @@ void SetBindSheetImpl(Ark_NativePointer node,
             [&sheetStyle, frameNode, node, &cbs](const CustomNodeBuilder& value) {
                 sheetStyle.isTitleBuilder = true;
                 cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
-                    auto uiNode = callback.BuildSync(node);
-                    ViewStackProcessor::GetInstance()->Push(uiNode);
+                    auto uiNode = Referenced::Claim(reinterpret_cast<UINode*>(
+                        callback.InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(node)));
+                    auto proxyNode = CreateProxyFrameNode(uiNode);
+                    ViewStackProcessor::GetInstance()->Push(proxyNode);
                 };
             }, []() {});
         BindSheetUtil::ParseSheetParams(sheetStyle, sheetOptions.value());
