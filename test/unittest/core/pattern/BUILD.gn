@@ -44,6 +44,7 @@ group("core_pattern_unittest") {
     "data_panel:data_panel_test_ng",
     "dialog:dialog_test_ng",
     "divider:divider_test_ng",
+    "dynamiclayout:dynamiclayout_test_ng",
     "flex:flex_test_ng",
     "flex:flex_overflow_test_ng",
     "flex:wrap_overflow_test_ng",
