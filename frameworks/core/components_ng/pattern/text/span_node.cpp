@@ -325,7 +325,6 @@ void SpanItem::SpanDumpInfo()
 
 void SpanItem::SpanDumpInfoAdvance()
 {
-    CHECK_NULL_VOID(SystemProperties::GetDebugEnabled());
     auto& dumpLog = DumpLog::GetInstance();
     auto textStyle = textStyle_;
     if (!textStyle) {
@@ -1804,7 +1803,7 @@ bool PlaceholderSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle
     PlaceholderRun run;
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
-    auto needReCreate = run_ != run;
+    auto needReCreate = run_ !=run;
     run_ = run;
     return needReCreate;
 }
@@ -1814,7 +1813,6 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
 {
     CHECK_NULL_RETURN(builder, -1);
     auto spanTextStyle = textStyle;
-    // ignore decoration styles
     spanTextStyle.SetTextDecoration(TextDecoration::NONE);
     spanTextStyle.SetTextBackgroundStyle(backgroundStyle);
     spanTextStyle.SetTextStyleUid(nodeId_);
@@ -1829,6 +1827,7 @@ bool PlaceholderSpanItem::UpdateSpanTextStyle(const TextStyle& textStyle, const 
 {
     CHECK_NULL_RETURN(textStyle_.has_value(), true);
     UpdateReLayoutTextStyle(textStyle_.value(), textStyle, false);
+    //ToDo Decoration
     textStyle_->SetTextDecoration(TextDecoration::NONE);
     textStyle_->SetTextBackgroundStyle(backgroundStyle);
     textStyle_->SetTextStyleUid(nodeId_);
