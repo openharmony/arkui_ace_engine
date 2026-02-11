@@ -32,13 +32,13 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
     private attachedNodeRef_?:pointer;
     //@ts-ignore
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options?: BuildOptions) {
-        let builderNode = new BuilderNode<T>(uiContext, {});
+        let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params, options);
     }
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<voidBuilderFunc>) {
-        let builderNode = new BuilderNode<T>(uiContext, {});
+        let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder);
     }
