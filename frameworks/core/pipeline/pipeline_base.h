@@ -1479,11 +1479,6 @@ public:
 
     virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
 
-    virtual void GetComponentOverlayInspector(
-        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {};
-
-    virtual void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {};
-
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
         return "";

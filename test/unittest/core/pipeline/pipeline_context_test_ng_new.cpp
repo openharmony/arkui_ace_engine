@@ -5365,5 +5365,31 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTest048, TestSize.Level1)
      */
     context_->FlushFocusView();
 }
+
+/**
+ * @tc.name: DumpSimplifyTreeJsonFromTopNavNode001
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with empty navNodeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, DumpSimplifyTreeJsonFromTopNavNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters with empty navNodeList.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ASSERT_NE(root, nullptr);
+
+    std::list<RefPtr<NG::FrameNode>> navNodeList; // Empty list
+    ParamConfig config;
+
+    /**
+     * @tc.steps2: call DumpSimplifyTreeJsonFromTopNavNode with empty list.
+     * @tc.expect: root should contain $children even with empty list.
+     */
+    context_->DumpSimplifyTreeJsonFromTopNavNode(context_->rootNode_, root, navNodeList, config);
+    EXPECT_TRUE(root->Contains("$children"));
+}
 } // namespace NG
 } // namespace OHOS::Ace

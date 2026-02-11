@@ -2511,7 +2511,9 @@ void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {
     CHECK_NULL_VOID(pipelineContext_);
-    pipelineContext_->GetComponentOverlayInspector(root, config, isInSubWindow);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetComponentOverlayInspector(root, pipelineContext->GetRootElement(), config, isInSubWindow);
 }
 
 void AceContainer::TriggerGarbageCollection()
