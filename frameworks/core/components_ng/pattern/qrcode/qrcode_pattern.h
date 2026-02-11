@@ -52,15 +52,14 @@ public:
         }
         return MakeRefPtr<QRCodePaintMethod>(WeakClaim(this), qrCodeSize_, qrCodeModifier_);
     }
-
     bool IsEnableMatchParent() override
     {
         return true;
     }
     void OnModifyDone() override;
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     FocusPattern GetFocusPattern() const override;
     void UpdateQRCodeCreate(const std::string& value);
     void UpdateColor(const Color& color, bool isFristLoad = false);
