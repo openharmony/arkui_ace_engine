@@ -37,6 +37,7 @@ ace_unittest("text_input_test") {
     "text_input_check_test.cpp",
     "text_input_cursor_test.cpp",
     "text_input_decoration_test.cpp",
+    "text_input_decorator_test.cpp",
     "text_input_menu_test.cpp",
     "text_input_modify_test.cpp",
     "text_input_preview_test.cpp",
