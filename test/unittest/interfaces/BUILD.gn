@@ -493,6 +493,7 @@ ohos_unittest("drag_and_drop_test") {
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "drag_and_drop_test.cpp",
+    "drag_and_drop_test_new_ng.cpp",
   ]
 
   configs = [
