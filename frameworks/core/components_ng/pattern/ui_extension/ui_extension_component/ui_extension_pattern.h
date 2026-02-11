@@ -353,6 +353,8 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitTouchpadInteraction(const RefPtr<InputEventHub>& inputHub);
+    bool IsInComponent(PointF point);
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleFocusEvent();
