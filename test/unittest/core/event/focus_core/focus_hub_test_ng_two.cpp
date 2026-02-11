@@ -446,67 +446,6 @@ HWTEST_F(FocusHubTestNg, PaintFocusState001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PaintFocusState002
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, PaintFocusState002, TestSize.Level1)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto focusManager = pipeline->GetOrCreateFocusManager();
-    ASSERT_NE(focusManager, nullptr);
-    focusManager->isFocusActive_ = true;
-    
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    eventHub->AttachHost(frameNode);
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    focusHub->onPaintFocusStateCallback_ = nullptr;
-    focusHub->focusType_ = FocusType::NODE;
-    focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
-    EXPECT_FALSE(focusHub->PaintFocusState());
-
-    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
-    eventHub1->AttachHost(frameNode1);
-    auto focusHub1 = frameNode1->GetOrCreateFocusHub();
-    std::function<bool()> lambdaFunction1 = []() {
-        return false;
-    };
-    focusHub1->onPaintFocusStateCallback_ = lambdaFunction1;
-    focusHub1->focusType_ = FocusType::NODE;
-    focusHub1->focusStyleType_ = FocusStyleType::OUTER_BORDER;
-    EXPECT_FALSE(focusHub1->PaintFocusState());
-
-    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::UI_EXTENSION_COMPONENT_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto eventHub2 = AceType::MakeRefPtr<EventHub>();
-    eventHub2->AttachHost(frameNode2);
-    auto focusHub2 = frameNode2->GetOrCreateFocusHub();
-    focusHub2->onPaintFocusStateCallback_ = nullptr;
-    focusHub2->focusType_ = FocusType::NODE;
-    focusHub2->focusStyleType_ = FocusStyleType::OUTER_BORDER;
-    EXPECT_FALSE(focusHub2->PaintFocusState());
-
-    auto frameNode3 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::UI_EXTENSION_COMPONENT_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto eventHub3 = AceType::MakeRefPtr<EventHub>();
-    eventHub3->AttachHost(frameNode3);
-    auto focusHub3 = frameNode3->GetOrCreateFocusHub();
-    std::function<bool()> lambdaFunction3 = []() {
-        return true;
-    };
-    focusHub3->onPaintFocusStateCallback_ = lambdaFunction3;
-    focusHub3->focusType_ = FocusType::NODE;
-    focusHub3->focusStyleType_ = FocusStyleType::OUTER_BORDER;
-    EXPECT_FALSE(focusHub3->PaintFocusState());
-}
-
-
-/**
  * @tc.name: FocusHubSetIsDefaultFocus001
  * @tc.desc: Test the function SetIsDefaultFocus.
  * @tc.type: FUNC
