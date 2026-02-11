@@ -1014,6 +1014,35 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
     }
 }
 
+void ScrollablePattern::OnTouchpadInteraction(PointF point)
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->HandleTouchDown(true);
+    if (GetNestedScrolling() && !NearZero(GetNestedScrollVelocity())) {
+        auto child = GetScrollOriginChild();
+        CHECK_NULL_VOID(child);
+        child->StopScrollAnimation();
+    }
+    if (scrollBar_) {
+        scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator(false);
+    }
+    if (isBackToTopRunning_) {
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        if (!isAnimationStop_) {
+            StopAnimation(springAnimation_);
+            StopAnimation(curveAnimation_);
+        }
+        isBackToTopRunning_ = false;
+    }
+}
+
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (GetAxis() == Axis::FREE) {
@@ -1058,15 +1087,12 @@ void ScrollablePattern::RegisterTouchpadInteractionCallback()
     CHECK_NULL_VOID(host);
     auto inputEventHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
-    inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)]() {
+    inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)](PointF point) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->GetNestedScrolling() && !NearZero(pattern->GetNestedScrollVelocity())) {
-            auto child = pattern->GetScrollOriginChild();
-            CHECK_NULL_VOID(child);
-            child->StopScrollAnimation();
+        if (pattern->IsInComponent(point)) {
+            pattern->OnTouchpadInteraction(point);
         }
-        pattern->StopAnimate();
     });
 }
 
@@ -1077,6 +1103,16 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddWindowStateChangedCallback(host->GetId());
+}
+
+bool ScrollablePattern::IsInComponent(PointF point)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto wholeRect = geometryNode->GetFrameRect();
+    return wholeRect.IsInRegion(point);
 }
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
