@@ -9713,7 +9713,7 @@ bool TextFieldPattern::IsShowVoiceButtonMode() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return !IsNormalInlineState() && layoutProperty->GetIsShowVoiceButton().value_or(false) && !IsInPasswordMode();
+    return layoutProperty->GetIsShowVoiceButton().value_or(false) && !IsNormalInlineState() && !IsInPasswordMode();
 }
 
 void TextFieldPattern::CheckPasswordAreaState()

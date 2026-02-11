@@ -46,7 +46,7 @@ private:
         SizeT<float> size = SizeT<float>(0.0f, 0.0f);
         SizeT<float> contentSize = SizeT<float>(0.0f, 0.0f);
         Alignment align = Alignment::CENTER;
-        float allResponseAreaWidth = 0.0f;
+        RefPtr<TextFieldPattern> pattern = nullptr;
     };
 
     struct UpdateTextRectParams {
@@ -55,7 +55,6 @@ private:
         SizeT<float> contentSize = SizeT<float>(0.0f, 0.0f);
         bool isRTL = false;
         OffsetF contentOffset = OffsetF(0.0f, 0.0f);
-        float allResponseAreaWidth = 0.0f;
     };
     void UpdateContentPosition(const UpdateContentPositionParams& params,
         const std::unique_ptr<GeometryProperty>& content);
