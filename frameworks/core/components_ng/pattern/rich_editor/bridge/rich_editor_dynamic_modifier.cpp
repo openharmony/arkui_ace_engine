@@ -592,12 +592,12 @@ void SetRichEditorNapiOnPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onPaste = [extraParam](NG::TextCommonEvent& commonEvent) {
-        ArkUINodeEvent event = CreateArkUINodeEvent(PREVENTABLE_EVENT, extraParam);
-        event.preventableEvent.subKind = ON_RICH_EDITOR_ON_PASTE;
-        event.preventableEvent.preventDefault = false;
+    auto onPaste = [extraParam](NG::TextCommonEvent& pasteEvent) {
+        ArkUINodeEvent event = CreateArkUINodeEvent(MIXED_EVENT, extraParam);
+        event.mixedEvent.subKind = ON_RICH_EDITOR_ON_PASTE;
         SendArkUISyncEvent(&event);
-        commonEvent.SetPreventDefault(event.preventableEvent.preventDefault);
+        bool preventDefault = static_cast<bool>(event.mixedEvent.numberReturnData[0].i32);
+        pasteEvent.SetPreventDefault(preventDefault);
     };
     RichEditorModelNG::SetOnPaste(frameNode, std::move(onPaste));
 }
@@ -626,11 +626,11 @@ void SetRichEditorNapiOnCut(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCut = [extraParam](NG::TextCommonEvent& pasteEvent) {
-        ArkUINodeEvent event = CreateArkUINodeEvent(PREVENTABLE_EVENT, extraParam);
-        event.preventableEvent.subKind = ON_RICH_EDITOR_ON_CUT;
-        event.preventableEvent.preventDefault = false;
+        ArkUINodeEvent event = CreateArkUINodeEvent(MIXED_EVENT, extraParam);
+        event.mixedEvent.subKind = ON_RICH_EDITOR_ON_CUT;
         SendArkUISyncEvent(&event);
-        pasteEvent.SetPreventDefault(event.preventableEvent.preventDefault);
+        bool preventDefault = static_cast<bool>(event.mixedEvent.numberReturnData[0].i32);
+        pasteEvent.SetPreventDefault(preventDefault);
     };
     RichEditorModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -658,12 +658,12 @@ void SetRichEditorNapiOnCopy(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onCopy = [extraParam](NG::TextCommonEvent& pasteEvent) {
-        ArkUINodeEvent event = CreateArkUINodeEvent(PREVENTABLE_EVENT, extraParam);
-        event.preventableEvent.subKind = ON_RICH_EDITOR_ON_COPY;
-        event.preventableEvent.preventDefault = false;
+    auto onCopy = [extraParam](NG::TextCommonEvent& copyEvent) {
+        ArkUINodeEvent event = CreateArkUINodeEvent(MIXED_EVENT, extraParam);
+        event.mixedEvent.subKind = ON_RICH_EDITOR_ON_COPY;
         SendArkUISyncEvent(&event);
-        pasteEvent.SetPreventDefault(event.preventableEvent.preventDefault);
+        bool preventDefault = static_cast<bool>(event.mixedEvent.numberReturnData[0].i32);
+        copyEvent.SetPreventDefault(preventDefault);
     };
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
@@ -1500,6 +1500,13 @@ void DoRichEditorDeleteBackward(ArkUINodeHandle node)
     RichEditorModelNG::DeleteBackward(frameNode);
 }
 
+void CloseSelectionMenu(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::CloseSelectionMenu(frameNode);
+}
+
 void SetRichEditorSupportPreviewText(ArkUINodeHandle node, ArkUI_Bool isSupportPreviewText)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1609,7 +1616,7 @@ void ParseFontSize(FrameNode* frameNode, struct OHOS::Ace::UpdateSpanStyle& upda
 void ParseShadow(struct OHOS::Ace::UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle,
     const ArkUIRichEditorTextStyle& style)
 {
-    std::vector<Shadow> shadows(style.textShadow.size());
+    std::vector<Shadow> shadows;
     for (auto& shadow : style.textShadow) {
         Shadow tempShadow;
         tempShadow.SetColor(Color(shadow.color));
@@ -1988,6 +1995,7 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .getRichEditorPreviewTextValue= GetRichEditorPreviewTextValue,
         .getRichEditorCaretRect = GetRichEditorCaretRect,
         .doRichEditorDeleteBackward = DoRichEditorDeleteBackward,
+        .closeSelectionMenu = CloseSelectionMenu,
         .setRichEditorSupportPreviewText = SetRichEditorSupportPreviewText,
         .resetRichEditorSupportPreviewText = ResetRichEditorSupportPreviewText,
         .getRichEditorSupportPreviewText = GetRichEditorSupportPreviewText,
