@@ -941,4 +941,366 @@ HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest016, TestSize.Level1)
     parallelRecognizer->CleanRecognizerStateVoluntarily();
     EXPECT_NE(clickRecognizerPtr, nullptr);
 }
+
+/**
+ * @tc.name: ParallelRecognizerBatchAdjudicateComprehensiveTest001
+ * @tc.desc: Test BatchAdjudicate method with high branch coverage - ACCEPT disposal cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerBatchAdjudicateComprehensiveTest001, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    // Case 1: ACCEPT disposal - recognizer already SUCCEED (early return)
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->refereeState_ = RefereeState::READY;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+    
+    // Case 2: ACCEPT disposal - parallelRecognizer SUCCEED state
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+    
+    // Case 3: ACCEPT disposal - SUCCEED_BLOCKED state, recognizer becomes SUCCEED_BLOCKED
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    int32_t initialBlockCount = parallelRecognizer->succeedBlockRecognizers_.size();
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(parallelRecognizer->succeedBlockRecognizers_.size(), initialBlockCount + 1);
+    
+    // Case 4: ACCEPT disposal - PENDING_BLOCKED state
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    
+    // Case 5: ACCEPT disposal - READY state triggers GroupAdjudicate
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::READY;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+}
+
+/**
+ * @tc.name: ParallelRecognizerBatchAdjudicateComprehensiveTest002
+ * @tc.desc: Test BatchAdjudicate method with high branch coverage - REJECT disposal cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerBatchAdjudicateComprehensiveTest002, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    // Case 1: REJECT disposal - recognizer already FAIL (early return)
+    clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+
+    // Case 2: REJECT disposal - normal REJECT path
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+
+    // Case 3: REJECT disposal - multiple recognizers, CheckAllFailed scenario
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizersWithMultiple = {
+        clickRecognizerPtr, clickRecognizerPtr2
+    };
+    RefPtr<ParallelRecognizer> parallelRecognizerWithMultiple =
+        AceType::MakeRefPtr<ParallelRecognizer>(recognizersWithMultiple);
+
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizerPtr2->refereeState_ = RefereeState::FAIL;
+    parallelRecognizerWithMultiple->BatchAdjudicate(clickRecognizerPtr2, GestureDisposal::REJECT);
+    EXPECT_EQ(clickRecognizerPtr2->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ParallelRecognizerBatchAdjudicateComprehensiveTest003
+ * @tc.desc: Test BatchAdjudicate method with high branch coverage - PENDING disposal cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerBatchAdjudicateComprehensiveTest003, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    // Case 1: PENDING disposal - recognizer already PENDING (early return)
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+
+    // Case 2: PENDING disposal - parallelRecognizer SUCCEED state
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+
+    // Case 3: PENDING disposal - parallelRecognizer PENDING state
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::PENDING;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+
+    // Case 4: PENDING disposal - SUCCEED_BLOCKED state
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+
+    // Case 5: PENDING disposal - PENDING_BLOCKED state
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+
+    // Case 6: PENDING disposal - READY state triggers GroupAdjudicate
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    parallelRecognizer->refereeState_ = RefereeState::READY;
+    parallelRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+}
+
+/**
+ * @tc.name: ParallelRecognizerBatchAdjudicateComprehensiveTest004
+ * @tc.desc: Test BatchAdjudicate method with null pointer handling and edge cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerBatchAdjudicateComprehensiveTest004, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    // Case 1: Null recognizer - should handle gracefully
+    parallelRecognizer->BatchAdjudicate(nullptr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+
+    // Case 2: All disposal types with null recognizer
+    parallelRecognizer->BatchAdjudicate(nullptr, GestureDisposal::REJECT);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+
+    parallelRecognizer->BatchAdjudicate(nullptr, GestureDisposal::PENDING);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: ParallelRecognizerCleanRecognizerStateComprehensiveTest001
+ * @tc.desc: Test CleanRecognizerState method with high branch coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerCleanRecognizerStateComprehensiveTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    // Case 1: MultiFingersRecognizer with touchPoints size <= 1
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizerPtr->touchPoints_.clear();
+    TouchEvent touchEvent;
+    touchEvent.originalId = 1;
+    clickRecognizerPtr->touchPoints_[1] = touchEvent;
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->currentFingers_ = 0;
+
+    parallelRecognizer->CleanRecognizerState();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+
+    // Case 2: MultiFingersRecognizer with touchPoints size > 1 (should not clean)
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    touchEvent.originalId = 2;
+    clickRecognizerPtr->touchPoints_[2] = touchEvent;
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->currentFingers_ = 0;
+
+    parallelRecognizer->CleanRecognizerState();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED); // Should remain unchanged
+
+    // Case 3: State reset conditions with currentFingers_ == 0
+    std::vector<RefereeState> testStates = {
+        RefereeState::SUCCEED, RefereeState::FAIL, RefereeState::DETECTING
+    };
+
+    for (auto state : testStates) {
+        parallelRecognizer->refereeState_ = state;
+        parallelRecognizer->currentFingers_ = 0;
+        parallelRecognizer->disposal_ = GestureDisposal::ACCEPT;
+
+        parallelRecognizer->CleanRecognizerState();
+        EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+        EXPECT_EQ(parallelRecognizer->disposal_, GestureDisposal::NONE);
+    }
+
+    // Case 4: State reset conditions with currentFingers_ != 0 (should not reset)
+    for (auto state : testStates) {
+        parallelRecognizer->refereeState_ = state;
+        parallelRecognizer->currentFingers_ = 1;
+        parallelRecognizer->disposal_ = GestureDisposal::ACCEPT;
+
+        parallelRecognizer->CleanRecognizerState();
+        EXPECT_NE(parallelRecognizer->refereeState_, RefereeState::READY);
+    }
+}
+
+/**
+ * @tc.name: ParallelRecognizerCleanRecognizerStateComprehensiveTest002
+ * @tc.desc: Test CleanRecognizerState method with null handling and edge cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerCleanRecognizerStateComprehensiveTest002, TestSize.Level1)
+{
+    // Case 1: Recognizers with null entries
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    parallelRecognizer->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->currentFingers_ = 0;
+
+    parallelRecognizer->CleanRecognizerState();
+    EXPECT_EQ(parallelRecognizer->refereeState_, RefereeState::READY);
+
+    // Case 2: Mixed null and valid recognizers
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizerPtr->touchPoints_.clear();
+
+    std::vector<RefPtr<NGGestureRecognizer>> mixedRecognizers = { nullptr, clickRecognizerPtr, nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizerMixed = AceType::MakeRefPtr<ParallelRecognizer>(mixedRecognizers);
+    parallelRecognizerMixed->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizerMixed->currentFingers_ = 0;
+
+    parallelRecognizerMixed->CleanRecognizerState();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizerMixed->refereeState_, RefereeState::READY);
+
+    // Case 3: PENDING state should not reset
+    parallelRecognizerMixed->refereeState_ = RefereeState::PENDING;
+    parallelRecognizerMixed->currentFingers_ = 0;
+
+    parallelRecognizerMixed->CleanRecognizerState();
+    EXPECT_EQ(parallelRecognizerMixed->refereeState_, RefereeState::PENDING);
+}
+
+/**
+ * @tc.name: ParallelRecognizerForceCleanRecognizerComprehensiveTest001
+ * @tc.desc: Test ForceCleanRecognizer method with high branch coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerForceCleanRecognizerComprehensiveTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    // Case 1: Valid recognizers - should clean all
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizerPtr2->refereeState_ = RefereeState::FAIL;
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizerPtr, clickRecognizerPtr2 };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    parallelRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(clickRecognizerPtr2->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+
+    // Case 2: Clean with currentBatchRecognizer_ set
+    RefPtr<ClickRecognizer> clickRecognizerPtr3 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr3->refereeState_ = RefereeState::SUCCEED;
+    parallelRecognizer->currentBatchRecognizer_ = clickRecognizerPtr3;
+    parallelRecognizer->AddSucceedBlockRecognizer(clickRecognizerPtr3);
+    parallelRecognizer->AddChildren({ clickRecognizerPtr3 });
+
+    parallelRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizerPtr3->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+}
+
+/**
+ * @tc.name: ParallelRecognizerForceCleanRecognizerComprehensiveTest002
+ * @tc.desc: Test ForceCleanRecognizer method with null handling and edge cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerForceCleanRecognizerComprehensiveTest002, TestSize.Level1)
+{
+    // Case 1: Recognizers with null entries
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { nullptr };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+
+    parallelRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+
+    // Case 2: Mixed null and valid recognizers
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+
+    std::vector<RefPtr<NGGestureRecognizer>> mixedRecognizers = {
+        nullptr, clickRecognizerPtr, nullptr
+    };
+    RefPtr<ParallelRecognizer> parallelRecognizerMixed = AceType::MakeRefPtr<ParallelRecognizer>(mixedRecognizers);
+
+    parallelRecognizerMixed->ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizerMixed->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizerMixed->succeedBlockRecognizers_.empty());
+
+    // Case 3: Empty recognizers list
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers = {};
+    RefPtr<ParallelRecognizer> parallelRecognizerEmpty = AceType::MakeRefPtr<ParallelRecognizer>(emptyRecognizers);
+
+    parallelRecognizerEmpty->ForceCleanRecognizer();
+    EXPECT_EQ(parallelRecognizerEmpty->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizerEmpty->succeedBlockRecognizers_.empty());
+
+    // Case 4: With succeedBlockRecognizers_ populated
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizersWithGroup = { clickRecognizerPtr2 };
+    RefPtr<ParallelRecognizer> parallelRecognizerWithBlock =
+        AceType::MakeRefPtr<ParallelRecognizer>(recognizersWithGroup);
+
+    parallelRecognizerWithBlock->AddSucceedBlockRecognizer(clickRecognizerPtr2);
+    parallelRecognizerWithBlock->AddSucceedBlockRecognizer(nullptr);
+
+    parallelRecognizerWithBlock->ForceCleanRecognizer();
+    EXPECT_TRUE(parallelRecognizerWithBlock->succeedBlockRecognizers_.empty());
+}
+
+/**
+ * @tc.name: ParallelRecognizerForceCleanRecognizerComprehensiveTest003
+ * @tc.desc: Test ForceCleanRecognizer method with different recognizer types
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerForceCleanRecognizerComprehensiveTest003, TestSize.Level1)
+{
+    // Case 1: Mixed recognizer types
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr =
+        AceType::MakeRefPtr<ExclusiveRecognizer>(std::vector<RefPtr<NGGestureRecognizer>>{});
+
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::PENDING;
+
+    std::vector<RefPtr<NGGestureRecognizer>> mixedRecognizers = {
+        clickRecognizerPtr, exclusiveRecognizerPtr
+    };
+    RefPtr<ParallelRecognizer> parallelRecognizer = AceType::MakeRefPtr<ParallelRecognizer>(mixedRecognizers);
+
+    parallelRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(exclusiveRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(parallelRecognizer->currentBatchRecognizer_, nullptr);
+    EXPECT_TRUE(parallelRecognizer->succeedBlockRecognizers_.empty());
+}
 } // namespace OHOS::Ace::NG

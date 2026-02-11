@@ -38,6 +38,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string ROOT_TAG("root");
+constexpr int32_t DEFAULT_POINTER_TIME_DIFFERENT = 1;
 } // namespace
 
 class PostEventManagerTestNg : public testing::Test {
@@ -1832,6 +1833,8 @@ HWTEST_F(PostEventManagerTestNg, CheckPointValidityTest002, TestSize.Level1)
     eventAction.touchEvent = touchEvent;
     postEventManager_->postEventAction_.push_back(eventAction);
 
+    // cost 1ms to creat different time
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_POINTER_TIME_DIFFERENT));
     // Check with different time
     TouchEvent touchEvent2;
     touchEvent2.type = TouchType::MOVE;
