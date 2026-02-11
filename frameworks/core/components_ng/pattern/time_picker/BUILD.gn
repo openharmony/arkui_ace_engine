@@ -42,12 +42,12 @@ build_component_ng("time_picker_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    ark_sources += [ "bridge/timepicker_static_modifier.cpp" ]
     if (!ace_engine_feature_wearable) {
       ark_sources += [
         "bridge/time_picker_dialog_extender.cpp",
         "bridge/time_picker_dialog_static_accessor.cpp",
         "bridge/timepickerdialog_static_modifier.cpp",
+        "bridge/timepicker_static_modifier.cpp"
       ]
     }
   }
