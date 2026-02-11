@@ -726,6 +726,13 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
+    // Handle globalDisplayX/Y
+    Offset globalDisplayOffset = src.GetGlobalDisplayLocation();
+    dst.globalDisplayX = ArkValue<Opt_Float64>(
+        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    dst.globalDisplayY = ArkValue<Opt_Float64>(
+        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
+
     dst.pressedTime = ArkValue<Opt_Int64>(static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count()));
     dst.pressure = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 

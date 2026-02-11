@@ -43,8 +43,8 @@ Ark_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
     if (!fingerList.empty()) {
         tapLocation = {
             fingerList.back().localLocation_,
-            fingerList.back().screenLocation_,
             fingerList.back().globalLocation_,
+            fingerList.back().screenLocation_,
             fingerList.back().globalDisplayLocation_
         };
     }
