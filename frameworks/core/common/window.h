@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_H
 
 #include <memory>
+#include <mutex>
+#include <set>
+#include <vector>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/mousestyle/mouse_style.h"
@@ -271,12 +274,36 @@ public:
     virtual void SetDVSyncUpdate(uint64_t dvsyncTime) {}
 
     virtual void FlushVsync() {}
+
+    // Thread-safe methods for managing sub-window IDs
+    void RegisterSubWindow(int32_t subWindowId)
+    {
+        std::lock_guard<std::mutex> lock(subWindowMutex_);
+        subWindowIds_.emplace(subWindowId);
+    }
+
+    void UnregisterSubWindow(int32_t subWindowId)
+    {
+        std::lock_guard<std::mutex> lock(subWindowMutex_);
+        subWindowIds_.erase(subWindowId);
+    }
+
+    std::vector<int32_t> GetSubWindowIds() const
+    {
+        std::lock_guard<std::mutex> lock(subWindowMutex_);
+        std::vector<int32_t> ids(subWindowIds_.begin(), subWindowIds_.end());
+        return ids;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
     MouseFormat cursor_ = MouseFormat::DEFAULT;
     bool isUserSetCursor_ = false;
+
+    mutable std::mutex subWindowMutex_;
+    std::set<int32_t> subWindowIds_;
 
     struct VsyncCallback {
         AceVsyncCallback callback_ = nullptr;

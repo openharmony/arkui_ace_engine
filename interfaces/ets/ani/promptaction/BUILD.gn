@@ -43,6 +43,7 @@ ohos_shared_library("promptAction_ani") {
 generate_static_abc("promptAction") {
   base_url = "./ets"
   files = [ "./ets/@ohos.promptAction.ets" ]
+  ui_enable = "True"
   is_boot_abc = "True"
   device_dst_file = "/system/framework/promptAction.abc"
 }

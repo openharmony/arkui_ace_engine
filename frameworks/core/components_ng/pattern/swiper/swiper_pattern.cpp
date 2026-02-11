@@ -548,6 +548,7 @@ void SwiperPattern::OnHostChildUpdateDone()
 
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
+    InitCapture();
     if (HasLeftButtonNode()) {
         auto leftArrowNode =
             DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(leftButtonId_.value())));

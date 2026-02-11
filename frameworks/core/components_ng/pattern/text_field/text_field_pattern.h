@@ -115,6 +115,12 @@ enum class InputOperation {
     SET_PREVIEW_FINISH,
     INPUT,
     PERFORM_ACTION,
+    CARET_SET,
+};
+
+struct CaretSetInfo {
+    int32_t pos;
+    std::string text;
 };
 
 struct PasswordModeStyle {
@@ -1043,6 +1049,7 @@ public:
     void SetSelection(int32_t start, int32_t end,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
+    bool IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager);
     void HandleFocusEvent();
     void SetFocusStyle();
     void ClearFocusStyle();
@@ -1288,6 +1295,7 @@ public:
         return isFillRequestFinish_;
     }
 
+    void ProcessPendingCaretEvent();
     bool IsNormalInlineState() const;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
@@ -1902,6 +1910,16 @@ public:
     virtual void UpdateHoverStyleForTV(bool isHover);
     virtual void UpdatePressStyleForTV(bool isPressed);
 
+    void SetHasUserAccessibilityText()
+    {
+        hasUserAccessibilityText_ = true;
+    }
+
+    bool HasUserAccessibilityText() const
+    {
+        return hasUserAccessibilityText_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -2373,7 +2391,7 @@ private:
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;
-
+    std::optional<CaretSetInfo> pendingCaretInfo_;
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     // inline
@@ -2407,6 +2425,7 @@ private:
 
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
+    std::queue<CaretSetInfo> caretMoveOperation_;
     std::queue<InsertCommandInfo> insertCommands_;
     std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
@@ -2499,6 +2518,7 @@ private:
     RelatedLPXInfo lpxInfo_;
     std::string placeholderColorInfo_;
     bool needResetFocusColor_ = true;
+    bool hasUserAccessibilityText_ = false;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

@@ -193,12 +193,61 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent003, TestSize.Level0)
     /**
      * @tc.step: step4. call the callback function
      */
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     richEditorPattern->textDetectEnable_ = true;
     richEditorPattern->HandleBlurEvent();
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
 }
 
+/**
+ * @tc.name: HandleBlurEvent004
+ * @tc.desc: test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, HandleBlurEvent004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->continueFeature_ = true;
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    auto host = richEditorPattern->GetHost();
+    auto curFocusHub = host->GetFocusHub();
+    curFocusHub->blurReason_ = BlurReason::WINDOW_BLUR;
+    auto func = []() {};
+    richEditorPattern->customKeyboardBuilder_ = func;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
+
+/**
+ * @tc.name: HandleBlurEvent005
+ * @tc.desc: test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, HandleBlurEvent005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    textFieldManager->continueFeature_ = false;
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    auto host = richEditorPattern->GetHost();
+    auto func = []() {};
+    richEditorPattern->customKeyboardBuilder_ = func;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
 
 /**
  * @tc.name: HandleUserGestureEvent001
@@ -329,6 +378,8 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent002, TestSize.Level0)
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isOnlyRequestFocus_ = true;
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     richEditorPattern->HandleFocusEvent();
     EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
 }

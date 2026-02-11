@@ -108,6 +108,7 @@ void BubblePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     host->GetRenderContext()->SetClipToFrame(true);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -121,6 +122,7 @@ void BubblePattern::OnAttachToFrameNode()
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);
+        ACE_UINODE_TRACE(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -192,6 +194,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -225,6 +228,7 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(bubbleRenderProp);
     if (touchRegion_.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
@@ -269,6 +273,7 @@ void BubblePattern::RegisterButtonOnHover()
     for (const auto& child : buttonRowNode->GetChildren()) {
         auto buttonNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(buttonNode);
+        ACE_UINODE_TRACE(buttonNode);
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             return;
         }
@@ -279,6 +284,7 @@ void BubblePattern::RegisterButtonOnHover()
             CHECK_NULL_VOID(pattern);
             auto buttonNode = buttonNodeWK.Upgrade();
             CHECK_NULL_VOID(buttonNode);
+            ACE_UINODE_TRACE(buttonNode);
             pattern->ButtonOnHover(isHover, buttonNode);
         };
         auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -326,6 +332,7 @@ void BubblePattern::RegisterButtonOnTouch()
     for (const auto& child : buttonRowNode->GetChildren()) {
         auto buttonNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(buttonNode);
+        ACE_UINODE_TRACE(buttonNode);
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             return;
         }
@@ -337,6 +344,7 @@ void BubblePattern::RegisterButtonOnTouch()
             CHECK_NULL_VOID(pattern);
             auto buttonNode = buttonNodeWK.Upgrade();
             CHECK_NULL_VOID(buttonNode);
+            ACE_UINODE_TRACE(buttonNode);
             pattern->ButtonOnPress(info, buttonNode);
         };
         auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -352,6 +360,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     CHECK_NULL_VOID(buttonNode);
+    ACE_UINODE_TRACE(buttonNode);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto theme = GetPopupTheme();
@@ -407,6 +416,7 @@ void BubblePattern::PopBubble(bool tips)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
@@ -476,6 +486,7 @@ bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& 
 void BubblePattern::StartEnteringTransitionEffects(
     const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
 {
+    ACE_UINODE_TRACE(popupNode);
     auto popupId = popupNode->GetId();
     auto pattern = popupNode->GetPattern<BubblePattern>();
     pattern->transitionStatus_ = TransitionStatus::ENTERING;
@@ -588,6 +599,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     optionAlpha.SetCurve(Curves::SHARP);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto popupId = host->GetId();
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
@@ -663,6 +675,7 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
@@ -807,6 +820,7 @@ void BubblePattern::OnWindowHide()
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowHide start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
@@ -890,6 +904,7 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_VOID(popupTheme);
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
@@ -906,7 +921,11 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
     renderContext->UpdateBackBlurStyle(styleOption);
     if (needUpdateShadow) {
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        CHECK_NULL_VOID(shadowTheme);
+        Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
         renderContext->UpdateBackShadow(shadow);
     }
 }

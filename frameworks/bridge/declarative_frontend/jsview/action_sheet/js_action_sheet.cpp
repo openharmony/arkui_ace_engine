@@ -381,6 +381,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     auto obj = JSRef<JSObject>::Cast(args[0]);
     auto execContext = args.GetExecutionContext();
     auto dialogNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(dialogNode);
 
     ParseTitleAndMessage(properties, obj);
     ParseConfirmButton(execContext, properties, obj);

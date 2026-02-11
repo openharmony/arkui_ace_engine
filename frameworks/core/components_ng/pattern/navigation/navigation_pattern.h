@@ -390,8 +390,8 @@ public:
     void AttachNavigationStackToParent();
     void DetachNavigationStackFromParent();
 
-    void AddToDumpManager();
-    void RemoveFromDumpManager();
+    void AttachToManager();
+    void DetachFromManager();
 
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode, NavDestinationLifecycle lifecycle,
         NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
@@ -417,7 +417,7 @@ public:
 
     bool IsFullPageNavigation() const
     {
-        return isFullPageNavigation_;
+        return isFullPageNavigation_.value_or(false);
     }
 
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
@@ -628,6 +628,8 @@ public:
 
     void FireNavigateChangeCallback();
 
+    void FireChangeCallbackAfterLayout();
+
     //-------for force split------- begin------
     bool CreateRelatedDestination(
         const std::string& name, RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& relatedDest);
@@ -642,6 +644,7 @@ public:
     {
         isSplitDisplay_ = isSplit;
     }
+    void UpdateForceSplitHomeDestVisibility();
     //-------for force split------- end------
 
 private:
@@ -866,7 +869,7 @@ private:
     RectF dragRect_;
     RectF dragBarRect_;
     WeakPtr<FrameNode> pageNode_;
-    bool isFullPageNavigation_ = false;
+    std::optional<bool> isFullPageNavigation_;
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;

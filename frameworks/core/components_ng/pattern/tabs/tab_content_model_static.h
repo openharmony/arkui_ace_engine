@@ -44,6 +44,8 @@ public:
     static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);
     static void SetTabBar(FrameNode* node,
         const std::optional<std::string>& label, const std::optional<std::string>& icon, TabBarBuilderFunc&& builder);
+    static void SetTabBarWithContent(FrameNode* node, FrameNode* tabBarNode);
+    static void SetCustomStyleNode(FrameNode* node, const RefPtr<FrameNode>& customStyleNode);
     static void SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode);
     static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
     static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);

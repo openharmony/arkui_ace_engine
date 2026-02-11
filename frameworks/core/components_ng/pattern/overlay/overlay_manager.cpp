@@ -20,7 +20,6 @@
 #include <utility>
 #include <vector>
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-#include "dm/display_manager.h"
 #include "want.h"
 #endif
 
@@ -196,6 +195,10 @@ static RefPtr<PipelineContext> GetPipeContextByWeakPtr(const WeakPtr<FrameNode>&
 }
 } // namespace
 
+const std::unordered_set<std::string> OverlayManager::OVERLAY_TAGS = { V2::TOAST_ETS_TAG, V2::POPUP_ETS_TAG,
+    V2::DIALOG_ETS_TAG, V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::ALERT_DIALOG_ETS_TAG, V2::MENU_ETS_TAG,
+    V2::MENU_WRAPPER_ETS_TAG, V2::SHEET_PAGE_TAG, V2::MODAL_PAGE_TAG, V2::SHEET_WRAPPER_TAG };
+
 OverlayManager::OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode)
 {
     if (rootNode) {
@@ -301,6 +304,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& containerNode)
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    ACE_UINODE_TRACE(node);
     TAG_LOGI(AceLogTag::ACE_DIALOG, "on dialog/%{public}d close event enter", node->GetId());
 
     BlurOverlayNode(node);
@@ -418,6 +422,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
+    ACE_UINODE_TRACE(node);
     auto root = rootNodeWeak_.Upgrade();
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
@@ -493,6 +498,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 
 void OverlayManager::UpdateChildVisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& childNode)
 {
+    ACE_UINODE_TRACE(node);
     auto layoutProperty = childNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -568,6 +574,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "set dialog transition");
     CHECK_NULL_VOID(node);
+    ACE_UINODE_TRACE(node);
     auto root = rootNodeWeak_.Upgrade();
     auto dialogPattern = node->GetPattern<DialogPattern>();
     dialogPattern->CallDialogWillAppearCallback();
@@ -629,6 +636,7 @@ void OverlayManager::SendDialogAccessibilityEvent(const RefPtr<FrameNode>& node,
 void OverlayManager::UpdateChildInvisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& child)
 {
     CHECK_NULL_VOID(node);
+    ACE_UINODE_TRACE(node);
     auto layoutProperty = child->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -658,6 +666,7 @@ void OverlayManager::UpdateChildInvisible(const RefPtr<FrameNode>& node, const R
 void OverlayManager::CloseMaskAndContentMatchTransition(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
+    ACE_UINODE_TRACE(node);
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
     node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     auto dialogPattern = node->GetPattern<DialogPattern>();
@@ -696,6 +705,7 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog match transition");
     CHECK_NULL_VOID(node);
+    ACE_UINODE_TRACE(node);
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
     node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     auto dialogPattern = node->GetPattern<DialogPattern>();
@@ -755,6 +765,7 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
     toastMap_.clear();
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     CHECK_NULL_VOID(toastNode);
+    ACE_UINODE_TRACE(toastNode);
     auto toastId = toastNode->GetId();
     // mount to parent
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast mount to root");
@@ -1004,6 +1015,7 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
         auto overlayManager = weak.Upgrade();
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(overlayManager && popupNode);
+        ACE_UINODE_TRACE(popupNode);
         if (isNeedFocus) {
             overlayManager->FocusOverlayNode(popupNode);
         }
@@ -1132,6 +1144,7 @@ void OverlayManager::ShowTipsInSubwindow(int32_t targetId, const PopupInfo& popu
     }
     auto targetNode = popupInfo.target.Upgrade();
     CHECK_NULL_VOID(targetNode);
+    ACE_UINODE_TRACE(targetNode);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
@@ -1370,6 +1383,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     CHECK_NULL_VOID(targetNode);
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -1445,6 +1459,7 @@ bool OverlayManager::IsContentUpdatePopup(const RefPtr<Pattern>& pattern)
 void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
 {
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto popupId = popupNode->GetId();
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
@@ -1486,6 +1501,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     auto focusable = popupInfo.focusable;
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -1532,6 +1548,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         auto popupNode = popupNodeWk.Upgrade();
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
+        ACE_UINODE_TRACE(popupNode);
         auto popupInfoIter = overlayManager->popupMap_.find(targetId);
         auto targetIsInMap = popupInfoIter != overlayManager->popupMap_.end();
         bool popupNodeIsInMap = false;
@@ -1645,6 +1662,7 @@ void OverlayManager::RemoveIndexerPopup()
     CHECK_NULL_VOID(rootNode);
     for (const auto& popup : customPopupMap_) {
         auto popupNode = popup.second;
+        ACE_UINODE_TRACE(popupNode);
         RemoveChildWithService(rootNode, popupNode);
     }
     customPopupMap_.clear();
@@ -1664,6 +1682,7 @@ void OverlayManager::HideCustomPopups()
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
             auto popupNode = popupInfo.popupNode;
             CHECK_NULL_VOID(popupNode);
+            ACE_UINODE_TRACE(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
             auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
@@ -1703,6 +1722,7 @@ void OverlayManager::HideAllPopups()
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
             auto popupNode = popupInfo.popupNode;
             CHECK_NULL_VOID(popupNode);
+            ACE_UINODE_TRACE(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
             popupInfo.markNeedUpdate = true;
@@ -1727,6 +1747,7 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
         auto targetId = popup.first;
         auto popupNode = popup.second.popupNode;
         CHECK_NULL_CONTINUE(popupNode);
+        ACE_UINODE_TRACE(popupNode);
         auto popupPattern = popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_CONTINUE(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
@@ -1757,6 +1778,7 @@ void OverlayManager::ErasePopup(int32_t targetId)
         CHECK_NULL_VOID(rootNode);
         auto popupNode = it->second.popupNode;
         CHECK_NULL_VOID(popupNode);
+        ACE_UINODE_TRACE(popupNode);
         auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
         auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -1995,6 +2017,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "fail to create dialog node");
         return nullptr;
     }
+    ACE_UINODE_TRACE(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
     BeforeShowDialog(dialog);
     if (dialogProps.transitionEffect != nullptr) {
@@ -2023,6 +2046,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
+    ACE_UINODE_TRACE(dialog);
     BeforeShowDialog(dialog);
     RegisterDialogLifeCycleCallback(dialog, dialogProps);
     if (dialogProps.transitionEffect != nullptr) {
@@ -2051,6 +2075,7 @@ RefPtr<FrameNode> OverlayManager::GetDialogNodeWithExistContent(const RefPtr<UIN
     while (iter != dialogMap_.end()) {
         auto dialogNode = (*iter).second;
         CHECK_NULL_RETURN(dialogNode, nullptr);
+        ACE_UINODE_TRACE(dialogNode);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
         CHECK_NULL_RETURN(dialogPattern, nullptr);
         if (dialogPattern->GetCustomNode() == node) {
@@ -2149,6 +2174,7 @@ void OverlayManager::ReloadBuilderNodeConfig()
     auto iter = dialogMap_.begin();
     while (iter != dialogMap_.end()) {
         auto dialogNode = (*iter).second;
+        ACE_UINODE_TRACE(dialogNode);
         if (dialogNode) {
             auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(dialogPattern);
@@ -2252,6 +2278,7 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialog(
         showComponentContent = true;
     }
     auto dialog = DialogView::CreateDialogNode(nodeId, dialogProps, customNode);
+    ACE_UINODE_TRACE(dialog);
     OpenCustomDialogInner(dialogProps, std::move(callback), dialog, showComponentContent);
     return dialog;
 }
@@ -2265,6 +2292,7 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId)
         iter = dialogMap_.begin();
         while (iter != dialogMap_.end()) {
             auto dialogNode = (*iter).second;
+            ACE_UINODE_TRACE(dialogNode);
             if (dialogNode && dialogNode->GetId() > tmpNodeId) {
                 tmpNodeId = dialogNode->GetId();
                 tmpNode = dialogNode;
@@ -2304,6 +2332,7 @@ void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::fun
     }
     TAG_LOGD(AceLogTag::ACE_DIALOG, "CloseCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
+    ACE_UINODE_TRACE(dialogNode);
     if (!dialogNode) {
         dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
     }
@@ -2332,6 +2361,7 @@ RefPtr<FrameNode> OverlayManager::UpdateCustomDialogInner(
     }
     TAG_LOGD(AceLogTag::ACE_DIALOG, "UpdateCustomDialog ComponentContent id: %{public}d", contentNode->GetId());
     auto dialogNode = GetDialogNodeWithExistContent(contentNode);
+    ACE_UINODE_TRACE(dialogNode);
     if (!dialogNode) {
         dialogNode = SubwindowManager::GetInstance()->GetSubwindowDialogNodeWithExistContent(contentNode);
     }
@@ -2365,6 +2395,7 @@ void OverlayManager::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
 {
     auto dialogNode = UpdateCustomDialogInner(node, dialogProps, callback);
+    ACE_UINODE_TRACE(dialogNode);
     if (dialogNode) {
         callback(ERROR_CODE_NO_ERROR);
     }
@@ -2374,6 +2405,7 @@ void OverlayManager::UpdateCustomDialogWithNode(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     auto dialogNode = UpdateCustomDialogInner(node, dialogProps, callback);
+    ACE_UINODE_TRACE(dialogNode);
     if (dialogNode) {
         callback(dialogNode->GetId());
         dialogMap_[dialogNode->GetId()] = dialogNode;
@@ -2622,6 +2654,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
 #ifndef ARKUI_WEARABLE
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
+    ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode, dialogProps);
@@ -2644,6 +2677,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     modifier->setTimePickerDialogViewShow(
         dialogInfo, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
     RefPtr<FrameNode> dialogNode = dialogInfo.timePickerNode;
+    ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode, dialogProps);
@@ -2659,6 +2693,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 #ifndef ARKUI_WEARABLE
     auto dialogNode = TextPickerDialogView::Show(
         dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
+    ACE_UINODE_TRACE(dialogNode);
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode, dialogProps);
@@ -2686,6 +2721,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     CHECK_NULL_VOID(node);
     FrameNode* dialogNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
     auto dialogRefNode = AceType::Claim<FrameNode>(dialogNode);
     CHECK_NULL_VOID(dialogRefNode);
     RegisterDialogCallback(dialogRefNode, std::move(dialogLifeCycleEvent));
@@ -3906,6 +3942,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         AceType::MakeRefPtr<ModalPresentationPattern>(targetId,
             static_cast<ModalTransition>(modalTransition.value_or(ModalTransition::DEFAULT)), std::move(callback)));
     CHECK_NULL_VOID(modalNode);
+    ACE_UINODE_TRACE(modalNode);
     auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
     CHECK_NULL_VOID(modalPagePattern);
     if (modalStyle.backgroundColor.has_value()) {
@@ -4943,6 +4980,7 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
         ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
+    ACE_UINODE_TRACE(sheetWrapperNode);
 
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
@@ -5717,6 +5755,7 @@ void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_
     if (!customKeyboard) {
         return;
     }
+    ACE_UINODE_TRACE(customKeyboard);
     MountCustomKeyboard(customKeyboard, targetId);
 }
 
@@ -6512,6 +6551,7 @@ void OverlayManager::CreateOverlayNode()
             AceType::MakeRefPtr<OverlayContainerPattern>());
     }
     CHECK_NULL_VOID(overlayNode_);
+    ACE_UINODE_TRACE(overlayNode_);
     overlayNode_->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto layoutProperty = overlayNode_->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -6577,6 +6617,7 @@ RefPtr<FrameNode> OverlayManager::CreateOverlayNodeWithOrder(std::optional<doubl
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OverlayContainerPattern>());
     }
     CHECK_NULL_RETURN(orderOverlayNode, nullptr);
+    ACE_UINODE_TRACE(orderOverlayNode);
 
     orderOverlayNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto layoutProperty = orderOverlayNode->GetLayoutProperty();
@@ -7207,6 +7248,7 @@ void OverlayManager::DumpPopupMapInfo() const
         auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(targetId);
         auto popupInfo = entry.second;
         auto popupNode = popupInfo.popupNode;
+        ACE_UINODE_TRACE(popupNode);
         DumpEntry(targetNode, targetId, popupNode);
     }
 
@@ -7610,37 +7652,16 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode,
     }
 
     rect = container->GetDisplayAvailableRect();
-#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-    auto displayId = container->GetCurrentDisplayId();
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    auto displayInfo = defaultDisplay->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, rect);
-    auto sourceMode = displayInfo->GetDisplaySourceMode();
-    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND ||
-        sourceMode == Rosen::DisplaySourceMode::EXTEND) {
-        return rect;
-    }
-#else
-    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
-        return rect;
-    }
-#endif
-
     auto parentContainer = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
     CHECK_NULL_RETURN(parentContainer, rect);
-    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
-    if (isCrossWindow || isSceneBoard) {
+    if (parentContainer->IsNeedModifySize(container)) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
             pipeContext->GetInstanceId(), static_cast<SubwindowType>(type), GetSubwindowKeyNodeId(frameNode));
         CHECK_NULL_RETURN(subwindow, rect);
         rect = subwindow->GetFoldExpandAvailableRect();
     }
 
-    TAG_LOGI(AceLogTag::ACE_OVERLAY,
-        "parentWindow isSceneBoard: %{public}d isCrossWindow: %{public}d availableRect: %{public}s", isSceneBoard,
-        isCrossWindow, rect.ToString().c_str());
-
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "availableRect: %{public}s", rect.ToString().c_str());
     return rect;
 }
 
@@ -7731,6 +7752,13 @@ bool OverlayManager::IsNeedAvoidFoldCrease(
         pipeline = DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_RETURN(pipeline, false);
     }
+
+    auto sourceMode = container->GetDisplaySourceMode();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "displaySourceMode: %{public}d", sourceMode);
+    if (expandDisplay && sourceMode == DisplaySourceMode::EXTEND) {
+        return false;
+    }
+
     // Check is half fold status
     auto halfFoldStatus = expandDisplay ? container->GetFoldStatusFromListener() == FoldStatus::HALF_FOLD
                                         : pipeline->IsHalfFoldHoverStatus();

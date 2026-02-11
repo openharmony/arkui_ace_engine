@@ -436,6 +436,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);
         auto dialogNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        ACE_UINODE_TRACE(dialogNode);
         auto execContext = args.GetExecutionContext();
 
         ParseDialogTitleAndMessage(properties, obj);

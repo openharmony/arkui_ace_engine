@@ -1338,6 +1338,13 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
 }
 
+ACE_WEAK_SYM bool SystemProperties::IsPortraitFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SMALL_FOLDER ||
+        foldScreenType_ == FoldScreenType::PORTRAIT_FOLDER;
+}
+
 ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
 {
     InitFoldScreenTypeBySystemProperty();

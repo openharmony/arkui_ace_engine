@@ -22,11 +22,42 @@
 
 #include "gtest/gtest.h"
 
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "core/components_ng/pattern/flex/flex_model_ng.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-class LayoutAlgorithmTestNg : public TestNG {};
+
+class LayoutAlgorithmTestNg : public TestNG {
+public:
+    static void SetUpTestSuite()
+    {
+        TestNG::SetUpTestSuite();
+        MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+        MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    }
+    static void TearDownTestSuite()
+    {
+        MockPipelineContext::TearDown();
+        MockContainer::TearDown();
+        TestNG::TearDownTestSuite();
+    }
+    RefPtr<FrameNode> CreateFlex(const std::function<void(FlexModelNG)>& callback)
+    {
+        FlexModelNG model;
+        model.CreateFlexRow();
+        if (callback) {
+            callback(model);
+        }
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        return AceType::DynamicCast<FrameNode>(element);
+    }
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_LAYOUT_ALGORITHM_TEST_NG_H

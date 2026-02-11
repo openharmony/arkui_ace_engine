@@ -1061,4 +1061,5 @@ function exportView() {
     globalThis.RichEditor = JSRichEditor;
 }
 
-export default { ArkRichEditorComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkRichEditorComponent, createComponent, exportComponent, exportView, loadComponent };

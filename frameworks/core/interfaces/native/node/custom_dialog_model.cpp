@@ -76,6 +76,7 @@ static void CloseDialogHandle(void* dialogHandle)
     CHECK_NULL_VOID(dialogHandle);
     auto* dialogNode = reinterpret_cast<FrameNode*>(dialogHandle);
     CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
     UnregisterOnWillDialogDismiss(dialogNode);
     CustomDialogControllerModelNG::SetCloseDialogForNDK(dialogNode);
     if (dialogNode) {
@@ -167,6 +168,7 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
         UnregisterOnWillDialogDismiss(dialog);
         dialog->DecRefCount();
     }
+    ACE_UINODE_TRACE(dialog);
     // 关闭非最新一次创建的Dialog
     CloseHistoryDialog(controllerHandler);
     controllerHandler->dialogHandle = nullptr;
@@ -742,6 +744,7 @@ ArkUI_Int32 ShowDialog(ArkUIDialogHandle controllerHandler, bool showInSubWindow
     CHECK_NULL_RETURN(contentNode, ERROR_CODE_PARAM_INVALID);
     auto contentPtr = AceType::Claim<FrameNode>(contentNode);
     auto dialogNode = CustomDialogControllerModelNG::SetOpenDialogWithNode(dialogProperties, contentPtr);
+    ACE_UINODE_TRACE(dialogNode);
     if (dialogNode) {
         dialogNode->IncRefCount();
     }
@@ -757,6 +760,7 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle controllerHandler)
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
+    ACE_UINODE_TRACE(dialogNode);
     CustomDialogControllerModelNG::SetCloseDialogForNDK(dialogNode);
     // 关闭Dialog时同步解绑节点上的OnWillDismiss事件，防止悬空指针回调
     UnregisterOnWillDialogDismiss(dialogNode);
@@ -788,6 +792,7 @@ ArkUI_Int32 GetDialogState(ArkUIDialogHandle controllerHandler, ArkUI_Int32* dia
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     auto* dialogNode = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     CHECK_NULL_RETURN(dialogNode, ERROR_CODE_PARAM_INVALID);
+    ACE_UINODE_TRACE(dialogNode);
     *dialogState = static_cast<int32_t>(CustomDialogControllerModelNG::GetStateWithNode(dialogNode));
     return ERROR_CODE_NO_ERROR;
 }

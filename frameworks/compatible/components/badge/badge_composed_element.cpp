@@ -70,19 +70,20 @@ std::string BadgeComposedElement::GetMaxCount(void) const
 std::string BadgeComposedElement::GetBadgePosition(void) const
 {
     auto renderBadge = GetRenderBadge();
+    if (!renderBadge) {
+        return std::string("-");
+    }
     auto badgeComponent = renderBadge->GetBadgeComponent();
     if (!badgeComponent->IsPositionXy()) {
-        if (renderBadge) {
-            switch (renderBadge->GetBadgeComponent()->GetBadgePosition()) {
-                case BadgePosition::RIGHT_TOP:
-                    return std::string("BadgePosition.RightTop");
-                case BadgePosition::RIGHT:
-                    return std::string("BadgePosition.Right");
-                case BadgePosition::LEFT:
-                    return std::string("BadgePosition.Left");
-                default:
-                    break;
-            }
+        switch (renderBadge->GetBadgeComponent()->GetBadgePosition()) {
+            case BadgePosition::RIGHT_TOP:
+                return std::string("BadgePosition.RightTop");
+            case BadgePosition::RIGHT:
+                return std::string("BadgePosition.Right");
+            case BadgePosition::LEFT:
+                return std::string("BadgePosition.Left");
+            default:
+                break;
         }
         return std::string("-");
     } else {

@@ -63,19 +63,51 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 } // namespace NavigationModifier
 
 namespace NavigationInterfaceModifier {
-void SetNavigationOptionsImpl(Ark_NativePointer node,
-                              const Opt_NavPathStack* pathInfos,
-                              const Opt_NavigationModuleInfo* moduleInfo)
+void SetNavigationOptions0Impl(Ark_NativePointer node,
+                               const Opt_NavPathStack* pathInfos,
+                               const Opt_NavigationModuleInfo* moduleInfo)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pathInfos);
+    NavigationModelStatic::SetUseHomeDestination(frameNode, false);
     auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     auto pathStack = pathInfos->value;
     CHECK_NULL_VOID(pathStack);
     auto navigationStack = pathStack->GetNavPathStack();
     navigationPattern->SetNavigationStack(navigationStack, false);
+    navigationStack->RegisterOnResultCallback();
+    // update path stack need to sync stack immediately
+    navigationStack->InvokeOnStateChanged();
+}
+void SetNavigationOptions1Impl(Ark_NativePointer node,
+                               const Opt_NavPathStack* pathInfos,
+                               const Opt_HomePathInfo* homeDestination,
+                               const Opt_NavigationModuleInfo* moduleInfo)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pathInfos);
+    CHECK_NULL_VOID(homeDestination);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto pathStack = pathInfos->value;
+    CHECK_NULL_VOID(pathStack);
+    auto navigationStack = pathStack->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
+    if (homeDestination->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavigationContext::HomePathInfo homePathInfo;
+        homePathInfo.name = Converter::Convert<std::string>(homeDestination->value.name);
+        homePathInfo.param = Converter::OptConvertPtr<Nav::ExternalData>(
+            &homeDestination->value.param).value_or(Nav::ExternalData{});
+        navigationStack->SetHomePathInfo(std::move(homePathInfo));
+        NavigationModelStatic::SetUseHomeDestination(frameNode, true);
+    } else {
+        NavigationModelStatic::SetUseHomeDestination(frameNode, false);
+    }
+    navigationPattern->SetNavigationStack(navigationStack, false);
+    navigationStack->RegisterOnResultCallback();
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
 }
@@ -351,6 +383,14 @@ void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     NavigationModelStatic::SetEnableModeChangeAnimation(frameNode,
         Converter::OptConvertPtr<bool>(value).value_or(true));
+}
+void SetEnableVisibilityLifecycleWithContentCoverImpl(Ark_NativePointer node,
+                                                      const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelStatic::SetEnableVisibilityLifecycleWithContentCover(
+        frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
 void SetBackButtonIconImpl(Ark_NativePointer node,
                             const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
@@ -680,7 +720,8 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
 {
     static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
         NavigationModifier::ConstructImpl,
-        NavigationInterfaceModifier::SetNavigationOptionsImpl,
+        NavigationInterfaceModifier::SetNavigationOptions0Impl,
+        NavigationInterfaceModifier::SetNavigationOptions1Impl,
         NavigationAttributeModifier::SetNavBarWidthImpl,
         NavigationAttributeModifier::SetNavBarPositionImpl,
         NavigationAttributeModifier::SetNavBarWidthRangeImpl,
@@ -701,6 +742,7 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::SetEnableDragBarImpl,
         NavigationAttributeModifier::SetDividerImpl,
         NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
+        NavigationAttributeModifier::SetEnableVisibilityLifecycleWithContentCoverImpl,
         NavigationAttributeModifier::SetBackButtonIconImpl,
         NavigationAttributeModifier::SetTitleImpl,
         NavigationAttributeModifier::SetHideTitleBar1Impl,

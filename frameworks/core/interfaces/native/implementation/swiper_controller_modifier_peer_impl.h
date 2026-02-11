@@ -80,6 +80,38 @@ public:
             controller->SetPreloadFinishCallback(preloadFinishCallback);
         }
     }
+
+    bool TriggerStartFakeDrag() const
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            return controller->StartFakeDrag();
+        }
+        return false;
+    }
+
+    bool TriggerFakeDragBy(float offset) const
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            return controller->FakeDragBy(offset);
+        }
+        return false;
+    }
+
+    bool TriggerStopFakeDrag() const
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            return controller->StopFakeDrag();
+        }
+        return false;
+    }
+
+    bool TriggerIsFakeDragging() const
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            return controller->IsFakeDragging();
+        }
+        return false;
+    }
 private:
     Ace::WeakPtr<SwiperController> handler_;
 };

@@ -113,6 +113,7 @@ void SetDataImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
     CHECK_NULL_VOID(unifiedData);
+    peer->dragInfo->SetUseDataLoadParams(false);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
 Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)

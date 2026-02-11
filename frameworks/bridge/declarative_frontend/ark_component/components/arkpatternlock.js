@@ -368,5 +368,5 @@ function exportComponent() {
 function exportView() {
     globalThis.PatternLock = JSPatternLock;
 }
-
-export default { ArkPatternLockComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkPatternLockComponent, createComponent, exportComponent, exportView, loadComponent };

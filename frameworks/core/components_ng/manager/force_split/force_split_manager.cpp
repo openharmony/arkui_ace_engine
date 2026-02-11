@@ -21,6 +21,14 @@
 #include "core/common/force_split/force_split_utils.h"
 
 namespace OHOS::Ace::NG {
+bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
+{
+    if (isRouter) {
+        return isForceSplitEnable_ && isRouter_;
+    }
+    return isForceSplitEnable_ && !isRouter_ && !disableNavForceSplitInternal_;
+}
+
 void ForceSplitManager::SetForceSplitEnable(bool isForceSplit)
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit", (isForceSplit ? "enable" : "disable"));
@@ -33,6 +41,11 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit)
         return;
     }
     isForceSplitEnable_ = isForceSplit;
+    OnForceSplitEnableChange();
+}
+
+void ForceSplitManager::OnForceSplitEnableChange()
+{
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
     UpdateIsInForceSplitMode();
@@ -48,7 +61,24 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit)
     }
     NotifyForceSplitStateChange();
 }
- 
+
+void ForceSplitManager::SetNavigationForceSplitEnableInternal(bool enableSplit)
+{
+    if (!isForceSplitSupported_ || isRouter_) {
+        return;
+    }
+    if (disableNavForceSplitInternal_ != enableSplit) {
+        return;
+    }
+    disableNavForceSplitInternal_ = !enableSplit;
+    OnForceSplitEnableChange();
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    windowManager->NotifyForceFullScreenChange(!enableSplit);
+}
+
 void ForceSplitManager::NotifyForceFullScreenChange(bool isForceFullScreen)
 {
     auto context = pipeline_.Upgrade();
@@ -71,7 +101,7 @@ void ForceSplitManager::UpdateIsInForceSplitMode()
     auto windowManager = context->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     bool forceSplitSuccess = false;
-    if (isForceSplitEnable_) {
+    if (isForceSplitEnable_ && (isRouter_ || !disableNavForceSplitInternal_)) {
         /**
          * The force split mode must meet the following conditions to take effect:
          *   1. Belonging to the main window of the application

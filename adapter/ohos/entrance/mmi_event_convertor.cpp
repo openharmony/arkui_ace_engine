@@ -30,6 +30,10 @@ constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
 constexpr int32_t DIGIT_X_REVERSE = 23;
 constexpr int32_t DIGIT_Y_REVERSE = 24;
+constexpr int32_t DEFAULT_MOUSE_PROCESS_TOUCH_ID = 0;
+
+// Force value for mouse to touch event conversion
+constexpr float MOUSE_TO_TOUCH_FORCE = 3.0f;
 
 TouchType ConvertTouchEventType(int32_t originAction)
 {
@@ -1215,5 +1219,35 @@ MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEve
     CHECK_NULL_RETURN(pointerEvent, MouseAction::NONE);
     auto pointerAction = pointerEvent->GetPointerAction();
     return ConvertMouseEventAction(pointerAction);
+}
+
+bool ProcessMouseToTouchEvent(const MouseEvent& event, TouchEvent& touchEvent, int32_t pointerAction)
+{
+    // Only process PRESS/MOVE/RELEASE/CANCEL event
+    switch (pointerAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            break;
+        default:
+            return false;
+    }
+
+    // Convert touch event properties
+    touchEvent = event.CreateTouchPoint();
+    touchEvent.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+    touchEvent.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+    for (auto& item : touchEvent.pointers) {
+        item.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+        item.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+        item.isPressed = (touchEvent.type == TouchType::DOWN) || (touchEvent.type == TouchType::MOVE);
+    }
+    touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+    touchEvent.convertInfo.second = UIInputEventType::TOUCH;
+    touchEvent.SetSourceType(SourceType::TOUCH);
+    touchEvent.force = MOUSE_TO_TOUCH_FORCE;
+
+    return true;
 }
 } // namespace OHOS::Ace::Platform

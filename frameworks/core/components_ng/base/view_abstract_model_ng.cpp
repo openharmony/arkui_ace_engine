@@ -218,6 +218,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
     CHECK_NULL_RETURN(overlayManager, false);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_RETURN(menuNode, false);
+    ACE_UINODE_TRACE(menuNode);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(wrapperPattern, false);
     if (menuParam.hasTransitionEffect) {
@@ -295,6 +296,7 @@ void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetIsShowFromUser(isShow);
@@ -319,6 +321,7 @@ void BindContextMenuSingle(
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -605,6 +608,7 @@ static bool SetMenuTransitionEffect(const RefPtr<FrameNode>& targetNode, const M
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_RETURN(overlayManager, false);
         auto menuNode = overlayManager->GetMenuNode(targetId);
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();

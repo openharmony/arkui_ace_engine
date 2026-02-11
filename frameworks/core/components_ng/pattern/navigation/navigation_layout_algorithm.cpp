@@ -401,6 +401,9 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
                                   navigationLayoutProperty->GetHideNavBar().value_or(false);
             hostNode->SetNeedSetInvisible(navbarIsHidden);
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (pattern->GetIsTargetForceSplitNav()) {
+                pattern->UpdateForceSplitHomeDestVisibility();
+            }
         }
     });
     AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
@@ -589,6 +592,15 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
         navigationPattern->SetNavigationMode(usrNavigationMode);
         navigationPattern->SetIsSplitDisplay(isSplitDisplay);
         navigationPattern->SetNavigationModeChange(modeChange);
+    }
+    if (navigationPattern->GetIsTargetForceSplitNav() && isSplitDisplayChange &&
+        !doModeSwitchAnimationInAnotherTask && !hostNode->IsOnModeSwitchAnimation()) {
+        // When switching the forceSplit display mode, we need udpate visibility of HomeType NavDestination.
+        pipeline->AddAfterLayoutTask([weakPattern = WeakPtr<NavigationPattern>(navigationPattern)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateForceSplitHomeDestVisibility();
+        });
     }
     pipeline->AddAfterLayoutTask([weakNavigationPattern = WeakPtr<NavigationPattern>(navigationPattern),
         modeChange, doModeSwitchAnimationInAnotherTask, isSplitDisplayChange]() {

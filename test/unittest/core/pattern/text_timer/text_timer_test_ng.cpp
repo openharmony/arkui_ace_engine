@@ -1513,4 +1513,85 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest013, TestSize.Level0)
     model.SetFontSizeByUser(frameNode, true);
     EXPECT_EQ(layoutProperty->GetTextFontSizeSetByUser(), false);
 }
+
+/**
+ * @tc.name: TextTimerTextColorSyncTest001
+ * @tc.desc: Test SetTextColor updates child Text node color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTextColorSyncTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textTimer frameNode.
+     */
+    TextTimerModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get text child node.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. call SetTextColor and verify child Text node properties are updated.
+     */
+    model.SetTextColor(TEXT_COLOR_VALUE);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step4. verify layout property is also updated.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_TRUE(layoutProperty->GetTextColorSetByUser());
+}
+
+/**
+ * @tc.name: TextTimerTextColorSyncTest002
+ * @tc.desc: Test SetFontColor with FrameNode updates child Text node color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTextColorSyncTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textTimer frameNode.
+     */
+    TextTimerModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get text child node.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. call SetFontColor with frameNode and verify child Text node properties are updated.
+     */
+    Color testColor = Color::FromRGB(128, 128, 128);
+    TextTimerModelNG::SetFontColor(frameNode, testColor);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step4. verify layout property is also updated.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
+    EXPECT_TRUE(layoutProperty->GetTextColorSetByUser());
+}
 } // namespace OHOS::Ace::NG

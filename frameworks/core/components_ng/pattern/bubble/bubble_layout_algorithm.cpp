@@ -338,6 +338,7 @@ void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool 
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
+    ACE_UINODE_TRACE(bubbleNode);
     auto pipelineContext = bubbleNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
@@ -389,6 +390,7 @@ void BubbleLayoutAlgorithm::FitMouseOffset(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     RefPtr<PipelineContext> pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
@@ -426,6 +428,8 @@ void BubbleLayoutAlgorithm::FitMouseOffset(LayoutWrapper* layoutWrapper)
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    ACE_UINODE_TRACE(host);
     auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
     auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -556,6 +560,7 @@ Dimension GetMaxWith(uint32_t maxColumns)
 
 SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode)
 {
+    ACE_UINODE_TRACE(frameNode);
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, SizeF());
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
@@ -612,6 +617,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     RefPtr<FrameNode> bubbleNode, bool showInSubWindow, LayoutWrapper* layoutWrapper)
 {
     enableArrow_ = followCursor_ ? false : bubbleProp->GetEnableArrow().value_or(false);
+    ACE_UINODE_TRACE(bubbleNode);
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     auto bubblePaintProperty = bubbleNode->GetPaintProperty<BubbleRenderProperty>();
@@ -665,6 +671,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(bubbleProp);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -751,6 +758,7 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
             rects.emplace_back(hostWindowRect_);
             rects.emplace_back(rect);
         }
+        ACE_UINODE_TRACE(frameNode);
         auto context = frameNode->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
@@ -877,6 +885,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
+    ACE_UINODE_TRACE(bubbleNode);
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(bubblePattern);
     avoidKeyboard_ = bubblePattern->GetAvoidKeyboard();
@@ -967,6 +976,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
+    ACE_UINODE_TRACE(bubbleNode);
     CHECK_NULL_VOID(layoutProp);
     auto enableHoverMode = layoutProp->GetEnableHoverMode();
     auto context = bubbleNode->GetContext();
@@ -1015,6 +1025,7 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper)
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
+    ACE_UINODE_TRACE(bubbleNode);
     auto columnNode = AceType::DynamicCast<FrameNode>(bubbleNode->GetLastChild());
     CHECK_NULL_VOID(columnNode);
     auto lastColumnNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
@@ -2335,6 +2346,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
     }
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
+    ACE_UINODE_TRACE(targetNode);
     if (!targetNode->IsOnMainTree() && !targetNode->IsVisible()) {
         return;
     }

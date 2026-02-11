@@ -1588,32 +1588,44 @@ void TextPickerColumnPattern::CreateReboundAnimation(double from, double to)
 
 void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir)
 {
-    auto shiftThreshold = shiftDistance / HALF_NUMBER;
-    uint32_t totalOptionCount = GetOptionCount();
-    uint32_t currentEnterIndex = GetCurrentIndex();
-    auto isOverScroll = NotLoopOptions() && overscroller_.IsOverScroll();
+    const auto totalOptionCount = GetOptionCount();
     if (totalOptionCount == 0) {
         return;
     }
+
+    const auto isNotLoop = NotLoopOptions();
+    const auto isOverScroll = isNotLoop && overscroller_.IsOverScroll();
+    if (isOverScroll) {
+        return;
+    }
+
+    const auto prevEnterIndex = GetEnterIndex();
+    const auto currentIndex = GetCurrentIndex();
+    auto newEnterIndex = currentIndex;
     if (dir == ScrollDirection::UP) {
-        currentEnterIndex = (totalOptionCount + currentEnterIndex + 1) % totalOptionCount;
+        newEnterIndex = (newEnterIndex + 1) % totalOptionCount;
+        if (isNotLoop && newEnterIndex == 0) {
+            return;
+        }
     } else {
-        auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
-        currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
+        newEnterIndex = (newEnterIndex + totalOptionCount - 1) % totalOptionCount;
+        if (isNotLoop && newEnterIndex == totalOptionCount - 1) {
+            return;
+        }
     }
-    bool isDragReverse = false;
-    if (GreatNotEqual(std::abs(enterDelta_), std::abs(scrollDelta))) {
-        isDragReverse = true;
-    }
+
+    const bool isDragReverse = GreatNotEqual(std::abs(enterDelta_), std::abs(scrollDelta));
     enterDelta_ = (NearEqual(scrollDelta, shiftDistance)) ? 0.0 : scrollDelta;
-    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
-        !isOverScroll) {
-        SetEnterIndex(currentEnterIndex);
+    const auto shiftThreshold = shiftDistance / HALF_NUMBER;
+    const auto absScroll = std::abs(scrollDelta);
+    if (GreatOrEqual(absScroll, std::abs(shiftThreshold)) && prevEnterIndex != newEnterIndex) {
+        SetEnterIndex(newEnterIndex);
         HandleEnterSelectedAreaEventCallback(true);
+        return;
     }
-    if (isDragReverse && LessOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) &&
-        GetEnterIndex() != GetCurrentIndex() && !isOverScroll) {
-        SetEnterIndex(GetCurrentIndex());
+
+    if (isDragReverse && LessOrEqual(absScroll, std::abs(shiftThreshold)) && prevEnterIndex != currentIndex) {
+        SetEnterIndex(currentIndex);
         HandleEnterSelectedAreaEventCallback(true);
     }
 }

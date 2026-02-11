@@ -65,6 +65,18 @@ Ark_TextStyle ConstructImpl(const Opt_TextStyleInterface* value)
         }
         font.fontFamiliesNG = fontFamilies;
         font.fontStyle = Converter::OptConvert<Ace::FontStyle>(options->fontStyle);
+        font.superscript = Converter::OptConvert<SuperscriptStyle>(options->superscript);
+        if (!font.superscript) {
+            font.superscript = SuperscriptStyle::NORMAL;
+        }
+        font.strokeWidth = Converter::OptConvert<Dimension>(options->strokeWidth);
+        if (!font.strokeWidth) {
+            font.strokeWidth = CalcDimension();
+        }
+        font.strokeColor = Converter::OptConvert<Color>(options->strokeColor);
+        if (!font.strokeColor) {
+            font.strokeColor = font.fontColor;
+        }
     }
     peer->span = Referenced::MakeRefPtr<FontSpan>(font);
 
@@ -118,6 +130,30 @@ Opt_FontStyle GetFontStyleImpl(Ark_TextStyle peer)
     CHECK_NULL_RETURN(peer->span, invalidValue);
     return Converter::ArkValue<Opt_FontStyle>(peer->span->GetFont().fontStyle);
 }
+Opt_SuperscriptStyle GetSuperscriptImpl(Ark_TextStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_SuperscriptStyle>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    return Converter::ArkValue<Opt_SuperscriptStyle>(peer->span->GetFont().superscript);
+}
+Opt_Float64 GetStrokeWidthImpl(Ark_TextStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_Float64>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    std::optional<Dimension> strokeWidth = peer->span->GetFont().strokeWidth;
+    CHECK_NULL_RETURN(strokeWidth.has_value(), invalidValue);
+    return Converter::ArkValue<Opt_Float64>(strokeWidth.value().ConvertToVp());
+}
+Opt_ResourceColor GetStrokeColorImpl(Ark_TextStyle peer)
+{
+    auto invalidValue = Converter::ArkValue<Opt_ResourceColor>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    auto color = peer->span->GetFont().strokeColor;
+    return Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
+}
 } // TextStyleAccessor
 const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
 {
@@ -130,6 +166,9 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
         TextStyleAccessor::GetFontSizeImpl,
         TextStyleAccessor::GetFontWeightImpl,
         TextStyleAccessor::GetFontStyleImpl,
+        TextStyleAccessor::GetSuperscriptImpl,
+        TextStyleAccessor::GetStrokeWidthImpl,
+        TextStyleAccessor::GetStrokeColorImpl,
     };
     return &TextStyleAccessorImpl;
 }

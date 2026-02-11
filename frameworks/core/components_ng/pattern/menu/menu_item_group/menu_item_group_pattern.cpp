@@ -81,6 +81,7 @@ void MenuItemGroupPattern::ModifyFontSize()
 {
     auto menu = GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     auto menuFontSize = menuProperty->GetFontSize();
@@ -203,6 +204,7 @@ void MenuItemGroupPattern::ModifyDivider()
 {
     auto menu = GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     auto host = GetHost();

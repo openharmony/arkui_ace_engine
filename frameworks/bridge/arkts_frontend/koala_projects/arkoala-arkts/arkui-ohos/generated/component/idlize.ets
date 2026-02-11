@@ -3754,10 +3754,10 @@ export class NavExtender {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_popToName(toPeerPtr(pathStack), name, animated ? 1 : 0)
         return retval
     }
-    static setCreateNavDestinationCallback_serialize(peer: NavPathStack, callback: NavExtender_CreateNavDestination): void {
+    static setNavDestinationRouterMapBuilderCallback_serialize(navigation: KPointer, callback: NavExtender_PageMapNodeBuilder): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback)
-        ArkUIGeneratedNativeModule._NavExtender_setCreateNavDestinationCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavExtender_setNavDestinationRouterMapBuilderCallback(navigation, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     static getRouteMapInConfig_serialize(context: KPointer): Array<string> {
@@ -3770,6 +3770,9 @@ export class NavExtender {
         }
         const returnResult: Array<string> = buffer
         return returnResult
+    }
+    static setSplitPlaceholder_serialize(navigation: KPointer, placeholderNode: KPointer): void {
+        ArkUIGeneratedNativeModule._NavExtender_setSplitPlaceholder(navigation, placeholderNode)
     }
     public static setNavigationOptions(ptr: KPointer, pathStack: NavPathStack): void {
         const ptr_casted = ptr as (KPointer)
@@ -3854,15 +3857,21 @@ export class NavExtender {
         const animated_casted = animated as (boolean)
         return NavExtender.popToName_serialize(pathStack_casted, name_casted, animated_casted)
     }
-    public static setCreateNavDestinationCallback(peer: NavPathStack, callback: NavExtender_CreateNavDestination): void {
-        const peer_casted = peer as (NavPathStack)
-        const callback_casted = callback as (NavExtender_CreateNavDestination)
-        NavExtender.setCreateNavDestinationCallback_serialize(peer_casted, callback_casted)
+    public static setNavDestinationRouterMapBuilderCallback(navigation: KPointer, callback: NavExtender_PageMapNodeBuilder): void {
+        const navigation_casted = navigation as (KPointer)
+        const callback_casted = callback as (NavExtender_PageMapNodeBuilder)
+        NavExtender.setNavDestinationRouterMapBuilderCallback_serialize(navigation_casted, callback_casted)
         return
     }
     public static getRouteMapInConfig(context: KPointer): Array<string> {
         const context_casted = context as (KPointer)
         return NavExtender.getRouteMapInConfig_serialize(context_casted)
+    }
+    public static setSplitPlaceholder(navigation: KPointer, placeholderNode: KPointer): void {
+        const navigation_casted = navigation as (KPointer)
+        const placeholderNode_casted = placeholderNode as (KPointer)
+        NavExtender.setSplitPlaceholder_serialize(navigation_casted, placeholderNode_casted)
+        return
     }
 }
 export class NodeContainerOps {
@@ -6458,7 +6467,6 @@ export interface SizeTLengthMetrics {
 }
 export type NavExtender_OnUpdateStack = () => void;
 export type NavExtender_PageMapNodeBuilder = (url: string, params?: Object) => KPointer;
-export type NavExtender_CreateNavDestination = (index: int32) => KPointer;
 export interface BorderRadiuses_graphics {
     topLeft: number;
     topRight: number;

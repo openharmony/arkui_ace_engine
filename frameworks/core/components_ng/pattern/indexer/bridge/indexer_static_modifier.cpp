@@ -27,6 +27,7 @@ namespace {
 constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
 constexpr Dimension DEFAULT_POPUP_ITEM_BORDER_RADIUS = 24.0_vp;
 constexpr Dimension DEFAULT_ITEM_BORDER_RADIUS = 8.0_vp;
+constexpr Dimension RADIUS_OFFSET = 4.0_vp;
 } // namespace
 namespace Converter {
 
@@ -315,9 +316,12 @@ void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
     auto radius = Converter::OptConvertPtr<Dimension>(value);
     if (!radius) {
         IndexerModelStatic::SetPopupItemBorderRadius(frameNode, DEFAULT_POPUP_ITEM_BORDER_RADIUS);
+        IndexerModelStatic::SetPopupBorderRadius(frameNode, DEFAULT_POPUP_ITEM_BORDER_RADIUS + RADIUS_OFFSET);
+        return;
     }
     Validator::ValidateNonNegative(radius);
-    IndexerModelStatic::SetPopupItemBorderRadius(frameNode, radius);
+    IndexerModelStatic::SetPopupItemBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
+    IndexerModelStatic::SetPopupBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
 }
 void SetItemBorderRadiusImpl(Ark_NativePointer node,
                              const Opt_Float64* value)
@@ -327,9 +331,12 @@ void SetItemBorderRadiusImpl(Ark_NativePointer node,
     auto radius = Converter::OptConvertPtr<Dimension>(value);
     if (!radius) {
         IndexerModelStatic::SetItemBorderRadius(frameNode, DEFAULT_ITEM_BORDER_RADIUS);
+        IndexerModelStatic::SetIndexerBorderRadius(frameNode, DEFAULT_ITEM_BORDER_RADIUS + RADIUS_OFFSET);
+        return;
     }
     Validator::ValidateNonNegative(radius);
-    IndexerModelStatic::SetItemBorderRadius(frameNode, radius);
+    IndexerModelStatic::SetItemBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
+    IndexerModelStatic::SetIndexerBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
 }
 void SetPopupBackgroundBlurStyleImpl(Ark_NativePointer node,
                                      const Opt_BlurStyle* value)

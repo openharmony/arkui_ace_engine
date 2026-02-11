@@ -55,9 +55,11 @@ public:
         return isForceSplitSupported_ && isRouter_ == isRouter;
     }
     void SetForceSplitEnable(bool isForceSplit);
-    bool IsForceSplitEnable(bool isRouter) const
+    bool IsForceSplitEnable(bool isRouter) const;
+    void SetNavigationForceSplitEnableInternal(bool enableSplit);
+    bool GetDisableNavForceSplitInternal() const
     {
-        return isForceSplitEnable_ && isRouter_ == isRouter;
+        return disableNavForceSplitInternal_;
     }
 
     void UpdateIsInForceSplitMode();
@@ -108,6 +110,8 @@ public:
     }
 
 private:
+    void OnForceSplitEnableChange();
+
     WeakPtr<PipelineContext> pipeline_;
     bool hasSetForceSplitConfig_ = false;
     bool isForceSplitSupported_ = false;
@@ -118,6 +122,8 @@ private:
     std::string relatedPageName_;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
     int32_t appIconId_ = 0;
+    // for navigation force split, we need disable forcesplit before router transition.
+    bool disableNavForceSplitInternal_ = false;
 };
 } // namespace OHOS::Ace::NG
 

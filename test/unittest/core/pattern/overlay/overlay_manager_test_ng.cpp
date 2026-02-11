@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -32,6 +33,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "core/common/display_info.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -1549,6 +1551,39 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet006, TestSize.Level1)
      */
     overlayManager->PlayBubbleStyleSheetTransition(topSheetNode, true);
     EXPECT_EQ(topSheetPattern->height_, topSheetPattern->sheetHeightForTranslate_);
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease001
+ * @tc.desc: Test IsNeedAvoidFoldCrease with EXTEND source mode in expand display
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, IsNeedAvoidFoldCrease001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with pipeline context
+     */
+    auto frameNode = OverlayManagerTestNg::CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set DisplaySourceMode to EXTEND to trigger branch
+     */
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+
+    auto displayInfo = mockContainer->GetMockDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::EXTEND);
+    mockContainer->SetDisplayInfo(displayInfo);
+
+    /**
+     * @tc.steps: step3. Call IsNeedAvoidFoldCrease with expandDisplay=true
+     * @tc.expected: Returns false because branch is taken:
+     *               if (expandDisplay && sourceMode == DisplaySourceMode::EXTEND)
+     */
+    bool result = OverlayManager::IsNeedAvoidFoldCrease(frameNode, false, true, std::nullopt);
+    EXPECT_FALSE(result);
 }
 
 /**

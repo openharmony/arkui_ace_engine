@@ -80,5 +80,5 @@ function exportComponent() {
 function exportView() {
   globalThis.FlowItem = JSFlowItem;
 }
-
-export default { ArkFlowItemComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkFlowItemComponent, createComponent, exportComponent, exportView, loadComponent };

@@ -611,6 +611,7 @@ void SelectModelNG::SetColorStatus(FrameNode* frameNode, const SelectColorType& 
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_VOID(menuModifier);
     menuModifier->setDisableMenuBgColorByUser(menuNode, true);
@@ -808,6 +809,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     } else {
         auto menuNode = pattern->GetMenuNode();
         CHECK_NULL_VOID(menuNode);
+        ACE_UINODE_TRACE(menuNode);
         const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
         CHECK_NULL_VOID(menuModifier);
         menuModifier->updateSelectParam(menuNode, params);
@@ -1035,6 +1037,7 @@ void SelectModelNG::ResetBuilderFunc(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_VOID(menuModifier);
     menuModifier->resetBuilderFunc(menuNode);
@@ -1047,6 +1050,7 @@ void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_VOID(menuModifier);
     menuModifier->setBuilderFunc(menuNode, std::move(makeFunc));

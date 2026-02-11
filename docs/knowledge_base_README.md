@@ -19,15 +19,15 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-06）：
+**统计数据**（截至 2026-02-07）：
 
-- 总知识库文档: 32 个
-- 组件知识库: 26 个
-- SDK API 知识库: 1 个
+- 总知识库文档: 33 个
+- 组件知识库: 27 个
+- SDK API 知识库: 2 个
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
 - 覆盖组件: 26 个
-- 检索关键词: 200+ 个
+- 检索关键词: 220+ 个
 
 ---
 
@@ -39,12 +39,23 @@ knowledge_base/
 ├── cj_frontend/           # CJ Frontend 桥接层知识库
 │   └── CJ_Frontend_Guide.md                   # 综合指南
 ├── sdk/                   # SDK 相关知识库
-│   └── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
+│   ├── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
+│   └── Component_API_Knowledge_Base_CN.md     # ArkUI 组件 API 知识库
 ├── pattern/               # 组件模式知识库
 │   ├── badge/
 │   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
 │   ├── calendar_picker/
 │   │   └── Calendar_Picker_Knowledge_Base.md  # CalendarPicker 组件知识库
+│   ├── counter/
+│   │   └── Counter_Knowledge_Base.md          # Counter 组件知识库
+│   ├── flex/
+│   │   └── Flex_Knowledge_Base.md             # Flex/Row/Column/Wrap 组件知识库
+│   ├── gauge/
+│   │   └── Gauge_Knowledge_Base.md             # Gauge 组件知识库
+│   ├── grid/
+│   │   └── Grid_Knowledge_Base.md          # Grid 组件知识库
+│   ├── image/
+│   │   └── Image_Knowledge_Base.md             # Image 组件知识库
 │   ├── container_picker/
 │   │   └── Container_Picker_Knowledge_Base.md # ContainerPicker 组件知识库
 │   ├── counter/
@@ -176,6 +187,41 @@ knowledge_base/
 
 ---
 
+### Component API Knowledge Base
+
+**位置**: `sdk/Component_API_Knowledge_Base_CN.md`
+
+**组件 API 指南** - OpenHarmony ArkUI 组件 API (`@internal/component/ets`) 的完整分析文档
+
+**包含内容**：
+
+- **概述**：组件 API 定位、与公开 API 的区别、代码规模统计
+- **公开 API vs 组件 API**：目录结构对比、文件命名对比、使用场景对比
+- **组件 API 分类**：120+ 个组件按功能分类（基础、容器、选择器、形状、媒体等）
+- **特殊文件说明**：通用类型文件、通用 API 文件、系统组件文件
+- **类型定义规范**：JSDoc 标签说明（@since、@crossplatform、@form、@atomicservice）、版本兼容性处理
+- **使用指南**：查找组件类型定义、理解类型定义、版本兼容性检查
+- **常见问题**：公开 API 和组件 API 的关系、为什么需要组件 API、动态导入说明
+
+**统计数据**：
+- 总文件数: 137 个 `.d.ts` 文件
+- 总代码行数: 184,823 行
+- 组件类型定义: 120+ 个
+- 版本范围: API 7 - API 23
+
+**适用场景**：
+- 理解 ArkUI 框架内部的类型定义组织方式
+- 区分公开 API 与组件 API 的差异
+- 查找组件和接口的类型定义文件
+- 查询 API 从哪个版本开始支持
+- 框架内部开发和维护参考
+
+**相关资源**：
+- 组件 API 目录: `OpenHarmony/interface/sdk-js/api/@internal/component/ets/`
+- ArkUI SDK API 知识库: [ArkUI_SDK_API_Knowledge_Base.md](./sdk/ArkUI_SDK_API_Knowledge_Base.md)
+
+---
+
 ### Menu Component Knowledge Base
 
 **位置**: `pattern/menu/Menu_Knowledge_Base.md`
@@ -192,6 +238,37 @@ knowledge_base/
 - 测试覆盖和调试指南
 
 **适用场景**：Menu 组件开发、测试、问题排查时参考
+
+---
+
+### Grid Component Knowledge Base
+
+**位置**: `pattern/grid/Grid_Knowledge_Base_CN.md`
+
+**完整指南** - Grid 网格布局组件的开发、测试和调试参考文档
+
+**包含内容**：
+
+- **概述**: Grid 组件定位、五种布局算法模式、技术架构
+- **核心类详解**: GridPattern、GridLayoutInfo、GridModelNG 类结构与职责
+- **布局算法体系**: 自适应/静态/自定义/不规则/可滚动五种算法详解
+- **GridLayoutInfo**: 网格矩阵、行高映射、项目位置等核心数据结构
+- **GridItem 子组件**: 行列跨度、生效规则、性能优化建议
+- **完整 API 清单**: ArkTS 和 C++ API 完整列表
+- **事件系统**: 滚动事件、拖拽事件、焦点管理
+- **滚动控制**: Scroller 接口、ScrollAlign 枚举
+- **使用示例**: 5 种布局模式完整示例代码
+- **性能优化**: 虚拟滚动、行跳跃、预加载机制
+- **测试覆盖**: 测试基类、测试目录结构、运行方法
+- **调试指南**: DumpInfo、常见问题排查
+
+**适用场景**：Grid 组件开发、网格布局实现、不规则跨行列项目处理时参考
+
+**代码规模**：
+
+- 核心文件: 约 70 个
+- 核心代码: 约 25,000+ 行 C++ 代码
+- 测试文件: 约 30 个
 
 ---
 

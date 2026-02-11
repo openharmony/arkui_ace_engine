@@ -52,6 +52,7 @@ public:
         pickerTheme->pressColor_ = Color::FromString("#FFFF0000");
         pickerTheme->hoverColor_ = Color::FromString("#FF000000");
         pickerTheme->lunarswitchTextColor_ = Color::FromString("#FF000000");
+        pickerTheme->pickerTextPadding_ = Dimension(16.0, DimensionUnit::VP);
         return pickerTheme;
     }
 };

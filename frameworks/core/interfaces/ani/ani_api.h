@@ -264,6 +264,7 @@ struct ArkUIDragControllerAsync {
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
+    SharedPointerWrapper dataLoadParams;
     SharedPointerWrapper pixelMap;
     std::vector<SharedPointerWrapper> pixelMapList;
     ArkUINodeHandle customBuilderNode = nullptr;

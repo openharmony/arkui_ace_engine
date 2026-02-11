@@ -211,19 +211,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
     CHECK_NULL_RETURN(parentContainer, size);
-    auto foldStatus = parentContainer->GetCurrentFoldStatus();
-    auto displayInfo = defaultDisplay->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, size);
-    auto sourceMode = displayInfo->GetDisplaySourceMode();
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d, FoldStatus: %{public}d, sourceMode: %{public}d",
-        displayId, foldStatus, sourceMode);
-    if (foldStatus == FoldStatus::EXPAND || sourceMode == Rosen::DisplaySourceMode::EXTEND) {
-        return size;
-    }
-
-    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
-    if (isCrossWindow || isSceneBoard) {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d", displayId);
+    if (parentContainer->IsNeedModifySize()) {
         auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
         finalDisplayId = DEFAULT_DISPLAY_ID;
         if (!display) {
@@ -235,9 +224,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow windowId: %{public}d isSceneBoard: %{public}d isCrossWindow: %{public}d "
-        "finalDisplayId: %{public}d  displaySize: %{public}s",
-        parentWindowId, isSceneBoard, isCrossWindow, finalDisplayId, size.ToString().c_str());
+        "parentWindow windowId: %{public}d finalDisplayId: %{public}d  displaySize: %{public}s",
+        parentWindowId, finalDisplayId, size.ToString().c_str());
     return size;
 }
 
@@ -743,6 +731,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
     popupInfo.markNeedUpdate = true;
     ContainerScope scope(childContainerId_);
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideEventColumn();
@@ -756,6 +745,7 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show tips ng enter, subwindowId: %{public}d", window_->GetWindowId());
     auto popup = popupInfo.popupNode;
     CHECK_NULL_VOID(popup);
+    ACE_UINODE_TRACE(popup);
     auto pattern = popup->GetPattern<NG::BubblePattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->IsTipsAppearing()) {
@@ -1074,6 +1064,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
     auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     auto menuNode = customNode;
+    ACE_UINODE_TRACE(menuNode);
     if (customNode->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
         const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
         CHECK_NULL_VOID(menuViewModifier);
@@ -1120,6 +1111,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     auto menuNode = menuViewModifier->createWithCustomNode(
         customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);

@@ -107,6 +107,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto menu = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_RETURN(menu, nullptr);
+        ACE_UINODE_TRACE(menu);
         return menu;
     }
 

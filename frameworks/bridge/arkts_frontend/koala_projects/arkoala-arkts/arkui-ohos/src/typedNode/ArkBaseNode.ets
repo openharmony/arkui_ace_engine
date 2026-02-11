@@ -462,6 +462,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer()?.setOnDragLeaveAttribute(value);
         return this
     }
+    public onDrop(eventCallback: ((event: DragEvent, extraParams?: string) => void) | undefined | OnDragEventCallback | undefined): this {
+        this.getPeer()?.setOnDrop0Attribute(eventCallback);
+        return this
+    }
     public onDrop(eventCallback: ((event: DragEvent, extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         this.getPeer()?.setOnDrop1Attribute(eventCallback, dropOptions);
         return this

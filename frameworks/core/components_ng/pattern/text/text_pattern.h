@@ -1069,7 +1069,7 @@ protected:
     void InitKeyEvent();
     void UpdateShiftFlag(const KeyEvent& keyEvent);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    void HandleOnSelect(KeyCode code);
+    bool HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelection(bool isEmojiStart, int32_t end);

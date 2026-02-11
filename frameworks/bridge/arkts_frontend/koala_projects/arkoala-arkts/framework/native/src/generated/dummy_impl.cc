@@ -9843,16 +9843,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // NavigationModifier
     namespace NavigationInterfaceModifier {
-    void SetNavigationOptionsImpl(Ark_NativePointer node,
-                                  const Opt_NavPathStack* pathInfos,
-                                  const Opt_NavigationModuleInfo* moduleInfo)
+    void SetNavigationOptions0Impl(Ark_NativePointer node,
+                                   const Opt_NavPathStack* pathInfos,
+                                   const Opt_NavigationModuleInfo* moduleInfo)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setNavigationOptions(");
+        string out("setNavigationOptions0(");
         WriteToString(&out, pathInfos);
+        out.append(", ");
+        WriteToString(&out, moduleInfo);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetNavigationOptions1Impl(Ark_NativePointer node,
+                                   const Opt_NavPathStack* pathInfos,
+                                   const Opt_HomePathInfo* homeDestination,
+                                   const Opt_NavigationModuleInfo* moduleInfo)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setNavigationOptions1(");
+        WriteToString(&out, pathInfos);
+        out.append(", ");
+        WriteToString(&out, homeDestination);
         out.append(", ");
         WriteToString(&out, moduleInfo);
         out.append(") \n");
@@ -11591,6 +11609,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnCopy(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillAttachIMEImpl(Ark_NativePointer node,
+                                const Opt_Callback_IMEClient_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillAttachIME(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -24035,7 +24065,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
             NavigationModifier::ConstructImpl,
-            NavigationInterfaceModifier::SetNavigationOptionsImpl,
+            NavigationInterfaceModifier::SetNavigationOptions0Impl,
+            NavigationInterfaceModifier::SetNavigationOptions1Impl,
             NavigationAttributeModifier::SetNavBarWidthImpl,
             NavigationAttributeModifier::SetNavBarPositionImpl,
             NavigationAttributeModifier::SetNavBarWidthRangeImpl,
@@ -24278,6 +24309,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetOnDidChangeImpl,
             RichEditorAttributeModifier::SetOnCutImpl,
             RichEditorAttributeModifier::SetOnCopyImpl,
+            RichEditorAttributeModifier::SetOnWillAttachIMEImpl,
             RichEditorAttributeModifier::SetEditMenuOptionsImpl,
             RichEditorAttributeModifier::SetEnableKeyboardOnFocusImpl,
             RichEditorAttributeModifier::SetEnableHapticFeedbackImpl,
@@ -39722,15 +39754,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    void SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
-                                             const NavExtender_CreateNavDestination* callback)
+    void SetNavDestinationRouterMapBuilderCallbackImpl(Ark_NativePointer navigation,
+                                                       const NavExtender_PageMapNodeBuilder* callback)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setCreateNavDestinationCallback(");
-        WriteToString(&out, peer);
+        string out("setNavDestinationRouterMapBuilderCallback(");
+        WriteToString(&out, navigation);
         out.append(", ");
         WriteToString(&out, callback);
         out.append(") \n");
@@ -39749,6 +39781,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
         return {};
+    }
+    void SetSplitPlaceholderImpl(Ark_NativePointer navigation,
+                                 Ark_NativePointer placeholderNode)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSplitPlaceholder(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, placeholderNode);
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     } // NavExtenderAccessor
     namespace NavigationTransitionProxyAccessor {
@@ -48147,6 +48193,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Opt_SuperscriptStyle GetSuperscriptImpl(Ark_TextStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getSuperscript(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_Float64 GetStrokeWidthImpl(Ark_TextStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStrokeWidth(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_ResourceColor GetStrokeColorImpl(Ark_TextStyle peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStrokeColor(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // TextStyleAccessor
     namespace TextTimerControllerAccessor {
     void DestroyPeerImpl(Ark_TextTimerController peer)
@@ -53411,6 +53493,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::PopToNameImpl,
             NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
             NavExtenderAccessor::GetRouteMapInConfigImpl,
+            NavExtenderAccessor::SetSplitPlaceholderImpl,
         };
         return &NavExtenderAccessorImpl;
     }
@@ -54802,6 +54885,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextStyleAccessor::GetFontSizeImpl,
             TextStyleAccessor::GetFontWeightImpl,
             TextStyleAccessor::GetFontStyleImpl,
+            TextStyleAccessor::GetSuperscriptImpl,
+            TextStyleAccessor::GetStrokeWidthImpl,
+            TextStyleAccessor::GetStrokeColorImpl,
         };
         return &TextStyleAccessorImpl;
     }

@@ -53,6 +53,7 @@ private:
     GridStartLineInfo GetStartIndexByIndex(int32_t index, const GridLayoutOptions& options);
     GridStartLineInfo GetStartIndexByOffset(float offset, const GridLayoutOptions& options);
     void ClearCache();
+    void ClearCacheForReload();
     void FillCurrentLine(int32_t startIndex);
     void MeasureBackward(float mainSize);
     void MeasureForward(float mainSize);
@@ -125,6 +126,7 @@ private:
     bool canOverScrollStart_ = false;
     bool canOverScrollEnd_ = false;
     bool reloadFlag_ = false;
+    std::optional<double> adjustOffset_; // Adjustment offset for automatic jump when crossCount changes
 
     SizeF frameSize_;
     double originalWidth_ = 0.0;

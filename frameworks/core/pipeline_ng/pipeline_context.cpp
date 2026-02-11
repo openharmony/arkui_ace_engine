@@ -4808,6 +4808,7 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent)
 
 bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
+    ContainerScope scope(instanceId_);
     return eventManager_->OnNonPointerEvent(event);
 }
 
@@ -5107,6 +5108,13 @@ void PipelineContext::UpdateFormLinkInfos()
     }
 }
 
+void PipelineContext::OnShowHideForAccessibility(bool isOnShow)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AccessibilityOnShowHide(isOnShow, WeakClaim(this));
+}
+
 void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
@@ -5116,6 +5124,7 @@ void PipelineContext::OnShow()
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     RequestFrame();
     FlushWindowStateChangedCallback(true);
+    OnShowHideForAccessibility(true);
     AccessibilityEvent event;
     event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
     event.type = AccessibilityEventType::PAGE_CHANGE;
@@ -5351,7 +5360,9 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     SetDestroyed();
-    rootNode_->DetachFromMainTree();
+    if (rootNode_) {
+        rootNode_->DetachFromMainTree();
+    }
     std::set<WeakPtr<UINode>> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);
     for (const auto& node : nodeSet) {
@@ -5360,11 +5371,15 @@ void PipelineContext::Destroy()
             illegalNode->DetachFromMainTree();
         }
     }
-    rootNode_->FireCustomDisappear();
+    if (rootNode_) {
+        rootNode_->FireCustomDisappear();
+    }
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
-    rootNode_.Reset();
+    if (rootNode_) {
+        rootNode_.Reset();
+    }
     accessibilityManagerNG_.Reset();
     stageManager_.Reset();
     if (overlayManager_) {

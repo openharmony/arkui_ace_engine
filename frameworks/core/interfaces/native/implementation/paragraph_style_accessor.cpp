@@ -148,7 +148,7 @@ Opt_Union_F64_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle p
     auto style = peer->span->GetParagraphStyle();
     if (style.leadingMargin.has_value() && style.leadingMargin->pixmap) {
         return Converter::ArkUnion<Opt_Union_F64_LeadingMarginPlaceholder,
-            Ark_LeadingMarginPlaceholder>(style.leadingMargin);
+            Ark_LeadingMarginPlaceholder>(style.leadingMargin, Converter::FC);
     } else {
         return Converter::ArkUnion<Opt_Union_F64_LeadingMarginPlaceholder,
             Ark_Float64>(style.leadingMargin);

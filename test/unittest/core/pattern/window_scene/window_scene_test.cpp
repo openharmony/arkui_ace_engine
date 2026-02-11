@@ -568,6 +568,36 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithNoPreloadData, Tes
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(windowScene->startingWindow_, nullptr);
 }
+ 
+/**
+ * @tc.name: OnPreLoadStartingWindowFinished_WithNoStartingWindow
+ * @tc.desc: Test OnPreLoadStartingWindowFinished with no starting window
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithNoStartingWindow, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
+    session->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    ASSERT_EQ(pixelMap, nullptr);
+}
 
 /**
  * @tc.name: OnRestart

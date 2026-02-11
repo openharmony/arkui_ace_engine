@@ -1,271 +1,270 @@
-# Grid 组件文档
+# Grid Component Documentation
 
-本文档记录 Grid 组件的核心架构、实现细节和使用指南。
+This document records the core architecture, implementation details, and usage guide for the Grid component.
 
-## 目录结构
+## Directory Structure
 
 ```
 grid/
-├── Core Implementation (核心实现)
-│   ├── grid_pattern.cpp/h              # Grid 主逻辑和生命周期管理
-│   ├── grid_model_ng.cpp/h             # Grid 数据模型 (ArkTS API 层)
-│   ├── grid_model_static.cpp/h         # 静态 Grid 模型
-│   └── grid_view.h                     # Grid 视图接口
+├── Core Implementation
+│   ├── grid_pattern.cpp/h              # Grid main logic and lifecycle management
+│   ├── grid_model_ng.cpp/h             # Grid data model (ArkTS API layer)
+│   └── grid_model_static.cpp/h         # Static Grid model
 │
-├── Layout Algorithms (布局算法 - 5种类型)
+├── Layout Algorithms (5 types)
 │   │
-│   ├── 1. grid_adaptive/               # 自适应布局算法
+│   ├── 1. grid_adaptive/               # Adaptive layout algorithm
 │   │   └── grid_adaptive_layout_algorithm.cpp/h
-│   │       # 使用场景: 无 columnsTemplate 且无 rowsTemplate
-│   │       # 行为: 项目自适应填充可用空间
+│   │       # Usage: No columnsTemplate and no rowsTemplate
+│   │       # Behavior: Items adaptively fill available space
 │   │
-│   ├── 2. grid_layout/                 # 静态布局算法
+│   ├── 2. grid_layout/                 # Static layout algorithm
 │   │   └── grid_layout_algorithm.cpp/h
-│   │       # 使用场景: columnsTemplate 和 rowsTemplate 都设置
-│   │       # 行为: 固定网格大小, 无滚动
+│   │       # Usage: Both columnsTemplate and rowsTemplate set
+│   │       # Behavior: Fixed grid size, no scrolling
 │   │
-│   ├── 3. grid_custom/                # 自定义布局算法
+│   ├── 3. grid_custom/                # Custom layout algorithm
 │   │   └── grid_custom_layout_algorithm.cpp/h
-│   │       # 使用场景: userDefined_ 标志为 true
-│   │       # 行为: 支持 layoutOptions, 带滚动
-│   │       # 关键方法: Measure(), Layout(), MeasureOnJump()
+│   │       # Usage: userDefined_ flag is true
+│   │       # Behavior: Supports layoutOptions, with scrolling
+│   │       # Key methods: Measure(), Layout(), MeasureOnJump()
 │   │
-│   ├── 4. irregular/                   # 不规则布局算法
-│   │   ├── grid_irregular_filler.cpp/h     # 填充不规则网格
+│   ├── 4. irregular/                   # Irregular layout algorithm
+│   │   ├── grid_irregular_filler.cpp/h     # Fill irregular grids
 │   │   ├── grid_irregular_layout_algorithm.cpp/h
-│   │   │   # 使用场景: UseIrregularLayout() 返回 true
-│   │   │   # 行为: 处理跨多行/多列的项目
-│   │   ├── grid_layout_range_solver.cpp/h  # 求解布局范围
-│   │   └── grid_layout_utils.cpp/h         # 布局工具
+│   │   │   # Usage: UseIrregularLayout() returns true
+│   │   │   # Behavior: Handle items spanning multiple rows/columns
+│   │   ├── grid_layout_range_solver.cpp/h  # Solve layout range
+│   │   └── grid_layout_utils.cpp/h         # Layout utilities
 │   │
-│   ├── 5. grid_scroll/                 # 可滚动布局算法
+│   ├── 5. grid_scroll/                 # Scrollable layout algorithm
 │   │   ├── grid_scroll_layout_algorithm.cpp/h (5A)
-│   │   │   # 使用场景: 设置一个模板, 无 layoutOptions
-│   │   │   # 行为: 纯标准可滚动布局
+│   │   │   # Usage: One template set, no layoutOptions
+│   │   │   # Behavior: Pure standard scrollable layout
 │   │   └── grid_scroll_with_options_layout_algorithm.cpp/h (5B)
-│   │       # 使用场景: 设置一个模板, 部分 layoutOptions
-│   │       # 行为: 标准 + 支持 layoutOptions 回调
+│   │       # Usage: One template set, partial layoutOptions
+│   │       # Behavior: Standard + supports layoutOptions callbacks
 │   │
-│   ├── grid_layout_base_algorithm.cpp/h # 布局算法基类
-│   └── grid_item_layout_algorithm.cpp/h  # GridItem 布局算法
+│   ├── grid_layout_base_algorithm.cpp/h # Layout algorithm base class
+│   └── grid_item_layout_algorithm.cpp/h  # GridItem layout algorithm
 │
-├── Data Structures (数据结构)
-│   ├── grid_layout_info.cpp/h          # 核心布局数据结构
-│   ├── grid_layout_property.cpp/h      # 布局属性
-│   └── grid_layout_options.h           # 布局配置选项
+├── Data Structures
+│   ├── grid_layout_info.cpp/h          # Core layout data structure
+│   ├── grid_layout_property.cpp/h      # Layout properties
+│   └── grid_layout_options.h           # Layout configuration options
 │
-├── GridItem (子组件)
-│   ├── grid_item_pattern.cpp/h         # GridItem 核心逻辑
-│   ├── grid_item_model_ng.cpp/h        # GridItem 模型
-│   └── grid_item_layout_property.cpp/h # GridItem 布局属性
+├── GridItem (Child Component)
+│   ├── grid_item_pattern.cpp/h         # GridItem core logic
+│   ├── grid_item_model_ng.cpp/h        # GridItem model
+│   └── grid_item_layout_property.cpp/h # GridItem layout properties
 │
-├── Functional Modules (功能模块)
-│   ├── grid_event_hub.cpp/h            # 事件处理
-│   ├── grid_focus.cpp/h                # 焦点管理
-│   ├── grid_accessibility_property.cpp/h # 无障碍支持
-│   └── grid_paint_method.cpp/h         # 绘制/渲染
+├── Functional Modules
+│   ├── grid_event_hub.cpp/h            # Event handling
+│   ├── grid_focus.cpp/h                # Focus management
+│   ├── grid_accessibility_property.cpp/h # Accessibility support
+│   └── grid_paint_method.cpp/h         # Painting/rendering
 │
-└── Utilities (工具类)
-    ├── grid_utils.cpp/h                # 工具函数
-    ├── grid_constants.h                # 常量定义
-    └── grid_item_theme.h               # 主题配置
+└── Utilities
+    ├── grid_utils.cpp/h                # Utility functions
+    ├── grid_constants.h                # Constants definition
+    └── grid_item_theme.h               # Theme configuration
 ```
 
-## 核心数据流
+## Core Data Flow
 
 ```
-用户 API 调用 (ArkTS/JS)
+User API Call (ArkTS/JS)
     ↓
-grid_model_ng (接收 API 调用)
+grid_model_ng (receives API call)
     ↓
-grid_pattern (核心逻辑管理)
+grid_pattern (core logic management)
     ↓
-grid_layout_algorithm (布局计算)
+grid_layout_algorithm (layout calculation)
     ↓
-grid_layout_info (存储布局状态)
+grid_layout_info (stores layout state)
     ↓
-渲染和事件处理
+Rendering and event handling
 ```
 
-## 核心类及其职责
+## Core Classes and Responsibilities
 
 ### GridPattern
-**文件**: [grid_pattern.h](grid_pattern.h)
+**File**: [grid_pattern.h](grid_pattern.h)
 
-Grid 组件的主 Pattern 类, 管理组件生命周期、状态和行为。
+The main Pattern class for the Grid component, managing component lifecycle, state, and behavior.
 
-**核心职责**:
-- 组件初始化和生命周期管理
-- 布局协调和事件路由
-- **创建适当的布局算法** ([CreateLayoutAlgorithm()](grid_pattern.cpp#L45))
+**Core Responsibilities**:
+- Component initialization and lifecycle management
+- Layout coordination and event routing
+- **Creating appropriate layout algorithm** ([CreateLayoutAlgorithm()](grid_pattern.cpp#L45))
 
-**关键成员**:
+**Key Members**:
 ```cpp
-GridLayoutInfo info_;        // 布局状态信息
-bool irregular_ = false;     // 是否使用不规则布局
-bool userDefined_ = false;   // 是否使用自定义布局
-GridFocus focusHandler_;     // 焦点处理器
-std::list<GridPreloadItem> preloadItemList_;  // 预加载项列表
+GridLayoutInfo info_;        // Layout state information
+bool irregular_ = false;     // Whether to use irregular layout
+bool userDefined_ = false;   // Whether to use custom layout
+GridFocus focusHandler_;     // Focus handler
+std::list<GridPreloadItem> preloadItemList_;  // Preload item list
 ```
 
-**关键方法**:
-- `CreateLayoutAlgorithm()` - 根据配置选择布局算法
-- `ScrollToIndex()` - 滚动到指定索引
-- `UpdateCurrentOffset()` - 更新滚动偏移
-- `OnModifyDone()` - 属性修改完成回调
+**Key Methods**:
+- `CreateLayoutAlgorithm()` - Select layout algorithm based on configuration
+- `ScrollToIndex()` - Scroll to specified index
+- `UpdateCurrentOffset()` - Update scroll offset
+- `OnModifyDone()` - Property modification completion callback
 
 ### GridLayoutInfo
-**文件**: [grid_layout_info.h](grid_layout_info.h)
+**File**: [grid_layout_info.h](grid_layout_info.h)
 
-Grid 布局的核心数据结构, 维护网格矩阵、行高、项目位置等状态。
+The core data structure for Grid layout, maintaining grid matrix, row heights, item positions, and other states.
 
-**核心数据成员**:
+**Core Data Members**:
 ```cpp
-Axis axis_;                                    // 主轴方向 (VERTICAL/HORIZONTAL)
-double currentOffset_;                         // 当前滚动偏移
-int32_t startIndex_;                           // 视口首项索引
-int32_t endIndex_;                             // 视口末项索引
-int32_t startMainLineIndex_;                   // 视口首行索引
-int32_t endMainLineIndex_;                     // 视口末行索引
-int32_t crossCount_;                           // 交叉轴数量 (列数或行数)
+Axis axis_;                                    // Main axis direction (VERTICAL/HORIZONTAL)
+double currentOffset_;                         // Current scroll offset
+int32_t startIndex_;                           // Viewport first item index
+int32_t endIndex_;                             // Viewport last item index
+int32_t startMainLineIndex_;                   // Viewport first line index
+int32_t endMainLineIndex_;                     // Viewport last line index
+int32_t crossCount_;                           // Cross axis count (column count or row count)
 
-std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;  // [行, [列, itemIdx]]
-std::map<int32_t, float> lineHeightMap_;       // [行号, 行高]
-std::map<int32_t, int32_t> irregularItemsPosition_;  // 不规则项目位置
+std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;  // [row, [col, itemIdx]]
+std::map<int32_t, float> lineHeightMap_;       // [line number, line height]
+std::map<int32_t, int32_t> irregularItemsPosition_;  // Irregular item positions
 ```
 
-**关键方法**:
-- `GetTotalHeightOfItemsInView()` - 获取视口内项目总高度
-- `GetContentHeight()` - 获取内容总高度
-- `FindInMatrix()` - 在网格矩阵中查找项目
-- `GetItemPos()` - 获取项目位置
-- `UpdateStartIndexByStartLine()` - 根据起始行更新起始索引
+**Key Methods**:
+- `GetTotalHeightOfItemsInView()` - Get total height of items in viewport
+- `GetContentHeight()` - Get total content height
+- `FindInMatrix()` - Find item in grid matrix
+- `GetItemPos()` - Get item position
+- `UpdateStartIndexByStartLine()` - Update start index based on start line
 
-## 布局算法详解
+## Layout Algorithm Details
 
-### 算法选择逻辑
+### Algorithm Selection Logic
 
-Grid 支持 **五种不同的布局算法**, 根据 `columnsTemplate`、`rowsTemplate` 和 `layoutOptions` 自动选择:
+Grid supports **five different layout algorithms**, automatically selected based on `columnsTemplate`, `rowsTemplate`, and `layoutOptions`:
 
-| 算法 | 文件位置 | 使用场景 | 特性 |
-|------|----------|----------|------|
-| **1. GridAdaptiveLayoutAlgorithm** | `grid_adaptive/` | 无模板设置 | 自适应布局, 项目填充可用空间 |
-| **2. GridLayoutAlgorithm** | `grid_layout/` | 双模板都设置 | **静态布局**, 无滚动, 固定大小 |
-| **3. GridCustomLayoutAlgorithm** | `grid_custom/` | layoutOptions 双回调 | 完全自定义, 支持滚动 |
-| **4. GridIrregularLayoutAlgorithm** | `irregular/` | 检测到跨行列项目 | 处理跨行列项目, 支持滚动 |
-| **5A. GridScrollLayoutAlgorithm** | `grid_scroll/` | 单模板, 无 layoutOptions | **标准可滚动** |
-| **5B. GridScrollWithOptionsLayoutAlgorithm** | `grid_scroll/` | 单模板, 部分 layoutOptions | 可滚动 + 部分自定义选项 |
+| Algorithm | File Location | Usage Scenario | Features |
+|-----------|---------------|----------------|----------|
+| **1. GridAdaptiveLayoutAlgorithm** | `grid_adaptive/` | No template set | Adaptive layout, items fill available space |
+| **2. GridLayoutAlgorithm** | `grid_layout/` | Both templates set | **Static layout**, no scrolling, fixed size |
+| **3. GridCustomLayoutAlgorithm** | `grid_custom/` | layoutOptions with both callbacks | Fully custom, supports scrolling |
+| **4. GridIrregularLayoutAlgorithm** | `irregular/` | Detected row/column spanning items | Handle spanning items, supports scrolling |
+| **5A. GridScrollLayoutAlgorithm** | `grid_scroll/` | One template, no layoutOptions | **Standard scrollable** |
+| **5B. GridScrollWithOptionsLayoutAlgorithm** | `grid_scroll/` | One template, partial layoutOptions | Scrollable + partial custom options |
 
-### 算法选择代码流程
+### Algorithm Selection Code Flow
 
-来自 [GridPattern::CreateLayoutAlgorithm()](grid_pattern.cpp#L45):
+From [GridPattern::CreateLayoutAlgorithm()](grid_pattern.cpp#L45):
 
 ```cpp
-// 1. 自适应: 无任何模板
+// 1. Adaptive: No templates
 if (!setColumns && !setRows) {
     return GridAdaptiveLayoutAlgorithm();
 }
 
-// 2. 静态: 双模板都设置
+// 2. Static: Both templates set
 if (setColumns && setRows) {
-    return GridLayoutAlgorithm();  // 无滚动
+    return GridLayoutAlgorithm();  // No scrolling
 }
 
-// 3-5. 可滚动布局 (仅设置一个模板)
+// 3-5. Scrollable layouts (only one template set)
 if (userDefined_) {
-    return GridCustomLayoutAlgorithm();  // layoutOptions 双回调
+    return GridCustomLayoutAlgorithm();  // layoutOptions with both callbacks
 }
 if (UseIrregularLayout()) {
-    return GridIrregularLayoutAlgorithm();  // 检测到不规则项目
+    return GridIrregularLayoutAlgorithm();  // Detected irregular items
 }
-return GridScrollLayoutAlgorithm();  // 标准滚动
+return GridScrollLayoutAlgorithm();  // Standard scrolling
 ```
 
-### 标志检测逻辑
+### Flag Detection Logic
 
-来自 [GridLayoutProperty::UpdateIrregularFlag()](grid_layout_property.cpp#137):
+From [GridLayoutProperty::UpdateIrregularFlag()](grid_layout_property.cpp#137):
 
 ```cpp
-// userDefined_ 设置为 TRUE 当:
+// userDefined_ set to TRUE when:
 if (layoutOptions.getStartIndexByIndex && layoutOptions.getStartIndexByOffset) {
-    pattern->SetUserDefined(true);  // 双回调都提供
+    pattern->SetUserDefined(true);  // Both callbacks provided
 }
 
-// irregular 设置为 TRUE 当:
+// irregular set to TRUE when:
 bool vertical = IsVertical();
 for (int32_t idx : layoutOptions.irregularIndexes) {
     auto size = layoutOptions.getSizeByIndex(idx);
-    // 横向滚动: 检查 columns > 1
-    // 纵向滚动: 检查 rows > 1
+    // Horizontal scroll: check columns > 1
+    // Vertical scroll: check rows > 1
     if ((!vertical && size.columns > 1) || (vertical && size.rows > 1)) {
         pattern->SetIrregular(true);
     }
 }
 ```
 
-### 配置与算法映射表
+### Configuration to Algorithm Mapping
 
-| columnsTemplate | rowsTemplate | layoutOptions | 回调 | 不规则项目? | 算法 |
-|:---------------:|:------------:|:-------------:|:----:|:----------:|:-----:|
+| columnsTemplate | rowsTemplate | layoutOptions | Callbacks | Irregular Items? | Algorithm |
+|:---------------:|:------------:|:-------------:|:---------:|:----------------:|:---------:|
 | ❌ | ❌ | ❌ | - | - | `GridAdaptiveLayoutAlgorithm` |
-| ✅ | ✅ | - | - | - | `GridLayoutAlgorithm` (无滚动) |
-| ✅ | ❌ | ✅ | 双 | - | `GridCustomLayoutAlgorithm` |
-| ❌ | ✅ | ✅ | 双 | - | `GridCustomLayoutAlgorithm` |
-| ✅ | ❌ | ❌ 部分/无 | - | ✅ | `GridIrregularLayoutAlgorithm` |
-| ❌ | ✅ | ❌ 部分/无 | - | ✅ | `GridIrregularLayoutAlgorithm` |
-| ✅ | ❌ | ❌ 无 | - | ❌ | `GridScrollLayoutAlgorithm` (5A) |
-| ❌ | ✅ | ❌ 无 | - | ❌ | `GridScrollLayoutAlgorithm` (5A) |
-| ✅ | ❌ | ✅ 部分 | 非双 | ❌ | `GridScrollWithOptionsLayoutAlgorithm` (5B) |
-| ❌ | ✅ | ✅ 部分 | 非双 | ❌ | `GridScrollWithOptionsLayoutAlgorithm` (5B) |
+| ✅ | ✅ | - | - | - | `GridLayoutAlgorithm` (no scroll) |
+| ✅ | ❌ | ✅ | Both | - | `GridCustomLayoutAlgorithm` |
+| ❌ | ✅ | ✅ | Both | - | `GridCustomLayoutAlgorithm` |
+| ✅ | ❌ | ❌ Partial/None | - | ✅ | `GridIrregularLayoutAlgorithm` |
+| ❌ | ✅ | ❌ Partial/None | - | ✅ | `GridIrregularLayoutAlgorithm` |
+| ✅ | ❌ | ❌ None | - | ❌ | `GridScrollLayoutAlgorithm` (5A) |
+| ❌ | ✅ | ❌ None | - | ❌ | `GridScrollLayoutAlgorithm` (5A) |
+| ✅ | ❌ | ✅ Partial | Not both | ❌ | `GridScrollWithOptionsLayoutAlgorithm` (5B) |
+| ❌ | ✅ | ✅ Partial | Not both | ❌ | `GridScrollWithOptionsLayoutAlgorithm` (5B) |
 
-### 各算法详解
+### Algorithm Details
 
 #### 1. GridAdaptiveLayoutAlgorithm
-**特点**: 项目自适应填充可用空间, 无固定行列数
-**支持的属性**: `columnsGap`, `rowsGap`, `layoutDirection`, `maxCount`, `minCount`, `cellLength`
+**Features**: Items adaptively fill available space, no fixed row/column count
+**Supported properties**: `columnsGap`, `rowsGap`, `layoutDirection`, `maxCount`, `minCount`, `cellLength`
 
 #### 2. GridLayoutAlgorithm
-**特点**: 静态网格, 完全固定, **不支持滚动**
-**适用**: 行列数已知的固定网格展示
+**Features**: Static grid, completely fixed, **does not support scrolling**
+**Use case**: Fixed grid display with known row/column counts
 
 #### 3. GridCustomLayoutAlgorithm
-**特点**: 完全自定义布局, 支持滚动
-**触发条件**: `layoutOptions` 中 **同时提供** `getStartIndexByIndex` 和 `getStartIndexByOffset`
+**Features**: Fully custom layout, supports scrolling
+**Trigger condition**: Both `getStartIndexByIndex` and `getStartIndexByOffset` provided in `layoutOptions`
 
-关键方法:
-- `Measure()` - 测量所有项目大小
-- `Layout()` - 定位元素
-- `MeasureOnJump()` - 处理滚动到指定索引
+Key methods:
+- `Measure()` - Measure all item sizes
+- `Layout()` - Position elements
+- `MeasureOnJump()` - Handle scrolling to specified index
 
 #### 4. GridIrregularLayoutAlgorithm
-**特点**: 处理跨行列项目, 支持滚动
-**触发条件**: 检测到 `rowSpan > 1` 或 `columnSpan > 1` 的项目
+**Features**: Handle row/column spanning items, supports scrolling
+**Trigger condition**: Detected items with `rowSpan > 1` or `columnSpan > 1`
 
-相关类:
-- `GridIrregularFiller` - 填充不规则网格
-- `GridLayoutRangeSolver` - 计算可见范围
+Related classes:
+- `GridIrregularFiller` - Fill irregular grids
+- `GridLayoutRangeSolver` - Calculate visible range
 
 #### 5. GridScrollLayoutAlgorithm / GridScrollWithOptionsLayoutAlgorithm
-**特点**: 标准 Grid 布局, 支持单方向滚动
-- **5A** (`GridScrollLayoutAlgorithm`): 纯标准滚动
-- **5B** (`GridScrollWithOptionsLayoutAlgorithm`): 支持部分 `layoutOptions`
+**Features**: Standard Grid layout, supports single-direction scrolling
+- **5A** (`GridScrollLayoutAlgorithm`): Pure standard scrolling
+- **5B** (`GridScrollWithOptionsLayoutAlgorithm`): Supports partial `layoutOptions`
 
-## GridLayoutOptions (自定义布局)
+## GridLayoutOptions (Custom Layout)
 
-**文件**: [grid_layout_options.h](grid_layout_options.h)
+**File**: [grid_layout_options.h](grid_layout_options.h)
 
-`layoutOptions` 支持完全自定义的网格布局。
+`layoutOptions` supports fully customizable grid layout.
 
-### 数据结构
+### Data Structures
 
 ```cpp
-// 项目大小 (行列数)
+// Item size (row/column count)
 struct GridItemSize {
     int32_t rows = 1;
     int32_t columns = 1;
 };
 
-// 项目精确位置
+// Item precise position
 struct GridItemRect {
     int32_t rowStart = -1;
     int32_t columnStart = -1;
@@ -273,7 +272,7 @@ struct GridItemRect {
     int32_t columnSpan = 1;
 };
 
-// 滚动位置信息
+// Scroll position information
 struct GridStartLineInfo {
     int32_t startIndex = 0;
     int32_t startLine = 0;
@@ -282,180 +281,182 @@ struct GridStartLineInfo {
 };
 ```
 
-### 回调函数
+### Callback Functions
 
 ```cpp
 struct GridLayoutOptions {
-    GridItemSize regularSize;                        // 常规项目大小
-    std::set<int32_t> irregularIndexes;              // 不规则项目索引集合
+    GridItemSize regularSize;                        // Regular item size
+    std::set<int32_t> irregularIndexes;              // Irregular item index set
 
-    // 回调函数
-    GetSizeByIndex getSizeByIndex;                   // 按索引获取大小
-    GetRectByIndex getRectByIndex;                   // 按索引获取位置
-    GetStartIndexByOffset getStartIndexByOffset;     // 偏移 → 位置
-    GetStartIndexByIndex getStartIndexByIndex;       // 索引 → 位置
+    // Callback functions
+    GetSizeByIndex getSizeByIndex;                   // Get size by index
+    GetRectByIndex getRectByIndex;                   // Get position by index
+    GetStartIndexByOffset getStartIndexByOffset;     // Offset → Position
+    GetStartIndexByIndex getStartIndexByIndex;       // Index → Position
 };
 ```
 
-### 回调要求
+### Callback Requirements
 
-要触发 `GridCustomLayoutAlgorithm` (userDefined_ = true), **必须同时提供**:
-- ✅ `getStartIndexByIndex` - 必需, 用于 scrollToIndex
-- ✅ `getStartIndexByOffset` - 必需, 用于滚动位置计算
+To trigger `GridCustomLayoutAlgorithm` (userDefined_ = true), **must provide both**:
+- ✅ `getStartIndexByIndex` - Required, for scrollToIndex
+- ✅ `getStartIndexByOffset` - Required, for scroll position calculation
 
-可选:
-- `getSizeByIndex` - 不规则项目大小 (irregularIndexes 非空时需要)
-- `getRectByIndex` - 精确定位 (getSizeByIndex 的替代方案)
+Optional:
+- `getSizeByIndex` - Irregular item size (needed when irregularIndexes non-empty)
+- `getRectByIndex` - Precise positioning (alternative to getSizeByIndex)
 
-### 使用场景
+### Usage Scenarios
 
-- 瀑布流布局
-- 日历应用 (可变大小事件)
-- 图片画廊 (特色项目)
-- 仪表盘 (不同尺寸小组件)
+- Waterfall layout
+- Calendar applications (variable-sized events)
+- Image gallery (featured items)
+- Dashboard (different-sized widgets)
 
-## GridItem (子组件)
+## GridItem (Child Component)
 
-### 核心文件
+### Core Files
 
-- [grid_item_pattern.h](grid_item_pattern.h) - GridItem 主逻辑
-- [grid_item_model_ng.h](grid_item_model_ng.h) - GridItem 模型
-- [grid_item_layout_property.h](grid_item_layout_property.h) - GridItem 布局属性
+- [grid_item_pattern.h](grid_item_pattern.h) - GridItem main logic
+- [grid_item_model_ng.h](grid_item_model_ng.h) - GridItem model
+- [grid_item_layout_property.h](grid_item_layout_property.h) - GridItem layout properties
 
-### GridItem 属性
-
-```cpp
-// 行列跨度 (用于不规则布局)
-rowStart / rowEnd        // 行起始/结束
-columnStart / columnEnd  // 列起始/结束
-
-// 选择
-selected                 // 是否选中
-```
-
-## 关键常量
-
-**文件**: [grid_constants.h](grid_constants.h)
-
-定义 Grid 组件使用的常量值。
-
-## 布局属性 (GridLayoutProperty)
-
-**文件**: [grid_layout_property.h](grid_layout_property.h)
-
-### 核心属性
-
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| `columnsTemplate` | string | 列模板, 如 `"1fr 1fr 2fr"` |
-| `rowsTemplate` | string | 行模板 |
-| `columnsGap` | Dimension | 列间距 |
-| `rowsGap` | Dimension | 行间距 |
-| `cachedCount` | int32_t | 缓存行数 |
-| `layoutOptions` | GridLayoutOptions | 自定义布局选项 |
-| `scrollEnabled` | bool | 是否启用滚动 |
-| `alignItems` | GridItemAlignment | 项目对齐方式 |
-
-### 关键方法
+### GridItem Properties
 
 ```cpp
-bool IsVertical() const;              // 是否为纵向网格
-bool IsConfiguredScrollable() const;  // 是否可滚动
-bool IsReverse() const;               // 是否反向 (RTL)
+// Row/column spans (for irregular layout)
+rowStart / rowEnd        // Row start/end
+columnStart / columnEnd  // Column start/end
+
+// Selection
+selected                 // Whether selected
 ```
 
-## 事件处理 (GridEventHub)
+## Key Constants
 
-**文件**: [grid_event_hub.h](grid_event_hub.h)
+**File**: [grid_constants.h](grid_constants.h)
 
-处理 Grid 组件的各种事件:
-- 滚动事件
-- 项目点击事件
-- 滚动到边界事件
+Defines constant values used by the Grid component.
 
-## 焦点管理 (GridFocus)
+## Layout Properties (GridLayoutProperty)
 
-**文件**: [grid_focus.h](grid_focus.h)
+**File**: [grid_layout_property.h](grid_layout_property.h)
 
-管理 Grid 内的焦点导航:
-- 焦点移动
-- 焦点包裹模式
-- 键盘导航
+### Core Properties
 
-## 常见维护任务
+| Property | Type | Description |
+|----------|------|-------------|
+| `columnsTemplate` | string | Column template, e.g., `"1fr 1fr 2fr"` |
+| `rowsTemplate` | string | Row template |
+| `columnsGap` | Dimension | Column spacing |
+| `rowsGap` | Dimension | Row spacing |
+| `cachedCount` | int32_t | Cached row count |
+| `layoutOptions` | GridLayoutOptions | Custom layout options |
+| `ScrollEnabled` | bool | **(C++ internal)** Whether scrolling is enabled |
+| `alignItems` | GridItemAlignment | Item alignment |
 
-### 1. 添加新的 Grid 属性
+**Note**: `ScrollEnabled` is the C++ property name. In ArkTS/JS API, use `.enableScrollInteraction(value: boolean)` instead. |
 
-1. 在 `grid_layout_property.h` 中添加属性定义
-2. 在 `grid_model_ng.cpp` 中解析属性
-3. 在 `grid_pattern.cpp` 或布局算法中应用属性
-4. 在 `test/unittest/core/pattern/grid/` 中添加测试
+### Key Methods
 
-### 2. 修改布局行为
+```cpp
+bool IsVertical() const;              // Whether vertical grid
+bool IsConfiguredScrollable() const;  // Whether scrollable
+bool IsReverse() const;               // Whether reverse (RTL)
+```
 
-根据场景选择正确的算法:
+## Event Handling (GridEventHub)
 
-| 场景 | 修改的算法 | 文件位置 |
-|------|-----------|----------|
-| 自适应网格 (无模板) | GridAdaptiveLayoutAlgorithm | `grid_adaptive/` |
-| 静态网格 (双模板) | GridLayoutAlgorithm | `grid_layout/` |
-| 自定义布局 | GridCustomLayoutAlgorithm | `grid_custom/` |
-| 不规则项目 (跨行列) | GridIrregularLayoutAlgorithm | `irregular/` |
-| 单向滚动 | GridScrollLayoutAlgorithm | `grid_scroll/` |
+**File**: [grid_event_hub.h](grid_event_hub.h)
 
-**常用布局算法文件**:
-- `grid_custom_layout_algorithm.cpp` - 自定义模板布局
-- `grid_irregular_layout_algorithm.cpp` - 不规则/跨行列项目
-- `grid_layout_info.cpp` - 状态管理 (所有算法共享)
+Handles various events for the Grid component:
+- Scroll events
+- Item click events
+- Scroll boundary events
 
-**关键方法**:
-- `Measure()` - 计算所有项目的大小
-- `Layout()` - 定位网格中的元素
-- `MeasureOnJump()` - 处理滚动到索引功能
-- `MeasureOnOffset()` - 处理滚动偏移变化
+## Focus Management (GridFocus)
 
-### 3. 调试布局问题
+**File**: [grid_focus.h](grid_focus.h)
 
-| 症状 | 可能位置 |
-|------|----------|
-| 项目位置错误 | 布局算法的 `Layout()` 方法 |
-| 大小计算错误 | `Measure()` 方法或 `grid_layout_info` |
-| 滚动问题 | `MeasureOnOffset()` 或滚动偏移计算 |
-| 项目缺失 | `GridIrregularFiller` 或范围计算 |
-| 焦点问题 | `grid_focus.cpp` |
+Manages focus navigation within Grid:
+- Focus movement
+- Focus wrap mode
+- Keyboard navigation
 
-## 使用示例
+## Common Maintenance Tasks
 
-### 1. 自适应布局
+### 1. Adding New Grid Properties
+
+1. Add property definition in `grid_layout_property.h`
+2. Parse property in `grid_model_ng.cpp`
+3. Apply property in `grid_pattern.cpp` or layout algorithm
+4. Add tests in `test/unittest/core/pattern/grid/`
+
+### 2. Modifying Layout Behavior
+
+Select the correct algorithm based on scenario:
+
+| Scenario | Algorithm to Modify | File Location |
+|----------|---------------------|---------------|
+| Adaptive grid (no template) | GridAdaptiveLayoutAlgorithm | `grid_adaptive/` |
+| Static grid (both templates) | GridLayoutAlgorithm | `grid_layout/` |
+| Custom layout | GridCustomLayoutAlgorithm | `grid_custom/` |
+| Irregular items (row/column span) | GridIrregularLayoutAlgorithm | `irregular/` |
+| Single-direction scrolling | GridScrollLayoutAlgorithm | `grid_scroll/` |
+
+**Common layout algorithm files**:
+- `grid_custom_layout_algorithm.cpp` - Custom template layout
+- `grid_irregular_layout_algorithm.cpp` - Irregular/spanning items
+- `grid_layout_info.cpp` - State management (shared by all algorithms)
+
+**Key methods**:
+- `Measure()` - Calculate sizes of all items
+- `Layout()` - Position elements in grid
+- `MeasureOnJump()` - Handle scroll-to-index functionality
+- `MeasureOnOffset()` - Handle scroll offset changes
+
+### 3. Debugging Layout Issues
+
+| Symptom | Possible Location |
+|---------|-------------------|
+| Wrong item positions | `Layout()` method of layout algorithm |
+| Incorrect size calculation | `Measure()` method or `grid_layout_info` |
+| Scrolling issues | `MeasureOnOffset()` or scroll offset calculation |
+| Missing items | `GridIrregularFiller` or range calculation |
+| Focus issues | `grid_focus.cpp` |
+
+## Usage Examples
+
+### 1. Adaptive Layout
 ```typescript
 Grid() {
-  // 项目填充可用空间
+  // Items fill available space
 }
 // → GridAdaptiveLayoutAlgorithm
 ```
 
-### 2A. 静态网格
+### 2A. Static Grid
 ```typescript
 Grid() {
 }
 .columnsTemplate("1fr 1fr 1fr")
 .rowsTemplate("1fr 1fr")
-// → GridLayoutAlgorithm (无滚动)
+// → GridLayoutAlgorithm (no scrolling)
 ```
 
-### 2B. 静态网格 + 布局选项
+### 2B. Static Grid + Layout Options
 ```typescript
 layoutOptions: {
-    onGetGetRectByIndex:(index) => { /* ... */} //获取节点大小位置
+    onGetGetRectByIndex:(index) => { /* ... */} //Get node size and position
 }
 Grid(undefined, this.layoutOptions) {
 }
 .columnsTemplate("1fr 1fr 1fr")
 .rowsTemplate("1fr 1fr")
-// → GridLayoutAlgorithm (无滚动)
+// → GridLayoutAlgorithm (no scrolling)
 ```
 
-### 3A. 标准滚动
+### 3A. Standard Scrolling
 ```typescript
 Grid() {
 }
@@ -463,10 +464,10 @@ Grid() {
 // → GridScrollLayoutAlgorithm
 ```
 
-### 3B. 滚动 + 部分选项
+### 3B. Scrolling + Partial Options
 ```typescript
 layoutOptions: {
-    irregularIndexes:[0] //不规则节点
+    irregularIndexes:[0] //Irregular nodes
 }
 Grid(this.scroller, this.layoutOptions) {
 }
@@ -474,10 +475,10 @@ Grid(this.scroller, this.layoutOptions) {
 // → GridScrollWithOptionsLayoutAlgorithm
 ```
 
-### 4. 不规则项目
+### 4. Irregular Items
 ```typescript
 layoutOptions: {
-    irregularIndexes:[0], //不规则节点
+    irregularIndexes:[0], //Irregular nodes
     onGetIrregularSizeByIndex(index) => { /* ... */}
 }
 Grid() {
@@ -486,7 +487,7 @@ Grid() {
 // → GridIrregularLayoutAlgorithm
 ```
 
-### 5. 完全自定义
+### 5. Fully Custom
 ```typescript
 layoutOptions: {
     onGetStartIndexByIndex: (index) => { /* ... */ },
@@ -498,145 +499,145 @@ Grid() {
 // → GridCustomLayoutAlgorithm
 ```
 
-## 测试 Grid 组件
+## Testing Grid Component
 
-测试位置: `test/unittest/core/pattern/grid/`
+Test location: `test/unittest/core/pattern/grid/`
 
-### 测试目录结构
+### Test Directory Structure
 
 ```
 test/unittest/core/pattern/grid/
-├── BUILD.gn                           # 测试构建配置
-├── grid_test_ng.cpp/h                 # 测试基类
+├── BUILD.gn                           # Test build configuration
+├── grid_test_ng.cpp/h                 # Test base class
 │
-├── 通用测试 (根目录)
-│   ├── grid_attr_test_ng.cpp          # 属性测试
-│   ├── grid_common_test_ng.cpp        # 通用测试
-│   ├── grid_layout_test_ng.cpp        # 布局测试
-│   ├── grid_pattern_test_ng.cpp       # Pattern 测试
-│   ├── grid_scroller_test_ng.cpp      # 滚动测试
-│   ├── grid_focus_test_ng.cpp         # 焦点测试
-│   ├── grid_event_test_ng.cpp         # 事件测试
-│   ├── grid_accessibility_test_ng.cpp # 无障碍测试
-│   ├── grid_cache_layout_test_ng.cpp  # 缓存布局测试
-│   ├── grid_static_test_ng.cpp        # 静态布局测试
-│   ├── grid_sync_load_test_ng.cpp     # 同步加载测试
-│   ├── grid_option_layout_test_ng.cpp # 布局选项测试
-│   └── selectable_item_test.cpp       # 可选择项目测试
+├── General Tests (root directory)
+│   ├── grid_attr_test_ng.cpp          # Property tests
+│   ├── grid_common_test_ng.cpp        # General tests
+│   ├── grid_layout_test_ng.cpp        # Layout tests
+│   ├── grid_pattern_test_ng.cpp       # Pattern tests
+│   ├── grid_scroller_test_ng.cpp      # Scrolling tests
+│   ├── grid_focus_test_ng.cpp         # Focus tests
+│   ├── grid_event_test_ng.cpp         # Event tests
+│   ├── grid_accessibility_test_ng.cpp # Accessibility tests
+│   ├── grid_cache_layout_test_ng.cpp  # Cache layout tests
+│   ├── grid_static_test_ng.cpp        # Static layout tests
+│   ├── grid_sync_load_test_ng.cpp     # Sync load tests
+│   ├── grid_option_layout_test_ng.cpp # Layout option tests
+│   └── selectable_item_test.cpp       # Selectable item tests
 │
-├── custom/                            # 自定义布局测试
-│   ├── custom_layout_options.cpp/h    # 自定义布局选项工具
+├── custom/                            # Custom layout tests
+│   ├── custom_layout_options.cpp/h    # Custom layout option utilities
 │   ├── grid_custom_algorithm_test_ng.cpp
 │   ├── grid_custom_layout_test_ng.cpp
 │   ├── grid_custom_layout_algorithm_test.cpp
 │   └── grid_custom_scroller_test_ng.cpp
 │
-└── irregular/                         # 不规则布局测试
-    ├── grid_irregular_filler_test.cpp      # GridIrregularFiller 测试
-    ├── grid_irregular_layout_test.cpp      # GridIrregularLayout 测试
-    ├── grid_irregular_layout_testtwo.cpp   # GridIrregularLayout 测试2
-    ├── grid_layout_range_solver_test.cpp   # GridLayoutRangeSolver 测试
-    ├── irregular_matrices.h                # 测试用矩阵数据
+└── irregular/                         # Irregular layout tests
+    ├── grid_irregular_filler_test.cpp      # GridIrregularFiller tests
+    ├── grid_irregular_layout_test.cpp      # GridIrregularLayout tests
+    ├── grid_irregular_layout_testtwo.cpp   # GridIrregularLayout tests 2
+    ├── grid_layout_range_solver_test.cpp   # GridLayoutRangeSolver tests
+    ├── irregular_matrices.h                # Test matrix data
     └── irregular_matrics.cpp
 ```
 
-### 测试基类 (GridTestNg)
+### Test Base Class (GridTestNg)
 
-**文件**: `test/unittest/core/pattern/grid/grid_test_ng.h`
+**File**: `test/unittest/core/pattern/grid/grid_test_ng.h`
 
-`GridTestNg` 是所有 Grid 测试的基类, 提供测试辅助方法:
+`GridTestNg` is the base class for all Grid tests, providing test helper methods:
 
 ```cpp
 class GridTestNg : public ScrollableUtilsTestNG {
-    // Grid 创建
+    // Grid creation
     GridModelNG CreateGrid();
     GridModelNG CreateRepeatGrid(int32_t itemNumber, ...);
 
-    // GridItem 创建
+    // GridItem creation
     GridItemModelNG CreateGridItem(float width, float height, ...);
     void CreateGridItems(int32_t itemNumber = 10, ...);
     void CreateFixedItems(int32_t itemNumber, ...);
     void CreateBigItem(int32_t rowStart, int32_t rowEnd, ...);
 
-    // 滚动操作
+    // Scroll operations
     void UpdateCurrentOffset(float offset, int32_t source);
 
-    // 成员
+    // Members
     RefPtr<GridPattern> pattern_;
     RefPtr<GridEventHub> eventHub_;
     RefPtr<GridLayoutProperty> layoutProperty_;
 };
 ```
 
-### 运行测试
+### Running Tests
 
 ```bash
-# 进入测试目录
+# Enter test directory
 cd test/unittest
 
-# 运行不规则布局测试
+# Run irregular layout tests
 python run.py -t grid_test_ng
 
-# 运行常规Grid测试
+# Run regular Grid tests
 python run.py -t grid_test_regular
 
-# 运行自定义布局测试
+# Run custom layout tests
 python run.py -t grid_test_custom
 
-# 运行不规则布局测试
+# Run irregular layout tests
 python run.py -t grid_test_ng
 
-# 运行arkts1.2测试
+# Run arkts1.2 tests
 python run.py -t grid_test_static
 ```
 
-### 测试覆盖范围
+### Test Coverage
 
-| 测试文件 | 测试内容 |
-|----------|----------|
-| `grid_attr_test_ng.cpp` | 属性设置与更新 |
-| `grid_layout_test_ng.cpp` | 布局计算与定位 |
-| `grid_scroll_layout_test_ng.cpp` | 可滚动布局 |
-| `grid_pattern_test_ng.cpp` | Pattern 核心逻辑 |
-| `grid_scroller_test_ng.cpp` | 滚动行为 |
-| `grid_focus_test_ng.cpp` | 焦点导航 |
-| `grid_event_test_ng.cpp` | 事件触发 |
-| `grid_cache_layout_test_ng.cpp` | 缓存机制 |
-| `grid_static_test_ng.cpp` | 静态布局 (arkts1.2) |
+| Test File | Test Content |
+|-----------|--------------|
+| `grid_attr_test_ng.cpp` | Property setting and updates |
+| `grid_layout_test_ng.cpp` | Layout calculation and positioning |
+| `grid_scroll_layout_test_ng.cpp` | Scrollable layout |
+| `grid_pattern_test_ng.cpp` | Pattern core logic |
+| `grid_scroller_test_ng.cpp` | Scrolling behavior |
+| `grid_focus_test_ng.cpp` | Focus navigation |
+| `grid_event_test_ng.cpp` | Event triggering |
+| `grid_cache_layout_test_ng.cpp` | Cache mechanism |
+| `grid_static_test_ng.cpp` | Static layout (arkts1.2) |
 | `grid_option_layout_test_ng.cpp` | layoutOptions |
-| `grid_custom_layout_test_ng.cpp` | 自定义布局 |
-| `grid_irregular_layout_test.cpp` | 不规则布局 |
-| `layout_info_test.cpp` | GridLayoutInfo 数据结构 |
+| `grid_custom_layout_test_ng.cpp` | Custom layout |
+| `grid_irregular_layout_test.cpp` | Irregular layout |
+| `layout_info_test.cpp` | GridLayoutInfo data structure |
 | `grid_irregular_filler_test.cpp` | GridIrregularFiller |
 | `grid_layout_range_solver_test.cpp` | GridLayoutRangeSolver |
 
-## 相关文件
+## Related Files
 
-Grid 组件开发时可能需要参考:
-- `frameworks/core/components_ng/pattern/scrollable/` - 可滚动基类
-- `frameworks/core/layout/` - 通用布局算法
-- `frameworks/core/common/` - 共享工具
+Grid component development may need reference to:
+- `frameworks/core/components_ng/pattern/scrollable/` - Scrollable base class
+- `frameworks/core/layout/` - Common layout algorithms
+- `frameworks/core/common/` - Shared utilities
 
-## 设计模式
+## Design Patterns
 
-### 策略模式
-Grid 使用策略模式根据配置选择不同的布局算法。`CreateLayoutAlgorithm()` 是策略选择器。
+### Strategy Pattern
+Grid uses the strategy pattern to select different layout algorithms based on configuration. `CreateLayoutAlgorithm()` is the strategy selector.
 
-### 模板方法模式
-`GridLayoutBaseAlgorithm` 定义了布局算法的骨架, 子类实现具体步骤。
+### Template Method Pattern
+`GridLayoutBaseAlgorithm` defines the skeleton of layout algorithms, with subclasses implementing specific steps.
 
-### 观察者模式
-Grid 通过 `GridEventHub` 处理和分发事件。
+### Observer Pattern
+Grid handles and dispatches events through `GridEventHub`.
 
-## JS 桥接层详解
+## JS Bridge Layer Details
 
-### JS 到 C++ 的映射
+### JS to C++ Mapping
 
-**文件**: [js_grid.cpp](../../../bridge/declarative_frontend/jsview/js_grid.cpp)
+**File**: [js_grid.cpp](../../../bridge/declarative_frontend/jsview/js_grid.cpp)
 
-Grid 组件通过 JS 桥接层将 ArkTS API 映射到 C++ 实现。
+The Grid component maps ArkTS API to C++ implementation through the JS bridge layer.
 
-#### Grid 创建流程
+#### Grid Creation Flow
 
 ```typescript
 // ArkTS API
@@ -648,36 +649,36 @@ Grid(scroller, layoutOptions) {
 ```
 
 ```cpp
-// C++ 实现 (js_grid.cpp)
+// C++ implementation (js_grid.cpp)
 void JSGrid::Create(const JSCallbackInfo& info) {
-    // 1. 创建 Scroller 控制器
+    // 1. Create Scroller controller
     JSScroller* jsScroller = ...;
     positionController = GridModel::GetInstance()->CreatePositionController();
     jsScroller->SetController(positionController);
 
-    // 2. 创建 Grid 组件
+    // 2. Create Grid component
     GridModel::GetInstance()->Create(positionController, scrollBarProxy);
 
-    // 3. 解析并设置 layoutOptions
+    // 3. Parse and set layoutOptions
     SetGridLayoutOptions(info);
 }
 ```
 
-#### layoutOptions 解析
+#### layoutOptions Parsing
 
 ```cpp
 void SetGridLayoutOptions(const JSCallbackInfo& info) {
     GridLayoutOptions option;
     auto obj = JSRef<JSObject>::Cast(info[1]);
 
-    // 解析 regularSize
+    // Parse regularSize
     ParseGridItemSize(obj->GetProperty("regularSize"), option.regularSize);
 
-    // 解析 irregularIndexes
+    // Parse irregularIndexes
     auto indexes = obj->GetProperty("irregularIndexes");
-    // 添加到 option.irregularIndexes
+    // Add to option.irregularIndexes
 
-    // 解析回调函数
+    // Parse callback functions
     ParseGetGridItemSize(info, obj, option);      // onGetIrregularSizeByIndex
     ParseGetGridItemRect(info, obj, option);      // onGetRectByIndex
     ParseGetStartIndexByOffset(info, obj, option); // onGetStartIndexByOffset
@@ -687,10 +688,10 @@ void SetGridLayoutOptions(const JSCallbackInfo& info) {
 }
 ```
 
-#### 回调函数封装
+#### Callback Function Wrapping
 
 ```cpp
-// onGetIrregularSizeByIndex 回调
+// onGetIrregularSizeByIndex callback
 auto onGetIrregularSizeByIndex = [execCtx, func](int32_t index) {
     JAVASCRIPT_EXECUTION_SCOPE(execCtx);
     JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
@@ -700,7 +701,7 @@ auto onGetIrregularSizeByIndex = [execCtx, func](int32_t index) {
     return gridItemSize;
 };
 
-// onGetStartIndexByOffset 回调
+// onGetStartIndexByOffset callback
 auto onGetStartIndexByOffset = [execCtx, func](float offset) {
     JAVASCRIPT_EXECUTION_SCOPE(execCtx);
     JSRef<JSVal> jsOffset = JSRef<JSVal>::Make(ToJSValue(Dimension(offset).ConvertToVp()));
@@ -716,235 +717,235 @@ auto onGetStartIndexByOffset = [execCtx, func](float offset) {
 };
 ```
 
-## Scroller 滚动控制
+## Scroller Scroll Control
 
-### Scroller 接口
+### Scroller Interface
 
-**API 文档**: [ts-container-scroll.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scroll.md)
+**API Documentation**: [ts-container-scroll.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scroll.md)
 
 ```typescript
-// 创建 Scroller
+// Create Scroller
 scroller: Scroller = new Scroller();
 
-// 主要方法
-scroller.scrollTo(options: ScrollOptions);           // 滑动到指定位置
-scroller.scrollEdge(value: Edge);                   // 滚动到边缘
+// Main methods
+scroller.scrollTo(options: ScrollOptions);           // Scroll to specified position
+scroller.scrollEdge(value: Edge);                   // Scroll to edge
 scroller.scrollToIndex(value: number,
                      smooth?: boolean,
                      align?: ScrollAlign,
-                     options?: ScrollToIndexOptions);  // 滚动到指定索引
-scroller.scrollBy(dx: Length, dy: Length);        // 滑动指定距离
-scroller.currentOffset(): OffsetResult;             // 获取当前偏移
-scroller.isAtEnd(): boolean;                        // 是否到达底部
-scroller.isAtStart(): boolean;                      // 是否到达顶部
-scroller.getItemRect(index: number): RectResult;  // 获取子组件位置
+                     options?: ScrollToIndexOptions);  // Scroll to specified index
+scroller.scrollBy(dx: Length, dy: Length);        // Scroll specified distance
+scroller.currentOffset(): OffsetResult;             // Get current offset
+scroller.isAtEnd(): boolean;                        // Whether at bottom
+scroller.isAtStart(): boolean;                      // Whether at top
+scroller.getItemRect(index: number): RectResult;  // Get child component position
 ```
 
-### ScrollAlign 枚举
+### ScrollAlign Enum
 
 ```typescript
 enum ScrollAlign {
-    START = 0,   // 首部对齐 - 指定item首部与滚动容器首部对齐
-    CENTER = 1,  // 居中对齐 - 指定item主轴方向居中对齐于滚动容器
-    END = 2,     // 尾部对齐 - 指定item尾部与滚动容器尾部对齐
-    AUTO = 3     // 自动对齐 - 若item完全在显示区则不调整，否则按最短距离原则
+    START = 0,   // Start align - specified item start aligns with scroll container start
+    CENTER = 1,  // Center align - specified item centered in scroll container on main axis
+    END = 2,     // End align - specified item end aligns with scroll container end
+    AUTO = 3     // Auto align - no adjustment if item fully visible, otherwise shortest distance
 }
 ```
 
-### ScrollOptions 对象
+### ScrollOptions Object
 
 ```typescript
 interface ScrollOptions {
-    xOffset?: number | string;              // 水平滚动总偏移量
-    yOffset?: number | string;              // 垂直滚动总偏移量
-    animation?: ScrollAnimationOptions | boolean;  // 动画配置
-    canOverScroll?: boolean;               // 是否可以越界停留
+    xOffset?: number | string;              // Horizontal scroll total offset
+    yOffset?: number | string;              // Vertical scroll total offset
+    animation?: ScrollAnimationOptions | boolean;  // Animation configuration
+    canOverScroll?: boolean;               // Whether can stay at boundary
 }
 
 interface ScrollAnimationOptions {
-    duration?: number;                     // 滚动时长，默认1000ms
-    curve?: Curve | ICurve;                // 滚动曲线，默认Curve.Ease
-    canOverScroll?: boolean;               // 滚动到边界后是否转换为回弹动画
+    duration?: number;                     // Scroll duration, default 1000ms
+    curve?: Curve | ICurve;                // Scroll curve, default Curve.Ease
+    canOverScroll?: boolean;               // Whether to convert to rebound animation after scrolling to boundary
 }
 ```
 
-## 滚动事件详解
+## Scroll Events Details
 
-### 通用滚动事件
+### Common Scroll Events
 
-**API 文档**: [ts-container-scrollable-common.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scrollable-common.md)
+**API Documentation**: [ts-container-scrollable-common.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scrollable-common.md)
 
 ```typescript
-// 滚动生命周期事件
-.onReachStart(() => void)        // 到达起始位置时触发
-.onReachEnd(() => void)          // 到达末尾位置时触发
-.onScrollStart(() => void)       // 滚动开始时触发
-.onScrollStop(() => void)        // 滚动停止时触发
+// Scroll lifecycle events
+.onReachStart(() => void)        // Triggered when reaching start position
+.onReachEnd(() => void)          // Triggered when reaching end position
+.onScrollStart(() => void)       // Triggered when scroll starts
+.onScrollStop(() => void)        // Triggered when scroll stops
 
-// 滚动索引变化事件
+// Scroll index change events
 .onScrollIndex((first: number, last: number) => void)
-// first: 视口中第一个项目索引
-// last: 视口中最后一个项目索引
+// first: First item index in viewport
+// last: Last item index in viewport
 
-// 滚动偏移事件 (已废弃，使用 onDidScroll 替代)
+// Scroll offset events (deprecated, use onDidScroll instead)
 .onScroll((scrollOffset: number, scrollState: ScrollState) => void)
 ```
 
-### 滚动帧事件
+### Scroll Frame Events
 
 ```typescript
-// 滚动前回调 - 可修改滚动量
+// Before scroll callback - can modify scroll amount
 .onWillScroll((scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => void | ScrollResult)
-// scrollOffset: 即将滚动的偏移量
-// scrollState: 当前滚动状态
-// scrollSource: 滚动操作来源 (用户手势/程序调用)
-// 返回值: 可选，指定实际滚动偏移
+// scrollOffset: Upcoming scroll offset
+// scrollState: Current scroll state
+// scrollSource: Scroll operation source (user gesture/program call)
+// Return value: Optional, specifies actual scroll offset
 
-// 滚动时回调 - 只读
+// During scroll callback - read-only
 .onDidScroll((scrollOffset: number, scrollState: ScrollState) => void)
-// scrollOffset: 当前帧滚动偏移量
-// scrollState: 当前滚动状态
+// scrollOffset: Current frame scroll offset
+// scrollState: Current scroll state
 ```
 
-### 滚动帧开始事件
+### Scroll Frame Begin Events
 
 ```typescript
 .onScrollFrameBegin((offset: number, state: ScrollState) => ScrollResult)
-// offset: 即将发生的滚动量
-// state: 当前滚动状态
-// 返回: { offsetRemain: number } - 实际滚动量
+// offset: About-to-happen scroll amount
+// state: Current scroll state
+// Returns: { offsetRemain: number } - Actual scroll amount
 ```
 
-## 可滚动组件通用属性
+## Scrollable Component Common Properties
 
-**API 文档**: [ts-container-scrollable-common.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scrollable-common.md)
+**API Documentation**: [ts-container-scrollable-common.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scrollable-common.md)
 
-### 滚动条属性
+### ScrollBar Properties
 
 ```typescript
 .scrollBar(barState: BarState)
-// BarState.Auto - 自动显示
-// BarState.On - 常驻显示
-// BarState.Off - 不显示
-// BarState.Auto - 默认值 (List/Grid/Scroll)
+// BarState.Auto - Auto display
+// BarState.On - Always display
+// BarState.Off - Don't display
+// BarState.Auto - Default value (List/Grid/Scroll)
 
 .scrollBarWidth(value: number | string)
-// 默认值: 4
-// 单位: vp
+// Default: 4
+// Unit: vp
 
 .scrollBarColor(value: Color | number | string | Resource)
-// 默认值: '#182431' (40%不透明度)
+// Default: '#182431' (40% opacity)
 ```
 
-### 边缘效果
+### Edge Effect
 
 ```typescript
 .edgeEffect(edgeEffect: EdgeEffect, options?: EdgeEffectOptions)
-// EdgeEffect.Spring - 弹簧效果
-// EdgeEffect.Fade - 阴影效果
-// EdgeEffect.None - 无效果
+// EdgeEffect.Spring - Spring effect
+// EdgeEffect.Fade - Shadow effect
+// EdgeEffect.None - No effect
 
 // EdgeEffectOptions
 interface EdgeEffectOptions {
-    alwaysEnabled?: boolean;  // 内容小于组件时是否开启滑动效果
-    effectEdge?: EffectEdge;    // 边缘生效方向 (START/END/BOTH)
+    alwaysEnabled?: boolean;  // Enable slide effect when content smaller than component
+    effectEdge?: EffectEdge;    // Edge effect direction (START/END/BOTH)
 }
 ```
 
-### 嵌套滚动
+### Nested Scrolling
 
 ```typescript
 .nestedScroll(value: NestedScrollOptions)
 interface NestedScrollOptions {
-    scrollForward: NestedScrollMode;   // 向末尾端滚动时的嵌套滚动选项
-    scrollBackward: NestedScrollMode;  // 向起始端滚动时的嵌套滚动选项
+    scrollForward: NestedScrollMode;   // Nested scroll option when scrolling to end
+    scrollBackward: NestedScrollMode;  // Nested scroll option when scrolling to start
 }
 
 // NestedScrollMode
-// NestedScrollMode.SELF_ONLY - 仅自身滚动
-// NestedScrollMode.SELF_FIRST - 自身优先，父组件次之
-// NestedScrollMode.PARENT_FIRST - 父组件优先，自身次之
-// NestedScrollMode.PARALLEL - 自身和父组件同时滚动
+// NestedScrollMode.SELF_ONLY - Only self scrolls
+// NestedScrollMode.SELF_FIRST - Self first, parent second
+// NestedScrollMode.PARENT_FIRST - Parent first, self second
+// NestedScrollMode.PARALLEL - Self and parent scroll simultaneously
 ```
 
-### 通用滚动属性
+### Common Scroll Properties
 
 ```typescript
-.enableScrollInteraction(value: boolean)     // 是否支持滚动手势
-.friction(value: number | Resource)         // 摼擦系数 (0, +∞)
-.flingSpeedLimit(speedLimit: number)        // Fling初始速度限制
-.fadingEdge(enabled: boolean, options?)    // 边缘渐隐效果
-.clipContent(clip: ContentClipMode)       // 内容裁剪区域
-.contentStartOffset(offset: number | Resource)  // 内容起始偏移
-.contentEndOffset(offset: number | Resource)    // 内容末尾偏移
+.enableScrollInteraction(value: boolean)     // Whether to support scroll gesture
+.friction(value: number | Resource)         // Friction coefficient (0, +∞)
+.flingSpeedLimit(speedLimit: number)        // Fling initial speed limit
+.fadingEdge(enabled: boolean, options?)    // Edge fade effect
+.clipContent(clip: ContentClipMode)       // Content clipping area
+.contentStartOffset(offset: number | Resource)  // Content start offset
+.contentEndOffset(offset: number | Resource)    // Content end offset
 ```
 
-## GridItem 行列跨度规则
+## GridItem Row/Column Span Rules
 
-### 行列号属性
+### Row/Column Number Properties
 
-**API 文档**: [ts-container-griditem.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-griditem.md)
+**API Documentation**: [ts-container-griditem.md](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-griditem.md)
 
 ```typescript
 GridItem() {
-  Text("跨行列项目")
+  Text("Row/Column spanning item")
 }
-.rowStart(0)      // 起始行号
-.rowEnd(1)         // 终止行号 (占据2行: 0-1)
-.columnStart(0)   // 起始列号
-.columnEnd(1)      // 终止列号 (占据2列: 0-1)
+.rowStart(0)      // Start row number
+.rowEnd(1)         // End row number (spans 2 rows: 0-1)
+.columnStart(0)   // Start column number
+.columnEnd(1)      // End column number (spans 2 columns: 0-1)
 ```
 
-### 生效规则
+### Validity Rules
 
-| 场景 | 行列号设置 | 布局结果 |
-|------|----------|----------|
-| 双模板都设置 | 合理行列号 | 按指定行列号布局 |
-| 双模板都设置 | rowStart/rowEnd 或 columnStart/columnEnd | 按一行一列布局 |
-| 仅 columnsTemplate | 列号 | 按列数布局，位置冲突则换行 |
-| 仅 rowsTemplate | 行号 | 按行数布局，位置冲突则换列 |
-| 无模板 | 任意 | 行列号属性无效 |
+| Scenario | Row/Column Settings | Layout Result |
+|---------|-------------------|---------------|
+| Both templates set | Valid row/column numbers | Layout according to specified row/column numbers |
+| Both templates set | rowStart/rowEnd or columnStart/columnEnd only | Layout as one row one column |
+| Only columnsTemplate | Column numbers | Layout by column count, newline on position conflict |
+| Only rowsTemplate | Row numbers | Layout by row count, new column on position conflict |
+| No template | Any | Row/column number properties invalid |
 
-### 异常处理
+### Exception Handling
 
-| 属性设置情况 | 异常类型 | 修正后布局规则 |
-|:-------------|:---------|:-------------|
-| 仅设置 columnsTemplate | 任意行列异常 | 按一行一列布局 |
-| 仅设置 rowsTemplate | 任意行列异常 | 按一行一列布局 |
-| 双模板都设置 | rowStart < rowEnd | 行跨度 = min(rowEnd-rowStart+1, 总行数) |
-| 双模板都设置 | rowStart > rowEnd | 按一行一列布局 |
-| 双模板都设置 | columnStart < columnEnd | 列跨度 = min(columnEnd-columnStart+1, 总列数) |
-| 双模板都设置 | columnStart > columnEnd | 按一行一列布局 |
+| Property Settings | Exception Type | Corrected Layout Rule |
+|:-----------------|:---------------|:----------------------|
+| Only columnsTemplate set | Any row/column exception | Layout as one row one column |
+| Only rowsTemplate set | Any row/column exception | Layout as one row one column |
+| Both templates set | rowStart < rowEnd | Row span = min(rowEnd-rowStart+1, total rows) |
+| Both templates set | rowStart > rowEnd | Layout as one row one column |
+| Both templates set | columnStart < columnEnd | Column span = min(columnEnd-columnStart+1, total columns) |
+| Both templates set | columnStart > columnEnd | Layout as one row one column |
 
-### 性能优化建议
+### Performance Optimization Recommendations
 
-> **重要**: 当 Grid 中存在大量 GridItem 时，使用 columnStart/columnEnd/rowStart/rowEnd 设置跨行列会导致 scrollToIndex 性能问题。建议使用 layoutOptions 布局。
+> **Important**: When Grid contains many GridItems, using columnStart/columnEnd/rowStart/rowEnd to set row/column spanning causes scrollToIndex performance issues. Recommend using layoutOptions layout.
 
-**推荐做法**:
+**Recommended Practice**:
 ```typescript
-// 不推荐 - 性能差
+// Not recommended - Poor performance
 GridItem() { }
 .rowStart(0).rowEnd(1).columnStart(0).columnEnd(1)
 
-// 推荐 - 性能好
+// Recommended - Good performance
 layoutOptions: {
     irregularIndexes: [0],
     onGetIrregularSizeByIndex: (index) => {
-        if (index === 0) return [2, 2];  // 2行2列
+        if (index === 0) return [2, 2];  // 2 rows 2 columns
         return [1, 1];
     }
 }
 ```
 
-## 性能优化
+## Performance Optimization
 
-### 虚拟滚动
-- Grid 使用虚拟滚动, 仅渲染可见 + 缓存的项目
-- 通过 `cachedCount` 控制缓存数量
-- 默认值: 1 (API 11+ 改为屏幕可见行数，最大16)
+### Virtual Scrolling
+- Grid uses virtual scrolling, only rendering visible + cached items
+- Control cache count through `cachedCount`
+- Default value: 1 (changed to screen visible rows in API 11+, max 16)
 
-### 行跳跃 (Line Skipping)
-当滚动偏移较大时, 算法可以跳过中间项目的测量, 直接跳转到估计位置:
+### Line Skipping
+When scroll offset is large, algorithms can skip measuring intermediate items and jump directly to estimated position:
 
 ```cpp
 bool TrySkipping(float mainSize) {
@@ -958,22 +959,22 @@ bool TrySkipping(float mainSize) {
 }
 ```
 
-### 预加载
-- `preloadItemList_` 存储需要预加载的项目
-- 通过 `PreloadItems()` 和 `SyncPreloadItems()` 实现
+### Preloading
+- `preloadItemList_` stores items to be preloaded
+- Implemented through `PreloadItems()` and `SyncPreloadItems()`
 
-### 推荐用法
+### Recommended Practices
 
-1. **使用 LazyForEach**: 配合 Grid 使用虚拟滚动
-2. **设置合理的 cachedCount**: 平衡内存和滚动流畅度
-3. **优先使用 layoutOptions**: 替代 rowStart/rowEnd 设置跨行列项目
-4. **避免大量 GridItem 跨行列**: 会导致 scrollToIndex 性能问题
-5. **开启行跳跃**: 大幅度滚动时启用 `enableSkip` 优化
-6. **使用 contentStartOffset/contentEndOffset**: 设置内容边距，避免首尾项目贴边
+1. **Use LazyForEach**: Combine with Grid for virtual scrolling
+2. **Set reasonable cachedCount**: Balance memory and scroll smoothness
+3. **Prefer layoutOptions**: Replace rowStart/rowEnd for row/column spanning items
+4. **Avoid many GridItem row/column spans**: Causes scrollToIndex performance issues
+5. **Enable line skipping**: Enable `enableSkip` optimization for large scroll distances
+6. **Use contentStartOffset/contentEndOffset**: Set content margins to avoid first/last items sticking to edges
 
-## API 映射关系总结
+## API Mapping Summary
 
-### ArkTS API → C++ 实现
+### ArkTS API → C++ Implementation
 
 ```typescript
 // ArkTS
@@ -988,21 +989,21 @@ Grid(this.scroller, this.layoutOptions) {
 ```
 
 ```cpp
-// C++ 实现路径
+// C++ implementation path
 Grid() → JSGrid::Create()
     ↓
 GridModelNG::Create()
     ↓
-GridPattern::OnAttachToFrameNode() [初始化]
+GridPattern::OnAttachToFrameNode() [initialization]
     ↓
-GridPattern::CreateLayoutAlgorithm() [选择算法]
+GridPattern::CreateLayoutAlgorithm() [algorithm selection]
     ↓
-GridLayoutAlgorithm::Measure/Layout() [布局计算]
+GridLayoutAlgorithm::Measure/Layout() [layout calculation]
     ↓
-GridLayoutInfo::UpdateStartIndexByStartLine() [更新索引]
+GridLayoutInfo::UpdateStartIndexByStartLine() [update index]
 ```
 
-### 事件流
+### Event Flow
 
 ```typescript
 // ArkTS
@@ -1010,32 +1011,32 @@ GridLayoutInfo::UpdateStartIndexByStartLine() [更新索引]
 ```
 
 ```cpp
-// C++ 回调链
+// C++ callback chain
 onScrollIndex
     → grid_event_hub.cpp
         → GridEventHub::SetOnScrollIndex()
             → JSGrid::JsOnScrollIndex()
-                → 执行 JavaScript 回调
+                → Execute JavaScript callback
 ```
 
-## 相关文件索引
+## Related Files Index
 
-### 核心实现
-- [grid_pattern.cpp](grid_pattern.cpp) - Grid 主逻辑
-- [grid_layout_property.cpp](grid_layout_property.cpp) - 布局属性
-- [grid_layout_info.cpp](grid_layout_info.cpp) - 布局数据结构
+### Core Implementation
+- [grid_pattern.cpp](grid_pattern.cpp) - Grid main logic
+- [grid_layout_property.cpp](grid_layout_property.cpp) - Layout properties
+- [grid_layout_info.cpp](grid_layout_info.cpp) - Layout data structure
 
-### 布局算法
+### Layout Algorithms
 - [grid_scroll/grid_scroll_layout_algorithm.cpp](grid_scroll/grid_scroll_layout_algorithm.cpp)
 - [irregular/grid_irregular_layout_algorithm.cpp](irregular/grid_irregular_layout_algorithm.cpp)
 - [grid_custom/grid_custom_layout_algorithm.cpp](grid_custom/grid_custom_layout_algorithm.cpp)
 
-### JS 桥接
-- [js_grid.cpp](../../../bridge/declarative_frontend/jsview/js_grid.cpp) - JS 到 C++ 桥接
-- [grid.d.ts](../../../../../interface/sdk-js/api/@internal/component/ets/grid.d.ts) - TypeScript 接口定义
+### JS Bridge
+- [js_grid.cpp](../../../bridge/declarative_frontend/jsview/js_grid.cpp) - JS to C++ bridge
+- [grid.d.ts](../../../../../interface/sdk-js/api/@internal/component/ets/grid.d.ts) - TypeScript interface definition
 
-### 文档
-- [Grid API 文档](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-grid.md)
-- [GridItem API 文档](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-griditem.md)
-- [可滚动组件通用属性](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scrollable-common.md)
+### Documentation
+- [Grid API Documentation](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-grid.md)
+- [GridItem API Documentation](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-griditem.md)
+- [Scrollable Component Common Properties](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scrollable-common.md)
 - [Scroll & Scroller](../../../../../docs/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-container-scroll.md)

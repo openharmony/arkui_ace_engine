@@ -25,9 +25,13 @@ void CheckBoxGroupModelStatic::SetSelectAll(FrameNode* frameNode, const std::opt
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     pattern->SetUpdateFlag(true);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (isSelected.has_value()) {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected.value());
         ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected.value(), frameNode);
     } else {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, false);
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, frameNode);
     }
 }

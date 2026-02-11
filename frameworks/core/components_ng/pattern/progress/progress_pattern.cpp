@@ -935,7 +935,7 @@ void ProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)
     CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateColor(color);
     }
     if (host->GetRerenderable()) {
@@ -951,7 +951,7 @@ void ProgressPattern::UpdateGradientColor(const NG::Gradient& gradient, bool isF
     CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateGradientColor(gradient);
     }
     if (host->GetRerenderable()) {

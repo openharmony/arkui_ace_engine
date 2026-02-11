@@ -691,6 +691,7 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowByNodeId(int32_t instanceId,  Su
     auto subwindow = GetSubwindowByType(instanceId, type);
     auto dialogNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeId);
     CHECK_NULL_RETURN(dialogNode, subwindow);
+    ACE_UINODE_TRACE(dialogNode);
     auto dialogPattern = dialogNode->GetPattern<NG::DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, subwindow);
     auto dialogProps = AceType::DynamicCast<NG::DialogLayoutProperty>(dialogNode->GetLayoutProperty());
@@ -1529,6 +1530,7 @@ RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(c
     for (auto &overlay : GetAllSubOverlayManager()) {
         CHECK_NULL_CONTINUE(overlay);
         auto dialogNode = overlay->GetDialogNodeWithExistContent(node);
+        ACE_UINODE_TRACE(dialogNode);
         if (dialogNode) {
             return dialogNode;
         }

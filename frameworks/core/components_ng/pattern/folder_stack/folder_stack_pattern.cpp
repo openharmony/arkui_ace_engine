@@ -36,7 +36,7 @@ void FolderStackPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct() ||
-        OHOS::Ace::SystemProperties::IsSmallFoldProduct());
+        OHOS::Ace::SystemProperties::IsPortraitFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -138,11 +138,11 @@ bool FolderStackPattern::IsSupportHoverState(const RefPtr<DisplayInfo>& displayI
 {
     CHECK_NULL_RETURN(displayInfo, false);
     bool isFoldable = OHOS::Ace::SystemProperties::IsBigFoldProduct();
-    bool isSmallFoldable = OHOS::Ace::SystemProperties::IsSmallFoldProduct();
+    bool isPortraitFoldable = OHOS::Ace::SystemProperties::IsPortraitFoldProduct();
     auto rotation = displayInfo->GetRotation();
     auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
     auto isPortrait = rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
-    return (isLandscape && isFoldable) || (isPortrait && isSmallFoldable);
+    return (isLandscape && isFoldable) || (isPortrait && isPortraitFoldable);
 }
 
 void FolderStackPattern::RefreshStack(FoldStatus foldStatus)

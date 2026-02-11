@@ -56,6 +56,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -178,6 +179,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void DialogLayoutAlgorithm::AdjustHoverModeForWaterfall(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(expandDisplay_);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(pattern);
     auto dialogProp = DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
@@ -310,6 +312,7 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfTitleColumn(LayoutWrapper* layoutWra
     }
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto isTitleEmpty = dialogPattern->GetTitle().empty();
@@ -351,6 +354,7 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
 {
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    ACE_UINODE_TRACE(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     auto text = scroll->GetAllChildrenWithBuild().front();
@@ -482,6 +486,7 @@ bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight(const RefPtr<DialogLay
         expandDisplay_ && isShowInSubWindow_ && dialogProp && !(isModal_ && isUIExtensionSubWindow_), false);
     auto dialog = dialogProp->GetHost();
     CHECK_NULL_RETURN(dialog, false);
+    ACE_UINODE_TRACE(dialog);
     auto pipelineContext = DialogManager::GetMainPipelineContext(dialog);
     CHECK_NULL_RETURN(pipelineContext, false);
     auto expandDisplayValidHeight =
@@ -619,6 +624,7 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask)
 {
     CHECK_NULL_VOID(dialog);
+    ACE_UINODE_TRACE(dialog);
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_VOID(dialogContext);
     auto width = maskRect->GetWidth();
@@ -755,6 +761,7 @@ void DialogLayoutAlgorithm::AvoidScreen(
     CHECK_NULL_VOID(dialogProp);
     auto dialogNode = dialogProp->GetHost();
     CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
     auto pipelineContext = dialogNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
@@ -806,6 +813,7 @@ void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>&
     subWindowId_ = Container::CurrentId();
     auto dialogNode = dialogProp->GetHost();
     CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
     auto pipeline = dialogNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     subWindowId_ = pipeline->GetInstanceId();
@@ -817,6 +825,8 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         return;
     }
+    auto hostNode = layoutWrapper->GetHostNode();
+    ACE_UINODE_TRACE(hostNode);
     auto childLayoutProperty = child->GetLayoutProperty();
     auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(childLayoutProperty);

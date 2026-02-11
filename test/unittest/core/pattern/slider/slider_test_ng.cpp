@@ -1467,4 +1467,45 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode007, TestSize.Level1)
     EXPECT_NE(sliderPattern->value_, .0f);
     EXPECT_FALSE(sliderPattern->valueChangeFlag_);
 }
+
+/**
+ * @tc.name: SliderTestNgSetOnChangeEvent001
+ * @tc.desc: Test Slider SetOnChangeEvent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgSetOnChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and set theme.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(MIN, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+
+    /**
+     * @tc.steps: step2. Bind event callback functions.
+     */
+    std::function<void(float)> onChange = [](float floatValue) { EXPECT_EQ(floatValue, 1); };
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    sliderModelNG.SetOnChangeEvent(node, std::move(onChange));
+
+    /**
+     * @tc.steps: step3. Trigger events.
+     */
+    auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    ASSERT_NE(sliderEventHub, nullptr);
+    sliderEventHub->FireChangeEvent(1, 0);
+}
 } // namespace OHOS::Ace::NG

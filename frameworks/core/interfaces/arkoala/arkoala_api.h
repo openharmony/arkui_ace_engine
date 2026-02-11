@@ -1224,6 +1224,17 @@ struct ArkUI_PickerIndicatorStyle {
     ArkUI_Float32 endMargin;
 };
 
+struct OH_ArkUI_FontWeightConfigs {
+    bool enableVariableFontWeight;
+    bool enableDeviceFontWeightCategory;
+    bool isEnableVariableFontWeightSet;
+    bool isEnableDeviceFontWeightCategorySet;
+};
+
+struct OH_ArkUI_FontConfigs {
+    struct OH_ArkUI_FontWeightConfigs* fontWeightConfigs;
+};
+
 struct ArkUIPickerDividerResObjStruct {
     void* strokeWidthRawPtr;
     void* colorRawPtr;
@@ -7154,6 +7165,11 @@ struct ArkUITextClockModifier {
     void (*setTextClockTimeZoneOffset)(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset);
     void (*setTextClockOnDateChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextClockOnDateChange)(ArkUINodeHandle node);
+    void (*removeResObjByKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*initFontDefault)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createTextClockController)();
+    void (*createWithTextColorResourceObj)(ArkUINodeHandle node, void* fontColorRawPtr);
+    void (*setTextColorByUser)(ArkUINodeHandle node, ArkUI_Bool value);
 };
 
 struct ArkUITextClockControllerModifier {

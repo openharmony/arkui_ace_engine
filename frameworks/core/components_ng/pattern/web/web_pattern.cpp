@@ -120,6 +120,8 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const std::string ACC_PAGE_MODE_FULL = "FULL_SILENT";
+const std::string ACC_PAGE_MODE_SEMI = "SEMI_SILENT";
 const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
@@ -1411,7 +1413,11 @@ void WebPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->AddToPageEventController(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!accessibilityProperty->HasAccessibilitySamePage()) {
+        accessibilityManager->AddToPageEventController(host);
+    }
 }
 
 void WebPattern::OnDetachFromMainTree()
@@ -1429,7 +1435,11 @@ void WebPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->ReleasePageEvent(host, true, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!accessibilityProperty->HasAccessibilitySamePage()) {
+        accessibilityManager->ReleasePageEvent(host, true, false);
+    }
 }
 
 void WebPattern::OnAttachToFrameNode()
@@ -3299,6 +3309,7 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
         delegate_->dragData_->ClearImageFileNames();
+        delegate_->dragData_->ClearDragData();
     }
 }
 
@@ -8298,6 +8309,29 @@ void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
     if (accessibilityState_ != state) {
         accessibilityState_ = state;
         delegate_->SetAccessibilityState(state, isDelayed);
+    }
+}
+
+bool WebPattern::IsAccessibilitySamePage()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    std::string accessibilitySamePage = accessibilityProperty->GetAccessibilitySamePage();
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::IsAccessibilitySamePage accessibilitySamePage = %{public}s",
+        accessibilitySamePage.c_str());
+    if (accessibilitySamePage == ACC_PAGE_MODE_FULL) {
+        return true;
+    } else if (accessibilitySamePage == ACC_PAGE_MODE_SEMI) {
+        if (useSemiSamePage_) {
+            return false;
+        }
+        useSemiSamePage_ = true;
+        return true;
+    } else {
+        return false;
     }
 }
 

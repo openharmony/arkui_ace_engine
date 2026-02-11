@@ -12,20 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_OVERFLOW_HANDLER_TEST_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_OVERFLOW_HANDLER_TEST_NG_H
- 
+
+#include "base/memory/ace_type.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
- 
+
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
- 
+
 class OverflowTestNg : public TestNG {
 public:
     void SetUp() override {}
@@ -55,4 +56,5 @@ public:
     }
 };
 } // namespace OHOS::Ace::NG
+
 #endif

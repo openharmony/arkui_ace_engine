@@ -77,7 +77,9 @@ void TextFieldManagerNG::CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtens
     CHECK_NULL_VOID(prePattern);
     auto textBasePattern = AceType::DynamicCast<TextBase>(prePattern);
     CHECK_NULL_VOID(textBasePattern);
-    textBasePattern->CloseTextCustomKeyboard(nodeId, isUIExtension);
+    if (GetCustomKeyboardContinueFeature()) {
+        textBasePattern->CloseTextCustomKeyboard(nodeId, isUIExtension);
+    }
 }
 
 bool TextFieldManagerNG::OnBackPressed()

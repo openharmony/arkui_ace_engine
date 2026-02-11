@@ -47,6 +47,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     }
 
@@ -71,6 +72,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetWrapperPaintMethod>();
     }
 
@@ -91,6 +93,7 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetWrapperAccessibilityProperty>();
     }
 

@@ -1551,4 +1551,119 @@ HWTEST_F(VideoTestExtraAddNg, VideoModelStaticEnableAnalyzerTest, TestSize.Level
     VideoModelStatic::EnableAnalyzer(AceType::RawPtr(frameNode), true);
     EXPECT_TRUE(videoPattern->isEnableAnalyzer_);
 }
+
+/**
+ * @tc.name: VideoPatternUINodeTraceTest001
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in VideoModelNG::Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, VideoPatternUINodeTraceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Reset trace and create Video.
+     * @tc.expected: Video created successfully.
+     */
+    ResetLastTraceId();
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Verify ACE_UINODE_TRACE was called during Create.
+     * @tc.expected: Trace ID matches the video node ID.
+     */
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_GT(traceId, 0);
+}
+
+/**
+ * @tc.name: VideoPatternUINodeTraceTest002
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in VideoPattern::SetMethodCall
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, VideoPatternUINodeTraceTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and reset trace.
+     * @tc.expected: Video created successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    ResetLastTraceId();
+    /**
+     * @tc.steps: step2. Call SetMethodCall which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    videoPattern->SetMethodCall();
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
+}
+
+/**
+ * @tc.name: VideoPatternUINodeTraceTest003
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in VideoPattern::EnableAnalyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, VideoPatternUINodeTraceTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and reset trace.
+     * @tc.expected: Video created successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+    videoPattern->imageAnalyzerManager_ = nullptr;
+
+    ResetLastTraceId();
+    /**
+     * @tc.steps: step2. Call EnableAnalyzer which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    videoPattern->EnableAnalyzer(true);
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
+}
+
+/**
+ * @tc.name: VideoPatternUINodeTraceTest004
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in VideoPattern::SetImageAIOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, VideoPatternUINodeTraceTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and reset trace.
+     * @tc.expected: Video created successfully.
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+    videoPattern->imageAnalyzerManager_ = nullptr;
+
+    ResetLastTraceId();
+    /**
+     * @tc.steps: step2. Call SetImageAIOptions which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    videoPattern->SetImageAIOptions(nullptr);
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, static_cast<uint64_t>(frameNode->GetId()));
+}
 } // namespace OHOS::Ace::NG

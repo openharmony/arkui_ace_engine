@@ -3260,6 +3260,11 @@ const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode,
             *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
             *doRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
             return geometryTransition->GetId();
+        } else {
+            auto result = layoutProperty->GetGeometryTransitionInfo();
+            *followWithoutTransition = std::get<1>(result);
+            *doRegisterSharedTransition = std::get<2>(result);
+            return std::get<0>(result);
         }
     }
     return "";
@@ -3941,6 +3946,7 @@ void ViewAbstract::BindPopup(
     }
     auto popupId = popupInfo.popupId;
     auto popupNode = popupInfo.popupNode;
+    ACE_UINODE_TRACE(popupNode);
     RefPtr<BubblePattern> popupPattern;
     if (popupNode) {
         popupPattern = popupNode->GetPattern<BubblePattern>();
@@ -4085,6 +4091,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     auto targetTag = targetNode->GetTag();
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    ACE_UINODE_TRACE(popupNode);
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
@@ -4107,8 +4114,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
         targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-            auto subwindow =
-                SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_TIPS);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_TIPS);
             CHECK_NULL_VOID(subwindow);
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -4150,6 +4156,7 @@ void ViewAbstract::AddHoverEventForTips(
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto targetId = targetNode->GetId();
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -4204,6 +4211,7 @@ void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, Pop
     auto instanceId = context->GetInstanceId();
     auto touchCallback = [targetId, instanceId,
         popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](const TouchEventInfo& info) {
+        ACE_UINODE_TRACE(popupNode);
         if (info.GetTouches().empty()) {
             return;
         }
@@ -4213,6 +4221,7 @@ void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, Pop
         }
         auto popup = popupNode.Upgrade();
         CHECK_NULL_VOID(popup);
+        ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsTipsAppearing(false);
@@ -4239,6 +4248,7 @@ void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, Pop
     auto mouseTask = [popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](MouseInfo& info) {
         auto popup = popupNode.Upgrade();
         CHECK_NULL_VOID(popup);
+        ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetMouseOffset(info.GetScreenLocation());
@@ -4440,6 +4450,7 @@ void ViewAbstract::DismissDialog()
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
     RefPtr<FrameNode> dialogNode;
+    ACE_UINODE_TRACE(dialogNode);
     auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
     auto dialogTag = DialogManager::GetInstance().GetDialogTag();
     if (dialogId && !dialogTag.empty()) {
@@ -4530,6 +4541,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
     auto menu = menuWrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    ACE_UINODE_TRACE(menu);
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, ERROR_CODE_INTERNAL_ERROR);
     auto node = WeakPtr<UINode>(customNode);
@@ -4571,6 +4583,7 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    ACE_UINODE_TRACE(menu);
     wrapperPattern->SetMenuParam(menuParam);
     const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
     if (menuViewModifier) {
@@ -4653,6 +4666,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto menuNode = menuViewModifier->createWithOptionParams(
                         std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -4720,6 +4734,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     auto menuNode = menuViewModifier->createWithCustomNode(
                         customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);

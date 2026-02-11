@@ -12,18 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const overrideMap = new Map();
 overrideMap.set(
   'ArkCheckboxComponent',
   new Map([
     ['Symbol(width)', (()=>{
       let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      return module.CheckboxWidthModifier;
+      return module.getCheckboxWidthModifier();
     })()],
     ['Symbol(height)', (()=>{
       let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      return module.CheckboxHeightModifier;
+      return module.getCheckboxHeightModifier();
     })()],
   ])
 );
@@ -2492,10 +2491,75 @@ class TextModifier extends ArkTextComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class TextClockModifier extends ArkTextClockComponent {
+
+class LazyArkTextClockComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkTextClockComponent.module === undefined) {
+      LazyArkTextClockComponent.module = globalThis.requireNapi('arkui.components.arktextclock');
+    }
+    this.lazyComponent = LazyArkTextClockComponent.module.createComponent(nativePtr, classType);
+    console.log("LazyArkTextClockComponent lazyload nativeModule")
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  value(value) {
+    this.lazyComponent.value(value);
+    return this;
+  }
+  format(value) {
+    this.lazyComponent.format(value);
+    return this;
+  }
+  onDateChange(event) {
+    this.lazyComponent.onDateChange(event);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  fontSize(value) {
+    this.lazyComponent.fontSize(value);
+    return this;
+  }
+  fontStyle(value) {
+    this.lazyComponent.fontStyle(value);
+    return this;
+  }
+  fontWeight(value) {
+    this.lazyComponent.fontWeight(value);
+    return this;
+  }
+  fontFamily(value) {
+    this.lazyComponent.fontFamily(value);
+    return this;
+  }
+  textShadow(value) {
+    this.lazyComponent.textShadow(value);
+    return this;
+  }
+  fontFeature(value) {
+    this.lazyComponent.fontFeature(value);
+    return this;
+  }
+  contentModifier(modifier) {
+    this.lazyComponent.contentModifier(modifier);
+    return this;
+  }
+  dateTimeOptions(dateTimeOptions) {
+    this.lazyComponent.dateTimeOptions(dateTimeOptions);
+    return this;
+  }
+}
+
+class TextClockModifier extends LazyArkTextClockComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -3015,7 +3079,6 @@ class UnionEffectContainerModifier extends ArkUnionEffectContainerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-
 export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
   GridModifier, GridColModifier, GridItemModifier, GridRowModifier, HyperlinkModifier, ImageAnimatorModifier, ImageModifier, ImageSpanModifier, LineModifier,

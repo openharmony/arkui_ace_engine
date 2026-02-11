@@ -29,6 +29,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOAST_ETS_TAG, toastId);
     auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
     CHECK_NULL_RETURN(toastNode, nullptr);
+    ACE_UINODE_TRACE(toastNode);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_RETURN(toastProperty, nullptr);
     auto toastContext = toastNode->GetRenderContext();
@@ -78,6 +79,7 @@ void ToastView::UpdateTextLayoutProperty(
     const RefPtr<FrameNode>& textNode, const std::string& message,
     bool isRightToLeft, const std::optional<Color>& textColor)
 {
+    ACE_UINODE_TRACE(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto context = textNode->GetContext();
@@ -113,6 +115,7 @@ void ToastView::UpdateTextLayoutProperty(
 
 void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
 {
+    ACE_UINODE_TRACE(toastNode);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_VOID(toastContext);
     auto pattern = toastNode->GetPattern<ToastPattern>();
@@ -151,6 +154,7 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
 
 void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
 {
+    ACE_UINODE_TRACE(toastNode);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_VOID(toastContext);
     auto pattern = toastNode->GetPattern<ToastPattern>();

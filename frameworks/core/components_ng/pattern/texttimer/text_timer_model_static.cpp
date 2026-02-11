@@ -39,11 +39,21 @@ void TextTimerModelStatic::SetInputCount(FrameNode* frameNode, const std::option
 
 void TextTimerModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value.value(), frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+        CHECK_NULL_VOID(textNode);
+        CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColorByRender(value.value());
+        auto textPattern = textNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->UpdateFontColor(value.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);

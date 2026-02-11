@@ -32,6 +32,7 @@ void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(pattern);
     auto menu = pattern->GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<InnerMenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->RecordItemsAndGroups();
@@ -326,6 +327,7 @@ std::list<WeakPtr<UINode>> MenuItemGroupLayoutAlgorithm::GetItemsAndGroups(const
     CHECK_NULL_RETURN(pattern, itemsAndGroups);
     auto menu = pattern->GetMenu();
     CHECK_NULL_RETURN(menu, itemsAndGroups);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<InnerMenuPattern>();
     CHECK_NULL_RETURN(menuPattern, itemsAndGroups);
     return menuPattern->GetItemsAndGroups();

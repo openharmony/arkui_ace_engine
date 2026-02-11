@@ -1394,7 +1394,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Navigation_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _NavigationInterface_setNavigationOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavigationInterface_setNavigationOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavigationInterface_setNavigationOptions1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setNavBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1436,11 +1438,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavigationAttribute_setEnableModeChangeAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NavigationAttribute_setEnableVisibilityLifecycleWithContentCover(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NavigationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NavigationAttribute_setTitle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideTitleBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NavigationAttribute_setMenus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NavigationAttribute_setToolbarConfiguration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideToolBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1648,6 +1655,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorAttribute_setOnCut(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setOnCopy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RichEditorAttribute_setOnWillAttachIME(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setEditMenuOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2273,6 +2282,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwiperAttribute_setOnUnselected(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SwiperAttribute_setOnScrollStateChanged(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SwiperAttribute_setOnAnimationStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SwiperAttribute_setOnAnimationEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2290,6 +2301,8 @@ export class ArkUIGeneratedNativeModule {
     native static _SwiperAttribute_setPageFlipMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SwiperAttribute_setOnContentWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SwiperAttribute_setMaintainVisibleContentPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SwiperAttribute_setAutoPlay1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -5493,6 +5506,10 @@ export class ArkUIGeneratedNativeModule {
     native static _NavDestinationContext_getNavDestinationId(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavDestinationContext_setNavDestinationId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavDestinationContext_getMode(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _NavDestinationContext_setMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavExtender_setNavigationOptions(ptr: KPointer, pathStack: KPointer): void
     @ani.unsafe.Direct
@@ -5521,9 +5538,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): int32
     @ani.unsafe.Direct
-    native static _NavExtender_setCreateNavDestinationCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _NavExtender_setNavDestinationRouterMapBuilderCallback(navigation: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _NavExtender_getRouteMapInConfig(context: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _NavExtender_setSplitPlaceholder(navigation: KPointer, placeholderNode: KPointer): void
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_construct(): KPointer
     @ani.unsafe.Direct
@@ -6350,6 +6369,14 @@ export class ArkUIGeneratedNativeModule {
     native static _SwiperController_finishAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _SwiperController_preloadItems(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SwiperController_startFakeDrag(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _SwiperController_fakeDragBy(ptr: KPointer, offset: KFloat): boolean
+    @ani.unsafe.Direct
+    native static _SwiperController_stopFakeDrag(ptr: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _SwiperController_isFakeDragging(ptr: KPointer): boolean
+    @ani.unsafe.Direct
     native static _SwipeRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _SwipeRecognizer_getFinalizer(): KPointer
@@ -6598,6 +6625,12 @@ export class ArkUIGeneratedNativeModule {
     native static _TextStyle_getFontWeight(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _TextStyle_getFontStyle(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getSuperscript(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getStrokeWidth(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _TextStyle_getStrokeColor(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TextTimerController_construct(): KPointer
     @ani.unsafe.Direct

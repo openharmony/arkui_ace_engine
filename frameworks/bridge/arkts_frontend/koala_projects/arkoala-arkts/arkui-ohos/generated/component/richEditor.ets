@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
-import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextVerticalAlign, TextChangeReason, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextVerticalAlign, TextChangeReason, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer, IMEClient } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -573,6 +573,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RichEditorAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillAttachIMEAttribute(value: ((value0: IMEClient) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setOnWillAttachIME(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEditMenuOptionsAttribute(value: EditMenuOptions | undefined): void {
@@ -1198,6 +1210,9 @@ export interface RichEditorAttribute extends CommonMethod {
     onCopy(value: ((value0: CopyEvent) => void) | undefined): this {
         throw new Error("Unimplemented method onCopy")
     }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        throw new Error("Unimplemented method onWillAttachIME")
+    }
     editMenuOptions(value: EditMenuOptions | undefined): this {
         throw new Error("Unimplemented method editMenuOptions")
     }
@@ -1283,6 +1298,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     onDidChange_value?: OnDidChangeCallback | undefined
     onCut_value?: ((value0: CutEvent) => void) | undefined
     onCopy_value?: ((value0: CopyEvent) => void) | undefined
+    onWillAttachIME_value?: ((value0: IMEClient) => void) | undefined
     editMenuOptions_value?: EditMenuOptions | undefined
     enableKeyboardOnFocus_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
@@ -1370,6 +1386,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
         return this
     }
     onCopy(value: ((value0: CopyEvent) => void) | undefined): this {
+        return this
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
         return this
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
@@ -1702,6 +1721,14 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((value0: CopyEvent) => void) | undefined)
             this.getPeer()?.setOnCopyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        if (this.checkPriority("onWillAttachIME")) {
+            const value_casted = value as (((value0: IMEClient) => void) | undefined)
+            this.getPeer()?.setOnWillAttachIMEAttribute(value_casted)
             return this
         }
         return this

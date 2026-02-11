@@ -326,6 +326,37 @@ HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CleanNode007
+ * @tc.desc: Test OnCleanNodeClicked
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+    EXPECT_FALSE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_FALSE(cleanNodeResponseArea->IsSymbolIcon());
+
+    /**
+     * @tc.steps: step2. test clean node clicked
+     */
+
+    cleanNodeResponseArea->OnCleanNodeClicked();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
  * @tc.name: RepeatClickCaret
  * @tc.desc: Test RepeatClickCaret
  * @tc.type: FUNC
@@ -790,6 +821,21 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
      */
     ASSERT_NE(pattern_, nullptr);
     EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+
+/**
+ * @tc.name: SetCaretTest001
+ * @tc.desc: test textInput SetCaretPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetCaretTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected:
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->ProcessPendingCaretEvent();
 }
 
 /**

@@ -13,183 +13,188 @@
  * limitations under the License.
  */
 /// <reference path='./import.ts' />
-class RatingStarsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().rating.resetStars(node);
+function loadComponent() {
+  if (globalThis.__ArkComponent__ !== undefined && loadComponent.componentObj === undefined) {
+    class RatingStarsModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().rating.resetStars(node);
+        }
+        else {
+          getUINativeModule().rating.setStars(node, this.value);
+        }
+      }
     }
-    else {
-      getUINativeModule().rating.setStars(node, this.value);
+    RatingStarsModifier.identity = Symbol('ratingStars');
+    class RatingStepSizeModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().rating.resetStepSize(node);
+        }
+        else {
+          getUINativeModule().rating.setStepSize(node, this.value);
+        }
+      }
     }
+    RatingStepSizeModifier.identity = Symbol('ratingStepSize');
+    class RatingStarStyleModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+          let _a;
+          let _b;
+          let _c;
+        if (reset) {
+          getUINativeModule().rating.resetStarStyle(node);
+        }
+        else {
+          getUINativeModule().rating.setStarStyle(node, (_a = this.value) === null ||
+          _a === void 0 ? void 0 : _a.backgroundUri, (_b = this.value) === null ||
+          _b === void 0 ? void 0 : _b.foregroundUri, (_c = this.value) === null ||
+          _c === void 0 ? void 0 : _c.secondaryUri);
+        }
+      }
+      checkObjectDiff() {
+        let _a;
+        let _b;
+        let _c;
+        let _d;
+        let _e;
+        let _f;
+        return ((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.backgroundUri) !==
+          ((_b = this.value) === null || _b === void 0 ? void 0 : _b.backgroundUri) ||
+          ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.foregroundUri) !==
+          ((_d = this.value) === null || _d === void 0 ? void 0 : _d.foregroundUri) ||
+          ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.secondaryUri) !==
+          ((_f = this.value) === null || _f === void 0 ? void 0 : _f.secondaryUri);
+      }
+    }
+    RatingStarStyleModifier.identity = Symbol('ratingStarStyle');
+    class RatingContentModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset, component) {
+        let ratingComponent = component;
+        ratingComponent.setContentModifier(this.value);
+      }
+    }
+    RatingStarStyleModifier.identity = Symbol('ratingContentModifier');
+    class RatingOnChangeModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().rating.resetOnChange(node);
+        } else {
+          getUINativeModule().rating.setOnChange(node, this.value);
+        }
+      }
+    }
+    RatingOnChangeModifier.identity = Symbol('ratingOnChangeModifier');
+    class ArkRatingComponent extends globalThis.__ArkComponent__ {
+      constructor(nativePtr, classType) {
+        super(nativePtr, classType);
+      }
+      allowChildCount() {
+        return 0;
+      }
+      initialize(value) {
+        if (!value.length) {
+          return this;
+        }
+        if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+          modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
+        } else {
+          modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
+        }
+        return this;
+      }
+      stars(value) {
+        modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
+        return this;
+      }
+      stepSize(value) {
+        modifierWithKey(this._modifiersWithKeys, RatingStepSizeModifier.identity, RatingStepSizeModifier, value);
+        return this;
+      }
+      starStyle(value) {
+        let starStyle = new ArkStarStyle();
+        if (!isUndefined(value) && !isNull(value) && isObject(value)) {
+          starStyle.backgroundUri = value.backgroundUri;
+          starStyle.foregroundUri = value.foregroundUri;
+          starStyle.secondaryUri = value.secondaryUri;
+          modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, value);
+        }
+        else {
+          modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, undefined);
+        }
+        return this;
+      }
+      onChange(callback) {
+        modifierWithKey(this._modifiersWithKeys, RatingOnChangeModifier.identity, RatingOnChangeModifier, callback);
+        return this;
+      }
+      contentModifier(value) {
+        modifierWithKey(this._modifiersWithKeys, RatingContentModifier.identity, RatingContentModifier, value);
+        return this;
+      }
+      setContentModifier(modifier) {
+        if (modifier === undefined || modifier === null) {
+          getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, false);
+          return;
+        }
+        this.needRebuild = false;
+        if (this.builder !== modifier.applyContent()) {
+          this.needRebuild = true;
+        }
+        this.builder = modifier.applyContent();
+        this.modifier = modifier;
+        getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
+      }
+      makeContentModifierNode(context, ratingConfiguration) {
+        ratingConfiguration.contentModifier = this.modifier;
+        if (isUndefined(this.ratingNode) || this.needRebuild) {
+          const xNode = globalThis.requireNapi('arkui.node');
+          this.ratingNode = new xNode.BuilderNode(context);
+          this.ratingNode.build(this.builder, ratingConfiguration);
+          this.needRebuild = false;
+        } else {
+          this.ratingNode.update(ratingConfiguration);
+        }
+        return this.ratingNode.getFrameNode();
+      }
+    }
+    class RatingOptionsModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().rating.setRatingOptions(node, undefined, undefined);
+        } else {
+          getUINativeModule().rating.setRatingOptions(node, this.value?.rating, this.value?.indicator);
+        }
+      }
+    
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue?.rating, this.value?.rating) ||
+          !isBaseOrResourceEqual(this.stageValue?.indicator, this.value?.indicator);
+      }
+    }
+    RatingOptionsModifier.identity = Symbol( 'ratingOptions' );
+    loadComponent.componentObj = {'component' : ArkRatingComponent };
   }
+ return loadComponent.componentObj;
 }
-RatingStarsModifier.identity = Symbol('ratingStars');
-class RatingStepSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().rating.resetStepSize(node);
-    }
-    else {
-      getUINativeModule().rating.setStepSize(node, this.value);
-    }
-  }
-}
-RatingStepSizeModifier.identity = Symbol('ratingStepSize');
-class RatingStarStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-      let _a;
-      let _b;
-      let _c;
-    if (reset) {
-      getUINativeModule().rating.resetStarStyle(node);
-    }
-    else {
-      getUINativeModule().rating.setStarStyle(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.backgroundUri, (_b = this.value) === null ||
-      _b === void 0 ? void 0 : _b.foregroundUri, (_c = this.value) === null ||
-      _c === void 0 ? void 0 : _c.secondaryUri);
-    }
-  }
-  checkObjectDiff() {
-    let _a;
-    let _b;
-    let _c;
-    let _d;
-    let _e;
-    let _f;
-    return ((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.backgroundUri) !==
-      ((_b = this.value) === null || _b === void 0 ? void 0 : _b.backgroundUri) ||
-      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.foregroundUri) !==
-      ((_d = this.value) === null || _d === void 0 ? void 0 : _d.foregroundUri) ||
-      ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.secondaryUri) !==
-      ((_f = this.value) === null || _f === void 0 ? void 0 : _f.secondaryUri);
-  }
-}
-RatingStarStyleModifier.identity = Symbol('ratingStarStyle');
-class RatingContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset, component) {
-    let ratingComponent = component;
-    ratingComponent.setContentModifier(this.value);
-  }
-}
-RatingStarStyleModifier.identity = Symbol('ratingContentModifier');
-class RatingOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().rating.resetOnChange(node);
-    } else {
-      getUINativeModule().rating.setOnChange(node, this.value);
-    }
-  }
-}
-RatingOnChangeModifier.identity = Symbol('ratingOnChangeModifier');
-class ArkRatingComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  allowChildCount() {
-    return 0;
-  }
-  initialize(value) {
-    if (!value.length) {
-      return this;
-    }
-    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
-      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
-    }
-    return this;
-  }
-  stars(value) {
-    modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
-    return this;
-  }
-  stepSize(value) {
-    modifierWithKey(this._modifiersWithKeys, RatingStepSizeModifier.identity, RatingStepSizeModifier, value);
-    return this;
-  }
-  starStyle(value) {
-    let starStyle = new ArkStarStyle();
-    if (!isUndefined(value) && !isNull(value) && isObject(value)) {
-      starStyle.backgroundUri = value.backgroundUri;
-      starStyle.foregroundUri = value.foregroundUri;
-      starStyle.secondaryUri = value.secondaryUri;
-      modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, value);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, undefined);
-    }
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, RatingOnChangeModifier.identity, RatingOnChangeModifier, callback);
-    return this;
-  }
-  contentModifier(value) {
-    modifierWithKey(this._modifiersWithKeys, RatingContentModifier.identity, RatingContentModifier, value);
-    return this;
-  }
-  setContentModifier(modifier) {
-    if (modifier === undefined || modifier === null) {
-      getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, false);
-      return;
-    }
-    this.needRebuild = false;
-    if (this.builder !== modifier.applyContent()) {
-      this.needRebuild = true;
-    }
-    this.builder = modifier.applyContent();
-    this.modifier = modifier;
-    getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
-  }
-  makeContentModifierNode(context, ratingConfiguration) {
-    ratingConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.ratingNode) || this.needRebuild) {
-      const xNode = globalThis.requireNapi('arkui.node');
-      this.ratingNode = new xNode.BuilderNode(context);
-      this.ratingNode.build(this.builder, ratingConfiguration);
-      this.needRebuild = false;
-    } else {
-      this.ratingNode.update(ratingConfiguration);
-    }
-    return this.ratingNode.getFrameNode();
-  }
-}
-class RatingOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().rating.setRatingOptions(node, undefined, undefined);
-    } else {
-      getUINativeModule().rating.setRatingOptions(node, this.value?.rating, this.value?.indicator);
-    }
-  }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue?.rating, this.value?.rating) ||
-      !isBaseOrResourceEqual(this.stageValue?.indicator, this.value?.indicator);
-  }
-}
-RatingOptionsModifier.identity = Symbol( 'ratingOptions' );
-
 class JSRating extends JSViewAbstract {
     static create(params) {
       getUINativeModule().rating.create(params);
@@ -213,7 +218,7 @@ class JSRating extends JSViewAbstract {
     
     static attributeModifier(modifier) {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {
-            return new ArkRatingComponent(nativePtr);
+            return createComponent(nativePtr);
         }, (nativePtr, classType, modifierJS) => {
             return new modifierJS.RatingModifier(nativePtr, classType);
         });
@@ -258,7 +263,10 @@ class JSRating extends JSViewAbstract {
 }
 
 function createComponent(nativePtr, classType) {
-    return new ArkRatingComponent(nativePtr, classType);
+  if (loadComponent.componentObj !== undefined) {
+    return new loadComponent.componentObj.component(nativePtr, classType);
+  }
+  return undefined;
 }
 
 function exportComponent() {
@@ -269,4 +277,4 @@ function exportView() {
     globalThis.Rating = JSRating;
 }
 
-export default { ArkRatingComponent, createComponent, exportComponent, exportView };
+export default { loadComponent, createComponent, exportComponent, exportView };

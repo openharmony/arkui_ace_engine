@@ -15,7 +15,7 @@
 
 import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, KPointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, NavPathStack_serializer, NavigationModuleInfo_serializer } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, NavPathStack_serializer, NavigationModuleInfo_serializer, HomePathInfo_serializer, HomePathInfo } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { NavExtender, ArkComponentRootPeer } from "../component/idlize"
 import { int32 } from "@koalaui/common"
@@ -27,6 +27,7 @@ import { PageMapBuilder, WrappedBuilder } from "../component/builder"
 import { setNeedCreate } from "../ArkComponentRoot"
 import { ObserveSingleton } from "../stateManagement/base/observeSingleton"
 import { ExtendableComponent } from '../component/extendableComponent'
+import { ComponentContent } from 'arkui.ComponentContent'
 
 export type NavDestinationBuilder =
 /** @memo */
@@ -76,7 +77,7 @@ export class NavigationRouterMap {
 }
 
 export class NavigationOpsHandWritten {
-    static hookSetNavigationOptionsImpl(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo) {
+    static hookSetNavigationOptionsImpl(component: ArkNavigationComponent, pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo) {
         let info: NavPathStack = new NavPathStack();
         const pathInfos_type = runtimeType(pathInfos)
         if (pathInfos_type != RuntimeType.UNDEFINED) {
@@ -92,6 +93,13 @@ export class NavigationOpsHandWritten {
         thisSerializer.writeInt8(RuntimeType.OBJECT)
         const pathInfosTmpValue  = info
         NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
+        if (homeDestination !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const homeDestinationTmpValue  = homeDestination!
+            HomePathInfo_serializer.write(thisSerializer, homeDestinationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         if (moduleInfo !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const moduleInfoTmpValue  = moduleInfo!
@@ -100,7 +108,7 @@ export class NavigationOpsHandWritten {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         let peerPtr = component.getPeer().peer.ptr
-        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions(peerPtr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions1(peerPtr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         if (info == undefined || info == null) {
             console.log(`AceNavigation: NavPathStack is empty!`)
@@ -108,15 +116,8 @@ export class NavigationOpsHandWritten {
         }
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
-        NavExtender.setCreateNavDestinationCallback(info!, (index: int32): KPointer => {
-            let names: Array<string> = info!.getAllPathName()
-            if (index < 0 || index >= names.length) {
-                InteropNativeModule._NativeLog(`AceNavigation: Invalid index:${index} names.length:${names.length}`);
-                return 0;
-            }
-            let param = info!.getParamByIndex(index)
-            let name = names[index];
-            InteropNativeModule._NativeLog(`AceNavigation: create new node: name: ${name}, index: ${index} from router map`);
+        NavExtender.setNavDestinationRouterMapBuilderCallback(component.getPeer().peer.ptr, (name: string, param?: Object): KPointer => {
+            InteropNativeModule._NativeLog(`AceNavigation: create new node: name: ${name} from router map`);
             let buildParam = {
                 currentRenderingComponent: currentRenderingComponent,
                 currentExtendableComponent: currentExtendableComponent,
@@ -148,6 +149,14 @@ export class NavigationOpsHandWritten {
             return peer.peer.ptr;
         });
     }
+    static hookSplitPlaceholderImpl(component: ArkNavigationComponent, value: ComponentContent) {
+        let peerPtr = component.getPeer().peer.ptr;
+        let ptr: KPointer = 0;
+        if (value.getNodePtr() !== undefined) {
+            ptr = value.getNodePtr() as KPointer;
+        }
+        NavExtender.setSplitPlaceholder(peerPtr, ptr);
+    }
     static hookGetRouteConfigImpl(context: NavDestinationContextInternal): RouteMapConfig | undefined {
         let info: Array<string> = NavExtender.getRouteMapInConfig(context.getPeer()!.ptr);
         if (info.length === 0) {
@@ -162,13 +171,13 @@ export class NavigationOpsHandWritten {
         if (info.length <= dataIndex) {
             return config;
         }
-        let jsonStr: JSONValue = JSONParser.parse(info[dataIndex]);
-        if (jsonStr instanceof JSONObject) {
-            let keys: Array<JSONString> = jsonStr.keys_;
-            let values: Array<JSONValue> = jsonStr.values;
+        let value: jsonx.JsonElement = JSON.parseJsonElement(info[dataIndex]);
+        let vType: jsonx.JsonType = value.jsonType;
+        if (vType === jsonx.JsonType.JsonObject) {
+            let iterVal: IterableIterator<[string, jsonx.JsonElement]> = value.$_iterator();
             let result: Record<string, string> = new Record<string, string>();
-            for (let i: int = 0; i < keys.length; i++) {
-                result[keys[i].value] = (values[i] as JSONString).value;
+            for (let t of iterVal) {
+                result[t[0]] = t[1].asString();
             }
             config.data = result;
         }

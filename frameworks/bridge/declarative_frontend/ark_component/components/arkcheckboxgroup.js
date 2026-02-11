@@ -14,279 +14,285 @@
  */
 
 /// <reference path='./import.ts' />
-class CheckboxGroupSelectAllModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
-    }
-  }
-}
-CheckboxGroupSelectAllModifier.identity = Symbol('checkboxgroupSelectAll');
-class CheckboxGroupSelectedColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CheckboxGroupSelectedColorModifier.identity = Symbol('checkboxgroupSelectedColor');
-class CheckboxGroupUnselectedColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CheckboxGroupUnselectedColorModifier.identity = Symbol('checkboxgroupUnselectedColor');
-class CheckboxGroupMarkModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c;
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupMark(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.strokeColor, (_b = this.value) === null ||
-      _b === void 0 ? void 0 : _b.size, (_c = this.value) === null ||
-      _c === void 0 ? void 0 : _c.strokeWidth);
-    }
-  }
-  checkObjectDiff() {
-    let colorEQ = isBaseOrResourceEqual(this.stageValue.strokeColor, this.value.strokeColor);
-    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
-    let widthEQ = isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
-    return !colorEQ || !sizeEQ || !widthEQ;
-  }
-}
-CheckboxGroupMarkModifier.identity = Symbol('checkboxgroupMark');
-class CheckboxGroupOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupOnChange(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupOnChange(node, this.value);
-    }
-  }
-}
-CheckboxGroupOnChangeModifier.identity = Symbol('checkboxGroupOnChange');
-
-class CheckboxGroupWidthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupWidth(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CheckboxGroupWidthModifier.identity = Symbol('checkboxGroupWidth');
-class CheckboxGroupSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupSize(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupSize(node, this.value.width, this.value.height);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
-      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
-  }
-}
-CheckboxGroupSizeModifier.identity = Symbol('checkboxGroupSize');
-class CheckboxGroupHeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupHeight(node);
-    }
-    else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupHeight(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CheckboxGroupHeightModifier.identity = Symbol('checkboxGroupHeight');
-class CheckboxGroupStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.resetCheckboxGroupStyle(node);
-    } else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupStyle(node, this.value);
-    }
-  }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CheckboxGroupStyleModifier.identity = Symbol('checkboxgroupStyle');
-class ArkCheckboxGroupComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  allowChildCount() {
-    return 0;
-  }
-  initialize(value) {
-    if (!value.length) {
-      return this;
-    }
-    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
-      modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
-        value[0]);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
-        undefined);
-    }
-    return this;
-  }
-  selectAll(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectAllModifier.identity, CheckboxGroupSelectAllModifier, value);
-    return this;
-  }
-  selectedColor(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectedColorModifier.identity, CheckboxGroupSelectedColorModifier, value);
-    return this;
-  }
-  unselectedColor(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupUnselectedColorModifier.identity, CheckboxGroupUnselectedColorModifier, value);
-    return this;
-  }
-  mark(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupOnChangeModifier.identity, CheckboxGroupOnChangeModifier, callback);
-    return this;
-  }
-  size(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupSizeModifier.identity, CheckboxGroupSizeModifier, value);
-    return this;
-  }
-  width(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupWidthModifier.identity, CheckboxGroupWidthModifier, value);
-    return this;
-  }
-  height(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupHeightModifier.identity, CheckboxGroupHeightModifier, value);
-    return this;
-  }
-  checkboxShape(value) {
-    modifierWithKey(this._modifiersWithKeys, CheckboxGroupStyleModifier.identity, CheckboxGroupStyleModifier, value);
-    return this;
-  }
-  setContentModifier(modifier) {
-    if (modifier === undefined || modifier === null) {
-      getUINativeModule().checkboxgroup.setContentModifierBuilder(this.nativePtr, false);
-      this.builder = undefined;
-      this.modifier = undefined;
-      return;
-    }
-    this.needRebuild = false;
-    const appliedContent = modifier.applyContent();
-    if (this.builder !== appliedContent) {
-      this.needRebuild = true;
-    }
-    this.builder = appliedContent;
-    this.modifier = modifier;
-    getUINativeModule().checkboxgroup.setContentModifierBuilder(this.nativePtr, this);
-  }
-  makeContentModifierNode(context, checkBoxGroupConfiguration) {
-    checkBoxGroupConfiguration.contentModifier = this.modifier;
-    if (this.checkboxgroupNode === undefined || this.needRebuild) {
-      if (this.checkboxgroupNode !== undefined) {
-        this.checkboxgroupNode = null;
+function loadComponent() {
+  if (globalThis.__ArkComponent__ !== undefined && loadComponent.componentObj === undefined) {
+    class CheckboxGroupSelectAllModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
       }
-      const xNode = globalThis.requireNapi('arkui.node');
-      this.checkboxgroupNode = new xNode.BuilderNode(context);
-      this.checkboxgroupNode.build(this.builder, checkBoxGroupConfiguration);
-      this.needRebuild = false;
-    } else {
-      this.checkboxgroupNode.update(checkBoxGroupConfiguration);
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
+        }
+      }
     }
-    return this.checkboxgroupNode.getFrameNode();
-  }
-}
-
-class CheckBoxGroupOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().checkboxgroup.setCheckboxGroupOptions(node, undefined);
-    } else {
-      getUINativeModule().checkboxgroup.setCheckboxGroupOptions(node, this.value.group);
+    CheckboxGroupSelectAllModifier.identity = Symbol('checkboxgroupSelectAll');
+    class CheckboxGroupSelectedColorModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
+    CheckboxGroupSelectedColorModifier.identity = Symbol('checkboxgroupSelectedColor');
+    class CheckboxGroupUnselectedColorModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    CheckboxGroupUnselectedColorModifier.identity = Symbol('checkboxgroupUnselectedColor');
+    class CheckboxGroupMarkModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        let _a, _b, _c;
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupMark(node, (_a = this.value) === null ||
+          _a === void 0 ? void 0 : _a.strokeColor, (_b = this.value) === null ||
+          _b === void 0 ? void 0 : _b.size, (_c = this.value) === null ||
+          _c === void 0 ? void 0 : _c.strokeWidth);
+        }
+      }
+      checkObjectDiff() {
+        let colorEQ = isBaseOrResourceEqual(this.stageValue.strokeColor, this.value.strokeColor);
+        let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+        let widthEQ = isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+        return !colorEQ || !sizeEQ || !widthEQ;
+      }
+    }
+    CheckboxGroupMarkModifier.identity = Symbol('checkboxgroupMark');
+    class CheckboxGroupOnChangeModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupOnChange(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupOnChange(node, this.value);
+        }
+      }
+    }
+    CheckboxGroupOnChangeModifier.identity = Symbol('checkboxGroupOnChange');
+    
+    class CheckboxGroupWidthModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupWidth(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupWidth(node, this.value);
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    CheckboxGroupWidthModifier.identity = Symbol('checkboxGroupWidth');
+    class CheckboxGroupSizeModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupSize(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupSize(node, this.value.width, this.value.height);
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+          !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+      }
+    }
+    CheckboxGroupSizeModifier.identity = Symbol('checkboxGroupSize');
+    class CheckboxGroupHeightModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupHeight(node);
+        }
+        else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupHeight(node, this.value);
+        }
+      }
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    CheckboxGroupHeightModifier.identity = Symbol('checkboxGroupHeight');
+    class CheckboxGroupStyleModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.resetCheckboxGroupStyle(node);
+        } else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupStyle(node, this.value);
+        }
+      }
+    
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
+    CheckboxGroupStyleModifier.identity = Symbol('checkboxgroupStyle');
+    class ArkCheckboxGroupComponent extends globalThis.__ArkComponent__ {
+      constructor(nativePtr, classType) {
+        super(nativePtr, classType);
+      }
+      allowChildCount() {
+        return 0;
+      }
+      initialize(value) {
+        if (!value.length) {
+          return this;
+        }
+        if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+          modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
+            value[0]);
+        } else {
+          modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
+            undefined);
+        }
+        return this;
+      }
+      selectAll(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectAllModifier.identity, CheckboxGroupSelectAllModifier, value);
+        return this;
+      }
+      selectedColor(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectedColorModifier.identity, CheckboxGroupSelectedColorModifier, value);
+        return this;
+      }
+      unselectedColor(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupUnselectedColorModifier.identity, CheckboxGroupUnselectedColorModifier, value);
+        return this;
+      }
+      mark(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
+        return this;
+      }
+      onChange(callback) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupOnChangeModifier.identity, CheckboxGroupOnChangeModifier, callback);
+        return this;
+      }
+      size(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupSizeModifier.identity, CheckboxGroupSizeModifier, value);
+        return this;
+      }
+      width(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupWidthModifier.identity, CheckboxGroupWidthModifier, value);
+        return this;
+      }
+      height(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupHeightModifier.identity, CheckboxGroupHeightModifier, value);
+        return this;
+      }
+      checkboxShape(value) {
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupStyleModifier.identity, CheckboxGroupStyleModifier, value);
+        return this;
+      }
+      setContentModifier(modifier) {
+        if (modifier === undefined || modifier === null) {
+          getUINativeModule().checkboxgroup.setContentModifierBuilder(this.nativePtr, false);
+          this.builder = undefined;
+          this.modifier = undefined;
+          return;
+        }
+        this.needRebuild = false;
+        const appliedContent = modifier.applyContent();
+        if (this.builder !== appliedContent) {
+          this.needRebuild = true;
+        }
+        this.builder = appliedContent;
+        this.modifier = modifier;
+        getUINativeModule().checkboxgroup.setContentModifierBuilder(this.nativePtr, this);
+      }
+      makeContentModifierNode(context, checkBoxGroupConfiguration) {
+        checkBoxGroupConfiguration.contentModifier = this.modifier;
+        if (this.checkboxgroupNode === undefined || this.needRebuild) {
+          if (this.checkboxgroupNode !== undefined) {
+            this.checkboxgroupNode = null;
+          }
+          const xNode = globalThis.requireNapi('arkui.node');
+          this.checkboxgroupNode = new xNode.BuilderNode(context);
+          this.checkboxgroupNode.build(this.builder, checkBoxGroupConfiguration);
+          this.needRebuild = false;
+        } else {
+          this.checkboxgroupNode.update(checkBoxGroupConfiguration);
+        }
+        return this.checkboxgroupNode.getFrameNode();
+      }
+    }
+    
+    class CheckBoxGroupOptionsModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset) {
+        if (reset) {
+          getUINativeModule().checkboxgroup.setCheckboxGroupOptions(node, undefined);
+        } else {
+          getUINativeModule().checkboxgroup.setCheckboxGroupOptions(node, this.value.group);
+        }
+      }
+    
+      checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue.group, this.value.group);
+      }
+    }
+    CheckBoxGroupOptionsModifier.identity = Symbol('checkBoxGroupOptions');
+    
+    class CheckBoxGroupContentModifier extends ModifierWithKey {
+      constructor(value) {
+        super(value);
+      }
+      applyPeer(node, reset, component) {
+        let checkboxgroupComponent = component;
+        checkboxgroupComponent.setContentModifier(this.value);
+      }
+    }
+    CheckBoxGroupContentModifier.identity = Symbol('checkBoxGroupContentModifier');
+    loadComponent.componentObj = {'component' : ArkCheckboxGroupComponent};
   }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.group, this.value.group);
-  }
+  return loadComponent.componentObj;
 }
-CheckBoxGroupOptionsModifier.identity = Symbol('checkBoxGroupOptions');
-
-class CheckBoxGroupContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset, component) {
-    let checkboxgroupComponent = component;
-    checkboxgroupComponent.setContentModifier(this.value);
-  }
-}
-CheckBoxGroupContentModifier.identity = Symbol('checkBoxGroupContentModifier');
 
 class JSCheckboxGroup extends JSViewAbstract {
   static create(params) {
@@ -325,7 +331,7 @@ class JSCheckboxGroup extends JSViewAbstract {
   }
   static attributeModifier(modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkCheckboxGroupComponent(nativePtr);
+      return createComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CheckboxGroupModifier(nativePtr, classType);
     });
@@ -365,7 +371,10 @@ class JSCheckboxGroup extends JSViewAbstract {
 }
 
 function createComponent(nativePtr, classType) {
-  return new ArkCheckboxGroupComponent(nativePtr, classType);
+  if (loadComponent.componentObj !== undefined) {
+    return new loadComponent.componentObj.component(nativePtr, classType);
+  }
+  return undefined;
 }
 
 function exportComponent() {
@@ -376,4 +385,4 @@ function exportView() {
   globalThis.CheckboxGroup = JSCheckboxGroup;
 }
 
-export default { ArkCheckboxGroupComponent, createComponent, exportComponent, exportView };
+export default { createComponent, exportComponent, exportView, loadComponent };

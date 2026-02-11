@@ -108,6 +108,8 @@ jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 ark_theme_obj_path = base_output_path + "/arkTheme.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
+arkcommon_obj_path = base_output_path + "/arkCommon.o"
+arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.o"
 
 action("run_state_mgmt_build") {
   script = "state_mgmt/build.py"
@@ -179,6 +181,24 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
+gen_obj("ark_common") {
+  input = "engine/arkCommon.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    arkcommon_obj_path = base_output_path + "/ark_common.c"
+  }
+  output = arkcommon_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("ark_dynamiccomponent") {
+  input = "engine/arkDynamicComponent.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    arkdynamiccomponent_obj_path = base_output_path + "/ark_dynamiccomponent.c"
+  }
+  output = arkdynamiccomponent_obj_path
+  snapshot_dep = []
+}
+
 gen_obj("ark_theme") {
   input = "engine/arkTheme.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
@@ -238,6 +258,8 @@ template("declarative_js_engine") {
     deps = [
       ":ark_modifier",
       ":ark_theme_control",
+      ":gen_obj_src_ark_common",
+      ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
@@ -513,7 +535,6 @@ template("declarative_js_engine") {
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
-      "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
@@ -761,6 +782,8 @@ template("declarative_js_engine_ng") {
     deps = [
       ":ark_modifier",
       ":ark_theme_control",
+      ":gen_obj_src_ark_common",
+      ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",

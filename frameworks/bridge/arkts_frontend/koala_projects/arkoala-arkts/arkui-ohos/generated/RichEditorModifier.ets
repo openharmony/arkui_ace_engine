@@ -25,7 +25,7 @@ import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInse
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback, ResourceColor, ResourceStr } from "./component/units"
-import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
+import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, IMEClient } from "./component/textCommon"
 import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./component/textInput"
@@ -90,6 +90,8 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _onCut_0_0value?: ((value0: CutEvent) => void) | undefined
     _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onCopy_0_0value?: ((value0: CopyEvent) => void) | undefined
+    _onWillAttachIME_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillAttachIME_0_0value?: ((value0: IMEClient) => void) | undefined
     _editMenuOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _editMenuOptions_0_0value?: EditMenuOptions | undefined
     _enableKeyboardOnFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -548,6 +550,24 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 default: {
                     this._onCopy_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnCopyAttribute((undefined as ((value0: CopyEvent) => void) | undefined));
+                }
+            }
+        }
+        if (this._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillAttachIME_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as ((value0: IMEClient) => void) | undefined));
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillAttachIMEAttribute((undefined as ((value0: IMEClient) => void) | undefined));
                 }
             }
         }
@@ -1196,6 +1216,19 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (modifier._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillAttachIME_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillAttachIME(modifier._onWillAttachIME_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillAttachIME((undefined as ((value0: IMEClient) => void) | undefined));
+                }
+            }
+        }
         if (modifier._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._editMenuOptions_0_flag) {
@@ -1716,6 +1749,17 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         } else
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
+        if (((this._onWillAttachIME_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillAttachIME_0_0value = value
+        } else
+        {
+            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

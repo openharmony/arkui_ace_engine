@@ -29,13 +29,48 @@ constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
 constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
 
-bool NavigationManager::IsOuterMostNavigation(int32_t nodeId, int32_t depth)
+NavigationManager::NavigationManager()
 {
-    if (dumpMap_.empty()) {
-        return false;
+#ifdef PREVIEW
+    hasCacheNavigationNodeEnable_ = false;
+#else
+    hasCacheNavigationNodeEnable_ = SystemProperties::GetCacheNavigationNodeEnable();
+#endif
+    auto callback = [weakMgr = WeakClaim(this)](
+        const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter) {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_VOID(mgr);
+            if (!isRouter) {
+                return;
+            }
+            mgr->OnRouterTransition(to.name);
+        };
+    RegisterNavigateChangeCallback(callback);
+}
+
+void NavigationManager::OnRouterTransition(const std::string& newTopUrl)
+{
+    if (!existForceSplitNav_.first) {
+        return;
     }
-    auto outerMostKey = dumpMap_.begin()->first;
-    return outerMostKey == DumpMapKey(nodeId, depth);
+    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav_.second);
+    CHECK_NULL_VOID(navNode);
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navPattern);
+    auto targetPage = navPattern->GetNavBasePageNode();
+    CHECK_NULL_VOID(targetPage);
+    auto targetPagePattern = targetPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(targetPagePattern);
+    auto pageInfo = targetPagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    const auto& url = pageInfo->GetPageUrl();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Router transition to url:%{public}s, forceSplit navigation url:%{public}s",
+        newTopUrl.c_str(), url.c_str());
+    forceSplitMgr->SetNavigationForceSplitEnableInternal(url == newTopUrl);
 }
 
 void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode)
@@ -46,6 +81,17 @@ void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const 
     pattern->SetIsTargetForceSplitNav(isTargetForceSplitNav);
     // Record that the force split has been done in navigation manager
     SetExistForceSplitNav(isTargetForceSplitNav, isTargetForceSplitNav ? navigationNode->GetId() : INVALID_NODE_ID);
+    if (!isTargetForceSplitNav) {
+        return;
+    }
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    bool hasDisableInternal = forceSplitMgr->GetDisableNavForceSplitInternal();
+    if (hasDisableInternal) {
+        forceSplitMgr->SetNavigationForceSplitEnableInternal(true);
+    }
 }
 
 void NavigationManager::RemoveForceSplitNavStateIfNeed(int32_t nodeId)
@@ -53,6 +99,44 @@ void NavigationManager::RemoveForceSplitNavStateIfNeed(int32_t nodeId)
     auto existForceSplitNav = GetExistForceSplitNav();
     if (existForceSplitNav.first && existForceSplitNav.second == nodeId) {
         SetExistForceSplitNav(false, INVALID_NODE_ID);
+        TryFindNewTargetNavigation();
+    }
+}
+
+void NavigationManager::TryFindNewTargetNavigation()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    auto existForceSplitNav = GetExistForceSplitNav();
+    if (!forceSplitMgr->IsForceSplitSupported(false) || existForceSplitNav.first || targetNavigationMap_.empty()) {
+        return;
+    }
+
+    int32_t curNavDepth = 0;
+    std::optional<int32_t> preNodeDepth;
+    for (auto& pair : targetNavigationMap_) {
+        auto navigationNode = pair.second.Upgrade();
+        CHECK_NULL_CONTINUE(navigationNode);
+        auto navPattern = navigationNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_CONTINUE(navPattern);
+        if (!navPattern->GetNavBasePageNode()) {
+            // Only the Navigation in the main page could possibly be the target navigation.
+            continue;
+        }
+        if (preNodeDepth.has_value() && preNodeDepth.value() < pair.first.depth) {
+            curNavDepth++;
+        }
+        preNodeDepth = pair.first.depth;
+        auto id = navigationNode->GetInspectorId().value_or("");
+        bool isTargetNav = (!forceSplitNavigationId_.has_value() && !forceSplitNavigationDepth_.has_value()) ||
+            (forceSplitNavigationId_.has_value() && forceSplitNavigationId_.value() == id) ||
+            (forceSplitNavigationDepth_.has_value() && forceSplitNavigationDepth_.value() == curNavDepth);
+        if (isTargetNav) {
+            SetForceSplitNavState(true, navigationNode);
+            return;
+        }
     }
 }
 
@@ -85,7 +169,7 @@ void NavigationManager::IsTargetForceSplitNav(const RefPtr<FrameNode>& navigatio
      * if the map is empty, the current navigation is the outermost navigation.
      */
     if (!TargetIdOrDepthExists()) {
-        bool isOuterMostNavigation = dumpMap_.begin() == dumpMap_.end();
+        bool isOuterMostNavigation = targetNavigationMap_.begin() == targetNavigationMap_.end();
         SetForceSplitNavState(isOuterMostNavigation, navigationNode);
         return;
     }
@@ -104,37 +188,40 @@ void NavigationManager::IsTargetForceSplitNav(const RefPtr<FrameNode>& navigatio
     }
 
     /**
-     * If the current navigation depth is greater than the maximum depth stored in the dumpMap_,
+     * If the current navigation depth is greater than the maximum depth stored in the targetNavigationMap_,
      * this means that there are no nodes at the same level in the current navigation node,
      * and nested depth increased by one.
      * After get the nested depth of the current navigation,
      * compare whether it is the target nested depth navigation.
      */
-    auto currDeepest = dumpMap_.rbegin();
+    auto currDeepest = targetNavigationMap_.rbegin();
     auto currNodeDepth = navigationNode->GetDepth();
     currNestedDepth_ =
-        currDeepest != dumpMap_.rend() && currNodeDepth > currDeepest->first.depth
+        currDeepest != targetNavigationMap_.rend() && currNodeDepth > currDeepest->first.depth
         ? ++currNestedDepth_
         : currNestedDepth_;
     bool isTargetForceSplitNav = currNestedDepth_ == targetNestedDepth.value();
     SetForceSplitNavState(isTargetForceSplitNav, navigationNode);
 }
 
-void NavigationManager::AddNavigationDumpCallback(const RefPtr<FrameNode>& navigationNode, const DumpCallback& callback)
+void NavigationManager::AttachNavigation(const RefPtr<FrameNode>& navigationNode)
 {
+    CHECK_NULL_VOID(navigationNode);
     CHECK_RUN_ON(UI);
     IsTargetForceSplitNav(navigationNode);
-    dumpMap_.emplace(DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()), callback);
+    targetNavigationMap_.emplace(
+        TargetNavigationKey(navigationNode->GetId(), navigationNode->GetDepth()), WeakPtr(navigationNode));
 }
 
-void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth)
+void NavigationManager::DetachNavigation(const RefPtr<FrameNode>& navigationNode)
 {
+    CHECK_NULL_VOID(navigationNode);
     CHECK_RUN_ON(UI);
-    auto it = dumpMap_.find(DumpMapKey(nodeId, depth));
-    if (it != dumpMap_.end()) {
-        dumpMap_.erase(it);
+    auto it = targetNavigationMap_.find(TargetNavigationKey(navigationNode->GetId(), navigationNode->GetDepth()));
+    if (it != targetNavigationMap_.end()) {
+        targetNavigationMap_.erase(it);
     }
-    RemoveForceSplitNavStateIfNeed(nodeId);
+    RemoveForceSplitNavStateIfNeed(navigationNode->GetId());
 }
 
 void NavigationManager::OnDumpInfo()
@@ -147,7 +234,7 @@ void NavigationManager::OnDumpInfo()
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navigation dump failed, invalid root node");
         return;
     }
-    DumpLog::GetInstance().Print("Navigation number: " + std::to_string(dumpMap_.size()));
+    DumpLog::GetInstance().Print("Navigation number: " + std::to_string(targetNavigationMap_.size()));
     std::stack<std::pair<RefPtr<UINode>, int32_t>> stack;
     stack.push({ rootNode, 0 });
     while (!stack.empty()) {
@@ -772,14 +859,16 @@ int32_t NavigationManager::RegisterNavigateChangeCallback(TransitionCallback cal
     return id;
 }
 
-void NavigationManager::FireNavigateChangeCallback(const NavigateChangeInfo& from, const NavigateChangeInfo& to)
+void NavigationManager::FireNavigateChangeCallback(
+    const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter)
 {
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "fire inner navigate callback isSplit(%{public}d) transition callback:"
         " %{public}s -> %{public}s",
         from.isSplit, from.name.c_str(), to.name.c_str());
     // full screen, fire all registered callback
-    for (auto callback : changeCallbacks_) {
-        callback.second(from, to);
+    auto callbacks = changeCallbacks_;
+    for (auto callback : callbacks) {
+        callback.second(from, to, isRouter);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -677,6 +677,7 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
     ani_int pointerIdAni;
     ani_ref extraParamsAni;
     ani_ref dataAni;
+    ani_ref dataLoadParamsAni;
     ani_ref touchPointAni;
     ani_ref previewOptionsAni;
     if (ANI_OK != env->Object_GetPropertyByName_Int(dragInfo, "pointerId", &pointerIdAni)) {
@@ -689,6 +690,10 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
     }
     if (ANI_OK != env->Object_GetPropertyByName_Ref(dragInfo, "data", &dataAni)) {
         HILOGE("AceDrag, get data failed.");
+        return false;
+    }
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(dragInfo, "dataLoadParams", &dataLoadParamsAni)) {
+        HILOGE("AceDrag, get dataLoadParams failed.");
         return false;
     }
     if (ANI_OK != env->Object_GetPropertyByName_Ref(dragInfo, "touchPoint", &touchPointAni)) {
@@ -715,6 +720,13 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
         if (dataValue) {
             asyncCtx.unifiedData = SharedPointerWrapper(dataValue);
         }
+    }
+    if (!AniUtils::IsUndefined(env, static_cast<ani_object>(dataLoadParamsAni))) {
+        auto dataLoadParamsValue =
+            OHOS::UDMF::AniConverter::UnwrapDataLoadParams(env, static_cast<ani_object>(dataLoadParamsAni));
+        asyncCtx.dataLoadParams =
+            SharedPointerWrapper(std::make_shared<OHOS::UDMF::DataLoadParams>(dataLoadParamsValue));
+        asyncCtx.unifiedData = SharedPointerWrapper(nullptr);
     }
 
     std::shared_ptr<DimensionOffset> dimensionPtr = nullptr;

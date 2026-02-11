@@ -2699,7 +2699,7 @@ void SetBackgroundImageResizableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     ImageResizableSlice convValue {};
-    convValue = Converter::OptConvert<ImageResizableSlice>(optValue->slice).value_or(convValue);
+    convValue = optValue ? Converter::OptConvert<ImageResizableSlice>(optValue->slice).value_or(convValue) : convValue;
     // lattice .. This parameter does not take effect for the backgroundImageResizable API.
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, convValue);
 }

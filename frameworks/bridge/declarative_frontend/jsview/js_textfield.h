@@ -164,6 +164,7 @@ public:
     static void SetIncludeFontPadding(const JSCallbackInfo& info);
     static void SetFallbackLineSpacing(const JSCallbackInfo& info);
     static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
+    static void SetAccessibilityText(const JSCallbackInfo& info);
     static void SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info);
 
 private:

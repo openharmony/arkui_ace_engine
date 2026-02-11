@@ -17,7 +17,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk, InteropNativeModule
 } from "@koalaui/interop"
 import { finalizerRegister, int32 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani"
@@ -190,6 +190,7 @@ export class FrameNodeInternal {
     public static fromPtr(ptr: KPointer): FrameNode {
         const obj: FrameNode = new FrameNode(undefined)
         obj.peer = new Finalizable(ptr, FrameNode.getFinalizer())
+        obj.nodePtr_ = obj.peer?.ptr;
         return obj
     }
 }
@@ -256,14 +257,15 @@ export class FrameNode implements MaterializedBase {
                 }
                 return;
             }
-            if (this.getType() === 'BuilderRootFrameNode') {
-                this.renderNode_ = new RenderNode(this.getType());
+            if (type === 'BuilderRootFrameNode') {
+                this.renderNode_ = new RenderNode('BuilderRootFrameNode');
                 this.renderNode_!.setFrameNode(new WeakRef<FrameNode>(this));
                 return;
             }
             const instanceId = this.instanceId_!.toInt();
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-            if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
+            const isCustomFrameNode = type === undefined || type === 'CustomFrameNode';
+            if (isCustomFrameNode) {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
@@ -275,7 +277,7 @@ export class FrameNode implements MaterializedBase {
                 this.nodePtr_ = this.peer?.ptr
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
-            if (this.renderNode_ && this.getType() === "CustomFrameNode") {
+            if (this.renderNode_ && isCustomFrameNode) {
                 this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
             }
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
@@ -484,7 +486,10 @@ export class FrameNode implements MaterializedBase {
         }
     }
     public getOpacity(): double {
-        return FrameNodeExtender.getOpacity(this);
+        let opacity: double = FrameNodeExtender.getOpacity(this);
+        opacity = opacity > 1.0 ? 1.0 : opacity;
+        opacity = opacity < 0.0 ? 0.0 : opacity;
+        return opacity;
     }
     public getPositionToWindowWithTransform(): NodePosition {
         return FrameNodeExtender.getPositionToWindowWithTransform(this);
@@ -936,7 +941,7 @@ class ImmutableFrameNode extends FrameNode {
 
 export class ProxyFrameNode extends ImmutableFrameNode {
     constructor(uiContext: UIContext, type: string = 'ProxyFrameNode', ptr?: KPointer) {
-        super(uiContext, type, ptr);
+        super(uiContext, 'ProxyFrameNode', ptr);
     }
     getType(): string {
         return 'ProxyFrameNode';
@@ -952,7 +957,7 @@ export class ProxyFrameNode extends ImmutableFrameNode {
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
     private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
-        super(uiContext, type, ptr);
+        super(uiContext, 'BuilderRootFrameNode', ptr);
         if (!ptr) {
             return;
         }
@@ -1995,6 +2000,33 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getSwiperAttribute(node: FrameNode): SwiperAttribute | undefined {
+        if (node.getType() !== 'Swiper') {
+            return undefined
+        }
+        let swiperNode = node as SwiperFrameNode
+        if (swiperNode !== undefined) {
+            return swiperNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindSwiperController(node: FrameNode, controller: SwiperController): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Swiper') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let swiperNode = node as SwiperFrameNode
+        if (!swiperNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        swiperNode.initialize(controller)
+        return
     }
 
     // @ts-ignore
