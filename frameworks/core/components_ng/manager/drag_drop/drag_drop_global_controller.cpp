@@ -180,13 +180,25 @@ bool DragDropGlobalController::GetEnableDropDisallowedBadge() const
 bool DragDropGlobalController::RequestDragEndCallback(int32_t requestId,
     DragRet dragResult, std::function<void(const DragRet&)> stopDragCallback)
 {
-    std::unique_lock<std::shared_mutex> lock(mutex_);
-    if (requestId == -1 || stopDragCallback == nullptr || !isOnOnDropPhase_) {
-        return false;
+    std::function<void(const DragRet&)> requestFunc = nullptr;
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        if (requestId == -1 || stopDragCallback == nullptr || !isOnOnDropPhase_) {
+            return false;
+        }
+        stopDragCallback_ = stopDragCallback;
+        if (prePendingDone_) {
+            stopDragCallback_ = nullptr;
+            isOnOnDropPhase_ = false;
+            requestId_ = -1;
+        } else {
+            dragResult_ = dragResult;
+        }
     }
-    requestId_ = requestId;
-    stopDragCallback_ = stopDragCallback;
-    dragResult_ = dragResult;
+    if (requestFunc) {
+        stopDragCallback_(dragResult_);
+        ResetPrePendingStatus();
+    }
     return true;
 }
 
@@ -202,20 +214,60 @@ int32_t DragDropGlobalController::NotifyDragResult(int32_t requestId, int32_t re
 
 int32_t DragDropGlobalController::NotifyDragEndPendingDone(int32_t requestId)
 {
+    std::function<void(const DragRet&)> doneFunc = nullptr;
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         if (requestId_ != requestId || !isOnOnDropPhase_) {
             return -1;
         }
-        requestId_ = -1;
-        isOnOnDropPhase_ = false;
+        prePendingDone_ = true;
+        if (stopDragCallback_) {
+            doneFunc = stopDragCallback_;
+            stopDragCallback_ = nullptr;
+            isOnOnDropPhase_ = false;
+            requestId_ = -1;
+        }
     }
-    if (stopDragCallback_) {
-        stopDragCallback_(dragResult_);
+    if (doneFunc) {
+        doneFunc(dragResult_);
+        ResetPrePendingStatus();
     }
-    stopDragCallback_ = nullptr;
-    dragResult_ = DragRet::DRAG_FAIL;
     return 0;
+}
+
+void DragDropGlobalController::SavePendingRequestIdentify(int32_t requestId)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    requestId_ = requestId;
+}
+
+void DragDropGlobalController::NotifyPendingFailed(int32_t requestId)
+{
+    std::function<void(const DragRet&)> failFunc = nullptr;
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        if (requestId_ != requestId || !isOnOnDropPhase_) {
+            return;
+        }
+        if (stopDragCallback_) {
+            failFunc = stopDragCallback_;
+            stopDragCallback_ = nullptr;
+            isOnOnDropPhase_ = false;
+            requestId_ = -1;
+        }
+    }
+
+    if (failFunc) {
+        failFunc(DragRet::DRAG_FAIL);
+        ResetPrePendingStatus();
+    }
+}
+
+void DragDropGlobalController::ResetPrePendingStatus()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    prePendingDone_ = false;
+    dragResult_ = DragRet::DRAG_FAIL;
 }
 
 void DragDropGlobalController::SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled)
