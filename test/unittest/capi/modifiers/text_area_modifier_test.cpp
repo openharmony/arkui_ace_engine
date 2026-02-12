@@ -1329,7 +1329,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTestValidValues, TestSize.
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    auto optCallbackValue = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onErrorChange, frameNode->GetId());
+    auto optCallbackValue =
+        Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onErrorChange, frameNode->GetId());
     Converter::ConvContext ctx;
     auto sendResource = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT, &ctx);
     auto sendResource2 = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT2, &ctx);
@@ -1876,7 +1877,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
             CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         };
     auto customBuilder = Converter::ArkCallback<Opt_CustomNodeBuilder>(func);
-    Opt_Union_CustomBuilder_ComponentContentBase builder; 
+    Opt_Union_CustomBuilder_ComponentContentBase builder;
     Ark_Union_CustomBuilder_ComponentContentBase unionData;
     unionData.selector = 0;
     unionData.value0 = customBuilder.value;

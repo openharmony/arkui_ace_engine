@@ -503,7 +503,8 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppear
             .nodeId = nodeId,
         };
     };
-    auto optOnWillDisAppearCallback = Converter::ArkCallback<Opt_VoidCallback>(onWillDisAppearCallback, frameNode->GetId());
+    auto optOnWillDisAppearCallback =
+        Converter::ArkCallback<Opt_VoidCallback>(onWillDisAppearCallback, frameNode->GetId());
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDisappear = optOnWillDisAppearCallback,

@@ -77,8 +77,6 @@ namespace GeneratedApiImpl {
 namespace GeneratedBridge {
     Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
 }
-
-
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {

@@ -731,7 +731,8 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSiz
             Array_Array_String>(value.range, &ctx);
 
         if (value.hasValues) {
-            auto bindableArray = Converter::ArkUnion<Ark_BindableResourceStrArray, Array_ResourceStr>(value.values, &ctx);
+            auto bindableArray = Converter::ArkUnion<Ark_BindableResourceStrArray, Array_ResourceStr>(
+                value.values, &ctx);
             arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
                 Ark_BindableResourceStrArray>(bindableArray);
         } else {

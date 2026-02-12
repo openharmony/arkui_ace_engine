@@ -116,7 +116,8 @@ void SetOnBackPressedImpl(Ark_NativePointer node,
         return;
     }
     auto onBackPressedEvent = [arkCallback = CallbackHelper(*optValue)]() -> bool {
-        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>().value_or(false);
+        return arkCallback.InvokeWithOptConvertResult<
+            bool, Ark_Boolean, synthetic_Callback_Boolean_Void>().value_or(false);
     };
     NavDestinationModelStatic::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
 }
@@ -421,8 +422,8 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
 void SetTitleImpl(Ark_NativePointer node,
-                  const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
-                  const Opt_NavigationTitleOptions* options)
+    const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
+    const Opt_NavigationTitleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

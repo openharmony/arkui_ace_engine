@@ -3337,7 +3337,8 @@ void SetOnKeyEventImpl(Ark_NativePointer node,
         auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
-            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(event.ArkValue());
+            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
+                event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
         ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
@@ -3387,7 +3388,8 @@ void SetOnKeyPreImeImpl(Ark_NativePointer node,
             -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
-            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(event.ArkValue());
+            auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
+                event.ArkValue());
             return Converter::Convert<bool>(arkResult);
         };
         ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
@@ -3407,7 +3409,8 @@ void SetOnKeyEventDispatchImpl(Ark_NativePointer node,
     auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
         PipelineContext::SetCallBackNode(node);
         const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
-        auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(event.ArkValue());
+        auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
+            event.ArkValue());
         return Converter::Convert<bool>(arkResult);
     };
     ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEvent));
@@ -5815,7 +5818,7 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
         },
         [frameNode](const Ark_Blender& value) {
             Converter::VisitUnion(value,
-                [frameNode](const Ark_uiEffect_BrightnessBlender& blender){
+                [frameNode](const Ark_uiEffect_BrightnessBlender& blender) {
                     auto ptrOpt = Converter::OptConvert<OHOS::Rosen::Blender*>(blender);
                     if (!ptrOpt || !(ptrOpt.value())) {
                         ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
@@ -5823,10 +5826,10 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
                     }
                     ViewAbstractModelStatic::SetBlender(frameNode, ptrOpt.value());
                 },
-                [frameNode](const Ark_uiEffect_HdrBrightnessBlender& blender){
+                [frameNode](const Ark_uiEffect_HdrBrightnessBlender& blender) {
                     LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrBrightnessBlender");
                 },
-                [frameNode](){
+                [frameNode]() {
                     ViewAbstractModelStatic::SetBlendMode(frameNode, BlendMode::NONE);
                     ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
                 });
@@ -6166,7 +6169,7 @@ void BindContextMenuBoth(Ark_NativePointer node,
             ViewAbstractModelStatic::BindContextMenuStatic(
                 frameNode, type, std::move(builder), menuParam, std::move(previewBuildFunc));
             ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
-        }, node, arkType);
+            }, node, arkType);
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);

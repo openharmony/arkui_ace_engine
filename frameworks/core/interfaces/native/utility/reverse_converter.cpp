@@ -314,7 +314,7 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, 
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
     dst.color = Converter::ArkUnion<
         Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(
-            src.GetColor().ColorToString(), ctx);
+        src.GetColor().ColorToString(), ctx);
     auto offset = src.GetOffset();
     dst.offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetX());
     dst.offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetY());

@@ -194,7 +194,8 @@ bool OnAlert(const CallbackHelper<Callback_OnAlertEvent_Boolean>& arkCallback,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -215,7 +216,8 @@ bool OnBeforeUnload(const CallbackHelper<Callback_OnBeforeUnloadEvent_Boolean>& 
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -236,7 +238,8 @@ bool OnConfirm(const CallbackHelper<Callback_OnConfirmEvent_Boolean>& arkCallbac
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -258,7 +261,8 @@ bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -276,7 +280,8 @@ bool OnConsole(const CallbackHelper<Callback_OnConsoleEvent_Boolean>& arkCallbac
     auto peer = new ConsoleMessagePeer();
     peer->webConsoleLog = eventInfo->GetMessage();
     parameter.message = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -384,7 +389,8 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     auto resultPeer = new FileSelectorResultPeer();
     resultPeer->handler = eventInfo->GetFileSelectorResult();
     parameter.result = resultPeer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -554,7 +560,8 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
     auto peer = new HttpAuthHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -673,7 +680,8 @@ bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Bool
     auto resultPeer = new WebContextMenuResultPeer();
     resultPeer->handler = eventInfo->GetContextMenuResult();
     parameter.result = resultPeer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -1201,7 +1209,8 @@ bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.data = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -1417,7 +1426,8 @@ bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& ar
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 

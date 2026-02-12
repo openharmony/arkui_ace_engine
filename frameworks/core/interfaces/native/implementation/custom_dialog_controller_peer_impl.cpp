@@ -444,7 +444,8 @@ void CustomDialogControllerPeerImpl::SetBlurStyle(Opt_BlurStyle backgroundBlurSt
         std::optional<int32_t>(static_cast<int32_t>(result.value())) : std::nullopt;
 }
 
-void CustomDialogControllerPeerImpl::SetKeyboardAvoidMode(Opt_arkui_component_common_KeyboardAvoidMode keyboardAvoidMode)
+void CustomDialogControllerPeerImpl::SetKeyboardAvoidMode(
+    Opt_arkui_component_common_KeyboardAvoidMode keyboardAvoidMode)
 {
     auto result = Converter::OptConvert<KeyboardAvoidMode>(keyboardAvoidMode);
     if (result) {

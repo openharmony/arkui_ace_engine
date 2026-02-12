@@ -74,7 +74,8 @@ std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_U
     return result;
 }
 
-std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable_Length* value)
+std::optional<Dimension> ProcessBindableSideBarWidth(
+    FrameNode* frameNode, const Opt_Union_Length_Bindable_Length* value)
 {
     std::optional<Dimension> result;
     Converter::VisitUnionPtr(value,

@@ -605,7 +605,8 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node, const Opt_EditMenuOptions* v
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
             auto arkResult =
-                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(menuItem, arkRange);
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
+                    menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
     }

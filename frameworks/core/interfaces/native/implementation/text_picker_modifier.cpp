@@ -39,7 +39,7 @@ std::optional<Converter::PickerValueType> ProcessBindableValue(FrameNode* frameN
     const Opt_Union_BindableResourceStr_BindableResourceStrArray& value)
 {
     std::optional<Converter::PickerValueType> result;
-        Converter::VisitUnion(value,
+    Converter::VisitUnion(value,
         [&result, frameNode](const Ark_BindableResourceStr& src) {
             Converter::VisitUnion(src,
                 [&result](const Ark_ResourceStr& src) {

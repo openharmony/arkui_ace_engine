@@ -38,41 +38,41 @@ std::optional<Converter::PickerValueType> ProcessBindableTextValue(
     std::optional<Converter::PickerValueType> result;
     Converter::VisitUnion(value,
         [&result](const Ark_BindableResourceStr& src) {
-        Converter::VisitUnion(src,
-            [&result](const Ark_ResourceStr& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src);
-            },
-            [&result](const Ark_Bindable_ResourceStr& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-                // Implement callback functionality
-            },
-            [&result](const Ark_Bindable_Resource& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-                // Implement callback functionality
-            },
-            [&result](const Ark_Bindable_String& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-                // Implement callback functionality
-            },
-            [] {});
+            Converter::VisitUnion(src,
+                [&result](const Ark_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src);
+                },
+                [&result](const Ark_Bindable_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [&result](const Ark_Bindable_Resource& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [&result](const Ark_Bindable_String& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [] {});
         },
         [&result](const Ark_BindableResourceStrArray& src) {
             Converter::VisitUnion(src,
-            [&result](const Array_ResourceStr& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src);
-            },
-            [&result](const Ark_Bindable_Array_ResourceStr& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-                // Implement callback functionality
-            },
-            [&result](const Ark_Bindable_Array_Resource& src) {
-                // Implement callback functionality
-            },
-            [&result](const Ark_Bindable_Array_String& src) {
-                result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-                // Implement callback functionality
-            },
-            [] {});
+                [&result](const Array_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src);
+                },
+                [&result](const Ark_Bindable_Array_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [&result](const Ark_Bindable_Array_Resource& src) {
+                    // Implement callback functionality
+                },
+                [&result](const Ark_Bindable_Array_String& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [] {});
         },
         [] {});
     return result;
