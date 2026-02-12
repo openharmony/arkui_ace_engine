@@ -171,7 +171,12 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
 
     auto theme = ArkTSUtils::GetTheme<CheckboxTheme>();
     Color strokeColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto frameNode = IsJsView(nodeArg, vm)
+        ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
+        : nativeNode;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor, colorResObj, nodeInfo)) {
         strokeColor = theme->GetPointColor();
     }
 
@@ -186,9 +191,9 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
         (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
         strokeWidth = theme->GetCheckStroke();
     }
-
-    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(nativeNode, strokeColor.GetValue(), size.Value(),
-        static_cast<int>(size.Unit()), strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(nativeNode, strokeColor.GetValue(), colorRawPtr,
+        size.Value(), static_cast<int>(size.Unit()), strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

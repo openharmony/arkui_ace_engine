@@ -404,7 +404,12 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
     CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
 
     Color strokeColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto frameNode = IsJsView(firstArg, vm)
+        ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
+        : nativeNode;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor, colorResObj, nodeInfo)) {
         strokeColor = theme->GetPointColor();
     }
 
@@ -419,9 +424,9 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
         (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
         strokeWidth = theme->GetCheckStroke();
     }
-
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
     GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupMark(
-        nativeNode, strokeColor.GetValue(), size.Value(), strokeWidth.Value());
+        nativeNode, strokeColor.GetValue(), colorRawPtr, size.Value(), strokeWidth.Value());
 
     return panda::JSValueRef::Undefined(vm);
 }

@@ -16934,7 +16934,7 @@ int32_t SetCheckboxMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setMark(
-        node->uiNodeHandle, strokeColor, size, unit, strokeWidth, unit);
+        node->uiNodeHandle, strokeColor, nullptr, size, unit, strokeWidth, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -17131,7 +17131,7 @@ int32_t SetCheckboxGroupMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
         }
     }
     GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupMark(
-        node->uiNodeHandle, strokeColor, size, strokeWidth);
+        node->uiNodeHandle, strokeColor, nullptr, size, strokeWidth);
     return ERROR_CODE_NO_ERROR;
 }
 

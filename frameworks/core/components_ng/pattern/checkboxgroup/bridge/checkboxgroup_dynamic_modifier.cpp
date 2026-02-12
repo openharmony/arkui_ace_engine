@@ -198,11 +198,24 @@ void ResetCheckboxGroupHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue)
+void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, void* colorRawPtr, ArkUI_Float32 sizeValue,
+    ArkUI_Float32 widthValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::STROKE_COLOR, resObj);
+    }
 
     Dimension size = Dimension(sizeValue, DEFAULT_UNIT);
     CheckBoxGroupModelNG::SetCheckMarkSize(frameNode, size);

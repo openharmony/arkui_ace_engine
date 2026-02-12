@@ -25,7 +25,8 @@
 namespace OHOS::Ace {
 enum class CheckBoxGroupColorType {
     SELECTED_COLOR,
-    UN_SELECTED_COLOR
+    UN_SELECTED_COLOR,
+    STROKE_COLOR
 };
 class ACE_FORCE_EXPORT CheckBoxGroupModel {
 public:
