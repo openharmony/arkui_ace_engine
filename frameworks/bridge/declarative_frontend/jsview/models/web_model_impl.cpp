@@ -740,13 +740,6 @@ void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
     webComponent->SetOptimizeParserBudgetEnabled(enable);
 }
 
-void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
-{
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    CHECK_NULL_VOID(webComponent);
-    webComponent->SetBypassVsyncCondition(condition);
-}
-
 void WebModelImpl::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -762,7 +755,14 @@ void WebModelImpl::SetOnLoadFinished(std::function<void(const BaseEventInfo* inf
     auto eventMarker = EventMarker(std::move(jsCallback));
     webComponent->SetOnLoadFinishedEventId(eventMarker);
 }
- 
+
+void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetBypassVsyncCondition(condition);
+}
+
 void WebModelImpl::SetForceEnableZoom(bool isForceEnableZoom)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
