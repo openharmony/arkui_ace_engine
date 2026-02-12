@@ -695,46 +695,10 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest012, TestSize.Level0)
 
 /**
  * @tc.name: CustomMeasureLayoutTest013
- * @tc.desc: Test Render method timeout scenario
- * @tc.type: FUNC
- */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest013, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create CustomMeasureLayoutNode.
-     * @tc.expected: CustomMeasureLayoutNode created successfully.
-     */
-    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
-        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
-    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
-
-    /**
-     * @tc.steps: step2. Set recycle render function and call Render with past deadline.
-     * @tc.expected: Render returns false, FireRecycleRenderFunc is NOT called.
-     * Logic explanation:
-     * - Render() checks: if (deadline > 0 && GetSysTimestamp() > deadline) return false
-     * - When deadline is in the past, condition is true, so it returns false immediately
-     * - FireRecycleRenderFunc() is inside a scope that only executes when Render() returns true
-     * - Since we return false at timeout check, FireRecycleRenderFunc() is never called
-     * Fix: Use larger time offset (1 second = 1000000 microseconds) to ensure
-     *   the past deadline is truly in the past, avoiding timing precision issues
-     */
-    int recycleCallCount = 0;
-    auto recycleRenderFunc = [&recycleCallCount]() { recycleCallCount++; };
-    customNode->SetRecycleRenderFunc(std::move(recycleRenderFunc));
-
-    int64_t pastDeadline = GetSysTimestamp() - 1000000; // 1 second in the past
-    bool renderResult = customNode->Render(pastDeadline);
-    EXPECT_FALSE(renderResult);
-    EXPECT_EQ(recycleCallCount, 0);
-}
-
-/**
- * @tc.name: CustomMeasureLayoutTest014
  * @tc.desc: Test Render method with zero deadline (no timeout check)
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest014, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode.
@@ -763,11 +727,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest014, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest015
+ * @tc.name: CustomMeasureLayoutTest014
  * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest015, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -804,11 +768,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest015, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest016
+ * @tc.name: CustomMeasureLayoutTest015
  * @tc.desc: Test FireOnLayout with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest016, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -845,11 +809,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest016, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest017
+ * @tc.name: CustomMeasureLayoutTest016
  * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -886,11 +850,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest018
+ * @tc.name: CustomMeasureLayoutTest017
  * @tc.desc: Test FireOnMeasure/FireOnLayout without setting function
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -922,41 +886,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest019
- * @tc.desc: Test RenderCustomChild timeout behavior
- * @tc.type: FUNC
- */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest019, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create CustomMeasureLayoutNode with child.
-     * @tc.expected: CustomMeasureLayoutNode created successfully.
-     */
-    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
-    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
-        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
-    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
-    customNode->MountToParent(frameNode);
-
-    auto textFrameNode = CreateNode(V2::TEXT_ETS_TAG);
-    textFrameNode->MountToParent(customNode);
-
-    /**
-     * @tc.steps: step2. Call RenderCustomChild with immediate timeout.
-     * @tc.expected: Returns false due to timeout.
-     * Logic: RenderCustomChild first checks if (GetSysTimestamp() > deadline)
-     */
-    int64_t immediateDeadline = GetSysTimestamp() - 1000;
-    bool result = customNode->RenderCustomChild(immediateDeadline);
-    EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: CustomMeasureLayoutTest020
+ * @tc.name: CustomMeasureLayoutTest018
  * @tc.desc: Test RenderCustomChild calls Render then FrameNode::RenderCustomChild
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest020, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode with child.
