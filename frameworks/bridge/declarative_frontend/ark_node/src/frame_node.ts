@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1197,9 +1197,7 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['WaterFlow', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'WaterFlow', (node: NodePtr, type: ModifierType): ArkWaterFlowComponent => {
-        getUINativeModule().loadNativeModule('WaterFlow');
-        let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-        return module.createComponent(node, type);
+        return new ArkWaterFlowComponent(node, type);
       })
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
@@ -1209,9 +1207,7 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
-        getUINativeModule().loadNativeModule('FlowItem');
-        let module = globalThis.requireNapi('arkui.components.arkflowitem');
-        return module.createComponent(node, type);
+        return new ArkFlowItemComponent(node, type);
       })
     }],
     ['QRCode', (context: UIContext): FrameNode => {
@@ -1363,9 +1359,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      getUINativeModule().loadNativeModule('WaterFlow');
-      let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['FlowItem', (node: FrameNode): ArkFlowItemComponent => {
@@ -1375,9 +1369,7 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      getUINativeModule().loadNativeModule('FlowItem');
-      let module = globalThis.requireNapi('arkui.components.arkflowitem');
-      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Grid', (node: FrameNode): ArkGridComponent => {

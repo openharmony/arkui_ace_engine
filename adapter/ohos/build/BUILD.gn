@@ -22,7 +22,6 @@ component_modules = [
   "checkbox",
   "patternlock",
   "rating",
-  "waterflow",
   "linear_split",
   "side_bar",
   "marquee",

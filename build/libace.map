@@ -43,7 +43,6 @@
       GetArkUIAniModifiers;
       GetArkUIDrawableDescriptor;
       GetArkUINodeModifiers;
-      SendArkUISyncEvent;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -155,6 +154,7 @@
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::ButtonModel::*;
+      OHOS::Ace::WaterFlowModel::*;
       OHOS::Ace::NG::WaterFlowSections::*;
       OHOS::Ace::WaterFlowItemModel::*;
       OHOS::Ace::OffscreenContextModel::*;
@@ -914,7 +914,6 @@
       OHOS::Ace::NG::CreateProxyNode*;
       OHOS::Ace::NG::Converter::ResourceConverter::*;
       OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
-      *OHOS::Ace::NG::Converter::ConvContext::Allocate*;
       *OHOS::Ace::NG::Converter::Convert*;
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;

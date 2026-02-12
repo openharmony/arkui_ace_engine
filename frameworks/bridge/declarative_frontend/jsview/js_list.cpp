@@ -1108,10 +1108,6 @@ void JSListScroller::Destructor(JSListScroller* scroller)
 
 void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
 {
-    JSListScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSListScroller>();
-    if (jsScroller == nullptr) {
-        return;
-    }
     int32_t index = -1;
     int32_t indexInGroup = -1;
     // Parameter passed into function must be 2.
@@ -1122,8 +1118,7 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     auto scrollController = GetController().Upgrade();
     if (scrollController) {
         ContainerScope scope(GetInstanceId());
-        JSRef<JSObject> rectObj = JSRef<JSObject>::Make(
-            jsScroller->CreateRectangle(scrollController->GetItemRectInGroup(index, indexInGroup)));
+        auto rectObj = CreateRectangle(scrollController->GetItemRectInGroup(index, indexInGroup));
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);
     } else {

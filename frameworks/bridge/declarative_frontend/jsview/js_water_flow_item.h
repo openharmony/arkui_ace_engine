@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_ITEM_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_ITEM_MODEL_IMPL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_ITEM_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_ITEM_H
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_model.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
-class WaterFlowItemModelImpl : public OHOS::Ace::WaterFlowItemModel {
+class JSWaterFlowItem : public JSContainerBase {
 public:
-    void Create() override;
+    static void JSBind(BindingTarget globalObj);
+    static void Create();
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_ITEM_MODEL_IMPL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_ITEM_H

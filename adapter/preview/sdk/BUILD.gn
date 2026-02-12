@@ -133,7 +133,6 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_component_model_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:datapanel",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:calendarpicker",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
@@ -142,7 +141,6 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:patternlock",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
-      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rowsplit",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menu",
@@ -167,7 +165,6 @@ if (is_ohos_standard_system) {
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/arkdatapanel.abc",
-      "${out_path}/arkui/ace_engine/arkflowitem.abc",
       "${out_path}/arkui/ace_engine/arkcounter.abc",
       "${out_path}/arkui/ace_engine/arkcalendarpicker.abc",
       "${out_path}/arkui/ace_engine/arkgauge.abc",
@@ -176,7 +173,6 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
       "${out_path}/arkui/ace_engine/arkpatternlock.abc",
       "${out_path}/arkui/ace_engine/arkrating.abc",
-      "${out_path}/arkui/ace_engine/arkwaterflow.abc",
       "${out_path}/arkui/ace_engine/arkcolumnsplit.abc",
       "${out_path}/arkui/ace_engine/arkrowsplit.abc",
       "${out_path}/arkui/ace_engine/arkmenu.abc",

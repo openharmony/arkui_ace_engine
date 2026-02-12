@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
 #include "interfaces/native/node/node_model.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -358,13 +357,7 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
     } else if (frameNode->GetTag() == V2::LIST_ETS_TAG) {
         return ListModelNG::GetOrCreateController(frameNode);
     } else if (frameNode->GetTag() == V2::WATERFLOW_ETS_TAG) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("WaterFlow");
-        CHECK_NULL_RETURN(module, nullptr);
-        auto* modifier = reinterpret_cast<const ArkUIWaterFlowModifier*>(module->GetDynamicModifier());
-        CHECK_NULL_RETURN(modifier, nullptr);
-        auto* controller = reinterpret_cast<ScrollControllerBase*>(modifier->getScrollController(node));
-        CHECK_NULL_RETURN(controller, nullptr);
-        return AceType::Claim(controller);
+        return WaterFlowModelNG::GetOrCreateController(frameNode);
     } else if (frameNode->GetTag() == V2::GRID_ETS_TAG) {
         return GridModelNG::GetOrCreateController(frameNode);
     }
