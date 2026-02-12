@@ -438,7 +438,6 @@ void WindowScene::BufferAvailableCallback()
                 leashSurfaceNode->SetUIFirstSwitch(Rosen::RSUIFirstSwitch::FORCE_DISABLE);
             }
         }
-        CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
