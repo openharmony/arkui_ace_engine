@@ -260,7 +260,6 @@ enum class ChangeFlag {
 
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
-
 public:
     SpanItem() : nodeId_(ElementRegister::GetInstance()->MakeUniqueId()) {}
     virtual ~SpanItem()
@@ -447,7 +446,7 @@ public:
     {
         return symbolId_;
     }
-    
+
     virtual void SpanDumpInfo();
     void SpanDumpInfoAdvance();
     void MarkDirty()
@@ -506,6 +505,24 @@ public:
 
     std::optional<TextStyle> textStyle_;
 
+    // 后续修改spanNode逻辑下沉到spanItem
+    void AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
+    void RemoveResObj(const std::string& key);
+    const RefPtr<PatternResourceManager>& GetResourceMgr()
+    {
+        return resourceMgr_;
+    }
+
+    // 用于属性字符串
+    struct SpanResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
+    };
+    void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
+    void RemoveResourceObj(const std::string& key);
+    const std::unordered_map<std::string, SpanResourceUpdater>& GetResMap() const; // end
+
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
@@ -534,24 +551,6 @@ public:
             resourceMgr_->ReloadResources();
         }
     }
-
-    // 后续修改spanNode逻辑下沉到spanItem
-    void AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
-    void RemoveResObj(const std::string& key);
-    const RefPtr<PatternResourceManager>& GetResourceMgr()
-    {
-        return resourceMgr_;
-    }
-
-    // 用于属性字符串
-    struct SpanResourceUpdater {
-        RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
-    };
-    void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
-    void RemoveResourceObj(const std::string& key);
-    const std::unordered_map<std::string, SpanResourceUpdater>& GetResMap() const; // end
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;

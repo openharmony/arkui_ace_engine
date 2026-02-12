@@ -73,6 +73,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(contentSize_);
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
+
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value(), host);
     }
@@ -1479,9 +1480,7 @@ void TextContentModifier::AddDefaultShadow()
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     if (textPattern) {
         auto frameNode = textPattern->GetHost();
-        if (frameNode) {
-            ACE_UINODE_TRACE(frameNode);
-        }
+        ACE_UINODE_TRACE(frameNode);
     }
     Shadow emptyShadow;
     auto blurRadius = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetBlurRadius());
@@ -1588,9 +1587,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     if (textPattern) {
         auto frameNode = textPattern->GetHost();
-        if (frameNode) {
-            ACE_UINODE_TRACE(frameNode);
-        }
+        ACE_UINODE_TRACE(frameNode);
     }
     if (!bounce) {
         marqueeCount_ = 0;
