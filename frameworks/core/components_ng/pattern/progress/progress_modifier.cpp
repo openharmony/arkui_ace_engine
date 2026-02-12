@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
 
     pressBlendColor_ = theme->GetClickEffect();
@@ -325,6 +325,7 @@ void ProgressModifier::SetInVisibleArea(bool value)
         }
     }
 }
+
 
 void ProgressModifier::StopAllLoopAnimation()
 {
@@ -1137,7 +1138,7 @@ std::vector<GradientColor> ProgressModifier::GetRingProgressGradientColors() con
     if (gradientColors.empty()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+        auto theme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_RETURN(theme, gradientColors);
         GradientColor endColor;
         GradientColor beginColor;
@@ -2370,11 +2371,5 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
     }
     canvas.DrawPath(path);
     canvas.DetachBrush();
-}
-
-uint32_t ProgressModifier::GetThemeScopeId() const
-{
-    auto host = host_.Upgrade();
-    return host ? host->GetThemeScopeId() : 0;
 }
 } // namespace OHOS::Ace::NG

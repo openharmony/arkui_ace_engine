@@ -141,8 +141,6 @@ public:
     static void SetCapsuleStyleFontColor(FrameNode* frameNode, bool value);
     static void CreateWithResourceObj(FrameNode* frameNode, JsProgressResourceType jsResourceType,
         const RefPtr<ResourceObject>& resObj);
-    static void CreateLSOrRingOrCapsuleWithResourceObj(
-        FrameNode* frameNode, JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
     static void SetGradientColorByUser(FrameNode* frameNode, bool value);
 
 private:

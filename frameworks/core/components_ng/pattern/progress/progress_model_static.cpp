@@ -30,10 +30,6 @@
 namespace OHOS::Ace::NG {
 void ProgressModelStatic::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedColor(value.has_value());
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value.value(), frameNode);
     } else {
@@ -433,15 +429,12 @@ void ProgressModelStatic::SetTextDefaultStyle(FrameNode* frameNode, const RefPtr
         textProps->UpdateContent(number);
     }
     textNode->MarkModifyDone();
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Text, number, frameNode);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
 }
 
 void ProgressModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedBgColor(value.has_value());
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value.value(), frameNode);
     } else {
