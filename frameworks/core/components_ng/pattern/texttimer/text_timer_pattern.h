@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/texttimer/texttimer_controller.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -89,11 +90,15 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
+            auto host = GetHost();
+            FREE_NODE_CHECK(host, SetBuilderFunc);
             OnModifyDone();
             return;
         }
         makeFunc_ = std::move(makeFunc);
     }
+
+    void SetBuilderFuncMultiThread();
 
     bool UseContentModifier() const
     {
@@ -104,10 +109,10 @@ public:
     {
         return true;
     }
-
+    
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void OnColorConfigurationUpdate() override;
 
     void UpdateTextColor(const Color& color, bool isFirstLoad = false);

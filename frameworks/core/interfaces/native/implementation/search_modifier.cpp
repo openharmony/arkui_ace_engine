@@ -18,6 +18,8 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -676,8 +678,6 @@ void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
-    SearchModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)

@@ -148,7 +148,7 @@ void TokenThemeStorage::CacheResetColor()
     }
     std::lock_guard<std::mutex> lock(themeCacheMutex_);
     for (auto& [themeId, theme] : themeCache_) {
-        LOGD("Theme reset colors with id %{public}d", themeId);
+        LOGI("Theme reset colors with id %{public}d, colorMode%{public}d", themeId, colorMode);
         if (!theme || (theme->GetColorMode() != ColorMode::COLOR_MODE_UNDEFINED)) {
             continue;
         }

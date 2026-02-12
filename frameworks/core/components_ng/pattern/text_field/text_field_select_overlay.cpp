@@ -519,7 +519,6 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
 int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, 0);
     auto contentRect = pattern->GetContentRect();
     auto selectController = pattern->GetTextSelectController();
     auto wideText = pattern->GetTextUtf16Value();
@@ -874,8 +873,10 @@ void TextFieldSelectOverlay::UpdateAISelectMenu()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
-    manager->FocusFirstFocusableChildInMenu();
+    if (!IsShowMouseMenu()) {
+        manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+        manager->FocusFirstFocusableChildInMenu();
+    }
 }
 
 void TextFieldSelectOverlay::OnHandleMarkInfoChange(
