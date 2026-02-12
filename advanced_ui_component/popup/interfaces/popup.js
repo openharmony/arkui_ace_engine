@@ -851,7 +851,8 @@ export class d1 extends ViewPU {
     }
     getTitleTextAlign() {
         let k2 = TextAlign.Start;
-        if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+        if ((Configuration.getLocale().dir === 'rtl') &&
+            (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
             k2 = TextAlign.End;
         }
         return k2;
@@ -991,6 +992,7 @@ export class d1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
+                        Text.textAlign(this.getTitleTextAlign());
                         Text.onAreaChange((i1, rect) => {
                             this.textHeight = rect.height;
                             this.setScrollMaxHeight(undefined);
@@ -1151,6 +1153,7 @@ export class d1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
+                        Text.textAlign(this.getTitleTextAlign());
                         Text.onAreaChange((f1, rect) => {
                             this.textHeight = rect.height;
                             this.setScrollMaxHeight(undefined);
