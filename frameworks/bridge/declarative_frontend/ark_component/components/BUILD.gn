@@ -31,7 +31,6 @@ template("arkui_abc") {
 }
 
 arkui_modules = [
-  "datapanel",
   "gauge",
   "patternlock",
   "counter",

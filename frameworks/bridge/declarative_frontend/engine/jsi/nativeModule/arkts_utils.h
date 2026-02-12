@@ -375,7 +375,7 @@ public:
     }
     // The Array decorated with the @State modifier has a proxy,
     // so its length cannot be obtained directly, and this method should be used instead.
-    static size_t GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array);
+    static double GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array);
     static BorderStyle ConvertBorderStyle(int32_t value);
     static void PushOuterBorderDimensionVector(
         const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options);

@@ -1129,8 +1129,8 @@ class ArkThemeWhiteList {
 ArkThemeWhiteList.whiteList = [
     'Badge',
     'Button',
+    'DataPanel',
     'JSAlphabetIndexer',
-    'JSDataPanel',
     'JSMenu',
     'JSMenuItem',
     'JSPatternLock',

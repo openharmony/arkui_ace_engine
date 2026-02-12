@@ -21,10 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
-#include "base/log/ace_scoring_log.h"
-
 namespace OHOS::Ace::NG {
-const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 namespace {
 constexpr int32_t TYPE_CYCLE = 0;
 
@@ -47,9 +44,9 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", DATA_PANEL_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DATA_PANEL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
+        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Values, values);
@@ -59,7 +56,6 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
     if (dataPanelType != TYPE_CYCLE) {
         SetDefaultBorderRadius();
     }
-
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
@@ -302,29 +298,6 @@ void DataPanelModelNG::SetValueColorsSetByUser(bool value)
 {
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, value);
-    }
-}
-
-void DataPanelModelNG::CreateDataPanelModelNG(const std::vector<double>& values, double max, int32_t dataPanelType)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", DATA_PANEL_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
-    stack->Push(frameNode);
-
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Values, values);
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Max, max);
-    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, dataPanelType);
-
-    if (dataPanelType != TYPE_CYCLE) {
-        SetDefaultBorderRadius();
-    }
-    if (SystemProperties::ConfigChangePerform()) {
-        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
-        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
-        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, false);
     }
 }
 

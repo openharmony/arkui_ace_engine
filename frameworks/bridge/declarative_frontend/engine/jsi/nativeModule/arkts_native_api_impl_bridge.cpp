@@ -85,6 +85,7 @@
 #ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
 #endif
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
@@ -501,7 +502,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Slider" },
         { "TimePicker" },
         { "TimePickerDialog" },
-        { "DataPanel" },
+        { "CalendarPicker" },
+        { "CalendarPickerDialog" },
 #ifndef ARKUI_WEARABLE
         { "FolderStack" },
         { "CalendarPicker" },
@@ -1982,6 +1984,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterSelectAttributes(object, vm);
     RegisterTextpickerAttributes(object, vm);
     RegisterThemeAttributes(object, vm);
+    RegisterDataPanelAttributes(object, vm);
     RegisterWaterFlowAttributes(object, vm);
     RegisterScrollAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
@@ -3643,6 +3646,34 @@ void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetCanLoop));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCanLoop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetCanLoop));
+}
+
+void ArkUINativeModule::RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM * vm)
+{
+    auto dataPanel = panda::ObjectRef::New(vm);
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCloseEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetCloseEffect));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCloseEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetCloseEffect));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataPanelTrackBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelTrackBackgroundColor));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataPanelTrackBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetDataPanelTrackBackgroundColor));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataPanelStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelStrokeWidth));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataPanelStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetDataPanelStrokeWidth));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataPanelValueColors"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetValueColors));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataPanelValueColors"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetValueColors));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataPanelTrackShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetTrackShadow));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataPanelTrackShadow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetTrackShadow));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetContentModifierBuilder));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "dataPanel"), dataPanel);
 }
 
 void ArkUINativeModule::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -5591,6 +5622,7 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterBlankAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
+    RegisterDataPanelAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
     RegisterGridColAttributes(object, vm);

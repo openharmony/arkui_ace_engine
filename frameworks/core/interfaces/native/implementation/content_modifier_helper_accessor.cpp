@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/gauge/bridge/content_modifier_helper.h"
-#include "core/components_ng/pattern/data_panel/bridge/data_panel_content_modifier_helper.h"
 #include "core/components_ng/pattern/gauge/bridge/gauge_dynamic_module.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
@@ -91,23 +90,6 @@ const GENERATED_ArkUIRadioContentModifier* GetRadioContentModifier()
         cachedModifier =
             reinterpret_cast<const GENERATED_ArkUIRadioContentModifier*>(module->GetCustomModifier("contentModifier"));
     }
-    return cachedModifier;
-}
-
-const GENERATED_ArkUIDataPanelContentModifier* GetDataPanelModifierWithCache()
-{
-    static const GENERATED_ArkUIDataPanelContentModifier* cachedModifier = nullptr;
-    static std::once_flag initFlag;
-
-    std::call_once(initFlag, []() {
-        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
-        if (module != nullptr) {
-            cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelContentModifier*>(
-                module->GetCustomModifier()
-            );
-        }
-    });
-
     return cachedModifier;
 }
 } // namespace
@@ -188,15 +170,13 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
             }, node, arkConfig);
         return panelNode;
     };
-    const auto* modifier = GetDataPanelModifierWithCache();
-    CHECK_NULL_VOID(modifier);
-    modifier->contentModifierDataPanelImpl(node, contentModifier, builder);
+    DataPanelModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
 }
 void ResetContentModifierDataPanelImpl(Ark_NativePointer node)
 {
-    const auto* modifier = GetDataPanelModifierWithCache();
-    CHECK_NULL_VOID(modifier);
-    modifier->resetContentModifierDataPanelImpl(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DataPanelModelNG::SetBuilderFunc(frameNode, nullptr);
 }
 void ContentModifierGaugeImpl(
     Ark_NativePointer node, const Ark_Object* contentModifier, const GaugeModifierBuilder* builder)
