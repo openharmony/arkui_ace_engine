@@ -37,7 +37,6 @@ public:
     void SetColor(const Color& value) override;
     void SetColorByUser(bool isSetByUser) override;
     void SetEnableLoading(bool enable) override;
-    void ResetColor() override;
     void SetForegroundColorParseFailed(bool isParseFailed) override;
     void CreateWithResourceObj(
         LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj) override;

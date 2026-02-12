@@ -26,26 +26,21 @@ public:
     void Create(double min, double value, double cachedValue, double max, NG::ProgressType type) override;
     void SetValue(double value) override;
     void SetColor(const Color& value) override;
-    void ResetColor() override;
     void SetBackgroundColor(const Color& value) override;
     void SetBackgroundColorByUser(bool value) override;
-    void ResetBackgroundColor() override;
     void SetStrokeWidth(const Dimension& value) override;
     void SetScaleCount(int32_t value) override;
     void SetScaleWidth(const Dimension& value) override;
     void SetBorderColor(const Color& value) override;
-    void ResetBorderColor() override;
     void SetBorderWidth(const Dimension& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetFontColor(const Color& value) override;
-    void ResetFontColor() override;
     void SetText(const std::optional<std::string>& value) override;
     void SetItalicFontStyle(const Ace::FontStyle& value) override;
     void SetFontWeight(const FontWeight& value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetSweepingEffect(bool value) override;
     void SetGradientColor(const Gradient& value) override;
-    void ResetGradientColor() override;
     void SetPaintShadow(bool value) override;
     void SetProgressStatus(ProgressStatus status) override;
     void SetShowText(bool value) override;
@@ -80,6 +75,7 @@ public:
     void SetCapsuleStyleFontColor(bool value) override;
     void SetCapsuleStyle(bool value) override;
     void SetGradientColorByUser(bool value) override;
+    void SetBorderColorSetByUser(bool value) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
@@ -119,7 +115,6 @@ public:
     static void ResetBorderRadius(FrameNode* frameNode);
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);
-    static void ResetGradientColor(FrameNode* frameNode);
     static void SetModifierInitiatedColor(FrameNode* frameNode, bool value);
     static void SetModifierInitiatedBgColor(FrameNode* frameNode, bool value);
     static void SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
