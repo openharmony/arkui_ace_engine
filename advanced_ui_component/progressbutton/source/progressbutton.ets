@@ -97,7 +97,7 @@ export struct ProgressButton {
 
   private getLoadingProgress() {
     if (this.isLoading) {
-      if(this.progress < 0) {
+      if (this.progress < 0) {
         this.textProgress = MIN_PERCENTAGE
       } else if (this.progress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE
@@ -146,10 +146,8 @@ export struct ProgressButton {
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
-          .style({
-            borderColor: this.colorOptions?.borderColor ? this.colorOptions?.borderColor : this.containerBorderColor,
-            borderRadius: this.getProgressButtonRadius()
-          })
+          .style(this.progressButtonRadius ?
+            { borderRadius: this.getProgressButtonRadius() } : {})
           .clip(false)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
           .color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor)

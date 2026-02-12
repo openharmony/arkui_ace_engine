@@ -1389,8 +1389,8 @@ export struct GridObjectSortComponent {
           .accessibilityText(
             this.readFlag ?
             this.getStringByResourceToken(
-              ACCESSIBILITY_UNSELECTED_ITEM, this.getAccessibilityText(item.text ?? '')
-            ) : this.textAnnouncedForAccessibility
+              ACCESSIBILITY_UNSELECTED_ITEM, this.getAccessibilityText(item.text ?? '')) :
+            this.textAnnouncedForAccessibility
           )
           .accessibilityDescription(
             this.readFlag ? this.getAddTagGridItemAccessibilityDesc() : ' '
