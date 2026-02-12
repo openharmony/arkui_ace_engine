@@ -115,6 +115,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enableSelectedDataDetector", &JSTextField::SetSelectDetectEnable);
     JSClass<JSTextInput>::StaticMethod("enableAutoFillAnimation", &JSTextField::SetEnableAutoFillAnimation);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
+    JSClass<JSTextInput>::StaticMethod("voiceButton", &JSTextField::SetVoiceButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);

@@ -293,6 +293,19 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     return result;
 }
 
+constexpr int32_t TEXT_INPUT_CAMERA_INPUT = 0;
+constexpr int32_t TEXT_INPUT_VOICE_INPUT = 1;
+
+static std::unordered_map<FocuseIndex, FocuseIndex> focusForwardMap_ = {
+    { FocuseIndex::TEXT, FocuseIndex::CANCEL },
+    { FocuseIndex::CANCEL, FocuseIndex::VOICE },
+    { FocuseIndex::VOICE, FocuseIndex::UNIT }
+};
+static std::unordered_map<FocuseIndex, FocuseIndex> focusBackwardMap_ = {
+    { FocuseIndex::UNIT, FocuseIndex::VOICE },
+    { FocuseIndex::VOICE, FocuseIndex::CANCEL },
+    { FocuseIndex::CANCEL, FocuseIndex::TEXT }
+};
 } // namespace
 
 void TextFieldPattern::OnAttachContext(PipelineContext* context)
@@ -725,6 +738,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+    auto oldContentRect = contentRect_;
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -791,7 +805,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     StopScrollable();
     CheckScrollable();
-    UpdateScrollBarOffset();
+    UpdateTextFieldScrollBarRegion(oldContentRect != contentRect_);
     if (config.frameSizeChange) {
         ScheduleDisappearDelayTask();
     }
@@ -1758,6 +1772,7 @@ void TextFieldPattern::HandleBlurEvent()
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
+    SetVoiceKBShown(false);
 }
 
 void TextFieldPattern::OnFocusCustomKeyboardChange()
@@ -2199,60 +2214,147 @@ bool TextFieldPattern::IsShowAutoFill()
     return SystemProperties::IsAutoFillSupport();
 }
 
-void TextFieldPattern::HandleOnCameraInput()
+void TextFieldPattern::HandleOnTextMethodInput(
+    int32_t type, const std::string& typeName, const std::function<void()>& successCallback)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCameraInput");
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::%{public}s", typeName.c_str());
 #if defined(ENABLE_STANDARD_INPUT)
-    if (textChangeListener_ == nullptr) {
-        textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-    }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
-        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput, inputMethod is null");
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "%{public}s, inputMethod is null", typeName.c_str());
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (imeShown_) {
-        inputMethod->StartInputTypeAsync(MiscServices::InputType::CAMERA_INPUT);
-    } else {
-        auto clientInfo = GetIMEClientInfo();
-        FireOnWillAttachIME(clientInfo);
-        auto optionalTextConfig = GetMiscTextConfig();
-        CHECK_NULL_VOID(optionalTextConfig.has_value());
-        MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        if (clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo()) {
-            textConfig.inputAttribute.extraConfig =
-                *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
-        }
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput set calling window id is : %{public}u",
-            textConfig.windowId);
-#ifdef WINDOW_SCENE_SUPPORTED
-        auto systemWindowId = GetSCBSystemWindowId();
-        if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
-                systemWindowId);
-            textConfig.windowId = systemWindowId;
-        }
-#endif
-        auto ret = inputMethod->Attach(textChangeListener_, false, textConfig,
-            MiscServices::ClientType::INNER_KIT_ARKUI);
-        if (ret == MiscServices::ErrorCode::NO_ERROR) {
-            auto pipeline = GetContext();
-            CHECK_NULL_VOID(pipeline);
-            auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-            CHECK_NULL_VOID(textFieldManager);
-            textFieldManager->SetIsImeAttached(true);
-        }
-        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
-        inputMethod->ShowTextInput();
+    MiscServices::InputType inputType = MiscServices::InputType::NONE;
+    if (type == TEXT_INPUT_CAMERA_INPUT) {
+        inputType = MiscServices::InputType::CAMERA_INPUT;
+    } else if (type == TEXT_INPUT_VOICE_INPUT) {
+        inputType = MiscServices::InputType::VOICEKB_INPUT;
     }
-    CloseSelectOverlay(true);
-    StartTwinkling();
+    if (imeShown_) {
+        inputMethod->StartInputTypeAsync(inputType, false);
+    } else {
+        AttachAndStartInputType(type);
+    }
+    if (successCallback) {
+        successCallback();
+    }
 #endif
 #endif
+}
+
+void TextFieldPattern::AttachAndStartInputType(int32_t type)
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (!inputMethod) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "inputMethod is null");
+        return;
+    }
+    if (textChangeListener_ == nullptr) {
+        textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+    }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    MiscServices::InputType inputType = MiscServices::InputType::NONE;
+    if (type == TEXT_INPUT_CAMERA_INPUT) {
+        inputType = MiscServices::InputType::CAMERA_INPUT;
+    } else if (type == TEXT_INPUT_VOICE_INPUT) {
+        inputType = MiscServices::InputType::VOICEKB_INPUT;
+    }
+    auto clientInfo = GetIMEClientInfo();
+    FireOnWillAttachIME(clientInfo);
+    auto optionalTextConfig = GetMiscTextConfig();
+    CHECK_NULL_VOID(optionalTextConfig.has_value());
+    MiscServices::TextConfig textConfig = optionalTextConfig.value();
+    if (clientInfo.extraInfo && clientInfo.extraInfo->GetExtraInfo()) {
+        textConfig.inputAttribute.extraConfig =
+            *reinterpret_cast<MiscServices::ExtraConfig*>(clientInfo.extraInfo->GetExtraInfo());
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "set calling window id is: %{public}u", textConfig.windowId);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto systemWindowId = GetSCBSystemWindowId();
+    if (systemWindowId) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+            systemWindowId);
+        textConfig.windowId = systemWindowId;
+    }
+#endif
+    auto ret = inputMethod->Attach(textChangeListener_, false, textConfig,
+        MiscServices::ClientType::INNER_KIT_ARKUI);
+    if (ret == MiscServices::ErrorCode::NO_ERROR) {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_VOID(textFieldManager);
+        textFieldManager->SetIsImeAttached(true);
+    }
+    inputMethod->StartInputType(inputType, false);
+    inputMethod->ShowTextInput();
+#endif
+#endif
+}
+
+void TextFieldPattern::HandleOnCameraInput()
+{
+    HandleOnTextMethodInput(TEXT_INPUT_CAMERA_INPUT, "HandleOnCameraInput", [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CloseSelectOverlay(true);
+        pattern->StartTwinkling();
+    });
+}
+
+void TextFieldPattern::SetVoiceKBShown(bool voiceKbShown)
+{
+    if (voiceKbShown_ == voiceKbShown) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d Set VoiceKB to %{public}d", host->GetId(), voiceKbShown);
+    voiceKbShown_ = voiceKbShown;
+    if (!IsShowVoiceButtonMode()) {
+        return;
+    }
+    auto responseArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+    if (!responseArea) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "No VoiceResponseArea return");
+        return;
+    }
+    responseArea->UpdateVoiceButton(voiceKbShown_);
+}
+
+void TextFieldPattern::HandleOnVoiceInput()
+{
+    TextFieldRequestFocus(RequestFocusReason::VOICE_NODE);
+    if (!voiceKbShown_) {
+        HandleOnTextMethodInput(TEXT_INPUT_VOICE_INPUT, "HandleOnVoiceInput", nullptr);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Close VoiceKB");
+        TextFieldLostFocusToViewRoot();
+    }
+}
+
+void TextFieldPattern::ProcessVoiceButton()
+{
+    if (IsShowVoiceButtonMode()) {
+        auto responseArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+        if (responseArea) {
+            responseArea->Refresh();
+        } else {
+            voiceResponseArea_ = AceType::MakeRefPtr<VoiceNodeResponseArea>(WeakClaim(this));
+            responseArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+            responseArea->InitResponseArea();
+        }
+    } else {
+        if (voiceResponseArea_) {
+            voiceResponseArea_->ClearArea();
+            voiceResponseArea_.Reset();
+        }
+    }
 }
 
 void TextFieldPattern::StripNextLine(std::wstring& data)
@@ -4348,7 +4450,7 @@ void TextFieldPattern::StartVibratorByLongPress()
 bool TextFieldPattern::IsInResponseArea(const Offset& location)
 {
     return cancelButtonTouched_ || IsOnUnitByPosition(location) || IsOnPasswordByPosition(location) ||
-    IsOnCleanNodeByPosition(location);
+           IsOnCleanNodeByPosition(location) || IsPositionInResponseNode(location, voiceResponseArea_);
 }
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
@@ -4448,27 +4550,29 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& localOffset)
     }
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_RETURN(unitArea, false);
-    auto frameNode = unitArea->GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+    return IsPositionInResponseNode(localOffset, unitArea);
 }
 
 bool TextFieldPattern::IsOnPasswordByPosition(const Offset& localOffset)
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_RETURN(passwordArea, false);
-    auto frameNode = passwordArea->GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+    return IsPositionInResponseNode(localOffset, passwordArea);
 }
 
 bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& localOffset)
 {
-    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-    CHECK_NULL_RETURN(cleanNodeResponseArea, false);
-    auto frameNode = cleanNodeResponseArea->GetFrameNode();
+    return IsPositionInResponseNode(localOffset, cleanNodeResponseArea_);
+}
+
+bool TextFieldPattern::IsPositionInResponseNode(const Offset& point, const RefPtr<TextInputResponseArea>& responseArea)
+{
+    CHECK_NULL_RETURN(responseArea, false);
+    auto frameNode = responseArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    return geometryNode->GetFrameRect().IsInRegion({ point.GetX(), point.GetY() });
 }
 
 bool TextFieldPattern::IsMouseOverScrollBar(const BaseEventInfo* info)
@@ -4873,8 +4977,7 @@ void TextFieldPattern::ChangeMouseState(const Offset location, int32_t frameId)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto responseAreaWidth = (responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f) +
-                             (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
+    auto responseAreaWidth = GetAllResponseAreaWidth();
     auto x = location.GetX();
     auto y = location.GetY();
     int32_t windowId = 0;
@@ -5624,11 +5727,11 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         updateFlag = false;
     }
-    if (responseArea_) {
-        responseArea_->OnThemeScopeUpdate(textFieldTheme);
-    }
-    if (cleanNodeResponseArea_) {
-        cleanNodeResponseArea_->OnThemeScopeUpdate(textFieldTheme);
+
+    for (const auto& area : GetAllResponseArea()) {
+        if (area) {
+            area->OnThemeScopeUpdate(textFieldTheme);
+        }
     }
     return updateFlag;
 }
@@ -6520,6 +6623,10 @@ bool TextFieldPattern::ProcessFocusIndexAction()
 {
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CleanNodeResponseKeyEvent();
+        return false;
+    }
+    if (focusIndex_ == FocuseIndex::VOICE) {
+        HandleOnVoiceInput();
         return false;
     }
     if (focusIndex_ == FocuseIndex::UNIT) {
@@ -8131,11 +8238,32 @@ void TextFieldPattern::UpdateScrollBarOffset()
         contentHeight = GetSingleLineHeight() * GetMaxLines();
     }
     Size size(frameRect_.Width(), contentHeight + paddingHeight);
-    UpdateScrollBarRegion(
-        contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, Offset(0.0, 0.0));
+    Offset barOffset(0.0, 0.0);
+    if (baseScrollBarRect_.has_value() && IsShowVoiceButtonMode()) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        auto isRTL = layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        auto offsetX = isRTL ? contentRect_.Left() - baseScrollBarRect_->Width() - baseScrollBarRect_->Left()
+                             : contentRect_.Right() - baseScrollBarRect_->Left();
+        barOffset.SetX(offsetX);
+    }
+    UpdateScrollBarRegion(contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + paddingHeight, size, barOffset);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::UpdateTextFieldScrollBarRegion(bool needUpdateOffset)
+{
+    if (IsShowVoiceButtonMode() && IsTextArea()) {
+        if (!baseScrollBarRect_.has_value() || needUpdateOffset) {
+            baseScrollBarRect_.reset();
+            UpdateScrollBarOffset();
+            auto scrollBar = GetScrollBar();
+            CHECK_NULL_VOID(scrollBar);
+            baseScrollBarRect_ = scrollBar->GetActiveRect();
+        }
+    }
+    UpdateScrollBarOffset();
 }
 
 void TextFieldPattern::PlayScrollBarAppearAnimation()
@@ -9562,6 +9690,13 @@ bool TextFieldPattern::IsShowCancelButtonMode() const
     return !IsNormalInlineState() && !IsTextArea() && layoutProperty->GetIsShowCancelButton().value_or(false);
 }
 
+bool TextFieldPattern::IsShowVoiceButtonMode() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return !IsNormalInlineState() && layoutProperty->GetIsShowVoiceButton().value_or(false) && !IsInPasswordMode();
+}
+
 void TextFieldPattern::CheckPasswordAreaState()
 {
     auto showPasswordState = IsShowPasswordText();
@@ -9623,6 +9758,7 @@ void TextFieldPattern::ProcessResponseArea()
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
     ProcessCancelButton();
+    ProcessVoiceButton();
     if (IsInPasswordMode()) {
         auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
         if (passwordArea) {
@@ -9663,23 +9799,45 @@ void TextFieldPattern::ProcessResponseArea()
     }
 }
 
+float TextFieldPattern::GetAllResponseAreaWidth() const
+{
+    float responseAreaWidth = 0.0f;
+    for (const auto& area : GetAllResponseArea()) {
+        if (area) {
+            responseAreaWidth += area->GetAreaRect().Width();
+        }
+    }
+    return responseAreaWidth;
+}
+
 void TextFieldPattern::AdjustTextRectByCleanNode(RectF& textRect)
 {
-    auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-    CHECK_NULL_VOID(cleanNodeResponseArea);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRTL && (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                     (cleanNodeStyle == CleanNodeStyle::INPUT && !contentController_->IsEmpty()))) {
+    auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    bool isAdjustByCleanNode = false;
+    if (isRTL && cleanNodeResponseArea &&
+        (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+            (cleanNodeStyle == CleanNodeStyle::INPUT && !contentController_->IsEmpty()))) {
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
         auto themePadding = textFieldTheme->GetPadding();
         auto rightOffset = static_cast<float>(themePadding.Left().ConvertToPx());
         textRect.SetLeft(textRect.GetX() + cleanNodeResponseArea->GetIconSize() + rightOffset);
+        isAdjustByCleanNode = true;
+    }
+
+    auto voiceNodeResponseArea = DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+    if (voiceNodeResponseArea) {
+        auto textFieldTheme = GetTheme();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto themePadding = textFieldTheme->GetPadding();
+        auto rightOffset = isAdjustByCleanNode ? 0.0f : static_cast<float>(themePadding.Left().ConvertToPx());
+        textRect.SetLeft(textRect.GetX() + voiceNodeResponseArea->GetIconSize() + rightOffset);
     }
 }
 
@@ -9721,48 +9879,71 @@ void TextFieldPattern::FocusForwardStopTwinkling()
 
 bool TextFieldPattern::UpdateFocusForward()
 {
-    if (focusIndex_ == FocuseIndex::TEXT && HasFocus()) {
-        FocusForwardStopTwinkling();
-        if (!CancelNodeIsShow()) {
-            if (responseArea_ == nullptr || (!IsShowUnit() && !IsShowPasswordIcon())) {
-                return false;
-            }
-            focusIndex_ = FocuseIndex::UNIT;
-            PaintResponseAreaRect();
-            return true;
-        }
-        focusIndex_ = FocuseIndex::CANCEL;
-        PaintCancelRect();
-        return true;
+    return HandleFocusForward(focusIndex_);
+}
+
+bool TextFieldPattern::HandleFocusForward(FocuseIndex index)
+{
+    if (!HasFocus()) {
+        return false;
     }
-    if (focusIndex_ == FocuseIndex::CANCEL && HasFocus()) {
-        FocusForwardStopTwinkling();
-        if (responseArea_ == nullptr || (!IsShowUnit() && !IsShowPasswordIcon())) {
-            return false;
-        }
-        focusIndex_ = FocuseIndex::UNIT;
-        PaintResponseAreaRect();
-        return true;
+    auto next = focusForwardMap_.find(index);
+    if (next == focusForwardMap_.end()) {
+        return false;
     }
-    return false;
+    return HandleSwithFocus(next->second) || HandleFocusForward(next->second);
 }
 
 bool TextFieldPattern::UpdateFocusBackward()
 {
-    if (focusIndex_ == FocuseIndex::CANCEL && HasFocus()) {
+    return HandleFocusBackward(focusIndex_);
+}
+
+bool TextFieldPattern::HandleFocusBackward(FocuseIndex index)
+{
+    if (!HasFocus()) {
+        return false;
+    }
+    auto next = focusBackwardMap_.find(index);
+    if (next == focusBackwardMap_.end()) {
+        return false;
+    }
+    return HandleSwithFocus(next->second) || HandleFocusBackward(next->second);
+}
+
+bool TextFieldPattern::HandleSwithFocus(FocuseIndex index)
+{
+    if (index == FocuseIndex::TEXT) {
         focusIndex_ = FocuseIndex::TEXT;
         PaintTextRect();
         StartTwinkling();
         return true;
-    } else if (focusIndex_ == FocuseIndex::UNIT && HasFocus()) {
+    }
+    if (index == FocuseIndex::CANCEL) {
         if (!CancelNodeIsShow()) {
-            focusIndex_ = FocuseIndex::TEXT;
-            PaintTextRect();
-            StartTwinkling();
-            return true;
+            return false;
         }
+        FocusForwardStopTwinkling();
         focusIndex_ = FocuseIndex::CANCEL;
         PaintCancelRect();
+        return true;
+    }
+    if (index == FocuseIndex::VOICE) {
+        if (!voiceResponseArea_) {
+            return false;
+        }
+        FocusForwardStopTwinkling();
+        focusIndex_ = FocuseIndex::VOICE;
+        PaintVoiceRect();
+        return true;
+    }
+    if (index == FocuseIndex::UNIT) {
+        if (responseArea_ == nullptr || (!IsShowUnit() && !IsShowPasswordIcon())) {
+            return false;
+        }
+        FocusForwardStopTwinkling();
+        focusIndex_ = FocuseIndex::UNIT;
+        PaintResponseAreaRect();
         return true;
     }
     return false;
@@ -9772,6 +9953,9 @@ bool TextFieldPattern::HandleSpaceEvent()
 {
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CleanNodeResponseKeyEvent();
+        return true;
+    } else if (focusIndex_ == FocuseIndex::VOICE) {
+        HandleOnVoiceInput();
         return true;
     } else if (focusIndex_ == FocuseIndex::UNIT) {
         if (IsShowPasswordIcon()) {
@@ -9834,6 +10018,12 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
             float cornerRadius = paintRect.GetRect().Width() / 2;
             paintRect.SetCornerRadius(cornerRadius);
         }
+    } else if (focusIndex_ == FocuseIndex::VOICE) {
+        CHECK_NULL_VOID(voiceResponseArea_);
+        GetIconPaintRect(voiceResponseArea_, paintRect);
+        voiceResponseArea_->CreateIconRect(paintRect, true);
+        float cornerRadius = paintRect.GetRect().Width() / 2;
+        paintRect.SetCornerRadius(cornerRadius);
     } else if (focusIndex_ == FocuseIndex::UNIT) {
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
@@ -9898,13 +10088,16 @@ void TextFieldPattern::PaintCancelRect()
         PaintCancelRectForTV();
         return;
     }
-    RoundRect focusRect;
-    GetInnerFocusPaintRect(focusRect);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->PaintInnerFocusState(focusRect);
+    PaintFocusAreaRect();
+}
+
+void TextFieldPattern::PaintVoiceRect()
+{
+    if (IsTV()) {
+        PaintFocusAreaRectForTV(voiceResponseArea_);
+        return;
+    }
+    PaintFocusAreaRect();
 }
 
 void TextFieldPattern::PaintResponseAreaRect()
@@ -9913,7 +10106,7 @@ void TextFieldPattern::PaintResponseAreaRect()
         PaintPasswordRect();
     }
     if (IsShowUnit()) {
-        PaintUnitRect();
+        PaintFocusAreaRect();
     }
 }
 
@@ -9923,23 +10116,17 @@ void TextFieldPattern::PaintPasswordRect()
         PaintPasswordRectForTV();
         return;
     }
-    RoundRect focusRect;
-    GetInnerFocusPaintRect(focusRect);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->PaintInnerFocusState(focusRect);
+    PaintFocusAreaRect();
 }
 
-void TextFieldPattern::PaintUnitRect()
+void TextFieldPattern::PaintFocusAreaRect()
 {
-    RoundRect focusRect;
-    GetInnerFocusPaintRect(focusRect);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
     focusHub->PaintInnerFocusState(focusRect);
 }
 
@@ -12030,10 +12217,10 @@ void TextFieldPattern::InitCancelButtonMouseEvent()
             CHECK_NULL_VOID(pattern);
             auto touchType = info.GetTouches().front().GetTouchType();
             if (touchType == TouchType::DOWN) {
-                pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
+                pattern->HandleResponseButtonTouchDown(cleanNodeResponseArea);
             }
             if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-                pattern->HandleCancelButtonTouchUp();
+                pattern->HandleResponseButtonTouchUp();
             }
     };
 
@@ -12073,17 +12260,17 @@ void TextFieldPattern::InitPasswordButtonMouseEvent()
             CHECK_NULL_VOID(pattern);
             auto touchType = info.GetTouches().front().GetTouchType();
             if (touchType == TouchType::DOWN) {
-                pattern->HandleCancelButtonTouchDown(responseArea);
+                pattern->HandleResponseButtonTouchDown(responseArea);
             }
             if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-                pattern->HandleCancelButtonTouchUp();
+                pattern->HandleResponseButtonTouchUp();
             }
     };
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
     imageTouchHub->AddTouchEvent(imageTouchEvent_);
 }
 
-void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea)
+void TextFieldPattern::HandleResponseButtonTouchDown(const RefPtr<TextInputResponseArea>& responseArea)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -12103,7 +12290,7 @@ void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputRespons
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void TextFieldPattern::HandleCancelButtonTouchUp()
+void TextFieldPattern::HandleResponseButtonTouchUp()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -13534,6 +13721,13 @@ void TextFieldPattern::GetInnerFocusPaintRectForTV(RoundRect& paintRect)
         float cornerRadius = paintRect.GetRect().Width() / 2;
         paintRect.SetCornerRadius(cornerRadius);
         UpdateFoucsOffsetIfNeed(paintRect);
+    } else if (focusIndex_ == FocuseIndex::VOICE) {
+        CHECK_NULL_VOID(voiceResponseArea_);
+        GetIconPaintRect(voiceResponseArea_, paintRect);
+        voiceResponseArea_->CreateIconRect(paintRect, true);
+        float cornerRadius = paintRect.GetRect().Width() / 2;
+        paintRect.SetCornerRadius(cornerRadius);
+        UpdateFoucsOffsetIfNeed(paintRect);
     } else if (focusIndex_ == FocuseIndex::UNIT) {
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
@@ -13555,6 +13749,20 @@ void TextFieldPattern::GetInnerFocusPaintRectForTV(RoundRect& paintRect)
     } else {
         GetTextInputFocusPaintRect(paintRect);
     }
+}
+
+void TextFieldPattern::PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea)
+{
+    CHECK_NULL_VOID(responseArea);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    needResetFocusColor_ = false;
+    HandleButtonFocusEvent(responseArea);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+    focusHub->PaintInnerFocusState(focusRect);
 }
 
 void TextFieldPattern::PaintCancelRectForTV()
