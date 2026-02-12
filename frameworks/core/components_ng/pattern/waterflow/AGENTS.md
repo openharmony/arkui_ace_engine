@@ -1,6 +1,6 @@
 # WaterFlow Pattern
 
-> Supplements root `CLAUDE.md`. All root-level rules apply.
+> Supplements root `AGENTS.md`. All root-level rules apply.
 
 ## Overview
 
