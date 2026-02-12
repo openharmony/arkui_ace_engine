@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -2394,6 +2395,10 @@ void SetResponseRegionImpl(Ark_NativePointer node,
             pattern->SetIsUserSetResponseRegion(true);
         } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
             auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<SwitchPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->SetIsUserSetResponseRegion(true);
         }
