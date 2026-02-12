@@ -194,7 +194,7 @@ class __Repeat<T> implements RepeatAPI<T> {
             new __RepeatItemPU(owningView as ViewPU, item, index);
 
         const isViewV2 = (this.config.owningView_ instanceof ViewV2);
-        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2: mkRepeatItemPU;
+        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2 : mkRepeatItemPU;
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {

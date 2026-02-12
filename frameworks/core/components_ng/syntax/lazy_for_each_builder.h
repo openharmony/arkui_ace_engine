@@ -314,7 +314,6 @@ public:
     std::string DumpHashKey();
     void DumpInfo();
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json);
-    
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
@@ -347,7 +346,7 @@ protected:
 private:
     void RecycleItemsOutOfBoundary();
     void RecycleChildByIndex(int32_t index);
-    std::string GetCachedItemDump() const;
+    std::string GetCachedItemsDump() const;
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
     std::list<std::pair<std::string, RefPtr<UINode>>> nodeList_;

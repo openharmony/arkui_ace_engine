@@ -189,7 +189,7 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         }
     }
 
-    // force update update active range if GetFrameChildByIndex and DoSetActiveChildRange have different ranges.
+    // force update active range if GetFrameChildByIndex and DoSetActiveChildRange have different ranges.
     if (!needRecordFirstFrameChild_ &&
         (static_cast<int32_t>(minFrameChildIndex_) != nStart || static_cast<int32_t>(maxFrameChildIndex_) != nEnd)) {
         forceRunDoSetActiveRange_ = true;
@@ -677,8 +677,8 @@ void RepeatVirtualScroll2Node::PostIdleTask()
     CHECK_NULL_VOID(context);
 
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t /*deadline*/, bool /*canUseLongPredictTask*/) {
-        auto node = weak.Upgrade();
         ACE_SCOPED_TRACE("Repeat.IdleTask");
+        auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).PostIdleTask idle task calls GetChildren",

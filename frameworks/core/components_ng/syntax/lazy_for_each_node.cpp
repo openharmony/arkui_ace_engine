@@ -737,11 +737,11 @@ void LazyForEachNode::DumpInfo()
         builder_->DumpInfo();
     }
 }
-
- void LazyForEachNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+void LazyForEachNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     if (builder_) {
         builder_->DumpSimplifyInfo(json);
     }
 }
+
 } // namespace OHOS::Ace::NG

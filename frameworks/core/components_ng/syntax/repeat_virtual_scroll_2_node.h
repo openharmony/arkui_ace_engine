@@ -317,7 +317,7 @@ private:
     // true in the time from requesting idle / predict task until exec predict tsk.
     bool postUpdateTaskHasBeenScheduled_;
 
-    // record the minimum and max index called by getFrameChildByIndex.
+    // record the minimum and maximum index called by getFrameChildByIndex.
     uint32_t minFrameChildIndex_ = 0;
     uint32_t maxFrameChildIndex_ = 0;
 
