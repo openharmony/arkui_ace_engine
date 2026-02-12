@@ -3545,6 +3545,7 @@ test/unittest/core/base/frame_node_test_ng.cpp @arkui_framework_xnode
 test/unittest/core/base/frame_node_test_ng_v3.cpp @arkui_framework_xnode
 test/unittest/core/common/ace_engine/ @arkui_framework_xnode
 test/unittest/core/common/asset/ @arkui_framework_xnode
+test/unittest/core/common/BUILD.gn @arkui_framework_xnode
 test/unittest/core/common/clipboard/ @huawei_g_five
 test/unittest/core/common/environment/ @arkui_statemgmt
 test/unittest/core/common/force_split/ @arkui_navigation
@@ -3557,6 +3558,7 @@ test/unittest/core/common/rosen/ @arkui_framework_xnode
 test/unittest/core/common/sharedata/ @arkui_framework_xnode
 test/unittest/core/common/storage/ @arkui_statemgmt
 test/unittest/core/common/task/ @arkui_framework_xnode
+test/unittest/core/common/task_runner_adapter_impl/task_runner_adapter_test.cpp @arkui_framework_xnode
 test/unittest/core/common/vibrator/ @arkui_framework_xnode
 test/unittest/core/common/transform/ @ArkUI_Event
 test/unittest/core/common/statistic_event/ @arkui_framework_xnode
