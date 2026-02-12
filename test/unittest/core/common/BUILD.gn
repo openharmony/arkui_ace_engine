@@ -42,6 +42,9 @@ ace_unittest("common_test") {
     "vibrator/vibrator_test.cpp",
     "task_runner_adapter_impl/task_runner_adapter_test.cpp",
   ]
+  external_deps = [
+    "eventhandler:libeventhandler",
+  ]
 }
 
 group("core_common_unittest") {
