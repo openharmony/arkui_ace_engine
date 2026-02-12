@@ -1528,6 +1528,36 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddExtraInfoWithParamConfig002
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, AddExtraInfoWithParamConfig002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    config.accessibilityInfo = true;
+    config.interactionInfo = true;
+    config.cacheNodes = true;
+    config.withUIExtension = true;
+    config.interactionInfo = true;
+    pattern->AddExtraInfoWithParamConfig(json, config);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
+}
+
+/**
  * @tc.name: PluginComponentTest001
  * @tc.desc: Test PluginComponent Creation
  * @tc.type: FUNC
