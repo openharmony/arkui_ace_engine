@@ -64,12 +64,8 @@ void GridLayoutUtils::PreloadGridItems(
 
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
-    CHECK_NULL_VOID(pattern);
     auto* context = pattern->GetContext();
     CHECK_NULL_VOID(context);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_UINODE_TRACE(host);
     context->AddPredictTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)), buildCb](int64_t deadline, bool _) {
         ACE_SCOPED_TRACE("Grid preload items");
         auto pattern = weak.Upgrade();
