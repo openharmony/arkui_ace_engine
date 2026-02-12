@@ -261,6 +261,7 @@ advanced_ui_component_static/multinavigation/ @arkui_navigation
 advanced_ui_component_static/arcbutton/ @arkuipopupwindow_all
 advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
 advanced_ui_component_static/popup/ @arkuipopupwindow_all
+advanced_ui_component_static/formmenu/ @form_framework
 
 [Advanced UI Components Static]
 advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomponent
