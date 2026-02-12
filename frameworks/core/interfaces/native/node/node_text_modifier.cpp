@@ -304,7 +304,7 @@ void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GestureEventFunc* click = nullptr;
     if (callback) {
@@ -317,7 +317,7 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
 
 void ResetOnClick(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ClearOnClick(frameNode);
 }
@@ -345,7 +345,7 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ClearResponseRegion(frameNode);
 }
@@ -517,6 +517,7 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+
     if (fontSize < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
         unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
         auto theme = GetTheme<TextTheme>();
@@ -1509,7 +1510,7 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
 
 void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* caretColorRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode *>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetCaretColor(frameNode, Color(color));
     NodeModifier::ProcessResourceObj<Color>(frameNode, "TextCaretColor", Color(color), caretColorRawPtr);
@@ -1517,14 +1518,14 @@ void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* caretColo
 
 ArkUI_Uint32 GetTextCaretColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode *>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
     return TextModelNG::GetCaretColor(frameNode).GetValue();
 }
 
 void ResetTextCaretColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode *>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -1541,7 +1542,7 @@ void ResetTextCaretColor(ArkUINodeHandle node)
 
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
@@ -1564,14 +1565,14 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
     return TextModelNG::GetSelectedBackgroundColor(frameNode).GetValue();
 }
 
 void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectedBackgroundColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
@@ -1709,7 +1710,7 @@ void SetTextOnCopy(ArkUINodeHandle node, void* callback)
 
 void ResetTextOnCopy(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnCopy(frameNode, nullptr);
 }
@@ -1728,7 +1729,7 @@ void SetTextOnTextSelectionChange(ArkUINodeHandle node, void* callback)
 
 void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
 }

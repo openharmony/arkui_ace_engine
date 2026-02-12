@@ -14,7 +14,6 @@
  */
 
 #include <sstream>
-
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
@@ -221,6 +220,7 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextFieldModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
+
 void SetOnSubmitImpl(Ark_NativePointer node, const Opt_TextAreaSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

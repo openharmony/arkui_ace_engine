@@ -2263,6 +2263,7 @@ ArkUI_Bool GetBlurOnSubmit(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, true);
     return TextFieldModelNG::GetBlurOnSubmit(frameNode);
 }
+
 void SetTextInputCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2294,6 +2295,7 @@ void ResetTextInputCustomKeyboard(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
 }
+
 
 void SetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)
 {
@@ -2339,21 +2341,21 @@ void ResetTextInputNumberOfLines(ArkUINodeHandle node)
 
 void SetTextInputShowPassword(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowPassword(frameNode, static_cast<bool>(value));
 }
 
 void ResetTextInputShowPassword(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowPassword(frameNode, false);
 }
 
 ArkUI_Bool GetTextInputShowPassword(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return TextFieldModelNG::GetShowPassword(frameNode);
 }

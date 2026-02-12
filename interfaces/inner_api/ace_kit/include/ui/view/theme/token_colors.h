@@ -167,12 +167,12 @@ public:
     {
         resObjs_ = std::move(resObjs);
     }
-
+ 
     const std::vector<RefPtr<ResourceObject>>& GetResObjs() const
     {
         return resObjs_;
     }
-
+ 
     void SetColorMode(const ColorMode& colorMode)
     {
         colorMode_ = colorMode;
@@ -184,5 +184,5 @@ private:
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 };
 
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_THEME_TOKEN_COLORS_H
