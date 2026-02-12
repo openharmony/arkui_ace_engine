@@ -4481,6 +4481,11 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
     }
 }
 
+bool TextPattern::GetIsSpecialSymbol() const
+{
+    return isSpecialSymbol_;
+}
+
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -4500,6 +4505,25 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
     ProcessOverlayAfterLayout();
+    if (textLayoutAlgorithm->GetIsSpecialSymbol() && pManager_) {
+        isSpecialSymbol_ = true;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProp, false);
+        auto symbolSourceInfo = textLayoutProp->GetSymbolSourceInfo();
+        std::uint32_t unicode = 0;
+        if (symbolSourceInfo) {
+            unicode = symbolSourceInfo->GetUnicode();
+        }
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "ACE symbol TextPattern::OnDirtyLayoutWrapperSwap id:%{public}d unicode:%{public}d, paragraph info "
+            "GetMaxWidth:%{public}f  GetHeight:%{public}f GetMaxIntrinsicWidth:%{public}f "
+            "GetLongestLineWithIndent:%{public}f, GetLineCount:%{public}d contentRect:%{public}s",
+            host->GetId(), unicode, pManager_->GetMaxWidth(), pManager_->GetHeight(), pManager_->GetMaxIntrinsicWidth(),
+            pManager_->GetLongestLineWithIndent(), static_cast<int32_t>(pManager_->GetLineCount()),
+            contentRect_.ToString().c_str());
+    }
     return true;
 }
 
