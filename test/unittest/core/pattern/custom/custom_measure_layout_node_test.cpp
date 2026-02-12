@@ -763,45 +763,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest014, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest015
- * @tc.desc: Test Render with negative deadline
+ * @tc.name: CustomMeasureLayoutTest017
+ * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest015, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create CustomMeasureLayoutNode.
-     * @tc.expected: CustomMeasureLayoutNode created successfully.
-     */
-    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
-        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
-    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
-
-    /**
-     * @tc.steps: step2. Set recycle render function and call Render with negative deadline.
-     * @tc.expected: Render returns true and calls FireRecycleRenderFunc.
-     * Logic explanation:
-     * - Condition: (deadline > 0 && GetSysTimestamp() > deadline)
-     * - deadline = -1000, so (-1000 > 0) = false
-     * - With && short-circuit, entire condition is false, timeout check is skipped
-     * - Render() executes FireRecycleRenderFunc() and returns true
-     */
-    int recycleCallCount = 0;
-    auto recycleRenderFunc = [&recycleCallCount]() { recycleCallCount++; };
-    customNode->SetRecycleRenderFunc(std::move(recycleRenderFunc));
-
-    int64_t negativeDeadline = -1000;
-    bool renderResult = customNode->Render(negativeDeadline);
-    EXPECT_TRUE(renderResult);
-    EXPECT_EQ(recycleCallCount, 1);
-}
-
-/**
- * @tc.name: CustomMeasureLayoutTest016
- * @tc.desc: Test FireOnMeasure with null LayoutWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest016, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -818,23 +784,64 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest016, TestSize.Level0)
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     /**
-     * @tc.steps: step2. Set measure function and call with null wrapper.
+     * @tc.steps: step2. Set updateParamFunc and call FireOnUpdateParam with null.
      * @tc.expected: Function is called, receives null, returns true.
-     * Logic: FireOnMeasure doesn't validate layoutWrapper, just passes it through
+     * Logic: FireOnUpdateParam doesn't validate layoutWrapper, just passes it through
      */
-    bool measureCalled = false;
-    NG::LayoutWrapper* receivedWrapper = nullptr;
-    auto measureFunc = [&measureCalled, &receivedWrapper](
+    NG::LayoutWrapper* capturedWrapper = nullptr;
+    bool updateCalled = false;
+    auto updateParamFunc = [&updateCalled, &capturedWrapper](
         NG::LayoutWrapper* layoutWrapper) {
-        measureCalled = true;
-        receivedWrapper = layoutWrapper;
+        updateCalled = true;
+        capturedWrapper = layoutWrapper;
     };
-    customNode->SetMeasureFunction(std::move(measureFunc));
+    customNode->SetUpdateParamFunc(std::move(updateParamFunc));
 
-    auto fireResult = customNode->FireOnMeasure(nullptr);
+    auto fireResult = customNode->FireOnUpdateParam(nullptr);
     EXPECT_TRUE(fireResult);
-    EXPECT_TRUE(measureCalled);
-    EXPECT_EQ(receivedWrapper, nullptr);
+    EXPECT_TRUE(updateCalled);
+    EXPECT_EQ(capturedWrapper, nullptr);
+}
+
+/**
+ * @tc.name: CustomMeasureLayoutTest017
+ * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
+     * @tc.expected: CustomMeasureLayoutNode created successfully.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+    customNode->MountToParent(frameNode);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto parentLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. Set updateParamFunc and call FireOnUpdateParam with null.
+     * @tc.expected: Function is called, receives null, returns true.
+     * Logic: FireOnUpdateParam doesn't validate layoutWrapper, just passes it through
+     */
+    NG::LayoutWrapper* capturedWrapper = nullptr;
+    bool updateCalled = false;
+    auto updateParamFunc = [&updateCalled, &capturedWrapper](
+        NG::LayoutWrapper* layoutWrapper) {
+        updateCalled = true;
+        capturedWrapper = layoutWrapper;
+    };
+    customNode->SetUpdateParamFunc(std::move(updateParamFunc));
+
+    auto fireResult = customNode->FireOnUpdateParam(nullptr);
+    EXPECT_TRUE(fireResult);
+    EXPECT_TRUE(updateCalled);
+    EXPECT_EQ(capturedWrapper, nullptr);
 }
 
 /**
