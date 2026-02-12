@@ -5469,6 +5469,10 @@
     },
     {
         "first_introduced": "24",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier"
+    },
+    {
+        "first_introduced": "24",
         "name": "OH_ArkUI_TextEditorSelectionMenuOptions_Create"
     },
     {
