@@ -43827,6 +43827,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetStyledPlaceholderImpl(Ark_RichEditorBaseController peer, Ark_StyledString styledString)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setStyledPlaceholder(");
+        WriteToString(&out, styledString);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // RichEditorBaseControllerAccessor
     namespace RichEditorControllerAccessor {
     void DestroyPeerImpl(Ark_RichEditorController peer)
@@ -54084,6 +54095,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorBaseControllerAccessor::GetPreviewTextImpl,
             RichEditorBaseControllerAccessor::GetCaretRectImpl,
             RichEditorBaseControllerAccessor::DeleteBackwardImpl,
+            RichEditorBaseControllerAccessor::SetStyledPlaceholderImpl,
         };
         return &RichEditorBaseControllerAccessorImpl;
     }

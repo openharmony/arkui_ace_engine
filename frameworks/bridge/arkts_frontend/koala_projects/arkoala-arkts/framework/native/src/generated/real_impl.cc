@@ -18160,6 +18160,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
     {
     }
+    void SetStyledPlaceholderImpl(Ark_RichEditorBaseController peer, Ark_StyledString styledString)
+    {
+    }
     } // RichEditorBaseControllerAccessor
     namespace RichEditorControllerAccessor {
     void DestroyPeerImpl(Ark_RichEditorController peer)
@@ -23788,6 +23791,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
             RichEditorBaseControllerAccessor::GetPreviewTextImpl,
             RichEditorBaseControllerAccessor::GetCaretRectImpl,
+            RichEditorBaseControllerAccessor::SetStyledPlaceholderImpl,
         };
         return &RichEditorBaseControllerAccessorImpl;
     }

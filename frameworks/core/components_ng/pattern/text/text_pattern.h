@@ -162,6 +162,8 @@ public:
 
     void OnWindowShow() override;
 
+    bool CheckMeasureFlag();
+
     void PreCreateLayoutWrapper();
 
     void BeforeCreateLayoutWrapper() override;

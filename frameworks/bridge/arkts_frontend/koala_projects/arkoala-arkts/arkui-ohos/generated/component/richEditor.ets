@@ -110,6 +110,11 @@ export class RichEditorBaseController implements MaterializedBase {
         this.deleteBackward_serialize()
         return
     }
+    public setStyledPlaceholder(styledString: StyledString): void {
+        const styledString_casted = styledString as (StyledString)
+        this.setStyledPlaceholder_serialize(styledString_casted)
+        return
+    }
     public stopEditing(): void {
         this.stopEditing_serialize()
         return
@@ -238,6 +243,10 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     deleteBackward_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_deleteBackward(this.peer!.ptr)
+    }
+    setStyledPlaceholder_serialize(styledString: StyledString): void {
+        ArkUIGeneratedNativeModule._RichEditorBaseController_setStyledPlaceholder(this.peer!.ptr,
+            toPeerPtr(styledString))
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {

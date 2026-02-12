@@ -6077,6 +6077,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorBaseController_deleteBackward(ptr: KPointer): void
     @ani.unsafe.Direct
+    native static _RichEditorBaseController_setStyledPlaceholder(ptr: KPointer, styledString: KPointer): void
+    @ani.unsafe.Direct
     native static _RichEditorController_construct(): KPointer
     @ani.unsafe.Direct
     native static _RichEditorController_getFinalizer(): KPointer
