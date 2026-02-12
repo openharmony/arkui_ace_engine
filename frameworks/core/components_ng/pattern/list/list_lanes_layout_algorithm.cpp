@@ -473,6 +473,7 @@ void ListLanesLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper,
     LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
     SyncGeometry(wrapper, isDirty);
     wrapper->SetActive(false);
+    SetCachedItemInfo(pos.first, std::move(pos.second));
 }
 
 std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
@@ -526,7 +527,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             posMap[curIndex + i] = { wrapper->GetHostNode()->GetId(), startPos, startPos + mainLen, isGroup };
         }
         auto startIndex = curIndex;
-        int32_t currCache = 1;
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
@@ -534,21 +534,16 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
                 predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, cachedCount, -1, forceCache });
                 return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
             }
-            currCache = std::max(res.forwardCacheMax, 1);
-        } else if (cnt <= 0) {
+            cachedCount += std::max(res.forwardCacheMax, 1);
+        } else if (cnt > 0) {
+            cachedCount++;
+        } else {
             break;
         }
         for (auto& pos : posMap) {
             pos.second.endPos = startPos + mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
-            if (NearEqual(pos.second.endPos, GetContentMainSize()) && NearZero(mainLen)) {
-                SetItemInfo(pos.first, std::move(pos.second));
-                currCache = 0;
-            } else {
-                SetCachedItemInfo(pos.first, std::move(pos.second));
-            }
         }
-        cachedCount += currCache;
         if (isStackFromEnd_) {
             SetLaneIdx4Divider(cnt - 1);
         }
@@ -592,7 +587,6 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             }
         }
         auto startIndex = GetLanesFloor(layoutWrapper, curIndex);
-        int32_t currCache = 1;
         if (isGroup) {
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
@@ -600,21 +594,16 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
                 predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, -1, cachedCount, forceCache });
                 return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
             }
-            currCache = std::max(res.backwardCacheMax, 1);
-        } else if (cnt <= 0) {
+            cachedCount += std::max(res.backwardCacheMax, 1);
+        } else if (cnt > 0) {
+            cachedCount++;
+        } else {
             break;
         }
         for (auto& pos: posMap) {
             pos.second.startPos = endPos - mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
-            if (NearEqual(pos.second.startPos, 0.0f) && NearZero(mainLen)) {
-                SetItemInfo(pos.first, std::move(pos.second));
-                currCache = 0;
-            } else {
-                SetCachedItemInfo(pos.first, std::move(pos.second));
-            }
         }
-        cachedCount += currCache;
         if (!isStackFromEnd_) {
             SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
         }
