@@ -267,7 +267,7 @@ void TextSelectController::UpdateSelectPragraphByOffset(const Offset& localOffse
 
 std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const Offset& localOffset)
 {
-    std::pair<int32_t, int32_t> err(-1, -1);
+    std::pair<int32_t, int32_t> err (-1, -1);
     CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), err);
     int32_t start = 0;
     int32_t end = 0;
@@ -325,7 +325,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
         TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
-    return { start, end };
+    return {start, end};
 }
 
 void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)
@@ -646,7 +646,6 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     }
     CaretMetricsF caretMetrics;
     CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, textAffinity);
-
     RectF caretRect;
     caretRect.SetOffset(caretMetrics.offset);
     auto pattern = pattern_.Upgrade();
@@ -732,7 +731,6 @@ void TextSelectController::FireSelectEvent()
         eventHub->FireOnSelectionChange(std::min(firstHandleInfo_.index, secondHandleInfo_.index),
             std::max(firstHandleInfo_.index, secondHandleInfo_.index));
         if (secondIndexChange) {
-            // when second index change, avoid caret in time
             textField->TriggerAvoidWhenCaretGoesDown();
         }
     }

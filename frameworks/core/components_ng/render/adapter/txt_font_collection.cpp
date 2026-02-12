@@ -71,7 +71,7 @@ RefPtr<FontCollection> TxtFontCollection::GetInstance()
     return instance;
 }
 
-ACE_FORCE_EXPORT RefPtr<FontCollection> FontCollection::Current()
+RefPtr<FontCollection> FontCollection::Current()
 {
     auto localFontCollection = TxtFontCollection::GetFormLocalInstance();
     if (localFontCollection) {

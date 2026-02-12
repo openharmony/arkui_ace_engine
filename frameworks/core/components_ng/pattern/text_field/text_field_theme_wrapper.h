@@ -54,7 +54,7 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
-        if (const auto& colors = theme.Colors(); colors) {
+        if (auto colors = theme.Colors(); colors) {
             textColor_ = colors->FontPrimary();
             placeholderColor_ = colors->FontSecondary();
             bgColor_ = colors->CompBackgroundTertiary();

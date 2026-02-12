@@ -31,8 +31,7 @@ constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
-ACE_FORCE_EXPORT RefPtr<Paragraph> Paragraph::Create(
-    const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
+RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
@@ -199,7 +198,7 @@ void TxtParagraph::Reset()
 void TxtParagraph::Layout(float width)
 {
     OTHER_DURATION();
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout, width:%f", width);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout width:%f", width);
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
 }
@@ -593,7 +592,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
             boxes = getTextRects(extent, end);
         }
     }
-    
+
     if (boxes.empty()) {
         return false;
     }

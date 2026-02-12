@@ -52,6 +52,17 @@ void TextTimerPattern::FireChangeEvent()
     }
 }
 
+void TextTimerPattern::SetBuilderFuncMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnModifyDone();
+    });
+}
+
 void TextTimerPattern::InitTextTimerController()
 {
     if (textTimerController_) {
