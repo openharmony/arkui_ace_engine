@@ -148,12 +148,6 @@ public:
         startAbilityOnJumpBrowserHandler_ = std::move(listener);
     }
 
-    using OpenLinkOnMapSearchHandler = std::function<void(const std::string& address)>;
-    void SetOpenLinkOnMapSearchHandler(OpenLinkOnMapSearchHandler&& listener)
-    {
-        startOpenLinkOnMapSearchHandler_ = std::move(listener);
-    }
-
     using StartAbilityOnCanlendarHandler = std::function<void(const std::map<std::string, std::string>& params)>;
     void SetStartAbilityOnCalendar(StartAbilityOnCanlendarHandler&& listener)
     {
@@ -163,7 +157,6 @@ public:
     void StartAbilityOnJumpBrowser(const std::string& address) const;
     void StartAbilityOnInstallAppInStore(const std::string& appName) const;
     void StartAbilityOnCalendar(const std::map<std::string, std::string>& params) const;
-    void OpenLinkOnMapSearch(const std::string& address);
 
     void OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content);
 
@@ -195,7 +188,6 @@ private:
 
     StartAbilityOnInstallAppInStoreHandler startAbilityOnInstallAppInStoreHandler_;
     StartAbilityOnJumpBrowserHandler startAbilityOnJumpBrowserHandler_;
-    OpenLinkOnMapSearchHandler startOpenLinkOnMapSearchHandler_;
     StartAbilityOnCanlendarHandler startAbilityOnCalendarHandler_;
 
     std::mutex hybridRenderNodesMutex_;
