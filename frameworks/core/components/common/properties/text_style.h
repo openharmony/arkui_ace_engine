@@ -1352,6 +1352,13 @@ public:
     void CopyResource(const TextStyle& source);
     void AppendResource(const TextStyle& source);
     void ReloadResources();
+    void UpdateFontSizeOrColorChanged();
+    bool CheckIsFontSizeOrColorChanged()
+    {
+        bool changed = isFontSizeOrColorChanged_;
+        isFontSizeOrColorChanged_ = true;
+        return changed;
+    }
 
 private:
     ACE_DEFINE_SYMBOL_TEXT_STYLE_OPTIONAL_TYPE(InnerSymbolEffectOptions, NG::SymbolEffectOptions);
@@ -1377,6 +1384,7 @@ private:
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
+    bool isFontSizeOrColorChanged_ = true;
 
     RefPtr<AdvancedTextStyle> advancedTextStyle_;
     RefPtr<SymbolTextStyle> symbolTextStyle_;

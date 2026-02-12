@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include <ctime>
 #include <string>
 #include <sys/time.h>
-#include "ui/base/utils/utils.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
@@ -163,12 +162,11 @@ void TextClockPattern::UpdateTextLayoutProperty(
 
 void TextClockPattern::OnModifyDone()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         Pattern::OnModifyDone();
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
 
     auto textNode = GetTextNode();
     CHECK_NULL_VOID(textNode);
@@ -245,7 +243,8 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     auto context = host->GetContext();
     if (context) {
         auto container = Container::Current();
-        bool isDynamicComponent = container && container->IsDynamicRender();
+        bool isDynamicComponent = container && container->IsDynamicRender()&&
+                                  container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
         isForm_ = context->IsFormRender() && !isDynamicComponent;
     }
     RegistVisibleAreaChangeCallback();
@@ -472,9 +471,7 @@ void TextClockPattern::ParseInputFormat()
             formatElementMap_[j] = tempFormatElement;
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
         is24H_ = false;
     }
 }
@@ -959,7 +956,7 @@ void TextClockPattern::UpdateTextClockFontFamily(const std::vector<std::string>&
     auto layoutProperty = host->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateFontFamily(fontFamilies);
-} 
+}
 
 void TextClockPattern::UpdateTextClockFormat(const std::string& format)
 {

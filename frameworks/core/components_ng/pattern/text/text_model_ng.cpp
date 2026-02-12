@@ -44,7 +44,6 @@ void TextModelNG::Create(const std::u16string& content)
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ACE_UINODE_TRACE(frameNode);
     stack->Push(frameNode);
-
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
@@ -960,8 +959,8 @@ void TextModelNG::SetClipEdge(bool clip)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ClipEdge, clip, frameNode);
     frameNode->GetRenderContext()->SetClipToFrame(clip);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
@@ -1974,7 +1973,7 @@ void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 }
 
 void TextModelNG::SetExternalDrawCallback(
-    FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback)
+    FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();

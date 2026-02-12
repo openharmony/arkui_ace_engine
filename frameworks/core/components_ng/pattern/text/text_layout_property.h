@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http:www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -151,6 +151,7 @@ public:
         ResetCursorColor();
         ResetSelectedBackgroundColor();
         ResetTextColorFlagByUser();
+        ResetClipEdge();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -239,6 +240,7 @@ public:
         UpdateContent(UtfUtils::Str8DebugToStr16(value));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
@@ -248,6 +250,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlHoverColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlPressedColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsTextMaxlinesFirst, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ClipEdge, bool, PROPERTY_UPDATE_RENDER);
 
     // symbol
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
@@ -332,6 +335,16 @@ public:
     std::string GetTextMarqueeOptionsString() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
 
+    void SetIsNewMaterial(bool isNewMaterial)
+    {
+        isNewMaterial_ = isNewMaterial;
+    }
+
+    bool IsNewMaterial() const
+    {
+        return isNewMaterial_;
+    }
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -344,6 +357,7 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propClipEdge_ = CloneClipEdge();
         value->propNeedReCreateParagraph_ = true;
     }
 
@@ -351,6 +365,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 
     bool isLoopAnimation_ = false;
+    bool isNewMaterial_ = false;
     RefPtr<AdvancedTextLayoutProperty> advancedTextLayoutProperty_;
 };
 } // namespace OHOS::Ace::NG

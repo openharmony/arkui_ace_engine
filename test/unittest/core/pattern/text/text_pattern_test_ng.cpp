@@ -2500,16 +2500,25 @@ HWTEST_F(TextPatternTestNg, TextNewMaterialFunctions, TestSize.Level1)
     ASSERT_NE(textPattern, nullptr);
     textPattern->CreateModifier();
     bool drawCalledFlag = false;
-    textPattern->SetExternalDrawCallback([flag = &drawCalledFlag](float x, float y, float width, float height) {
-        *flag = true;
-        return true;
-    });
+    ExternalDrawCallbackInfo callbackInfo;
+    textPattern->SetExternalDrawCallback(
+        [flag = &drawCalledFlag, callInfo = &callbackInfo](const ExternalDrawCallbackInfo& info) {
+            *flag = true;
+            *callInfo = info;
+            return true;
+        });
     Testing::MockCanvas rsCanvas;
     auto pManager = textPattern->GetParagraphManager();
     ASSERT_NE(pManager, nullptr);
     pManager->AddParagraph({ .paragraph = nullptr, .start = 0, .end = 100 });
     textPattern->contentMod_->DrawText(rsCanvas, pManager, textPattern);
     EXPECT_TRUE(drawCalledFlag);
+    EXPECT_EQ(callbackInfo.paintX, 0.0f);
+    EXPECT_EQ(callbackInfo.paintY, 0.0f);
+    EXPECT_EQ(callbackInfo.width, 0.0f);
+    EXPECT_EQ(callbackInfo.height, 0.0f);
+    EXPECT_TRUE(callbackInfo.isFontChanged);
+    EXPECT_EQ(callbackInfo.fontSize, 14.0f);
     auto drawParagraph = textPattern->GetDrawParagraph();
     EXPECT_EQ(drawParagraph, std::nullopt);
 }

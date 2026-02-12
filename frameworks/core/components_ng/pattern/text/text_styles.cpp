@@ -56,6 +56,21 @@ void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const
     UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol);
 }
 
+void UpdateFontSizeWithPxUnit(
+    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
+{
+    auto& fontStyle = property->GetFontStyle();
+    Dimension fontSize;
+    if (fontStyle && fontStyle->HasFontSize()) {
+        fontSize = fontStyle->GetFontSizeValue();
+    } else {
+        fontSize = textTheme->GetTextStyle().GetFontSize();
+    }
+    auto fontSizePx = fontSize.ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    textStyle.SetFontSize(Dimension(fontSizePx, DimensionUnit::PX));
+}
+
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme, bool isSymbol)
 {
@@ -68,7 +83,12 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
 
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    if (property->IsNewMaterial()) {
+        UpdateFontSizeWithPxUnit(property, textStyle, textTheme);
+    } else {
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    }
+
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);

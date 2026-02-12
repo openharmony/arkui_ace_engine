@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -373,7 +373,14 @@ void TextClockModelNG::CreateWithTextColorResourceObj(FrameNode* frameNode, cons
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         Color result;
+        std::string color = pattern->GetResCacheMapByKey(key);
         if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            pattern->UpdateTextClockColor(result);
+        } else {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            result = theme->GetTextStyle().GetTextColor();
             pattern->UpdateTextClockColor(result);
         }
     };
@@ -403,8 +410,12 @@ void TextClockModelNG::CreateWithFontSizeResourceObj(FrameNode* frameNode, const
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, fontSize, false) || fontSize.IsNegative() ||
-            fontSize.Unit() == DimensionUnit::PERCENT) {
+        if (!ResourceParseUtils::ParseResDimensionFpNG(resObj, fontSize, false)) {
+            fontSize = theme->GetTextStyle().GetFontSize();
+        }
+        if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
             fontSize = theme->GetTextStyle().GetFontSize();
         }
         pattern->UpdateTextClockFontSize(fontSize);
@@ -436,6 +447,7 @@ void TextClockModelNG::CreateWithFontFamilyResourceObj(FrameNode* frameNode, con
             pattern->UpdateTextClockFontFamily(fontFamilies);
         }
     };
+    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -490,6 +502,8 @@ void TextClockModelNG::CreateWithFormatResourceObj(FrameNode* frameNode, const R
         CHECK_NULL_VOID(pattern);
         const std::string DEFAULT_FORMAT_API_TEN = "hms";
         std::string result;
+        static const std::string TEXT_CLOCK_FORMAT_REGEX =
+            R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)";
         if (!ResourceParseUtils::ParseResString(resObj, result)) {
             return;
         }
@@ -497,8 +511,6 @@ void TextClockModelNG::CreateWithFormatResourceObj(FrameNode* frameNode, const R
             pattern->UpdateTextClockFormat(result);
             return;
         }
-        static const std::string TEXT_CLOCK_FORMAT_REGEX =
-            R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)";
         std::regex jsPattern(TEXT_CLOCK_FORMAT_REGEX);
         if (result.empty() || !StringUtils::IsAscii(result) || !std::regex_match(result, jsPattern)) {
             pattern->UpdateTextClockFormat(DEFAULT_FORMAT_API_TEN);

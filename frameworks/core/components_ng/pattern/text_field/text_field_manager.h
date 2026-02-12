@@ -156,7 +156,11 @@ public:
 
     void UpdatePrevHasTextFieldPattern()
     {
-        prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
+        if (onFocusTextField_.Upgrade()) {
+            prevHasTextFieldPattern_ = true;
+        } else {
+            prevHasTextFieldPattern_ = false;
+        }
     }
 
     void AvoidKeyBoardInNavigation();
@@ -202,6 +206,8 @@ public:
     int32_t GetOnFocusTextFieldId() {
         return onFocusTextFieldId_;
     }
+
+    void TriggerCaretInfoUpdateOnScaleChange();
 
     bool GetLaterAvoid() const
     {
@@ -255,7 +261,7 @@ public:
     {
         return clickPositionOffset_;
     }
-    
+
     void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
 
     void RemoveAvoidKeyboardCallback(int32_t id)

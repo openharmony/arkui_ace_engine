@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 #include "base/i18n/time_format.h"
 #include "base/memory/referenced.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/text_clock/text_clock_controller.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -97,11 +98,15 @@ public:
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
             contentModifierNode_ = nullptr;
+            auto host = GetHost();
+            FREE_NODE_CHECK(host, SetBuilderFunc);
             OnModifyDone();
             return;
         }
         makeFunc_ = std::move(makeFunc);
     }
+
+    void SetBuilderFuncMultiThread();
 
     bool UseContentModifier() const
     {
@@ -126,7 +131,6 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
     void OnColorModeChange(uint32_t colorMode) override;
     void UpdateTextColor(const Color& color);
     void UpdateFontSize(const CalcDimension& fontSize);

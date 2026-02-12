@@ -36,4 +36,14 @@ void TextClockPattern::OnDetachFromMainTreeMultiThread()
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
 }
 
+void TextClockPattern::SetBuilderFuncMultiThread()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnModifyDone();
+    });
+}
 } // namespace OHOS::Ace::NG
