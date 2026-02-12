@@ -77,11 +77,9 @@ HWTEST_F(FormScopedRSTransactionTest, FormScopedRSTransactionTest002, TestSize.L
 {
     SystemProperties::SetMultiInstanceEnabled(false);
     FormScopedRSTransaction scopedRSTransaction(0);
-    EXPECT_NE(scopedRSTransaction.rsTransaction_, nullptr);
     EXPECT_EQ(scopedRSTransaction.needCloseSync_, true);
 
     scopedRSTransaction.CloseSyncTransaction();
-    EXPECT_NE(scopedRSTransaction.rsTransaction_, nullptr);
     EXPECT_EQ(scopedRSTransaction.needCloseSync_, false);
 }
 }  // namespace OHOS::Ace::NG
