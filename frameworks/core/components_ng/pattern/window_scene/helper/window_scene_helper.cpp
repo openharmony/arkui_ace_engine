@@ -49,7 +49,7 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targe
 
     auto container = Container::Current();
     if (!container || !container->IsSceneBoardWindow() || !container->IsSceneBoardEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not SceneBoardWindow.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container null Or not SceneBoardWindow.");
         return nullptr;
     }
 
@@ -80,7 +80,7 @@ sptr<Rosen::Session> GetCurSession(const RefPtr<FrameNode>& focusedFrameNode)
 
     auto windowScenePattern = windowSceneFrameNode->GetPattern<SystemWindowScene>();
     if (windowScenePattern == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "windowScenePattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "windowScenePattern is null.");
         return nullptr;
     }
 
@@ -91,7 +91,7 @@ bool WindowSceneHelper::IsWindowScene(const RefPtr<FrameNode>& focusedFrameNode)
 {
     auto window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is null.");
         return false;
     }
 
