@@ -1972,14 +1972,15 @@ HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmTest001, TestSize.Level1)
     auto displayInfo = container->GetDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    RefPtr<FrameNode> stack1;
 
-    auto frameNode = CreateFolder([this](FolderStackModelNG model) {
+    auto frameNode = CreateFolder([this, &stack1](FolderStackModelNG model) {
         model.SetAlignment(Alignment::BOTTOM_CENTER);
         ViewAbstract::SetWidth(CalcLength(400.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
         // Add child 1 (100x80)
-        auto stack1 = CreateStack([this](StackModelNG model) {
+        stack1 = CreateFolder([this](FolderStackModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(80.0f));
         });
@@ -2000,13 +2001,20 @@ HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmTest001, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 
-    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto childGeometry = child->GetGeometryNode();
-        auto childOffset = childGeometry->GetMarginFrameOffset();
-        // Child 1 (100x80): offset = ((400-100)/2, (300-80)) = (150, 340)
-        EXPECT_FLOAT_EQ(childOffset.GetX(), 150.0f);
-        EXPECT_FLOAT_EQ(childOffset.GetY(), 340.0f);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+
+    for (const auto& childNode : frameNode->GetChildren()) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(childNode);
+        if (childFrameNode) {
+            auto geometryNode = childFrameNode->GetGeometryNode();
+            ASSERT_NE(geometryNode, nullptr);
+            auto size = geometryNode->GetMarginFrameSize();
+            EXPECT_EQ(size, SizeF(100.0f, 80.0f));
+            auto offset = geometryNode->GetFrameOffset();
+            // Child 1 (100x80): offset = ((400-100)/2, (300-80)) = (150, 220)
+            EXPECT_EQ(offset, OffsetF(150.0f, 220.0f));
+        }
     }
 }
 
