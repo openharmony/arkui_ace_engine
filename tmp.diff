@@ -1,0 +1,157 @@
+diff --git a/adapter/ohos/entrance/ace_ability.cpp b/adapter/ohos/entrance/ace_ability.cpp
+index 665c1665e0023ea16b56d2270610323849c92961..d4ead8215ffa4de59c971be7a979f2ae0150ffc5 100644
+--- a/adapter/ohos/entrance/ace_ability.cpp
++++ b/adapter/ohos/entrance/ace_ability.cpp
+@@ -512,6 +512,9 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
+             context->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+         }
+         context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FA_APP_START);
++        if (frontendType == FrontendType::DECLARATIVE_JS) {
++            context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FA_AND_DECLARATIVE_APP_START);
++        }
+     }
+ 
+     // get url
+diff --git a/adapter/ohos/entrance/ace_container.cpp b/adapter/ohos/entrance/ace_container.cpp
+index 67be0172e657c4a82f945a36ef611fe78aff5948..1ef518c654a2952d7b253fbea3434220d2ca0d80 100644
+--- a/adapter/ohos/entrance/ace_container.cpp
++++ b/adapter/ohos/entrance/ace_container.cpp
+@@ -59,6 +59,7 @@
+ #include "core/common/plugin_manager.h"
+ #include "core/common/resource/resource_manager.h"
+ #include "core/common/resource/resource_wrapper.h"
++#include "core/common/statistic_event_reporter.h"
+ #include "core/common/task_executor_impl.h"
+ #include "core/common/text_field_manager.h"
+ #include "core/common/transform/input_compatible_manager.h"
+@@ -953,6 +954,12 @@ void AceContainer::OnShow(int32_t instanceId)
+         CHECK_NULL_VOID(pipelineBase);
+         pipelineBase->OnShow();
+         pipelineBase->SetForegroundCalled(true);
++        if (container->GetFrontendType() == FrontendType::JS) {
++            pipelineBase->GetStatisticEventReporter()->SendEvent(StatisticEventType::WEB_LIKE_FRONTEND);
++        }
++        if (container->GetFrontendType() == FrontendType::JS_CARD) {
++            pipelineBase->GetStatisticEventReporter()->SendEvent(StatisticEventType::JS_CARD_FRONTEND);
++        }
+     };
+ 
+     // stege model needn't post task when already run on UI
+diff --git a/frameworks/core/common/statistic_event_reporter.cpp b/frameworks/core/common/statistic_event_reporter.cpp
+index 07f7e73a3de10fc99c11003c464bedbc0ea2de98..58461bc5897307b537e97e0f528fb3f701c2de82 100644
+--- a/frameworks/core/common/statistic_event_reporter.cpp
++++ b/frameworks/core/common/statistic_event_reporter.cpp
+@@ -116,6 +116,16 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
+             return { "CANVAS", "NINE_PARAM_DRAWIMAGE" };
+         case StatisticEventType::CANVAS_GLOBAL_ALPHA_MINUS_ONE:
+             return { "CANVAS", "GLOBAL_ALPHA_MINUS_ONE" };
++        case StatisticEventType::WEB_LIKE_FRONTEND:
++            return { "FRAMEWORK", "WEB_LIKE_FRONTEND" };
++        case StatisticEventType::JS_CARD_FRONTEND:
++            return { "FRAMEWORK", "JS_CARD_FRONTEND" };
++        case StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER:
++            return { "FRAMEWORK", "FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER" };
++        case StatisticEventType::GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO:
++            return { "FRAMEWORK", "GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO" };
++        case StatisticEventType::FA_AND_DECLARATIVE_APP_START:
++            return { "FRAMEWORK", "FA_AND_DECLARATIVE_APP_START" };
+         case StatisticEventType::VIDEO_INVALID_PROGRESS_RATE:
+             return { "VIDEO", "INVALID_PROGRESS_RATE" };
+         case StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE:
+diff --git a/frameworks/core/common/statistic_event_reporter.h b/frameworks/core/common/statistic_event_reporter.h
+index 0c0332c9edab7ff9ee36a2f477abd2f3fbeda340..05a6606a1be467dd76f91686327f1ba89b669efd 100644
+--- a/frameworks/core/common/statistic_event_reporter.h
++++ b/frameworks/core/common/statistic_event_reporter.h
+@@ -27,6 +27,9 @@ class PipelineBase;
+ enum class StatisticEventType {
+     // General framework events (0-10099)
+     FA_APP_START = 0,
++    FA_AND_DECLARATIVE_APP_START,
++    WEB_LIKE_FRONTEND,
++    JS_CARD_FRONTEND,
+     // XComponent events (10100-10199)
+     XCOMPONENT_TYPE_USE_STRING = 10100,
+     XCOMPONENT_SET_SURFACE_SIZE = 10101,
+@@ -77,6 +80,8 @@ enum class StatisticEventType {
+     SEARCH_ONDIDINSERT = 10700,
+     SEARCH_ONWILLDELETE = 10701,
+     SEARCH_ONDIDDELETE = 10702,
++    FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER = 10800,
++    GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO,
+     // Video events (10900-10999)
+     VIDEO_INVALID_PROGRESS_RATE = 10901,
+     VIDEO_EXCEED_PROGRESS_RATE = 10902,
+diff --git a/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp b/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp
+index c06ba43dfe57be69e1a8a52910c79fa08dfe91fb..10b696088fa09fdaf1fb8d0d3c5f17e8af600ad6 100644
+--- a/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp
++++ b/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp
+@@ -20,6 +20,7 @@
+ #include "core/pipeline_ng/pipeline_context.h"
+ #include "core/components_ng/manager/event/json_child_report.h"
+ #include "core/common/reporter/reporter.h"
++#include "core/common/statistic_event_reporter.h"
+ #include "core/components_ng/manager/event/json_report.h"
+ #include "core/components_ng/event/event_constants.h"
+ 
+@@ -390,6 +391,13 @@ void LongPressRecognizer::SendCallbackMsg(
+     std::string callbackName = GetCallbackName(callback);
+     ACE_SCOPED_TRACE("LongPressRecognizer %s", callbackName.c_str());
+     auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
++    if (extraHandlingResult) {
++        auto frameNode = GetAttachedNode().Upgrade();
++        CHECK_NULL_VOID(frameNode);
++        auto context = frameNode->GetContext();
++        CHECK_NULL_VOID(context);
++        context->GetStatisticEventReporter()->SendEvent(StatisticEventType::GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO);
++    }
+     if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult ||
+         (!isOnActionTriggered_ && type != GestureCallbackType::START)) {
+         return;
+diff --git a/frameworks/core/interfaces/native/node/node_common_modifier.cpp b/frameworks/core/interfaces/native/node/node_common_modifier.cpp
+index efc9a60ff66114f8dd15728e1f36b8e272ece0ff..b5416300d1c6de3e9fbb4c6305d0f8d0747ea71b 100644
+--- a/frameworks/core/interfaces/native/node/node_common_modifier.cpp
++++ b/frameworks/core/interfaces/native/node/node_common_modifier.cpp
+@@ -30,6 +30,7 @@
+ #include "core/common/resource/resource_manager.h"
+ #include "core/common/resource/resource_wrapper.h"
+ #include "core/common/resource/resource_parse_utils.h"
++#include "core/common/statistic_event_reporter.h"
+ #include "core/components/common/layout/constants.h"
+ #include "core/components/common/properties/animation_option.h"
+ #include "core/components/common/properties/color.h"
+@@ -9006,6 +9007,11 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
+             marginUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
+             margin.SetUnit(marginUnitEnum);
+         }
++        if (marginUnitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
++            auto context = frameNode->GetContext();
++            CHECK_NULL_VOID(context);
++            context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER);
++        }
+         style.margin = margin;
+         ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_0], "focusBoxStyleMargin");
+     }
+@@ -9015,6 +9021,11 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
+             widthUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
+             strokeWidth.SetUnit(widthUnitEnum);
+         }
++        if (widthUnitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
++            auto context = frameNode->GetContext();
++            CHECK_NULL_VOID(context);
++            context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER);
++        }
+         style.strokeWidth = strokeWidth;
+         ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_1], "focusBoxStyleWidth");
+     }
+diff --git a/test/unittest/core/pattern/web/ani/BUILD.gn b/test/unittest/core/pattern/web/ani/BUILD.gn
+index aa1324dfbac56f63a987e7c01664c98a79a1a619..ed01c3abb425d9e70d8fc701fec37517961305a0 100755
+--- a/test/unittest/core/pattern/web/ani/BUILD.gn
++++ b/test/unittest/core/pattern/web/ani/BUILD.gn
+@@ -681,6 +681,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
+     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
+     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
+     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.cpp",
++    "$ace_root/frameworks/core/common/statistic_event_reporter.cpp",
+     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
+     "$ace_root/test/mock/core/pattern/mock_picker_haptic_controller.cpp",
+   ]
