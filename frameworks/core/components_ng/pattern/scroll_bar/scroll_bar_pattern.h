@@ -433,6 +433,7 @@ private:
     std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
     bool isMousePressed_ = false;
     bool isScrolling_ = false;
+    RefPtr<ClickEvent> clickListener_;
     RefPtr<ClickRecognizer> clickRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<InputEvent> mouseEvent_;

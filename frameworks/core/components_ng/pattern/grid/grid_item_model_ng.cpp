@@ -63,13 +63,6 @@ RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-RefPtr<FrameNode> GridItemModelNG::CreateGridItem(int32_t nodeId)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
-    return frameNode;
-}
-
 void GridItemModelNG::SetRowStart(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, value);
