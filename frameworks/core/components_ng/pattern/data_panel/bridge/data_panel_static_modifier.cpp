@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_static.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -234,14 +235,20 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.maxValue = Converter::ArkValue<Ark_Float64>(config.maxValue_);
         arkConfig.values = Converter::ArkValue<Array_Float64>(config.values_, Converter::FC);
-        auto dataPanelNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync(
-            [dataPanelNode](const RefPtr<UINode>& uiNode) mutable {
-                dataPanelNode->AddChild(uiNode);
-                dataPanelNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            },
-            node, arkConfig);
-        return dataPanelNode;
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
+        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
+            boxNode->AddChild(uiNode);
+            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            }, node, arkConfig);
+        return boxNode;
     };
     DataPanelModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
 }

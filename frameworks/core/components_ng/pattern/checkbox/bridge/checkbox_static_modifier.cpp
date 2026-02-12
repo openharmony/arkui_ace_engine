@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_static.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -225,8 +226,16 @@ void ContentModifierCheckboxImpl(
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
             boxNode->AddChild(uiNode);
             boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);

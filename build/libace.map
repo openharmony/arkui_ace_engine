@@ -734,6 +734,8 @@
       *OHOS::Ace::NG::Converter::AssignCast*;
       OHOS::Ace::NG::Converter::ResourceConverter::*;
       *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
+      *OHOS::Ace::NG::GeneratedApiImpl::GetContentNode*;
+      *OHOS::Ace::NG::GeneratedApiImpl::SetContentNode*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
