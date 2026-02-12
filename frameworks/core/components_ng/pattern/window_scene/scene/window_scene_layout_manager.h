@@ -84,7 +84,7 @@ private:
     void GetUINodeInfo(const RefPtr<FrameNode>& node, int32_t parentId, std::ostringstream& oss);
     void GetUITreeInfo(const RefPtr<FrameNode>& node, int32_t depth, int32_t parentId, std::ostringstream& oss);
     void GetTotalUITreeInfo(std::string& info);
-    void DumpRSNodeType(Rosen::RSUINodeType rsNode, std::ostringstream& oss);
+    void DumpRSNodeType(Rosen::RSUINodeType nodeType, std::ostringstream& oss);
     void GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
         std::ostringstream& oss);
     void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,

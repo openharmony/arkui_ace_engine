@@ -37,7 +37,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
 const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
-const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
+const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME_MS = 100;
 const uint64_t REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS =
     system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 1000);
 std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
@@ -438,7 +438,6 @@ void WindowScene::BufferAvailableCallback()
                 leashSurfaceNode->SetUIFirstSwitch(Rosen::RSUIFirstSwitch::FORCE_DISABLE);
             }
         }
-        CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
@@ -589,7 +588,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(removeSnapshotWindowTask_, TaskExecutor::TaskType::UI,
-            REMOVE_SNAPSHOT_WINDOW_DELAY_TIME, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+            REMOVE_SNAPSHOT_WINDOW_DELAY_TIME_MS, "ArkUIWindowSceneBufferAvailableDelayedCallback");
     } else {
         pipelineContext->PostAsyncEvent(
             std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
@@ -1160,11 +1159,6 @@ void WindowScene::CleanBlankWindow()
         deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_WINDOW_DELAY_TIME, "ArkUICleanBlankWindow");
 }
 
-uint32_t WindowScene::GetWindowPatternType() const
-{
-    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
-}
-
 void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     CHECK_NULL_VOID(surfaceNode);
@@ -1187,6 +1181,11 @@ void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rose
             "ArkUIWindowSceneSubWindowBufferAvailable", TaskExecutor::TaskType::UI);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
+}
+
+uint32_t WindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
 }
 
 void WindowScene::SetOpacityAnimation(RefPtr<FrameNode>& window)

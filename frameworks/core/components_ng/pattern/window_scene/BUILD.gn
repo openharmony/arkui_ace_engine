@@ -56,7 +56,6 @@ build_component_ng("window_scene") {
 
   if (is_ohos_standard_system) {
     configs = [ ":window_scene_config" ]
-
     # The path of libwm should take priority over graphic_2d
     external_deps += [ "window_manager:libwm" ]
     external_deps += [

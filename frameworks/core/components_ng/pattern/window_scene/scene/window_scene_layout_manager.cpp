@@ -228,7 +228,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         (rsNode->GetGlobalPositionY() - ancestorInfo.transScenePosY));
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
-    uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt);
+    uiParam.zOrder_ = res.zOrderCnt;
     auto windowId = GetWindowId(node);
     uiParam.sessionName_ = GetWindowName(node);
     if (ancestorInfo.isAncestorRecent) {
@@ -317,7 +317,7 @@ void WindowSceneLayoutManager::RemoveAbnormalId()
 {
     for (auto it = abnormalNodeDfxSet_.begin(); it != abnormalNodeDfxSet_.end();) {
         if (windowSceneOnTreeDfxSet_.find(*it) == windowSceneOnTreeDfxSet_.end()) {
-            TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "remove: %{public}" PRIu64, *it);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "remove: %{public}" PRIu64, *it);
             it = abnormalNodeDfxSet_.erase(it);
         } else {
             ++it;
@@ -562,7 +562,7 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
     if (!nodeGeometry) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE,
             "reason:%{public}s globalGeometry name:%{public}s lrsId:%{public}" PRIu64 " %{public}d"
-            "parentRSId:%{public}" PRIu64 " frameNodeId:%{public}d global geFnoMetry is null",
+            "parentRSId:%{public}" PRIu64 " frameNodeId:%{public}d global geoMetry is null",
             reason.c_str(), GetWindowName(node).c_str(), GetRSNodeId(node), node->GetId(),
             GetRSNodeId(parentNode), parentId);
         return;
@@ -570,8 +570,8 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
     auto nodeLocalGeometry = rsNode->GetLocalGeometry();
     if (!nodeLocalGeometry) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE,
-            "reason:%{public}s localGeometry name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64
-            " localGeo is null", reason.c_str(), GetWindowName(node).c_str(),
+            "reason:%{public}s localGeometry name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 " "
+            "localGeo is null", reason.c_str(), GetWindowName(node).c_str(),
             GetRSNodeId(node), GetRSNodeId(parentNode));
         return;
     }
@@ -595,8 +595,8 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
     float globalPosX = rsNode->GetGlobalPositionX();
     float globalPosY = rsNode->GetGlobalPositionY();
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE,
-        "DumpNodeInfo reason:%{public}s name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 ""
-        " frameNodeId:%{public}d [Rect:%{public}s lTransX:%{public}f lTransY:%{public}f absLocalRect:%{public}s, "
+        "DumpNodeInfo reason:%{public}s name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 " "
+        "frameNodeId:%{public}d [Rect:%{public}s lTransX:%{public}f lTransY:%{public}f absLocalRect:%{public}s, "
         "gRect:%{public}s gTransX:%{public}f gTransY:%{public}f globalPosX:%{public}f, globalPosY:%{public}f, "
         "absGlobalRect:%{public}s lScaleX:%{public}f lScaleY:%{public}f gScaleX:%{public}f gScaleY:%{public}f]",
         GetWindowName(node).c_str(), reason.c_str(), GetRSNodeId(node), GetRSNodeId(parentNode), parentId,
