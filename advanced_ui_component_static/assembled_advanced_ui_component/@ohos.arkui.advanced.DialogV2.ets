@@ -1880,7 +1880,7 @@ import {
   @ComponentV2
   export struct PopoverDialogV2 {
     @Require @Param
-    visible: boolean | undefined = false;
+    visible: boolean = false;
     @Event
     $visible?: PopoverDialogV2OnVisibleChange;
     @Require @Param

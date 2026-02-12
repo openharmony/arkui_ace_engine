@@ -323,12 +323,12 @@ export struct GridObjectSortComponent {
   }
 
   // translate option imageSize to symbol fontSize
-  getSymbolFontSizeFrom(imageSize?: Int | Resource | undefined): string | Resource {
+  getSymbolFontSizeFrom(imageSize?: int | Resource | undefined): string | Resource {
     if (imageSize === undefined) {
       return SYMBOL_DEFAULT;
     }
-    if (typeof imageSize === 'number') {
-      return `${imageSize as Int}vp`;
+    if (typeof imageSize === 'int') {
+      return `${imageSize as int}vp`;
     }
     return imageSize as Resource;
   }
