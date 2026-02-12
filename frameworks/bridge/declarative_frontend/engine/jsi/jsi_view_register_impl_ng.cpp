@@ -142,6 +142,9 @@
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
+#ifdef QRCODEGEN_SUPPORT
+#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #endif
 
 #ifdef VIDEO_SUPPORTED
@@ -509,10 +512,16 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
+#ifdef QRCODEGEN_SUPPORT
+    JSBindLibs("arkui.qrcode", "QRCode");
+#endif
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
+#ifdef QRCODEGEN_SUPPORT
+    JSQRCode::JSBind(globalObj);
+#endif
     JSRelativeContainer::JSBind(globalObj);
     JSPatternLockControllerBinding::JSBind(globalObj);
 #endif

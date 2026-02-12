@@ -108,6 +108,9 @@
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
+#ifdef QRCODEGEN_SUPPORT
+#include "bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -474,6 +477,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
+#ifdef QRCODEGEN_SUPPORT
+    { "QRCode", JSQRCode::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Swiper", JSSwiper::JSBind },
@@ -609,6 +615,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
+#ifdef QRCODEGEN_SUPPORT
+    { "QRCode", JSQRCode::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },

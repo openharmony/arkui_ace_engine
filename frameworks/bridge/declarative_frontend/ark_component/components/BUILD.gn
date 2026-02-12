@@ -57,14 +57,10 @@ arkui_modules = [
   "hyperlink",
 ]
 
-if (qrcodegen_support) {
-    arkui_modules += [ "qrcode" ]
-}
-
-if (!ace_engine_feature_wearable) {
-  arkui_modules += [
-    "folderstack",
-  ]
+if (!ace_engine_feature_wearable) { 
+  arkui_modules += [ 
+    "folderstack", 
+  ] 
 }
 
 module_targets = []

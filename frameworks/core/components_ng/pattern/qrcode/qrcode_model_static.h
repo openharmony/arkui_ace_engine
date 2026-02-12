@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_FORCE_EXPORT QRCodeModelStatic {
+class ACE_EXPORT QRCodeModelStatic {
 public:
     static void SetQRCodeColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetQRBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);

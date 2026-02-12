@@ -2084,9 +2084,7 @@ const __creatorMap__ = new Map([
         }],
     ['QRCode', (context) => {
             return new TypedFrameNode(context, 'QRCode', (node, type) => {
-                getUINativeModule().loadNativeModule('QRCode');
- 	            let module = globalThis.requireNapi('arkui.components.arkqrcode');
- 	            return module.createComponent(node, type);
+                return new ArkQRCodeComponent(node, type);
             });
         }],
     ['Badge', (context) => {
