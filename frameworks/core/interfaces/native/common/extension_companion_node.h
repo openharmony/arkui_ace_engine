@@ -60,10 +60,21 @@ public:
         return context_;
     }
 
+    void SetContentNode(const RefPtr<FrameNode>& node)
+    {
+        contentNode_ = node;
+    }
+
+    const RefPtr<FrameNode>& GetContentNode() const
+    {
+        return contentNode_;
+    }
+
 private:
     Ark_UInt32 flags_ = 0;
     Ark_Int32 alignment_ = 0;
     Ark_VMContext context_ = nullptr;
+    RefPtr<FrameNode> contentNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_EXTENSION_COMPANION_NODE_H

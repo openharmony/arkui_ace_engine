@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_static.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
@@ -172,8 +173,16 @@ void ContentModifierRatingImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_F64_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
             boxNode->AddChild(uiNode);
             boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);

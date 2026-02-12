@@ -94,6 +94,8 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
     accessor_->contentModifierCheckBox(nodePtr, &obj, &builder);
 
     FireBuilder(pattern.GetRawPtr());
+    auto builtNode1 = checkBoxNode->GetChildAtIndex(0);
+    EXPECT_NE(builtNode1, nullptr);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
     EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
@@ -103,6 +105,11 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
     EXPECT_THAT(checkEvent->selected, Optional(TEST_DEFAULT_SELECTED));
     EXPECT_NE(checkEvent->trigger.resource.resourceId, 0);
     EXPECT_NE(checkEvent->trigger.call, nullptr);
+
+    // Content modifier node should not change after rebuild
+    FireBuilder(pattern.GetRawPtr());
+    auto builtNode2 = checkBoxNode->GetChildAtIndex(0);
+    EXPECT_NE(AceType::RawPtr(builtNode1), AceType::RawPtr(builtNode2));
 }
 
 }

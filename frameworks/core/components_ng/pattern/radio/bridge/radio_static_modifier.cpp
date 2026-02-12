@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_static.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -161,12 +162,20 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
             RadioModelNG::SetChangeValue(frameNode, change);
         });
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto radioNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync([radioNode](const RefPtr<UINode>& uiNode) mutable {
-            radioNode->AddChild(uiNode);
-            radioNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
+        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
+            boxNode->AddChild(uiNode);
+            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);
-        return radioNode;
+        return boxNode;
     };
     RadioModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
 }
