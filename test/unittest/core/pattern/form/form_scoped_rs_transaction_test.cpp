@@ -31,6 +31,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp() override;
+    void TearDown() override;
 
 private:
     static bool multiInstanceEnabledBackup_;

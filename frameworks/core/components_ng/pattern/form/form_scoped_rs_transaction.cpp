@@ -51,11 +51,11 @@ void FormScopedRSTransaction::OpenSyncTransaction(int32_t scopeId)
             return;
         }
         std::shared_ptr<Rosen::RSUIDirector> rsUIDirector = pipeline->GetRSUIDirector();
-        CHECK_NULL_VOID(rsUIDirector, nullptr);
+        CHECK_NULL_VOID(rsUIDirector);
         auto rsUIContext = rsUIDirector->GetRSUIContext();
-        CHECK_NULL_VOID(rsUIContext, nullptr);
+        CHECK_NULL_VOID(rsUIContext);
         auto transactionHandler = rsUIContext->GetSyncTransactionHandler();
-        CHECK_NULL_VOID(transactionHandler, nullptr);
+        CHECK_NULL_VOID(transactionHandler);
 
         if (!transactionHandler->GetRSTransaction()) {
             transactionHandler->OpenSyncTransaction();
