@@ -1277,7 +1277,7 @@ abstract class ViewPU extends PUV2ViewBase
   public reuseOrCreateNewComponent(params: { componentClass: any, getParams: () => Object,
     getReuseId?: () => string, extraInfo?: ExtraInfo }): void {
       // ViewPU should not have a ReusableV2 Component, throw error!
-      const error = `@Component cannot have a child @ReusableV2 component !`;
+      const error = `@Component cannot have a child @ReusableV2 component.`;
       stateMgmtConsole.applicationError(error);
       throw new BusinessError(USE_REUSABLE_V2_IN_COMPONENT, error);
   }
