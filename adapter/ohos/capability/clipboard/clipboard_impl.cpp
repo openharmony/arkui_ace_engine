@@ -623,9 +623,9 @@ void ClipboardImpl::GetSpanStringData(
 {
     CHECK_NULL_VOID(callback);
     auto callbackWith4Args = [callback](std::vector<std::vector<uint8_t>>& arrs, const std::string& text,
-        bool& isMulitiTypeRecord, bool& isFromAutoFill) {
+        bool& isMultiTypeRecord, bool& isFromAutoFill) {
         (void)isFromAutoFill;
-        callback(arrs, text, isMulitiTypeRecord);
+        callback(arrs, text, isMultiTypeRecord);
     };
     GetSpanStringData(callbackWith4Args, syncMode);
 }

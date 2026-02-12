@@ -1147,7 +1147,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, value[1]);
     return this;
   }
-  enableSelectedDataDetector(value) {
+  enableSelectedDataDetector(value): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextSelectDetectorEnableModifier.identity, TextSelectDetectorEnableModifier, value);
     return this;
   }
