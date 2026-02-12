@@ -73,7 +73,7 @@ import {
   CopyOptions,
   focusControl
 } from '@ohos.arkui.component';
-import { BusinessError } from '@ohos.base';
+import { BusinessError } from '@ohos.base'
 import { Watch, State, PropRef } from '@ohos.arkui.stateManagement';
 import { LengthMetrics } from '@ohos.arkui.node';
 import resourceManager from '@ohos.resourceManager';
