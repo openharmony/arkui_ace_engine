@@ -437,9 +437,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param index Zero-based index of the array element to be returned.
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+     * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: int): T | undefined {
+    public override at(index: int): T {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(index as Object | undefined | null));
