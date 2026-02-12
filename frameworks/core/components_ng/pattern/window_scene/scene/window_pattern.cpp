@@ -230,7 +230,7 @@ void WindowPattern::OnAttachToFrameNode()
         "prelaunch: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent(),
         session_->GetAppLockControl(), session_->IsPrelaunch());
-    
+
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
