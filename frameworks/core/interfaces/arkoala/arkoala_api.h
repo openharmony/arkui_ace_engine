@@ -7716,8 +7716,6 @@ struct ArkUIRadioModifier {
     void (*setBuilder) (void* indicator);
     void (*setOnRadioChange)(ArkUINodeHandle node, void* extraParam);
     void (*setRadioPaddingByJs)(const struct ArkUIPaddingType* oldPaddings, const struct ArkUIPaddingType* newPaddings);
-    void (*setRadioMarginByJs)(
-        const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse);
     void (*setCheckedBackgroundColorByJs)(ArkUI_Uint32 checkedBackgroundColor, ArkUI_Bool isSetByJS,
         ArkUI_Bool isUserSetCheckedBackgroundColor);
     void (*setUncheckedBorderColorByJs)(ArkUI_Uint32 uncheckedBorderColor,
@@ -7726,8 +7724,6 @@ struct ArkUIRadioModifier {
     void (*setIndicatorColorByJs)(ArkUI_Uint32 indicatorColor, ArkUI_Bool isSetByJS,
         ArkUI_Bool isUserSetIndicatorColor, ArkUI_Bool isByJSRadioTheme);
     void (*createWithColorResourceObjByJs)(void* resObj, const ArkUI_Int32 colorType);
-    void (*setRadioSizeByJs)(
-        ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth);
     ArkUINodeHandle (*createFrameNode)(ArkUI_Uint32 nodeId);
 };
 

@@ -1670,4 +1670,37 @@ HWTEST_F(RadioTestNg, RadioSetHoverEffect001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     EXPECT_TRUE(pattern->showHoverEffect_);
 }
+
+/**
+ * @tc.name: CreateRadio001
+ * @tc.desc: Test CreateRadio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, CreateRadio001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and check name, groupName
+     * @tc.expected: step1. name  equal NAME, groupName equal GROUP_NAME.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.CreateRadio(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto name = RadioModelNG::GetRadioValue(AceType::RawPtr(frameNode));
+    auto groupName = RadioModelNG::GetRadioGroup(AceType::RawPtr(frameNode));
+    EXPECT_EQ(name, NAME);
+    EXPECT_EQ(groupName, GROUP_NAME);
+
+    /**
+     * @tc.steps: step1. Init Radio node and check name, groupName
+     * @tc.expected: step1. name  equal "", groupName equal "".
+     */
+    radioModelNG.CreateRadio(std::nullopt, std::nullopt, std::nullopt);
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    name = RadioModelNG::GetRadioValue(AceType::RawPtr(frameNode));
+    groupName = RadioModelNG::GetRadioGroup(AceType::RawPtr(frameNode));
+    EXPECT_EQ(name, "");
+    EXPECT_EQ(groupName, "");
+}
 } // namespace OHOS::Ace::NG
