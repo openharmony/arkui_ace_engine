@@ -93,6 +93,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     hitTestRecordInfo_ = { isRealTouch, touchPoint.screenX, touchPoint.screenY, touchPoint.id, touchPoint.time,
         touchPoint.type };
+    if (touchHitTestInfos_.find(touchPoint.id) != touchHitTestInfos_.end()) {
+        touchHitTestInfos_.erase(touchPoint.id);
+    }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     NotifyHitTestFrameNodeListener(touchPoint);
@@ -2894,6 +2897,11 @@ void EventManager::AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode)
         nodeInfos.hitNodeInfos = { { frameNode->GetId(), frameNode->GetTag() } };
         touchHitTestInfos_[fingerId] = nodeInfos;
     } else {
+        touchHitTestInfos_[fingerId].pointerId = fingerId;
+        touchHitTestInfos_[fingerId].positionX = (*hitTestRecordInfo_).screenX;
+        touchHitTestInfos_[fingerId].positionY = (*hitTestRecordInfo_).screenY;
+        touchHitTestInfos_[fingerId].timeStamp = static_cast<uint64_t>(
+            (*hitTestRecordInfo_).timeStamp.time_since_epoch().count());
         NodeGeneralInfo nodeGeneralInfo = { frameNode->GetId(), frameNode->GetTag() };
         touchHitTestInfos_[fingerId].hitNodeInfos.emplace_back(nodeGeneralInfo);
     }
@@ -2984,6 +2992,7 @@ void EventManager::UnregisterTouchpadInteractionListenerInner(int32_t frameNodeI
 
 void EventManager::NotifyTouchpadInteraction()
 {
+    NG::PointF point(lastMouseEvent_.x, lastMouseEvent_.y);
     auto iter = touchpadInteractionListeners_.begin();
     while (iter != touchpadInteractionListeners_.end()) {
         if (!iter->second.frameNode.Upgrade()) {
@@ -2992,7 +3001,7 @@ void EventManager::NotifyTouchpadInteraction()
         }
 
         if (auto& callback = iter->second.callback) {
-            callback();
+            callback(point);
             ++iter;
         } else {
             iter = touchpadInteractionListeners_.erase(iter);

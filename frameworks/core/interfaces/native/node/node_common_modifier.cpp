@@ -29,6 +29,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -8997,6 +8998,11 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
             marginUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
             margin.SetUnit(marginUnitEnum);
         }
+        if (marginUnitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+            auto context = frameNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER);
+        }
         style.margin = margin;
         ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_0], "focusBoxStyleMargin");
     }
@@ -9005,6 +9011,11 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
         if (widthUnitEnum >= OHOS::Ace::DimensionUnit::PX && widthUnitEnum <= OHOS::Ace::DimensionUnit::CALC &&
             widthUnitEnum != OHOS::Ace::DimensionUnit::PERCENT) {
             strokeWidth.SetUnit(widthUnitEnum);
+        }
+        if (widthUnitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+            auto context = frameNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER);
         }
         style.strokeWidth = strokeWidth;
         ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_1], "focusBoxStyleWidth");
