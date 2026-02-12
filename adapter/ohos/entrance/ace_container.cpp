@@ -2891,24 +2891,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         fontManager->SetStartAbilityOnJumpBrowserHandler(startAbilityOnJumpBrowserHandler);
     }
 
-    auto&& openLinkOnMapSearchHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
-        auto container = weak.Upgrade();
-        CHECK_NULL_VOID(container);
-        ContainerScope scope(instanceId);
-        auto context = container->GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakPtr<AceContainer>(container), address]() {
-                auto container = weak.Upgrade();
-                CHECK_NULL_VOID(container);
-                container->OnOpenLinkOnMapSearch(address);
-            },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleOpenLinkOnMapSearch");
-    };
-    if (fontManager) {
-        fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
-    }
-
     auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](
                                         const std::map<std::string, std::string>& params) {
         auto container = weak.Upgrade();

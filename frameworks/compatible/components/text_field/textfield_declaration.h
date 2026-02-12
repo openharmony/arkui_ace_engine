@@ -29,6 +29,7 @@
 #include "compatible/components/text_field/text_field_type.h"
 
 namespace OHOS::Ace {
+
 struct TextFieldAttribute : Attribute {
     bool isValueUpdated = false;
     std::string value;
