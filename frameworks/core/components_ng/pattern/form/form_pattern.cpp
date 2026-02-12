@@ -1705,7 +1705,6 @@ void FormPattern::InitFormManagerDelegate()
     InitFormRenderDiedCallback();
     const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback =
         [this](bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
-            ACE_SCOPED_TRACE("SizeChangeByRotateCallback");
             FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
         };
     context->SetSizeChangeByRotateCallback(callback);
