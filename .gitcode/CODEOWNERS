@@ -3773,6 +3773,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interopExtendableComponent.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkStructBase.ets
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/enums.ets @arkui_statemgmt
 
 [RenderControl ArkTS1.2]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/if.ets @arkuieco3
