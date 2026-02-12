@@ -465,11 +465,13 @@ void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
     std::list<RefPtr<NG::FrameNode>> result;
     pageNode->FindTopNavDestination(result);
-    for (auto frameNode : result) {
-        if (frameNode) {
-            TravelFindPixelMap(frameNode);
-        } else {
-            TravelFindPixelMap(pageNode);
+    if (result.empty()) {
+        TravelFindPixelMap(pageNode);
+    } else {
+        for (auto frameNode : result) {
+            if (frameNode) {
+                TravelFindPixelMap(frameNode);
+            }
         }
     }
     
