@@ -936,7 +936,7 @@ ArkUINativeModuleValue TextBridge::SetContent(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-
+ 
     Framework::JSRef<Framework::JSVal> args = info[1];
     if (args->IsObject() && Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>()) {
         auto* spanString = Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>();
@@ -1259,7 +1259,7 @@ ArkUINativeModuleValue TextBridge::SetEllipsisMode(ArkUIRuntimeCallInfo* runtime
     GetArkUINodeModifiers()->getTextModifier()->setEllipsisMode(nativeNode, ellipsisMode);
     return panda::JSValueRef::Undefined(vm);
 }
-
+ 
 ArkUINativeModuleValue TextBridge::ResetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

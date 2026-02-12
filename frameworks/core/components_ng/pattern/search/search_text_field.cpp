@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float MAX_FONT_SCALE = 2.0f;
-} // namespace
+}  // namespace
 
 RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 {
