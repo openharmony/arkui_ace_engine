@@ -244,7 +244,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
                 const node = this.getPeer().parent! as PeerNode
                 const preNativePtr = this.getPeer().peer.ptr
                 node.peer.removeChild(this.getPeer().peer.ptr)
-                ArkUINativeModule._DisposeNode(preNativePtr)
                 
                 if (options.type == ToggleType.SWITCH) {
                     const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
@@ -259,6 +258,7 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
                     throw new Error("Invalid Toggle Type")
                     return this
                 }
+                ArkUINativeModule._DisposeNode(preNativePtr)
 
                 if (sibling === undefined) {
                     // Add to the end (common case!).

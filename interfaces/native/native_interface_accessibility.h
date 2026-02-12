@@ -1153,6 +1153,18 @@ int32_t OH_ArkUI_FindAccessibilityActionArgumentByKey(
  */
 int32_t OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(
     ArkUI_NodeHandle* node, ArkUI_AccessibilityProvider** provider);
+
+/**
+ * @brief Sets the component identifier for an <b>ArkUI_AccessibilityElementInfo</b> object.
+ *
+ * @param elementInfo Indicates the pointer to an <b>ArkUI_AccessibilityElementInfo</b> object.
+ * @param identifier Indicates the component identifier. A string up to 1024 bytes.
+ * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+ *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ * @since 24
+ */
+int32_t OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(
+    ArkUI_AccessibilityElementInfo *elementInfo, const char *identifier);
 #ifdef __cplusplus
 };
 #endif

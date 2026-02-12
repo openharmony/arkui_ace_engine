@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -10797,5 +10798,39 @@ RenderStrategy ViewAbstract::GetRenderStrategy(FrameNode* frameNode)
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, RenderStrategy::FAST);
     return target->GetRenderStrategyValue(RenderStrategy::FAST);
+}
+
+void ViewAbstract::SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnNeedSoftKeyboard(std::move(onNeedSoftkeyboardCallback));
+}
+
+void ViewAbstract::ResetOnNeedSoftkeyboard()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetOnNeedSoftKeyboard();
+}
+
+void ViewAbstract::SetOnNeedSoftkeyboard(FrameNode* frameNode, OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnNeedSoftKeyboard(std::move(onNeedSoftkeyboardCallback));
+}
+
+void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetOnNeedSoftKeyboard();
 }
 } // namespace OHOS::Ace::NG

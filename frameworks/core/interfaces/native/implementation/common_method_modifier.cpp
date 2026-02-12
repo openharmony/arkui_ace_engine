@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -2394,6 +2395,10 @@ void SetResponseRegionImpl(Ark_NativePointer node,
             pattern->SetIsUserSetResponseRegion(true);
         } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
             auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<SwitchPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->SetIsUserSetResponseRegion(true);
         }
@@ -5350,6 +5355,22 @@ void SetCustomPropertyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     LOGE("CommonMethodModifier::CustomPropertyImpl is not implemented");
 }
+void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
+                               const Opt_OnNeedSoftkeyboardCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() -> bool {
+        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>()
+            .value_or(false);
+    };
+    ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onEvent));
+}
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
                            const Opt_Array_SafeAreaEdge* edges)
@@ -6854,6 +6875,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSystemMaterialImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+        CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

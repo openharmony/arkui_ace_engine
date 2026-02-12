@@ -113,6 +113,9 @@ public:
 
     bool NeedSoftKeyboard() const override
     {
+        if (onNeedSoftkeyboardCallback_ && !Pattern::NeedSoftKeyboard()) {
+            return false;
+        }
         return (nativeXComponentImpl_ ? nativeXComponentImpl_->IsNeedSoftKeyboard() : false) || isNeedSoftKeyboard_;
     }
 

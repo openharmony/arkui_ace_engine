@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,12 +79,12 @@ public:
     void SetRingProgressLeftPadding(const Dimension& ringProgressLeftPadding);
 
     Color CalculateHoverPressColor(const Color& color);
-    void StopAllLoopAnimation();
-    void SetInVisibleArea(bool value);
     void SetGradientColor(const NG::Gradient& gradient)
     {
         ringProgressColors_->Set(GradientArithmetic(gradient));
     }
+    void StopAllLoopAnimation();
+    void SetInVisibleArea(bool value);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -157,9 +157,9 @@ private:
     inline bool IsDynamicComponent()
     {
         auto container = Container::Current();
-        return container && container->IsDynamicRender();
+        return container && container->IsDynamicRender() &&
+               container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
-    uint32_t GetThemeScopeId() const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height

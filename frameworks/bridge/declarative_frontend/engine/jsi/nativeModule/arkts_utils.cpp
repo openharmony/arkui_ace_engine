@@ -4030,6 +4030,8 @@ template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<std::u16
 
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<Color>(
     const EcmaVM*, const Local<JSValueRef>&, Color&, RefPtr<ResourceObject>&);
+template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<CalcDimension>(
+    const EcmaVM*, const Local<JSValueRef>&, CalcDimension&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<Dimension>(
     const EcmaVM*, const Local<JSValueRef>&, Dimension&, RefPtr<ResourceObject>&);
 

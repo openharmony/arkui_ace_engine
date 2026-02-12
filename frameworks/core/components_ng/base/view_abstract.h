@@ -74,7 +74,7 @@ class UiMaterial;
 namespace OHOS::Ace::NG {
 struct AttractionEffect;
 using TransitionFinishCallback = std::function<void(bool)>;
-
+using OnNeedSoftkeyboardFunc = std::function<bool()>;
 struct ACE_FORCE_EXPORT OptionParam {
     std::string value;
     std::string icon;
@@ -1177,6 +1177,10 @@ public:
     static BorderWidthProperty GetDashGap(FrameNode* frameNode);
     static BorderWidthProperty GetDashWidth(FrameNode* frameNode);
     static RenderStrategy GetRenderStrategy(FrameNode* frameNode);
+    static void SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback);
+    static void ResetOnNeedSoftkeyboard();
+    static void SetOnNeedSoftkeyboard(FrameNode* frameNode, OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback);
+    static void ResetOnNeedSoftkeyboard(FrameNode* frameNode);
 
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,

@@ -1404,6 +1404,7 @@ enum ArkUIEventSubKind {
     ON_CHILD_TOUCH_TEST,
     ON_CUSTOM_OVERFLOW_SCROLL = 34,
     ON_STACK_OVERFLOW_SCROLL = 35,
+    ON_NEED_SOFTKEYBOARD = 36,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
@@ -6093,6 +6094,8 @@ struct ArkUICounterModifier {
     void (*resetCounterOnInc)(ArkUINodeHandle node);
     void (*setCounterOnDec)(ArkUINodeHandle node, void* callback);
     void (*resetCounterOnDec)(ArkUINodeHandle node);
+    void (*setControlWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setStateChange)(ArkUINodeHandle node, ArkUI_Bool state);
     ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 

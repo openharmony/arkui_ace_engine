@@ -1038,6 +1038,121 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboardWithNode002, TestSiz
 }
 
 /**
+ * @tc.name: SetCustomKeyboardWithNode003
+ * @tc.desc: test SetCustomKeyboardWithNode with customKeyboardNode_ && isCustomKeyboardAttached_ && !keyboardBuilder
+ * condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboardWithNode003, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto customKeyboardPtr = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
+    FrameNode* customKeyboard = Referenced::RawPtr(customKeyboardPtr);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboard, true);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isCustomKeyboardAttached_ = true;
+
+    EXPECT_TRUE(pattern->isCustomKeyboardAttached_);
+    EXPECT_NE(pattern->customKeyboardNode_, nullptr);
+
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
+    EXPECT_EQ(pattern->customKeyboardNode_, 0);
+}
+
+/**
+ * @tc.name: SetCustomKeyboardWithNode004
+ * @tc.desc: test SetCustomKeyboardWithNode covering all branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboardWithNode004, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto customKeyboardPtr = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
+    FrameNode* customKeyboard = Referenced::RawPtr(customKeyboardPtr);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboard, true);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->customKeyboardNode_, nullptr);
+
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
+    EXPECT_EQ(pattern->customKeyboardNode_, nullptr);
+}
+
+/**
+ * @tc.name: SetCustomKeyboardWithNode005
+ * @tc.desc: test SetCustomKeyboardWithNode with customKeyboardNode_ && !isCustomKeyboardAttached_ && !keyboardBuilder
+ * condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboardWithNode005, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto customKeyboardPtr = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
+    FrameNode* customKeyboard = Referenced::RawPtr(customKeyboardPtr);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboard, true);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_NE(pattern->customKeyboardNode_, nullptr);
+    pattern->isCustomKeyboardAttached_ = false;
+
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
+    EXPECT_EQ(pattern->customKeyboardNode_, nullptr);
+}
+
+/**
+ * @tc.name: SetCustomKeyboardWithNode006
+ * @tc.desc: test SetCustomKeyboardWithNode with customKeyboardNode_ && !isCustomKeyboardAttached_ && !keyboardBuilder
+ * condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboardWithNode006, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isEditing_ = true;
+
+    auto customKeyboardPtr = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
+    FrameNode* customKeyboard = Referenced::RawPtr(customKeyboardPtr);
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboard, true);
+
+    EXPECT_NE(pattern->customKeyboardNode_, nullptr);
+    pattern->isCustomKeyboardAttached_ = false;
+
+    RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, nullptr, false);
+    EXPECT_EQ(pattern->customKeyboardNode_, nullptr);
+}
+
+/**
  * @tc.name: SetEnterKeyType
  * @tc.desc: test SetEnterKeyType
  * @tc.type: FUNC

@@ -478,6 +478,11 @@ public:
         return embeddedSubMenuExpandTotalCount_;
     }
 
+    void SetEmbeddedSubMenuExpandTotalCount(int cnt)
+    {
+        embeddedSubMenuExpandTotalCount_ = cnt;
+    }
+
     bool HasEmbeddedSubMenu();
     void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
     void ClearAllSubMenu();

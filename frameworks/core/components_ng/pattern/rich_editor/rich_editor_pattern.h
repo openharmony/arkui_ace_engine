@@ -431,6 +431,9 @@ public:
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
+        if (onNeedSoftkeyboardCallback_) {
+            return Pattern::NeedSoftKeyboard();
+        }
         return true;
     }
 

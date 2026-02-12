@@ -1358,4 +1358,25 @@ HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill001, TestSize.Level0)
     auto flag = richEditorPattern->ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
     EXPECT_FALSE(flag);
 }
+
+/**
+ * @tc.name: ProcessAutoFill002
+ * @tc.desc: test ProcessAutoFill002
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill002, TestSize.Level0)
+{
+    auto mockContainer = AceType::MakeRefPtr<MockContainer>();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    auto savedContainer = Container::Current();
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto flag = richEditorPattern->ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
+    EXPECT_FALSE(flag);
+}
 }

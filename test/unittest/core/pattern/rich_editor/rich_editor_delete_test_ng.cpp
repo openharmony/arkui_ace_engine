@@ -934,6 +934,40 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteForwardOperation002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DeleteForwardOperation003
+ * @tc.desc: Test DeleteForwardOperation to cover the branch when textContent.length() != GetTextContentLength()
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteForwardOperation003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Hello ";
+    span1->rangeStart = 0;
+    span1->position = 6;
+    auto span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"World";
+    span2->rangeStart = 6;
+    span2->position = 15;
+
+    richEditorPattern->spans_.clear();
+    richEditorPattern->spans_.push_back(span1);
+    richEditorPattern->spans_.push_back(span2);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 15);
+
+    std::u16string textContent;
+    richEditorPattern->GetContentBySpans(textContent);
+    EXPECT_EQ(textContent.length(), 11);
+    richEditorPattern->caretPosition_ = 0;
+    int32_t length = 1;
+    auto ret = richEditorPattern->DeleteForwardOperation(length);
+    EXPECT_GE(ret.length(), 0);
+}
+
+/**
  * @tc.name: DeleteRange001
  * @tc.desc: test DeleteRange
  * @tc.type: FUNC

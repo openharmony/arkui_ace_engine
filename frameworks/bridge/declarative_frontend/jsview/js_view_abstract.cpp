@@ -9929,6 +9929,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("getPixelRoundMode", &JSViewAbstract::GetPixelRoundMode);
 
     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
+    JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -12648,6 +12649,30 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
     };
 
     ViewAbstractModel::GetInstance()->SetOnFocus(std::move(onFocus));
+}
+
+void JSViewAbstract::JSOnNeedSoftkeyboard(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (!arg->IsFunction()) {
+        ViewAbstractModel::GetInstance()->ResetOnNeedSoftkeyboard();
+        return;
+    }
+    auto jsOnNeedSoftkeyboard = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(arg));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onNeedSoftkeyboard = [execCtx = args.GetExecutionContext(),
+        func = std::move(jsOnNeedSoftkeyboard), node = frameNode]() -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onNeedSoftkeyboard");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteJS();
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return false;
+    };
+
+    ViewAbstractModel::GetInstance()->SetOnNeedSoftkeyboard(std::move(onNeedSoftkeyboard));
 }
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)

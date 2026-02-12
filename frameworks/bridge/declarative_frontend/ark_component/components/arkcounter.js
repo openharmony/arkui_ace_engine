@@ -183,13 +183,9 @@ function loadComponent() {
   }
 }
 
-class JSCounter extends JSViewAbstract {
-    static create(params) {
-        if (params !== undefined) {
-            getUINativeModule().counter.create();
-        } else {
-            getUINativeModule().counter.create();
-        }
+class JSCounter extends JSContainerBase {
+    static create() {
+        getUINativeModule().counter.create();
     }
 
     static onInc(event) {
@@ -223,6 +219,14 @@ class JSCounter extends JSViewAbstract {
         if (value !== undefined && value !== null) {
             getUINativeModule().counter.setCounterSize(true, value.width, value.height);
         }
+    }
+
+    static controlWidth(value) {
+        getUINativeModule().counter.controlWidth(true, value);
+    }
+
+    static state(value) {
+        getUINativeModule().counter.state(true, value);
     }
 
     static attributeModifier(modifier) {

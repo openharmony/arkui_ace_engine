@@ -598,6 +598,7 @@ public:
     static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsDispatchKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
+    static void JSOnNeedSoftkeyboard(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
     static void JsFocusOnTouch(const JSCallbackInfo& info);

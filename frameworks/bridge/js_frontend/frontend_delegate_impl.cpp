@@ -1972,16 +1972,31 @@ void FrontendDelegateImpl::CancelAnimationFrame(const std::string& callbackId)
     }
 }
 
+bool FrontendDelegateImpl::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    bool ret = false;
+    if (taskExecutor_) {
+        taskExecutor_->PostSyncTask(
+            [callbackId, call = onCrownEventCallback_, weak = AceType::WeakClaim(this), &ret, args] {
+                auto delegate = weak.Upgrade();
+                if (delegate && call) {
+                    ret = call(callbackId, args);
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIMonitorForCrownEventsCallback");
+    }
+    return ret;
+}
+
 void FrontendDelegateImpl::SetMonitorForCrownEvents(const std::string& callbackId)
 {
-    auto crownEventTask =
-        ([callbackId, call = onCrownEventCallback_, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
-            auto delegate = weak.Upgrade();
-            if (delegate && call) {
-                return call(callbackId, args);
-            }
-            return false;
-        });
+    auto crownEventTask = ([callbackId, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            return delegate->OnMonitorForCrownEvents(callbackId, args);
+        }
+        return false;
+    });
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->RequestCrownEventMonitor(crownEventTask);

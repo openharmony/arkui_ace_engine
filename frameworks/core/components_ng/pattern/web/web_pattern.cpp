@@ -1378,6 +1378,9 @@ void WebPattern::OnContextMenuHide()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
+    if (onNeedSoftkeyboardCallback_ && !Pattern::NeedSoftKeyboard()) {
+        return false;
+    }
     if (delegate_) {
         return delegate_->NeedSoftKeyboard();
     }

@@ -637,8 +637,8 @@ export function canBeObserved(obj: Object): ObservedResult {
         return extractMixusageCaseForV1Result(objectInfo, decoratorInfoArray, observedType, observed);
     }
 
-    if (observedType === ObservedType.TRACK || observedType === ObservedType.INTERFACE_MAKEOBSERVED || observedType === ObservedType.TRACE
-        || observedType === ObservedType.BUILTIN_V2 || observedType === ObservedType.BUILTIN_MAKEOBSERVED) {
+    if (observedType === ObservedType.TRACK || observedType === ObservedType.INTERFACE_MAKEOBSERVED || observedType === ObservedType.TRACE ||
+            observedType === ObservedType.BUILTIN_V2 || observedType === ObservedType.BUILTIN_MAKEOBSERVED) {
         return extractMetaInfos(objectInfo, observedType, observed);
     }
 
@@ -691,68 +691,121 @@ const ObservedTypeToReasonNOUI: Map<ObservedType, ObservedReason> = new Map<Obse
 
 function extractMixusageCaseForV1Result(objectInfo: ObservedObjectInfo,
     decoratorInfoArray: Array<DecoratorInfo>, observedType: ObservedType, obj: Object): ObservedResult {
-        const elementInfos = new Map<int, ElementInfo>();
-        let elementsCount: int = 0;
-        const mutableStateMetas = objectInfo.getMutableStateMetas();
-        const metaInfos: Array<DecoratorInfo> = [];
-        if (mutableStateMetas && mutableStateMetas.size > 0) {
-            mutableStateMetas.forEach((meta: MutableStateMeta) => {
-                const info = StateMgmtDFX.extractDecoratorInfoFromMutableStateMeta(meta);
-                if (info) {
-                    info.dependentInfo.forEach((element) => {
-                        elementInfos.set(element.elementId, element);
-                    });
-                    metaInfos.push(info);
-                }
+    const infoArrays: ElementInfoAndMetaArray = collectElementInfoAndMetaArray(objectInfo);
+    const elementInfos = infoArrays.elementInfos;
+    const metaInfos = infoArrays.metaInfos;
+    const clearArrays = filterAndClearDecoratorInfo(decoratorInfoArray, elementInfos);
+
+    if (elementInfos.size > 0) {
+        processMetaInfosWhenElementsExist(metaInfos, elementInfos, observedType, obj, clearArrays);
+    }
+
+    const elementsCount = calculateElementsCount(clearArrays);
+
+    return {
+        isObserved: true,
+        reason: elementsCount > 0 ? ObservedTypeToReasonUI.get(observedType)! : ObservedTypeToReasonNOUI.get(observedType)!,
+        decoratorInfo: clearArrays
+    };
+}
+
+interface ElementInfoAndMetaArray {
+    elementInfos: Map<int, ElementInfo>;
+    metaInfos: Array<DecoratorInfo>;
+}
+
+function collectElementInfoAndMetaArray(objectInfo: ObservedObjectInfo): ElementInfoAndMetaArray {
+    const elementInfos = new Map<int, ElementInfo>();
+    const metaInfos: Array<DecoratorInfo> = [];
+    const mutableStateMetas = objectInfo.getMutableStateMetas();
+
+    if (!mutableStateMetas || mutableStateMetas.size === 0) {
+        return { elementInfos, metaInfos };
+    }
+
+    mutableStateMetas.forEach((meta: MutableStateMeta) => {
+        const info = StateMgmtDFX.extractDecoratorInfoFromMutableStateMeta(meta);
+        if (info) {
+            info.dependentInfo.forEach((element) => {
+                elementInfos.set(element.elementId, element);
             });
+            metaInfos.push(info);
         }
-        const clearArrays: Array<DecoratorInfo> = [];
-        decoratorInfoArray.forEach((info) => {
-            if (!V2Decorators.has(info.decoratorName)) {
-                info.dependentInfo.forEach((element) => {
-                    elementInfos.delete(element.elementId);
-                });
-                clearArrays.push(info);
-            }
-        });
-        if (elementInfos.size > 0) {
-            const elementArrs: Array<ElementInfo> = [];
-            elementInfos.forEach((element) => {
-                elementArrs.push(element);
+    });
+
+    return { elementInfos: elementInfos, metaInfos: metaInfos };
+}
+
+function filterAndClearDecoratorInfo(decoratorInfoArray: Array<DecoratorInfo>, elementInfos: Map<int, ElementInfo>): Array<DecoratorInfo> {
+    const clearArrays: Array<DecoratorInfo> = [];
+    decoratorInfoArray.forEach((info) => {
+        if (!V2Decorators.has(info.decoratorName)) {
+            info.dependentInfo.forEach((element) => {
+                elementInfos.delete(element.elementId);
             });
-            if (metaInfos && (metaInfos.length === 1 || observedType === ObservedType.BUILTIN_V1)) {
-                metaInfos.forEach((meta) => {
-                    const related: Array<ElementInfo> = [];
-                    meta.dependentInfo.forEach((element) => {
-                        if (elementInfos.has(element.elementId)) {
-                            related.push(element);
-                        }
-                    });
-                    if (related.length === 0) {
-                        return;
-                    }
-                    meta.dependentInfo = related;
-                    meta.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
-                    if (meta.stateVariableName === '__metaBuiltInV1_WrappedDate') {
-                        meta.stateVariableName = 'Date Inner Property';
-                    } else {
-                        meta.stateVariableName = (observedType === ObservedType.BUILTIN_V1 )
-                            ? meta.stateVariableName : V1CaseMixusageStateVariableName.get(observedType)!;
-                    }
-                    meta.owningComponentId = -1;
-                    meta.owningComponentOrClassName = determineClassName(observedType, obj);
-                    clearArrays.push(meta)
-                });
-            }
+            clearArrays.push(info);
         }
-        clearArrays.forEach((meta) => {
-            elementsCount += meta.dependentInfo.length;
-        });
-        return {
-            isObserved: true,
-            reason: elementsCount > 0 ? ObservedTypeToReasonUI.get(observedType)! : ObservedTypeToReasonNOUI.get(observedType)!,
-            decoratorInfo: clearArrays
-        };
+    });
+    return clearArrays;
+}
+
+function processMetaInfosWhenElementsExist(
+    metaInfos: Array<DecoratorInfo>,
+    elementInfos: Map<int, ElementInfo>,
+    observedType: ObservedType,
+    obj: Object,
+    clearArrays: Array<DecoratorInfo>
+): void {
+    if (!metaInfos || metaInfos.length === 0) {
+        return;
+    }
+
+    if (metaInfos.length !== 1 && observedType !== ObservedType.BUILTIN_V1) {
+        return;
+    }
+
+    metaInfos.forEach((meta) => {
+        const related = filterRelatedElements(meta.dependentInfo, elementInfos);
+        if (related.length === 0) {
+            return;
+        }
+
+        updateMetaInfo(meta, related, observedType, obj);
+        clearArrays.push(meta);
+    });
+}
+
+function filterRelatedElements(dependentInfo: Array<ElementInfo>, elementInfos: Map<int, ElementInfo>): Array<ElementInfo> {
+    const related: Array<ElementInfo> = [];
+    dependentInfo.forEach((element) => {
+        if (elementInfos.has(element.elementId)) {
+            related.push(element);
+        }
+    });
+    return related;
+}
+
+function updateMetaInfo(meta: DecoratorInfo, related: Array<ElementInfo>, observedType: ObservedType, obj: Object): void {
+    meta.dependentInfo = related;
+    meta.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
+
+    if (meta.stateVariableName === '__metaBuiltInV1_WrappedDate') {
+        meta.stateVariableName = 'Date Inner Property';
+    } else {
+        meta.stateVariableName = (observedType === ObservedType.BUILTIN_V1)
+            ? meta.stateVariableName : V1CaseMixusageStateVariableName.get(observedType)!;
+    }
+
+    meta.owningComponentId = -1;
+    meta.owningComponentOrClassName = determineClassName(observedType, obj);
+}
+
+function calculateElementsCount(decoratorInfos: Array<DecoratorInfo>): int {
+    let elementsCount: int = 0;
+    decoratorInfos.forEach((meta) => {
+        elementsCount += meta.dependentInfo.length;
+    });
+    return elementsCount;
 }
 
 function determineVariableNameByType(observedType: ObservedType, info: string): string {

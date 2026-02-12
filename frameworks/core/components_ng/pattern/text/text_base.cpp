@@ -287,14 +287,15 @@ LayoutCalPolicy TextBase::GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool 
     return layoutPolicyProperty->heightLayoutPolicy_.value();
 }
 
-VectorF TextBase::GetHostScale(RefPtr<FrameNode> host) const
+VectorF TextBase::GetHostScale(const RefPtr<FrameNode>& host) const
 {
     auto unitScale = VectorF(1, 1);
     CHECK_NULL_RETURN(host, unitScale);
     auto scaleX = 1.0f;
     auto scaleY = 1.0f;
-    while (host && host->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
-        auto renderContext = host->GetRenderContext();
+    auto parent = host;
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, unitScale);
         auto scale = renderContext->GetTransformScaleValue(unitScale);
         scaleX *= std::abs(scale.x);
@@ -306,7 +307,7 @@ VectorF TextBase::GetHostScale(RefPtr<FrameNode> host) const
             scaleX *= std::abs(transform.scale[0]);
             scaleY *= std::abs(transform.scale[1]);
         }
-        host = host->GetAncestorNodeOfFrame(true);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return VectorF(scaleX, scaleY);
 }

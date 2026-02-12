@@ -743,4 +743,94 @@ HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest009, TestSize
     }
     OH_ArkUI_DestoryAccessibilityElementInfo(elementInfo);
 }
+
+/**
+ * @tc.name: accessibilityTest010
+ * @tc.desc: OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest010, TestSize.Level1)
+{
+    // test OH_ArkUI_CreateAccessibilityElementInfo
+    ArkUI_AccessibilityElementInfo* elementInfo = OH_ArkUI_CreateAccessibilityElementInfo();
+    ASSERT_NE(elementInfo, nullptr);
+    const char* componentIdentifier = "ComponentIdentifier";
+    int32_t ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(elementInfo, componentIdentifier);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL);
+    EXPECT_EQ(elementInfo->GetComponentIdentifier(), componentIdentifier);
+    OH_ArkUI_DestoryAccessibilityElementInfo(elementInfo);
+}
+
+/**
+ * @tc.name: accessibilityTest011
+ * @tc.desc: OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier nullptr parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest011, TestSize.Level1)
+{
+    ArkUI_AccessibilityElementInfo* elementInfo = OH_ArkUI_CreateAccessibilityElementInfo();
+    const char* testIdentifier = "test";
+
+    // elementInfo is nullptr
+    int32_t ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(nullptr, testIdentifier);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+
+    // identifier is nullptr
+    ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(elementInfo, nullptr);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+
+    // both are nullptr
+    ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+
+    OH_ArkUI_DestoryAccessibilityElementInfo(elementInfo);
+}
+
+/**
+ * @tc.name: accessibilityTest012
+ * @tc.desc: OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier length limit (1024 chars)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest012, TestSize.Level1)
+{
+    ArkUI_AccessibilityElementInfo* elementInfo = OH_ArkUI_CreateAccessibilityElementInfo();
+    ASSERT_NE(elementInfo, nullptr);
+
+    // Test with exactly 1024 characters (MAX_IDENTIFIER_LEN)
+    std::string identifier1024(1024, 'A');
+    int32_t ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(
+        elementInfo, identifier1024.c_str());
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL);
+    EXPECT_EQ(elementInfo->GetComponentIdentifier().length(), 1024);
+    EXPECT_EQ(elementInfo->GetComponentIdentifier(), identifier1024);
+
+    // Test with more than 1024 characters (should be truncated)
+    std::string identifier2000(2000, 'B');
+    ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(
+        elementInfo, identifier2000.c_str());
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL);
+    EXPECT_EQ(elementInfo->GetComponentIdentifier().length(), 1024);
+    EXPECT_EQ(elementInfo->GetComponentIdentifier(), std::string(1024, 'B'));
+
+    OH_ArkUI_DestoryAccessibilityElementInfo(elementInfo);
+}
+
+/**
+ * @tc.name: accessibilityTest013
+ * @tc.desc: OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeInterfaceAccessibilityTestNg, AccessibilityUtilsTest013, TestSize.Level1)
+{
+    ArkUI_AccessibilityElementInfo* elementInfo = OH_ArkUI_CreateAccessibilityElementInfo();
+    ASSERT_NE(elementInfo, nullptr);
+
+    const char* emptyIdentifier = "";
+    int32_t ret = OH_ArkUI_AccessibilityElementInfoSetComponentIdentifier(
+        elementInfo, emptyIdentifier);
+    EXPECT_EQ(ret, ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL);
+    EXPECT_EQ(elementInfo->GetComponentIdentifier(), "");
+
+    OH_ArkUI_DestoryAccessibilityElementInfo(elementInfo);
+}
 } // namespace OHOS::Ace::NG

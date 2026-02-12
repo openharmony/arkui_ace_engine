@@ -549,6 +549,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/typedNode/ArkWaterFlowNode.ets",
   "arkui-preprocessed/arkui/typedNode/ArkXComponentNode.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
 ]
 
 arkui_path_keys = [

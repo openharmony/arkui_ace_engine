@@ -5162,6 +5162,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnNeedSoftkeyboardAttribute(value: OnNeedSoftkeyboardCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnNeedSoftkeyboard(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (types !== undefined) {
@@ -10082,6 +10094,18 @@ export interface CommonMethod {
         }
         throw new Error("Unimplemented method accessibilityActionOptions")
     }
+    onNeedSoftkeyboard(value: OnNeedSoftkeyboardCallback | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onNeedSoftkeyboard(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onNeedSoftkeyboard' can only be set when creating a custom component")
+            }
+        }
+        throw new Error("Unimplemented method onNeedSoftkeyboard")
+    }
     customProperty(name: string, value: CustomProperty): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10854,6 +10878,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     systemMaterial_value?: uiMaterial.Material | undefined
     accessibilityStateDescription_value?: string | Resource | undefined
     accessibilityActionOptions_value?: AccessibilityActionOptions | undefined
+    onNeedSoftkeyboard_value?: OnNeedSoftkeyboardCallback | undefined
     width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
@@ -11368,6 +11393,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        return this
+    }
+    onNeedSoftkeyboard(value: OnNeedSoftkeyboardCallback | undefined): this {
         return this
     }
     customProperty(name: string, value: CustomProperty): this {
@@ -11924,6 +11952,7 @@ export interface Bindable<T = void> {
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<Resource>> | Bindable<Array<string>>;
 export type InputEventType = TouchEvent | MouseEvent | AxisEvent;
+export type OnNeedSoftkeyboardCallback = () => boolean;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         if (!this.peer) {
@@ -13338,6 +13367,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("accessibilityActionOptions")) {
             const value_casted = value as (AccessibilityActionOptions | undefined)
             this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onNeedSoftkeyboard(value: OnNeedSoftkeyboardCallback | undefined): this {
+        if (this.checkPriority("onNeedSoftkeyboard")) {
+            const value_casted = value as (OnNeedSoftkeyboardCallback | undefined)
+            this.getPeer()?.setOnNeedSoftkeyboardAttribute(value_casted)
             return this
         }
         return this

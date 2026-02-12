@@ -574,23 +574,15 @@ void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
         SetFontSize(uiNode, value.fontSize.value());
-    } else {
-        ResetFontSize(uiNode);
     }
     if (value.fontWeight.has_value()) {
         SetFontWeight(uiNode, value.fontWeight.value());
-    } else {
-        ResetFontWeight(uiNode);
     }
     if (!value.fontFamilies.empty()) {
         SetFontFamily(uiNode, value.fontFamilies);
-    } else {
-        ResetFontFamily(uiNode);
     }
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(uiNode, value.fontStyle.value());
-    } else {
-        ResetItalicFontStyle(uiNode);
     }
     if (value.variableFontWeight.has_value()) {
         SetVariableFontWeight(uiNode, value.variableFontWeight.value());

@@ -34,6 +34,8 @@ export interface IVariableOwner {
     __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
+    __addEnv__Internal(alias: string, v: Object): void;
+    __findEnv__Internal(alias: string): Object | undefined;
 }
 
 export interface IDecoratedVariable {
@@ -145,6 +147,12 @@ export interface ConsumeOptions<T> {
     defaultValue?: T
 }
 
+export interface EnvOptions<T> {
+    initValue?: T
+}
+
+export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
+
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeMutableStateMeta(observedObject: IObservedObject | undefined, propertyName: string): IMutableStateMeta;
@@ -246,6 +254,12 @@ export interface IStateMgmtFactory {
     ): ILocalStoragePropRefDecoratedVariable<T>;
     makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
     makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback, owningView?: IVariableOwner): IMonitorDecoratedVariable;
+    makeEnv<T>(
+        owningView: IVariableOwner,
+        envValue: string,
+        varName: string,
+        envOptions?: EnvOptions<T>
+    ): IEnvDecoratedVariable<T>;
 }
 
 export type WatchFuncType = (propertyName: string) => void;

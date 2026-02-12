@@ -35,8 +35,10 @@ build_component_ng("patternlock_pattern_ng") {
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/patternlock_model_impl.cpp",
-      "bridge/patternlock_static_modifier.cpp"
     ]
+    if (!ace_engine_feature_wearable) {
+        ark_sources += [ "bridge/patternlock_static_modifier.cpp" ]
+    }
   }
 }
 

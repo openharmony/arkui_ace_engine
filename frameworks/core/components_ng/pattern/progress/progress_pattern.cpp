@@ -997,9 +997,9 @@ void ProgressPattern::OnColorConfigurationUpdate()
     }
     const auto& type = pops->GetProgressType();
     if (!pops->GetBackgroundColorSetByUserValue(false)) {
-        Color colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
-                         : (type == ProgressType::RING)  ? theme->GetRingProgressParseFailedBgColor()
-                                                         : theme->GetTrackParseFailedBgColor();
+        Color colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
+                         : (type == ProgressType::RING)  ? theme->GetRingProgressBgColor()
+                                                         : theme->GetTrackBgColor();
         pops->UpdateBackgroundColor(colorVal);
     }
 }
@@ -1022,8 +1022,7 @@ void ProgressPattern::ProcessColorOnColorConfigurationUpdate()
         NG::Gradient gradient;
         NG::GradientColor beginSideColor;
         NG::GradientColor endSideColor;
-        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
-                                                   : theme->GetTrackParseFailedSelectedColor();
+        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor() : theme->GetTrackSelectedColor();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
             endColor = (type == ProgressType::RING || type == ProgressType::SCALE)
                            ? theme->GetRingProgressEndSideColor()

@@ -55,8 +55,6 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         progressFocusNode->SetFocusable(false);
     }
 
-    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
-    CHECK_NULL_VOID(theme);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
@@ -72,6 +70,8 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         CHECK_NULL_VOID(textHost);
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
         eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
         if (!frameNode->GetChildren().empty()) {
@@ -79,7 +79,6 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         }
         eventHub->SetHoverEffect(HoverEffectType::NONE);
     }
-
     auto pros = frameNode->GetPaintProperty<ProgressPaintProperty>();
     if (pros) {
         pros->ResetBackgroundColorSetByUser();
@@ -122,11 +121,6 @@ void ProgressModelNG::SetValue(double value)
 
 void ProgressModelNG::SetColor(const Color& value)
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedColor(true);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
 }
 
@@ -224,7 +218,7 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
     if (!value.has_value()) {
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
-        if (maxValue.has_value() && curValue.has_value()) {
+        if (maxValue.has_value() && curValue.has_value() && !NearZero(maxValue.value())) {
             int32_t curPercent = curValue.value() * 100 / maxValue.value();
             std::string number = std::to_string(curPercent) + "%";
             bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
@@ -482,7 +476,7 @@ void ProgressModelNG::SetText(FrameNode* frameNode, const std::optional<std::str
     if (!value.has_value()) {
         auto maxValue = progressPaintProperty->GetMaxValue();
         auto curValue = progressPaintProperty->GetValue();
-        if (maxValue.has_value() && curValue.has_value()) {
+        if (maxValue.has_value() && curValue.has_value() && !NearZero(maxValue.value())) {
             int32_t curPercent = curValue.value() * 100 / maxValue.value();
             std::string number = std::to_string(curPercent) + "%";
             bool isShowText = progressPaintProperty->GetEnableShowText().value_or(false);
@@ -627,7 +621,7 @@ void ProgressModelNG::ProgressInitialize(
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
-    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
+    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
     progressFocusNode->SetFocusable(type == ProgressType::CAPSULE);
@@ -731,7 +725,6 @@ void ProgressModelNG::SetModifierInitiatedBgColor(FrameNode* frameNode, bool val
 
 void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     std::string key = "progress.color";
     pattern->RemoveResObj(key);
@@ -741,24 +734,24 @@ void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<Resour
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
+        auto pops = frameNode->GetPaintProperty<ProgressPaintProperty>();
+        CHECK_NULL_VOID(pops);
         auto pattern = patternWeak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        Color result;
+        const auto& type = pops->GetProgressType();
         NG::Gradient gradient;
         Color endColor;
         Color beginColor;
+        Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            auto pops = frameNode->GetPaintProperty<ProgressPaintProperty>();
-            CHECK_NULL_VOID(pops);
-            const auto& type = pops->GetProgressType();
             auto progressTheme = pipeline->GetTheme<ProgressTheme>();
             CHECK_NULL_VOID(progressTheme);
             endColor = progressTheme->GetRingProgressEndSideColor();
             beginColor = progressTheme->GetRingProgressBeginSideColor();
-            result = (type == ProgressType::CAPSULE) ? progressTheme->GetCapsuleParseFailedSelectColor()
-                                                     : progressTheme->GetTrackParseFailedSelectedColor();
+            result = (type == ProgressType::CAPSULE) ? progressTheme->GetCapsuleSelectColor()
+                                                     : progressTheme->GetTrackSelectedColor();
 
         } else {
             endColor = result;
@@ -1073,6 +1066,7 @@ void ProgressModelNG::SetCapsuleSweepingEffect(FrameNode* frameNode, const RefPt
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
+
     const std::string key = "progress.capsule.sweepingEffect";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
@@ -1119,6 +1113,7 @@ void ProgressModelNG::SetFontColorResource(FrameNode* frameNode, const RefPtr<Re
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
+
     const std::string key = "progress.fontColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
@@ -1202,8 +1197,10 @@ void ProgressModelNG::SetFontWeightResource(FrameNode* frameNode, const RefPtr<R
             SetFontWeight(AceType::RawPtr(node), theme->GetTextStyle().GetFontWeight());
         }
     };
+    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
+
 void ProgressModelNG::SetRSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1370,82 +1367,49 @@ void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType type, const R
     CreateWithResourceObj(frameNode, type, resObj);
 }
 
-void ProgressModelNG::CreateLSOrRingOrCapsuleWithResourceObj(
-    FrameNode* frameNode, JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
-{
-    switch (type) {
-        case JsProgressResourceType::LSStrokeWidth:
-            SetLSStrokeWidth(frameNode, resObj);
-            break;
-        case JsProgressResourceType::LSSweepingEffect:
-            SetLSSweepingEffect(frameNode, resObj);
-            break;
-        case JsProgressResourceType::LSStrokeRadius:
-            SetLSStrokeRadius(frameNode, resObj);
-            break;
-        case JsProgressResourceType::RingStrokeWidth:
-            SetRingStrokeWidth(frameNode, resObj);
-            break;
-        case JsProgressResourceType::RingShadow:
-            SetRingShadow(frameNode, resObj);
-            break;
-        case JsProgressResourceType::RingStatus:
-            SetRingStatus(frameNode, resObj);
-            break;
-        case JsProgressResourceType::RingSweepingEffect:
-            SetRingSweepingEffect(frameNode, resObj);
-            break;
-        case JsProgressResourceType::CapsuleBorderWidth:
-            SetCapsuleBorderWidth(frameNode, resObj);
-            break;
-        case JsProgressResourceType::CapsuleBorderColor:
-            SetCapsuleBorderColor(frameNode, resObj);
-            break;
-        case JsProgressResourceType::CapsuleSweepingEffect:
-            SetCapsuleSweepingEffect(frameNode, resObj);
-            break;
-        default:
-            break;
-    }
-}
-
 void ProgressModelNG::CreateWithResourceObj(
     FrameNode* frameNode, JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
 {
-    switch (type) {
-        case JsProgressResourceType::COLOR:
-            SetProgressColor(frameNode, resObj);
-            break;
-        case JsProgressResourceType::SmoothEffect:
-            SetSmoothResEffect(frameNode, resObj);
-            break;
-        case JsProgressResourceType::ShowDefaultPercentage:
-            SetShowDefaultPercentage(frameNode, resObj);
-            break;
-        case JsProgressResourceType::FontColor:
-            SetFontColorResource(frameNode, resObj);
-            break;
-        case JsProgressResourceType::BackgroundColor:
-            SetBackgroundColorResource(frameNode, resObj);
-            break;
-        case JsProgressResourceType::FontWeight:
-            SetFontWeightResource(frameNode, resObj);
-            break;
-        case JsProgressResourceType::PSStrokeWidth:
-            SetRSStrokeWidth(frameNode, resObj);
-            break;
-        case JsProgressResourceType::PSScaleWidth:
-            SetRSScaleWidth(frameNode, resObj);
-            break;
-        case JsProgressResourceType::Text:
-            SetTextResource(frameNode, resObj);
-            break;
-        case JsProgressResourceType::FontSize:
-            SetFontSizeResource(frameNode, resObj);
-            break;
-        default:
-            CreateLSOrRingOrCapsuleWithResourceObj(frameNode, type, resObj);
-            break;
+    if (type == JsProgressResourceType::COLOR) {
+        SetProgressColor(frameNode, resObj);
+    } else if (type == JsProgressResourceType::LSStrokeWidth) {
+        SetLSStrokeWidth(frameNode, resObj);
+    } else if (type == JsProgressResourceType::LSSweepingEffect) {
+        SetLSSweepingEffect(frameNode, resObj);
+    } else if (type == JsProgressResourceType::LSStrokeRadius) {
+        SetLSStrokeRadius(frameNode, resObj);
+    } else if (type == JsProgressResourceType::SmoothEffect) {
+        SetSmoothResEffect(frameNode, resObj);
+    } else if (type == JsProgressResourceType::RingStrokeWidth) {
+        SetRingStrokeWidth(frameNode, resObj);
+    } else if (type == JsProgressResourceType::RingShadow) {
+        SetRingShadow(frameNode, resObj);
+    } else if (type == JsProgressResourceType::RingStatus) {
+        SetRingStatus(frameNode, resObj);
+    } else if (type == JsProgressResourceType::RingSweepingEffect) {
+        SetRingSweepingEffect(frameNode, resObj);
+    } else if (type == JsProgressResourceType::CapsuleBorderWidth) {
+        SetCapsuleBorderWidth(frameNode, resObj);
+    } else if (type == JsProgressResourceType::CapsuleBorderColor) {
+        SetCapsuleBorderColor(frameNode, resObj);
+    } else if (type == JsProgressResourceType::CapsuleSweepingEffect) {
+        SetCapsuleSweepingEffect(frameNode, resObj);
+    } else if (type == JsProgressResourceType::ShowDefaultPercentage) {
+        SetShowDefaultPercentage(frameNode, resObj);
+    } else if (type == JsProgressResourceType::FontColor) {
+        SetFontColorResource(frameNode, resObj);
+    } else if (type == JsProgressResourceType::BackgroundColor) {
+        SetBackgroundColorResource(frameNode, resObj);
+    } else if (type == JsProgressResourceType::FontWeight) {
+        SetFontWeightResource(frameNode, resObj);
+    } else if (type == JsProgressResourceType::PSStrokeWidth) {
+        SetRSStrokeWidth(frameNode, resObj);
+    } else if (type == JsProgressResourceType::PSScaleWidth) {
+        SetRSScaleWidth(frameNode, resObj);
+    } else if (type == JsProgressResourceType::Text) {
+        SetTextResource(frameNode, resObj);
+    } else if (type == JsProgressResourceType::FontSize) {
+        SetFontSizeResource(frameNode, resObj);
     }
 }
 } // namespace OHOS::Ace::NG
