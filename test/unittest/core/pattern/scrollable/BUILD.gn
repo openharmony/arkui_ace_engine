@@ -28,5 +28,6 @@ ace_unittest("scrollable_test_ng") {
     "scrollable_test_ng.cpp",
     "scrollable_testtwo_ng.cpp",
     "scrollable_utils_test.cpp",
+    "scrollable_generated_test_ng.cpp",
   ]
 }
