@@ -47,6 +47,9 @@
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+#include "transaction/rs_transaction_proxy.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
