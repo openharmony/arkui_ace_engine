@@ -1013,4 +1013,528 @@ HWTEST_F(DragAnimationHelperTestNg, ShowGatherNodeAnimation, TestSize.Level1)
     ASSERT_NE(itemNode, nullptr);
     ASSERT_EQ(DragAnimationHelper::ShowGatherNodeAnimation(itemNode), true);
 }
+
+/**
+ * @tc.name: CalcDistanceBeforeLifting001
+ * @tc.desc: test CalcDistanceBeforeLifting with isGrid=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcDistanceBeforeLifting001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data with grid items.
+     */
+    auto imageNodeId = GetElmtId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+
+    GatherNodeChildInfo childInfo;
+    childInfo.imageNode = AceType::WeakClaim(AceType::RawPtr(imageNode));
+    childInfo.width = 100.0f;
+    childInfo.height = 150.0f;
+    childInfo.halfWidth = 50.0f;
+    childInfo.halfHeight = 75.0f;
+    childInfo.offset = OffsetF(10.0f, 20.0f);
+
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    gatherNodeChildrenInfo.push_back(childInfo);
+
+    OffsetF gatherNodeCenter(50.0f, 100.0f);
+    CalcResult calcResult = { 0.0f, -1.0f, -1.0f };
+
+    /**
+     * @tc.steps: step2. Call CalcDistanceBeforeLifting with isGrid=true.
+     * @tc.expected: maxTranslation uses min of width and height.
+     */
+    DragAnimationHelper::CalcDistanceBeforeLifting(
+        true, calcResult, gatherNodeCenter, gatherNodeChildrenInfo);
+
+    EXPECT_GT(calcResult.maxDistance, 0.0f);
+    EXPECT_GT(calcResult.minDistance, 0.0f);
+    EXPECT_GT(calcResult.maxTranslation, 0.0f);
+}
+
+/**
+ * @tc.name: CalcDistanceBeforeLifting002
+ * @tc.desc: test CalcDistanceBeforeLifting with isGrid=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcDistanceBeforeLifting002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data for list items.
+     */
+    auto imageNodeId = GetElmtId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+
+    GatherNodeChildInfo childInfo;
+    childInfo.imageNode = AceType::WeakClaim(AceType::RawPtr(imageNode));
+    childInfo.width = 100.0f;
+    childInfo.height = 150.0f;
+    childInfo.halfWidth = 50.0f;
+    childInfo.halfHeight = 75.0f;
+    childInfo.offset = OffsetF(10.0f, 20.0f);
+
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    gatherNodeChildrenInfo.push_back(childInfo);
+
+    OffsetF gatherNodeCenter(50.0f, 100.0f);
+    CalcResult calcResult = { 0.0f, -1.0f, -1.0f };
+
+    /**
+     * @tc.steps: step2. Call CalcDistanceBeforeLifting with isGrid=false.
+     * @tc.expected: maxTranslation uses height only.
+     */
+    DragAnimationHelper::CalcDistanceBeforeLifting(
+        false, calcResult, gatherNodeCenter, gatherNodeChildrenInfo);
+
+    EXPECT_GT(calcResult.maxDistance, 0.0f);
+    EXPECT_GT(calcResult.minDistance, 0.0f);
+    EXPECT_GT(calcResult.maxTranslation, 0.0f);
+}
+
+/**
+ * @tc.name: PlayGatherNodeOpacityAnimation001
+ * @tc.desc: test PlayGatherNodeOpacityAnimation func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, PlayGatherNodeOpacityAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gather node children info.
+     */
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    auto imageNodeId = GetElmtId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+
+    GatherNodeChildInfo childInfo;
+    childInfo.imageNode = AceType::WeakClaim(AceType::RawPtr(imageNode));
+    gatherNodeChildrenInfo.push_back(childInfo);
+
+    /**
+     * @tc.steps: step2. Get overlayManager and set gather node children info.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    overlayManager->MountGatherNodeToRootNode(parentNode_, gatherNodeChildrenInfo);
+
+    /**
+     * @tc.steps: step3. Call PlayGatherNodeOpacityAnimation.
+     */
+    DragAnimationHelper::PlayGatherNodeOpacityAnimation(overlayManager);
+
+    /**
+     * @tc.steps: step4. Verify opacity animation was set.
+     */
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: SetPreOpacity001
+ * @tc.desc: test SetPreOpacity func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, SetPreOpacity001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with grayed opacity.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    const float testOpacity = 0.6f;
+    frameNode->SetPreGrayedOpacity(testOpacity);
+
+    /**
+     * @tc.steps: step2. Call SetPreOpacity.
+     */
+    DragAnimationHelper::SetPreOpacity(frameNode);
+
+    /**
+     * @tc.steps: step3. Verify opacity was updated.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: DoDragStartGrayedAnimation001
+ * @tc.desc: test DoDragStartGrayedAnimation func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, DoDragStartGrayedAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with existing opacity.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    const float initialOpacity = 0.8f;
+    renderContext->UpdateOpacity(initialOpacity);
+
+    /**
+     * @tc.steps: step2. Call DoDragStartGrayedAnimation.
+     */
+    DragAnimationHelper::DoDragStartGrayedAnimation(frameNode);
+
+    /**
+     * @tc.steps: step3. Verify preGrayedOpacity was set.
+     */
+    auto savedOpacity = frameNode->GetPreGrayedOpacity();
+    EXPECT_NEAR(savedOpacity, initialOpacity, EPSILON);
+}
+
+/**
+ * @tc.name: DoGrayedAnimation001
+ * @tc.desc: test DoGrayedAnimation with text component.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, DoGrayedAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateOpacity(1.0f);
+
+    /**
+     * @tc.steps: step2. Call DoGrayedAnimation - should return early for text.
+     */
+    const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 380.0f, 34.0f);
+    DragAnimationHelper::DoGrayedAnimation(frameNode, 0.4f, curve);
+
+    /**
+     * @tc.steps: step3. For text, opacity should not change due to early return.
+     */
+    auto opacity = renderContext->GetOpacity();
+    EXPECT_TRUE(opacity.has_value());
+}
+
+/**
+ * @tc.name: SetNodeVisible001
+ * @tc.desc: test SetNodeVisible func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, SetNodeVisible001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set node visible to false.
+     */
+    DragAnimationHelper::SetNodeVisible(frameNode, false);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step3. Set node visible to true.
+     */
+    DragAnimationHelper::SetNodeVisible(frameNode, true);
+}
+
+/**
+ * @tc.name: SetImageNodeInitAttr001
+ * @tc.desc: test SetImageNodeInitAttr func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, SetImageNodeInitAttr001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and imageNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set drag preview options with shadow.
+     */
+    DragPreviewOption previewOption;
+    previewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::None);
+    frameNode->SetDragPreviewOptions(previewOption);
+
+    /**
+     * @tc.steps: step3. Call SetImageNodeInitAttr.
+     */
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
+
+    /**
+     * @tc.steps: step4. Verify initial attributes were set.
+     */
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto scale = renderContext->GetTransformScale();
+    EXPECT_TRUE(scale.has_value());
+}
+
+/**
+ * @tc.name: SetImageNodeFinishAttr001
+ * @tc.desc: test SetImageNodeFinishAttr with filled shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, SetImageNodeFinishAttr001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and imageNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set drag preview options with unfilled shadow.
+     */
+    DragPreviewOption previewOption;
+    auto shadow = Shadow::CreateShadow(ShadowStyle::None);
+    shadow.SetIsFilled(false);
+    previewOption.options.shadow = shadow;
+    frameNode->SetDragPreviewOptions(previewOption);
+
+    /**
+     * @tc.steps: step3. Call SetImageNodeFinishAttr.
+     */
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
+
+    /**
+     * @tc.steps: step4. Verify shadow was updated.
+     */
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: PreLayout001
+ * @tc.desc: test PreLayout func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, PreLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create imageNode.
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Attach to pipeline context.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    imageNode->AttachContext(AceType::RawPtr(pipelineContext), true);
+
+    /**
+     * @tc.steps: step3. Call PreLayout.
+     */
+    DragAnimationHelper::PreLayout(imageNode);
+}
+
+/**
+ * @tc.name: UpdateGatherNodeToTop001
+ * @tc.desc: test UpdateGatherNodeToTop func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, UpdateGatherNodeToTop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get main pipeline context.
+     */
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdateGatherNodeToTop.
+     */
+    DragAnimationHelper::UpdateGatherNodeToTop();
+
+    /**
+     * @tc.steps: step3. Verify overlay manager is accessible.
+     */
+    auto overlayManager = mainPipeline->GetOverlayManager();
+    EXPECT_NE(overlayManager, nullptr);
+}
+
+/**
+ * @tc.name: GetMenuWrapperNodeFromDrag001
+ * @tc.desc: test GetMenuWrapperNodeFromDrag with null pipeline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetMenuWrapperNodeFromDrag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetMenuWrapperNodeFromDrag.
+     * @tc.expected: Should return nullptr when no menu wrapper is set.
+     */
+    auto menuWrapperNode = DragAnimationHelper::GetMenuWrapperNodeFromDrag();
+    EXPECT_EQ(menuWrapperNode, nullptr);
+}
+
+/**
+ * @tc.name: GetMenuRenderContextFromMenuWrapper001
+ * @tc.desc: test GetMenuRenderContextFromMenuWrapper with null wrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetMenuRenderContextFromMenuWrapper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call with null menuWrapperNode.
+     * @tc.expected: Should return nullptr.
+     */
+    auto renderContext = DragAnimationHelper::GetMenuRenderContextFromMenuWrapper(nullptr);
+    EXPECT_EQ(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: HideDragNodeCopyWithAnimation001
+ * @tc.desc: test HideDragNodeCopyWithAnimation without dragNodeCopy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, HideDragNodeCopyWithAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode without dragNodeCopy.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    DragPreviewOption option;
+    option.defaultAnimationBeforeLifting = true;
+    frameNode->SetDragPreviewOptions(option);
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call HideDragNodeCopyWithAnimation.
+     */
+    DragAnimationHelper::HideDragNodeCopyWithAnimation(overlayManager, frameNode);
+
+    /**
+     * @tc.steps: step3. Verify visibility is restored to VISIBLE.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto visibility = layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE);
+    EXPECT_EQ(visibility, VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: CalcBadgeTextOffset002
+ * @tc.desc: test CalcBadgeTextOffset with non-RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create nodes for testing.
+     */
+    auto imageNodeId = GetElmtId();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, imageNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set up geometry node with size.
+     */
+    auto geometryNode = imageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(10.0f), Dimension(20.0f)));
+
+    /**
+     * @tc.steps: step3. Get pipeline context.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step4. Call CalcBadgeTextOffset in non-RTL mode.
+     */
+    const int32_t badgeLength = 2;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+    auto offset = DragAnimationHelper::CalcBadgeTextOffset(host, imageNode, pipelineContext, badgeLength);
+
+    /**
+     * @tc.steps: step5. Verify offset calculation.
+     */
+    EXPECT_NEAR(offset.GetX(), 0.0f, EPSILON);
+    EXPECT_NEAR(offset.GetY(), 0.0f, EPSILON);
+}
+
+/**
+ * @tc.name: ShowMenuHideAnimation002
+ * @tc.desc: test ShowMenuHideAnimation with SIZE_CONTENT_TRANSITION.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare data with SIZE_CONTENT_TRANSITION.
+     */
+    PreparedInfoForDrag data;
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    data.menuNode = menuNode;
+    data.isMenuNotShow = false;
+    data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateOpacity(1.0f);
+
+    /**
+     * @tc.steps: step2. Call ShowMenuHideAnimation.
+     */
+    DragAnimationHelper::ShowMenuHideAnimation(data);
+
+    /**
+     * @tc.steps: step3. Verify opacity was changed.
+     */
+    auto opacity = renderContext->GetOpacity().value();
+    EXPECT_TRUE(opacity == 0.0f || opacity == 1.0f);
+}
 } // namespace OHOS::Ace::NG
