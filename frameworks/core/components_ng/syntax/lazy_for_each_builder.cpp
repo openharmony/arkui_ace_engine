@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/json/json_util.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 
@@ -38,8 +39,7 @@ namespace OHOS::Ace::NG {
         }
 
         if (needBuild) {
-            ACE_SCOPED_TRACE("Builder:BuildLazyItem index[%d], needBuild[%d], isCache[%d]",
-                index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache));
+            ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
                 itemInfo = OnGetChildByIndexNew(ConvertFromToIndex(index), cachedItems_, expiringItem_);
@@ -764,7 +764,7 @@ namespace OHOS::Ace::NG {
     bool LazyForEachBuilder::PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint,
         bool canRunLongPredictTask)
     {
-        ACE_SYNTAX_SCOPED_TRACE("PreBuild expiringItem_ count:[%zu]", expiringItem_.size());
+        ACE_SYNTAX_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
         outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;
@@ -861,6 +861,7 @@ namespace OHOS::Ace::NG {
 
     bool LazyForEachBuilder::SetActiveChildRange(int32_t start, int32_t end)
     {
+        ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
@@ -931,7 +932,7 @@ namespace OHOS::Ace::NG {
         std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
-        ACE_SCOPED_TRACE("Builder:BuildLazyItem index[%d], isTimeout[%d]", index, static_cast<int32_t>(isTimeout));
+        ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
         auto itemInfo = OnGetChildByIndex(ConvertFromToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         auto pair = cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
@@ -1215,12 +1216,10 @@ namespace OHOS::Ace::NG {
         return cachedItemInfo + "|" + expiringItemInfo;
     }
 
-    void LazyForEachBuilder::DumpInfo()
+    std::string LazyForEachBuilder::GetCachedItemDump() const
     {
-        DumpLog::GetInstance().AddDesc(std::string("The totalCount of data:")
-                                            .append(std::to_string(GetTotalCount()).c_str()));
+        std::string cachedNodes;
         if (expiringItem_.size() > 0) {
-            std::string cachedNodes;
             for (auto& [index, item] : expiringItem_) {
                 if (item.second) {
                     cachedNodes.append("[")
@@ -1233,9 +1232,26 @@ namespace OHOS::Ace::NG {
                 }
             }
             cachedNodes.pop_back();
-            DumpLog::GetInstance().AddDesc(
-                std::string("CachedItems: ").append("[").append(cachedNodes).append("]"));
+            cachedNodes = std::string("[").append(cachedNodes).append("]");
+        }
+        return cachedNodes;
+    }
+
+    void LazyForEachBuilder::DumpInfo()
+    {
+        DumpLog::GetInstance().AddDesc(std::string("The totalCount of data:")
+                                            .append(std::to_string(GetTotalCount()).c_str()));
+        auto info = GetCachedItemDump();
+        if (!info.empty()) {
+            DumpLog::GetInstance().AddDesc(std::string("cachedItems: ").append(info));
         }
     }
 
+    void LazyForEachBuilder::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+    {
+        auto info = GetCachedItemDump();
+        if (!info.empty()) {
+            json->Put("$CachedItems", info.c_str());
+        }
+    }
 }

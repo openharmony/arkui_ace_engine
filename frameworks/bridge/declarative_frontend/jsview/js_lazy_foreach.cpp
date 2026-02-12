@@ -142,7 +142,7 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
         return false;
     }
 
-    for (uint32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
+    for (int32_t idx = PARAM_VIEW_ID; idx < std::min(info.Length(), static_cast<uint32_t>(MAX_PARAM_SIZE)); ++idx) {
         params[idx] = info[idx];
     }
     return true;
@@ -154,6 +154,7 @@ void JSLazyForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLazyForEach>::Declare("LazyForEach");
     JSClass<JSLazyForEach>::StaticMethod("create", &JSLazyForEach::Create);
+    JSClass<JSLazyForEach>::StaticMethod("createInternal", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("pop", &JSLazyForEach::Pop);
     JSClass<JSLazyForEach>::StaticMethod("onMove", &JSLazyForEach::OnMove);
     JSClass<JSLazyForEach>::Bind(globalObj);
@@ -170,7 +171,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     }
     if (!params[PARAM_PARENT_VIEW]->IsObject()|| !params[PARAM_DATA_SOURCE]->IsObject()
         || !params[PARAM_ITEM_GENERATOR]->IsFunction() || !params[PARAM_VIEW_ID]->IsString()) {
-            return;
+        return;
     }
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 

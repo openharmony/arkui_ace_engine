@@ -255,7 +255,6 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
             } else {
                 repeatNode->AddDisappearingChild(node);
             }
-
             return false;
         });
     if (needSync) {
@@ -405,7 +404,6 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
     }
 
-    // this is new node or node from L2 cache
     if (childNode) {
         TAG_LOGD(AceLogTag::ACE_REPEAT,
             "Repeat(%{public}d).GetFrameChildByIndex index %{public}d, its child is %{public}d, returning child.",

@@ -92,6 +92,7 @@ void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32
         repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
     }
     CHECK_NULL_VOID(repeatNode);
+    repeatNode->fireOnUpdateDirty();
     repeatNode->UpdateTotalCount(totalCount);
     repeatNode->UpdateArrLen(arrLen);
     repeatNode->UpdateL1Rid4Index(l1Rd4Index);
@@ -122,7 +123,6 @@ void RepeatVirtualScroll2ModelNG::SetItemDragHandler(int32_t repeatElmtId, std::
     repeatNode->SetItemDragHandler(
         std::move(onLongPress), std::move(onDragStart), std::move(onMoveThrough), std::move(onDrop));
 }
-
 void RepeatVirtualScroll2ModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
 {
     auto childOfRepeat = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -130,5 +130,4 @@ void RepeatVirtualScroll2ModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
         childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
     }
 }
-
 } // namespace OHOS::Ace::NG
