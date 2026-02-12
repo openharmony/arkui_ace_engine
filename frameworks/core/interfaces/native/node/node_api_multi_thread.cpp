@@ -16,9 +16,9 @@
 #include "core/interfaces/native/node/node_api_multi_thread.h"
 
 #include "base/error/error_code.h"
+#include "base/utils/system_properties.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/ui_node.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 void SetIsThreadSafeNodeScope(ArkUI_Bool isThreadSafeNodeScope)
