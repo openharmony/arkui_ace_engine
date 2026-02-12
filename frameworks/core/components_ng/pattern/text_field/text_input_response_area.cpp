@@ -40,8 +40,6 @@ constexpr Dimension ICON_FOCUS_PADDING = 2.0_vp;
 constexpr Dimension DEFAULT_HOVER_SIZE = 32.0_vp;
 constexpr int HALF_SPACE = 2;
 constexpr int DOUBLE_PADDING = 2;
-constexpr Color VOICE_BUTTON_ACTIVATE_COLOR = Color(0xFF0A59F7);
-constexpr Dimension MIC_ICON_DEFAULT_PADDING = 4.0_vp;
 } // namespace
 
 // TextInputResponseArea begin
@@ -983,6 +981,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(symbolNode, nullptr);
         cleanNode_ = stackNode;
+        symbolNode_ = symbolNode;
         symbolNode->MountToParent(stackNode);
         InitClickEvent(stackNode);
         SetCancelSymbolIconSize();
@@ -1469,32 +1468,49 @@ void VoiceNodeResponseArea::OnCleanNodeClicked()
     textFieldPattern->HandleOnVoiceInput();
 }
 
+void VoiceNodeResponseArea::ParseTheme(
+    const RefPtr<TextLayoutProperty>& symbolProperty, const RefPtr<TextFieldTheme>& theme)
+{
+    micIconColor_ = theme->GetMicIconColor();
+    micIconActiveBgColor_ = theme->GetMicIconActiveBgColor();
+    micIconSize_ = theme->GetMicIconSize().ConvertToPxDistribute(
+        symbolProperty->GetMinFontScale().value_or(0.0f), MAX_FONT_SCALE, true);
+    micPadding_ = theme->GetMicPadding().ConvertToPx();
+    micBgOffsetToIcon_ =
+        Dimension((theme->GetMicSize().Value() - theme->GetMicIconSize().Value()) / HALF_SPACE, DimensionUnit::VP);
+    auto verticalGap = theme->GetContentHeight() + CalcLength(theme->GetPadding().Top()).GetDimension() +
+                       CalcLength(theme->GetPadding().Bottom()).GetDimension() - theme->GetMicSize();
+    micBgDefaultVerticalGapToParent_ = verticalGap.ConvertToPx();
+}
+
 void VoiceNodeResponseArea::UpdateNodeProperty(const RefPtr<LayoutProperty>& nodeProp,
     const RefPtr<TextLayoutProperty>& symbolProperty, const RefPtr<TextFieldTheme>& theme)
 {
     CHECK_NULL_VOID(symbolProperty);
     CHECK_NULL_VOID(theme);
+    ParseTheme(symbolProperty, theme);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetMicSymbolId()));
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->GetVoiceKBShown()) {
-        symbolProperty->UpdateSymbolColorList({ VOICE_BUTTON_ACTIVATE_COLOR });
+        symbolProperty->UpdateSymbolColorList({ micIconColor_ });
     } else {
         symbolProperty->UpdateSymbolColorList({ theme->GetSymbolColor() });
     }
-    micStackSize_ = theme->GetMicSize().ConvertToPx();
-    micIconSize_ = theme->GetMicIconSize().ConvertToPx();
-    micPadding_ = theme ? theme->GetMicPadding().ConvertToPx() : MIC_ICON_DEFAULT_PADDING.ConvertToPx();
     if (textFieldPattern->IsTextArea()) {
-        nodeProp->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(theme->GetMicSize()), CalcLength(theme->GetMicSize())));
+        nodeProp->ClearUserDefinedIdealSize(true, true);
+        PaddingProperty nodePadding;
+        nodePadding.SetEdges(CalcLength(micBgOffsetToIcon_));
+        nodeProp->UpdatePadding(nodePadding);
         nodeProp->UpdateAlignment(Alignment::CENTER);
         symbolProperty->UpdateFontSize(theme->GetMicIconSize());
         symbolProperty->ClearUserDefinedIdealSize(true, true);
     } else {
-        auto rightOffset = (micStackSize_ / HALF_SPACE + micPadding_) - micIconSize_ / HALF_SPACE;
+        float rightPadding = (theme->GetMicSize().Value() - theme->GetMicIconSize().Value()) / HALF_SPACE +
+                             theme->GetMicPadding().Value();
+        auto rightOffset = Dimension(rightPadding, DimensionUnit::VP).ConvertToPx();
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1506,8 +1522,10 @@ void VoiceNodeResponseArea::UpdateNodeProperty(const RefPtr<LayoutProperty>& nod
         }
         auto hotZoneSize = NearZero(iconSize) ? 0.0f : iconSize + rightOffset;
         nodeProp->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), CalcLength(iconSize)));
+        nodeProp->ClearUserDefinedIdealSize(false, true);
         symbolProperty->UpdateFontSize(theme->GetMicIconSize());
-        symbolProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+        symbolProperty->ClearUserDefinedIdealSize(true, true);
+        symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
         auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
         if (layoutProperty) {
             nodeProp->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
@@ -1536,9 +1554,8 @@ void VoiceNodeResponseArea::UpdateVoiceButton(bool activate)
         mouseRect.SetCornerRadius(cornerRadius);
         std::vector<RoundRect> roundRectVector;
         roundRectVector.push_back(mouseRect);
-        Color buttonColor = VOICE_BUTTON_ACTIVATE_COLOR.BlendOpacity(0.1);
-        overlayModifier->SetHoverColorAndRects(roundRectVector, buttonColor.GetValue());
-        symbolProperty->UpdateSymbolColorList({ VOICE_BUTTON_ACTIVATE_COLOR });
+        overlayModifier->SetHoverColorAndRects(roundRectVector, micIconActiveBgColor_.GetValue());
+        symbolProperty->UpdateSymbolColorList({ micIconColor_ });
     } else {
         auto textFieldTheme = textFieldPattern->GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
@@ -1606,16 +1623,22 @@ void VoiceNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
     } else {
         auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto offset = (micStackSize_ - micIconSize_) / HALF_SPACE;
+        auto iconNode = symbolNode_.Upgrade();
+        CHECK_NULL_VOID(iconNode);
+        auto iconGeoNode = iconNode->GetGeometryNode();
+        CHECK_NULL_VOID(iconGeoNode);
+        auto iconFrameRect = iconGeoNode->GetFrameRect();
+        auto paintSize = iconFrameRect.Height() + micBgOffsetToIcon_.ConvertToPx() * 2.0f;
+        auto offset = micBgOffsetToIcon_.ConvertToPx();
         auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (isRTL) {
-            nodeRect.SetLeft((nodeRect.Right() + offset) - micStackSize_);
+            nodeRect.SetLeft((nodeRect.Left() + iconFrameRect.Left()) - offset);
         } else {
             nodeRect.SetLeft(nodeRect.Left() - offset);
         }
         nodeRect.SetTop(nodeRect.Top() - offset);
-        nodeRect.SetWidth(micStackSize_);
-        nodeRect.SetHeight(micStackSize_);
+        nodeRect.SetWidth(paintSize);
+        nodeRect.SetHeight(paintSize);
         paintRect.SetRect(nodeRect);
     }
 }

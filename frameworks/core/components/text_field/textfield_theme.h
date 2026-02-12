@@ -59,6 +59,8 @@ public:
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->micSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.mic");
+            theme->micIconColor_ = themeConstants->GetColorByName("sys.color.icon_emphasize");
+            theme->micIconActiveBgColor_ = themeConstants->GetColorByName("sys.color.comp_emphasize_secondary");
             theme->autoFillSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.security_shield");
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle || !theme) {
@@ -498,6 +500,16 @@ public:
     const Dimension& GetMicIconSize() const
     {
         return micIconSize_;
+    }
+
+    const Color& GetMicIconColor() const
+    {
+        return micIconColor_;
+    }
+
+    const Color& GetMicIconActiveBgColor() const
+    {
+        return micIconActiveBgColor_;
     }
 
     bool ShowEllipsis() const
@@ -1065,6 +1077,8 @@ private:
     Dimension micSize_ = 32.0_vp;
     Dimension micPadding_ = 4.0_vp;
     Dimension micIconSize_ = 20.0_fp;
+    Color micIconColor_;
+    Color micIconActiveBgColor_;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 

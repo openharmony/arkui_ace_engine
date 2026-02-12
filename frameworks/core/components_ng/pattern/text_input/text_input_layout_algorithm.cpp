@@ -132,6 +132,10 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto height = LessNotEqual(contentHeight, defaultHeight)
                           ? defaultHeight + pattern->GetVerticalPaddingAndBorderSum()
                           : contentHeight + pattern->GetVerticalPaddingAndBorderSum();
+        auto voiceArea = DynamicCast<VoiceNodeResponseArea>(pattern->GetVoiceResponseArea());
+        if (voiceArea) {
+            height = std::max(height, voiceArea->GetVoiceBgHeight());
+        }
         frameSize.SetHeight(height);
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
