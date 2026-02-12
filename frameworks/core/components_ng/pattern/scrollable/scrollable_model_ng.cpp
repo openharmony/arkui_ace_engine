@@ -92,15 +92,6 @@ void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
-void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
-{
-    if (value) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
-    }
-}
-
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -108,6 +99,15 @@ void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
+}
+
+void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
+    }
 }
 
 void ScrollableModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
