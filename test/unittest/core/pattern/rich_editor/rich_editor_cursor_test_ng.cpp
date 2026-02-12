@@ -226,6 +226,28 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: CursorMoveToParagraphEnd002
+ * @tc.desc: test CursorMoveToParagraphEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan("First line\nSecond line\nThird line");
+    richEditorPattern->caretPosition_ = 10;
+    int32_t contentLength = richEditorPattern->GetTextContentLength();
+    EXPECT_GT(contentLength, 10);
+    EXPECT_LT(richEditorPattern->caretPosition_, contentLength);
+    bool result = richEditorPattern->CursorMoveToParagraphEnd();
+
+    EXPECT_TRUE(result);
+    EXPECT_NE(richEditorPattern->caretPosition_, 10);
+}
+
+/**
  * @tc.name: CalcCursorOffsetByPosition001
  * @tc.desc: test CalcCursorOffsetByPosition
  * @tc.type: FUNC

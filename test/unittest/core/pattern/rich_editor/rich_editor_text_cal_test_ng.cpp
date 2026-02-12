@@ -591,6 +591,57 @@ HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetLeftWordPosition003
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test content");
+    richEditorPattern->caretPosition_ = 5;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition004
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test@content");
+    richEditorPattern->caretPosition_ = 5;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition005
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test content@");
+    richEditorPattern->caretPosition_ = 12;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
  * @tc.name: HandleOnEscape001
  * @tc.desc: test HandleOnEscape
  * @tc.type: FUNC

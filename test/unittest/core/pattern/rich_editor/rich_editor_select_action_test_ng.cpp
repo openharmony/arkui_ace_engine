@@ -812,6 +812,97 @@ HWTEST_F(RichEditorSelectActionTestNg, UpdateSelectionAndHandleVisibility002, Te
 }
 
 /**
+ * @tc.name: UpdateSelectionAndHandleVisibility003
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectActionTestNg, UpdateSelectionAndHandleVisibility003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->recoverStart_ = 5;
+    richEditorPattern->recoverEnd_ = 10;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 5);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 10);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility004
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectActionTestNg, UpdateSelectionAndHandleVisibility004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::UNKNOWN;
+    richEditorPattern->releaseInDrop_ = true;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility005
+ * @tc.desc: test UpdateSelectionAndHandleVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectActionTestNg, UpdateSelectionAndHandleVisibility005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->sourceTool_ = SourceTool::MOUSE;
+    richEditorPattern->releaseInDrop_ = false;
+    AddSpan("test--test");
+
+    richEditorPattern->textSelector_.Update(5, 10);
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+    ASSERT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    ASSERT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+}
+
+/**
+ * @tc.name: UpdateSelectionAndHandleVisibility006
+ * @tc.desc: test UpdateSelectionAndHandleVisibility to enter the branch where both handles are not shown and overlay is
+ * not creating
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectActionTestNg, UpdateSelectionAndHandleVisibility006, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    richEditorPattern->sourceTool_ = SourceTool::UNKNOWN;
+    richEditorPattern->releaseInDrop_ = false;
+    AddSpan("test content");
+    
+    richEditorPattern->recoverStart_ = 0;
+    richEditorPattern->recoverEnd_ = 0;
+    richEditorPattern->textSelector_.Update(2, 8);
+    
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    EXPECT_FALSE(selectOverlay->IsBothHandlesShow());
+    EXPECT_FALSE(selectOverlay->SelectOverlayIsCreating());
+
+    richEditorPattern->UpdateSelectionAndHandleVisibility();
+
+    EXPECT_TRUE(richEditorPattern->GetShowSelect());
+}
+
+/**
  * @tc.name: GetSelectArea001
  * @tc.desc: test GetSelectArea
  * @tc.type: FUNC
@@ -890,6 +981,31 @@ HWTEST_F(RichEditorSelectActionTestNg, DeleteByRange001, TestSize.Level0)
     richEditorPattern->previewTextRecord_.newPreviewContent = u"";
     richEditorPattern->previewTextRecord_.previewContent = INIT_VALUE_1;
     richEditorPattern->lastSelectionRange_ = { -1, -1 };
+    auto value = richEditorPattern->lastSelectionRange_;
+    richEditorPattern->DeleteByRange(nullptr, 1, 2);
+    EXPECT_TRUE(value == richEditorPattern->lastSelectionRange_);
+}
+
+/**
+ * @tc.name: DeleteByRange002
+ * @tc.desc: test DeleteByRange func
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectActionTestNg, DeleteByRange002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    richEditorPattern->previewTextRecord_.needReplacePreviewText = true;
+    richEditorPattern->previewTextRecord_.newPreviewContent = u"";
+    richEditorPattern->previewTextRecord_.previewContent = INIT_VALUE_1;
+    richEditorPattern->lastSelectionRange_ = { -1, -1 };
+    richEditorPattern->isSpanStringMode_ = true;
     auto value = richEditorPattern->lastSelectionRange_;
     richEditorPattern->DeleteByRange(nullptr, 1, 2);
     EXPECT_TRUE(value == richEditorPattern->lastSelectionRange_);
