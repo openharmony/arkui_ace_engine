@@ -223,6 +223,18 @@ public:
     {
         isModal_ = isModal;
     }
+    bool GetModalFlag() const
+    {
+        return isModal_;
+    }
+    bool GetIsModalFixFocus() const
+    {
+        return isModalFixFocus_;
+    }
+    void SetIsModalFixFocus(bool isModalFixFocus)
+    {
+        isModalFixFocus_ = isModalFixFocus;
+    }
 
     void SetNeedCheckWindowSceneId(bool needCheckWindowSceneId)
     {
@@ -459,6 +471,7 @@ private:
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
+    bool isModalFixFocus_ = false;
     bool isKeyAsync_ = false;
     bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension

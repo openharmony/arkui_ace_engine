@@ -611,7 +611,7 @@ void UIExtensionPattern::OnConnect()
     FireOnRemoteReadyCallback();
     bool isFocusedAfterCallback = focusHub && focusHub->IsCurrentFocus();
     if ((usage_ == UIExtensionUsage::MODAL) && focusHub && isModalRequestFocus_) {
-        focusHub->RequestFocusImmediately();
+        focusHub->RequestFocusImmediatelyFromModalUEC();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
@@ -1281,7 +1281,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     focusState_ = pipeline->IsWindowFocused();
     if (focusState_ && !focusHub->IsCurrentFocus()) {
         canFocusSendToUIExtension_ = false;
-        ret = focusHub->RequestFocusImmediately();
+        ret = focusHub->RequestFocusImmediatelyFromModalUEC();
         if (!ret) {
             canFocusSendToUIExtension_ = true;
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
@@ -1319,7 +1319,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     if (info.GetAction() == MouseAction::PRESS) {
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
-        hub->RequestFocusImmediately();
+        hub->RequestFocusImmediatelyFromModalUEC();
         SetForceProcessOnKeyEventInternal(true);
     }
     DispatchPointerEvent(pointerEvent);
