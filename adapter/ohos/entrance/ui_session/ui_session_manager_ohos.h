@@ -129,8 +129,8 @@ public:
     void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) override;
     void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) override;
     void SetStopContentChangeDetectCallback(std::function<void()>&&) override;
-    void GetStateMgmtInfo(
-        const std::string& ComponentName, const std::string& propertyName, const std::string& jsonPath) override;
+    void GetStateMgmtInfo(const std::string& ComponentName, const std::string& propertyName,
+        const std::string& jsonPath, bool onlyVisible) override;
     void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
     void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) override;

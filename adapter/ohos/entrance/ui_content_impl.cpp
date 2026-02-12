@@ -6518,14 +6518,15 @@ void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,
-                                        const std::string& propertyName, const std::string& jsonPath) {
+                                        const std::string& propertyName, const std::string& jsonPath,
+                                        bool onlyVisible) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [componentName, propertyName, jsonPath]() {
+            [componentName, propertyName, jsonPath, onlyVisible]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath, onlyVisible);
             },
             TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
     };

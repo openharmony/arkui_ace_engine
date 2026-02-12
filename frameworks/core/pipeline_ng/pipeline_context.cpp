@@ -7556,12 +7556,12 @@ RefPtr<FrameNode> PipelineContext::FindPageRootNodeInOrder(const RefPtr<UINode>&
     return nullptr;
 }
 
-void PipelineContext::GetStateMgmtInfo(
-    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+void PipelineContext::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, bool onlyVisible)
 {
     std::vector<std::string> resultsStateMgmtInfo;
     std::vector<int32_t> matchNodeIds;
-    rootNode_->GetNodeListByComponentName(0, matchNodeIds, componentName);
+    rootNode_->GetNodeListByComponentName(0, matchNodeIds, componentName, onlyVisible);
     if (matchNodeIds.empty()) {
         LOGE("GetStateMgmtInfo can't find componentName: %s", componentName.c_str());
         return;

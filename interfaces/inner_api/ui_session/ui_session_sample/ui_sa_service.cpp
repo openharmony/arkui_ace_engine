@@ -436,15 +436,17 @@ void UiSaService::HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::v
         std::string componentName = params[1];
         std::string propertyName = params[2];
         std::string jsonPath = params[3];
+        int32_t onlyVisible = std::atoi(params[4].c_str());
         auto finishCallback = [](std::vector<std::string> results) {
             LOGI("[GetStateMgmtInfo] finishCallback results.size=%{public}zu", results.size());
             for (const auto& result : results) {
                 LOGI("[GetStateMgmtInfo] finishCallback result=%{public}s", result.c_str());
             }
         };
-        service->GetStateMgmtInfo(componentName, propertyName, jsonPath, finishCallback);
+        service->GetStateMgmtInfo(componentName, propertyName, jsonPath, finishCallback, onlyVisible);
         LOGI("[GetStateMgmtInfo] call GetStateMgmtInfo componentName=%{public}s, propertyName=%{public}s, "
-            "jsonPath=%{public}s", componentName.c_str(), propertyName.c_str(), jsonPath.c_str());
+             "jsonPath=%{public}s, onlyVisible=%{public}d",
+            componentName.c_str(), propertyName.c_str(), jsonPath.c_str(), onlyVisible);
     }
 }
 } // namespace OHOS::Ace
