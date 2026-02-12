@@ -17,6 +17,7 @@ import { IBindingSource, ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { RenderIdType, IMutableStateMeta, IComputedDecoratedVariable, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
 import { FactoryInternal } from '../base/iFactoryInternal';
+import { ElementInfo } from '../utils';
 
 export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
     fireChange(): void;
@@ -111,5 +112,12 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
 
     public registerToOwningView(): void {
         this.owningComponent_?.__registerStateVariables__Internal(this);
+    }
+
+    public getDFXInfo(): ElementInfo {
+        return {
+            elementName: `@Computed ${this.varName}`,
+            elementId: this.id
+        };
     }
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IMutableStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, STATE_MGMT_FACTORY, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
@@ -34,17 +34,24 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     private ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
-
+    private isAPI_ : boolean;
     /**
      * Constructs a Date from another Date
      * @param date another Date
      */
-    constructor(date: Date, allowDeep: boolean) {
+    constructor(date: Date, allowDeep: boolean, isAPI: boolean = false) {
         // Create without parameters to avoid call back to WrappedMap before "this" is fully constructed!
         super();
         this.store_ = date;
         this.allowDeep_ = allowDeep;
-        this.meta_ = FactoryInternal.mkMutableStateMeta('');
+        this.isAPI_ = isAPI;
+        this.meta_ = STATE_MGMT_FACTORY.makeMutableStateMeta(this,
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2Key_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedDate');
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches

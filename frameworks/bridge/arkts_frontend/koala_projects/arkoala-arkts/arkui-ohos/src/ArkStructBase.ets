@@ -210,4 +210,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     isV2(): boolean {
         return true;
     }
+
+    getName(): string {
+        return '';
+    }
 }

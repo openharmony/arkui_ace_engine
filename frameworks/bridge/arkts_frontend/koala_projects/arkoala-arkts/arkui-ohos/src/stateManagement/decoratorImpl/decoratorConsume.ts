@@ -21,7 +21,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 import { ProvideDecoratedVariable } from './decoratorProvide';
 export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
@@ -43,10 +43,13 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         } else {
             this.sourceProvide_!.registerWatchToSource(this);
         }
+        const initValue = this.sourceProvide_!.get()
+        this.registerToObservedObject(initValue);
     }
 
     public get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consume ${this.getTraceInfo()}`);
+        this.selfTrack();
         return this.sourceProvide_!.get();
     }
 
@@ -61,6 +64,12 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             this.sourceProvide_!.set(newValue);
             return;
         }
+
+        // Update ObservedObjectRegistry registration before setting the new value
+        // Only update when using fake Provide source
+        const processedNewValue = uiUtils.makeV1Observed(newValue);
+        this.updateObservedObjectRegistration(oldValue, processedNewValue);
+
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.sourceProvide_!.set(newValue, false);
         this.registerWatchForObservedObjectChanges(this.sourceProvide_!.get(false));
@@ -69,5 +78,17 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
     public getSource(): IProvideDecoratedVariable<T> {
         return this.sourceProvide_! as IProvideDecoratedVariable<T>;
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        // Only unregister when using fake Provide source
+        if (this.checkFake && this.sourceProvide_) {
+            const currentValue = this.sourceProvide_!.get(false);
+            this.unregisterFromObservedObject(currentValue);
+        }
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

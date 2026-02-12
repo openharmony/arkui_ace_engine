@@ -28,6 +28,9 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         this.provideAlias_ = provideAlias;
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         owningView.__addProvider__Internal(provideAlias, this);
+
+        // Register the relationship between this Provider variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     get(): T {
@@ -36,6 +39,7 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);
+            this.selfTrack();
         }
         return value;
     }
@@ -47,6 +51,10 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
             return;
         }
         const makeObserved = uiUtils.autoProxyObject(newValue) as T;
+
+        // Update ObservedObjectRegistry registration before setting the new value
+        this.updateObservedObjectRegistration(value, makeObserved);
+
         this.backing_.setNoCheck(makeObserved);
         if (this.viewV2) {
             ESValue.wrap(this.viewV2).setProperty(this.provideAlias_, ESValue.wrap(makeObserved));
@@ -57,5 +65,14 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
 
     resetOnReuse(newValue: T): void {
         this.set(newValue);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.backing_.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

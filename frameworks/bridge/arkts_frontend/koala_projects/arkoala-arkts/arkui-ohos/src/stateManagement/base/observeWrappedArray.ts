@@ -47,7 +47,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         this.store_ = src;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta(
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedArray', this);
     }
 
     public getRaw(): Object {

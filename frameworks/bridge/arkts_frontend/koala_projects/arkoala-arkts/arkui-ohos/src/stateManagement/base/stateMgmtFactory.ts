@@ -23,7 +23,8 @@ import {
     IProviderDecoratedVariable,
     IStateMgmtFactory,
     IVariableOwner,
-    ConsumeOptions
+    ConsumeOptions,
+    IObservedObject
 } from '../decorator';
 import {
     IStateDecoratedVariable,
@@ -68,10 +69,20 @@ import { MonitorFunctionDecorator } from '../decoratorImpl/decoratorMonitor';
 import { uiUtils } from './uiUtilsImpl';
 import { FactoryInternal } from './iFactoryInternal';
 import { EnvDecoratedVariable } from '../decoratorImpl/decoratorEnv';
+import { ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
         return FactoryInternal.mkMutableStateMeta('');
+    }
+    public makeMutableStateMeta(observedObject: IObservedObject | undefined, propertyName: string): IMutableStateMeta {
+        const meta = FactoryInternal.mkMutableStateMeta(propertyName) as MutableStateMeta;
+        if (observedObject) {
+            const info = ObservedObjectRegistry.getOrRegister(observedObject!);
+            info.setType(propertyName);
+            info.registerMutableStateMeta(meta);
+        }
+        return meta;
     }
     public makeSubscribedWatches(): ISubscribedWatches {
         return new SubscribedWatches();

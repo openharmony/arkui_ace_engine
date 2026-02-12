@@ -24,6 +24,9 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase<T> im
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Param @Once', owningView, varName);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+
+        // Register the relationship between this ParamOnce variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     get(): T {
@@ -32,6 +35,7 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase<T> im
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);
+            this.selfTrack();
         }
         return value;
     }
@@ -42,10 +46,24 @@ export class ParamOnceDecoratedVariable<T> extends DecoratedV2VariableBase<T> im
         if (value === newValue) {
             return;
         }
-        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+
+        // Update ObservedObjectRegistry registration before setting the new value
+        this.updateObservedObjectRegistration(value, processedNewValue);
+
+        this.backing_.setNoCheck(processedNewValue);
     }
 
     resetOnReuse(newValue: T): void {
         this.set(newValue);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.backing_.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

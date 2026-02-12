@@ -17,6 +17,7 @@ import { IBindingSource } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
+import { ElementInfo } from '../utils';
 
 export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor, IDecoratorBaseRegistry {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
@@ -209,6 +210,13 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     public reset(): void {
         this.before = this.now;
         this.dirty_ = false;
+    }
+
+    public getDFXInfo(): ElementInfo {
+        return {
+            elementName: `@Monitor function path: ${this.path}`,
+            elementId: this.id
+        };
     }
 }
 

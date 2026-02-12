@@ -58,6 +58,7 @@ export const StateManagerLocal = new WorkerLocalValue<StateManager | undefined>(
  */
 export interface StateManager extends StateContext {
     currentScope: IncrementalScopeEx | undefined
+    readonly currentScopeNodeRef: IncrementalNode | undefined
     contextData: object | undefined
     isDebugMode: boolean
     _isNeedCreate: boolean
@@ -75,11 +76,16 @@ export interface StateManager extends StateContext {
     frozen: boolean
     reset(): void
 }
-
+interface DependentInfoStore {
+    /**
+    * return collection of nodes
+    */
+    getDependentInfo(): Set<IncrementalNode> | undefined { return undefined; }
+}
 /**
  * Individual mutable state, wrapping a value of type `Value`.
  */
-export interface MutableState<Value> extends Disposable, ReadableState<Value> {
+export interface MutableState<Value> extends Disposable, ReadableState<Value>, DependentInfoStore {
     /**
      * Current value of the state as a mutable value.
      * You should not change state value from a memo code.
@@ -427,6 +433,19 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
         if (this.manager?.frozen === true) { str += ',frozen' }
         return str + '=' + this.value
     }
+
+    getDependentInfo(): Set<IncrementalNode> | undefined {
+        const nodes = new Set<IncrementalNode>();
+        if (this.dependencies) {
+            (this.dependencies as StateToScopes).getDependencies()?.forEach((scope) => {
+                let node: IncrementalNode | undefined = undefined;
+                if (scope.getNodeRef && (node = scope.getNodeRef!())) {
+                    nodes.add(node!);
+                }
+            });
+        }
+        return nodes;
+    }
 }
 
 class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<Item> {
@@ -638,6 +657,10 @@ class StateManagerImpl implements StateManager {
         } else {
             throw new Error('Wrong use of Internal API: unexpected implementation of IncrementalScopeEx')
         }
+    }
+
+    get currentScopeNodeRef(): IncrementalNode | undefined {
+        return this.current?.nodeRef;
     }
 
     reset(): void {
@@ -1066,7 +1089,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     // Constructor with (compute?: () => Value, cleanup?: (value: Value | undefined) => void)
     // signature causes es2panda recheck crash, so I have introduced a create
     private constructor() {
-        this._states = new ScopeToStates(() => { this.invalidate() })
+        this._states = new ScopeToStates(() => { this.invalidate() }, () => { return this.nodeRef})
     }
 
     get states(): ScopeToStates | undefined {
