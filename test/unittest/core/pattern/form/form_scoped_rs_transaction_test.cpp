@@ -22,6 +22,10 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_INSTANCE_ID = 0;
+}
+
 class FormScopedRSTransactionTest : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -35,17 +39,20 @@ private:
 bool FormScopedRSTransactionTest::multiInstanceEnabledBackup_ = false;
 
 void FormScopedRSTransactionTest::SetUpTestSuite()
+{}
+ 
+void FormScopedRSTransactionTest::TearDownTestSuite()
+{}
+
+void FormScopedRSTransactionTest::SetUp()
 {
     FormScopedRSTransactionTest::multiInstanceEnabledBackup_ = SystemProperties::GetMultiInstanceEnabled();
 }
 
-void FormScopedRSTransactionTest::TearDownTestSuite()
+void FormScopedRSTransactionTest::TearDown()
 {
     SystemProperties::SetMultiInstanceEnabled(FormScopedRSTransactionTest::multiInstanceEnabledBackup_);
 }
-
-void FormScopedRSTransactionTest::SetUp()
-{}
 
 /**
  * @tc.name: FormScopedRSTransactionTest001
@@ -55,8 +62,9 @@ void FormScopedRSTransactionTest::SetUp()
 HWTEST_F(FormScopedRSTransactionTest, FormScopedRSTransactionTest001, TestSize.Level0)
 {
     SystemProperties::SetMultiInstanceEnabled(true);
-    FormScopedRSTransaction scopedRSTransaction(0);
-    EXPECT_EQ(scopedRSTransaction.rsTransaction_, nullptr);
+    FormScopedRSTransaction scopedRSTransaction(DEFAULT_INSTANCE_ID);
+    EXPECT_TRUE(scopedRSTransaction.isMultiInstanceEnabled_);
+    EXPECT_EQ(scopedRSTransaction.transactionHandler_, nullptr);
     EXPECT_EQ(scopedRSTransaction.needCloseSync_, false);
 }
 
@@ -76,4 +84,4 @@ HWTEST_F(FormScopedRSTransactionTest, FormScopedRSTransactionTest002, TestSize.L
     EXPECT_NE(scopedRSTransaction.rsTransaction_, nullptr);
     EXPECT_EQ(scopedRSTransaction.needCloseSync_, false);
 }
-} // namespace OHOS::Ace::NG
+}  // namespace OHOS::Ace::NG

@@ -29,56 +29,49 @@ namespace OHOS::Ace::NG {
 FormScopedRSTransaction::FormScopedRSTransaction(int32_t scopeId)
 {
     ACE_SCOPED_TRACE("%s scopeId:%d", __func__, scopeId);
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction = OpenSyncTransaction(scopeId);
-
-    rsTransaction_ = rsTransaction;
-    if (rsTransaction) {
-        rsTransaction->Begin();
-    } else {
-        TAG_LOGW(AceLogTag::ACE_FORM, "FormScopedRSTransaction: rsTransaction is nullptr");
-    }
+    OpenSyncTransaction(scopeId);
 }
 
 FormScopedRSTransaction::~FormScopedRSTransaction()
 {
     ACE_SCOPED_TRACE("%s", __func__);
-    if (rsTransaction_) {
-        rsTransaction_->Commit();
-    }
     CloseSyncTransaction();
 }
 
-std::shared_ptr<Rosen::RSTransaction> FormScopedRSTransaction::OpenSyncTransaction(int32_t scopeId)
+void FormScopedRSTransaction::OpenSyncTransaction(int32_t scopeId)
 {
     isMultiInstanceEnabled_ = SystemProperties::GetMultiInstanceEnabled();
     ACE_SCOPED_TRACE("%s isMultiInstanceEnabled:%d", __func__, isMultiInstanceEnabled_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormScopedRSTransaction isMultiInstanceEnabled:%d", isMultiInstanceEnabled_);
     if (isMultiInstanceEnabled_) {
         ContainerScope scope(scopeId);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (!pipeline) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "FormScopedRSTransaction: pipeline is nullptr");
-            return nullptr;
+            TAG_LOGE(AceLogTag::ACE_FORM, "FormScopedRSTransaction pipeline is nullptr");
+            return;
         }
         std::shared_ptr<Rosen::RSUIDirector> rsUIDirector = pipeline->GetRSUIDirector();
-        CHECK_NULL_RETURN(rsUIDirector, nullptr);
+        CHECK_NULL_VOID(rsUIDirector, nullptr);
         auto rsUIContext = rsUIDirector->GetRSUIContext();
-        CHECK_NULL_RETURN(rsUIContext, nullptr);
+        CHECK_NULL_VOID(rsUIContext, nullptr);
         auto transactionHandler = rsUIContext->GetSyncTransactionHandler();
-        CHECK_NULL_RETURN(transactionHandler, nullptr);
+        CHECK_NULL_VOID(transactionHandler, nullptr);
 
         if (!transactionHandler->GetRSTransaction()) {
             transactionHandler->OpenSyncTransaction();
             needCloseSync_ = true;
             transactionHandler_ = transactionHandler;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_FORM, "FormScopedRSTransaction sync transaction is open");
         }
-        return transactionHandler->GetRSTransaction();
     } else {
         auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
         if (!transactionController->GetRSTransaction()) {
             transactionController->OpenSyncTransaction();
             needCloseSync_ = true;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_FORM, "FormScopedRSTransaction sync transaction is open");
         }
-        return transactionController->GetRSTransaction();
     }
 }
 
