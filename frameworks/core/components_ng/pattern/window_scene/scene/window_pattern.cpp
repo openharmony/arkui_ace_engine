@@ -665,7 +665,7 @@ void WindowPattern::CreateStartingWindow()
     std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
     session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
     std::string darkMode = Rosen::SceneSessionManager::GetInstance().IsStartWindowDark(sessionInfo) ?
-        "dark" : "light";
+        Rosen::DARK_MODE : Rosen::LIGHT_MODE;
     std::string saveStartWindowKey = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +
         sessionInfo.abilityName_ + '_' + darkMode;
     std::string startWindowPersistencePath =
