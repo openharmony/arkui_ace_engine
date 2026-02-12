@@ -1894,19 +1894,31 @@ HWTEST_F(ScrollableCoverTestNg, TouchpadInteractionTest001, TestSize.Level1)
     geometryNode->SetFrameSize(SizeF(720.0f, 1280.0f));
     auto pattern = scroll_->GetPattern<PartiallyMockedScrollable>();
     ASSERT_NE(pattern, nullptr);
-    pattern->locationInfo_ = Offset(1000.0f, 200.0f);
+    eventManager->lastMouseEvent_.x = 1000.0f;
+    eventManager->lastMouseEvent_.y = 200.0f;
     auto scrollable = pattern->GetScrollable();
     ASSERT_NE(scrollable, nullptr);
     scrollable->frictionOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, [](float) {});
 
     /**
-     * @tc.steps: step2. Call StartScrollAnimation and verify StopSpringAnimation is called.
+     * @tc.steps: step2. Call StartScrollAnimation and verify StopFrictionAnimation is called.
      */
     scrollable->StartScrollAnimation(100.0f, 400.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
-    pattern->locationInfo_ = Offset(100.0f, 200.0f);
-    eventManager->NotifyTouchpadInteraction();
+    eventManager->OnTouchpadInteractionBegin();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
+    eventManager->lastMouseEvent_.x = 100.0f;
+    eventManager->OnTouchpadInteractionBegin();
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+
+    /**
+     * @tc.steps: step3. Clean invalid iter.
+     */
+    auto& listeners = eventManager->touchpadInteractionListeners_;
+    TouchpadInteractionListener iter = { WeakPtr<FrameNode>(scroll_), std::function<void(PointF)>() };
+    listeners[scroll_->GetId()] = iter;
+    eventManager->OnTouchpadInteractionBegin();
+    EXPECT_EQ(listeners.find(scroll_->GetId()), listeners.end());
 }
 
 /**
@@ -1929,17 +1941,26 @@ HWTEST_F(ScrollableCoverTestNg, TouchpadInteractionTest002, TestSize.Level1)
     geometryNode->SetFrameSize(SizeF(720.0f, 1280.0f));
     auto pattern = scroll_->GetPattern<PartiallyMockedScrollable>();
     ASSERT_NE(pattern, nullptr);
-    pattern->locationInfo_ = Offset(100.0f, 200.0f);
     auto scrollable = pattern->GetScrollable();
     ASSERT_NE(scrollable, nullptr);
     scrollable->nestedScrolling_ = true;
+    pattern->isBackToTopRunning_ = true;
     pattern->nestedScrollVelocity_ = 400.0f;
     pattern->nestedScrollTimestamp_ = static_cast<uint64_t>(GetSysTimestamp());
 
     /**
-     * @tc.steps: step2. Call StartScrollAnimation and verify StopSpringAnimation is called.
+     * @tc.steps: step2. Call StartScrollAnimation and verify StopFrictionAnimation is called.
      */
     eventManager->NotifyTouchpadInteraction();
     EXPECT_TRUE(scrollable->IsStopped());
+
+    /**
+     * @tc.steps: step3. Clean invalid iter.
+     */
+    auto& listeners = eventManager->touchpadInteractionListeners_;
+    TouchpadInteractionListener iter = { WeakPtr<FrameNode>(), std::function<void(PointF)>() };
+    listeners[scroll_->GetId()] = iter;
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_EQ(listeners.find(scroll_->GetId()), listeners.end());
 }
 } // namespace OHOS::Ace::NG
