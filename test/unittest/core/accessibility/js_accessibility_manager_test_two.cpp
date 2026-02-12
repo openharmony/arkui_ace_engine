@@ -208,6 +208,123 @@ HWTEST_F(JsAccessibilityManagerTestTwo, JsAccessibilityManager006, TestSize.Leve
 }
 
 /**
+ * @tc.name: IsSendAccessibilityEventTest001
+ * @tc.desc: Test IsSendAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin IsSendAccessibilityEventTest001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test non-page event returns true.
+     */
+    AccessibilityEvent event;
+    event.type = AccessibilityEventType::CLICK;
+    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(event);
+    EXPECT_TRUE(result);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest001";
+}
+
+/**
+ * @tc.name: IsSendAccessibilityEventTest002
+ * @tc.desc: Test page event with null PipelineContext returns result of IsSendAccessibilityEventForHost.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, IsSendAccessibilityEventTest002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin IsSendAccessibilityEventTest002";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test page event with null PipelineContext returns result of IsSendAccessibilityEventForHost.
+     */
+    AccessibilityEvent eventPageChange;
+    eventPageChange.type = AccessibilityEventType::PAGE_CHANGE;
+    eventPageChange.nodeId = -1;
+    jsAccessibilityManager->context_ = nullptr;
+    bool result = jsAccessibilityManager->IsSendAccessibilityEvent(eventPageChange);
+    EXPECT_TRUE(result);
+
+    AccessibilityEvent eventPageOpen;
+    eventPageOpen.type = AccessibilityEventType::PAGE_OPEN;
+    eventPageOpen.nodeId = -1;
+    jsAccessibilityManager->context_ = nullptr;
+    result = jsAccessibilityManager->IsSendAccessibilityEvent(eventPageOpen);
+    EXPECT_TRUE(result);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end IsSendAccessibilityEventTest002";
+}
+
+/**
+ * @tc.name: GetComponentTypeAndPageIdByNodeIdTest001
+ * @tc.desc: Test GetComponentTypeAndPageIdByNodeId when context is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, GetComponentTypeAndPageIdByNodeIdTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin GetComponentTypeAndPageIdByNodeIdTest001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetComponentTypeAndPageIdByNodeId when context is null.
+     */
+    RefPtr<PipelineBase> context = nullptr;
+    Framework::GetInfoByNodeId infoOfNode;
+    infoOfNode.componentType = "Stack";
+    infoOfNode.pageId = 666;
+    infoOfNode.nodeInstanceId = 777;
+    jsAccessibilityManager->GetComponentTypeAndPageIdByNodeId(-1LL, context, infoOfNode);
+    EXPECT_EQ(infoOfNode.componentType, "Stack");
+    EXPECT_EQ(infoOfNode.pageId, 666);
+    EXPECT_EQ(infoOfNode.nodeInstanceId, 777);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end GetComponentTypeAndPageIdByNodeIdTest001";
+}
+
+/**
+ * @tc.name: CheckPageEventCachedTest001
+ * @tc.desc: Test CheckPageEventCached when node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTestTwo, CheckPageEventCachedTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-begin CheckPageEventCachedTest001";
+
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test CheckPageEventCached
+     */
+    RefPtr<NG::FrameNode> node = nullptr;
+    bool result = jsAccessibilityManager->CheckPageEventCached(node, 1);
+    EXPECT_FALSE(result);
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestTwo-end CheckPageEventCachedTest001";
+}
+
+/**
  * @tc.name: JsAccessibilityManager007
  * @tc.desc: Test GetUECAccessibilityParentRectInfo
  * @tc.type: FUNC
