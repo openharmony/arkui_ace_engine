@@ -20,14 +20,10 @@
 #include "drawing_rendering_context_peer_impl.h"
 #include "canvas_rendering_context2d_peer_impl.h"
 #ifdef WINDOWS_PLATFORM
-const char* LIBARKOALA_MODULE = "libArkoalaNative_ark.dll";
-#else
-const char* LIBARKOALA_MODULE = "libArkoalaNative_ark.z.so";
-#endif
-#ifdef WINDOWS_PLATFORM
 #include <windows.h>
-inline void* LoadLibrary(const char* libPath)
+inline void* LoadLibrary()
 {
+    const char* libPath = "libArkoalaNative_ark.dll";
     return LoadLibraryA(libPath);
 }
 inline void* FindSymbol(void* library, const char* name)
@@ -36,8 +32,9 @@ inline void* FindSymbol(void* library, const char* name)
 }
 #else
 #include <dlfcn.h>
-inline void* LoadLibrary(const char* libPath)
+inline void* LoadLibrary()
 {
+    const char* libPath = "libArkoalaNative_ark.z.so";
     void* handle = dlopen(libPath, RTLD_LOCAL | RTLD_LAZY);
     if (!handle) {
         return nullptr;
@@ -113,7 +110,7 @@ void DrawingRenderingContextPeerImpl::ThrowError(int32_t errCode, const std::str
     }
     auto vmContext = Ark_VMContext(frontEnd->GetEnv());
     CHECK_NULL_VOID(vmContext);
-    auto handle = LoadLibrary(LIBARKOALA_MODULE);
+    auto handle = LoadLibrary();
     CHECK_NULL_VOID(handle);
     auto aniErrorFunc = reinterpret_cast<AniThrowErrorFunc>(FindSymbol(handle, "AniThrowError"));
     CHECK_NULL_VOID(aniErrorFunc);
