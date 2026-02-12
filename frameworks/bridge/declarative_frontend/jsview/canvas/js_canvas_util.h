@@ -23,7 +23,6 @@ enum class StatisticEventType;
 }
 
 namespace OHOS::Ace::Framework {
-
 void SendStatisticEvent(StatisticEventType type);
 
 bool GetDoubleArg(const JSCallbackInfo& info, size_t index, double& value, bool isJudgeSpecialValue);
