@@ -85,11 +85,13 @@ public:
     std::optional<std::string> navDestinationId_;
     bool isEntry_ = false;
     bool fromRecovery_ = false;
+    bool recoveryFromReplaceDestination_ = false;
     int32_t mode_ = 0;
     bool needDelete_ = false;
     std::function<void(int32_t errorCode, std::string errorMessage)> promise_;
     bool isForceSet_ = false;
     bool isFromSingleToNMoved_ = false;
+    std::shared_ptr<PathInfo> replacedDestinationInfo_ = nullptr;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };
@@ -370,15 +372,8 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
-    void AddCustomNode(int32_t index, const RefPtr<NG::UINode>& node)
-    {
-        nodes_.insert(std::pair<int32_t, RefPtr<NG::UINode>>(index, node));
-    }
-
-    void ClearNodeList()
-    {
-        nodes_.clear();
-    }
+    bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex) override;
+    void SetRecoveryFromReplaceDestination(int32_t index, bool value) override;
     ParamType GetParamByIndex(int32_t index) const;
     void RegisterOnResultCallback();
 
@@ -401,7 +396,6 @@ public:
     bool IsHomeDestination(const std::string& name) const override;
 
 protected:
-    std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
     std::function<void()> onStateChangedCallback_;
     NavDestinationBuilderCallback navDestRouterMapBuilder_;
@@ -425,7 +419,8 @@ private:
         const std::string& name, Opt_Object param, RefPtr<NG::UINode>& node,
         RefPtr<NG::NavDestinationGroupNode>& desNode);
     std::string ErrorToMessage(int32_t code);
-    void FirePromise(PathInfo*, int32_t errorCode);
+    void RemoveInvalidPage(int32_t index, const std::string& name);
+    bool RemoveDestinationIfNeeded(PathInfo* pathInfo, int32_t errorCode, int32_t index);
     bool ExecutePopCallbackInStack(Opt_Object param);
     bool ExecutePopCallback(const RefPtr<NG::UINode>& uiNode, uint64_t navDestinationId, Opt_Object param);
     void ExecutePopCallbackForHomeNavDestination(Opt_Object param);

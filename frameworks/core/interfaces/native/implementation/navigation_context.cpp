@@ -46,7 +46,7 @@ void PathStack::InitNavPathIndex(const std::vector<std::string>& pathName)
 {
     popArray_.clear();
     for (size_t i = 0; i < pathArray_.size() && i < pathName.size(); i++) {
-        if (pathName[i] == pathArray_[i].name_ && isReplace_ != BOTH_ANIM_AND_REPLACE) {
+        if (pathName[i] == pathArray_[i].name_) {
             pathArray_[i].index_ = i;
         }
     }
@@ -253,6 +253,8 @@ ReplaceDestinationResultType PathStack::ReplaceDestination(PathInfo info,
         }
     } else {
         if (!pathArray_.empty()) {
+            info.replacedDestinationInfo_ = std::make_shared<PathInfo>();
+            *info.replacedDestinationInfo_ = pathArray_.back();
             pathArray_.pop_back();
         }
         pathArray_.push_back(info);
@@ -867,11 +869,40 @@ std::string NavigationStack::ErrorToMessage(int32_t code)
     }
 }
 
-void NavigationStack::FirePromise(PathInfo* pathInfo, int32_t errorCode)
+void NavigationStack::RemoveInvalidPage(int32_t index, const std::string& name)
 {
-    if (pathInfo->promise_) {
-        pathInfo->promise_(errorCode, ErrorToMessage(errorCode));
+    int32_t size = static_cast<int32_t>(pathArray_.size());
+    if (index >= size || index < 0) {
+        return;
     }
+    auto* info = &pathArray_[index];
+    if (info->name_ != name) {
+        return;
+    }
+    if (info->replacedDestinationInfo_) {
+        PathInfo tempInfo = *info->replacedDestinationInfo_;
+        *info = tempInfo;
+        info->recoveryFromReplaceDestination_ = true;
+        return;
+    }
+    auto it = std::next(pathArray_.begin(), index);
+    pathArray_.erase(it);
+}
+
+bool NavigationStack::RemoveDestinationIfNeeded(PathInfo* pathInfo, int32_t errorCode, int32_t index)
+{
+    CHECK_NULL_RETURN(pathInfo, true);
+    if (!pathInfo->promise_) {
+        return true;
+    }
+    if (errorCode == ERROR_CODE_NO_ERROR) {
+        pathInfo->promise_(errorCode, ErrorToMessage(errorCode));
+        return true;
+    }
+    auto tempInfo = *pathInfo;
+    RemoveInvalidPage(index, pathInfo->name_);
+    tempInfo.promise_(errorCode, ErrorToMessage(errorCode));
+    return false;
 }
 
 bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode,
@@ -909,12 +940,15 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
             }
         }
     }
+    bool isRemove = RemoveDestinationIfNeeded(pathInfo, errorCode, index);
+    if (!isRemove) {
+        return false;
+    }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfoStatic>();
         node = AceType::DynamicCast<NG::UINode>(
             NavDestinationModelStatic::CreateFrameNode(0, navPathInfo));
-        FirePromise(pathInfo, errorCode);
         auto navNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
         CHECK_NULL_RETURN(navNode, true);
         auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(navNode->GetPattern());
@@ -934,7 +968,6 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         pattern->SetNavPathInfo(pathInfoData);
         pattern->SetNavigationStack(WeakClaim(this));
     }
-    FirePromise(pathInfo, errorCode);
     return true;
 }
 
@@ -1291,5 +1324,24 @@ std::vector<std::string> PathStack::GetIdByName(const std::string& name)
         }
     }
     return array;
+}
+
+bool NavigationStack::CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex)
+{
+    auto* info = PathStack::GetPathInfo(index);
+    CHECK_NULL_RETURN(info, false);
+    if (!info->recoveryFromReplaceDestination_) {
+        return false;
+    }
+    replacedName = info->name_;
+    replacedIndex = info->index_;
+    return true;
+}
+
+void NavigationStack::SetRecoveryFromReplaceDestination(int32_t index, bool value)
+{
+    auto* info = PathStack::GetPathInfo(index);
+    CHECK_NULL_VOID(info);
+    info->recoveryFromReplaceDestination_ = value;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
