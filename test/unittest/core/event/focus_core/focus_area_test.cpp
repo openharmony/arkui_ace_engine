@@ -145,6 +145,7 @@ void FocusAreaTestNG::InitFocusareaTest()
         std::list<RefPtr<FocusHub>> children;
         rootNodeFocusHub->FlushChildrenFocusHub(children);
         EXPECT_EQ(children.size(), childSize);
+
         if (!testCase.isFocusBrotherNode) {
             auto nextnode = focusHubA->GetNearestNodeByProjectArea(children, testCase.StepMethod);
             CHECK_NULL_VOID(nextnode);

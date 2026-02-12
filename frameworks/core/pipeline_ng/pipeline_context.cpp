@@ -5044,7 +5044,8 @@ void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     ACE_SCOPED_TRACE("HandleVisibleAreaChangeEvent_nodeCount:%d", static_cast<int32_t>(nodes.size()));
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp, false, isDisappearChangeNodeMinDepth_);
+        frameNode->TriggerVisibleAreaChangeCallback(
+            { nanoTimestamp, instanceId_ }, false, isDisappearChangeNodeMinDepth_);
     }
 
     isDisappearChangeNodeMinDepth_ = 0;

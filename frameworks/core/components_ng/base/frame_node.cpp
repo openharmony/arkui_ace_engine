@@ -2162,7 +2162,7 @@ bool FrameNode::IsFrameDisappear() const
     return !curIsVisible || !curFrameIsActive;
 }
 
-bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth)
+bool FrameNode::IsFrameDisappear(std::pair<uint64_t, int32_t> timestampInstanceId, int32_t isVisibleChangeMinDepth)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -2184,14 +2184,15 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinD
         ClearCachedIsFrameDisappear();
         return true;
     }
-    auto result = IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
+    auto result = IsFrameAncestorDisappear(timestampInstanceId, isVisibleChangeMinDepth);
     if (result) {
         SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::ANCESTOR_INVISIBLE);
     }
     return result;
 }
 
-bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth)
+bool FrameNode::IsFrameAncestorDisappear(
+    std::pair<uint64_t, int32_t> timestampInstanceId, int32_t isVisibleChangeMinDepth)
 {
     bool curFrameIsActive = isActive_;
     bool curIsVisible = IsVisible();
@@ -2204,28 +2205,28 @@ bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleCh
     }
 
     // if this node have not calculate once, then it will calculate to root
-    isVisibleChangeMinDepth = cachedIsFrameDisappear_.first > 0 ? isVisibleChangeMinDepth : -1;
+    isVisibleChangeMinDepth = cachedIsFrameDisappear_.first.first > 0 ? isVisibleChangeMinDepth : -1;
     // MinDepth < 0, it do not work
     // MinDepth >= 0, and this node have calculate once
     // MinDepth = 0, no change from last frame, use cache directly
     // MinDepth > 0, and parent->GetDepth < MinDepth, parent do not change, use cache directly
     auto parentIsFrameDisappear = parentUi->cachedIsFrameDisappear_;
-    if ((parentIsFrameDisappear.first == timestamp) ||
-        ((isVisibleChangeMinDepth >= 0) && parentIsFrameDisappear.first && (isVisibleChangeMinDepth == 0 ||
+    if ((parentIsFrameDisappear.first == timestampInstanceId) ||
+        ((isVisibleChangeMinDepth >= 0) && parentIsFrameDisappear.first.first && (isVisibleChangeMinDepth == 0 ||
         ((isVisibleChangeMinDepth > 0) && (parentUi->GetDepth() < isVisibleChangeMinDepth))))) {
         result = result || parentIsFrameDisappear.second;
-        cachedIsFrameDisappear_ = { timestamp, result };
+        cachedIsFrameDisappear_ = { timestampInstanceId, result };
         return result;
     }
 
-    result = result || parentUi->IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
+    result = result || parentUi->IsFrameAncestorDisappear(timestampInstanceId, isVisibleChangeMinDepth);
 
-    cachedIsFrameDisappear_ = { timestamp, result };
+    cachedIsFrameDisappear_ = { timestampInstanceId, result };
     return result;
 }
 
 void FrameNode::TriggerVisibleAreaChangeCallback(
-    uint64_t timestamp, bool forceDisappear, int32_t isVisibleChangeMinDepth)
+    std::pair<uint64_t, int32_t> timestampInstanceId, bool forceDisappear, int32_t isVisibleChangeMinDepth)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -2244,12 +2245,12 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
-    if (forceDisappear || IsFrameDisappear(timestamp, isVisibleChangeMinDepth)) {
+    if (forceDisappear || IsFrameDisappear(timestampInstanceId, isVisibleChangeMinDepth)) {
         if (IsDebugInspectorId()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnVisibleAreaChange Node(%{public}s/%{public}d) "
                 "lastRatio(User:%{public}s/Inner:%{public}s) forceDisappear:%{public}d frameDisappear:%{public}d ",
                 tag_.c_str(), nodeId_, std::to_string(lastVisibleRatio_).c_str(),
-                std::to_string(lastInnerVisibleRatio_).c_str(), forceDisappear, IsFrameDisappear(timestamp));
+                std::to_string(lastInnerVisibleRatio_).c_str(), forceDisappear, IsFrameDisappear(timestampInstanceId));
         }
         if (!NearEqual(lastInnerVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN,
@@ -2263,7 +2264,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
         }
         return;
     }
-    auto visibleResult = GetCacheVisibleRect(timestamp, IsDebugInspectorId());
+    auto visibleResult = GetCacheVisibleRect(timestampInstanceId.first, IsDebugInspectorId());
     SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
     DispatchVisibleAreaChangeEvent(visibleResult);
 }
@@ -7976,7 +7977,7 @@ void FrameNode::HandleAreaChangeDestruct()
         if (eventHub_->HasVisibleAreaCallback(true) || eventHub_->HasVisibleAreaCallback(false) ||
             eventHub_->HasThrottledVisibleAreaCallback()) {
             SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::FRAMENODE_DESTROY);
-            TriggerVisibleAreaChangeCallback(0, true);
+            TriggerVisibleAreaChangeCallback({ 0, 0 }, true);
             CleanVisibleAreaUserCallback(true);
             CleanVisibleAreaUserCallback();
             CleanVisibleAreaInnerCallback();

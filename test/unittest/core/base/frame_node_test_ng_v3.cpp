@@ -510,10 +510,10 @@ HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback100, TestSize.Level1)
     addInfo.isCurrentVisible = false;
     child->SetVisibleAreaUserCallback(ratioList, addInfo);
     auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
-    child->TriggerVisibleAreaChangeCallback(1, false);
+    child->TriggerVisibleAreaChangeCallback({ 1, 0 }, false);
     EXPECT_FALSE(visibleAreaUserCallback.measureFromViewport);
     visibleAreaUserCallback.measureFromViewport = true;
-    child->TriggerVisibleAreaChangeCallback(2, false);
+    child->TriggerVisibleAreaChangeCallback({ 2, 0 }, false);
     EXPECT_TRUE(visibleAreaUserCallback.measureFromViewport);
 }
 

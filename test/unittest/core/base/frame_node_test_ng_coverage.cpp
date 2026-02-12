@@ -1400,7 +1400,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear03, TestSize.Level1)
      */
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
-    frameNode->IsFrameDisappear(TIMESTAMP_1);
+    frameNode->IsFrameDisappear({ TIMESTAMP_1, 0 });
     EXPECT_TRUE(parentNode->isActive_);
     EXPECT_TRUE(frameNode->onMainTree_);
     EXPECT_NE(frameNode->pattern_, nullptr);
@@ -1449,20 +1449,20 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear04, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode2->SetLayoutProperty(layoutProperty2);
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear({ TIMESTAMP_1, 0 }));
 
     /**
      * @tc.steps: step4. call the function IsFrameDisappear and use TIMESTAMP_1 cache.
      * @tc.expected: expect res is false
      */
     parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 0));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear({ TIMESTAMP_2, 0 }, 0));
 
     /**
      * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
      * @tc.expected: expect res is true
      */
-    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_3));
+    EXPECT_TRUE(frameNode2->IsFrameDisappear({ TIMESTAMP_3, 0 }));
 }
 
 /**
@@ -1507,20 +1507,20 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear05, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode2->SetLayoutProperty(layoutProperty2);
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear({ TIMESTAMP_1, 0 }));
 
     /**
      * @tc.steps: step4. call the function IsFrameDisappear and use TIMESTAMP_1 cache.
      * @tc.expected: expect res is false
      */
     parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 3));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear({ TIMESTAMP_2, 0 }, 3));
 
     /**
      * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
      * @tc.expected: expect res is true
      */
-    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_3, 1));
+    EXPECT_TRUE(frameNode2->IsFrameDisappear({ TIMESTAMP_3, 0 }, 1));
 }
 
 /**
@@ -1565,7 +1565,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear06, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode2->SetLayoutProperty(layoutProperty2);
-    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+    EXPECT_TRUE(frameNode2->IsFrameDisappear({ TIMESTAMP_1, 0 }));
 
     /**
      * @tc.steps: step4. set onshow false and call the function IsFrameDisappear.
@@ -1573,14 +1573,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear06, TestSize.Level1)
      */
     parentLayoutProperty->propVisibility_ = VisibleType::VISIBLE;
     context->onShow_ = false;
-    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 1));
+    EXPECT_TRUE(frameNode2->IsFrameDisappear({ TIMESTAMP_2, 0 }, 1));
 
     /**
      * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
      * @tc.expected: expect res is true
      */
     context->onShow_ = true;
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_3, 0));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear({ TIMESTAMP_3, 0 }, 0));
 }
 
 /**
@@ -1625,7 +1625,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear07, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode2->SetLayoutProperty(layoutProperty2);
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear({ TIMESTAMP_1, 0 }));
 
     /**
      * @tc.steps: step4. set frameNode2 INVISIBLE and call the function IsFrameDisappear.
@@ -1633,14 +1633,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear07, TestSize.Level1)
      */
     parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
     layoutProperty2->propVisibility_ = VisibleType::INVISIBLE;
-    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 1));
+    EXPECT_TRUE(frameNode2->IsFrameDisappear({ TIMESTAMP_2, 0 }, 1));
 
     /**
      * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
      * @tc.expected: expect res is true
      */
     layoutProperty2->propVisibility_ = VisibleType::VISIBLE;
-    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_3, 3));
+    EXPECT_TRUE(frameNode2->IsFrameDisappear({ TIMESTAMP_3, 0 }, 3));
 }
 
 /**
@@ -1810,15 +1810,15 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
     frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true) = callbackInfo;
-    frameNode->TriggerVisibleAreaChangeCallback(0, false);
+    frameNode->TriggerVisibleAreaChangeCallback({ 0, 0 }, false);
     frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback = nullptr;
     frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(false) = callbackInfo;
-    frameNode->TriggerVisibleAreaChangeCallback(0, false);
+    frameNode->TriggerVisibleAreaChangeCallback({ 0, 0 }, false);
     EXPECT_NE(frameNode->GetEventHub<EventHub>(), nullptr);
     frameNode->isCalculateInnerVisibleRectClip_ = true;
     frameNode->lastInnerVisibleRatio_ = 10.0;
     frameNode->lastVisibleRatio_ = 10.0;
-    frameNode->TriggerVisibleAreaChangeCallback(0, true);
+    frameNode->TriggerVisibleAreaChangeCallback({ 0, 0 }, true);
     frameNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true) = callbackInfo;
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1831,7 +1831,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
      */
     std::vector<double> ratios = { 0, 1.0 };
     frameNode->SetLayoutProperty(layoutProperty);
-    frameNode->TriggerVisibleAreaChangeCallback(false);
+    frameNode->TriggerVisibleAreaChangeCallback({ 0, 0 }, false);
     frameNode->ProcessAllVisibleCallback(ratios, callbackInfo, 1.0, 0.0, true);
     EXPECT_NE(frameNode->GetEventHub<EventHub>(), nullptr);
 }

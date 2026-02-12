@@ -55,7 +55,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
 
     if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false) || HasThrottledVisibleAreaCallback()) {
         host->SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::DETACH_FROM_MAINTREE);
-        host->TriggerVisibleAreaChangeCallback(0, true);
+        host->TriggerVisibleAreaChangeCallback({ 0, 0 }, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
     auto eventManager = context->GetEventManager();

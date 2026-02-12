@@ -2908,15 +2908,15 @@ void EventManager::LogHitTestInfoRecord(const TouchEvent& touchPoint)
         constexpr size_t lengthLimit = 900;
         auto json = GetLastHitTestNodeInfosForTouch(false);
         if (json.length() <= lengthLimit) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "LogHitTestInfoRecord fingerId:%{public}d json:%{public}s", touchPoint.id,
-                json.c_str());
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "LogHitTestInfoRecord fingerId:%{public}d json:" SEC_PLD("%{public}s"),
+                touchPoint.id, SEC_PARAM(json.c_str()));
             return;
         }
-        auto jsonChar = json.c_str();
-        for (size_t i = 0; i < json.length(); i += lengthLimit) {
+        size_t partSize = json.size() / lengthLimit + (json.size() % lengthLimit == 0 ? 0 : 1);
+        for (size_t i = 0; i < partSize; i++) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT,
-                "LogHitTestInfoRecord fingerId:%{public}d .%{public}zu:json:[%{public}.*s]", touchPoint.id, i,
-                (int)lengthLimit, jsonChar + i);
+                "LogHitTestInfoRecord fingerId:%{public}d .%{public}zu:json:" SEC_PLD("%{public}s"), touchPoint.id, i,
+                SEC_PARAM(json.substr(i * lengthLimit, lengthLimit).c_str()));
         }
     }
 }

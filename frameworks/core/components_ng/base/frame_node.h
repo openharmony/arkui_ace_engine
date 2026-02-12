@@ -301,8 +301,8 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(
-        uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
+    void TriggerVisibleAreaChangeCallback(std::pair<uint64_t, int32_t> timestampInstanceId,
+        bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -1389,7 +1389,7 @@ public:
 
     void ClearCachedIsFrameDisappear()
     {
-        cachedIsFrameDisappear_ = { 0, false };
+        cachedIsFrameDisappear_ = { { 0, 0 }, false };
     }
 
     void SetTopWindowBoundary(bool topWindowBoundary)
@@ -1596,8 +1596,9 @@ private:
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
-    bool IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
-    bool IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
+    bool IsFrameDisappear(std::pair<uint64_t, int32_t> timestampInstanceId, int32_t isVisibleChangeMinDepth = -1);
+    bool IsFrameAncestorDisappear(
+        std::pair<uint64_t, int32_t> timestampInstanceId, int32_t isVisibleChangeMinDepth = -1);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
@@ -1807,7 +1808,7 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
-    std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
+    std::pair<std::pair<uint64_t, int32_t>, bool> cachedIsFrameDisappear_ = { { 0, 0 }, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     struct onSizeChangeDumpInfo {
