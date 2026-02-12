@@ -29,17 +29,11 @@ public:
     void Create(const std::u16string& content) override;
     void Create(const std::u16string& content, RefPtr<ResourceObject>& resObj) override;
     void SetFont(const Font& value) override;
-    void ResetFont() override {};
     void SetFontSize(const Dimension& value) override;
-    void ResetFontSize() override {};
     void SetTextColor(const Color& value) override;
-    void ResetTextColor() override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
-    void ResetItalicFontStyle() override {};
     void SetFontWeight(FontWeight value) override;
-    void ResetFontWeight() override {};
     void SetFontFamily(const std::vector<std::string>& value) override;
-    void ResetFontFamily() override {};
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
