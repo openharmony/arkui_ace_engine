@@ -2137,6 +2137,7 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
     selectMenu_->MarkModifyDone();
 }
 
+
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
 {
     CHECK_NULL_VOID(!isDoingAnimation_);
@@ -2696,6 +2697,10 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params, co
     auto extensionMenuContext = extensionMenu_->GetRenderContext();
     CHECK_NULL_VOID(extensionMenuContext);
 
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    if (pattern) {
+        pattern->SetEmbeddedSubMenuExpandTotalCount(0);
+    }
     extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
     extensionMenuStatus_ = FrameNodeStatus::GONE;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -3411,11 +3416,11 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     CHECK_NULL_RETURN(theme, systemItemParams);
     auto isUsingMouse = info->isUsingMouse;
     auto menuInfo = info->menuInfo;
-    AddMenuItemParamIf(menuInfo.showCut || isUsingMouse, OH_DEFAULT_CUT, theme->GetCutLabel(), systemItemParams);
     AddMenuItemParamIf(
         menuInfo.showCopy || isUsingMouse, OH_DEFAULT_COPY, theme->GetCopyLabel(), systemItemParams);
     AddMenuItemParamIf(
         menuInfo.showPaste || isUsingMouse, OH_DEFAULT_PASTE, theme->GetPasteLabel(), systemItemParams);
+    AddMenuItemParamIf(menuInfo.showCut || isUsingMouse, OH_DEFAULT_CUT, theme->GetCutLabel(), systemItemParams);
     AddMenuItemParamIf(menuInfo.showCopyAll || isUsingMouse, OH_DEFAULT_SELECT_ALL, theme->GetSelectAllLabel(),
         systemItemParams);
     // Below is advanced options, consider support disableMenuItems and disableSystemServiceMenuItems by TextSystemMenu

@@ -19,10 +19,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
+#include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/offset.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
