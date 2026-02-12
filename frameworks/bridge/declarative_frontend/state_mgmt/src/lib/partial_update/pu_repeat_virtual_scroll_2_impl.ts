@@ -490,7 +490,7 @@ class __RepeatVirtualScroll2Impl<T> {
             }
 
             if (!this.itemGenFuncs_[RepeatEachFuncTtype]) {
-                throw new Error(`${this.constructor.name}(${this.repeatElmtId_}))` +
+                throw new BusinessError(103802, `${this.constructor.name}(${this.repeatElmtId_}))` +
                     `lacks mandatory '.each' attribute function, i.e. has no default item builder. Application error!`);
             }
 
@@ -954,9 +954,11 @@ class __RepeatVirtualScroll2Impl<T> {
      */
     private onGetRid4Index(forIndex: number): [number, number] {
         if (forIndex < 0 || forIndex >= this.totalCount()) {
-            throw new Error(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
+            stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
                 `\ndata array length: ${this.arr_.length}, totalCount: ${this.totalCount()}: ` +
                 `Out of range, application error.`);
+            this.activeDataItems_[forIndex] = ActiveDataItem.createMissingDataItem();
+            return [0, /* failed to create or update */ 0];
         }
         const [dataItemExists, dataItem] = this.getItemUnmonitored(forIndex);
         if (!dataItemExists) {
@@ -1506,7 +1508,7 @@ class __RepeatVirtualScroll2Impl<T> {
         
         if (this.lazyLoadingIndex_ !== -1 && arrChange !== 'set') {
             const msg = `onLazyLoading function executed illegal operation: ${arrChange}!`;
-            throw new Error(`${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
+            throw new BusinessError(103804, `${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayout for '${arrChange}'`,
@@ -1546,7 +1548,7 @@ class __RepeatVirtualScroll2Impl<T> {
             const changeIndex = args[0] as number;
             if (this.lazyLoadingIndex_ !== -1 && changeIndex !== this.lazyLoadingIndex_) {
                 const msg = `onLazyLoading function illegally set to index: ${changeIndex}`;
-                throw new Error(`${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
+                throw new BusinessError(103804, `${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
             }
             return (changeIndex >= 0) && this.tryFastRelayoutForChange(this.arr_.length, changeIndex, 0, 0);
         }

@@ -1216,7 +1216,7 @@ namespace OHOS::Ace::NG {
         return cachedItemInfo + "|" + expiringItemInfo;
     }
 
-    std::string LazyForEachBuilder::GetCachedItemDump() const
+    std::string LazyForEachBuilder::GetCachedItemsDump() const
     {
         std::string cachedNodes;
         if (expiringItem_.size() > 0) {
@@ -1241,15 +1241,15 @@ namespace OHOS::Ace::NG {
     {
         DumpLog::GetInstance().AddDesc(std::string("The totalCount of data:")
                                             .append(std::to_string(GetTotalCount()).c_str()));
-        auto info = GetCachedItemDump();
+        auto info = GetCachedItemsDump();
         if (!info.empty()) {
-            DumpLog::GetInstance().AddDesc(std::string("cachedItems: ").append(info));
+            DumpLog::GetInstance().AddDesc(std::string("CachedItems: ").append(info));
         }
     }
 
     void LazyForEachBuilder::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
     {
-        auto info = GetCachedItemDump();
+        auto info = GetCachedItemsDump();
         if (!info.empty()) {
             json->Put("$CachedItems", info.c_str());
         }

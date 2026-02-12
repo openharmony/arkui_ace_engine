@@ -240,8 +240,7 @@ OptCacheItem RepeatVirtualScroll2Caches::GetNewRid4Index(IndexType index, RIDTyp
     TAG_LOGD(AceLogTag::ACE_REPEAT, "REPEAT TRACE ABNORMAL (after startup) ...CallOnGetRid4Index"
         "(index %{public}d -> rid %{public}d) returns CacheItem with newly created node %{public}s .",
         index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
-    ACE_SCOPED_TRACE(
-        "RepeatVirtualScroll:CallOnGetRid4Index CREATED_NEW_NODE [index] %d, [rid] %d, [item] %s",
+    ACE_SCOPED_TRACE("RepeatVirtualScroll:CallOnGetRid4Index CREATED_NEW_NODE [index] %d, [rid] %d, [item] %s",
         index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
     return cacheItem4Rid_[rid];
 }
@@ -265,8 +264,7 @@ OptCacheItem RepeatVirtualScroll2Caches::GetUpdatedRid4Index(IndexType index, RI
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "CallOnGetRid4Index(index %{public}d -> rid %{public}d): returns CacheItem with updated node "
         "%{public}s .", index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
-    ACE_SCOPED_TRACE(
-        "RepeatVirtualScroll:CallOnGetRid4Index UPDATED_NODE [index] %d, [rid] %d, [item] %s",
+    ACE_SCOPED_TRACE("RepeatVirtualScroll:CallOnGetRid4Index UPDATED_NODE [index] %d, [rid] %d, [item] %s",
         index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
     return optCacheItem;
 }
