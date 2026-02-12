@@ -842,7 +842,15 @@ void setGestureInterrupterToNodeWithUserData(
             if (item.Invalid()) {
                 continue;
             }
-            auto recognizer = NodeModifier::CreateGestureRecognizer(item.Upgrade());
+            auto innerRecognizer = item.Upgrade();
+            if (!innerRecognizer) {
+                continue;
+            }
+            auto gestureInfo = innerRecognizer->GetGestureInfo();
+            if (gestureInfo && gestureInfo->GetDisposeTag()) {
+                continue;
+            }
+            auto recognizer = NodeModifier::CreateGestureRecognizer(innerRecognizer);
             if (recognizer) {
                 othersRecognizers.push_back(recognizer);
             }

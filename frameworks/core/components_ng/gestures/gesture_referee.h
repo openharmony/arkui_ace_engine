@@ -151,7 +151,7 @@ public:
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus);
 private:
     void RecallOnAcceptGesture();
-    bool CheckRecognizerInInnerContainer(const RefPtr<NGGestureRecognizer>& recognizer);
+    bool CheckRecognizerInInnerContiner(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& recognizer);

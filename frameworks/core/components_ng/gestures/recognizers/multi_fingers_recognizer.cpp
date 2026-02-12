@@ -78,7 +78,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         
         auto it = latestTimeStamps.find(originalId);
         if (it == latestTimeStamps.end() || static_cast<uint64_t>(currentTimeStamp) > it->second) {
-            latestTimeStamps[originalId] = currentTimeStamp;
+            latestTimeStamps[originalId] = static_cast<uint64_t>(currentTimeStamp);
 
             FingerInfo fingerInfo = { originalId, point.second.operatingHand,
                 point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),

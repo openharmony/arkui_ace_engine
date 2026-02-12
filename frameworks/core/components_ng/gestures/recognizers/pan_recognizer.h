@@ -195,6 +195,8 @@ private:
 
     void UpdateAxisDeltaTransform(const AxisEvent& event);
 
+    bool CheckNeedAddCurrentFingerInfo(const TouchEvent& event) override;
+
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;

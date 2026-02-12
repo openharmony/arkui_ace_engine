@@ -254,6 +254,16 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
     }
 }
 
+bool PanRecognizer::CheckNeedAddCurrentFingerInfo(const TouchEvent& event)
+{
+    if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        extraInfo_ += "mouse event is not allowed.";
+        return false;
+    }
+    return true;
+}
+
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();

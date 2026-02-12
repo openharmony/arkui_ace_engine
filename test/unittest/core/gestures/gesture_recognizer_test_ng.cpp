@@ -1156,6 +1156,49 @@ HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRecognizerHandleEvent003
+ * @tc.desc: Test PanRecognizer function: ChangeDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GestureRecognizerHandleEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    PanDirection direction;
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(SINGLE_FINGER_NUMBER, direction, 0);
+    ASSERT_NE(panRecognizerPtr, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceType = SourceType::TOUCH;
+
+    /**
+     * @tc.steps: step3. set currentFinger = 0, test with sourceType::TOUCH_SCREEN and isAllowMouse_ true.
+     * @tc.steps: case1: touchPoints is in recognizer region.
+     * @tc.expected: step3. func success, panRecognizer currentFingers add.
+     */
+    panRecognizerPtr->currentFingers_ = 0;
+    bool result = panRecognizerPtr->AboutToAddCurrentFingers(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(panRecognizerPtr->currentFingers_, 1);
+
+    touchEvent.sourceType = SourceType::MOUSE;
+    result = panRecognizerPtr->AboutToAddCurrentFingers(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(panRecognizerPtr->currentFingers_, 2);
+
+    panRecognizerPtr->isAllowMouse_ = false;
+    touchEvent.sourceType = SourceType::TOUCH;
+    result = panRecognizerPtr->AboutToAddCurrentFingers(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(panRecognizerPtr->currentFingers_, 3);
+
+    touchEvent.sourceType = SourceType::MOUSE;
+    result = panRecognizerPtr->AboutToAddCurrentFingers(touchEvent);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(panRecognizerPtr->currentFingers_, 3);
+}
+
+/**
  * @tc.name: GetGestureInfoString001
  * @tc.desc: Test GestureRecognizerTestNg function: GetGestureInfoString
  * @tc.type: FUNC
