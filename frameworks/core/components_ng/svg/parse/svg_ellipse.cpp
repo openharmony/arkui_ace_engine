@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_ellipse.h"
-
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components_ng/svg/parse/svg_ellipse.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,7 +55,7 @@ RSRecordingPath SvgEllipse::AsPath(const SvgLengthScaleRule& lengthRule)
 {
     RSRecordingPath path;
     /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && lengthRule_ == lengthRule) {
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
         path = path_.value();
     } else {
         auto rx = GreatNotEqual(ellipseAttr_.rx.Value(), 0.0) ?

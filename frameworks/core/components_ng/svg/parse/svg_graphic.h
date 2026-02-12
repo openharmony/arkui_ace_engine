@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,7 @@ protected:
     void OnGraphicFill()
     {
         if (rsCanvas_) {
-            if (!path_.has_value()) {
+            if(!path_.has_value()){
                 return;
             }
             auto smoothEdge = GetSmoothEdge();
@@ -118,7 +118,6 @@ protected:
             return;
         }
         DumpDrawPathInfo(rsPath);
-
         canvas.AttachBrush(brush);
         canvas.DrawPath(rsPath);
         canvas.DetachBrush();
@@ -149,7 +148,7 @@ protected:
 
     void OnGraphicStroke()
     {
-        if (!path_.has_value()) {
+        if(!path_.has_value()){
             return;
         }
         if (rsCanvas_) {
@@ -161,6 +160,7 @@ protected:
             if (!path_->IsValid()) {
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
+            DumpDrawPathInfo(path_.value());
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
@@ -172,7 +172,6 @@ protected:
             } else {
                 rsCanvas_->AttachPen(strokePen_);
             }
-            DumpDrawPathInfo(path_.value());
             rsCanvas_->DrawPath(path_.value());
             rsCanvas_->DetachPen();
         }
