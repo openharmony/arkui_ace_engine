@@ -5479,6 +5479,9 @@ bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartT
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
+    if (!NeedSoftKeyboard()) {
+        return false;
+    }
     if (needShowSoftKeyboard && (customKeyboardNode_ || customKeyboardBuilder_)) {
         return RequestCustomKeyboard();
     }

@@ -446,6 +446,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_RICH_EDITOR_ON_CUT;
         case NODE_TEXT_EDITOR_ON_COPY:
             return ON_RICH_EDITOR_ON_COPY;
+        case NODE_ON_NEED_SOFTKEYBOARD:
+            return ON_NEED_SOFTKEYBOARD;
         default:
             return -1;
     }
@@ -762,6 +764,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_EDITOR_ON_CUT;
         case ON_RICH_EDITOR_ON_COPY:
             return NODE_TEXT_EDITOR_ON_COPY;
+        case ON_NEED_SOFTKEYBOARD:
+            return NODE_ON_NEED_SOFTKEYBOARD;
         default:
             return -1;
     }
@@ -1239,16 +1243,27 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
 
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
 {
-    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+    if (!event || (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT) &&
+        event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT))) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
-    auto* mixedData = reinterpret_cast<ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
-    for (int i = 0; i < size; i++) {
-        mixedData->numberReturnData[i].i32 = value[i].i32;
+    if (event->category == static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        auto* mixedData = reinterpret_cast<ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
+        if (mixedData != nullptr) {
+            for (int i = 0; i < size; i++) {
+                mixedData->numberReturnData[i].i32 = value[i].i32;
+            }
+        }
+    }
+    if (event->kind == NODE_ON_NEED_SOFTKEYBOARD) {
+        auto* keyBoardData = reinterpret_cast<ArkUINodeAsyncEvent*>(&(originNodeEvent->componentAsyncEvent));
+        if (keyBoardData != nullptr) {
+            keyBoardData->data[0].i32 = value[0].i32;
+        }
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

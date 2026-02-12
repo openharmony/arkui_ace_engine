@@ -57,6 +57,7 @@ using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
 using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
 using BiasPair = std::pair<float, float>;
+using OnNeedSoftkeyboardFunc = std::function<bool()>;
 enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
@@ -359,6 +360,8 @@ public:
     virtual void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) = 0;
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
+    virtual void SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback) {};
+    virtual void ResetOnNeedSoftkeyboard() {};
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
     virtual void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) = 0;
     virtual void SetDraggable(bool draggable) = 0;

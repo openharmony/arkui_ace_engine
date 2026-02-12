@@ -231,6 +231,8 @@ public:
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override;
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
+    void SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback) override {};
+    void ResetOnNeedSoftkeyboard() override {};
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
     void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override {}
     void SetDraggable(bool draggable) override {}

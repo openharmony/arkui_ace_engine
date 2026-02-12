@@ -273,6 +273,7 @@ export enum CallbackKind {
     Kind_OnNativeEmbedObjectParamChangeCallback = 2143431884,
     Kind_OnNativeEmbedVisibilityChangeCallback = -1641338704,
     Kind_OnNavigationEntryCommittedCallback = -398722176,
+    Kind_OnNeedSoftkeyboardCallback = 1976128819,
     Kind_OnOverrideErrorPageCallback = 1599140581,
     Kind_OnOverrideUrlLoadingCallback = 865258467,
     Kind_OnPasteCallback = 1738363337,
