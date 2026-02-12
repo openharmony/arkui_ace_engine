@@ -763,11 +763,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest014, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest017
+ * @tc.name: CustomMeasureLayoutTest015
  * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -804,52 +804,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest017
- * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
-     * @tc.expected: CustomMeasureLayoutNode created successfully.
-     */
-    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
-    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
-        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
-    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
-    customNode->MountToParent(frameNode);
-
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step2. Set updateParamFunc and call FireOnUpdateParam with null.
-     * @tc.expected: Function is called, receives null, returns true.
-     * Logic: FireOnUpdateParam doesn't validate layoutWrapper, just passes it through
-     */
-    NG::LayoutWrapper* capturedWrapper = nullptr;
-    bool updateCalled = false;
-    auto updateParamFunc = [&updateCalled, &capturedWrapper](
-        NG::LayoutWrapper* layoutWrapper) {
-        updateCalled = true;
-        capturedWrapper = layoutWrapper;
-    };
-    customNode->SetUpdateParamFunc(std::move(updateParamFunc));
-
-    auto fireResult = customNode->FireOnUpdateParam(nullptr);
-    EXPECT_TRUE(fireResult);
-    EXPECT_TRUE(updateCalled);
-    EXPECT_EQ(capturedWrapper, nullptr);
-}
-
-/**
- * @tc.name: CustomMeasureLayoutTest017
+ * @tc.name: CustomMeasureLayoutTest016
  * @tc.desc: Test FireOnLayout with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -886,11 +845,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest018
+ * @tc.name: CustomMeasureLayoutTest017
  * @tc.desc: Test FireOnUpdateParam with null LayoutWrapper
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -927,11 +886,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest019
+ * @tc.name: CustomMeasureLayoutTest018
  * @tc.desc: Test FireOnMeasure/FireOnLayout without setting function
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest019, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest018, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode and parent wrapper.
@@ -963,11 +922,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest019, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest020
+ * @tc.name: CustomMeasureLayoutTest019
  * @tc.desc: Test RenderCustomChild timeout behavior
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest020, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest019, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode with child.
@@ -993,11 +952,11 @@ HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest020, TestSize.Level0)
 }
 
 /**
- * @tc.name: CustomMeasureLayoutTest021
+ * @tc.name: CustomMeasureLayoutTest020
  * @tc.desc: Test RenderCustomChild calls Render then FrameNode::RenderCustomChild
  * @tc.type: FUNC
  */
-HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest021, TestSize.Level0)
+HWTEST_F(CustomMeasureLayoutTestNg, CustomMeasureLayoutTest020, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create CustomMeasureLayoutNode with child.
