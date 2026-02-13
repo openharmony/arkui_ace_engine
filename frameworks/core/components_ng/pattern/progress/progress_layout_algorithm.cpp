@@ -131,8 +131,8 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(progressLayoutProperty->GetThemeScopeId());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth().
@@ -194,7 +194,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     CHECK_NULL_RETURN(paintProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     Dimension margin = progressTheme->GetTextMargin();
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(childWrapper, DEFALT_CAPSULE_WIDTH.ConvertToPx());

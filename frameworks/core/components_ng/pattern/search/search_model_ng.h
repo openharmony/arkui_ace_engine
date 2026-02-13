@@ -33,7 +33,6 @@ public:
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override;
     void SetCaretColor(const Color& color) override;
-    void ResetCaretColor() override;
     void SetSearchIconSize(const Dimension& value) override;
     void SetSearchIconColor(const Color& color) override;
     void SetSearchSrcPath(
@@ -50,7 +49,7 @@ public:
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color, bool isTheme = false) override;
     void SetSearchButtonAutoDisable(bool needToDisable) override;
-    void SetPlaceholderColor(const Color& color) override;
+    void SetPlaceholderColor(const Color& color, bool isTheme = false) override;
     void ResetPlaceholderColor() override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
@@ -60,8 +59,6 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;
     void ResetTextColor() override;
-    void SetBackgroundColor(const Color& color) override;
-    void ResetBackgroundColor() override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
@@ -105,7 +102,6 @@ public:
     void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
-    void ResetSelectedBackgroundColor() override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
@@ -161,7 +157,6 @@ public:
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden);
     static void SetCaretWidth(FrameNode* frameNode, const Dimension& value);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
-    static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);

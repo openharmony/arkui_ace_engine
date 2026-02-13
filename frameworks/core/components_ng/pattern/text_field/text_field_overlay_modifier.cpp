@@ -276,7 +276,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
             textBox.Right() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
             defaultStyle
                 ? (textBox.Bottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
-                         : textFieldPattern->GetFrameRect().Height()));
+                : textFieldPattern->GetFrameRect().Height()));
     }
     canvas.DetachBrush();
     canvas.Restore();
@@ -310,7 +310,9 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (showOriginCursor) {
         pen.SetColor(ToRSColor(LinearColor(textFieldPattern->GetOriginCursorColor())));
     } else {
-        pen.SetColor(ToRSColor(cursorColor_->Get()));
+        auto color = cursorColor_->Get().ToColor();
+        color.SetPlaceholder(setCursorColor_.GetPlaceholder());
+        pen.SetColor(ToRSColor(color));
     }
     canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
@@ -485,6 +487,7 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
 {
     cursorColor_->Set(LinearColor(value));
+    setCursorColor_ = value;
 }
 
 void TextFieldOverlayModifier::SetCursorWidth(float value)

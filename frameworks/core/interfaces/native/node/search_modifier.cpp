@@ -33,6 +33,7 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr CancelButtonStyle DEFAULT_CANCEL_BUTTON_STYLE = CancelButtonStyle::INPUT;
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
+constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -156,8 +157,9 @@ void ResetSearchCaretStyle(ArkUINodeHandle node)
     auto textFieldTheme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
+    uint32_t caretColor = textFieldTheme->GetCursorColor().GetValue();
     SearchModelNG::SetCaretWidth(frameNode, Dimension(caretWidth.Value(), caretWidth.Unit()));
-    SearchModelNG::ResetCaretColor(frameNode);
+    SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -421,7 +423,7 @@ void ResetSearchFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::ResetTextColor(frameNode);
+    SearchModelNG::SetTextColor(frameNode, THEME_SEARCH_TEXT_COLOR);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -730,7 +732,17 @@ void ResetSearchSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::ResetSelectedBackgroundColor(frameNode);
+    Color selectedColor;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor = theme->GetSelectedColor();
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    SearchModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);

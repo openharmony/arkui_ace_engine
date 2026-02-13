@@ -219,19 +219,6 @@ void SearchModelNG::SetCaretColor(const Color& color)
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SearchModelNG::ResetCaretColor()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFrameNode);
-    auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textPaintProperty);
-    textPaintProperty->ResetCursorColor();
-    textPaintProperty->ResetCaretColorFlagByUser();
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
 void SearchModelNG::SetSearchButton(const std::string& text)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -414,7 +401,7 @@ void SearchModelNG::SetSearchButtonAutoDisable(bool needToDisable)
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchModelNG::SetPlaceholderColor(const Color& color)
+void SearchModelNG::SetPlaceholderColor(const Color& color, bool isTheme)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -422,18 +409,18 @@ void SearchModelNG::SetPlaceholderColor(const Color& color)
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
     auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
-    textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
     textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     std::string info;
     if (color.GetValue() == 0x99000000) {
-        info = "ModelNG::Set: 99000000";
+        info = "ModelNG::Set: 99000000 isT:" + std::to_string(isTheme);
     } else {
-        info = "ModelNG::Set";
+        info = "ModelNG::Set isT:" + std::to_string(isTheme);
     }
     textFieldPattern->SetPlaceholderColorInfo(info);
 }
@@ -491,18 +478,6 @@ void SearchModelNG::SetSelectedBackgroundColor(const Color& value)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SearchModelNG::ResetSelectedBackgroundColor()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textFieldPaintProperty);
-    textFieldPaintProperty->ResetSelectedBackgroundColor();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
 void SearchModelNG::SetTextFont(const Font& font)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -557,27 +532,6 @@ void SearchModelNG::ResetTextColor()
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void SearchModelNG::SetBackgroundColor(const Color& color)
-{
-    ViewAbstract::SetBackgroundColor(color);
- 
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textFieldPaintProperty);
-    textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, BackgroundColor, color);
-}
- 
-void SearchModelNG::ResetBackgroundColor()
-{
-    ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SearchLayoutProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
-}
-
 void SearchModelNG::SetInputFilter(
     FrameNode* frameNode, const std::string& value, const std::function<void(const std::u16string&)>& onError)
 {
@@ -593,7 +547,6 @@ void SearchModelNG::SetInputFilter(
     CHECK_NULL_VOID(textFieldEventHub);
     textFieldEventHub->SetOnInputFilterError(onError);
 }
-
 void SearchModelNG::SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1555,20 +1508,6 @@ void SearchModelNG::SetTextColor(FrameNode* frameNode, const Color& color)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SearchModelNG::ResetTextColor(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textFieldPaintProperty);
-    textFieldLayoutProperty->ResetTextColor();
-    textFieldPaintProperty->ResetTextColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
 void SearchModelNG::SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1677,18 +1616,6 @@ void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
     textPaintProperty->UpdateCaretColorFlagByUser(true);
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void SearchModelNG::ResetCaretColor(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFrameNode);
-    auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textPaintProperty);
-    textPaintProperty->ResetCursorColor();
-    textPaintProperty->ResetCaretColorFlagByUser();
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2046,17 +1973,6 @@ void SearchModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color
     auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->UpdateSelectedBackgroundColor(value);
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void SearchModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textFieldPaintProperty);
-    textFieldPaintProperty->ResetSelectedBackgroundColor();
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

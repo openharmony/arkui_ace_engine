@@ -68,7 +68,7 @@ void SearchModelImpl::SetSearchButton(const std::string& text)
     searchComponent->SetSearchText(text);
 }
 
-void SearchModelImpl::SetPlaceholderColor(const Color& color)
+void SearchModelImpl::SetPlaceholderColor(const Color& color, bool isTheme)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
@@ -86,6 +86,7 @@ void SearchModelImpl::SetPlaceholderColor(const Color& color)
         LOGE("text component error");
         return;
     }
+    textFieldComponent->SetPlaceholderColor(color);
     textFieldComponent->SetFocusPlaceholderColor(color);
 }
 
