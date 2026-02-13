@@ -1445,6 +1445,7 @@ void SetTextInputPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, 
 void ResetTextInputPadding(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextInputPadding(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
@@ -1615,7 +1616,7 @@ void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
 
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor, void* resRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
     if (SystemProperties::ConfigChangePerform()) {
@@ -2341,21 +2342,21 @@ void ResetTextInputNumberOfLines(ArkUINodeHandle node)
 
 void SetTextInputShowPassword(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowPassword(frameNode, static_cast<bool>(value));
 }
 
 void ResetTextInputShowPassword(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowPassword(frameNode, false);
 }
 
 ArkUI_Bool GetTextInputShowPassword(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return TextFieldModelNG::GetShowPassword(frameNode);
 }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/text_input_controller_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"

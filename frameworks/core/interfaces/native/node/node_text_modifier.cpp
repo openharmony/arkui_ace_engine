@@ -1051,8 +1051,8 @@ void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t
                 textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
                 textShadowVector[i].GetIsFilled()};
         } else {
-            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR), Color::TRANSPARENT.GetValue(), 0.0f, 0.0f,
-                0 };
+            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR),
+                Color::TRANSPARENT.GetValue(), 0.0f, 0.0f, 0 };
         }
     }
 }
@@ -1565,14 +1565,14 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
     return TextModelNG::GetSelectedBackgroundColor(frameNode).GetValue();
 }
 
 void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectedBackgroundColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
@@ -1710,7 +1710,7 @@ void SetTextOnCopy(ArkUINodeHandle node, void* callback)
 
 void ResetTextOnCopy(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnCopy(frameNode, nullptr);
 }
@@ -1729,7 +1729,7 @@ void SetTextOnTextSelectionChange(ArkUINodeHandle node, void* callback)
 
 void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
 }
