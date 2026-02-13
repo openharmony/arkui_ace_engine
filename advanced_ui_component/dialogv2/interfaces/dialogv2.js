@@ -157,6 +157,25 @@ export class TipsDialogV2 extends ViewV2 {
     this.appMaxFontScale = 3.2;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('imageRes', (params && 'imageRes' in params) ? params.imageRes : undefined);
+    this.resetParam('imageSize', (params && 'imageSize' in params) ? params.imageSize : { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE });
+    this.resetParam('imageBorderColor', (params && 'imageBorderColor' in params) ? params.imageBorderColor : undefined);
+    this.resetParam('imageBorderWidth', (params && 'imageBorderWidth' in params) ? params.imageBorderWidth : undefined);
+    this.resetParam('title', (params && 'title' in params) ? params.title : null);
+    this.resetParam('content', (params && 'content' in params) ? params.content : null);
+    this.resetParam('onCheckedChange', (params && 'onCheckedChange' in params) ? params.onCheckedChange : undefined);
+    this.resetParam('checkTips', (params && 'checkTips' in params) ? params.checkTips : null);
+    this.resetParam('checked', (params && 'checked' in params) ? params.checked : false);
+    this.checkedInner = false;
+    this.resetComputed('buttons');
+    this.resetParam('primaryButton', (params && 'primaryButton' in params) ? params.primaryButton : null);
+    this.resetParam('secondaryButton', (params && 'secondaryButton' in params) ? params.secondaryButton : null);
+    this.fontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.fontSizeScale = 1;
+    this.minContentHeight = 160;
+    this.resetMonitorsOnReuse();
+  }
   checkedChangeMonitor(monitor) {
     this.checkedInner = monitor.value('checked')?.now;
   }
@@ -602,6 +621,14 @@ class TipsDialogContentLayout extends ViewV2 {
     this.childrenSize = 3;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('title', (params && 'title' in params) ? params.title : null);
+    this.resetParam('content', (params && 'content' in params) ? params.content : null);
+    this.resetParam('checkTips', (params && 'checkTips' in params) ? params.checkTips : null);
+    this.resetParam('minContentHeight', (params && 'minContentHeight' in params) ? params.minContentHeight : 0);
+    this.$minContentHeight = '$minContentHeight' in params ? params.$minContentHeight : undefined;
+    this.dialogBuilder = 'dialogBuilder' in params ? params.dialogBuilder : this.doNothingBuilder;
+  }
   doNothingBuilder(parent = null) {
   }
   ;
@@ -718,6 +745,26 @@ export class SelectDialogV2 extends ViewV2 {
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('title', (params && 'title' in params) ? params.title : '');
+    this.resetParam('content', (params && 'content' in params) ? params.content : '');
+    this.resetParam('confirm', (params && 'confirm' in params) ? params.confirm : null);
+    this.resetParam('radioContent', (params && 'radioContent' in params) ? params.radioContent : []);
+    this.resetParam('selectedIndex', (params && 'selectedIndex' in params) ? params.selectedIndex : -1);
+    this.selectedIndexInner = -1;
+    this.isFocus = false;
+    this.currentFocusIndex = -1;
+    this.radioHeight = 0;
+    this.itemHeight = 0;
+    this.contentBuilder = 'contentBuilder' in params ? params.contentBuilder : this.buildContent;
+    this.fontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.dividerColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+    this.resetComputed('buttons');
+    this.resetComputed('contentPadding');
+    this.resetMonitorsOnReuse();
+  }
   selectedIndexMonitor(monitor) {
     this.selectedIndexInner = monitor.value('selectedIndex')?.now;
   }
@@ -832,7 +879,7 @@ export class SelectDialogV2 extends ViewV2 {
         {
           const itemCreation = (elmtId, isInitialRender) => {
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            itemCreation2(elmtId, isInitialRender);
+            ListItem.create(deepRenderFunction, true);
             if (!isInitialRender) {
               ListItem.pop();
             }
@@ -1085,6 +1132,11 @@ class ConfirmDialogContentLayout extends ViewV2 {
     this.dialogBuilder = 'dialogBuilder' in params ? params.dialogBuilder : this.doNothingBuilder;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('minContentHeight', (params && 'minContentHeight' in params) ? params.minContentHeight : 0);
+    this.$minContentHeight = '$minContentHeight' in params ? params.$minContentHeight : undefined;
+    this.dialogBuilder = 'dialogBuilder' in params ? params.dialogBuilder : this.doNothingBuilder;
+  }
   doNothingBuilder(parent = null) {
   }
   ;
@@ -1163,6 +1215,21 @@ export class ConfirmDialogV2 extends ViewV2 {
     this.textIndex = 0;
     this.checkboxIndex = 1;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('title', (params && 'title' in params) ? params.title : '');
+    this.resetParam('content', (params && 'content' in params) ? params.content : '');
+    this.resetParam('checkTips', (params && 'checkTips' in params) ? params.checkTips : '');
+    this.resetParam('checked', (params && 'checked' in params) ? params.checked : false);
+    this.checkedInner = this.checked;
+    this.resetParam('primaryButton', (params && 'primaryButton' in params) ? params.primaryButton : new AdvancedDialogV2Button({ content: '' }));
+    this.resetParam('secondaryButton', (params && 'secondaryButton' in params) ? params.secondaryButton : new AdvancedDialogV2Button({ content: '' }));
+    this.fontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.resetParam('onCheckedChange', (params && 'onCheckedChange' in params) ? params.onCheckedChange : undefined);
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+    this.resetComputed('buttons');
+    this.resetMonitorsOnReuse();
   }
   checkedMonitor(monitor) {
     this.checkedInner = monitor.value('checked')?.now;
@@ -1485,6 +1552,17 @@ export class AlertDialogV2 extends ViewV2 {
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('primaryTitle', (params && 'primaryTitle' in params) ? params.primaryTitle : undefined);
+    this.resetParam('secondaryTitle', (params && 'secondaryTitle' in params) ? params.secondaryTitle : undefined);
+    this.resetParam('content', (params && 'content' in params) ? params.content : '');
+    this.resetParam('primaryButton', (params && 'primaryButton' in params) ? params.primaryButton : null);
+    this.resetParam('secondaryButton', (params && 'secondaryButton' in params) ? params.secondaryButton : null);
+    this.fontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+    this.resetComputed('buttons');
+  }
   get buttons() {
     if (!this.primaryButton && !this.secondaryButton) {
       return undefined;
@@ -1648,6 +1726,15 @@ export class CustomContentDialogV2 extends ViewV2 {
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('primaryTitle', (params && 'primaryTitle' in params) ? params.primaryTitle : undefined);
+    this.resetParam('secondaryTitle', (params && 'secondaryTitle' in params) ? params.secondaryTitle : undefined);
+    this.contentBuilder = 'contentBuilder' in params ? params.contentBuilder : undefined;
+    this.resetParam('contentAreaPadding', (params && 'contentAreaPadding' in params) ? params.contentAreaPadding : undefined);
+    this.resetParam('buttons', (params && 'buttons' in params) ? params.buttons : undefined);
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       __Common__.create();
@@ -1751,6 +1838,14 @@ class CustomDialogLayout extends ViewV2 {
     this.contentIndex = 1;
     this.buttonIndex = 2;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('titleHeight', (params && 'titleHeight' in params) ? params.titleHeight : 0);
+    this.$titleHeight = '$titleHeight' in params ? params.$titleHeight : undefined;
+    this.resetParam('buttonHeight', (params && 'buttonHeight' in params) ? params.buttonHeight : 0);
+    this.$buttonHeight = '$buttonHeight' in params ? params.$buttonHeight : undefined;
+    this.resetParam('titleMinHeight', (params && 'titleMinHeight' in params) ? params.titleMinHeight : 0);
+    this.dialogBuilder = 'dialogBuilder' in params ? params.dialogBuilder : this.doNothingBuilder;
   }
   doNothingBuilder(parent = null) {
   }
@@ -1863,6 +1958,28 @@ class CustomDialogContentComponent extends ViewV2 {
     this.initParam('isHasDefaultFocus', (params && 'isHasDefaultFocus' in params) ? params.isHasDefaultFocus : false);
     this.initParam('isAllFocusFalse', (params && 'isAllFocusFalse' in params) ? params.isAllFocusFalse : false);
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('primaryTitle', (params && 'primaryTitle' in params) ? params.primaryTitle : undefined);
+    this.resetParam('secondaryTitle', (params && 'secondaryTitle' in params) ? params.secondaryTitle : undefined);
+    this.contentBuilder = 'contentBuilder' in params ? params.contentBuilder : this.defaultContentBuilder;
+    this.resetParam('buttons', (params && 'buttons' in params) ? params.buttons : undefined);
+    this.resetParam('contentAreaPadding', (params && 'contentAreaPadding' in params) ? params.contentAreaPadding : undefined);
+    this.resetParam('minContentHeight', (params && 'minContentHeight' in params) ? params.minContentHeight : undefined);
+    this.$minContentHeight = '$minContentHeight' in params ? params.$minContentHeight : undefined;
+    this.titleHeight = 0;
+    this.buttonHeight = 0;
+    this.contentMaxHeight = '100%';
+    this.resetConsumer('fontSizeScale', -1);
+    this.customStyle = undefined;
+    this.buttonMaxFontSize = `${BODY_L}fp`;
+    this.buttonMinFontSize = 9;
+    this.primaryTitleFontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.secondaryTitleFontColorWithTheme = { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    this.titleTextAlign = TextAlign.Center;
+    this.isButtonVertical = false;
+    this.resetParam('isHasDefaultFocus', (params && 'isHasDefaultFocus' in params) ? params.isHasDefaultFocus : false);
+    this.resetParam('isAllFocusFalse', (params && 'isAllFocusFalse' in params) ? params.isAllFocusFalse : false);
   }
   defaultContentBuilder(parent = null) {
   }
@@ -2055,8 +2172,8 @@ class CustomDialogContentComponent extends ViewV2 {
   aboutToAppear() {
     try {
       let uiContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-      this.appMaxFontScale = uiContext?.getMaxFontScale();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+      this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
     }
     catch (err) {
       let code = err?.code;
@@ -2854,6 +2971,25 @@ export class LoadingDialogV2 extends ViewV2 {
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('content', (params && 'content' in params) ? params.content : '');
+    this.fontColorWithTheme = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.font_primary'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__'
+    };
+    this.loadingProgressIconColorWithTheme = {
+      'id': -1,
+      'type': 10001,
+      params: ['sys.color.icon_secondary'],
+      'bundleName': '__harDefaultBundleName__',
+      'moduleName': '__harDefaultModuleName__'
+    };
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+  }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
@@ -2871,7 +3007,7 @@ export class LoadingDialogV2 extends ViewV2 {
             },
             minContentHeight: this.minContentHeight,
             $minContentHeight: value => { this.minContentHeight = value; }
-          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 1707, col: 7 });
+          }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/dialog.ets', line: 1706, col: 7 });
           ViewV2.create(componentCall);
           let paramsLambda = () => {
             return {
@@ -2970,6 +3106,15 @@ export class PopoverDialogV2 extends ViewV2 {
     this.dialogWidth = this.popover?.width;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('visible', (params && 'visible' in params) ? params.visible : false);
+    this.$visible = '$visible' in params ? params.$visible : () => { };
+    this.resetParam('popover', (params && 'popover' in params) ? params.popover : {
+      builder: undefined
+    });
+    this.targetBuilder = 'targetBuilder' in params ? params.targetBuilder : undefined;
+    this.dialogWidth = this.popover?.width;
+  }
   emptyBuilder(parent = null) {
   }
   aboutToAppear() {
@@ -3048,34 +3193,6 @@ __decorate([
 __decorate([
   Local
 ], PopoverDialogV2.prototype, 'dialogWidth', void 0);
-function toLengthString(value) {
-  if (!value) {
-    return undefined;
-  }
-  const length = value.value;
-  let lengthString = '';
-  switch (value.unit) {
-    case LengthUnit.PX:
-      lengthString = `${length}px`;
-      break;
-    case LengthUnit.FP:
-      lengthString = `${length}fp`;
-      break;
-    case LengthUnit.LPX:
-      lengthString = `${length}lpx`;
-      break;
-    case LengthUnit.PERCENT:
-      lengthString = `${length * 100}%`;
-      break;
-    case LengthUnit.VP:
-      lengthString = `${length}vp`;
-      break;
-    default:
-      lengthString = `${length}vp`;
-      break;
-  }
-  return lengthString;
-}
 function lengthMetricsToPX(value) {
   if (!value) {
     return 0;

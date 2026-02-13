@@ -58,6 +58,7 @@
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
@@ -951,6 +952,12 @@ void AceContainer::OnShow(int32_t instanceId)
         CHECK_NULL_VOID(pipelineBase);
         pipelineBase->OnShow();
         pipelineBase->SetForegroundCalled(true);
+        if (container->GetFrontendType() == FrontendType::JS) {
+            pipelineBase->GetStatisticEventReporter()->SendEvent(StatisticEventType::WEB_LIKE_FRONTEND);
+        }
+        if (container->GetFrontendType() == FrontendType::JS_CARD) {
+            pipelineBase->GetStatisticEventReporter()->SendEvent(StatisticEventType::JS_CARD_FRONTEND);
+        }
     };
 
     // stege model needn't post task when already run on UI
@@ -2879,24 +2886,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     if (fontManager) {
         fontManager->SetStartAbilityOnJumpBrowserHandler(startAbilityOnJumpBrowserHandler);
-    }
-
-    auto&& openLinkOnMapSearchHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
-        auto container = weak.Upgrade();
-        CHECK_NULL_VOID(container);
-        ContainerScope scope(instanceId);
-        auto context = container->GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakPtr<AceContainer>(container), address]() {
-                auto container = weak.Upgrade();
-                CHECK_NULL_VOID(container);
-                container->OnOpenLinkOnMapSearch(address);
-            },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleOpenLinkOnMapSearch");
-    };
-    if (fontManager) {
-        fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
     }
 
     auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](

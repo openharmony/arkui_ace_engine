@@ -496,7 +496,7 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 
 void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
 {
-    if (taskExecutor_) {
+    if (taskExecutor_ && task) {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
     }
 }

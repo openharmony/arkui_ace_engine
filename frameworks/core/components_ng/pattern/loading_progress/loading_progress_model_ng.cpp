@@ -101,8 +101,8 @@ void LoadingProgressModelNG::SetColorByUser(FrameNode* frameNode, bool isSetByUs
 bool LoadingProgressModelNG::GetEnableLoading(FrameNode* frameNode)
 {
     bool enable = true;
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        LoadingProgressPaintProperty, EnableLoading, enable, frameNode, enable);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(LoadingProgressPaintProperty,
+        EnableLoading, enable, frameNode, enable);
     return enable;
 }
 
@@ -179,13 +179,7 @@ void HandleColorResource(const RefPtr<LoadingProgressPattern>& pattern, const Re
         CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-                CHECK_NULL_VOID(progressTheme);
-                result = progressTheme->GetLoadingColor();
-            }
+            return;
         }
         pattern->UpdateColor(result, isFirstLoad);
     };
@@ -222,6 +216,7 @@ void LoadingProgressModelNG::CreateWithResourceObj(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
+
     switch (resourceType) {
         case LoadingProgressResourceType::COLOR:
             HandleColorResource(pattern, resObj);

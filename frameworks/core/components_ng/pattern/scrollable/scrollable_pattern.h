@@ -192,6 +192,8 @@ public:
 
     virtual void OnTouchDown(const TouchEventInfo& info);
 
+    void OnTouchpadInteraction(PointF point);
+
     virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
 
     void AddScrollEvent();
@@ -1106,6 +1108,7 @@ private:
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
+    bool IsInComponent(PointF point);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};

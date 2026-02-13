@@ -716,14 +716,14 @@ RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParamsFromANI(void* rawD
     return dataLP;
 }
 
-void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr)
+void UdmfClientImpl::TransformSummaryANI(
+    std::map<std::string, int64_t>& summary, std::shared_ptr<UDMF::Summary> summaryPtr)
 {
-    std::shared_ptr<OHOS::UDMF::Summary> udmfSummary = std::static_pointer_cast<OHOS::UDMF::Summary>(summaryPtr);
-    CHECK_NULL_VOID(udmfSummary);
-    udmfSummary->totalSize = 0;
+    CHECK_NULL_VOID(summaryPtr);
+    summaryPtr->totalSize = 0;
     for (auto element : summary) {
-        udmfSummary->totalSize += element.second;
+        summaryPtr->totalSize += element.second;
     }
-    udmfSummary->summary = std::move(summary);
+    summaryPtr->summary = std::move(summary);
 }
 } // namespace OHOS::Ace

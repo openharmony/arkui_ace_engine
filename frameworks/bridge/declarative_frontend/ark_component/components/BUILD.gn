@@ -50,7 +50,6 @@ arkui_modules = [
   "slider",
   "timepicker",
   "calendarpicker",
-  "hyperlink",
 ]
 
 if (!ace_engine_feature_wearable) { 

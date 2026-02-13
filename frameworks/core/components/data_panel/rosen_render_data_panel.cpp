@@ -831,9 +831,9 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     botPen.SetWidth(thickness);
     botPen.SetAntiAlias(true);
 
-    botPen.SetShaderEffect(
-        RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, 0.0,
-            sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / ACE_PI * std::asin(thickness / ((diameter) / 2)), nullptr));
+    botPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors, pos,
+        RSTileMode::DECAL, 0.0,
+        sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / ACE_PI * std::asin(thickness / ((diameter) / 2)), nullptr));
     canvas->Save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
     canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate

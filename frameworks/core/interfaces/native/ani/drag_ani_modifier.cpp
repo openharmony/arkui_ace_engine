@@ -59,14 +59,14 @@ ani_ref GetDragData(ani_ref event)
     return reinterpret_cast<ani_ref>(unifiedDataPtr);
 }
 
-void GetDragSummary(ani_ref event, SharedPointerWrapper& summaryPtr)
+void GetDragSummary(ani_ref event, std::shared_ptr<OHOS::UDMF::Summary> summaryPtr)
 {
     auto peer = reinterpret_cast<Ark_DragEvent>(event);
     CHECK_NULL_VOID(peer);
     auto dragEvent = peer->dragInfo;
     CHECK_NULL_VOID(dragEvent);
     auto summary = dragEvent->GetSummary();
-    UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr.GetSharedPtr());
+    UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr);
 }
 
 void SetDragDataLoadParams(ani_ref event, void* dataLoadParams)

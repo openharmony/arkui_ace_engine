@@ -80,7 +80,8 @@ public:
 
     RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) override;
     RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) override;
-    void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) override;
+    void TransformSummaryANI(
+        std::map<std::string, int64_t>& summary, std::shared_ptr<UDMF::Summary> summaryPtr) override;
 };
 
 class UnifiedDataImpl : public UnifiedData {

@@ -22,7 +22,7 @@
 
 #include "core/common/ime/text_selection.h"
 
-#if defined(CROSS_PLATFORM)
+#if defined(IOS_PLATFORM)
 #include "core/common/ime/text_compose.h"
 #endif
 
@@ -81,7 +81,7 @@ struct ACE_FORCE_EXPORT TextEditingValue {
     bool isDelete;
     std::string appendText;
 
-#if defined(CROSS_PLATFORM)
+#if defined(IOS_PLATFORM)
     TextCompose compose;
     bool unmarkText;
     bool discardedMarkedText;

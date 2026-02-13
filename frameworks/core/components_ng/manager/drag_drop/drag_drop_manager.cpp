@@ -1524,30 +1524,23 @@ bool DragDropManager::PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const
 {
     CHECK_NULL_RETURN(dragFrameNode, false);
     CHECK_NULL_RETURN(event, false);
+
+    std::function<void(const DragRet&)> callback = GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams);
+    auto success = DragDropGlobalController::GetInstance().RequestDragEndCallback(event->GetRequestIdentify(),
+        event->GetResult(), callback);
+
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskScheduler, false);
+    auto task = [requestId = event->GetRequestIdentify()]() {
+        DragDropGlobalController::GetInstance().NotifyPendingFailed(requestId);
+        DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+    };
     taskScheduler->PostDelayedTask(
-        [pointerEvent, event, extraParams, nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
-            weakManager = WeakClaim(this)]() {
-            if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase() || !event) {
-                return;
-            }
-            if (!DragDropGlobalController::GetInstance().IsCurrentDrag(event->GetRequestIdentify())) {
-                return;
-            }
-            auto dragDropManager = weakManager.Upgrade();
-            if (dragDropManager) {
-                auto frameNode = nodeWeak.Upgrade();
-                event->SetResult(DragRet::DRAG_FAIL);
-                dragDropManager->HandleStopDrag(frameNode, pointerEvent, event, extraParams);
-            }
-            DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
-        },
-        TaskExecutor::TaskType::UI, DROP_DELAY_TIME, "ArkUIStopDragDeadlineTimer");
-    return DragDropGlobalController::GetInstance().RequestDragEndCallback(event->GetRequestIdentify(),
-        event->GetResult(), GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams));
+        task, TaskExecutor::TaskType::UI, DROP_DELAY_TIME, "ArkUIStopDragDeadlineTimer");
+
+    return success;
 }
 
 std::function<void(const DragRet&)> DragDropManager::GetStopDragCallBack(const RefPtr<FrameNode>& dragFrameNode,

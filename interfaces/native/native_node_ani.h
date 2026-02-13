@@ -31,7 +31,7 @@ extern "C" {
  * @param handle ArkUI_NodeHandle指针.
  * @return 0 - 成功。
  *         401 - 函数参数异常。
- * @since 22
+ * @since 20
  */
 int32_t OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(ani_env* env, ani_object value, ArkUI_NodeHandle* handle);
 
@@ -43,7 +43,7 @@ int32_t OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(ani_env* env, ani_object
  * @param context ArkUI_ContextHandle指针。
  * @return 0 - 成功。
  *         401 - 函数参数异常。
- * @since 22
+ * @since 20
  */
 int32_t OH_ArkUI_NativeModule_GetContextFromAniValue(ani_env* env, ani_object value, ArkUI_ContextHandle* context);
 

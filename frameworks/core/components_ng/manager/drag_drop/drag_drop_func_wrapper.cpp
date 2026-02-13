@@ -350,6 +350,7 @@ int32_t DragDropFuncWrapper::RequestDragEndPending()
     }
     static std::atomic<int32_t> gDragDropDelayEndRequestId;
     int32_t id = gDragDropDelayEndRequestId.fetch_add(1);
+    DragDropGlobalController::GetInstance().SavePendingRequestIdentify(id);
     return id;
 }
 

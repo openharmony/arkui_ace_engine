@@ -193,6 +193,8 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a function key, key code: %{public}d, modKeyFlags: %{public}d",
+            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         this->ResetOriginCaretPosition();
         return iterFunctionKeys->second(this);
     }

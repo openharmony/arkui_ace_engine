@@ -20,6 +20,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/event/event_constants.h"
 
@@ -390,6 +391,13 @@ void LongPressRecognizer::SendCallbackMsg(
     std::string callbackName = GetCallbackName(callback);
     ACE_SCOPED_TRACE("LongPressRecognizer %s", callbackName.c_str());
     auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
+    if (extraHandlingResult) {
+        auto frameNode = GetAttachedNode().Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        context->GetStatisticEventReporter()->SendEvent(StatisticEventType::GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO);
+    }
     if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult ||
         (!isOnActionTriggered_ && type != GestureCallbackType::START)) {
         return;

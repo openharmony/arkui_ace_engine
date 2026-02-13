@@ -22,6 +22,10 @@
 #include "base/memory/ace_type.h"
 #include "core/common/udmf/udmf_client.h"
 
+namespace OHOS::UDMF {
+struct Summary;
+}
+
 namespace OHOS::Ace {
 class MockUdmfClient : public UdmfClient {
     DECLARE_ACE_TYPE(MockUdmfClient, UdmfClient);
@@ -35,7 +39,7 @@ public:
     MOCK_METHOD(std::shared_ptr<void>, TransformUnifiedDataSharedPtr, (RefPtr<UnifiedData>& UnifiedData), (override));
     MOCK_METHOD(napi_value, TransformSummary, ((std::map<std::string, int64_t>& summary)), (override));
     MOCK_METHOD(void, TransformSummaryANI,
-        ((std::map<std::string, int64_t>& summaryMap), std::shared_ptr<void> summaryPtr), (override));
+        ((std::map<std::string, int64_t>& summaryMap), std::shared_ptr<OHOS::UDMF::Summary> summaryPtr), (override));
     MOCK_METHOD(RefPtr<UnifiedData>, CreateUnifiedData, (), (override));
     MOCK_METHOD(int32_t, SetData, (const RefPtr<UnifiedData>& unifiedData, std::string& key), (override));
     MOCK_METHOD(int32_t, GetData, (const RefPtr<UnifiedData>& unifiedData, const std::string& key), (override));

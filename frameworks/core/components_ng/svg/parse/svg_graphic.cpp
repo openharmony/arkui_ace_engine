@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/parse/svg_graphic.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
 #include "core/components_ng/svg/parse/svg_radial_gradient.h"
@@ -85,17 +86,6 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         strokeType != PaintType::NONE) {
         OnGraphicStroke(canvas, svgCoordinateSystemContext, path, strokeType);
     }
-}
-
-void SvgGraphic::DumpDrawPathInfo(const RSRecordingPath& path)
-{
-    auto svgContext = svgContext_.Upgrade();
-    if (!svgContext || svgContext->GetHasRecordedPath()) {
-        return;
-    }
-    std::string dumpInfo = "";
-    path.Dump(dumpInfo);
-    svgContext->SetSvgDrawPathInfoDump(std::move(dumpInfo));
 }
 
 PaintType SvgGraphic::GetFillType()
@@ -186,6 +176,17 @@ void SvgGraphic::SetLinearGradient(const Size& viewPort, OHOS::Ace::Gradient& gr
     gradient.SetLinearGradientInfo(gradientInfo);
 }
 
+void SvgGraphic::DumpDrawPathInfo(const RSRecordingPath& path)
+{
+    auto svgContext = svgContext_.Upgrade();
+    if (!svgContext || svgContext->GetHasRecordedPath()) {
+        return;
+    }
+    std::string dumpInfo = "";
+    path.Dump(dumpInfo);
+    svgContext->SetSvgDrawPathInfoDump(std::move(dumpInfo));
+}
+
 void SvgGraphic::SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient)
 {
     auto bounds = AsBounds(viewPort);
@@ -242,7 +243,7 @@ void SvgGraphic::UpdateFillGradient(const Size& viewPort)
 bool SvgGraphic::GradientHasColors()
 {
     auto& gradient = attributes_.fillState.GetGradient();
-    if (!gradient.has_value()) {
+    if (!gradient.has_value()){
         return false;
     }
     auto gradientColors = gradient->GetColors();
@@ -286,11 +287,13 @@ void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
         return;
     }
     if (imageComponentColor->IsPlaceholder()) {
-        brush.SetColor(RSColor(static_cast<RSColorPlaceholder>(imageComponentColor->GetPlaceholder())));
+        auto opacityFillColor = imageComponentColor->BlendOpacity(curOpacity);
+        opacityFillColor.SetPlaceholder(imageComponentColor->GetPlaceholder());
+        brush.SetColor(ToRSColor(opacityFillColor));
     } else if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
         auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
         brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
-                       p3Color.GetAlpha() / 255.0 },
+                            p3Color.GetAlpha() / 255.0 },
             RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
     } else {
         brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
@@ -345,7 +348,9 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     } else {
         auto fillColor = (color) ? *color : fillState_.GetColor();
         if (fillColor.IsPlaceholder()) {
-            fillBrush_.SetColor(RSColor(static_cast<RSColorPlaceholder>(fillColor.GetPlaceholder())));
+            auto opacityFillColor = fillColor.BlendOpacity(curOpacity);
+            opacityFillColor.SetPlaceholder(fillColor.GetPlaceholder());
+            fillBrush_.SetColor(ToRSColor(opacityFillColor));
         } else if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
             auto p3Color = fillColor.BlendOpacity(curOpacity);
             fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
@@ -411,6 +416,7 @@ RSMatrix SvgGraphic::GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
         if (!GreatNotEqual(bounds.Width(), 0.0) || !GreatNotEqual(bounds.Height(), 0.0)) {
             return RSMatrix();
         }
+
         m.SetScale(bounds.Width(), bounds.Height());
         t.Translate(bounds.Left(), bounds.Top());
         t.PreConcat(m);
@@ -790,7 +796,7 @@ void SvgGraphic::UpdateColorFilter(RSFilter& filter)
     if (colorFilter.value().colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(colorFilter.value().colorFilterMatrix_->data());
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
         return;
     }
     if (!colorFilter.value().colorFilterDrawing_) {

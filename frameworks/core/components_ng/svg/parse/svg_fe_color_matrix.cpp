@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
-
 #include "core/components_ng/svg/parse/svg_constants.h"
+#include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -171,7 +170,7 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_.data());
-    auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
+    auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP);
     CHECK_NULL_VOID(colorFilter);
     RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
         effectFilterArea_.Right(), effectFilterArea_.Bottom());
