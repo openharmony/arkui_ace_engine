@@ -142,7 +142,7 @@ private:
     int32_t selectingFingerId_ = -1;
 };
 
-class ACE_FORCE_EXPORT TextBase : public SelectOverlayClient {
+class TextBase : public SelectOverlayClient {
     DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
 public:

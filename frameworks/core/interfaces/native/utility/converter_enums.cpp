@@ -257,7 +257,7 @@ void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
 }
 
 template<>
-ACE_FORCE_EXPORT void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
+void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
 {
     switch (src) {
         case ARK_FONT_WEIGHT_LIGHTER: dst = FontWeight::LIGHTER; break;

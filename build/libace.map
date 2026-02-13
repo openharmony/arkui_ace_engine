@@ -193,7 +193,7 @@
       OHOS::Ace::ListItemModel::*;
       OHOS::Ace::ListItemGroupModel::*;
       OHOS::Ace::LoadingProgressModel::*;
-      OHOS::Ace::NG::MarqueeModelNG::*;
+      OHOS::Ace::MarqueeModel::*;
       OHOS::Ace::MenuModel::*;
       OHOS::Ace::MenuItemModel::*;
       OHOS::Ace::NavigationModel::*;
@@ -632,19 +632,6 @@
       OHOS::Ace::NG::InputEventActuator::InputEventActuator*;
       OHOS::Ace::ToRSColor*;
       OHOS::Ace::RSPoint*;
-
-      OHOS::Ace::NG::TextBase::*;
-      OHOS::Ace::NG::UpdateOptionSizeByCalcLayoutConstraint*;
-      OHOS::Ace::NG::CheckMeasureFlag*;
-      OHOS::Ace::NG::CheckLayoutFlag*;
-      OHOS::Ace::NG::TextLayoutadapter::*;
-      OHOS::Ace::PatternResourceManager::AddResource*;
-      OHOS::Ace::PatternResourceManager::ParsePropertyValue*;
-      OHOS::Ace::NG::Validator::*;
-      *OHOS::Ace::NG::Converter::Convert*;
-      *OHOS::Ace::NG::Converter::AssignCast*;
-      OHOS::Ace::NG::Converter::ResourceConverter::*;
-      *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;

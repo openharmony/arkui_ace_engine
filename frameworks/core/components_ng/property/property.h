@@ -57,11 +57,11 @@ bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
 
-ACE_FORCE_EXPORT bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckForceParentMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
-ACE_FORCE_EXPORT bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
 ACE_FORCE_EXPORT bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
 
