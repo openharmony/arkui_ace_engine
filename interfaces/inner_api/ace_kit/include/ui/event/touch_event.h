@@ -300,6 +300,31 @@ using TouchEventFunc = std::function<void(TouchEventInfo&)>;
 using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
 using CatchTouchEventCallback = std::function<void()>;
 
+namespace NG {
+class TouchEventImpl : public virtual AceType {
+    DECLARE_ACE_TYPE(TouchEventImpl, AceType);
+public:
+    explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
+    TouchEventImpl(const TouchEventFunc& callback) : callback_(callback) {}
+    ~TouchEventImpl() override = default;
+
+    const TouchEventFunc& GetTouchEventCallback() const
+    {
+        return callback_;
+    }
+
+    void operator()(TouchEventInfo& info) const
+    {
+        if (callback_) {
+            callback_(info);
+        }
+    }
+
+private:
+    TouchEventFunc callback_;
+};
+} // namespace NG
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_EVENT_TOUCH_EVENT_H
