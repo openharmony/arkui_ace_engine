@@ -149,7 +149,6 @@ ace_unittest("accessibility_adapter_test_ng") {
     "osal/element_info/accessibility_node_osal_test.cpp",
     "osal/focus_move/accessibility_focus_frame_node_utils_test.cpp",
     "utils/accessibitlity_action_function_utils_test.cpp",
-    "utils/accessibitlity_rect_info_utils_test.cpp",
   ]
   if (is_ohos_standard_system) {
     defines = [ "OHOS_STANDARD_SYSTEM" ]

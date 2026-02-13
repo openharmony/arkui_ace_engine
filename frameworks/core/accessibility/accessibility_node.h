@@ -137,11 +137,11 @@ public:
     const EventMarker& GetBlurEventMarker() const;
 
     // node attr need to barrierfree
-    NodeId GetNodeId() const;
+    ACE_FORCE_EXPORT NodeId GetNodeId() const;
 
     const std::string& GetText() const;
 
-    void SetText(const std::string& text);
+    ACE_FORCE_EXPORT void SetText(const std::string& text);
 
     const std::string& GetHintText() const;
 
