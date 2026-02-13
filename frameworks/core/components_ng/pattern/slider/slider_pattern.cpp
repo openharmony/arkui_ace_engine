@@ -20,10 +20,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/multi_thread.h"
-#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/container.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
@@ -155,7 +154,7 @@ void SliderPattern::OnModifyDone()
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    showTips_ = sliderPaintProperty->GetShowTips().value_or(false);
+    CheckShowTips();
     sliderInteractionMode_ =
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
@@ -204,6 +203,25 @@ void SliderPattern::InitEvent()
     crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
     InitDigitalCrownEvent(focusHub);
 #endif
+}
+
+void SliderPattern::CheckShowTips()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto showTips = sliderPaintProperty->GetShowTips().value_or(false);
+    if (showTips_ != showTips) {
+        showTips_ = showTips;
+        if (HasPrefix()) {
+            UpdatePrefixPosition();
+        }
+
+        if (HasPrefix()) {
+            UpdateSuffixPosition();
+        }
+    }
 }
 
 void SliderPattern::InitSliderEnds()
@@ -631,7 +649,6 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
             isDisabledDesc = true;
         }
         UpdateStepPointsAccessibilityText(pointNode, i, optionsMap);
-
         if (i == indexPrefix && HasPrefix()) {
             if (!prefixAccessibilityoptions_.accessibilityText.empty()) {
                 pointAccessibilityProperty->SetAccessibilityText(prefixAccessibilityoptions_.accessibilityText);
@@ -655,11 +672,10 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
             pointAccessibilityProperty->SetAccessibilityLevel(suffixAccessibilityoptions_.accessibilityLevel);
             pointAccessibilityProperty->SetAccessibilityGroup(suffixAccessibilityoptions_.accessibilityGroup);
         }
-
         SetStepPointsAccessibilityVirtualNodeEvent(pointNode, i, isClickAbled, reverse, isDisabledDesc);
     }
 }
-
+ 
 void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
     const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse, bool isDisabledDesc)
 {
@@ -697,6 +713,7 @@ uint32_t SliderPattern::GetCurrentStepIndex()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, false);
     const float step = sliderPaintProperty->GetStep().value_or(1.0f);
     const float currentValue = sliderPaintProperty->GetValueValue(value_);
     const double min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
@@ -1028,7 +1045,7 @@ bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
         circleCenter_.GetY() + sideHotSizeY < offset.GetY());
 }
 
-bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType)
+bool SliderPattern::AtPanArea(const Offset &offset, const SourceType &sourceType)
 {
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, false);
@@ -1662,15 +1679,11 @@ void SliderPattern::GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect)
 void SliderPattern::UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode,
     RoundRect& paintRect, const RectF& rect, float rectRadius)
 {
-    if (theme->ShowFocusFrame()) {
-        if (sliderMode == SliderModel::SliderMode::INSET) {
-            paintRect.SetRect(rect);
-            paintRect.SetCornerRadius(rectRadius);
-        }
-    } else {
-        paintRect.SetRect(rect);
-        paintRect.SetCornerRadius(rectRadius);
+    if (theme->ShowFocusFrame() && (sliderMode != SliderModel::SliderMode::INSET)) {
+        return;
     }
+    paintRect.SetRect(rect);
+    paintRect.SetCornerRadius(rectRadius);
 }
 
 void SliderPattern::PaintFocusState()
@@ -1982,7 +1995,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     if (sliderMode == SliderModel::SliderMode::NONE) {
         trackColor = theme->GetNoneModeSelectedTrackColor();
     }
-    Gradient defaultSelectGradientColor = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor());
+    Gradient defaultSelectGradientColor = SliderModelNG::CreateSolidGradient(trackColor);
     parameters.selectGradientColor = paintProperty->GetSelectGradientColor().value_or(defaultSelectGradientColor);
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
@@ -2319,9 +2332,7 @@ void SliderPattern::UpdateEndsNotShowStepsPosition(
                         : (sliderMode == SliderModel::SliderMode::NONE) ? noneOffset : 0;
         EndsPosition.SetX(block.GetX() - halfWidth + xOffset);
         EndsPosition.SetY(block.GetY() - halfHeight);
-    }
-
-    else {
+    } else {
         float yOffset = (sliderMode == SliderModel::SliderMode::OUTSET) ? -outsetOffset
                         : (sliderMode == SliderModel::SliderMode::NONE) ? noneOffset : 0;
         EndsPosition.SetY(block.GetY() - halfHeight + yOffset);
@@ -2385,6 +2396,7 @@ void SliderPattern::SetPrefix(const RefPtr<NG::UINode>& prefix, const NG::Slider
     prefixAccessibilityoptions_ = options;
 
     prefix_ = prefix;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SliderPattern::SetSuffix(const RefPtr<NG::UINode>& suffix, const NG::SliderSuffixOptions& options)
@@ -2406,6 +2418,7 @@ void SliderPattern::SetSuffix(const RefPtr<NG::UINode>& suffix, const NG::Slider
     suffixAccessibilityoptions_ = options;
 
     suffix_ = suffix;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void SliderPattern::ResetPrefix()
@@ -2441,7 +2454,7 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 
 void SliderPattern::UpdateValue(float value)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value_);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value);
     if (!panMoveFlag_) {
         auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
         CHECK_NULL_VOID(sliderPaintProperty);
@@ -2656,7 +2669,7 @@ void SliderPattern::RemoveCallbackOnDetach(FrameNode* frameNode)
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider RemoveCallbackOnDetach OK");
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider RemoveCallbackOnDetach  OK");
 }
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -2702,6 +2715,7 @@ bool SliderPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(host, result);
     auto paintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, result);
+    OnColorConfigurationUpdate();
     result = !paintProperty->HasBlockColor() ||
         !paintProperty->HasTrackBackgroundColor() ||
         !paintProperty->HasSelectColor() ||
@@ -2849,11 +2863,11 @@ int32_t SliderPattern::CheckAccessibilityStepCount()
     CHECK_NULL_RETURN(sliderPaintProperty, DEFAULT_STEP);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, DEFAULT_STEP);
-    int32_t scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
     if (NearZero(step)) {
         return DEFAULT_STEP;
     }
+    int32_t scrollStep = accessibilityProperty->GetAccessibilityActionOptions().scrollStep;
     auto min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     auto max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
     return (scrollStep > (max - min) / step) ? DEFAULT_STEP : scrollStep;

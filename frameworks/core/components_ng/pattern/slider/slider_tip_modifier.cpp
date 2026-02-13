@@ -604,11 +604,11 @@ bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
         auto maxWidth = std::max(circleSize.Width(), frameSize.Width());
         if (sliderGlobalOffset_->Get().GetX() + vertex.GetX() < bubbleSize_.Width()) {
             rect.SetOffset(OffsetF(AceApplicationInfo::GetInstance().IsRightToLeft()
-                ? (sliderOffsetX - bubbleSize_.Width() - distance)
+                ? (sliderOffsetX + bubbleSize_.Width() + distance)
                 : (bubbleSize_.Width() + distance), -bubbleSize_.Height()));
         } else {
             rect.SetOffset(OffsetF(AceApplicationInfo::GetInstance().IsRightToLeft()
-                ? (sliderOffsetX + bubbleSize_.Width() + distance)
+                ? (sliderOffsetX - bubbleSize_.Width() - distance)
                 : (-bubbleSize_.Width() - distance), -bubbleSize_.Height()));
         }
         rect.SetSize(
