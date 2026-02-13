@@ -49,6 +49,11 @@ public:
         return atCPackage_;
     }
 
+    const AtCXComponentCallback& GetCJXcompCtrFuncs() const
+    {
+        return atCXcompCtr_;
+    }
+
     const AtCPackageV2& GetCJFuncsV2() const
     {
         return atCPackageV2_;
@@ -59,13 +64,7 @@ public:
         return atCPackageV3_;
     }
 
-    const AtCXComponentCallback& GetCJXcompCtrFuncs() const
-    {
-        return atCXcompCtr_;
-    }
-
     bool LoadAppEntry(const std::string& name);
-    bool CheckLoadCJLibrary();
 
     void* LoadCJLibrary(const char* dlName);
     void* GetUIScheduler();
@@ -84,6 +83,7 @@ private:
 
     AtCXComponentCallback atCXcompCtr_;
     bool atCXcompCtrLoaded_ = false;
+
 };
 
 } // namespace OHOS::Ace::Framework

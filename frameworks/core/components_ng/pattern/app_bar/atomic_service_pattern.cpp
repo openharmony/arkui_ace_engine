@@ -27,22 +27,8 @@ constexpr int32_t FIRST_OVERLAY_INDEX = 1;
 
 std::atomic<int32_t> g_nextListenerId = 1;
 
-std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)>
-    AtomicServicePattern::beforeCreateLayoutBuilder_ = nullptr;
-
-void AtomicServicePattern::RegisterBeforeCreateLayoutBuilder(
-    std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder)
-{
-    beforeCreateLayoutBuilder_ = beforeCreateLayoutBuilder;
-}
-
 void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
-    // before create layout builder for cj frontend
-    if (beforeCreateLayoutBuilder_) {
-        beforeCreateLayoutBuilder_(GetHost(), settedColorMode);
-        return;
-    }
     MenuBarSafeAreaCallBack();
     ContentSafeAreaCallBack();
     ColorConfigurationCallBack();

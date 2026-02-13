@@ -1021,24 +1021,28 @@ void FfiWebOnConsole(bool (*callback)(void* event))
 int32_t FfiWebConsoleGetLineNumber(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, -1);
     return msgPtr->GetLineNumber();
 }
 
 ExternalString FfiWebConsoleGetMessage(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, Utils::MallocCString(""));
     return Utils::MallocCString(msgPtr->GetLog());
 }
 
 int32_t FfiWebConsoleGetMessageLevel(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, -1);
     return static_cast<int32_t>(msgPtr->GetLogLevel());
 }
 
 ExternalString FfiWebConsoleGetSourceId(void* msg)
 {
     auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    CHECK_NULL_RETURN(msgPtr, Utils::MallocCString(""));
     return Utils::MallocCString(msgPtr->GetSourceId());
 }
 
@@ -1147,7 +1151,9 @@ int64_t FfiVectorHeaderSize(VectorHeaderHandle handle)
 void FfiVectorHeaderDelete(VectorHeaderHandle handle)
 {
     auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
-    delete actualVec;
+    if (actualVec) {
+        delete actualVec;
+    }
 }
 
 VectorHeaderHandle FfiWebGetRequestHeader(void* ptr)
@@ -1155,6 +1161,7 @@ VectorHeaderHandle FfiWebGetRequestHeader(void* ptr)
     auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
     auto header = request->GetHeaders();
     auto vecHeader = new std::vector<FfiHeader>(header.size());
+    CHECK_NULL_RETURN(vecHeader, nullptr);
     for (const auto& it : header) {
         size_t i = 0;
         (*vecHeader)[i] = FfiHeader { .key = Utils::MallocCString(it.first), .value = Utils::MallocCString(it.second) };
@@ -1204,24 +1211,28 @@ void FfiWebFreeResourceRequest(void* ptr)
 ExternalString FfiWebGetReasonMessage(void* prt)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(prt);
+    CHECK_NULL_RETURN(response, Utils::MallocCString(""));
     return Utils::MallocCString(response->GetReason());
 }
 
 int32_t FfiWebGetResponseCode(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, 0);
     return response->GetStatusCode();
 }
 
 ExternalString FfiWebGetResponseData(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, Utils::MallocCString(""));
     return Utils::MallocCString(response->GetData());
 }
 
 ExternalString FfiWebGetResponseEncoding(void* ptr)
 {
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    CHECK_NULL_RETURN(response, Utils::MallocCString(""));
     return Utils::MallocCString(response->GetEncoding());
 }
 
@@ -1230,6 +1241,7 @@ VectorHeaderHandle FfiWebGetResponseHeader(void* ptr)
     auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
     auto header = response->GetHeaders();
     auto vecHeader = new std::vector<FfiHeader>(header.size());
+    CHECK_NULL_RETURN(vecHeader, nullptr);
     for (const auto& it : header) {
         size_t i = 0;
         (*vecHeader)[i] = FfiHeader { .key = Utils::MallocCString(it.first), .value = Utils::MallocCString(it.second) };
@@ -1244,256 +1256,5 @@ void FfiWebFreeResourceResponse(void* ptr)
     if (response) {
         delete response;
     }
-}
-
-void FfiWebOnContextMenuShow(bool (*callback)(void* param, void* result))
-{
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) -> bool {
-        auto webNode = node.Upgrade();
-        CHECK_NULL_RETURN(webNode, false);
-        ContainerScope scope(webNode->GetInstanceId());
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext) {
-            pipelineContext->UpdateCurrentActiveNode(node);
-        }
-        auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info);
-        auto param = new RefPtr<WebContextMenuParam>(eventInfo->GetParam());
-        auto result = new RefPtr<ContextMenuResult>(eventInfo->GetContextMenuResult());
-        return func(param, result);
-    };
-    WebModel::GetInstance()->SetOnContextMenuShow(std::move(cjCallback));
-}
-
-int32_t FfiWebContextMenuParamGetXCoord(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, -1);
-    return param->GetXCoord();
-}
-
-int32_t FfiWebContextMenuParamGetYCoord(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, -1);
-    return param->GetYCoord();
-}
-
-ExternalString FfiWebContextMenuParamGetLinkUrl(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, Utils::MallocCString(""));
-    return Utils::MallocCString(param->GetLinkUrl());
-}
-
-ExternalString FfiWebContextMenuParamGetUnfilteredLinkUrl(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, Utils::MallocCString(""));
-    return Utils::MallocCString(param->GetUnfilteredLinkUrl());
-}
-
-ExternalString FfiWebContextMenuParamGetSourceUrl(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, Utils::MallocCString(""));
-    return Utils::MallocCString(param->GetSourceUrl());
-}
-
-bool FfiWebContextMenuParamExistsImageContents(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, false);
-    return param->HasImageContents();
-}
-
-int32_t FfiWebContextMenuParamGetMediaType(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, 0);
-    return param->GetMediaType();
-}
-
-ExternalString FfiWebContextMenuParamGetSelectionText(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, Utils::MallocCString(""));
-    return Utils::MallocCString(param->GetSelectionText());
-}
-
-int32_t FfiWebContextMenuParamGetSourceType(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, 0);
-    return param->GetSourceType();
-}
-
-int32_t FfiWebContextMenuParamGetInputFieldType(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, 0);
-    return param->GetInputFieldType();
-}
-
-bool FfiWebContextMenuParamIsEditable(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, false);
-    return param->IsEditable();
-}
-
-int32_t FfiWebContextMenuParamGetEditStateFlags(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebContextMenuParam>*>(ptr);
-    CHECK_NULL_RETURN(param, 0);
-    return param->GetEditStateFlags();
-}
-
-void FfiWebContextMenuResultCloseContextMenu(void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<ContextMenuResult>*>(ptr);
-    CHECK_NULL_VOID(result);
-    result->Cancel();
-}
-
-void FfiWebContextMenuResultCopyImage(void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<ContextMenuResult>*>(ptr);
-    CHECK_NULL_VOID(result);
-    result->CopyImage();
-}
-
-void FfiWebContextMenuResultCopy(void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<ContextMenuResult>*>(ptr);
-    CHECK_NULL_VOID(result);
-    result->Copy();
-}
-
-void FfiWebContextMenuResultPaste(void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<ContextMenuResult>*>(ptr);
-    CHECK_NULL_VOID(result);
-    result->Paste();
-}
-
-void FfiWebContextMenuResultCut(void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<ContextMenuResult>*>(ptr);
-    CHECK_NULL_VOID(result);
-    result->Cut();
-}
-
-void FfiWebContextMenuResultSelectAll(void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<ContextMenuResult>*>(ptr);
-    CHECK_NULL_VOID(result);
-    result->SelectAll();
-}
-
-void FfiOHOSAceFrameworkWebOnShowFileSelector(bool (*callback)(void* param, void* result))
-{
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) -> bool {
-        auto webNode = node.Upgrade();
-        CHECK_NULL_RETURN(webNode, false);
-        ContainerScope scope(webNode->GetInstanceId());
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext) {
-            pipelineContext->UpdateCurrentActiveNode(node);
-        }
-        auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
-        auto param = new RefPtr<WebFileSelectorParam>(eventInfo->GetParam());
-        auto result = new RefPtr<FileSelectorResult>(eventInfo->GetFileSelectorResult());
-        return func(param, result);
-    };
-    WebModel::GetInstance()->SetOnFileSelectorShow(std::move(cjCallback));
-}
-
-void FfiWebFileSelectorResultSetHandleFileList(VectorStringHandle listPtr, void* ptr)
-{
-    auto result = *reinterpret_cast<RefPtr<FileSelectorResult>*>(ptr);
-    auto& fileList = *reinterpret_cast<std::vector<std::string>*>(listPtr);
-    if (result) {
-        result->HandleFileList(fileList);
-    }
-}
-
-ExternalString FfiWebFileSelectorParamGetTitle(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
-    auto title = param->GetTitle();
-    return Utils::MallocCString(title);
-}
-
-int32_t FfiWebFileSelectorParamGetMode(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
-    return static_cast<int32_t>(param->GetMode());
-}
-
-VectorStringHandle FfiWebFileSelectorParamGetAcceptType(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
-    auto result = new std::vector<std::string>;
-    auto acceptType = param->GetAcceptType();
-    for (auto& it : acceptType) {
-        result->emplace_back(it);
-    }
-    return result;
-}
-
-bool FfiWebFileSelectorParamIsCapture(void* ptr)
-{
-    auto param = *reinterpret_cast<RefPtr<WebFileSelectorParam>*>(ptr);
-    return param->IsCapture();
-}
-
-void FfiOHOSAceFrameworkWebOnNativeEmbedLifecyccleChange(void (*callback)(FfiNativeEmbedDataInfo datainfo))
-{
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto lambda = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
-        auto webNode = node.Upgrade();
-        CHECK_NULL_VOID(webNode);
-        ContainerScope scope(webNode->GetInstanceId());
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext) {
-            pipelineContext->UpdateCurrentActiveNode(node);
-        }
-        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
-        auto status = static_cast<int32_t>(eventInfo->GetStatus());
-        auto surfaceId = eventInfo->GetSurfaceId().c_str();
-        auto embedId = eventInfo->GetEmbedId().c_str();
-        auto embedinfo = eventInfo->GetEmebdInfo();
-
-        FfiNativeEmbedInfo nativeEmbedInfo;
-        nativeEmbedInfo.id = embedinfo.id.c_str();
-        nativeEmbedInfo.type = embedinfo.type.c_str();
-        nativeEmbedInfo.src = embedinfo.src.c_str();
-        nativeEmbedInfo.width = embedinfo.width;
-        nativeEmbedInfo.height = embedinfo.height;
-        nativeEmbedInfo.url = embedinfo.url.c_str();
-        nativeEmbedInfo.tag = embedinfo.tag.c_str();
-        nativeEmbedInfo.x = embedinfo.x;
-        nativeEmbedInfo.y = embedinfo.y;
-        auto paramTmp = embedinfo.params;
-        auto vecParams = new std::vector<FfiHeader>(paramTmp.size());
-        CHECK_NULL_VOID(vecParams);
-        size_t i = 0;
-        for (const auto& it : paramTmp) {
-            (*vecParams)[i] =
-                FfiHeader { .key = Utils::MallocCString(it.first), .value = Utils::MallocCString(it.second) };
-            i++;
-        }
-        nativeEmbedInfo.params = vecParams;
-
-        FfiNativeEmbedDataInfo datainfo;
-        datainfo.status = status;
-        datainfo.surfaceId = surfaceId;
-        datainfo.embedId = embedId;
-        datainfo.info = nativeEmbedInfo;
-        func(datainfo);
-    };
-    WebModel::GetInstance()->SetNativeEmbedLifecycleChangeId(lambda);
 }
 }

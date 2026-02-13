@@ -45,37 +45,7 @@ VectorStringHandle FfiFontManagerGetSystemFontList()
     }
 }
 
-NativeOptionFontInfo FfiFontManagerGetFontByName(const char* fontName)
-{
-    auto container = Container::Current();
-    if (!container || !container->GetPipelineContext()) {
-        LOGE("Can not get pipelineContext.");
-        return NativeOptionFontInfo { .hasValue = false, .info = nullptr };
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    FontInfo fontInfo;
-    if (!pipelineContext->GetSystemFont(fontName, fontInfo)) {
-        LOGE("Can not get system font.");
-        return NativeOptionFontInfo { .hasValue = false, .info = nullptr };
-    }
-    return NativeOptionFontInfo {
-        .hasValue = true,
-        .info = new NativeFontInfo {
-            .path = fontInfo.path.c_str(),
-            .postScriptName = fontInfo.postScriptName.c_str(),
-            .fullName = fontInfo.fullName.c_str(),
-            .family = fontInfo.family.c_str(),
-            .subfamily = fontInfo.subfamily.c_str(),
-            .weight = fontInfo.weight,
-            .width = fontInfo.width,
-            .italic = fontInfo.italic,
-            .monoSpace = fontInfo.monoSpace,
-            .symbolic = fontInfo.symbolic
-        }
-    } ;
-}
-
-NativeFontInfo4Font* FfiFontManagerGetFontByNameV2(const char* fontName)
+NativeFontInfo4Font* FfiFontManagerGetFontByName(const char* fontName)
 {
     auto container = Container::Current();
     if (!container || !container->GetPipelineContext()) {
@@ -111,8 +81,8 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
             return;
         }
         for (auto alias : generic.aliasSet) {
-            NativeUIFontAliasInfo nativeAlias = NativeUIFontAliasInfo { .name = Utils::MallocCString(alias.familyName),
-                .weight = static_cast<uint32_t>(alias.weight) };
+            NativeUIFontAliasInfo nativeAlias =
+                NativeUIFontAliasInfo { .name = Utils::MallocCString(alias.familyName), .weight = alias.weight };
             aliasInfoList->push_back(nativeAlias);
         }
         nativeGeneric.alias = aliasInfoList;
@@ -123,8 +93,7 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
         }
         for (auto adjust : generic.adjustSet) {
             NativeUIFontAdjustInfo nativeAdjust =
-                NativeUIFontAdjustInfo { .weight = static_cast<uint32_t>(adjust.origValue),
-                    .to = static_cast<uint32_t>(adjust.newValue) };
+                NativeUIFontAdjustInfo { .weight = adjust.origValue, .to = adjust.newValue };
             adjustInfoList->push_back(nativeAdjust);
         }
         nativeGeneric.adjust = adjustInfoList;

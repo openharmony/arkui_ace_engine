@@ -105,7 +105,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_component_id_ffi.cpp",
       "interfaces/cj_ffi/cj_component_utils_ffi.cpp",
       "interfaces/cj_ffi/cj_container_base_ffi.cpp",
-      "interfaces/cj_ffi/cj_container_span_ffi.cpp",
       "interfaces/cj_ffi/cj_context_menu_ffi.cpp",
       "interfaces/cj_ffi/cj_counter_ffi.cpp",
       "interfaces/cj_ffi/cj_customdialog_controller_ffi.cpp",
