@@ -438,7 +438,7 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "UpdateImageNode set HDR. %{public}d, format. %{public}d",
- 	    dynamicRangeMode_, movingPhotoFormat_);
+        dynamicRangeMode_, movingPhotoFormat_);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
@@ -482,7 +482,7 @@ void MovingPhotoPattern::UpdateTempImageNode(const ImageSourceInfo& imageSourceI
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "UpdateTempImageNode set HDR. %{public}d, format. %{public}d",
- 	    dynamicRangeMode_, movingPhotoFormat_);
+        dynamicRangeMode_, movingPhotoFormat_);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
