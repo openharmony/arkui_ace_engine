@@ -97,9 +97,9 @@ class JSBuilderNode extends BaseNode {
   private frameNode_: FrameNode;
   private _nativeRef: NativeStrongRef;
   private _supportNestingBuilder: boolean;
+  private _isDisposed: boolean;
   private _proxyObjectParam: Object;
   private bindedViewOfBuilderNode: ViewPU;
-  private _isDisposed: boolean;
   private inheritFreeze: boolean;
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
@@ -140,7 +140,7 @@ class JSBuilderNode extends BaseNode {
           }
           else {
             // FIXME fix for mixed V2 - V3 Hierarchies
-            throw new BusinessError(100029, 'aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+            throw new BusinessError(100029, 'aboutToReuseInternal: Reuse not implemented for ViewV2, yet');
           }
         } // if child
       });
@@ -339,7 +339,7 @@ class JSBuilderNode extends BaseNode {
       if (this.isBuilderNodeActive()) {
         this.isFreeze = false;
       } else {
-        this.isFreeze = this.allowFreezeWhenInactive;
+      this.isFreeze = this.allowFreezeWhenInactive;
       }
       if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
         this.update(this.updateParams_);

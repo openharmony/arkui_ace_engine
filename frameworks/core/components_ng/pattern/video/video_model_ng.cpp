@@ -39,7 +39,6 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     bool hasMediaColumnNode = videoNode->HasMediaColumnNode();
     if (!hasMediaColumnNode) {
         auto mediaColumnId = videoNode->GetMediaColumnId();
-        ACE_UINODE_TRACE(nodeId);
         auto mediaColumNode = FrameNode::GetOrCreateFrameNode(
             V2::COLUMN_ETS_TAG, mediaColumnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         CHECK_NULL_VOID(mediaColumNode);
@@ -47,7 +46,6 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     }
     if (!hasPreviewImageNode) {
         auto previewImageId = videoNode->GetPreviewImageId();
-        ACE_UINODE_TRACE(nodeId);
         auto previewImageNode = FrameNode::GetOrCreateFrameNode(
             V2::IMAGE_ETS_TAG, previewImageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
         CHECK_NULL_VOID(previewImageNode);

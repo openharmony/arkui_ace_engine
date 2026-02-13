@@ -110,7 +110,7 @@ class __RepeatVirtualScrollImpl<T> {
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode index ${forIndex} - start`);
             if (forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
                 // STATE_MGMT_NOTE check also index < totalCount
-                throw new BusinessError(103803, `__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode: for index=${forIndex}  \
+                throw new BusinessError(103803,`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode: for index=${forIndex}  \
                     with data array length ${this.arr_.length}, totalCount=${this.totalCount_}  out of range error.`);
             }
 
@@ -130,7 +130,7 @@ class __RepeatVirtualScrollImpl<T> {
 
         const onUpdateNode = (fromKey: string, forIndex: number): void => {
             if (!fromKey || fromKey === '' || forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
-                throw new BusinessError(103803, `__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                throw new BusinessError(103803,`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
                     forIndex=${forIndex}, with data array length ${this.arr_.length}, totalCount=${this.totalCount_}, invalid function input error.`);
             }
             // create dependency array item [forIndex] -> Repeat

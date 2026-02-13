@@ -109,7 +109,6 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
     ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateRecordingCanvas[%f, %f]", GetId(), width, height);
-    ACE_UINODE_TRACE(GetId());
     rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
     CHECK_NULL_VOID(rsCanvas_);

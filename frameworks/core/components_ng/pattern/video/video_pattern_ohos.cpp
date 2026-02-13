@@ -137,7 +137,6 @@ void VideoPattern::PrepareMediaPlayer()
     videoSrcInfo_.moduleName_ = videoSrcInfo.moduleName_;
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] create MediaPlayer.", hostId_);
-        ACE_UINODE_TRACE(GetHost());
         mediaPlayer_->CreateMediaPlayer();
     }
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
@@ -557,7 +556,6 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
-    ACE_UINODE_TRACE(host);
     renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
