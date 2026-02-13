@@ -4574,7 +4574,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _FrameNodeExtender_constructorFrameNode(): KPointer
+    native static _FrameNodeExtender_constructorFrameNode(supportMultiThread: KInt): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getDestroy(): KPointer
     @ani.unsafe.Direct
@@ -4692,7 +4692,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodePtr(node: KPointer): KPointer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_createTypedFrameNode(type: KStringPtr): KPointer
+    native static _FrameNodeExtender_createTypedFrameNode(type: KStringPtr, supportMultiThread: KInt): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_createByRawPtr(ptr: KPointer): KPointer
     @ani.unsafe.Direct

@@ -195,6 +195,10 @@ export class FrameNodeInternal {
     }
 }
 
+export interface FrameNodeOptions {
+    supportMultiThread?: boolean;
+}
+
 const ERROR_CODE_NODE_IS_ADOPTED = 106206;
 const ERROR_CODE_NODE_HAS_PARENT = 106207;
 const ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208;
@@ -220,6 +224,7 @@ export class FrameNode implements MaterializedBase {
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
     public nodeType_?: string | undefined = undefined;
     private nodeAdapterRef_ ?: NodeAdapter;
+    private supportMultiThread: boolean = false;
 
     getType(): string {
         return 'CustomFrameNode';
@@ -245,11 +250,12 @@ export class FrameNode implements MaterializedBase {
         }
         return this._gestureEvent as UIGestureEvent;
     }
-    constructor(uiContext?: UIContext, type?: string, ptr?: KPointer) {
+    constructor(uiContext?: UIContext, options?: FrameNodeOptions, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
             this.uiContext = uiContext as UIContextImpl;
             this.instanceId_ = this.uiContext!.instanceId_;
             this.nodeType_ = type;
+            this.supportMultiThread = options?.supportMultiThread ?? false;
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
@@ -267,12 +273,12 @@ export class FrameNode implements MaterializedBase {
             const isCustomFrameNode = type === undefined || type === 'CustomFrameNode';
             if (isCustomFrameNode) {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
-                const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode()
+                const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode(this.supportMultiThread)
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
                 ArkUIAniModule._SetCustomCallbackWithCheck(this!.peer!.ptr, this);  
             } else {
-                const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string);
+                const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string, this.supportMultiThread);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
             }
@@ -478,6 +484,7 @@ export class FrameNode implements MaterializedBase {
         this.renderNode_?.resetNodePtr();
     }
     public isDisposed(): boolean {
+        ArkUIAniModule._CheckThreadValid(true, 0);
         return (this.nodePtr_ == undefined);
     }
     public resetNodePtr(): void {
@@ -773,6 +780,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getNodePropertyValue(this, property_casted);
     }
     public getRenderNode(): RenderNode | null {
+        ArkUIAniModule._CheckThreadValid(true, 0);
         return (this.renderNode_ && this.renderNode_?.peer?.ptr) ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
@@ -793,6 +801,7 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getNodeType(this)
     }
     public getCustomProperty(name: string): CustomProperty {
+        ArkUIAniModule._CheckThreadValid(true, 0);
         const name_casted = name as (string);
         const nodeId = this._nodeId;
         if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
@@ -913,7 +922,7 @@ export class FrameNode implements MaterializedBase {
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {
-        super(uiContext, type, ptr);
+        super(uiContext, undefined, type, ptr);
     }
     isModifiable(): boolean {
         return false;
@@ -1039,8 +1048,8 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
         return true;
     }
 
-    constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => T) {
-        super(uiContext, type, nullptr);
+    constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => T, options?: FrameNodeOptions) {
+        super(uiContext, options, type, nullptr);
         this.attrCreator_ = attrCreator;
         this.type_ = type;
     }
@@ -1077,6 +1086,7 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
         return true;
     }
     get attribute(): T {
+        ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
         if (this.attribute_ === undefined) {
             this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
         }
@@ -1087,40 +1097,44 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
 export namespace typeNode {
 
     class ColumnFrameNode extends TypedFrameNode<ArkColumnNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkColumnNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkColumnNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: ColumnOptions | ColumnOptionsV2): ColumnAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkColumnNode = this.attribute as ArkColumnNode;
             return arkColumnNode!.initialize(options);
         }
     }
 
     class RowFrameNode extends TypedFrameNode<ArkRowNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRowNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRowNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: RowOptions | RowOptionsV2): RowAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkRowNode = this.attribute as ArkRowNode;
             return arkRowNode!.initialize(options);
         }
     }
 
     class StackFrameNode extends TypedFrameNode<ArkStackNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkStackNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkStackNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: StackOptions): StackAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkStackNode = this.attribute as ArkStackNode;
             return arkStackNode!.initialize(options);
         }
     }
 
     class FlexFrameNode extends TypedFrameNode<ArkFlexNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkFlexNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkFlexNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: FlexOptions): FlexAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkFlexNode = this.attribute as ArkFlexNode;
             return arkFlexNode!.initialize(options);
         }
@@ -1167,90 +1181,99 @@ export namespace typeNode {
     }
 
     class RelativeContainerFrameNode extends TypedFrameNode<ArkRelativeContainerNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRelativeContainerNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRelativeContainerNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(): RelativeContainerAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkRelativeContainerNode = this.attribute as ArkRelativeContainerNode;
             return arkRelativeContainerNode!.initialize();
         }
     }
 
     class ListFrameNode extends TypedFrameNode<ArkListNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: ListOptions): ListAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkListNode = this.attribute as ArkListNode;
             return arkListNode!.initialize(options);
         }
     }
 
     class ListItemFrameNode extends TypedFrameNode<ArkListItemNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListItemNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListItemNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: ListItemOptions): ListItemAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkListItemNode = this.attribute as ArkListItemNode;
             return arkListItemNode!.initialize(options);
         }
     }
 
     class ListItemGroupFrameNode extends TypedFrameNode<ArkListItemGroupNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListItemGroupNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListItemGroupNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: ListItemGroupOptions): ListItemGroupAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkListItemGroupNode = this.attribute as ArkListItemGroupNode;
             return arkListItemGroupNode!.initialize(options);
         }
     }
 
     class ScrollFrameNode extends TypedFrameNode<ArkScrollNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkScrollNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkScrollNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(scroller: Scroller): ScrollAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkScrollNode = this.attribute as ArkScrollNode;
             return arkScrollNode!.initialize(scroller);
         }
     }
 
     class GridFrameNode extends TypedFrameNode<ArkGridNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(scroller: Scroller, layoutOptions: GridLayoutOptions): GridAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkGridNode = this.attribute as ArkGridNode;
             return arkGridNode!.initialize(scroller, layoutOptions);
         }
     }
 
     class GridItemFrameNode extends TypedFrameNode<ArkGridItemNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridItemNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridItemNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: GridItemOptions): GridItemAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkGridItemNode = this.attribute as ArkGridItemNode;
             return arkGridItemNode!.initialize(options);
         }
     }
 
     class WaterFlowFrameNode extends TypedFrameNode<ArkWaterFlowNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkWaterFlowNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkWaterFlowNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: WaterFlowOptions): WaterFlowAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkWaterFlowNode = this.attribute as ArkWaterFlowNode;
             return arkWaterFlowNode!.initialize(options);
         }
     }
 
     class FlowItemFrameNode extends TypedFrameNode<ArkFlowItemNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkFlowItemNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkFlowItemNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(): FlowItemAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkFlowItemNode = this.attribute as ArkFlowItemNode;
             return arkFlowItemNode!.initialize();
         }
@@ -1267,40 +1290,44 @@ export namespace typeNode {
     }
 
     class SwiperFrameNode extends TypedFrameNode<ArkSwiperNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSwiperNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSwiperNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(controller?: SwiperController): SwiperAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkSwiperNode = this.attribute as ArkSwiperNode;
             return arkSwiperNode!.initialize(controller);
         }
     }
 
     class TextAreaFrameNode extends TypedFrameNode<ArkTextAreaNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(value?: TextAreaOptions): TextAreaAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkTextAreaNode = this.attribute as ArkTextAreaNode;
             return arkTextAreaNode!.initialize(value);
         }
     }
 
     class TextInputFrameNode extends TypedFrameNode<ArkTextInputNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextInputNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextInputNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(value?: TextInputOptions): TextInputAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkTextInputNode = this.attribute as ArkTextInputNode;
             return arkTextInputNode!.initialize(value);
         }
     }
 
     class TextFrameNode extends TypedFrameNode<ArkTextNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(content?: string | Resource, value?: TextOptions): TextAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkTextNode = this.attribute as ArkTextNode;
             return arkTextNode!.initialize(content, value);
         }
@@ -1327,36 +1354,42 @@ export namespace typeNode {
     }
 
     class XComponentFrameNode extends TypedFrameNode<ArkXComponentNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkXComponentNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkXComponentNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(value: XComponentParameters): XComponentAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkXComponentNode = this.attribute as ArkXComponentNode;
             return arkXComponentNode!.initialize(value);
         }
         initialize(value: XComponentOptions): XComponentAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkXComponentNode = this.attribute as ArkXComponentNode;
             return arkXComponentNode!.initialize(value);
         }
         initialize(value: NativeXComponentParameters): XComponentAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkXComponentNode = this.attribute as ArkXComponentNode;
             return arkXComponentNode!.initialize(value);
         }
     }
 
     class ImageFrameNode extends TypedFrameNode<ArkImageNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkImageNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkImageNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(src: PixelMap | ResourceStr | DrawableDescriptor): ImageAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkImageNode = this.attribute as ArkImageNode;
             return arkImageNode!.initialize(src);
         }
         initialize(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent): ImageAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkImageNode = this.attribute as ArkImageNode;
             return arkImageNode!.initialize(src);
         }
         initialize(src: PixelMap | ResourceStr | DrawableDescriptor, options: ImageAIOptions): ImageAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkImageNode = this.attribute as ArkImageNode;
             return arkImageNode!.initialize(src, options);
         }
@@ -1387,20 +1420,22 @@ export namespace typeNode {
     }
 
     class ProgressFrameNode extends TypedFrameNode<ArkProgressNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkProgressNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkProgressNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: ProgressOptions): ProgressAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkProgressNode = this.attribute as ArkProgressNode;
             return arkProgressNode!.initialize(options);
         }
     }
 
     class LoadingProgressFrameNode extends TypedFrameNode<ArkLoadingProgressNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkLoadingProgressNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkLoadingProgressNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(): LoadingProgressAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkLoadingProgressNode = this.attribute as ArkLoadingProgressNode;
             return arkLoadingProgressNode!.initialize();
         }
@@ -1428,48 +1463,54 @@ export namespace typeNode {
 
 
     class ButtonFrameNode extends TypedFrameNode<ArkButtonNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkButtonNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkButtonNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(): ButtonAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkButtonNode = this.attribute as ArkButtonNode;
             return arkButtonNode!.initialize();
         }
         initialize(options: ButtonOptions): ButtonAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkButtonNode = this.attribute as ArkButtonNode;
             return arkButtonNode!.initializeWithChild(options);
         }
         initialize(label: ResourceStr, options?: ButtonOptions): ButtonAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkButtonNode = this.attribute as ArkButtonNode;
             return arkButtonNode!.initializeWithLabel(label, options);
         }
     }
 
     class CheckboxFrameNode extends TypedFrameNode<ArkCheckboxNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkCheckboxNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkCheckboxNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: CheckboxOptions): CheckboxAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkCheckboxNode = this.attribute as ArkCheckboxNode;
             return arkCheckboxNode!.initialize(options);
         }
     }
 
     class CheckboxGroupFrameNode extends TypedFrameNode<ArkCheckboxGroupNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkCheckboxGroupNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkCheckboxGroupNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: CheckboxGroupOptions): CheckboxGroupAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkCheckboxGroupNode = this.attribute as ArkCheckboxGroupNode;
             return arkCheckboxGroupNode!.initialize(options);
         }
     }
 
     class RadioFrameNode extends TypedFrameNode<ArkRadioNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRadioNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRadioNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: RadioOptions): RadioAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkRadioNode = this.attribute as ArkRadioNode;
             return arkRadioNode!.initialize(options);
         }
@@ -1496,20 +1537,22 @@ export namespace typeNode {
     }
 
     class SliderFrameNode extends TypedFrameNode<ArkSliderNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSliderNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSliderNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: SliderOptions): SliderAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkSliderNode = this.attribute as ArkSliderNode;
             return arkSliderNode!.initialize(options);
         }
     }
 
     class ToggleFrameNode extends TypedFrameNode<ArkToggleNode> {
-        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkToggleNode) {
-            super(uiContext, type, attrCreator);
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkToggleNode, options?: FrameNodeOptions) {
+            super(uiContext, type, attrCreator, options);
         }
         initialize(options: ToggleOptions): ToggleAttribute {
+            ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
             let arkToggleNode = this.attribute as ArkToggleNode;
             return arkToggleNode!.initialize(options);
         }
@@ -1524,14 +1567,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createColumnNode(context: UIContext): ColumnFrameNode {
+    export function createColumnNode(context: UIContext, options?: FrameNodeOptions): ColumnFrameNode {
         return new ColumnFrameNode(context, 'Column', (node: FrameNode, type: ModifierType): ArkColumnNode => {
             let arknode = new ArkColumnNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkColumnPeer(retval, node._nodeId!.toInt(), "Column", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1547,14 +1590,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRowNode(context: UIContext): RowFrameNode {
+    export function createRowNode(context: UIContext, options?: FrameNodeOptions): RowFrameNode {
         return new RowFrameNode(context, 'Row', (node: FrameNode, type: ModifierType): ArkRowNode => {
             let arknode = new ArkRowNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkRowPeer(retval, node._nodeId!.toInt(), "Row", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1570,14 +1613,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createStackNode(context: UIContext): StackFrameNode {
+    export function createStackNode(context: UIContext, options?: FrameNodeOptions): StackFrameNode {
         return new StackFrameNode(context, 'Stack', (node: FrameNode, type: ModifierType): ArkStackNode => {
             let arknode = new ArkStackNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkStackPeer(retval, node._nodeId!.toInt(), "Stack", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1593,14 +1636,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createFlexNode(context: UIContext): FlexFrameNode {
+    export function createFlexNode(context: UIContext, options?: FrameNodeOptions): FlexFrameNode {
         return new FlexFrameNode(context, 'Flex', (node: FrameNode, type: ModifierType): ArkFlexNode => {
             let arknode = new ArkFlexNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkFlexPeer(retval, node._nodeId!.toInt(), "Flex", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1660,14 +1703,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createRelativeContainerNode(context: UIContext): RelativeContainerFrameNode {
+    export function createRelativeContainerNode(context: UIContext, options?: FrameNodeOptions): RelativeContainerFrameNode {
         return new RelativeContainerFrameNode(context, 'RelativeContainer', (node: FrameNode, type: ModifierType): ArkRelativeContainerNode => {
             let arknode = new ArkRelativeContainerNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkRelativeContainerPeer(retval, node._nodeId!.toInt(), "RelativeContainer", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1683,14 +1726,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createListNode(context: UIContext): ListFrameNode {
+    export function createListNode(context: UIContext, options?: FrameNodeOptions): ListFrameNode {
         return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
             let arknode = new ArkListNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkListPeer(retval, node._nodeId!.toInt(), "List", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1734,14 +1777,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createListItemNode(context: UIContext): ListItemFrameNode {
+    export function createListItemNode(context: UIContext, options?: FrameNodeOptions): ListItemFrameNode {
         return new ListItemFrameNode(context, 'ListItem', (node: FrameNode, type: ModifierType): ArkListItemNode => {
             let arknode = new ArkListItemNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkListItemPeer(retval, node._nodeId!.toInt(), "ListItem", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1757,14 +1800,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createListItemGroupNode(context: UIContext): ListItemGroupFrameNode {
+    export function createListItemGroupNode(context: UIContext, options?: FrameNodeOptions): ListItemGroupFrameNode {
         return new ListItemGroupFrameNode(context, 'ListItemGroup', (node: FrameNode, type: ModifierType): ArkListItemGroupNode => {
             let arknode = new ArkListItemGroupNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkListItemGroupPeer(retval, node._nodeId!.toInt(), "ListItemGroup", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1780,14 +1823,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createScrollNode(context: UIContext): ScrollFrameNode {
+    export function createScrollNode(context: UIContext, options?: FrameNodeOptions): ScrollFrameNode {
         return new ScrollFrameNode(context, 'Scroll', (node: FrameNode, type: ModifierType): ArkScrollNode => {
             let arknode = new ArkScrollNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkScrollPeer(retval, node._nodeId!.toInt(), "Scroll", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1831,14 +1874,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createGridNode(context: UIContext): GridFrameNode {
+    export function createGridNode(context: UIContext, options?: FrameNodeOptions): GridFrameNode {
         return new GridFrameNode(context, 'Grid', (node: FrameNode, type: ModifierType): ArkGridNode => {
             let arknode = new ArkGridNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkGridPeer(retval, node._nodeId!.toInt(), "Grid", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1884,14 +1927,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createGridItemNode(context: UIContext): GridItemFrameNode {
+    export function createGridItemNode(context: UIContext, options?: FrameNodeOptions): GridItemFrameNode {
         return new GridItemFrameNode(context, 'GridItem', (node: FrameNode, type: ModifierType): ArkGridItemNode => {
             let arknode = new ArkGridItemNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkGridItemPeer(retval, node._nodeId!.toInt(), "GridItem", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1907,14 +1950,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createWaterFlowNode(context: UIContext): WaterFlowFrameNode {
+    export function createWaterFlowNode(context: UIContext, options?: FrameNodeOptions): WaterFlowFrameNode {
         return new WaterFlowFrameNode(context, 'WaterFlow', (node: FrameNode, type: ModifierType): ArkWaterFlowNode => {
             let arknode = new ArkWaterFlowNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkWaterFlowPeer(retval, node._nodeId!.toInt(), "WaterFlow", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1958,14 +2001,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createFlowItemNode(context: UIContext): FlowItemFrameNode {
+    export function createFlowItemNode(context: UIContext, options?: FrameNodeOptions): FlowItemFrameNode {
         return new FlowItemFrameNode(context, 'FlowItem', (node: FrameNode, type: ModifierType): ArkFlowItemNode => {
             let arknode = new ArkFlowItemNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkFlowItemPeer(retval, node._nodeId!.toInt(), "FlowItem", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -1992,14 +2035,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createSwiperNode(context: UIContext): SwiperFrameNode {
+    function createSwiperNode(context: UIContext, options?: FrameNodeOptions): SwiperFrameNode {
         return new SwiperFrameNode(context, 'Swiper', (node: FrameNode, type: ModifierType): ArkSwiperNode => {
             let arknode = new ArkSwiperNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkSwiperPeer(retval, node._nodeId!.toInt(), "Swiper", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2030,14 +2073,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextAreaNode(context: UIContext): TextAreaFrameNode {
+    function createTextAreaNode(context: UIContext, options?: FrameNodeOptions): TextAreaFrameNode {
         return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
             let arknode = new ArkTextAreaNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkTextAreaPeer(retval, node._nodeId as int32, "TextArea", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2068,14 +2111,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextInputNode(context: UIContext): TextInputFrameNode {
+    function createTextInputNode(context: UIContext, options?: FrameNodeOptions): TextInputFrameNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkTextInputPeer(retval, node._nodeId as int32, "TextInput", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2106,14 +2149,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextNode(context: UIContext): TextFrameNode {
+    function createTextNode(context: UIContext, options?: FrameNodeOptions): TextFrameNode {
         return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
             let arknode = new ArkTextNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
 
@@ -2189,53 +2232,53 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeDefault(context: UIContext): XComponentFrameNode {
+    function createXComponentNodeDefault(context: UIContext, options?: FrameNodeOptions): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
         xcFrameNode.initialize({ type: XComponentType.SURFACE } as NativeXComponentParameters);
         return xcFrameNode;
     }
 
     // @ts-ignore
-    function createXComponentNodeWithOptions(context: UIContext, options: XComponentOptions): XComponentFrameNode {
+    function createXComponentNodeWithOptions(context: UIContext, value: XComponentOptions, options?: FrameNodeOptions): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
-        xcFrameNode.initialize(options);
+        }, options);
+        xcFrameNode.initialize(value);
         return xcFrameNode;
     }
 
     // @ts-ignore
-    function createXComponentNodeWithNativeParameters(context: UIContext, parameters: NativeXComponentParameters): XComponentFrameNode {
+    function createXComponentNodeWithNativeParameters(context: UIContext, parameters: NativeXComponentParameters, options?: FrameNodeOptions): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
         xcFrameNode.initialize(parameters);
         return xcFrameNode;
     }
 
     // @ts-ignore
-    function createImageNode(context: UIContext): ImageFrameNode {
+    function createImageNode(context: UIContext, options?: FrameNodeOptions): ImageFrameNode {
         return new ImageFrameNode(context, 'Image', (node: FrameNode, type: ModifierType): ArkImageNode => {
             let arknode = new ArkImageNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkImagePeer(retval, node._nodeId as int32, 'Image', 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2333,14 +2376,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createProgressNode(context: UIContext): ProgressFrameNode {
+    function createProgressNode(context: UIContext, options?: FrameNodeOptions): ProgressFrameNode {
         return new ProgressFrameNode(context, 'Progress', (node: FrameNode, type: ModifierType): ArkProgressNode => {
             let arknode = new ArkProgressNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkProgressPeer(retval, node._nodeId as int32, 'Progress', 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2356,14 +2399,14 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createLoadingProgressNode(context: UIContext): LoadingProgressFrameNode {
+    function createLoadingProgressNode(context: UIContext, options?: FrameNodeOptions): LoadingProgressFrameNode {
         return new LoadingProgressFrameNode(context, 'LoadingProgress', (node: FrameNode, type: ModifierType): ArkLoadingProgressNode => {
             let arknode = new ArkLoadingProgressNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkLoadingProgressPeer(retval, node._nodeId as int32, 'LoadingProgress', 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2401,47 +2444,47 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createButtonNode(context: UIContext): ButtonFrameNode {
+    export function createButtonNode(context: UIContext, options?: FrameNodeOptions): ButtonFrameNode {
         return new ButtonFrameNode(context, 'Button', (node: FrameNode, type: ModifierType): ArkButtonNode => {
             let arknode = new ArkButtonNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkButtonPeer(retval, node._nodeId as int32, "Button", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
-    export function createCheckboxNode(context: UIContext): CheckboxFrameNode {
+    export function createCheckboxNode(context: UIContext, options?: FrameNodeOptions): CheckboxFrameNode {
         return new CheckboxFrameNode(context, 'Checkbox', (node: FrameNode, type: ModifierType): ArkCheckboxNode => {
             let arknode = new ArkCheckboxNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkCheckboxPeer(retval, node._nodeId as int32, "Checkbox", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
-    export function createCheckboxGroupNode(context: UIContext): CheckboxGroupFrameNode {
+    export function createCheckboxGroupNode(context: UIContext, options?: FrameNodeOptions): CheckboxGroupFrameNode {
         return new CheckboxGroupFrameNode(context, 'CheckboxGroup', (node: FrameNode, type: ModifierType): ArkCheckboxGroupNode => {
             let arknode = new ArkCheckboxGroupNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkCheckboxGroupPeer(retval, node._nodeId as int32, "CheckboxGroup", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
-    export function createRadioNode(context: UIContext): RadioFrameNode {
+    export function createRadioNode(context: UIContext, options?: FrameNodeOptions): RadioFrameNode {
         return new RadioFrameNode(context, 'Radio', (node: FrameNode, type: ModifierType): ArkRadioNode => {
             let arknode = new ArkRadioNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkRadioPeer(retval, node._nodeId as int32, "Radio", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
@@ -2467,25 +2510,25 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    export function createSliderNode(context: UIContext): SliderFrameNode {
+    export function createSliderNode(context: UIContext, options?: FrameNodeOptions): SliderFrameNode {
         return new SliderFrameNode(context, 'Slider', (node: FrameNode, type: ModifierType): ArkSliderNode => {
             let arknode = new ArkSliderNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkSliderPeer(retval, node._nodeId as int32, "Slider", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, options);
     }
 
     // @ts-ignore
-    export function createToggleNode(context: UIContext, options?: ToggleOptions): ToggleFrameNode {
+    export function createToggleNode(context: UIContext, options?: ToggleOptions, frameNodeOptions?: FrameNodeOptions): ToggleFrameNode {
         let toggleNode = new ToggleFrameNode(context, 'Toggle', (node: FrameNode, type: ModifierType): ArkToggleNode => {
             let arknode = new ArkToggleNode();
             const retval = FrameNodeExtender.getFrameNodePtr(node);
             const peer = new ArkTogglePeer(retval, node._nodeId as int32, "Toggle", 0);
             arknode.setPeer(peer);
             return arknode;
-        });
+        }, frameNodeOptions);
         toggleNode.initialize(options as ToggleOptions);
         return toggleNode;
     }

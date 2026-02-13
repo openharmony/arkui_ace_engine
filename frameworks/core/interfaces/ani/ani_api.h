@@ -569,6 +569,7 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_long ptr);
     void (*onLayoutInnerLayout)(ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*checkThreadValid)(ani_boolean checkUIThread, ani_long node);
     void (*setCustomPropertyCallBack)(
         ArkUINodeHandle node, std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc,

@@ -33256,10 +33256,10 @@ void impl_ForEachOps_SyncOnMoveOps(Ark_NativePointer node, KSerializerBuffer thi
         GetAccessors()->getForEachOpsAccessor()->SyncOnMoveOps(node, static_cast<Array_NativePointer*>(&additionalChildValueTemp), static_cast<Opt_OnMoveHandler*>(&onMoveOpsValueTemp), static_cast<Opt_ItemDragEventHandler*>(&onMoveDragEventOpsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_FrameNodeExtender_constructorFrameNode() {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->constructorFrameNode();
+Ark_NativePointer impl_FrameNodeExtender_constructorFrameNode(Ark_Boolean supportMultiThread) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->constructorFrameNode(supportMultiThread);
 }
-KOALA_INTEROP_DIRECT_0(FrameNodeExtender_constructorFrameNode, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(FrameNodeExtender_constructorFrameNode, Ark_NativePointer, Ark_Boolean)
 Ark_NativePointer impl_FrameNodeExtender_getDestroy() {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getDestroy();
 }
@@ -33589,10 +33589,10 @@ Ark_NativePointer impl_FrameNodeExtender_getFrameNodePtr(Ark_NativePointer node)
         return GetAccessors()->getFrameNodeExtenderAccessor()->getFrameNodePtr(static_cast<Ark_FrameNode>(node));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_getFrameNodePtr, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_FrameNodeExtender_createTypedFrameNode(const KStringPtr& type) {
-        return GetAccessors()->getFrameNodeExtenderAccessor()->createTypedFrameNode((const Ark_String*) (&type));
+Ark_NativePointer impl_FrameNodeExtender_createTypedFrameNode(const KStringPtr& type, Ark_Boolean supportMultiThread) {
+        return GetAccessors()->getFrameNodeExtenderAccessor()->createTypedFrameNode((const Ark_String*) (&type), supportMultiThread);
 }
-KOALA_INTEROP_1(FrameNodeExtender_createTypedFrameNode, Ark_NativePointer, KStringPtr)
+KOALA_INTEROP_2(FrameNodeExtender_createTypedFrameNode, Ark_NativePointer, KStringPtr, Ark_Boolean)
 Ark_NativePointer impl_FrameNodeExtender_createByRawPtr(Ark_NativePointer ptr) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->createByRawPtr(ptr);
 }

@@ -2123,8 +2123,8 @@ export class ForEachOps {
     }
 }
 export class FrameNodeExtender {
-    static constructorFrameNode_serialize(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode()
+    static constructorFrameNode_serialize(supportMultiThread: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode(supportMultiThread ? 1 : 0)
         return retval
     }
     static getDestroy_serialize(): KPointer {
@@ -2430,8 +2430,8 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodePtr(extractors.toFrameNodePtr(node))
         return retval
     }
-    static createTypedFrameNode_serialize(type: string): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type)
+    static createTypedFrameNode_serialize(type: string, supportMultiThread: boolean): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type, supportMultiThread ? 1 : 0)
         return retval
     }
     static createByRawPtr_serialize(ptr: KPointer): KPointer {
@@ -2518,8 +2518,9 @@ export class FrameNodeExtender {
         const returnResult : InteractionEventBindingInfo = InteractionEventBindingInfo_serializer.read(retvalDeserializer)
         return returnResult
     }
-    public static constructorFrameNode(): KPointer {
-        return FrameNodeExtender.constructorFrameNode_serialize()
+    public static constructorFrameNode(supportMultiThread: boolean): KPointer {
+        const supportMultiThread_casted = supportMultiThread as (boolean)
+        return FrameNodeExtender.constructorFrameNode_serialize(supportMultiThread_casted)
     }
     public static getDestroy(): KPointer {
         return FrameNodeExtender.getDestroy_serialize()
@@ -2794,9 +2795,10 @@ export class FrameNodeExtender {
         const node_casted = node as (FrameNode)
         return FrameNodeExtender.getFrameNodePtr_serialize(node_casted)
     }
-    public static createTypedFrameNode(type: string): KPointer {
+    public static createTypedFrameNode(type: string, supportMultiThread: boolean): KPointer {
         const type_casted = type as (string)
-        return FrameNodeExtender.createTypedFrameNode_serialize(type_casted)
+        const supportMultiThread_casted = supportMultiThread as (boolean)
+        return FrameNodeExtender.createTypedFrameNode_serialize(type_casted, supportMultiThread_casted)
     }
     public static createByRawPtr(ptr: KPointer): KPointer {
         return FrameNodeExtender.createByRawPtr_serialize(ptr)
