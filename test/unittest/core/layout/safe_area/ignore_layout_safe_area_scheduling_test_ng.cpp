@@ -650,4 +650,846 @@ HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling002
     }
 }
 
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling003
+ * @tc.desc: Scenario 1 - Single layer with single ignore node (Container Proactive Packing)
+ *
+ *           Component tree (2 layers):
+ *           Root(Flex)
+ *            └─ Child[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Simplest test case: only 2 nodes
+ *           - Uses TracingFlexPattern (Container Proactive Packing Mechanism)
+ *           - FlexLayoutAlgorithm detects Child as ignore → skip Child, adds to bundle
+ *           - Container sets delaySelfLayoutForIgnore → Root::Layout(skip)
+ *           - PostponedTaskForIgnore returns false → creates LAYOUT_FOR_IGNORE task
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling003, TestSize.Level0)
+{
+    // ---- Step 1: Create 2 FrameNodes ----
+    auto root = CreateTracingFlexNode("Root", GetElmtId(), true);
+    auto child = CreateTracingLeafNode("Child", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(child);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on Child ----
+    ConfigureIgnoreLayoutSafeArea(child);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",         // Root detects Child as ignore → skip
+        "Root:Layout(skip)",    // Root.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[Child], Root})
+        "Child:Measure",        // Child.MEASURE_FOR_IGNORE
+        "Child:Layout(skip)",   // Child.CreateLayoutTask internal Layout: delay=true → skip
+        "Root:Layout",          // Root.LAYOUT_FOR_IGNORE: delay=false → execute
+        "Child:Layout",         // Child.Layout called by Root.Layout
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling004
+ * @tc.desc: Scenario 1 - Single layer with single ignore node (Pattern Hook)
+ *
+ *           Component tree (2 layers):
+ *           Root(MultiChild)
+ *            └─ Child[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Simplest test case: only 2 nodes
+ *           - Uses TracingMultiChildPattern (Pattern Hook Mechanism)
+ *           - MultiChildPattern enables ChildPreMeasureHelperEnabled=true
+ *           - Child::PreMeasure returns true → skip, sets delay
+ *           - Root::Layout executes normally (container does NOT set delay)
+ *           - PostponedTaskForIgnore processes Child (no LAYOUT_FOR_IGNORE task)
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling004, TestSize.Level0)
+{
+    // ---- Step 1: Create 2 FrameNodes ----
+    auto root = CreateTracingMultiChildNode("Root", GetElmtId());
+    auto child = CreateTracingLeafNode("Child", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(child);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on Child ----
+    ConfigureIgnoreLayoutSafeArea(child);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",             // Root measures
+        "Child:PreMeasure(skip)",   // Child.PreMeasure returns true → skip
+        "Root:Layout",              // Root.Layout executes (container does NOT set delay)
+        "Child:Layout(skip)",       // Child.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[Child], Root})
+        "Child:Measure",            // Child.MEASURE_FOR_IGNORE
+        "Child:Layout",             // Child.CreateLayoutTask internal Layout: delay=false → execute
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling005
+ * @tc.desc: Scenario 2 - Same level with multiple ignore nodes (Container Proactive Packing)
+ *
+ *           Component tree (2 layers):
+ *           Root(Flex)
+ *            ├─ Child1[I](Leaf)
+ *            ├─ Child2[I](Leaf)
+ *            └─ Child3(Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Tests DFS order: Child1 → Child2 → Child3
+ *           - Multiple ignore nodes packed into single bundle: {[Child1, Child2], Root}
+ *           - Container Proactive Packing: FlexLayoutAlgorithm skips Child1, Child2
+ *           - Root::Layout(skip) in Phase 1 due to delaySelfLayoutForIgnore
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling005, TestSize.Level0)
+{
+    // ---- Step 1: Create 4 FrameNodes ----
+    auto root = CreateTracingFlexNode("Root", GetElmtId(), true);
+    auto child1 = CreateTracingLeafNode("Child1", GetElmtId());
+    auto child2 = CreateTracingLeafNode("Child2", GetElmtId());
+    auto child3 = CreateTracingLeafNode("Child3", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(child1);
+    root->AddChild(child2);
+    root->AddChild(child3);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on Child1 and Child2 ----
+    ConfigureIgnoreLayoutSafeArea(child1);
+    ConfigureIgnoreLayoutSafeArea(child2);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",         // Root detects Child1, Child2 as ignore → skip both
+                                // Child3 is not ignore → measure normally
+        "Child3:Measure",       // Child3 measured normally
+        "Root:Layout(skip)",    // Root.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[Child1, Child2], Root})
+        "Child1:Measure",       // Child1.MEASURE_FOR_IGNORE
+        "Child1:Layout(skip)",  // Child1.CreateLayoutTask internal Layout: delay=true → skip
+        "Child2:Measure",       // Child2.MEASURE_FOR_IGNORE
+        "Child2:Layout(skip)",  // Child2.CreateLayoutTask internal Layout: delay=true → skip
+        "Root:Layout",          // Root.LAYOUT_FOR_IGNORE: delay=false → execute
+        "Child1:Layout",        // Child1.Layout called by Root.Layout
+        "Child2:Layout",        // Child2.Layout called by Root.Layout
+        "Child3:Layout",        // Child3.Layout called by Root.Layout
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling006
+ * @tc.desc: Scenario 2 - Same level with multiple ignore nodes (Pattern Hook)
+ *
+ *           Component tree (2 layers):
+ *           Root(MultiChild)
+ *            ├─ Child1[I](Leaf)
+ *            ├─ Child2[I](Leaf)
+ *            └─ Child3(Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Tests DFS order: Child1 → Child2 → Child3
+ *           - Pattern Hook: PreMeasure(skip) for Child1, Child2
+ *           - Multiple ignore nodes packed into single bundle: {[Child1, Child2], Root}
+ *           - Root::Layout executes normally (container does NOT set delay)
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling006, TestSize.Level0)
+{
+    // ---- Step 1: Create 4 FrameNodes ----
+    auto root = CreateTracingMultiChildNode("Root", GetElmtId());
+    auto child1 = CreateTracingLeafNode("Child1", GetElmtId());
+    auto child2 = CreateTracingLeafNode("Child2", GetElmtId());
+    auto child3 = CreateTracingLeafNode("Child3", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(child1);
+    root->AddChild(child2);
+    root->AddChild(child3);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on Child1 and Child2 ----
+    ConfigureIgnoreLayoutSafeArea(child1);
+    ConfigureIgnoreLayoutSafeArea(child2);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",             // Root measures
+        "Child1:PreMeasure(skip)",  // Child1.PreMeasure returns true → skip
+        "Child2:PreMeasure(skip)",  // Child2.PreMeasure returns true → skip
+        "Child3:Measure",           // Child3 measured normally
+        "Root:Layout",              // Root.Layout executes (container does NOT set delay)
+        "Child1:Layout(skip)",      // Child1.delaySelfLayoutForIgnore=true → skip
+        "Child2:Layout(skip)",      // Child2.delaySelfLayoutForIgnore=true → skip
+        "Child3:Layout",            // Child3.Layout executes normally
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[Child1, Child2], Root})
+        "Child1:Measure",           // Child1.MEASURE_FOR_IGNORE
+        "Child1:Layout",            // Child1.CreateLayoutTask internal Layout: delay=false → execute
+        "Child2:Measure",           // Child2.MEASURE_FOR_IGNORE
+        "Child2:Layout",            // Child2.CreateLayoutTask internal Layout: delay=false → execute
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling007
+ * @tc.desc: Scenario 3 - Three-layer single chain ignore (Container Proactive Packing)
+ *
+ *           Component tree (4 layers):
+ *           Root(Flex)
+ *            └─ A[I](Flex)
+ *                └─ B(Flex)
+ *                    └─ C[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Cross-layer ignore dependency: C needs A and Root layout to complete
+ *           - Bundle generation order: #1{[C],B} → #2{[A],Root}
+ *           - Bundle execution order (reverse): #2 → #1
+ *           - Verifies 2-round while loop
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling007, TestSize.Level0)
+{
+    // ---- Step 1: Create 4 FrameNodes ----
+    auto root = CreateTracingFlexNode("Root", GetElmtId(), true);
+    auto a = CreateTracingFlexNode("A", GetElmtId());
+    auto b = CreateTracingFlexNode("B", GetElmtId());
+    auto c = CreateTracingLeafNode("C", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(a);
+    a->AddChild(b);
+    b->AddChild(c);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on A and C ----
+    ConfigureIgnoreLayoutSafeArea(a);
+    ConfigureIgnoreLayoutSafeArea(c);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",         // Root detects A as ignore → skip A
+        "Root:Layout(skip)",    // Root.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask - Iteration #1
+        // Bundle #1: {[A], Root}
+        "A:Measure",            // A.MEASURE_FOR_IGNORE
+        "B:Measure",            // B detects C as ignore → skip C
+        "A:Layout(skip)",       // A.CreateLayoutTask internal Layout: delay=true → skip, consumed
+        "Root:Layout",          // Root.LAYOUT_FOR_IGNORE: delay=false (Phase 1 consumed)
+        "A:Layout",             // A.Layout called by Root: delay=false (consumed in A:Layout(skip))
+                                // → FlexLayoutAlgorithm::Layout executes, places B
+        "B:Layout(skip)",       // B.Layout called by A: delay=true (set in A.Measure) → skip, consumed
+
+        // Bundle #2: {[C], B}
+        "C:Measure",            // C.MEASURE_FOR_IGNORE
+        "C:Layout(skip)",       // C.CreateLayoutTask internal Layout: delay=true → skip, consumed
+        "B:Layout",             // B.LAYOUT_FOR_IGNORE: delay=false (consumed in B:Layout(skip))
+                                // → FlexLayoutAlgorithm::Layout executes, places C
+        "C:Layout",             // C.Layout called by B: delay=false (consumed in C:Layout(skip))
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling008
+ * @tc.desc: Scenario 3 - Three-layer single chain ignore (Pattern Hook)
+ *
+ *           Component tree (4 layers):
+ *           Root(MultiChild)
+ *            └─ A[I](MultiChild)
+ *                └─ B(MultiChild)
+ *                    └─ C[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Cross-layer ignore dependency: C needs A and Root layout to complete
+ *           - Bundle generation order: #1{[C],B} → #2{[A],Root}
+ *           - Bundle execution order (reverse): #2 → #1
+ *           - Pattern Hook: PreMeasure(skip) for A and C
+ *           - Verifies 2-round while loop
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling008, TestSize.Level0)
+{
+    // ---- Step 1: Create 4 FrameNodes ----
+    auto root = CreateTracingMultiChildNode("Root", GetElmtId());
+    auto a = CreateTracingMultiChildNode("A", GetElmtId());
+    auto b = CreateTracingMultiChildNode("B", GetElmtId());
+    auto c = CreateTracingLeafNode("C", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(a);
+    a->AddChild(b);
+    b->AddChild(c);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on A and C ----
+    ConfigureIgnoreLayoutSafeArea(a);
+    ConfigureIgnoreLayoutSafeArea(c);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",             // Root measures
+        "A:PreMeasure(skip)",       // A.PreMeasure returns true → skip
+        "Root:Layout",              // Root.Layout executes (container does NOT set delay)
+        "A:Layout(skip)",           // A.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask - Iteration #1
+        // Bundle #2: {[A], Root}
+        "A:Measure",                // A.MEASURE_FOR_IGNORE
+        "B:Measure",                // B measures
+        "C:PreMeasure(skip)",       // C.PreMeasure returns true → skip
+        "A:Layout",                 // A.CreateLayoutTask internal Layout: delay=false → execute
+        "B:Layout",                 // B.Layout executes
+        "C:Layout(skip)",           // C.delaySelfLayoutForIgnore=true → skip
+
+        // Bundle #1: {[C], B}
+        "C:Measure",                // C.MEASURE_FOR_IGNORE
+        "C:Layout",                 // C.CreateLayoutTask internal Layout: delay=false → execute
+
+        // Phase 3: while loop exits (no new bundles)
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling009
+ * @tc.desc: Scenario 4 - Container without ignore but children with ignore (Container Proactive Packing)
+ *
+ *           Component tree (3 layers):
+ *           Root(Flex)
+ *            └─ Container(Flex)
+ *                ├─ Child1[I](Leaf)
+ *                ├─ Child2(Leaf)
+ *                └─ Child3[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Middle container (Container) has no ignore, only children do
+ *           - Bundle only contains Container's direct children: {[Child1, Child3], Container}
+ *           - Verifies ignore does not propagate upward
+ *           - Root layout executes normally (no ignore in its children)
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling009, TestSize.Level0)
+{
+    // ---- Step 1: Create 5 FrameNodes ----
+    auto root = CreateTracingFlexNode("Root", GetElmtId(), true);
+    auto container = CreateTracingFlexNode("Container", GetElmtId());
+    auto child1 = CreateTracingLeafNode("Child1", GetElmtId());
+    auto child2 = CreateTracingLeafNode("Child2", GetElmtId());
+    auto child3 = CreateTracingLeafNode("Child3", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(container);
+    container->AddChild(child1);
+    container->AddChild(child2);
+    container->AddChild(child3);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on Child1 and Child3 ----
+    ConfigureIgnoreLayoutSafeArea(child1);
+    ConfigureIgnoreLayoutSafeArea(child3);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",             // Root measures
+        "Container:Measure",        // Container detects Child1, Child3 as ignore → skip both
+                                    // Child1.SetDelaySelfLayoutForIgnore(), Child3.SetDelaySelfLayoutForIgnore()
+                                    // Container.SetDelaySelfLayoutForIgnore()
+                                    // Bundle #1: {[Child1, Child3], Container}
+                                    // Note: Root does NOT set delay (Container is not ignore)
+        "Child2:Measure",           // Child2 measured normally
+        "Root:Layout",              // Root.Layout executes (Root does NOT have delay)
+        "Container:Layout(skip)",   // Container.delaySelfLayoutForIgnore=true → skip, consumed
+        // Note: Container skipped layout, so its children are NOT laid out in Phase 1
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[Child1, Child3], Container})
+        "Child1:Measure",           // Child1.MEASURE_FOR_IGNORE
+        "Child1:Layout(skip)",      // Child1.CreateLayoutTask internal Layout: delay=true → skip, consumed
+        "Child3:Measure",           // Child3.MEASURE_FOR_IGNORE
+        "Child3:Layout(skip)",      // Child3.CreateLayoutTask internal Layout: delay=true → skip, consumed
+        "Container:Layout",         // Container.LAYOUT_FOR_IGNORE: delay=false (consumed in Phase 1)
+                                    // → FlexLayoutAlgorithm::Layout executes, places all children
+        "Child1:Layout",            // Child1.Layout called by Container: delay=false (consumed)
+        "Child2:Layout",            // Child2.Layout called by Container
+        "Child3:Layout",            // Child3.Layout called by Container: delay=false (consumed)
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling010
+ * @tc.desc: Scenario 4 - Container without ignore but children with ignore (Pattern Hook)
+ *
+ *           Component tree (3 layers):
+ *           Root(MultiChild)
+ *            └─ Container(MultiChild)
+ *                ├─ Child1[I](Leaf)
+ *                ├─ Child2(Leaf)
+ *                └─ Child3[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Middle container (Container) has no ignore, only children do
+ *           - Bundle only contains Container's direct children: {[Child1, Child3], Container}
+ *           - Pattern Hook: PreMeasure(skip) for Child1, Child3
+ *           - Root and Container layout execute normally (containers do NOT set delay)
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling010, TestSize.Level0)
+{
+    // ---- Step 1: Create 5 FrameNodes ----
+    auto root = CreateTracingMultiChildNode("Root", GetElmtId());
+    auto container = CreateTracingMultiChildNode("Container", GetElmtId());
+    auto child1 = CreateTracingLeafNode("Child1", GetElmtId());
+    auto child2 = CreateTracingLeafNode("Child2", GetElmtId());
+    auto child3 = CreateTracingLeafNode("Child3", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(container);
+    container->AddChild(child1);
+    container->AddChild(child2);
+    container->AddChild(child3);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on Child1 and Child3 ----
+    ConfigureIgnoreLayoutSafeArea(child1);
+    ConfigureIgnoreLayoutSafeArea(child3);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",             // Root measures
+        "Container:Measure",        // Container measures
+        "Child1:PreMeasure(skip)",  // Child1.PreMeasure returns true → skip
+        "Child2:Measure",           // Child2 measured normally
+        "Child3:PreMeasure(skip)",  // Child3.PreMeasure returns true → skip
+        "Root:Layout",              // Root.Layout executes
+        "Container:Layout",         // Container.Layout executes (container does NOT set delay)
+        "Child1:Layout(skip)",      // Child1.delaySelfLayoutForIgnore=true → skip
+        "Child2:Layout",            // Child2.Layout executes normally
+        "Child3:Layout(skip)",      // Child3.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[Child1, Child3], Container})
+        "Child1:Measure",           // Child1.MEASURE_FOR_IGNORE
+        "Child1:Layout",            // Child1.CreateLayoutTask internal Layout: delay=false → execute
+        "Child3:Measure",           // Child3.MEASURE_FOR_IGNORE
+        "Child3:Layout",            // Child3.CreateLayoutTask internal Layout: delay=false → execute
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling011
+ * @tc.desc: Scenario 5 - Two-layer branch ignore (Container Proactive Packing)
+ *
+ *           Component tree (3 layers):
+ *           Root(Flex)
+ *            ├─ A[I](Flex)
+ *            │   └─ B(Leaf)
+ *            └─ C[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Two branches both have ignore nodes (A and C)
+ *           - Verifies DFS order: A → B → C
+ *           - Bundle packing: A and C are Root's direct children → packed into single bundle
+ *           - Simple tree branch structure
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling011, TestSize.Level0)
+{
+    // ---- Step 1: Create 4 FrameNodes ----
+    auto root = CreateTracingFlexNode("Root", GetElmtId(), true);
+    auto a = CreateTracingFlexNode("A", GetElmtId());
+    auto b = CreateTracingLeafNode("B", GetElmtId());
+    auto c = CreateTracingLeafNode("C", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(a);
+    root->AddChild(c);
+    a->AddChild(b);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on A and C ----
+    ConfigureIgnoreLayoutSafeArea(a);
+    ConfigureIgnoreLayoutSafeArea(c);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",         // Root detects A, C as ignore → skip both
+        "Root:Layout(skip)",    // Root.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[A, C], Root})
+        "A:Measure",            // A.MEASURE_FOR_IGNORE
+        "B:Measure",            // B measured normally (under A)
+        "A:Layout(skip)",       // A.CreateLayoutTask internal Layout: delay=true → skip
+        "C:Measure",            // C.MEASURE_FOR_IGNORE
+        "C:Layout(skip)",       // C.CreateLayoutTask internal Layout: delay=true → skip
+        "Root:Layout",          // Root.LAYOUT_FOR_IGNORE: delay=false → execute
+        "A:Layout",             // A.Layout called by Root.Layout
+        "B:Layout",             // B.Layout called by A.Layout
+        "C:Layout",             // C.Layout called by Root.Layout
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
+/**
+ * @tc.name: IgnoreLayoutSafeAreaScheduling012
+ * @tc.desc: Scenario 5 - Two-layer branch ignore (Pattern Hook)
+ *
+ *           Component tree (3 layers):
+ *           Root(MultiChild)
+ *            ├─ A[I](MultiChild)
+ *            │   └─ B(Leaf)
+ *            └─ C[I](Leaf)
+ *
+ *           [I] = ignoreLayoutSafeArea configured (SYSTEM + ALL + MatchParent)
+ *
+ *           Key characteristics:
+ *           - Two branches both have ignore nodes (A and C)
+ *           - Pattern Hook: PreMeasure(skip) for A and C
+ *           - Bundle packing: A and C are Root's direct children → packed into single bundle
+ *           - Root layout executes normally (container does NOT set delay)
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(IgnoreLayoutSafeAreaSchedulingTestNG, IgnoreLayoutSafeAreaScheduling012, TestSize.Level0)
+{
+    // ---- Step 1: Create 4 FrameNodes ----
+    auto root = CreateTracingMultiChildNode("Root", GetElmtId());
+    auto a = CreateTracingMultiChildNode("A", GetElmtId());
+    auto b = CreateTracingLeafNode("B", GetElmtId());
+    auto c = CreateTracingLeafNode("C", GetElmtId());
+
+    // ---- Step 2: Build tree hierarchy ----
+    root->AddChild(a);
+    root->AddChild(c);
+    a->AddChild(b);
+
+    // ---- Step 3: Set root size constraint ----
+    root->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(600.0f), CalcLength(600.0f)));
+
+    // ---- Step 4: Configure ignoreLayoutSafeArea on A and C ----
+    ConfigureIgnoreLayoutSafeArea(a);
+    ConfigureIgnoreLayoutSafeArea(c);
+
+    // ---- Step 5: Clear tracer and trigger layout ----
+    LayoutTracer::Clear();
+    FlushUITasks(root);
+
+    // ---- Step 6: Verify execution sequence ----
+    std::vector<std::string> expected = {
+        // Phase 1: Root::CreateLayoutTask (Initial DFS)
+        "Root:Measure",             // Root measures
+        "A:PreMeasure(skip)",       // A.PreMeasure returns true → skip
+        "C:PreMeasure(skip)",       // C.PreMeasure returns true → skip
+        "Root:Layout",              // Root.Layout executes (container does NOT set delay)
+        "A:Layout(skip)",           // A.delaySelfLayoutForIgnore=true → skip
+        "C:Layout(skip)",           // C.delaySelfLayoutForIgnore=true → skip
+
+        // Phase 2: FlushPostponedLayoutTask (Bundle #1: {[A, C], Root})
+        "A:Measure",                // A.MEASURE_FOR_IGNORE
+        "B:Measure",                // B measured normally (under A)
+        "A:Layout",                 // A.CreateLayoutTask internal Layout: delay=false → execute
+        "B:Layout",                 // B.Layout called by A.Layout
+        "C:Measure",                // C.MEASURE_FOR_IGNORE
+        "C:Layout",                 // C.CreateLayoutTask internal Layout: delay=false → execute
+    };
+
+    // Print actual sequence for debugging if mismatch
+    if (LayoutTracer::events != expected) {
+        std::string actualStr = "Actual sequence (" + std::to_string(LayoutTracer::events.size()) + " events):\n";
+        for (size_t i = 0; i < LayoutTracer::events.size(); ++i) {
+            actualStr += "  [" + std::to_string(i) + "] " + LayoutTracer::events[i] + "\n";
+        }
+        std::string expectedStr =
+            "Expected sequence (" + std::to_string(expected.size()) + " events):\n";
+        for (size_t i = 0; i < expected.size(); ++i) {
+            expectedStr += "  [" + std::to_string(i) + "] " + expected[i] + "\n";
+        }
+        ADD_FAILURE() << actualStr << expectedStr;
+    }
+
+    ASSERT_EQ(LayoutTracer::events.size(), expected.size()) << "Event count mismatch";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(LayoutTracer::events[i], expected[i]) << "Mismatch at index " << i;
+    }
+}
+
 } // namespace OHOS::Ace::NG
