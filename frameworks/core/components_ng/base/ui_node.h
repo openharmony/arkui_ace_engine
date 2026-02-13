@@ -283,12 +283,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    virtual void SetParent(const WeakPtr<UINode>& parent)
-    {
-        parent_ = parent;
-        ancestor_ = parent;
-        lastParent_ = parent;
-    }
+    virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
 
     void SetAdoptParent(const WeakPtr<UINode>& adoptParent)
     {
