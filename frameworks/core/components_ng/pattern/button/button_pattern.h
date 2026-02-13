@@ -205,12 +205,6 @@ public:
 
     bool IsDynamicSwitchButtonStyle(const BorderWidthProperty& width, RefPtr<ButtonTheme>& buttonTheme);
 
-    void DumpInfo() override;
-
-    void DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty);
-
-    void HandleBackgroundColor();
-
     void UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType);
 
     void UpdateComponentString(const std::string& value, const ButtonStringType buttonStringType);
@@ -221,9 +215,15 @@ public:
 
     void UpdateComponentFamilies(const std::vector<std::string>& value, const ButtonStringType buttonStringType);
 
-    std::string VectorToString(const std::vector<std::string>& vec, const std::string& delimiter = " ");
+    void DumpInfo() override;
 
+    void DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty);
+
+    std::string VectorToString(const std::vector<std::string>& vec, const std::string& delimiter = " ");
+    
     std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
+
+    void HandleBackgroundColor();
 
     void SetNavigationFocusBlendBgColor(const Color& navigationFocusBgColor);
 

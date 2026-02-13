@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 
-#include "base/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -447,7 +446,7 @@ void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         CHECK_NULL_VOID(buttonTheme);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
-        SetButtonSize(frameNode, controlSize, buttonTheme);
+        SetButtonPadding(frameNode, controlSize, buttonTheme, false);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(fontSize);
     }
@@ -489,24 +488,29 @@ void ButtonModelNG::SetButtonStyle(FrameNode* frameNode, const std::optional<But
     }
 }
 
-void ButtonModelNG::SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
-    RefPtr<ButtonTheme> buttonTheme)
+void ButtonModelNG::SetButtonPadding(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
+    RefPtr<ButtonTheme> buttonTheme, bool isUpdateNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (controlSize.has_value()) {
-        auto padding = buttonTheme->GetPadding(controlSize.value());
-        ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-        PaddingProperty defaultPadding;
-        if (buttonStyle == ButtonStyleMode::TEXT && controlSize.value() == ControlSize::SMALL) {
-            float leftPadding = buttonTheme->GetPaddingText().ConvertToPx();
-            float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
-            defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding), CalcLength(padding.Top()),
-                CalcLength(padding.Bottom()) };
-        } else {
-            defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
-                CalcLength(padding.Bottom()) };
-        }
+    if (!controlSize.has_value()) {
+        return;
+    }
+    auto padding = buttonTheme->GetPadding(controlSize.value());
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    PaddingProperty defaultPadding;
+    if (buttonStyle == ButtonStyleMode::TEXT && controlSize.value() == ControlSize::SMALL) {
+        float leftPadding =  buttonTheme->GetPaddingText().ConvertToPx();
+        float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
+        defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding),
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
+    } else {
+        defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+            CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
+    }
+    if (isUpdateNode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding, frameNode);
+    } else {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
     }
 }
@@ -519,7 +523,7 @@ void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
         CHECK_NULL_VOID(context);
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        SetButtonSize(frameNode, controlSize, buttonTheme);
+        SetButtonPadding(frameNode, controlSize, buttonTheme, true);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(frameNode, fontSize);
     }
@@ -937,7 +941,7 @@ Dimension ButtonModelNG::GetFontSize(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, FontSize, value, frameNode, value);
     return value;
 }
-
+ 
 Ace::FontWeight ButtonModelNG::GetFontWeight(FrameNode* frameNode)
 {
     Ace::FontWeight value = Ace::FontWeight::NORMAL;
@@ -945,7 +949,7 @@ Ace::FontWeight ButtonModelNG::GetFontWeight(FrameNode* frameNode)
         ButtonLayoutProperty, FontWeight, value, frameNode, Ace::FontWeight::NORMAL);
     return value;
 }
-
+ 
 Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
 {
     Color value;

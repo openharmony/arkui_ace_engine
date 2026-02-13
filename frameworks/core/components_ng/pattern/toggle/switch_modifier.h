@@ -55,14 +55,6 @@ public:
         if (!actualSize_.IsPositive()) {
             return;
         }
-        bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
-                                                       : direction_ == TextDirection::RTL;
-        auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
-                                ? (isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f)
-                                : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_ : actualTrackRadius_);
-        auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
-                               ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
-                               : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
         if (!isCancelAnimation_ || !isFocusOrBlur_) {
             AnimationOption colorOption = AnimationOption();
             colorOption.SetDuration(colorAnimationDuration_);
@@ -74,10 +66,24 @@ public:
         } else {
             animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
         }
+        UpdatePointOffsetAnimation(host);
+    }
+
+    void UpdatePointOffsetAnimation(const RefPtr<FrameNode>& host)
+    {
+        CHECK_NULL_VOID(host);
         AnimationOption pointOption = AnimationOption();
         pointOption.SetDuration(pointAnimationDuration_);
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         float newPointOffset = 0.0f;
+        bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
+                                                       : direction_ == TextDirection::RTL;
+        auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                                ? (isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f)
+                                : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_ : actualTrackRadius_);
+        auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                               ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
+                               : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
         if (!isDragEvent_) {
             FixPointOffset();
             if (isRtl) {
