@@ -590,7 +590,7 @@ public:
     void OnDetachFromMainTreeMultiThread();
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     
-    void RegisiterCaretChangeListener(std::function<void(int32_t)>&& listener)
+    void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;
     }
