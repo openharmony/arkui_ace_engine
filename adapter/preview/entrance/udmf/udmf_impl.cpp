@@ -84,7 +84,8 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
     return nullptr;
 }
 
-void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr)
+void UdmfClientImpl::TransformSummaryANI(
+    std::map<std::string, int64_t>& summary, std::shared_ptr<UDMF::Summary> summaryPtr)
 {}
 
 RefPtr<UnifiedData> UdmfClientImpl::CreateUnifiedData()
