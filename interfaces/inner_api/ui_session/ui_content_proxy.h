@@ -90,8 +90,8 @@ public:
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
     virtual int32_t UnregisterContentChangeCallback() override;
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
-        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
-
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
+        bool onlyVisible) override;
 
     virtual int32_t GetWebInfoByRequest(
         int32_t webId,

@@ -2705,8 +2705,12 @@ void UINode::FindTopNavDestination(std::list<RefPtr<FrameNode>>& result)
     }
 }
 
-void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name)
+void UINode::GetNodeListByComponentName(
+    int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name, bool onlyVisible)
 {
+    if (onlyVisible) {
+        CHECK_NULL_VOID(IsVisibleAndActive());
+    }
     if (auto customNode = DynamicCast<CustomNode>(this)) {
         const std::string& tag = customNode->GetCustomTag();
         if (tag.size() >= name.size() && StringUtils::StartWith(tag, name)) {
@@ -2714,14 +2718,14 @@ void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& fou
         }
     }
     for (const auto& child : GetChildren(true)) {
-        child->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+        child->GetNodeListByComponentName(depth + 1, foundNodeId, name, onlyVisible);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
-        frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+        frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name, onlyVisible);
     }
     if (frameNode && frameNode->GetCornerMarkNode()) {
-        frameNode->GetCornerMarkNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+        frameNode->GetCornerMarkNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name, onlyVisible);
     }
 }
 

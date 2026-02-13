@@ -1355,8 +1355,8 @@ public:
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
-    void GetStateMgmtInfo(
-        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath);
+    void GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, bool onlyVisible = false);
     bool IsCustomNodeDeleteInTransition() const
     {
         return isCustomNodeDeleteInTransition_;
