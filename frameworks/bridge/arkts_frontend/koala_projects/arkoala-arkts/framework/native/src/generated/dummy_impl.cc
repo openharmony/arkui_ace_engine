@@ -37231,6 +37231,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Opt_PositionWithAffinity GetCharacterPositionAtCoordinateImpl(Ark_LayoutManager peer,
+                                                                  Ark_Float64 x,
+                                                                  Ark_Float64 y)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getCharacterPositionAtCoordinate(");
+        WriteToString(&out, x);
+        out.append(", ");
+        WriteToString(&out, y);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* charRange)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getGlyphRangeForCharacterRange(");
+        WriteToString(&out, charRange);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* glyphRange)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getCharacterRangeForGlyphRange(");
+        WriteToString(&out, glyphRange);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                             Ark_Int32 lineNumber)
     {
@@ -53093,6 +53138,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutManagerAccessor::GetFinalizerImpl,
             LayoutManagerAccessor::GetLineCountImpl,
             LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetCharacterPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetGlyphRangeForCharacterRangeImpl,
+            LayoutManagerAccessor::GetCharacterRangeForGlyphRangeImpl,
             LayoutManagerAccessor::GetLineMetricsImpl,
             LayoutManagerAccessor::GetRectsForRangeImpl,
         };

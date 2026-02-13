@@ -2748,6 +2748,9 @@
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetLineMetrics*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetRectsForRange*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetGlyphPositionAtCoordinate*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetCharacterPositionAtCoordinate*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetGlyphRangeForCharacterRange*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::GetCharacterRangeForGlyphRange*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::BetweenSelectedPosition*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::OnHandleMove*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::~TextPattern*;

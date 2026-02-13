@@ -7040,6 +7040,22 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
 }
 
+PositionWithAffinity TextPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return pManager_->GetCharacterPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+}
+
+std::pair<TextRange, TextRange> TextPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+{
+    return pManager_->GetGlyphRangeForCharacterRange(start, end);
+}
+
+std::pair<TextRange, TextRange> TextPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+{
+    return pManager_->GetCharacterRangeForGlyphRange(start, end);
+}
+
 void TextPattern::ProcessMarqueeVisibleAreaCallback()
 {
     OnTextOverflowChanged();

@@ -206,6 +206,109 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
     return finalResult;
 }
 
+PositionWithAffinity ParagraphManager::GetCharacterPositionAtCoordinate(Offset offset)
+{
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    CHECK_NULL_RETURN(!paragraphs_.empty(), finalResult);
+    if (LessNotEqual(offset.GetY(), 0.0)) {
+        return finalResult;
+    }
+    int idx = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto& info = *it;
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
+            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
+            auto result = info.paragraph->GetCharacterPositionAtCoordinate(offset);
+            finalResult.position_ = result.position_ + static_cast<size_t>(info.start);
+            finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+            return finalResult;
+        }
+        // get offset relative to each paragraph
+        offset.SetY(offset.GetY() - info.paragraph->GetHeight());
+    }
+    auto info = paragraphs_.back();
+    auto result = info.paragraph->GetCharacterPositionAtCoordinate(offset);
+    finalResult.position_ = static_cast<size_t>(info.end);
+    finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
+    return finalResult;
+}
+
+std::pair<TextRange, TextRange> ParagraphManager::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+{
+    std::pair<TextRange, TextRange> textRanges;
+    bool isRange = LessNotEqual(start, 0) || LessNotEqual(end, 0) || paragraphs_.empty() || start > end;
+    CHECK_NULL_RETURN(!isRange, textRanges);
+    int idx = 0;
+    TextRange glyphRange { .start = 0, .end = 0 };
+    TextRange charRange { .start = 0, .end = 0 };
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto& info = *it;
+        int32_t charLength =
+            static_cast<int32_t>(StringUtils::Str16ToStr8(info.paragraph->GetParagraphText()).length() +
+                                 info.paragraph->GetPlaceholderCnt());
+        if (LessOrEqual(end, charLength) || (idx == static_cast<int>(paragraphs_.size()) - 1)) {
+            auto range = info.paragraph->GetGlyphRangeForCharacterRange(start, end);
+            glyphRange.start += range.first.start;
+            glyphRange.end += range.first.end;
+            charRange.start += range.second.start;
+            charRange.end += range.second.end;
+            textRanges.first = glyphRange;
+            textRanges.second = charRange;
+            return textRanges;
+        } else if (LessOrEqual(start, charLength)) {
+            auto range = info.paragraph->GetGlyphRangeForCharacterRange(start, charLength);
+            glyphRange.start += range.first.start;
+            glyphRange.end += range.first.end;
+            charRange.start += range.second.start;
+            charRange.end += range.second.end;
+            start = 0;
+            end -= charLength;
+        }
+    }
+    auto info = paragraphs_.back();
+    auto range = info.paragraph->GetGlyphRangeForCharacterRange(start, end);
+    textRanges.first = range.first;
+    textRanges.second = range.second;
+    return textRanges;
+}
+
+std::pair<TextRange, TextRange> ParagraphManager::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+{
+    std::pair<TextRange, TextRange> textRanges;
+    bool isRange = LessNotEqual(start, 0) || LessNotEqual(end, 0) || paragraphs_.empty() || start > end;
+    CHECK_NULL_RETURN(!isRange, textRanges);
+    int idx = 0;
+    TextRange charRange { .start = 0, .end = 0 };
+    TextRange glyphRange { .start = 0, .end = 0 };
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
+        auto& info = *it;
+        int32_t glyphLength = static_cast<int32_t>(info.end - info.start - 1);
+        if (LessOrEqual(end, glyphLength) || (idx == static_cast<int>(paragraphs_.size()) - 1)) {
+            auto range = info.paragraph->GetCharacterRangeForGlyphRange(start, end);
+            charRange.start += range.first.start;
+            charRange.end += range.first.end;
+            glyphRange.start += range.second.start;
+            glyphRange.end += range.second.end;
+            textRanges.first = charRange;
+            textRanges.second = glyphRange;
+            return textRanges;
+        } else if (LessOrEqual(start, glyphLength)) {
+            auto range = info.paragraph->GetCharacterRangeForGlyphRange(start, glyphLength);
+            charRange.start += range.first.start;
+            charRange.end += range.first.end;
+            glyphRange.start += range.second.start;
+            glyphRange.end += range.second.end;
+            start = 0;
+            end -= glyphLength;
+        }
+    }
+    auto info = paragraphs_.back();
+    auto range = info.paragraph->GetCharacterRangeForGlyphRange(start, end);
+    textRanges.first = range.first;
+    textRanges.second = range.second;
+    return textRanges;
+}
+
 int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelectionPos) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), 0);

@@ -59,6 +59,10 @@ void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pMana
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(4));
     PositionWithAffinity positionWithAffinity(POSITION_WITH_AFFINITY, TextAffinity::UPSTREAM);
     EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    EXPECT_CALL(*paragraph, GetCharacterPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    std::pair<TextRange, TextRange> testRangePair { TextRange { 10, 20 }, TextRange { 5, 25 } };
+    EXPECT_CALL(*paragraph, GetGlyphRangeForCharacterRange(_, _)).WillRepeatedly(Return(testRangePair));
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _)).WillRepeatedly(Return(testRangePair));
 
     TextLineMetrics textLineMetrics;
     textLineMetrics.lineNumber = 0;
@@ -403,5 +407,114 @@ HWTEST_F(ParagraphManagerTestNg, ParagraphUtil004, TestSize.Level1)
     EXPECT_TRUE(textOptions.image.has_value());
     EXPECT_TRUE(textOptions.bundleName.has_value());
     EXPECT_TRUE(textOptions.moduleName.has_value());
+}
+
+/**
+ * @tc.name: GetCharacterPositionAtCoordinate001
+ * @tc.desc: Test GetCharacterPositionAtCoordinate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterPositionAtCoordinate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+
+    /**
+     * @tc.steps: step2. call GetCharacterPositionAtCoordinate.
+     * @tc.expected: the position of the paragraphs is 2.
+     */
+    auto result = pManager->GetCharacterPositionAtCoordinate(Offset(10.0, 50.0)).position_;
+    EXPECT_EQ(result, 2);
+
+    /**
+     * @tc.steps: step3. call GetGlyphPositionAtCoordinate.
+     * @tc.expected: the position of the paragraphs is 22.
+     */
+    result = pManager->GetCharacterPositionAtCoordinate(Offset(10.0, 150.0)).position_;
+    EXPECT_EQ(result, 22);
+
+    /**
+     * @tc.steps: step4. call GetCharacterPositionAtCoordinate.
+     * @tc.expected: the position of the paragraphs is 37.
+     */
+    result = pManager->GetCharacterPositionAtCoordinate(Offset(10.0, 250.0)).position_;
+    EXPECT_EQ(result, 37);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRange001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRange001, TestSize.Level1)
+{
+    auto result1 = pManager->GetGlyphRangeForCharacterRange(10, 30);
+    auto glyphStart1 = result1.first.start;
+    auto glyphEnd1 = result1.first.end;
+    auto charStart1 = result1.second.start;
+    auto charEnd1 = result1.second.end;
+    EXPECT_EQ(glyphStart1, 10);
+    EXPECT_EQ(glyphEnd1, 20);
+    EXPECT_EQ(charStart1, 5);
+    EXPECT_EQ(charEnd1, 25);
+
+    auto result2 = pManager->GetGlyphRangeForCharacterRange(0, 20);
+    auto glyphStart2 = result2.first.start;
+    auto glyphEnd2 = result2.first.end;
+    auto charStart2 = result2.second.start;
+    auto charEnd2 = result2.second.end;
+    EXPECT_EQ(glyphStart2, 30);
+    EXPECT_EQ(glyphEnd2, 60);
+    EXPECT_EQ(charStart2, 15);
+    EXPECT_EQ(charEnd2, 75);
+
+    auto result3 = pManager->GetGlyphRangeForCharacterRange(-10, 40);
+    auto glyphStart3 = result3.first.start;
+    auto glyphEnd3 = result3.first.end;
+    auto charStart3 = result3.second.start;
+    auto charEnd3 = result3.second.end;
+    EXPECT_EQ(glyphStart3, -1);
+    EXPECT_EQ(glyphEnd3, -1);
+    EXPECT_EQ(charStart3, -1);
+    EXPECT_EQ(charEnd3, -1);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRange001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Level1)
+{
+    auto result1 = pManager->GetCharacterRangeForGlyphRange(10, 30);
+    auto glyphStart1 = result1.first.start;
+    auto glyphEnd1 = result1.first.end;
+    auto charStart1 = result1.second.start;
+    auto charEnd1 = result1.second.end;
+    EXPECT_EQ(glyphStart1, 10);
+    EXPECT_EQ(glyphEnd1, 20);
+    EXPECT_EQ(charStart1, 5);
+    EXPECT_EQ(charEnd1, 25);
+
+    auto result2 = pManager->GetCharacterRangeForGlyphRange(0, 20);
+    auto glyphStart2 = result2.first.start;
+    auto glyphEnd2 = result2.first.end;
+    auto charStart2 = result2.second.start;
+    auto charEnd2 = result2.second.end;
+    EXPECT_EQ(glyphStart2, 30);
+    EXPECT_EQ(glyphEnd2, 60);
+    EXPECT_EQ(charStart2, 15);
+    EXPECT_EQ(charEnd2, 75);
+
+    auto result3 = pManager->GetCharacterRangeForGlyphRange(-10, 40);
+    auto glyphStart3 = result3.first.start;
+    auto glyphEnd3 = result3.first.end;
+    auto charStart3 = result3.second.start;
+    auto charEnd3 = result3.second.end;
+    EXPECT_EQ(glyphStart3, -1);
+    EXPECT_EQ(glyphEnd3, -1);
+    EXPECT_EQ(charStart3, -1);
+    EXPECT_EQ(charEnd3, -1);
 }
 } // namespace OHOS::Ace::NG

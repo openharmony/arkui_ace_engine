@@ -5574,5 +5574,17 @@
     {
         "first_introduced": "24",
         "name": "OH_ArkUI_FontConfigs_GetFontWeightConfigs"
-    }
+    },
+    {
+ 	    "first_introduced": "24",
+ 	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate"
+ 	},
+ 	{
+ 	    "first_introduced": "24",
+ 	    "name": "OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange"
+ 	},
+ 	{
+ 	    "first_introduced": "24",
+ 	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange"
+ 	}
 ]

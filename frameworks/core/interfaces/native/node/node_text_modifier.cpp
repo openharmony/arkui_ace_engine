@@ -32,6 +32,7 @@
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
+#include "frameworks/core/common/ime/text_range.h"
 
 namespace OHOS::Ace::NG {
 constexpr int DEFAULT_SELECTION = -1;
@@ -2746,6 +2747,53 @@ void SetFontColorWithPlaceholder(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI
     result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
     TextModelNG::SetTextColor(frameNode, result);
 }
+
+void* GetCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    PositionWithAffinity positionWithAffinity = TextModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy);
+    OHOS::Rosen::IndexAndAffinity* indexAndAffinity = new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
+    indexAndAffinity->index = positionWithAffinity.position_;
+    indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
+    return indexAndAffinity;
+#else
+    return nullptr;
+#endif
+}
+
+void GetGlyphRangeForCharacterRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::pair<OHOS::Ace::TextRange, OHOS::Ace::TextRange> textRect =
+        TextModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
+    range->glyphStart = textRect.first.start;
+    range->glyphEnd = textRect.first.end;
+    range->charStart = textRect.second.start;
+    range->charEnd = textRect.second.end;
+#else
+#endif
+}
+
+void GetCharacterRangeForGlyphRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::pair<OHOS::Ace::TextRange, OHOS::Ace::TextRange> textRect =
+        TextModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
+    range->charStart = textRect.first.start;
+    range->charEnd = textRect.first.end;
+    range->glyphStart = textRect.second.start;
+    range->glyphEnd = textRect.second.end;
+#else
+#endif
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2947,6 +2995,9 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
         .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
         .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
+        .getCharacterPositionAtCoordinate = GetCharacterPositionAtCoordinate,
+        .getGlyphRangeForCharacterRange = GetGlyphRangeForCharacterRange,
+        .getCharacterRangeForGlyphRange = GetCharacterRangeForGlyphRange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

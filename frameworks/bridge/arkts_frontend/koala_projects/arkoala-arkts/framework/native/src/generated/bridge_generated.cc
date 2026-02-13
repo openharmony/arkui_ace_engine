@@ -35528,6 +35528,60 @@ KInteropReturnBuffer impl_LayoutManager_getGlyphPositionAtCoordinate(Ark_NativeP
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_3(LayoutManager_getGlyphPositionAtCoordinate, KInteropReturnBuffer, Ark_NativePointer, KDouble, KDouble)
+KInteropReturnBuffer impl_LayoutManager_getCharacterPositionAtCoordinate(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
+        Ark_LayoutManager self = reinterpret_cast<Ark_LayoutManager>(thisPtr);
+        const auto &retValue = GetAccessors()->getLayoutManagerAccessor()->getCharacterPositionAtCoordinate(self, x, y);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            PositionWithAffinity_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(LayoutManager_getCharacterPositionAtCoordinate, KInteropReturnBuffer, Ark_NativePointer, KDouble, KDouble)
+KInteropReturnBuffer impl_LayoutManager_getGlyphRangeForCharacterRange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_LayoutManager self = reinterpret_cast<Ark_LayoutManager>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TextRange charRangeValueTemp = TextRange_serializer::read(thisDeserializer);;
+        const auto &retValue = GetAccessors()->getLayoutManagerAccessor()->getGlyphRangeForCharacterRange(self, static_cast<Ark_TextRange*>(&charRangeValueTemp));
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(retValueTmpValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValueTmpValue.length; retValueTmpValueCounterI++) {
+                const Ark_TextRange retValueTmpValueTmpElement = retValueTmpValue.array[retValueTmpValueCounterI];
+                TextRange_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(LayoutManager_getGlyphRangeForCharacterRange, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_LayoutManager_getCharacterRangeForGlyphRange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_LayoutManager self = reinterpret_cast<Ark_LayoutManager>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_TextRange glyphRangeValueTemp = TextRange_serializer::read(thisDeserializer);;
+        const auto &retValue = GetAccessors()->getLayoutManagerAccessor()->getCharacterRangeForGlyphRange(self, static_cast<Ark_TextRange*>(&glyphRangeValueTemp));
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeInt32(retValueTmpValue.length);
+            for (int retValueTmpValueCounterI = 0; retValueTmpValueCounterI < retValueTmpValue.length; retValueTmpValueCounterI++) {
+                const Ark_TextRange retValueTmpValueTmpElement = retValueTmpValue.array[retValueTmpValueCounterI];
+                TextRange_serializer::write(_retSerializer, retValueTmpValueTmpElement);
+            }
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(LayoutManager_getCharacterRangeForGlyphRange, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_LayoutManager_getLineMetrics(Ark_NativePointer thisPtr, Ark_Int32 lineNumber) {
         Ark_LayoutManager self = reinterpret_cast<Ark_LayoutManager>(thisPtr);
         const auto &retValue = GetAccessors()->getLayoutManagerAccessor()->getLineMetrics(self, lineNumber);

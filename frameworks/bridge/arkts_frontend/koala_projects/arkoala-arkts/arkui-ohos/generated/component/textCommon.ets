@@ -117,6 +117,9 @@ export class IMEClientInternal implements MaterializedBase,IMEClient {
 export interface LayoutManager {
     getLineCount(): int32 | undefined
     getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
+    getCharacterPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
+    getGlyphRangeForCharacterRange(charRange: TextRange): Array<TextRange> | undefined
+    getCharacterRangeForGlyphRange(glyphRange: TextRange): Array<TextRange> | undefined
     getLineMetrics(lineNumber: int32): text.LineMetrics | undefined
     getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined
 }
@@ -149,6 +152,19 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const y_casted = y as (double)
         return this.getGlyphPositionAtCoordinate_serialize(x_casted, y_casted)
     }
+    public getCharacterPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        return this.getCharacterPositionAtCoordinate_serialize(x_casted, y_casted)
+    }
+    public getGlyphRangeForCharacterRange(charRange: TextRange): Array<TextRange> | undefined {
+        const charRange_casted = charRange as (TextRange)
+        return this.getGlyphRangeForCharacterRange_serialize(charRange_casted)
+    }
+    public getCharacterRangeForGlyphRange(glyphRange: TextRange): Array<TextRange> | undefined {
+        const glyphRange_casted = glyphRange as (TextRange)
+        return this.getCharacterRangeForGlyphRange_serialize(glyphRange_casted)
+    }
     public getLineMetrics(lineNumber: int32): text.LineMetrics | undefined {
         const lineNumber_casted = lineNumber as (int32)
         return this.getLineMetrics_serialize(lineNumber_casted)
@@ -179,6 +195,55 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
             buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
         }
         const returnResult : PositionWithAffinity | undefined = buffer
+        return returnResult
+    }
+    getCharacterPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate(this.peer!.ptr, x, y)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : PositionWithAffinity | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
+        }
+        const returnResult : PositionWithAffinity | undefined = buffer
+        return returnResult
+    }
+    getGlyphRangeForCharacterRange_serialize(charRange: TextRange): Array<TextRange> | undefined {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, charRange)
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphRangeForCharacterRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<TextRange> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<TextRange> = new Array<TextRange>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = TextRange_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
+        }
+        const returnResult : Array<TextRange> | undefined = buffer
+        return returnResult
+    }
+    getCharacterRangeForGlyphRange_serialize(glyphRange: TextRange): Array<TextRange> | undefined {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TextRange_serializer.write(thisSerializer, glyphRange)
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getCharacterRangeForGlyphRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : Array<TextRange> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_Length : int32 = retvalDeserializer.readInt32()
+            let buffer_ : Array<TextRange> = new Array<TextRange>(buffer_Length)
+            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
+                buffer_[buffer_BufCounterI] = TextRange_serializer.read(retvalDeserializer)
+            }
+            buffer = buffer_
+        }
+        const returnResult : Array<TextRange> | undefined = buffer
         return returnResult
     }
     getLineMetrics_serialize(lineNumber: int32): text.LineMetrics | undefined {

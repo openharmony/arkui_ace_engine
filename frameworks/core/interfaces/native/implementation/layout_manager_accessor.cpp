@@ -236,6 +236,49 @@ Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer
     );
     return Converter::ArkValue<Opt_PositionWithAffinity>(result);
 }
+Opt_PositionWithAffinity GetCharacterPositionAtCoordinateImpl(Ark_LayoutManager peer,
+                                                              Ark_Float64 x,
+                                                              Ark_Float64 y)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
+    PositionWithAffinity result = handler->GetCharacterPositionAtCoordinate(
+        Converter::Convert<Ark_Float64>(x),
+        Converter::Convert<Ark_Float64>(y)
+    );
+    return Converter::ArkValue<Opt_PositionWithAffinity>(result);
+}
+Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer, const Ark_TextRange* charRange)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    std::pair<TextRange, TextRange> textRanges =
+        handler->GetGlyphRangeForCharacterRange(Converter::OptConvert<int32_t>(charRange->start).value(),
+            Converter::OptConvert<int32_t>(charRange->end).value());
+    std::vector<Ark_TextRange> values;
+    auto first = Converter::ArkValue<Ark_TextRange>(textRanges.first);
+    values.push_back(first);
+    auto second = Converter::ArkValue<Ark_TextRange>(textRanges.second);
+    values.push_back(second);
+    return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
+}
+Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer, const Ark_TextRange* glyphRange)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    std::pair<TextRange, TextRange> textRanges =
+        handler->GetCharacterRangeForGlyphRange(Converter::OptConvert<int32_t>(glyphRange->start).value(),
+            Converter::OptConvert<int32_t>(glyphRange->end).value());
+    std::vector<Ark_TextRange> values;
+    auto first = Converter::ArkValue<Ark_TextRange>(textRanges.first);
+    values.push_back(first);
+    auto second = Converter::ArkValue<Ark_TextRange>(textRanges.second);
+    values.push_back(second);
+    return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
+}
 Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                         Ark_Int32 lineNumber)
 {
@@ -279,6 +322,9 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
         LayoutManagerAccessor::GetFinalizerImpl,
         LayoutManagerAccessor::GetLineCountImpl,
         LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetCharacterPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetGlyphRangeForCharacterRangeImpl,
+        LayoutManagerAccessor::GetCharacterRangeForGlyphRangeImpl,
         LayoutManagerAccessor::GetLineMetricsImpl,
         LayoutManagerAccessor::GetRectsForRangeImpl,
     };
