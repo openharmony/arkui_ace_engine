@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,36 +16,31 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { default as curves } from "@ohos.curves"
-import { extractors } from "#handwritten"
+import { int32, int64, float32 } from '@koalaui/common'
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from '@koalaui/interop'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Curve } from './enums'
+import { default as curves } from '@ohos.curves'
+import { ICurve } from './common'
+import { extractors } from '#handwritten'
 export enum RouteType {
-    NONE = 0,
     None = 0,
-    PUSH = 1,
     Push = 1,
-    POP = 2,
     Pop = 2
 }
 export enum SlideEffect {
-    LEFT = 1, // in backend, 0 means None
-    Left = 1,
-    RIGHT = 2,
-    Right = 2,
-    TOP = 3,
-    Top = 3,
-    BOTTOM = 4,
-    Bottom = 4,
+    Left = 0,
+    Right = 1,
+    Top = 2,
+    Bottom = 3,
     START = 5,
     END = 6
 }
 export interface PageTransitionOptions {
     type?: RouteType;
     duration?: int32;
-    curve?: curves.Curve | string | curves.ICurve;
+    curve?: Curve | string | ICurve;
     delay?: int32;
 }
 export type PageTransitionCallback = (type: RouteType, progress: double) => void;

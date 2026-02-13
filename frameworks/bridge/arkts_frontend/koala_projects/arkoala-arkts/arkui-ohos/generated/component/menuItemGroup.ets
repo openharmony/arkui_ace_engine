@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,43 +16,43 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookMenuItemGroupAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ResourceStr } from "./units"
-import { Resource } from "global.resource"
-import { CustomBuilder } from "./builder"
-import { MenuItemGroupModifier } from "./../MenuItemGroupModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookMenuItemGroupAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ResourceStr, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { MenuItemGroupModifier } from './../MenuItemGroupModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkMenuItemGroupPeer extends ArkCommonMethodPeer {
     attributeSet?: MenuItemGroupModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkMenuItemGroupPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._MenuItemGroup_construct(peerId, flags)
-        const _peer  = new ArkMenuItemGroupPeer(_peerPtr, peerId, 'MenuItemGroup', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._MenuItemGroup_construct(peerId, flags)
+        const _peer = new ArkMenuItemGroupPeer(_peerPtr, peerId, 'MenuItemGroup', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setMenuItemGroupOptionsAttribute(value?: MenuItemGroupOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             MenuItemGroupOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -67,41 +67,26 @@ export interface MenuItemGroupOptions {
 }
 export interface MenuItemGroupAttribute extends CommonMethod {
     setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
-        throw new Error("Unimplemented method setMenuItemGroupOptions")
+        throw new Error('Unimplemented method setMenuItemGroupOptions')
     }
     attributeModifier(value: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkMenuItemGroupStyle extends ArkCommonMethodStyle implements MenuItemGroupAttribute {
-    attributeModifier_value?: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined
-    setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implements MenuItemGroupAttribute {
     getPeer(): ArkMenuItemGroupPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkMenuItemGroupPeer)
     }
     public setMenuItemGroupOptions(value?: MenuItemGroupOptions): this {
-        if (this.checkPriority("setMenuItemGroupOptions")) {
-            const value_casted = value as (MenuItemGroupOptions | undefined)
-            this.getPeer()?.setMenuItemGroupOptionsAttribute(value_casted)
-            this.applyOptionsFinish('MenuItemGroupAttribute');
-            return this
-        }
+        const value_casted = value as (MenuItemGroupOptions | undefined)
+        this.getPeer()?.setMenuItemGroupOptionsAttribute(value_casted)
+        this.applyOptionsFinish('MenuItemGroupAttribute');
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookMenuItemGroupAttributeModifier(this, value);
+            hookMenuItemGroupAttributeModifier(this, value);
         })
         return this
     }
@@ -116,68 +101,66 @@ export class ArkMenuItemGroupComponent extends ArkCommonMethodComponent implemen
 
 @memo
 export function MenuItemGroupImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: MenuItemGroupAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkMenuItemGroupComponent>((): ArkMenuItemGroupComponent => {
         return new ArkMenuItemGroupComponent()
     })
-    NodeAttach<ArkMenuItemGroupPeer>((): ArkMenuItemGroupPeer => ArkMenuItemGroupPeer.create(receiver), (peer: ArkMenuItemGroupPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkMenuItemGroupPeer>((): ArkMenuItemGroupPeer => ArkMenuItemGroupPeer.create(receiver), (_: ArkMenuItemGroupPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 export class MenuItemGroupOptions_serializer {
     public static write(buffer: SerializerBase, value: MenuItemGroupOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForHeader  = value.header
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForHeader = value.header
         if (valueHolderForHeader !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForHeaderTmpValue  = valueHolderForHeader!
+            const valueHolderForHeaderTmpValue = valueHolderForHeader!
             if (valueHolderForHeaderTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForHeaderTmpValueForIdx0  = valueHolderForHeaderTmpValue as ResourceStr
+                const valueHolderForHeaderTmpValueForIdx0 = valueHolderForHeaderTmpValue as ResourceStr
                 if (valueHolderForHeaderTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForHeaderTmpValueForIdx0ForIdx0  = valueHolderForHeaderTmpValueForIdx0 as string
+                    const valueHolderForHeaderTmpValueForIdx0ForIdx0 = valueHolderForHeaderTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForHeaderTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForHeaderTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForHeaderTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForHeaderTmpValueForIdx0ForIdx1  = valueHolderForHeaderTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForHeaderTmpValueForIdx0ForIdx1)
+                    const valueHolderForHeaderTmpValueForIdx0ForIdx1 = valueHolderForHeaderTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForHeaderTmpValueForIdx0ForIdx1)
                 }
             } else if (valueHolderForHeaderTmpValue instanceof CustomBuilder) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeaderTmpValueForIdx1  = valueHolderForHeaderTmpValue as CustomBuilder
+                const valueHolderForHeaderTmpValueForIdx1 = valueHolderForHeaderTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForHeaderTmpValueForIdx1))
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForFooter  = value.footer
+        const valueHolderForFooter = value.footer
         if (valueHolderForFooter !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFooterTmpValue  = valueHolderForFooter!
+            const valueHolderForFooterTmpValue = valueHolderForFooter!
             if (valueHolderForFooterTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFooterTmpValueForIdx0  = valueHolderForFooterTmpValue as ResourceStr
+                const valueHolderForFooterTmpValueForIdx0 = valueHolderForFooterTmpValue as ResourceStr
                 if (valueHolderForFooterTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForFooterTmpValueForIdx0ForIdx0  = valueHolderForFooterTmpValueForIdx0 as string
+                    const valueHolderForFooterTmpValueForIdx0ForIdx0 = valueHolderForFooterTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForFooterTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForFooterTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForFooterTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForFooterTmpValueForIdx0ForIdx1  = valueHolderForFooterTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForFooterTmpValueForIdx0ForIdx1)
+                    const valueHolderForFooterTmpValueForIdx0ForIdx1 = valueHolderForFooterTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForFooterTmpValueForIdx0ForIdx1)
                 }
             } else if (valueHolderForFooterTmpValue instanceof CustomBuilder) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForFooterTmpValueForIdx1  = valueHolderForFooterTmpValue as CustomBuilder
+                const valueHolderForFooterTmpValueForIdx1 = valueHolderForFooterTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForFooterTmpValueForIdx1))
             }
         } else {
@@ -185,82 +168,82 @@ export class MenuItemGroupOptions_serializer {
         }
     }
     public static read(buffer: DeserializerBase): MenuItemGroupOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const headerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let headerTmpBuf : ResourceStr | CustomBuilder | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const headerTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let headerTmpBuf: ResourceStr | CustomBuilder | undefined = undefined
         if ((headerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const headerTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let headerTmpBuf_ : ResourceStr | CustomBuilder | undefined
-            if (headerTmpBuf_UnionSelector == (0).toChar()) {
-                const headerTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let headerTmpBuf_BufU : string | Resource | undefined
-                if (headerTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    headerTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (headerTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    headerTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const headerTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let headerTmpBufOpt: ResourceStr | CustomBuilder | undefined
+            if (headerTmpBufOptUnionSelector == (0).toByte()) {
+                const headerTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
+                let headerTmpBufOptBufU: string | arkui_component_units_Resource | undefined
+                if (headerTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    headerTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (headerTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    headerTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for headerTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for headerTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                headerTmpBuf_ = (headerTmpBuf_BufU as string | Resource)
-            } else if (headerTmpBuf_UnionSelector == (1).toChar()) {
-                const headerTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-                const headerTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
-                const headerTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                const headerTmpBuf_BufUClosure  = ():void => {
-                    const headerTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
-                    headerTmpBuf_BufUBufArgsSerializer.writeInt32(headerTmpBuf_BufUBufResource.resourceId);
-                    headerTmpBuf_BufUBufArgsSerializer.writePointer(headerTmpBuf_BufUBufCall);
-                    headerTmpBuf_BufUBufArgsSerializer.writePointer(headerTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallbackSync(10, 737226752, headerTmpBuf_BufUBufArgsSerializer.asBuffer(), headerTmpBuf_BufUBufArgsSerializer.length());
-                    headerTmpBuf_BufUBufArgsSerializer.release();
+                headerTmpBufOpt = (headerTmpBufOptBufU as string | arkui_component_units_Resource)
+            } else if (headerTmpBufOptUnionSelector == (1).toByte()) {
+                const headerTmpBufOptBufUBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+                const headerTmpBufOptBufUBufCall: KPointer = valueDeserializer.readPointer()
+                const headerTmpBufOptBufUBufCallSync: KPointer = valueDeserializer.readPointer()
+                const headerTmpBufOptBufUClosure = ():void => {
+                    const headerTmpBufOptBufUBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                    headerTmpBufOptBufUBufArgsSerializer.writeInt32(headerTmpBufOptBufUBufResource.resourceId);
+                    headerTmpBufOptBufUBufArgsSerializer.writePointer(headerTmpBufOptBufUBufCall);
+                    headerTmpBufOptBufUBufArgsSerializer.writePointer(headerTmpBufOptBufUBufCallSync);
+                    InteropNativeModule._CallCallbackSync(10, -1834072896, headerTmpBufOptBufUBufArgsSerializer.asBuffer(), headerTmpBufOptBufUBufArgsSerializer.length());
+                    headerTmpBufOptBufUBufArgsSerializer.release();
                     return;
                 }
-                resourceFinalizerRegister(headerTmpBuf_BufUClosure, headerTmpBuf_BufUBufResource)
-                headerTmpBuf_ = headerTmpBuf_BufUClosure
+                resourceFinalizerRegister(headerTmpBufOptBufUClosure, headerTmpBufOptBufUBufResource)
+                headerTmpBufOpt = headerTmpBufOptBufUClosure
             } else {
-                throw new Error("One of the branches for headerTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for headerTmpBufOpt has to be chosen through deserialisation.')
             }
-            headerTmpBuf = (headerTmpBuf_ as ResourceStr | CustomBuilder)
+            headerTmpBuf = (headerTmpBufOpt as ResourceStr | CustomBuilder)
         }
-        const headerTmpResult : ResourceStr | CustomBuilder | undefined = headerTmpBuf
-        const footerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let footerTmpBuf : ResourceStr | CustomBuilder | undefined = undefined
+        const headerTmpResult: ResourceStr | CustomBuilder | undefined = headerTmpBuf
+        const footerTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let footerTmpBuf: ResourceStr | CustomBuilder | undefined = undefined
         if ((footerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const footerTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let footerTmpBuf_ : ResourceStr | CustomBuilder | undefined
-            if (footerTmpBuf_UnionSelector == (0).toChar()) {
-                const footerTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let footerTmpBuf_BufU : string | Resource | undefined
-                if (footerTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    footerTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (footerTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    footerTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const footerTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let footerTmpBufOpt: ResourceStr | CustomBuilder | undefined
+            if (footerTmpBufOptUnionSelector == (0).toByte()) {
+                const footerTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
+                let footerTmpBufOptBufU: string | arkui_component_units_Resource | undefined
+                if (footerTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    footerTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (footerTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    footerTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for footerTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for footerTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                footerTmpBuf_ = (footerTmpBuf_BufU as string | Resource)
-            } else if (footerTmpBuf_UnionSelector == (1).toChar()) {
-                const footerTmpBuf_BufUBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-                const footerTmpBuf_BufUBufCall : KPointer = valueDeserializer.readPointer()
-                const footerTmpBuf_BufUBufCallSync : KPointer = valueDeserializer.readPointer()
-                const footerTmpBuf_BufUClosure  = ():void => {
-                    const footerTmpBuf_BufUBufArgsSerializer : SerializerBase = SerializerBase.hold();
-                    footerTmpBuf_BufUBufArgsSerializer.writeInt32(footerTmpBuf_BufUBufResource.resourceId);
-                    footerTmpBuf_BufUBufArgsSerializer.writePointer(footerTmpBuf_BufUBufCall);
-                    footerTmpBuf_BufUBufArgsSerializer.writePointer(footerTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallbackSync(10, 737226752, footerTmpBuf_BufUBufArgsSerializer.asBuffer(), footerTmpBuf_BufUBufArgsSerializer.length());
-                    footerTmpBuf_BufUBufArgsSerializer.release();
+                footerTmpBufOpt = (footerTmpBufOptBufU as string | arkui_component_units_Resource)
+            } else if (footerTmpBufOptUnionSelector == (1).toByte()) {
+                const footerTmpBufOptBufUBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+                const footerTmpBufOptBufUBufCall: KPointer = valueDeserializer.readPointer()
+                const footerTmpBufOptBufUBufCallSync: KPointer = valueDeserializer.readPointer()
+                const footerTmpBufOptBufUClosure = ():void => {
+                    const footerTmpBufOptBufUBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                    footerTmpBufOptBufUBufArgsSerializer.writeInt32(footerTmpBufOptBufUBufResource.resourceId);
+                    footerTmpBufOptBufUBufArgsSerializer.writePointer(footerTmpBufOptBufUBufCall);
+                    footerTmpBufOptBufUBufArgsSerializer.writePointer(footerTmpBufOptBufUBufCallSync);
+                    InteropNativeModule._CallCallbackSync(10, -1834072896, footerTmpBufOptBufUBufArgsSerializer.asBuffer(), footerTmpBufOptBufUBufArgsSerializer.length());
+                    footerTmpBufOptBufUBufArgsSerializer.release();
                     return;
                 }
-                resourceFinalizerRegister(footerTmpBuf_BufUClosure, footerTmpBuf_BufUBufResource)
-                footerTmpBuf_ = footerTmpBuf_BufUClosure
+                resourceFinalizerRegister(footerTmpBufOptBufUClosure, footerTmpBufOptBufUBufResource)
+                footerTmpBufOpt = footerTmpBufOptBufUClosure
             } else {
-                throw new Error("One of the branches for footerTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for footerTmpBufOpt has to be chosen through deserialisation.')
             }
-            footerTmpBuf = (footerTmpBuf_ as ResourceStr | CustomBuilder)
+            footerTmpBuf = (footerTmpBufOpt as ResourceStr | CustomBuilder)
         }
-        const footerTmpResult : ResourceStr | CustomBuilder | undefined = footerTmpBuf
-        let value : MenuItemGroupOptions = ({header: headerTmpResult, footer: footerTmpResult} as MenuItemGroupOptions)
+        const footerTmpResult: ResourceStr | CustomBuilder | undefined = footerTmpBuf
+        let value: MenuItemGroupOptions = ({header: headerTmpResult, footer: footerTmpResult} as MenuItemGroupOptions)
         return value
     }
 }

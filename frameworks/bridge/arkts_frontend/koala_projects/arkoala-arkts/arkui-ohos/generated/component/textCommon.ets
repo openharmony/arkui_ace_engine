@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,43 +16,41 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from "@koalaui/interop"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors } from "#handwritten"
-import { InputMethodExtraConfig } from "@ohos.inputMethod.ExtraConfig"
-import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
-import { default as text } from "@ohos.graphics.text"
-import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
-import { SelectionOptions_serializer, SelectionOptions, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from "./common"
-import { Resource_serializer } from "./../framework/resource"
-import { ResourceStr, ResourceColor, Length } from "./units"
-import { Resource } from "global.resource"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
-import { default as text } from "@ohos.graphics.text"
-import { LengthMetrics, LengthMetrics_serializer } from "arkui.Graphics"
-import { ArkThemeScopeManager } from "#arktheme"
+import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { extractors } from '#handwritten'
+import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
+import { text_LineMetrics_serializer, text_TextBox_serializer } from './../framework/ohos.graphics.text'
+import { default as text } from '@ohos.graphics.text'
+import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from './styledString'
+import { SelectionOptions_serializer, SelectionOptions, Callback as arkui_component_common_Callback, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from './common'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { ResourceStr, Resource as arkui_component_units_Resource, ResourceColor, Length, LengthMetrics as arkui_component_units_LengthMetrics } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Color as arkui_component_enums_Color, TextDecorationType, TextDecorationStyle } from './enums'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
-        return new ContentTransition(ptr)
+        return new ContentTransition(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ContentTransition implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ContentTransition.getFinalizer())
     }
     constructor() {
-        this(ContentTransition.construct())
+        this(MaterializedBaseTag.NOP, ContentTransition.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ContentTransition_construct()
+        const retval = ArkUIGeneratedNativeModule._ContentTransition_construct()
         return retval
     }
     static getFinalizer(): KPointer {
@@ -64,31 +62,28 @@ export interface IMEClient {
     setExtraConfig(config: InputMethodExtraConfig): void
 }
 export class IMEClientInternal implements MaterializedBase,IMEClient {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get nodeId(): int64 {
-        return this.getNodeId()
-    }
-    set nodeId(nodeId: int64) {
-        this.setNodeId(nodeId)
-    }
-    constructor(peerPtr: KPointer) {
+    public nodeId: int64
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, IMEClientInternal.getFinalizer())
+        this.nodeId = this.getNodeId()
     }
     constructor() {
-        this(IMEClientInternal.construct())
+        this(MaterializedBaseTag.NOP, IMEClientInternal.construct())
+        this.nodeId = this.getNodeId()
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._IMEClient_construct()
+        const retval = ArkUIGeneratedNativeModule._IMEClient_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._IMEClient_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): IMEClientInternal {
-        return new IMEClientInternal(ptr)
+        return new IMEClientInternal(MaterializedBaseTag.NOP, ptr)
     }
     public setExtraConfig(config: InputMethodExtraConfig): void {
         const config_casted = config as (InputMethodExtraConfig)
@@ -103,11 +98,11 @@ export class IMEClientInternal implements MaterializedBase,IMEClient {
         this.setNodeId_serialize(nodeId_casted)
         return
     }
-    setExtraConfig_serialize(config: InputMethodExtraConfig): void {
+    private setExtraConfig_serialize(config: InputMethodExtraConfig): void {
         ArkUIGeneratedNativeModule._IMEClient_setExtraConfig(this.peer!.ptr, extractors.toInputMethodExtraConfigPtr(config))
     }
     private getNodeId_serialize(): int64 {
-        const retval  = ArkUIGeneratedNativeModule._IMEClient_getNodeId(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._IMEClient_getNodeId(this.peer!.ptr)
         return retval
     }
     private setNodeId_serialize(nodeId: int64): void {
@@ -120,29 +115,29 @@ export interface LayoutManager {
     getCharacterPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
     getGlyphRangeForCharacterRange(charRange: TextRange): Array<TextRange> | undefined
     getCharacterRangeForGlyphRange(glyphRange: TextRange): Array<TextRange> | undefined
-    getLineMetrics(lineNumber: int32): text.LineMetrics | undefined
-    getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined
+    getLineMetrics(lineNumber: int32): LineMetrics | undefined
+    getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> | undefined
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LayoutManagerInternal.getFinalizer())
     }
     constructor() {
-        this(LayoutManagerInternal.construct())
+        this(MaterializedBaseTag.NOP, LayoutManagerInternal.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_construct()
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._LayoutManager_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
-        return new LayoutManagerInternal(ptr)
+        return new LayoutManagerInternal(MaterializedBaseTag.NOP, ptr)
     }
     public getLineCount(): int32 | undefined {
         return this.getLineCount_serialize()
@@ -165,136 +160,136 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const glyphRange_casted = glyphRange as (TextRange)
         return this.getCharacterRangeForGlyphRange_serialize(glyphRange_casted)
     }
-    public getLineMetrics(lineNumber: int32): text.LineMetrics | undefined {
+    public getLineMetrics(lineNumber: int32): LineMetrics | undefined {
         const lineNumber_casted = lineNumber as (int32)
         return this.getLineMetrics_serialize(lineNumber_casted)
     }
-    public getRectsForRange(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
+    public getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> | undefined {
         const range_casted = range as (TextRange)
-        const widthStyle_casted = widthStyle as (text.RectWidthStyle)
-        const heightStyle_casted = heightStyle as (text.RectHeightStyle)
+        const widthStyle_casted = widthStyle as (RectWidthStyle)
+        const heightStyle_casted = heightStyle as (RectHeightStyle)
         return this.getRectsForRange_serialize(range_casted, widthStyle_casted, heightStyle_casted)
     }
-    getLineCount_serialize(): int32 | undefined {
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : int32 | undefined = undefined
+    private getLineCount_serialize(): int32 | undefined {
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getLineCount(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : int32 | undefined = buffer
+        const returnResult: int32 | undefined = buffer
         return returnResult
     }
-    getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : PositionWithAffinity | undefined = undefined
+    private getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: PositionWithAffinity | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
         }
-        const returnResult : PositionWithAffinity | undefined = buffer
+        const returnResult: PositionWithAffinity | undefined = buffer
         return returnResult
     }
-    getCharacterPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate(this.peer!.ptr, x, y)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : PositionWithAffinity | undefined = undefined
+    private getCharacterPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate(this.peer!.ptr, x, y)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: PositionWithAffinity | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = PositionWithAffinity_serializer.read(retvalDeserializer)
         }
-        const returnResult : PositionWithAffinity | undefined = buffer
+        const returnResult: PositionWithAffinity | undefined = buffer
         return returnResult
     }
-    getGlyphRangeForCharacterRange_serialize(charRange: TextRange): Array<TextRange> | undefined {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private getGlyphRangeForCharacterRange_serialize(charRange: TextRange): Array<TextRange> | undefined {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, charRange)
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphRangeForCharacterRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphRangeForCharacterRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : Array<TextRange> | undefined = undefined
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<TextRange> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_Length : int32 = retvalDeserializer.readInt32()
-            let buffer_ : Array<TextRange> = new Array<TextRange>(buffer_Length)
-            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
-                buffer_[buffer_BufCounterI] = TextRange_serializer.read(retvalDeserializer)
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            let bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength)
+            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
+                bufferOpt[bufferOptBufCounterI] = TextRange_serializer.read(retvalDeserializer)
             }
-            buffer = buffer_
+            buffer = bufferOpt
         }
-        const returnResult : Array<TextRange> | undefined = buffer
+        const returnResult: Array<TextRange> | undefined = buffer
         return returnResult
     }
-    getCharacterRangeForGlyphRange_serialize(glyphRange: TextRange): Array<TextRange> | undefined {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private getCharacterRangeForGlyphRange_serialize(glyphRange: TextRange): Array<TextRange> | undefined {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, glyphRange)
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getCharacterRangeForGlyphRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterRangeForGlyphRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : Array<TextRange> | undefined = undefined
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<TextRange> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_Length : int32 = retvalDeserializer.readInt32()
-            let buffer_ : Array<TextRange> = new Array<TextRange>(buffer_Length)
-            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
-                buffer_[buffer_BufCounterI] = TextRange_serializer.read(retvalDeserializer)
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            let bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength)
+            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
+                bufferOpt[bufferOptBufCounterI] = TextRange_serializer.read(retvalDeserializer)
             }
-            buffer = buffer_
+            buffer = bufferOpt
         }
-        const returnResult : Array<TextRange> | undefined = buffer
+        const returnResult: Array<TextRange> | undefined = buffer
         return returnResult
     }
-    getLineMetrics_serialize(lineNumber: int32): text.LineMetrics | undefined {
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : text.LineMetrics | undefined = undefined
+    private getLineMetrics_serialize(lineNumber: int32): LineMetrics | undefined {
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: LineMetrics | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = text_LineMetrics_serializer.read(retvalDeserializer)
         }
-        const returnResult : text.LineMetrics | undefined = buffer
+        const returnResult: LineMetrics | undefined = buffer
         return returnResult
     }
-    getRectsForRange_serialize(range: TextRange, widthStyle: text.RectWidthStyle, heightStyle: text.RectHeightStyle): Array<text.TextBox> | undefined {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private getRectsForRange_serialize(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> | undefined {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         TextRange_serializer.write(thisSerializer, range)
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
+        const retval = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
         thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : Array<text.TextBox> | undefined = undefined
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: Array<TextBox> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_Length : int32 = retvalDeserializer.readInt32()
-            let buffer_ : Array<text.TextBox> = new Array<text.TextBox>(buffer_Length)
-            for (let buffer_BufCounterI = 0; buffer_BufCounterI < buffer_Length; buffer_BufCounterI++) {
-                buffer_[buffer_BufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
+            const bufferOptLength: int32 = retvalDeserializer.readInt32()
+            let bufferOpt: Array<TextBox> = new Array<TextBox>(bufferOptLength)
+            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
+                bufferOpt[bufferOptBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
             }
-            buffer = buffer_
+            buffer = bufferOpt
         }
-        const returnResult : Array<text.TextBox> | undefined = buffer
+        const returnResult: Array<TextBox> | undefined = buffer
         return returnResult
     }
 }
 export class ShaderStyleInternal {
     public static fromPtr(ptr: KPointer): ShaderStyle {
-        return new ShaderStyle(ptr)
+        return new ShaderStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ShaderStyle implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ShaderStyle.getFinalizer())
     }
     constructor() {
-        this(ShaderStyle.construct())
+        this(MaterializedBaseTag.NOP, ShaderStyle.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ShaderStyle_construct()
+        const retval = ArkUIGeneratedNativeModule._ShaderStyle_construct()
         return retval
     }
     static getFinalizer(): KPointer {
@@ -306,25 +301,25 @@ export interface StyledStringController {
     getStyledString(): MutableStyledString | undefined
 }
 export class StyledStringControllerInternal implements MaterializedBase,StyledStringController {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, StyledStringControllerInternal.getFinalizer())
     }
     constructor() {
-        this(StyledStringControllerInternal.construct())
+        this(MaterializedBaseTag.NOP, StyledStringControllerInternal.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._StyledStringController_construct()
+        const retval = ArkUIGeneratedNativeModule._StyledStringController_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._StyledStringController_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): StyledStringControllerInternal {
-        return new StyledStringControllerInternal(ptr)
+        return new StyledStringControllerInternal(MaterializedBaseTag.NOP, ptr)
     }
     public setStyledString(styledString: StyledString): void {
         const styledString_casted = styledString as (StyledString)
@@ -334,50 +329,50 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
     public getStyledString(): MutableStyledString | undefined {
         return this.getStyledString_serialize()
     }
-    setStyledString_serialize(styledString: StyledString): void {
+    private setStyledString_serialize(styledString: StyledString): void {
         ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
-    getStyledString_serialize(): MutableStyledString | undefined {
-        const retval  = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : MutableStyledString | undefined = undefined
+    private getStyledString_serialize(): MutableStyledString | undefined {
+        const retval = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: MutableStyledString | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (MutableStyledString_serializer.read(retvalDeserializer) as MutableStyledString)
         }
-        const returnResult : MutableStyledString | undefined = buffer
+        const returnResult: MutableStyledString | undefined = buffer
         return returnResult
     }
 }
 export interface TextBaseController {
-    setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions | undefined): void
+    setSelection(selectionStart: int32, selectionEnd: int32, options: SelectionOptions | undefined): void
     closeSelectionMenu(): void
     getLayoutManager(): LayoutManager | undefined
 }
 export class TextBaseControllerInternal implements MaterializedBase,TextBaseController {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextBaseControllerInternal.getFinalizer())
     }
     constructor() {
-        this(TextBaseControllerInternal.construct())
+        this(MaterializedBaseTag.NOP, TextBaseControllerInternal.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._TextBaseController_construct()
+        const retval = ArkUIGeneratedNativeModule._TextBaseController_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextBaseController_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): TextBaseControllerInternal {
-        return new TextBaseControllerInternal(ptr)
+        return new TextBaseControllerInternal(MaterializedBaseTag.NOP, ptr)
     }
-    public setSelection(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
-        const selectionStart_casted = selectionStart as (number)
-        const selectionEnd_casted = selectionEnd as (number)
+    public setSelection(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
+        const selectionStart_casted = selectionStart as (int32)
+        const selectionEnd_casted = selectionEnd as (int32)
         const options_casted = options as (SelectionOptions | undefined)
         this.setSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
         return
@@ -389,11 +384,11 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
     public getLayoutManager(): LayoutManager | undefined {
         return this.getLayoutManager_serialize()
     }
-    setSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private setSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             SelectionOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -401,139 +396,59 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         ArkUIGeneratedNativeModule._TextBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    closeSelectionMenu_serialize(): void {
+    private closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._TextBaseController_closeSelectionMenu(this.peer!.ptr)
     }
-    getLayoutManager_serialize(): LayoutManager | undefined {
-        const retval  = ArkUIGeneratedNativeModule._TextBaseController_getLayoutManager(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : LayoutManager | undefined = undefined
+    private getLayoutManager_serialize(): LayoutManager | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextBaseController_getLayoutManager(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: LayoutManager | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (LayoutManager_serializer.read(retvalDeserializer) as LayoutManager)
         }
-        const returnResult : LayoutManager | undefined = buffer
+        const returnResult: LayoutManager | undefined = buffer
         return returnResult
     }
 }
 export class TextMenuItemIdInternal {
     public static fromPtr(ptr: KPointer): TextMenuItemId {
-        return new TextMenuItemId(ptr)
+        return new TextMenuItemId(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class TextMenuItemId implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static readonly CUT: TextMenuItemId = TextMenuItemId.getCUT()
-    static readonly COPY: TextMenuItemId = TextMenuItemId.getCOPY()
-    static readonly PASTE: TextMenuItemId = TextMenuItemId.getPASTE()
-    static readonly SELECT_ALL: TextMenuItemId = TextMenuItemId.getSELECT_ALL()
-    static readonly COLLABORATION_SERVICE: TextMenuItemId = TextMenuItemId.getCOLLABORATION_SERVICE()
-    static readonly CAMERA_INPUT: TextMenuItemId = TextMenuItemId.getCAMERA_INPUT()
-    static readonly AI_WRITER: TextMenuItemId = TextMenuItemId.getAI_WRITER()
-    static readonly TRANSLATE: TextMenuItemId = TextMenuItemId.getTRANSLATE()
-    static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
-    static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
-    static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
-    static readonly passwordVault: TextMenuItemId = TextMenuItemId.getPasswordVault()
-    constructor(peerPtr: KPointer) {
+    public static readonly CUT: TextMenuItemId = TextMenuItemId.getCUT()
+    public static readonly COPY: TextMenuItemId = TextMenuItemId.getCOPY()
+    public static readonly PASTE: TextMenuItemId = TextMenuItemId.getPASTE()
+    public static readonly SELECT_ALL: TextMenuItemId = TextMenuItemId.getSELECT_ALL()
+    public static readonly COLLABORATION_SERVICE: TextMenuItemId = TextMenuItemId.getCOLLABORATION_SERVICE()
+    public static readonly CAMERA_INPUT: TextMenuItemId = TextMenuItemId.getCAMERA_INPUT()
+    public static readonly AI_WRITER: TextMenuItemId = TextMenuItemId.getAI_WRITER()
+    public static readonly TRANSLATE: TextMenuItemId = TextMenuItemId.getTRANSLATE()
+    public static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
+    public static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
+    public static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
+    public static readonly passwordVault: TextMenuItemId = TextMenuItemId.getPasswordVault()
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextMenuItemId.getFinalizer())
     }
     constructor() {
-        this(TextMenuItemId.construct())
+        this(MaterializedBaseTag.NOP, TextMenuItemId.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_construct()
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextMenuItemId_getFinalizer()
     }
-    static of_serialize(id: ResourceStr): TextMenuItemId {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (id instanceof string) {
-            thisSerializer.writeInt8((0).toByte())
-            const idForIdx0  = id as string
-            thisSerializer.writeString(idForIdx0)
-        } else if (id instanceof Resource) {
-            thisSerializer.writeInt8((1).toByte())
-            const idForIdx1  = id as Resource
-            Resource_serializer.write(thisSerializer, idForIdx1)
-        }
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_of(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getCUT_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCUT()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getCOPY_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCOPY()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getPASTE_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getPASTE()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getSELECT_ALL_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getSELECT_ALL()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getCOLLABORATION_SERVICE_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCOLLABORATION_SERVICE()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getCAMERA_INPUT_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCAMERA_INPUT()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getAI_WRITER_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getAI_WRITER()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getTRANSLATE_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getTRANSLATE()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getSEARCH_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getSEARCH()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getSHARE_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getSHARE()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getAutoFill_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getAutoFill()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
-    private static getPasswordVault_serialize(): TextMenuItemId {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getPasswordVault()
-        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
-        return obj
-    }
     public static of(id: ResourceStr): TextMenuItemId {
         const id_casted = id as (ResourceStr)
         return TextMenuItemId.of_serialize(id_casted)
-    }
-    public equals(id: TextMenuItemId): boolean {
-        const id_casted = id as (TextMenuItemId)
-        return this.equals_serialize(id_casted)
     }
     private static getCUT(): TextMenuItemId {
         return TextMenuItemId.getCUT_serialize()
@@ -571,8 +486,88 @@ export class TextMenuItemId implements MaterializedBase {
     private static getPasswordVault(): TextMenuItemId {
         return TextMenuItemId.getPasswordVault_serialize()
     }
-    equals_serialize(id: TextMenuItemId): boolean {
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))
+    private static of_serialize(id: ResourceStr): TextMenuItemId {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (id instanceof string) {
+            thisSerializer.writeInt8((0).toByte())
+            const idForIdx0 = id as string
+            thisSerializer.writeString(idForIdx0)
+        } else if (id instanceof arkui_component_units_Resource) {
+            thisSerializer.writeInt8((1).toByte())
+            const idForIdx1 = id as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, idForIdx1)
+        }
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_of(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCUT_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getCUT()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCOPY_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getCOPY()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getPASTE_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getPASTE()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getSELECT_ALL_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getSELECT_ALL()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCOLLABORATION_SERVICE_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getCOLLABORATION_SERVICE()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCAMERA_INPUT_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getCAMERA_INPUT()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAI_WRITER_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAI_WRITER()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getTRANSLATE_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getTRANSLATE()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getSEARCH_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getSEARCH()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getSHARE_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getSHARE()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAutoFill_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAutoFill()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getPasswordVault_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getPasswordVault()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    public equals(id: TextMenuItemId): boolean {
+        const id_casted = id as (TextMenuItemId)
+        return this.equals_serialize(id_casted)
+    }
+    private equals_serialize(id: TextMenuItemId): boolean {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))
         return retval
     }
 }
@@ -585,7 +580,7 @@ export enum TextDataDetectorType {
 }
 export interface TextDataDetectorConfig {
     types: Array<TextDataDetectorType> | null | undefined;
-    onDetectResultUpdate?: ((value0: string) => void);
+    onDetectResultUpdate?: arkui_component_common_Callback<string, void>;
     color?: ResourceColor;
     decoration?: DecorationStyleInterface;
     enablePreviewMenu?: boolean;
@@ -606,27 +601,6 @@ export enum MenuType {
     SELECTION_MENU = 0,
     PREVIEW_MENU = 1
 }
-export enum TextVerticalAlign {
-    BASELINE = 0,
-    BOTTOM = 1,
-    CENTER = 2,
-    TOP = 3
-}
-export enum TextChangeReason {
-    UNKNOWN = 0,
-    INPUT = 1,
-    PASTE = 2,
-    CUT = 3,
-    DRAG = 4,
-    AUTO_FILL = 5,
-    AI_WRITE = 6,
-    REDO = 7,
-    UNDO = 8,
-    CONTROLLER = 9,
-    ACCESSIBILITY = 10,
-    COLLABORATION = 11,
-    STYLUS = 12
-}
 export enum AutoCapitalizationMode {
     NONE = 0,
     WORDS = 1,
@@ -645,7 +619,7 @@ export interface PreviewText {
     value: string;
 }
 export interface StyledStringChangedListener {
-    onWillChange?: ((value0: StyledStringChangeValue) => boolean);
+    onWillChange?: arkui_component_common_Callback<StyledStringChangeValue, boolean>;
     onDidChange?: OnDidChangeCallback;
 }
 export interface StyledStringChangeValue {
@@ -655,7 +629,7 @@ export interface StyledStringChangeValue {
 }
 export interface PositionWithAffinity {
     position: int32;
-    affinity: text.Affinity;
+    affinity: Affinity;
 }
 export type Affinity = text.Affinity;
 export type LineMetrics = text.LineMetrics;
@@ -719,14 +693,14 @@ export interface AccessibilitySpanOptions {
     accessibilityDescription?: ResourceStr;
     accessibilityLevel?: string;
 }
+export interface SelectedDragPreviewStyle {
+    color?: ResourceColor;
+}
 export enum TextDirection {
     LTR = 0,
     RTL = 1,
     DEFAULT = 2,
     AUTO = 3
-}
-export interface SelectedDragPreviewStyle {
-    color?: ResourceColor;
 }
 export enum TextContentAlign {
     TOP = 0,
@@ -754,6 +728,27 @@ export enum KeyboardFluidLightMode {
     NONE = 0,
     BACKGROUND_FLUID_LIGHT = 1
 }
+export enum TextChangeReason {
+    UNKNOWN = 0,
+    INPUT = 1,
+    PASTE = 2,
+    CUT = 3,
+    DRAG = 4,
+    AUTO_FILL = 5,
+    AI_WRITE = 6,
+    REDO = 7,
+    UNDO = 8,
+    CONTROLLER = 9,
+    ACCESSIBILITY = 10,
+    COLLABORATION = 11,
+    STYLUS = 12
+}
+export enum TextVerticalAlign {
+    BASELINE = 0,
+    BOTTOM = 1,
+    CENTER = 2,
+    TOP = 3
+}
 export interface MaxLinesOptions {
     overflowMode?: MaxLinesMode;
 }
@@ -765,1296 +760,1326 @@ export interface NumericTextTransitionOptions {
     enableBlur?: boolean;
 }
 export interface TextLayoutOptions {
-    constraintWidth?: LengthMetrics;
+    constraintWidth?: arkui_component_units_LengthMetrics;
 }
 export interface KeyboardAppearanceConfig {
     gradientMode?: KeyboardGradientMode;
     fluidLightMode?: KeyboardFluidLightMode;
 }
+export interface VoiceButtonOptions {
+    enabled?: boolean;
+}
+export interface FontConfigs {
+    fontWeightConfigs?: FontWeightConfigs;
+}
+export interface FontWeightConfigs {
+    enableVariableFontWeight?: boolean;
+    enableDeviceFontWeightCategory?: boolean;
+}
+export class ColorShaderStyle_serializer {
+    public static write(buffer: SerializerBase, value: ColorShaderStyle): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ColorShaderStyle {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return ColorShaderStyleInternal.fromPtr(ptr)
+    }
+}
 export class ContentTransition_serializer {
     public static write(buffer: SerializerBase, value: ContentTransition): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): ContentTransition {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return ContentTransitionInternal.fromPtr(ptr)
+    }
+}
+export class IMEClient_serializer {
+    public static write(buffer: SerializerBase, value: IMEClient): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): IMEClient {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return IMEClientInternal.fromPtr(ptr)
     }
 }
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): LayoutManager {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return LayoutManagerInternal.fromPtr(ptr)
+    }
+}
+export class LinearGradientStyle_serializer {
+    public static write(buffer: SerializerBase, value: LinearGradientStyle): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LinearGradientStyle {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return LinearGradientStyleInternal.fromPtr(ptr)
+    }
+}
+export class NumericTextTransition_serializer {
+    public static write(buffer: SerializerBase, value: NumericTextTransition): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): NumericTextTransition {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return NumericTextTransitionInternal.fromPtr(ptr)
+    }
+}
+export class RadialGradientStyle_serializer {
+    public static write(buffer: SerializerBase, value: RadialGradientStyle): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): RadialGradientStyle {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return RadialGradientStyleInternal.fromPtr(ptr)
     }
 }
 export class ShaderStyle_serializer {
     public static write(buffer: SerializerBase, value: ShaderStyle): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): ShaderStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return ShaderStyleInternal.fromPtr(ptr)
     }
 }
 export class StyledStringController_serializer {
     public static write(buffer: SerializerBase, value: StyledStringController): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): StyledStringController {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return StyledStringControllerInternal.fromPtr(ptr)
     }
 }
 export class TextBaseController_serializer {
     public static write(buffer: SerializerBase, value: TextBaseController): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): TextBaseController {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return TextBaseControllerInternal.fromPtr(ptr)
     }
 }
 export class TextEditControllerEx_serializer {
     public static write(buffer: SerializerBase, value: TextEditControllerEx): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): TextEditControllerEx {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return TextEditControllerExInternal.fromPtr(ptr)
     }
 }
 export class TextMenuItemId_serializer {
     public static write(buffer: SerializerBase, value: TextMenuItemId): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): TextMenuItemId {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return TextMenuItemIdInternal.fromPtr(ptr)
     }
 }
 export class DeleteValue_serializer {
     public static write(buffer: SerializerBase, value: DeleteValue): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForDeleteOffset  = value.deleteOffset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForDeleteOffset = value.deleteOffset
         valueSerializer.writeInt32(valueHolderForDeleteOffset)
-        const valueHolderForDirection  = value.direction
+        const valueHolderForDirection = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
-        const valueHolderForDeleteValue  = value.deleteValue
+        const valueHolderForDeleteValue = value.deleteValue
         valueSerializer.writeString(valueHolderForDeleteValue)
     }
     public static read(buffer: DeserializerBase): DeleteValue {
-        let valueDeserializer : DeserializerBase = buffer
-        const deleteOffsetTmpResult : int32 = valueDeserializer.readInt32()
-        const directionTmpResult : TextDeleteDirection = TextDeleteDirection.fromValue(valueDeserializer.readInt32())
-        const deleteValueTmpResult : string = (valueDeserializer.readString() as string)
-        let value : DeleteValue = ({deleteOffset: deleteOffsetTmpResult, direction: directionTmpResult, deleteValue: deleteValueTmpResult} as DeleteValue)
+        let valueDeserializer: DeserializerBase = buffer
+        const deleteOffsetTmpResult: int32 = valueDeserializer.readInt32()
+        const directionTmpResult: TextDeleteDirection = TextDeleteDirection.fromValue(valueDeserializer.readInt32())
+        const deleteValueTmpResult: string = (valueDeserializer.readString() as string)
+        let value: DeleteValue = ({deleteOffset: deleteOffsetTmpResult, direction: directionTmpResult, deleteValue: deleteValueTmpResult} as DeleteValue)
         return value
     }
 }
 export class EditMenuOptions_serializer {
     public static write(buffer: SerializerBase, value: EditMenuOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOnCreateMenu  = value.onCreateMenu
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOnCreateMenu = value.onCreateMenu
         if (valueHolderForOnCreateMenu !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnCreateMenuTmpValue  = valueHolderForOnCreateMenu!
+            const valueHolderForOnCreateMenuTmpValue = valueHolderForOnCreateMenu!
             valueSerializer.holdAndWriteCallback(valueHolderForOnCreateMenuTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForOnMenuItemClick  = value.onMenuItemClick
+        const valueHolderForOnMenuItemClick = value.onMenuItemClick
         if (valueHolderForOnMenuItemClick !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnMenuItemClickTmpValue  = valueHolderForOnMenuItemClick!
+            const valueHolderForOnMenuItemClickTmpValue = valueHolderForOnMenuItemClick!
             valueSerializer.holdAndWriteCallback(valueHolderForOnMenuItemClickTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForOnPrepareMenu  = value.onPrepareMenu
+        const valueHolderForOnPrepareMenu = value.onPrepareMenu
         if (valueHolderForOnPrepareMenu !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnPrepareMenuTmpValue  = valueHolderForOnPrepareMenu!
+            const valueHolderForOnPrepareMenuTmpValue = valueHolderForOnPrepareMenu!
             valueSerializer.holdAndWriteCallback(valueHolderForOnPrepareMenuTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): EditMenuOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const onCreateMenuTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onCreateMenuTmpBuf : OnCreateMenuCallback | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const onCreateMenuTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onCreateMenuTmpBuf: OnCreateMenuCallback | undefined = undefined
         if ((onCreateMenuTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onCreateMenuTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onCreateMenuTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onCreateMenuTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            const onCreateMenuTmpBuf_Closure  = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
-                const onCreateMenuTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onCreateMenuTmpBuf_BufArgsSerializer.writeInt32(onCreateMenuTmpBuf_BufResource.resourceId);
-                onCreateMenuTmpBuf_BufArgsSerializer.writePointer(onCreateMenuTmpBuf_BufCall);
-                onCreateMenuTmpBuf_BufArgsSerializer.writePointer(onCreateMenuTmpBuf_BufCallSync);
-                onCreateMenuTmpBuf_BufArgsSerializer.writeInt32((menuItems.length).toInt());
+            const onCreateMenuTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onCreateMenuTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onCreateMenuTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onCreateMenuTmpBufOptClosure = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
+                const onCreateMenuTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onCreateMenuTmpBufOptBufArgsSerializer.writeInt32(onCreateMenuTmpBufOptBufResource.resourceId);
+                onCreateMenuTmpBufOptBufArgsSerializer.writePointer(onCreateMenuTmpBufOptBufCall);
+                onCreateMenuTmpBufOptBufArgsSerializer.writePointer(onCreateMenuTmpBufOptBufCallSync);
+                onCreateMenuTmpBufOptBufArgsSerializer.writeInt32((menuItems.length).toInt());
                 for (let menuItemsCounterI = 0; menuItemsCounterI < menuItems.length; menuItemsCounterI++) {
-                    const menuItemsTmpElement : TextMenuItem = menuItems[menuItemsCounterI];
-                    TextMenuItem_serializer.write(onCreateMenuTmpBuf_BufArgsSerializer, menuItemsTmpElement);
+                    const menuItemsTmpElement: TextMenuItem = menuItems[menuItemsCounterI];
+                    TextMenuItem_serializer.write(onCreateMenuTmpBufOptBufArgsSerializer, menuItemsTmpElement);
                 }
-                let onCreateMenuTmpBuf_BufContinuationValue : Array<TextMenuItem> | undefined;
-                const onCreateMenuTmpBuf_BufContinuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
-                onCreateMenuTmpBuf_BufContinuationValue = value;
+                let onCreateMenuTmpBufOptBufContinuationValue: Array<TextMenuItem> | undefined;
+                const onCreateMenuTmpBufOptBufContinuationCallback: ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+                onCreateMenuTmpBufOptBufContinuationValue = value;
             }
-                onCreateMenuTmpBuf_BufArgsSerializer.holdAndWriteCallback(onCreateMenuTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallbackSync(10, 312701677, onCreateMenuTmpBuf_BufArgsSerializer.asBuffer(), onCreateMenuTmpBuf_BufArgsSerializer.length());
-                onCreateMenuTmpBuf_BufArgsSerializer.release();
-                return (onCreateMenuTmpBuf_BufContinuationValue as Array<TextMenuItem>);
+                onCreateMenuTmpBufOptBufArgsSerializer.holdAndWriteCallback(onCreateMenuTmpBufOptBufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 652275661, onCreateMenuTmpBufOptBufArgsSerializer.asBuffer(), onCreateMenuTmpBufOptBufArgsSerializer.length());
+                onCreateMenuTmpBufOptBufArgsSerializer.release();
+                return (onCreateMenuTmpBufOptBufContinuationValue as Array<TextMenuItem>);
             }
-            resourceFinalizerRegister(onCreateMenuTmpBuf_Closure, onCreateMenuTmpBuf_BufResource)
-            onCreateMenuTmpBuf = onCreateMenuTmpBuf_Closure
+            resourceFinalizerRegister(onCreateMenuTmpBufOptClosure, onCreateMenuTmpBufOptBufResource)
+            onCreateMenuTmpBuf = onCreateMenuTmpBufOptClosure
         }
-        const onCreateMenuTmpResult : OnCreateMenuCallback | undefined = onCreateMenuTmpBuf
-        const onMenuItemClickTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onMenuItemClickTmpBuf : OnMenuItemClickCallback | undefined = undefined
+        const onCreateMenuTmpResult: OnCreateMenuCallback | undefined = onCreateMenuTmpBuf
+        const onMenuItemClickTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onMenuItemClickTmpBuf: OnMenuItemClickCallback | undefined = undefined
         if ((onMenuItemClickTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onMenuItemClickTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onMenuItemClickTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onMenuItemClickTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            const onMenuItemClickTmpBuf_Closure  = (menuItem: TextMenuItem, range: TextRange):boolean => {
-                const onMenuItemClickTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onMenuItemClickTmpBuf_BufArgsSerializer.writeInt32(onMenuItemClickTmpBuf_BufResource.resourceId);
-                onMenuItemClickTmpBuf_BufArgsSerializer.writePointer(onMenuItemClickTmpBuf_BufCall);
-                onMenuItemClickTmpBuf_BufArgsSerializer.writePointer(onMenuItemClickTmpBuf_BufCallSync);
-                TextMenuItem_serializer.write(onMenuItemClickTmpBuf_BufArgsSerializer, menuItem);
-                TextRange_serializer.write(onMenuItemClickTmpBuf_BufArgsSerializer, range);
-                let onMenuItemClickTmpBuf_BufContinuationValue : boolean | undefined;
-                const onMenuItemClickTmpBuf_BufContinuationCallback : ((value0: boolean) => void) = (value: boolean):void => {
-                onMenuItemClickTmpBuf_BufContinuationValue = value;
+            const onMenuItemClickTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onMenuItemClickTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onMenuItemClickTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onMenuItemClickTmpBufOptClosure = (menuItem: TextMenuItem, range: TextRange):boolean => {
+                const onMenuItemClickTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onMenuItemClickTmpBufOptBufArgsSerializer.writeInt32(onMenuItemClickTmpBufOptBufResource.resourceId);
+                onMenuItemClickTmpBufOptBufArgsSerializer.writePointer(onMenuItemClickTmpBufOptBufCall);
+                onMenuItemClickTmpBufOptBufArgsSerializer.writePointer(onMenuItemClickTmpBufOptBufCallSync);
+                TextMenuItem_serializer.write(onMenuItemClickTmpBufOptBufArgsSerializer, menuItem);
+                TextRange_serializer.write(onMenuItemClickTmpBufOptBufArgsSerializer, range);
+                let onMenuItemClickTmpBufOptBufContinuationValue: boolean | undefined;
+                const onMenuItemClickTmpBufOptBufContinuationCallback: ((isSelected: boolean) => void) = (value: boolean):void => {
+                onMenuItemClickTmpBufOptBufContinuationValue = value;
             }
-                onMenuItemClickTmpBuf_BufArgsSerializer.holdAndWriteCallback(onMenuItemClickTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallbackSync(10, -1106041422, onMenuItemClickTmpBuf_BufArgsSerializer.asBuffer(), onMenuItemClickTmpBuf_BufArgsSerializer.length());
-                onMenuItemClickTmpBuf_BufArgsSerializer.release();
-                return (onMenuItemClickTmpBuf_BufContinuationValue as boolean);
+                onMenuItemClickTmpBufOptBufArgsSerializer.holdAndWriteCallback(onMenuItemClickTmpBufOptBufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 1398584914, onMenuItemClickTmpBufOptBufArgsSerializer.asBuffer(), onMenuItemClickTmpBufOptBufArgsSerializer.length());
+                onMenuItemClickTmpBufOptBufArgsSerializer.release();
+                return (onMenuItemClickTmpBufOptBufContinuationValue as boolean);
             }
-            resourceFinalizerRegister(onMenuItemClickTmpBuf_Closure, onMenuItemClickTmpBuf_BufResource)
-            onMenuItemClickTmpBuf = onMenuItemClickTmpBuf_Closure
+            resourceFinalizerRegister(onMenuItemClickTmpBufOptClosure, onMenuItemClickTmpBufOptBufResource)
+            onMenuItemClickTmpBuf = onMenuItemClickTmpBufOptClosure
         }
-        const onMenuItemClickTmpResult : OnMenuItemClickCallback | undefined = onMenuItemClickTmpBuf
-        const onPrepareMenuTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onPrepareMenuTmpBuf : OnPrepareMenuCallback | undefined = undefined
+        const onMenuItemClickTmpResult: OnMenuItemClickCallback | undefined = onMenuItemClickTmpBuf
+        const onPrepareMenuTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onPrepareMenuTmpBuf: OnPrepareMenuCallback | undefined = undefined
         if ((onPrepareMenuTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onPrepareMenuTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onPrepareMenuTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onPrepareMenuTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            const onPrepareMenuTmpBuf_Closure  = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
-                const onPrepareMenuTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onPrepareMenuTmpBuf_BufArgsSerializer.writeInt32(onPrepareMenuTmpBuf_BufResource.resourceId);
-                onPrepareMenuTmpBuf_BufArgsSerializer.writePointer(onPrepareMenuTmpBuf_BufCall);
-                onPrepareMenuTmpBuf_BufArgsSerializer.writePointer(onPrepareMenuTmpBuf_BufCallSync);
-                onPrepareMenuTmpBuf_BufArgsSerializer.writeInt32((menuItems.length).toInt());
+            const onPrepareMenuTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onPrepareMenuTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onPrepareMenuTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onPrepareMenuTmpBufOptClosure = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
+                const onPrepareMenuTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onPrepareMenuTmpBufOptBufArgsSerializer.writeInt32(onPrepareMenuTmpBufOptBufResource.resourceId);
+                onPrepareMenuTmpBufOptBufArgsSerializer.writePointer(onPrepareMenuTmpBufOptBufCall);
+                onPrepareMenuTmpBufOptBufArgsSerializer.writePointer(onPrepareMenuTmpBufOptBufCallSync);
+                onPrepareMenuTmpBufOptBufArgsSerializer.writeInt32((menuItems.length).toInt());
                 for (let menuItemsCounterI = 0; menuItemsCounterI < menuItems.length; menuItemsCounterI++) {
-                    const menuItemsTmpElement : TextMenuItem = menuItems[menuItemsCounterI];
-                    TextMenuItem_serializer.write(onPrepareMenuTmpBuf_BufArgsSerializer, menuItemsTmpElement);
+                    const menuItemsTmpElement: TextMenuItem = menuItems[menuItemsCounterI];
+                    TextMenuItem_serializer.write(onPrepareMenuTmpBufOptBufArgsSerializer, menuItemsTmpElement);
                 }
-                let onPrepareMenuTmpBuf_BufContinuationValue : Array<TextMenuItem> | undefined;
-                const onPrepareMenuTmpBuf_BufContinuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
-                onPrepareMenuTmpBuf_BufContinuationValue = value;
+                let onPrepareMenuTmpBufOptBufContinuationValue: Array<TextMenuItem> | undefined;
+                const onPrepareMenuTmpBufOptBufContinuationCallback: ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+                onPrepareMenuTmpBufOptBufContinuationValue = value;
             }
-                onPrepareMenuTmpBuf_BufArgsSerializer.holdAndWriteCallback(onPrepareMenuTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallbackSync(10, -1238906520, onPrepareMenuTmpBuf_BufArgsSerializer.asBuffer(), onPrepareMenuTmpBuf_BufArgsSerializer.length());
-                onPrepareMenuTmpBuf_BufArgsSerializer.release();
-                return (onPrepareMenuTmpBuf_BufContinuationValue as Array<TextMenuItem>);
+                onPrepareMenuTmpBufOptBufArgsSerializer.holdAndWriteCallback(onPrepareMenuTmpBufOptBufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 1160177960, onPrepareMenuTmpBufOptBufArgsSerializer.asBuffer(), onPrepareMenuTmpBufOptBufArgsSerializer.length());
+                onPrepareMenuTmpBufOptBufArgsSerializer.release();
+                return (onPrepareMenuTmpBufOptBufContinuationValue as Array<TextMenuItem>);
             }
-            resourceFinalizerRegister(onPrepareMenuTmpBuf_Closure, onPrepareMenuTmpBuf_BufResource)
-            onPrepareMenuTmpBuf = onPrepareMenuTmpBuf_Closure
+            resourceFinalizerRegister(onPrepareMenuTmpBufOptClosure, onPrepareMenuTmpBufOptBufResource)
+            onPrepareMenuTmpBuf = onPrepareMenuTmpBufOptClosure
         }
-        const onPrepareMenuTmpResult : OnPrepareMenuCallback | undefined = onPrepareMenuTmpBuf
-        let value : EditMenuOptions = ({onCreateMenu: onCreateMenuTmpResult, onMenuItemClick: onMenuItemClickTmpResult, onPrepareMenu: onPrepareMenuTmpResult} as EditMenuOptions)
+        const onPrepareMenuTmpResult: OnPrepareMenuCallback | undefined = onPrepareMenuTmpBuf
+        let value: EditMenuOptions = ({onCreateMenu: onCreateMenuTmpResult, onMenuItemClick: onMenuItemClickTmpResult, onPrepareMenu: onPrepareMenuTmpResult} as EditMenuOptions)
         return value
     }
 }
 export class FontSettingOptions_serializer {
     public static write(buffer: SerializerBase, value: FontSettingOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForEnableVariableFontWeight  = value.enableVariableFontWeight
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEnableVariableFontWeight = value.enableVariableFontWeight
         if (valueHolderForEnableVariableFontWeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnableVariableFontWeightTmpValue  = valueHolderForEnableVariableFontWeight!
+            const valueHolderForEnableVariableFontWeightTmpValue = valueHolderForEnableVariableFontWeight!
             valueSerializer.writeBoolean(valueHolderForEnableVariableFontWeightTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FontSettingOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const enableVariableFontWeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableVariableFontWeightTmpBuf : boolean | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const enableVariableFontWeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableVariableFontWeightTmpBuf: boolean | undefined = undefined
         if ((enableVariableFontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableVariableFontWeightTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableVariableFontWeightTmpResult : boolean | undefined = enableVariableFontWeightTmpBuf
-        let value : FontSettingOptions = ({enableVariableFontWeight: enableVariableFontWeightTmpResult} as FontSettingOptions)
+        const enableVariableFontWeightTmpResult: boolean | undefined = enableVariableFontWeightTmpBuf
+        let value: FontSettingOptions = ({enableVariableFontWeight: enableVariableFontWeightTmpResult} as FontSettingOptions)
         return value
     }
 }
-export class IMEClient_serializer {
-    public static write(buffer: SerializerBase, value: IMEClient): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
+export class FontWeightConfigs_serializer {
+    public static write(buffer: SerializerBase, value: FontWeightConfigs): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEnableVariableFontWeight = value.enableVariableFontWeight
+        if (valueHolderForEnableVariableFontWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableVariableFontWeightTmpValue = valueHolderForEnableVariableFontWeight!
+            valueSerializer.writeBoolean(valueHolderForEnableVariableFontWeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnableDeviceFontWeightCategory = value.enableDeviceFontWeightCategory
+        if (valueHolderForEnableDeviceFontWeightCategory !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableDeviceFontWeightCategoryTmpValue = valueHolderForEnableDeviceFontWeightCategory!
+            valueSerializer.writeBoolean(valueHolderForEnableDeviceFontWeightCategoryTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
-    public static read(buffer: DeserializerBase): IMEClient {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return IMEClientInternal.fromPtr(ptr)
+    public static read(buffer: DeserializerBase): FontWeightConfigs {
+        let valueDeserializer: DeserializerBase = buffer
+        const enableVariableFontWeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableVariableFontWeightTmpBuf: boolean | undefined = undefined
+        if ((enableVariableFontWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableVariableFontWeightTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableVariableFontWeightTmpResult: boolean | undefined = enableVariableFontWeightTmpBuf
+        const enableDeviceFontWeightCategoryTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableDeviceFontWeightCategoryTmpBuf: boolean | undefined = undefined
+        if ((enableDeviceFontWeightCategoryTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableDeviceFontWeightCategoryTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableDeviceFontWeightCategoryTmpResult: boolean | undefined = enableDeviceFontWeightCategoryTmpBuf
+        let value: FontWeightConfigs = ({enableVariableFontWeight: enableVariableFontWeightTmpResult, enableDeviceFontWeightCategory: enableDeviceFontWeightCategoryTmpResult} as FontWeightConfigs)
+        return value
     }
 }
 export class InsertValue_serializer {
     public static write(buffer: SerializerBase, value: InsertValue): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForInsertOffset  = value.insertOffset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForInsertOffset = value.insertOffset
         valueSerializer.writeInt32(valueHolderForInsertOffset)
-        const valueHolderForInsertValue  = value.insertValue
+        const valueHolderForInsertValue = value.insertValue
         valueSerializer.writeString(valueHolderForInsertValue)
     }
     public static read(buffer: DeserializerBase): InsertValue {
-        let valueDeserializer : DeserializerBase = buffer
-        const insertOffsetTmpResult : int32 = valueDeserializer.readInt32()
-        const insertValueTmpResult : string = (valueDeserializer.readString() as string)
-        let value : InsertValue = ({insertOffset: insertOffsetTmpResult, insertValue: insertValueTmpResult} as InsertValue)
+        let valueDeserializer: DeserializerBase = buffer
+        const insertOffsetTmpResult: int32 = valueDeserializer.readInt32()
+        const insertValueTmpResult: string = (valueDeserializer.readString() as string)
+        let value: InsertValue = ({insertOffset: insertOffsetTmpResult, insertValue: insertValueTmpResult} as InsertValue)
         return value
-    }
-}
-export class PositionWithAffinity_serializer {
-    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForPosition  = value.position
-        valueSerializer.writeInt32(valueHolderForPosition)
-        const valueHolderForAffinity  = value.affinity
-        valueSerializer.writeInt32(valueHolderForAffinity.valueOf())
-    }
-    public static read(buffer: DeserializerBase): PositionWithAffinity {
-        let valueDeserializer : DeserializerBase = buffer
-        const positionTmpResult : int32 = valueDeserializer.readInt32()
-        const affinityTmpResult : text.Affinity = text.Affinity.fromValue(valueDeserializer.readInt32())
-        let value : PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as PositionWithAffinity)
-        return value
-    }
-}
-export class LinearGradientStyle_serializer {
-    public static write(buffer: SerializerBase, value: LinearGradientStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): LinearGradientStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LinearGradientStyleInternal.fromPtr(ptr)
     }
 }
 export class LineSpacingOptions_serializer {
     public static write(buffer: SerializerBase, value: LineSpacingOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOnlyBetweenLines  = value.onlyBetweenLines
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOnlyBetweenLines = value.onlyBetweenLines
         if (valueHolderForOnlyBetweenLines !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnlyBetweenLinesTmpValue  = valueHolderForOnlyBetweenLines!
+            const valueHolderForOnlyBetweenLinesTmpValue = valueHolderForOnlyBetweenLines!
             valueSerializer.writeBoolean(valueHolderForOnlyBetweenLinesTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): LineSpacingOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const onlyBetweenLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onlyBetweenLinesTmpBuf : boolean | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const onlyBetweenLinesTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onlyBetweenLinesTmpBuf: boolean | undefined = undefined
         if ((onlyBetweenLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             onlyBetweenLinesTmpBuf = valueDeserializer.readBoolean()
         }
-        const onlyBetweenLinesTmpResult : boolean | undefined = onlyBetweenLinesTmpBuf
-        let value : LineSpacingOptions = ({onlyBetweenLines: onlyBetweenLinesTmpResult} as LineSpacingOptions)
+        const onlyBetweenLinesTmpResult: boolean | undefined = onlyBetweenLinesTmpBuf
+        let value: LineSpacingOptions = ({onlyBetweenLines: onlyBetweenLinesTmpResult} as LineSpacingOptions)
         return value
     }
 }
 export class MaxLinesOptions_serializer {
     public static write(buffer: SerializerBase, value: MaxLinesOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOverflowMode  = value.overflowMode
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOverflowMode = value.overflowMode
         if (valueHolderForOverflowMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOverflowModeTmpValue  = (valueHolderForOverflowMode as MaxLinesMode)
+            const valueHolderForOverflowModeTmpValue = (valueHolderForOverflowMode as MaxLinesMode)
             valueSerializer.writeInt32(valueHolderForOverflowModeTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): MaxLinesOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const overflowModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let overflowModeTmpBuf : MaxLinesMode | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const overflowModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let overflowModeTmpBuf: MaxLinesMode | undefined = undefined
         if ((overflowModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             overflowModeTmpBuf = MaxLinesMode.fromValue(valueDeserializer.readInt32())
         }
-        const overflowModeTmpResult : MaxLinesMode | undefined = overflowModeTmpBuf
-        let value : MaxLinesOptions = ({overflowMode: overflowModeTmpResult} as MaxLinesOptions)
+        const overflowModeTmpResult: MaxLinesMode | undefined = overflowModeTmpBuf
+        let value: MaxLinesOptions = ({overflowMode: overflowModeTmpResult} as MaxLinesOptions)
         return value
-    }
-}
-export class NumericTextTransition_serializer {
-    public static write(buffer: SerializerBase, value: NumericTextTransition): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): NumericTextTransition {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return NumericTextTransitionInternal.fromPtr(ptr)
     }
 }
 export class NumericTextTransitionOptions_serializer {
     public static write(buffer: SerializerBase, value: NumericTextTransitionOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForFlipDirection  = value.flipDirection
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForFlipDirection = value.flipDirection
         if (valueHolderForFlipDirection !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFlipDirectionTmpValue  = (valueHolderForFlipDirection as FlipDirection)
+            const valueHolderForFlipDirectionTmpValue = (valueHolderForFlipDirection as FlipDirection)
             valueSerializer.writeInt32(valueHolderForFlipDirectionTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnableBlur  = value.enableBlur
+        const valueHolderForEnableBlur = value.enableBlur
         if (valueHolderForEnableBlur !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnableBlurTmpValue  = valueHolderForEnableBlur!
+            const valueHolderForEnableBlurTmpValue = valueHolderForEnableBlur!
             valueSerializer.writeBoolean(valueHolderForEnableBlurTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NumericTextTransitionOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const flipDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let flipDirectionTmpBuf : FlipDirection | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const flipDirectionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let flipDirectionTmpBuf: FlipDirection | undefined = undefined
         if ((flipDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             flipDirectionTmpBuf = FlipDirection.fromValue(valueDeserializer.readInt32())
         }
-        const flipDirectionTmpResult : FlipDirection | undefined = flipDirectionTmpBuf
-        const enableBlurTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableBlurTmpBuf : boolean | undefined = undefined
+        const flipDirectionTmpResult: FlipDirection | undefined = flipDirectionTmpBuf
+        const enableBlurTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableBlurTmpBuf: boolean | undefined = undefined
         if ((enableBlurTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableBlurTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableBlurTmpResult : boolean | undefined = enableBlurTmpBuf
-        let value : NumericTextTransitionOptions = ({flipDirection: flipDirectionTmpResult, enableBlur: enableBlurTmpResult} as NumericTextTransitionOptions)
+        const enableBlurTmpResult: boolean | undefined = enableBlurTmpBuf
+        let value: NumericTextTransitionOptions = ({flipDirection: flipDirectionTmpResult, enableBlur: enableBlurTmpResult} as NumericTextTransitionOptions)
+        return value
+    }
+}
+export class PositionWithAffinity_serializer {
+    public static write(buffer: SerializerBase, value: PositionWithAffinity): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForPosition = value.position
+        valueSerializer.writeInt32(valueHolderForPosition)
+        const valueHolderForAffinity = value.affinity
+        valueSerializer.writeInt32(valueHolderForAffinity.valueOf())
+    }
+    public static read(buffer: DeserializerBase): PositionWithAffinity {
+        let valueDeserializer: DeserializerBase = buffer
+        const positionTmpResult: int32 = valueDeserializer.readInt32()
+        const affinityTmpResult: Affinity = text.Affinity.fromValue(valueDeserializer.readInt32())
+        let value: PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as PositionWithAffinity)
         return value
     }
 }
 export class PreviewText_serializer {
     public static write(buffer: SerializerBase, value: PreviewText): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOffset  = value.offset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOffset = value.offset
         valueSerializer.writeInt32(valueHolderForOffset)
-        const valueHolderForValue  = value.value
+        const valueHolderForValue = value.value
         valueSerializer.writeString(valueHolderForValue)
     }
     public static read(buffer: DeserializerBase): PreviewText {
-        let valueDeserializer : DeserializerBase = buffer
-        const offsetTmpResult : int32 = valueDeserializer.readInt32()
-        const valueTmpResult : string = (valueDeserializer.readString() as string)
-        let value : PreviewText = ({offset: offsetTmpResult, value: valueTmpResult} as PreviewText)
+        let valueDeserializer: DeserializerBase = buffer
+        const offsetTmpResult: int32 = valueDeserializer.readInt32()
+        const valueTmpResult: string = (valueDeserializer.readString() as string)
+        let value: PreviewText = ({offset: offsetTmpResult, value: valueTmpResult} as PreviewText)
         return value
     }
 }
 export class StyledStringChangedListener_serializer {
     public static write(buffer: SerializerBase, value: StyledStringChangedListener): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOnWillChange  = value.onWillChange
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOnWillChange = value.onWillChange
         if (valueHolderForOnWillChange !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnWillChangeTmpValue  = valueHolderForOnWillChange!
+            const valueHolderForOnWillChangeTmpValue = valueHolderForOnWillChange!
             valueSerializer.holdAndWriteCallback(valueHolderForOnWillChangeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForOnDidChange  = value.onDidChange
+        const valueHolderForOnDidChange = value.onDidChange
         if (valueHolderForOnDidChange !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnDidChangeTmpValue  = valueHolderForOnDidChange!
+            const valueHolderForOnDidChangeTmpValue = valueHolderForOnDidChange!
             valueSerializer.holdAndWriteCallback(valueHolderForOnDidChangeTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): StyledStringChangedListener {
-        let valueDeserializer : DeserializerBase = buffer
-        const onWillChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillChangeTmpBuf : ((value0: StyledStringChangeValue) => boolean) | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const onWillChangeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onWillChangeTmpBuf: arkui_component_common_Callback<StyledStringChangeValue, boolean> | undefined = undefined
         if ((onWillChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onWillChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onWillChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            const onWillChangeTmpBuf_Closure  = (value0: StyledStringChangeValue):boolean => {
-                const onWillChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onWillChangeTmpBuf_BufArgsSerializer.writeInt32(onWillChangeTmpBuf_BufResource.resourceId);
-                onWillChangeTmpBuf_BufArgsSerializer.writePointer(onWillChangeTmpBuf_BufCall);
-                onWillChangeTmpBuf_BufArgsSerializer.writePointer(onWillChangeTmpBuf_BufCallSync);
-                StyledStringChangeValue_serializer.write(onWillChangeTmpBuf_BufArgsSerializer, value0);
-                let onWillChangeTmpBuf_BufContinuationValue : boolean | undefined;
-                const onWillChangeTmpBuf_BufContinuationCallback : ((value0: boolean) => void) = (value: boolean):void => {
-                onWillChangeTmpBuf_BufContinuationValue = value;
+            const onWillChangeTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillChangeTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onWillChangeTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onWillChangeTmpBufOptClosure = (data: StyledStringChangeValue):boolean => {
+                const onWillChangeTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onWillChangeTmpBufOptBufArgsSerializer.writeInt32(onWillChangeTmpBufOptBufResource.resourceId);
+                onWillChangeTmpBufOptBufArgsSerializer.writePointer(onWillChangeTmpBufOptBufCall);
+                onWillChangeTmpBufOptBufArgsSerializer.writePointer(onWillChangeTmpBufOptBufCallSync);
+                StyledStringChangeValue_serializer.write(onWillChangeTmpBufOptBufArgsSerializer, data);
+                let onWillChangeTmpBufOptBufContinuationValue: boolean | undefined;
+                const onWillChangeTmpBufOptBufContinuationCallback: ((isSelected: boolean) => void) = (value: boolean):void => {
+                onWillChangeTmpBufOptBufContinuationValue = value;
             }
-                onWillChangeTmpBuf_BufArgsSerializer.holdAndWriteCallback(onWillChangeTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallbackSync(10, 2116745428, onWillChangeTmpBuf_BufArgsSerializer.asBuffer(), onWillChangeTmpBuf_BufArgsSerializer.length());
-                onWillChangeTmpBuf_BufArgsSerializer.release();
-                return (onWillChangeTmpBuf_BufContinuationValue as boolean);
+                onWillChangeTmpBufOptBufArgsSerializer.holdAndWriteCallback(onWillChangeTmpBufOptBufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 295315188, onWillChangeTmpBufOptBufArgsSerializer.asBuffer(), onWillChangeTmpBufOptBufArgsSerializer.length());
+                onWillChangeTmpBufOptBufArgsSerializer.release();
+                return (onWillChangeTmpBufOptBufContinuationValue as boolean);
             }
-            resourceFinalizerRegister(onWillChangeTmpBuf_Closure, onWillChangeTmpBuf_BufResource)
-            onWillChangeTmpBuf = onWillChangeTmpBuf_Closure
+            resourceFinalizerRegister(onWillChangeTmpBufOptClosure, onWillChangeTmpBufOptBufResource)
+            onWillChangeTmpBuf = onWillChangeTmpBufOptClosure
         }
-        const onWillChangeTmpResult : ((value0: StyledStringChangeValue) => boolean) | undefined = onWillChangeTmpBuf
-        const onDidChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDidChangeTmpBuf : OnDidChangeCallback | undefined = undefined
+        const onWillChangeTmpResult: arkui_component_common_Callback<StyledStringChangeValue, boolean> | undefined = onWillChangeTmpBuf
+        const onDidChangeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onDidChangeTmpBuf: OnDidChangeCallback | undefined = undefined
         if ((onDidChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDidChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDidChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDidChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            const onDidChangeTmpBuf_Closure  = (rangeBefore: TextRange, rangeAfter: TextRange):void => {
-                const onDidChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDidChangeTmpBuf_BufArgsSerializer.writeInt32(onDidChangeTmpBuf_BufResource.resourceId);
-                onDidChangeTmpBuf_BufArgsSerializer.writePointer(onDidChangeTmpBuf_BufCall);
-                onDidChangeTmpBuf_BufArgsSerializer.writePointer(onDidChangeTmpBuf_BufCallSync);
-                TextRange_serializer.write(onDidChangeTmpBuf_BufArgsSerializer, rangeBefore);
-                TextRange_serializer.write(onDidChangeTmpBuf_BufArgsSerializer, rangeAfter);
-                InteropNativeModule._CallCallbackSync(10, 1648184341, onDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDidChangeTmpBuf_BufArgsSerializer.length());
-                onDidChangeTmpBuf_BufArgsSerializer.release();
+            const onDidChangeTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDidChangeTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onDidChangeTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onDidChangeTmpBufOptClosure = (rangeBefore: TextRange, rangeAfter: TextRange):void => {
+                const onDidChangeTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onDidChangeTmpBufOptBufArgsSerializer.writeInt32(onDidChangeTmpBufOptBufResource.resourceId);
+                onDidChangeTmpBufOptBufArgsSerializer.writePointer(onDidChangeTmpBufOptBufCall);
+                onDidChangeTmpBufOptBufArgsSerializer.writePointer(onDidChangeTmpBufOptBufCallSync);
+                TextRange_serializer.write(onDidChangeTmpBufOptBufArgsSerializer, rangeBefore);
+                TextRange_serializer.write(onDidChangeTmpBufOptBufArgsSerializer, rangeAfter);
+                InteropNativeModule._CallCallbackSync(10, 1673645397, onDidChangeTmpBufOptBufArgsSerializer.asBuffer(), onDidChangeTmpBufOptBufArgsSerializer.length());
+                onDidChangeTmpBufOptBufArgsSerializer.release();
                 return;
             }
-            resourceFinalizerRegister(onDidChangeTmpBuf_Closure, onDidChangeTmpBuf_BufResource)
-            onDidChangeTmpBuf = onDidChangeTmpBuf_Closure
+            resourceFinalizerRegister(onDidChangeTmpBufOptClosure, onDidChangeTmpBufOptBufResource)
+            onDidChangeTmpBuf = onDidChangeTmpBufOptClosure
         }
-        const onDidChangeTmpResult : OnDidChangeCallback | undefined = onDidChangeTmpBuf
-        let value : StyledStringChangedListener = ({onWillChange: onWillChangeTmpResult, onDidChange: onDidChangeTmpResult} as StyledStringChangedListener)
+        const onDidChangeTmpResult: OnDidChangeCallback | undefined = onDidChangeTmpBuf
+        let value: StyledStringChangedListener = ({onWillChange: onWillChangeTmpResult, onDidChange: onDidChangeTmpResult} as StyledStringChangedListener)
         return value
     }
 }
 export class TextMenuOptions_serializer {
     public static write(buffer: SerializerBase, value: TextMenuOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForShowMode  = value.showMode
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForShowMode = value.showMode
         if (valueHolderForShowMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForShowModeTmpValue  = (valueHolderForShowMode as TextMenuShowMode)
+            const valueHolderForShowModeTmpValue = (valueHolderForShowMode as TextMenuShowMode)
             valueSerializer.writeInt32(valueHolderForShowModeTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextMenuOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const showModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showModeTmpBuf : TextMenuShowMode | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const showModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let showModeTmpBuf: TextMenuShowMode | undefined = undefined
         if ((showModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             showModeTmpBuf = TextMenuShowMode.fromValue(valueDeserializer.readInt32())
         }
-        const showModeTmpResult : TextMenuShowMode | undefined = showModeTmpBuf
-        let value : TextMenuOptions = ({showMode: showModeTmpResult} as TextMenuOptions)
-        return value
-    }
-}
-export class TextLayoutOptions_serializer {
-    public static write(buffer: SerializerBase, value: TextLayoutOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForConstraintWidth = value.constraintWidth!
-        if (valueHolderForConstraintWidth !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForConstraintWidthTmpValue = (valueHolderForConstraintWidth as LengthMetrics)
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): TextLayoutOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const constraintWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let constraintWidthTmpBuf : LengthMetrics | undefined = undefined
-        if ((constraintWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            constraintWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
-        }
-        const constraintWidthTmpResult : LengthMetrics | undefined = constraintWidthTmpBuf
-        let value : TextLayoutOptions = ({ constraintWidth: constraintWidthTmpResult } as TextLayoutOptions)
-        return value
-    }
-}
-export class KeyboardAppearanceConfig_serializer {
-    public static write(buffer: SerializerBase, value: KeyboardAppearanceConfig): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForGradientMode = value.gradientMode
-        if (valueHolderForGradientMode !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForGradientModeTmpValue = (valueHolderForGradientMode as KeyboardGradientMode)
-            valueSerializer.writeInt32(valueHolderForGradientModeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForFluidLightMode = value.fluidLightMode
-        if (valueHolderForFluidLightMode !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFluidLightModeTmpValue = (valueHolderForFluidLightMode as KeyboardFluidLightMode)
-            valueSerializer.writeInt32(valueHolderForFluidLightModeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): KeyboardAppearanceConfig {
-        let valueDeserializer : DeserializerBase = buffer
-        const gradientModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let gradientModeTmpBuf : KeyboardGradientMode | undefined = undefined
-        if ((gradientModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            gradientModeTmpBuf = KeyboardGradientMode.fromValue(valueDeserializer.readInt32())
-        }
-        const gradientModeTmpResult : KeyboardGradientMode | undefined = gradientModeTmpBuf
-        const fluidLightModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fluidLightModeTmpBuf : KeyboardFluidLightMode | undefined = undefined
-        if ((fluidLightModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fluidLightModeTmpBuf = KeyboardFluidLightMode.fromValue(valueDeserializer.readInt32())
-        }
-        const fluidLightModeTmpResult : KeyboardFluidLightMode | undefined = fluidLightModeTmpBuf
-        let value : KeyboardAppearanceConfig = ({ gradientMode: gradientModeTmpResult, fluidLightMode: fluidLightModeTmpResult } as KeyboardAppearanceConfig)
+        const showModeTmpResult: TextMenuShowMode | undefined = showModeTmpBuf
+        let value: TextMenuOptions = ({showMode: showModeTmpResult} as TextMenuOptions)
         return value
     }
 }
 export class TextRange_serializer {
     public static write(buffer: SerializerBase, value: TextRange): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForStart  = value.start
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStart = value.start
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStartTmpValue  = valueHolderForStart!
+            const valueHolderForStartTmpValue = valueHolderForStart!
             valueSerializer.writeInt32(valueHolderForStartTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnd  = value.end
+        const valueHolderForEnd = value.end
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEndTmpValue  = valueHolderForEnd!
+            const valueHolderForEndTmpValue = valueHolderForEnd!
             valueSerializer.writeInt32(valueHolderForEndTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextRange {
-        let valueDeserializer : DeserializerBase = buffer
-        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let startTmpBuf : int32 | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const startTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let startTmpBuf: int32 | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             startTmpBuf = valueDeserializer.readInt32()
         }
-        const startTmpResult : int32 | undefined = startTmpBuf
-        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let endTmpBuf : int32 | undefined = undefined
+        const startTmpResult: int32 | undefined = startTmpBuf
+        const endTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let endTmpBuf: int32 | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             endTmpBuf = valueDeserializer.readInt32()
         }
-        const endTmpResult : int32 | undefined = endTmpBuf
-        let value : TextRange = ({start: startTmpResult, end: endTmpResult} as TextRange)
+        const endTmpResult: int32 | undefined = endTmpBuf
+        let value: TextRange = ({start: startTmpResult, end: endTmpResult} as TextRange)
+        return value
+    }
+}
+export class VoiceButtonOptions_serializer {
+    public static write(buffer: SerializerBase, value: VoiceButtonOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEnabled = value.enabled
+        if (valueHolderForEnabled !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnabledTmpValue = valueHolderForEnabled!
+            valueSerializer.writeBoolean(valueHolderForEnabledTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): VoiceButtonOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const enabledTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enabledTmpBuf: boolean | undefined = undefined
+        if ((enabledTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enabledTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enabledTmpResult: boolean | undefined = enabledTmpBuf
+        let value: VoiceButtonOptions = ({enabled: enabledTmpResult} as VoiceButtonOptions)
         return value
     }
 }
 export class AccessibilitySpanOptions_serializer {
     public static write(buffer: SerializerBase, value: AccessibilitySpanOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForAccessibilityText  = value.accessibilityText
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAccessibilityText = value.accessibilityText
         if (valueHolderForAccessibilityText !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAccessibilityTextTmpValue  = valueHolderForAccessibilityText!
+            const valueHolderForAccessibilityTextTmpValue = valueHolderForAccessibilityText!
             if (valueHolderForAccessibilityTextTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForAccessibilityTextTmpValueForIdx0  = valueHolderForAccessibilityTextTmpValue as string
+                const valueHolderForAccessibilityTextTmpValueForIdx0 = valueHolderForAccessibilityTextTmpValue as string
                 valueSerializer.writeString(valueHolderForAccessibilityTextTmpValueForIdx0)
-            } else if (valueHolderForAccessibilityTextTmpValue instanceof Resource) {
+            } else if (valueHolderForAccessibilityTextTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForAccessibilityTextTmpValueForIdx1  = valueHolderForAccessibilityTextTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityTextTmpValueForIdx1)
+                const valueHolderForAccessibilityTextTmpValueForIdx1 = valueHolderForAccessibilityTextTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForAccessibilityTextTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForAccessibilityDescription  = value.accessibilityDescription
+        const valueHolderForAccessibilityDescription = value.accessibilityDescription
         if (valueHolderForAccessibilityDescription !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAccessibilityDescriptionTmpValue  = valueHolderForAccessibilityDescription!
+            const valueHolderForAccessibilityDescriptionTmpValue = valueHolderForAccessibilityDescription!
             if (valueHolderForAccessibilityDescriptionTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForAccessibilityDescriptionTmpValueForIdx0  = valueHolderForAccessibilityDescriptionTmpValue as string
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx0 = valueHolderForAccessibilityDescriptionTmpValue as string
                 valueSerializer.writeString(valueHolderForAccessibilityDescriptionTmpValueForIdx0)
-            } else if (valueHolderForAccessibilityDescriptionTmpValue instanceof Resource) {
+            } else if (valueHolderForAccessibilityDescriptionTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForAccessibilityDescriptionTmpValueForIdx1  = valueHolderForAccessibilityDescriptionTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForAccessibilityDescriptionTmpValueForIdx1)
+                const valueHolderForAccessibilityDescriptionTmpValueForIdx1 = valueHolderForAccessibilityDescriptionTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForAccessibilityDescriptionTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForAccessibilityLevel  = value.accessibilityLevel
+        const valueHolderForAccessibilityLevel = value.accessibilityLevel
         if (valueHolderForAccessibilityLevel !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAccessibilityLevelTmpValue  = valueHolderForAccessibilityLevel!
+            const valueHolderForAccessibilityLevelTmpValue = valueHolderForAccessibilityLevel!
             valueSerializer.writeString(valueHolderForAccessibilityLevelTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): AccessibilitySpanOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const accessibilityTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let accessibilityTextTmpBuf : ResourceStr | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const accessibilityTextTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let accessibilityTextTmpBuf: ResourceStr | undefined = undefined
         if ((accessibilityTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const accessibilityTextTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let accessibilityTextTmpBuf_ : string | Resource | undefined
-            if (accessibilityTextTmpBuf_UnionSelector == (0).toChar()) {
-                accessibilityTextTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (accessibilityTextTmpBuf_UnionSelector == (1).toChar()) {
-                accessibilityTextTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const accessibilityTextTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let accessibilityTextTmpBufOpt: string | arkui_component_units_Resource | undefined
+            if (accessibilityTextTmpBufOptUnionSelector == (0).toByte()) {
+                accessibilityTextTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (accessibilityTextTmpBufOptUnionSelector == (1).toByte()) {
+                accessibilityTextTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for accessibilityTextTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for accessibilityTextTmpBufOpt has to be chosen through deserialisation.')
             }
-            accessibilityTextTmpBuf = (accessibilityTextTmpBuf_ as string | Resource)
+            accessibilityTextTmpBuf = (accessibilityTextTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const accessibilityTextTmpResult : ResourceStr | undefined = accessibilityTextTmpBuf
-        const accessibilityDescriptionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let accessibilityDescriptionTmpBuf : ResourceStr | undefined = undefined
+        const accessibilityTextTmpResult: ResourceStr | undefined = accessibilityTextTmpBuf
+        const accessibilityDescriptionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let accessibilityDescriptionTmpBuf: ResourceStr | undefined = undefined
         if ((accessibilityDescriptionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const accessibilityDescriptionTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let accessibilityDescriptionTmpBuf_ : string | Resource | undefined
-            if (accessibilityDescriptionTmpBuf_UnionSelector == (0).toChar()) {
-                accessibilityDescriptionTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (accessibilityDescriptionTmpBuf_UnionSelector == (1).toChar()) {
-                accessibilityDescriptionTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const accessibilityDescriptionTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let accessibilityDescriptionTmpBufOpt: string | arkui_component_units_Resource | undefined
+            if (accessibilityDescriptionTmpBufOptUnionSelector == (0).toByte()) {
+                accessibilityDescriptionTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (accessibilityDescriptionTmpBufOptUnionSelector == (1).toByte()) {
+                accessibilityDescriptionTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for accessibilityDescriptionTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for accessibilityDescriptionTmpBufOpt has to be chosen through deserialisation.')
             }
-            accessibilityDescriptionTmpBuf = (accessibilityDescriptionTmpBuf_ as string | Resource)
+            accessibilityDescriptionTmpBuf = (accessibilityDescriptionTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const accessibilityDescriptionTmpResult : ResourceStr | undefined = accessibilityDescriptionTmpBuf
-        const accessibilityLevelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let accessibilityLevelTmpBuf : string | undefined = undefined
+        const accessibilityDescriptionTmpResult: ResourceStr | undefined = accessibilityDescriptionTmpBuf
+        const accessibilityLevelTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let accessibilityLevelTmpBuf: string | undefined = undefined
         if ((accessibilityLevelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             accessibilityLevelTmpBuf = (valueDeserializer.readString() as string)
         }
-        const accessibilityLevelTmpResult : string | undefined = accessibilityLevelTmpBuf
-        let value : AccessibilitySpanOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult} as AccessibilitySpanOptions)
+        const accessibilityLevelTmpResult: string | undefined = accessibilityLevelTmpBuf
+        let value: AccessibilitySpanOptions = ({accessibilityText: accessibilityTextTmpResult, accessibilityDescription: accessibilityDescriptionTmpResult, accessibilityLevel: accessibilityLevelTmpResult} as AccessibilitySpanOptions)
         return value
-    }
-}
-export class ColorShaderStyle_serializer {
-    public static write(buffer: SerializerBase, value: ColorShaderStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ColorShaderStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ColorShaderStyleInternal.fromPtr(ptr)
     }
 }
 export class DecorationStyleResult_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyleResult): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForType  = value.type
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForType = value.type
         valueSerializer.writeInt32(valueHolderForType.valueOf())
-        const valueHolderForColor  = value.color
-        if (valueHolderForColor instanceof Color) {
+        const valueHolderForColor = value.color
+        if (valueHolderForColor instanceof arkui_component_enums_Color) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForColorForIdx0  = valueHolderForColor as Color
-            valueSerializer.writeInt32(valueHolderForColorForIdx0.getOrdinal())
+            const valueHolderForColorForIdx0 = valueHolderForColor as arkui_component_enums_Color
+            valueSerializer.writeInt32((valueHolderForColorForIdx0.getOrdinal()) % (12))
         } else if (valueHolderForColor instanceof int32) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForColorForIdx1  = valueHolderForColor as int32
+            const valueHolderForColorForIdx1 = valueHolderForColor as int32
             valueSerializer.writeInt32(valueHolderForColorForIdx1)
         } else if (valueHolderForColor instanceof string) {
             valueSerializer.writeInt8((2).toByte())
-            const valueHolderForColorForIdx2  = valueHolderForColor as string
+            const valueHolderForColorForIdx2 = valueHolderForColor as string
             valueSerializer.writeString(valueHolderForColorForIdx2)
-        } else if (valueHolderForColor instanceof Resource) {
+        } else if (valueHolderForColor instanceof arkui_component_units_Resource) {
             valueSerializer.writeInt8((3).toByte())
-            const valueHolderForColorForIdx3  = valueHolderForColor as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
+            const valueHolderForColorForIdx3 = valueHolderForColor as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorForIdx3)
         }
-        const valueHolderForStyle  = value.style
+        const valueHolderForStyle = value.style
         if (valueHolderForStyle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStyleTmpValue  = (valueHolderForStyle as TextDecorationStyle)
+            const valueHolderForStyleTmpValue = (valueHolderForStyle as TextDecorationStyle)
             valueSerializer.writeInt32(valueHolderForStyleTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForThicknessScale  = value.thicknessScale
+        const valueHolderForThicknessScale = value.thicknessScale
         if (valueHolderForThicknessScale !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForThicknessScaleTmpValue  = valueHolderForThicknessScale!
+            const valueHolderForThicknessScaleTmpValue = valueHolderForThicknessScale!
             valueSerializer.writeFloat64(valueHolderForThicknessScaleTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DecorationStyleResult {
-        let valueDeserializer : DeserializerBase = buffer
-        const typeTmpResult : TextDecorationType = TextDecorationType.fromValue(valueDeserializer.readInt32())
-        const colorTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let colorTmpBuf : Color | int32 | string | Resource | undefined
-        if (colorTmpBufUnionSelector == (0).toChar()) {
-            colorTmpBuf = Color.values()[valueDeserializer.readInt32()]
-        } else if (colorTmpBufUnionSelector == (1).toChar()) {
+        let valueDeserializer: DeserializerBase = buffer
+        const typeTmpResult: TextDecorationType = TextDecorationType.fromValue(valueDeserializer.readInt32())
+        const colorTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let colorTmpBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+        if (colorTmpBufUnionSelector == (0).toByte()) {
+            colorTmpBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+        } else if (colorTmpBufUnionSelector == (1).toByte()) {
             colorTmpBuf = valueDeserializer.readInt32()
-        } else if (colorTmpBufUnionSelector == (2).toChar()) {
+        } else if (colorTmpBufUnionSelector == (2).toByte()) {
             colorTmpBuf = (valueDeserializer.readString() as string)
-        } else if (colorTmpBufUnionSelector == (3).toChar()) {
-            colorTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else if (colorTmpBufUnionSelector == (3).toByte()) {
+            colorTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else {
-            throw new Error("One of the branches for colorTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for colorTmpBuf has to be chosen through deserialisation.')
         }
-        const colorTmpResult : ResourceColor = (colorTmpBuf as Color | int32 | string | Resource)
-        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let styleTmpBuf : TextDecorationStyle | undefined = undefined
+        const colorTmpResult: ResourceColor = (colorTmpBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        const styleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let styleTmpBuf: TextDecorationStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             styleTmpBuf = TextDecorationStyle.fromValue(valueDeserializer.readInt32())
         }
-        const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
-        const thicknessScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let thicknessScaleTmpBuf : double | undefined = undefined
+        const styleTmpResult: TextDecorationStyle | undefined = styleTmpBuf
+        const thicknessScaleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let thicknessScaleTmpBuf: double | undefined = undefined
         if ((thicknessScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             thicknessScaleTmpBuf = valueDeserializer.readFloat64()
         }
-        const thicknessScaleTmpResult : double | undefined = thicknessScaleTmpBuf
-        let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult, thicknessScale: thicknessScaleTmpResult} as DecorationStyleResult)
+        const thicknessScaleTmpResult: double | undefined = thicknessScaleTmpBuf
+        let value: DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult, thicknessScale: thicknessScaleTmpResult} as DecorationStyleResult)
+        return value
+    }
+}
+export class FontConfigs_serializer {
+    public static write(buffer: SerializerBase, value: FontConfigs): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForFontWeightConfigs = value.fontWeightConfigs
+        if (valueHolderForFontWeightConfigs !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontWeightConfigsTmpValue = valueHolderForFontWeightConfigs!
+            FontWeightConfigs_serializer.write(valueSerializer, valueHolderForFontWeightConfigsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): FontConfigs {
+        let valueDeserializer: DeserializerBase = buffer
+        const fontWeightConfigsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let fontWeightConfigsTmpBuf: FontWeightConfigs | undefined = undefined
+        if ((fontWeightConfigsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontWeightConfigsTmpBuf = FontWeightConfigs_serializer.read(valueDeserializer)
+        }
+        const fontWeightConfigsTmpResult: FontWeightConfigs | undefined = fontWeightConfigsTmpBuf
+        let value: FontConfigs = ({fontWeightConfigs: fontWeightConfigsTmpResult} as FontConfigs)
         return value
     }
 }
 export class SelectedDragPreviewStyle_serializer {
     public static write(buffer: SerializerBase, value: SelectedDragPreviewStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForColor  = value.color
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForColor = value.color
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
+            const valueHolderForColorTmpValue = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                const valueHolderForColorTmpValueForIdx2 = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+                const valueHolderForColorTmpValueForIdx3 = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SelectedDragPreviewStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorTmpBuf : ResourceColor | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | number | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
-                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
-        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
-        let value : SelectedDragPreviewStyle = ({color: colorTmpResult} as SelectedDragPreviewStyle)
+        const colorTmpResult: ResourceColor | undefined = colorTmpBuf
+        let value: SelectedDragPreviewStyle = ({color: colorTmpResult} as SelectedDragPreviewStyle)
         return value
     }
 }
 export class StyledStringChangeValue_serializer {
     public static write(buffer: SerializerBase, value: StyledStringChangeValue): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRange  = value.range
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForRange = value.range
         TextRange_serializer.write(valueSerializer, valueHolderForRange)
-        const valueHolderForReplacementString  = value.replacementString
+        const valueHolderForReplacementString = value.replacementString
         StyledString_serializer.write(valueSerializer, valueHolderForReplacementString)
-        const valueHolderForPreviewText  = value.previewText
+        const valueHolderForPreviewText = value.previewText
         if (valueHolderForPreviewText !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreviewTextTmpValue  = valueHolderForPreviewText!
+            const valueHolderForPreviewTextTmpValue = valueHolderForPreviewText!
             StyledString_serializer.write(valueSerializer, valueHolderForPreviewTextTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): StyledStringChangeValue {
-        let valueDeserializer : DeserializerBase = buffer
-        const rangeTmpResult : TextRange = TextRange_serializer.read(valueDeserializer)
-        const replacementStringTmpResult : StyledString = (StyledString_serializer.read(valueDeserializer) as StyledString)
-        const previewTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewTextTmpBuf : StyledString | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const rangeTmpResult: TextRange = TextRange_serializer.read(valueDeserializer)
+        const replacementStringTmpResult: StyledString = (StyledString_serializer.read(valueDeserializer) as StyledString)
+        const previewTextTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let previewTextTmpBuf: StyledString | undefined = undefined
         if ((previewTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             previewTextTmpBuf = (StyledString_serializer.read(valueDeserializer) as StyledString)
         }
-        const previewTextTmpResult : StyledString | undefined = previewTextTmpBuf
-        let value : StyledStringChangeValue = ({range: rangeTmpResult, replacementString: replacementStringTmpResult, previewText: previewTextTmpResult} as StyledStringChangeValue)
+        const previewTextTmpResult: StyledString | undefined = previewTextTmpBuf
+        let value: StyledStringChangeValue = ({range: rangeTmpResult, replacementString: replacementStringTmpResult, previewText: previewTextTmpResult} as StyledStringChangeValue)
         return value
     }
 }
 export class TextChangeOptions_serializer {
     public static write(buffer: SerializerBase, value: TextChangeOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRangeBefore  = value.rangeBefore
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForRangeBefore = value.rangeBefore
         TextRange_serializer.write(valueSerializer, valueHolderForRangeBefore)
-        const valueHolderForRangeAfter  = value.rangeAfter
+        const valueHolderForRangeAfter = value.rangeAfter
         TextRange_serializer.write(valueSerializer, valueHolderForRangeAfter)
-        const valueHolderForOldContent  = value.oldContent
+        const valueHolderForOldContent = value.oldContent
         valueSerializer.writeString(valueHolderForOldContent)
-        const valueHolderForOldPreviewText  = value.oldPreviewText
+        const valueHolderForOldPreviewText = value.oldPreviewText
         PreviewText_serializer.write(valueSerializer, valueHolderForOldPreviewText)
     }
     public static read(buffer: DeserializerBase): TextChangeOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const rangeBeforeTmpResult : TextRange = TextRange_serializer.read(valueDeserializer)
-        const rangeAfterTmpResult : TextRange = TextRange_serializer.read(valueDeserializer)
-        const oldContentTmpResult : string = (valueDeserializer.readString() as string)
-        const oldPreviewTextTmpResult : PreviewText = PreviewText_serializer.read(valueDeserializer)
-        let value : TextChangeOptions = ({rangeBefore: rangeBeforeTmpResult, rangeAfter: rangeAfterTmpResult, oldContent: oldContentTmpResult, oldPreviewText: oldPreviewTextTmpResult} as TextChangeOptions)
+        let valueDeserializer: DeserializerBase = buffer
+        const rangeBeforeTmpResult: TextRange = TextRange_serializer.read(valueDeserializer)
+        const rangeAfterTmpResult: TextRange = TextRange_serializer.read(valueDeserializer)
+        const oldContentTmpResult: string = (valueDeserializer.readString() as string)
+        const oldPreviewTextTmpResult: PreviewText = PreviewText_serializer.read(valueDeserializer)
+        let value: TextChangeOptions = ({rangeBefore: rangeBeforeTmpResult, rangeAfter: rangeAfterTmpResult, oldContent: oldContentTmpResult, oldPreviewText: oldPreviewTextTmpResult} as TextChangeOptions)
         return value
     }
 }
 export class TextMenuItem_serializer {
     public static write(buffer: SerializerBase, value: TextMenuItem): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForContent  = value.content
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForContent = value.content
         if (valueHolderForContent instanceof string) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForContentForIdx0  = valueHolderForContent as string
+            const valueHolderForContentForIdx0 = valueHolderForContent as string
             valueSerializer.writeString(valueHolderForContentForIdx0)
-        } else if (valueHolderForContent instanceof Resource) {
+        } else if (valueHolderForContent instanceof arkui_component_units_Resource) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForContentForIdx1  = valueHolderForContent as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForContentForIdx1)
+            const valueHolderForContentForIdx1 = valueHolderForContent as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForContentForIdx1)
         }
-        const valueHolderForIcon  = value.icon
+        const valueHolderForIcon = value.icon
         if (valueHolderForIcon !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            const valueHolderForIconTmpValue = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                const valueHolderForIconTmpValueForIdx0 = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
-            } else if (valueHolderForIconTmpValue instanceof Resource) {
+            } else if (valueHolderForIconTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
+                const valueHolderForIconTmpValueForIdx1 = valueHolderForIconTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForId  = value.id
+        const valueHolderForId = value.id
         TextMenuItemId_serializer.write(valueSerializer, valueHolderForId)
-        const valueHolderForLabelInfo  = value.labelInfo
+        const valueHolderForLabelInfo = value.labelInfo
         if (valueHolderForLabelInfo !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLabelInfoTmpValue  = valueHolderForLabelInfo!
+            const valueHolderForLabelInfoTmpValue = valueHolderForLabelInfo!
             if (valueHolderForLabelInfoTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForLabelInfoTmpValueForIdx0  = valueHolderForLabelInfoTmpValue as string
+                const valueHolderForLabelInfoTmpValueForIdx0 = valueHolderForLabelInfoTmpValue as string
                 valueSerializer.writeString(valueHolderForLabelInfoTmpValueForIdx0)
-            } else if (valueHolderForLabelInfoTmpValue instanceof Resource) {
+            } else if (valueHolderForLabelInfoTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForLabelInfoTmpValueForIdx1  = valueHolderForLabelInfoTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForLabelInfoTmpValueForIdx1)
+                const valueHolderForLabelInfoTmpValueForIdx1 = valueHolderForLabelInfoTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForLabelInfoTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextMenuItem {
-        let valueDeserializer : DeserializerBase = buffer
-        const contentTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let contentTmpBuf : string | Resource | undefined
-        if (contentTmpBufUnionSelector == (0).toChar()) {
+        let valueDeserializer: DeserializerBase = buffer
+        const contentTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let contentTmpBuf: string | arkui_component_units_Resource | undefined
+        if (contentTmpBufUnionSelector == (0).toByte()) {
             contentTmpBuf = (valueDeserializer.readString() as string)
-        } else if (contentTmpBufUnionSelector == (1).toChar()) {
-            contentTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else if (contentTmpBufUnionSelector == (1).toByte()) {
+            contentTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else {
-            throw new Error("One of the branches for contentTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for contentTmpBuf has to be chosen through deserialisation.')
         }
-        const contentTmpResult : ResourceStr = (contentTmpBuf as string | Resource)
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iconTmpBuf : ResourceStr | undefined = undefined
+        const contentTmpResult: ResourceStr = (contentTmpBuf as string | arkui_component_units_Resource)
+        const iconTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let iconTmpBuf: ResourceStr | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let iconTmpBuf_ : string | Resource | undefined
-            if (iconTmpBuf_UnionSelector == (0).toChar()) {
-                iconTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
-                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const iconTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let iconTmpBufOpt: string | arkui_component_units_Resource | undefined
+            if (iconTmpBufOptUnionSelector == (0).toByte()) {
+                iconTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (iconTmpBufOptUnionSelector == (1).toByte()) {
+                iconTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for iconTmpBufOpt has to be chosen through deserialisation.')
             }
-            iconTmpBuf = (iconTmpBuf_ as string | Resource)
+            iconTmpBuf = (iconTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
-        const idTmpResult : TextMenuItemId = (TextMenuItemId_serializer.read(valueDeserializer) as TextMenuItemId)
-        const labelInfoTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let labelInfoTmpBuf : ResourceStr | undefined = undefined
+        const iconTmpResult: ResourceStr | undefined = iconTmpBuf
+        const idTmpResult: TextMenuItemId = (TextMenuItemId_serializer.read(valueDeserializer) as TextMenuItemId)
+        const labelInfoTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let labelInfoTmpBuf: ResourceStr | undefined = undefined
         if ((labelInfoTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const labelInfoTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let labelInfoTmpBuf_ : string | Resource | undefined
-            if (labelInfoTmpBuf_UnionSelector == (0).toChar()) {
-                labelInfoTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (labelInfoTmpBuf_UnionSelector == (1).toChar()) {
-                labelInfoTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const labelInfoTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let labelInfoTmpBufOpt: string | arkui_component_units_Resource | undefined
+            if (labelInfoTmpBufOptUnionSelector == (0).toByte()) {
+                labelInfoTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (labelInfoTmpBufOptUnionSelector == (1).toByte()) {
+                labelInfoTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for labelInfoTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for labelInfoTmpBufOpt has to be chosen through deserialisation.')
             }
-            labelInfoTmpBuf = (labelInfoTmpBuf_ as string | Resource)
+            labelInfoTmpBuf = (labelInfoTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const labelInfoTmpResult : ResourceStr | undefined = labelInfoTmpBuf
-        let value : TextMenuItem = ({content: contentTmpResult, icon: iconTmpResult, id: idTmpResult, labelInfo: labelInfoTmpResult} as TextMenuItem)
+        const labelInfoTmpResult: ResourceStr | undefined = labelInfoTmpBuf
+        let value: TextMenuItem = ({content: contentTmpResult, icon: iconTmpResult, id: idTmpResult, labelInfo: labelInfoTmpResult} as TextMenuItem)
         return value
     }
 }
 export class CaretStyle_serializer {
     public static write(buffer: SerializerBase, value: CaretStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForWidth  = value.width
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForWidth = value.width
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            const valueHolderForWidthTmpValue = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                const valueHolderForWidthTmpValueForIdx0 = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                const valueHolderForWidthTmpValueForIdx1 = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
-            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
+                const valueHolderForWidthTmpValueForIdx2 = valueHolderForWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForColor  = value.color
+        const valueHolderForColor = value.color
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
+            const valueHolderForColorTmpValue = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                const valueHolderForColorTmpValueForIdx2 = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+                const valueHolderForColorTmpValueForIdx3 = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CaretStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : Length | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const widthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let widthTmpBuf: Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | Resource | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
-                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const widthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt: string | double | arkui_component_units_Resource | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (widthTmpBufOptUnionSelector == (2).toByte()) {
+                widthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
+            widthTmpBuf = (widthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
-        const widthTmpResult : Length | undefined = widthTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorTmpBuf : ResourceColor | undefined = undefined
+        const widthTmpResult: Length | undefined = widthTmpBuf
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
-                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
-        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
-        let value : CaretStyle = ({width: widthTmpResult, color: colorTmpResult} as CaretStyle)
+        const colorTmpResult: ResourceColor | undefined = colorTmpBuf
+        let value: CaretStyle = ({width: widthTmpResult, color: colorTmpResult} as CaretStyle)
         return value
     }
 }
 export class EditableTextChangeValue_serializer {
     public static write(buffer: SerializerBase, value: EditableTextChangeValue): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForContent  = value.content
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForContent = value.content
         valueSerializer.writeString(valueHolderForContent)
-        const valueHolderForPreviewText  = value.previewText
+        const valueHolderForPreviewText = value.previewText
         if (valueHolderForPreviewText !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreviewTextTmpValue  = valueHolderForPreviewText!
+            const valueHolderForPreviewTextTmpValue = valueHolderForPreviewText!
             PreviewText_serializer.write(valueSerializer, valueHolderForPreviewTextTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForOptions  = value.options
+        const valueHolderForOptions = value.options
         if (valueHolderForOptions !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOptionsTmpValue  = valueHolderForOptions!
+            const valueHolderForOptionsTmpValue = valueHolderForOptions!
             TextChangeOptions_serializer.write(valueSerializer, valueHolderForOptionsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): EditableTextChangeValue {
-        let valueDeserializer : DeserializerBase = buffer
-        const contentTmpResult : string = (valueDeserializer.readString() as string)
-        const previewTextTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewTextTmpBuf : PreviewText | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const contentTmpResult: string = (valueDeserializer.readString() as string)
+        const previewTextTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let previewTextTmpBuf: PreviewText | undefined = undefined
         if ((previewTextTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             previewTextTmpBuf = PreviewText_serializer.read(valueDeserializer)
         }
-        const previewTextTmpResult : PreviewText | undefined = previewTextTmpBuf
-        const optionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let optionsTmpBuf : TextChangeOptions | undefined = undefined
+        const previewTextTmpResult: PreviewText | undefined = previewTextTmpBuf
+        const optionsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let optionsTmpBuf: TextChangeOptions | undefined = undefined
         if ((optionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             optionsTmpBuf = TextChangeOptions_serializer.read(valueDeserializer)
         }
-        const optionsTmpResult : TextChangeOptions | undefined = optionsTmpBuf
-        let value : EditableTextChangeValue = ({content: contentTmpResult, previewText: previewTextTmpResult, options: optionsTmpResult} as EditableTextChangeValue)
+        const optionsTmpResult: TextChangeOptions | undefined = optionsTmpBuf
+        let value: EditableTextChangeValue = ({content: contentTmpResult, previewText: previewTextTmpResult, options: optionsTmpResult} as EditableTextChangeValue)
         return value
-    }
-}
-export class RadialGradientStyle_serializer {
-    public static write(buffer: SerializerBase, value: RadialGradientStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): RadialGradientStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return RadialGradientStyleInternal.fromPtr(ptr)
     }
 }
 export class TextDataDetectorConfig_serializer {
     public static write(buffer: SerializerBase, value: TextDataDetectorConfig): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForTypes  = value.types
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForTypes = value.types
         if (valueHolderForTypes !== undefined && valueHolderForTypes !== null) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTypesTmpValue  = valueHolderForTypes!
+            const valueHolderForTypesTmpValue = valueHolderForTypes!
             valueSerializer.writeInt32((valueHolderForTypesTmpValue.length).toInt())
             for (let valueHolderForTypesTmpValueCounterI = 0; valueHolderForTypesTmpValueCounterI < valueHolderForTypesTmpValue.length; valueHolderForTypesTmpValueCounterI++) {
-                const valueHolderForTypesTmpValueTmpElement : TextDataDetectorType = valueHolderForTypesTmpValue[valueHolderForTypesTmpValueCounterI]
+                const valueHolderForTypesTmpValueTmpElement: TextDataDetectorType = valueHolderForTypesTmpValue[valueHolderForTypesTmpValueCounterI]
                 valueSerializer.writeInt32(valueHolderForTypesTmpValueTmpElement.valueOf())
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForOnDetectResultUpdate  = value.onDetectResultUpdate
+        const valueHolderForOnDetectResultUpdate = value.onDetectResultUpdate
         if (valueHolderForOnDetectResultUpdate !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnDetectResultUpdateTmpValue  = valueHolderForOnDetectResultUpdate!
+            const valueHolderForOnDetectResultUpdateTmpValue = valueHolderForOnDetectResultUpdate!
             valueSerializer.holdAndWriteCallback(valueHolderForOnDetectResultUpdateTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForColor  = value.color
+        const valueHolderForColor = value.color
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
+            const valueHolderForColorTmpValue = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                const valueHolderForColorTmpValueForIdx2 = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+                const valueHolderForColorTmpValueForIdx3 = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForDecoration  = value.decoration
+        const valueHolderForDecoration = value.decoration
         if (valueHolderForDecoration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDecorationTmpValue  = valueHolderForDecoration!
+            const valueHolderForDecorationTmpValue = valueHolderForDecoration!
             DecorationStyleInterface_serializer.write(valueSerializer, valueHolderForDecorationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnablePreviewMenu  = value.enablePreviewMenu
+        const valueHolderForEnablePreviewMenu = value.enablePreviewMenu
         if (valueHolderForEnablePreviewMenu !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnablePreviewMenuTmpValue  = valueHolderForEnablePreviewMenu!
+            const valueHolderForEnablePreviewMenuTmpValue = valueHolderForEnablePreviewMenu!
             valueSerializer.writeBoolean(valueHolderForEnablePreviewMenuTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextDataDetectorConfig {
-        let valueDeserializer : DeserializerBase = buffer
-        const typesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let typesTmpBuf : Array<TextDataDetectorType> | null | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const typesTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let typesTmpBuf: Array<TextDataDetectorType> | null | undefined = undefined
         if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const typesTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let typesTmpBuf_ : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBuf_Length)
-            for (let typesTmpBuf_BufCounterI = 0; typesTmpBuf_BufCounterI < typesTmpBuf_Length; typesTmpBuf_BufCounterI++) {
-                typesTmpBuf_[typesTmpBuf_BufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
+            const typesTmpBufOptLength: int32 = valueDeserializer.readInt32()
+            let typesTmpBufOpt: Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBufOptLength)
+            for (let typesTmpBufOptBufCounterI = 0; typesTmpBufOptBufCounterI < typesTmpBufOptLength; typesTmpBufOptBufCounterI++) {
+                typesTmpBufOpt[typesTmpBufOptBufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
             }
-            typesTmpBuf = typesTmpBuf_
+            typesTmpBuf = typesTmpBufOpt
         }
-        const typesTmpResult : Array<TextDataDetectorType> | null | undefined = typesTmpBuf
-        const onDetectResultUpdateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDetectResultUpdateTmpBuf : ((value0: string) => void) | undefined = undefined
+        const typesTmpResult: Array<TextDataDetectorType> | null | undefined = typesTmpBuf
+        const onDetectResultUpdateTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let onDetectResultUpdateTmpBuf: arkui_component_common_Callback<string, void> | undefined = undefined
         if ((onDetectResultUpdateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDetectResultUpdateTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDetectResultUpdateTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDetectResultUpdateTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            const onDetectResultUpdateTmpBuf_Closure  = (value0: string):void => {
-                const onDetectResultUpdateTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDetectResultUpdateTmpBuf_BufArgsSerializer.writeInt32(onDetectResultUpdateTmpBuf_BufResource.resourceId);
-                onDetectResultUpdateTmpBuf_BufArgsSerializer.writePointer(onDetectResultUpdateTmpBuf_BufCall);
-                onDetectResultUpdateTmpBuf_BufArgsSerializer.writePointer(onDetectResultUpdateTmpBuf_BufCallSync);
-                onDetectResultUpdateTmpBuf_BufArgsSerializer.writeString(value0);
-                InteropNativeModule._CallCallbackSync(10, 814634522, onDetectResultUpdateTmpBuf_BufArgsSerializer.asBuffer(), onDetectResultUpdateTmpBuf_BufArgsSerializer.length());
-                onDetectResultUpdateTmpBuf_BufArgsSerializer.release();
+            const onDetectResultUpdateTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+            const onDetectResultUpdateTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()
+            const onDetectResultUpdateTmpBufOptBufCallSync: KPointer = valueDeserializer.readPointer()
+            const onDetectResultUpdateTmpBufOptClosure = (data: string):void => {
+                const onDetectResultUpdateTmpBufOptBufArgsSerializer: SerializerBase = SerializerBase.hold();
+                onDetectResultUpdateTmpBufOptBufArgsSerializer.writeInt32(onDetectResultUpdateTmpBufOptBufResource.resourceId);
+                onDetectResultUpdateTmpBufOptBufArgsSerializer.writePointer(onDetectResultUpdateTmpBufOptBufCall);
+                onDetectResultUpdateTmpBufOptBufArgsSerializer.writePointer(onDetectResultUpdateTmpBufOptBufCallSync);
+                onDetectResultUpdateTmpBufOptBufArgsSerializer.writeString(data);
+                InteropNativeModule._CallCallbackSync(10, 657413210, onDetectResultUpdateTmpBufOptBufArgsSerializer.asBuffer(), onDetectResultUpdateTmpBufOptBufArgsSerializer.length());
+                onDetectResultUpdateTmpBufOptBufArgsSerializer.release();
                 return;
             }
-            resourceFinalizerRegister(onDetectResultUpdateTmpBuf_Closure, onDetectResultUpdateTmpBuf_BufResource)
-            onDetectResultUpdateTmpBuf = onDetectResultUpdateTmpBuf_Closure
+            resourceFinalizerRegister(onDetectResultUpdateTmpBufOptClosure, onDetectResultUpdateTmpBufOptBufResource)
+            onDetectResultUpdateTmpBuf = onDetectResultUpdateTmpBufOptClosure
         }
-        const onDetectResultUpdateTmpResult : ((value0: string) => void) | undefined = onDetectResultUpdateTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorTmpBuf : ResourceColor | undefined = undefined
+        const onDetectResultUpdateTmpResult: arkui_component_common_Callback<string, void> | undefined = onDetectResultUpdateTmpBuf
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
-                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
-        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
-        const decorationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let decorationTmpBuf : DecorationStyleInterface | undefined = undefined
+        const colorTmpResult: ResourceColor | undefined = colorTmpBuf
+        const decorationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let decorationTmpBuf: DecorationStyleInterface | undefined = undefined
         if ((decorationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             decorationTmpBuf = DecorationStyleInterface_serializer.read(valueDeserializer)
         }
-        const decorationTmpResult : DecorationStyleInterface | undefined = decorationTmpBuf
-        const enablePreviewMenuTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enablePreviewMenuTmpBuf : boolean | undefined = undefined
+        const decorationTmpResult: DecorationStyleInterface | undefined = decorationTmpBuf
+        const enablePreviewMenuTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enablePreviewMenuTmpBuf: boolean | undefined = undefined
         if ((enablePreviewMenuTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enablePreviewMenuTmpBuf = valueDeserializer.readBoolean()
         }
-        const enablePreviewMenuTmpResult : boolean | undefined = enablePreviewMenuTmpBuf
-        let value : TextDataDetectorConfig = ({types: typesTmpResult, onDetectResultUpdate: onDetectResultUpdateTmpResult, color: colorTmpResult, decoration: decorationTmpResult, enablePreviewMenu: enablePreviewMenuTmpResult} as TextDataDetectorConfig)
+        const enablePreviewMenuTmpResult: boolean | undefined = enablePreviewMenuTmpBuf
+        let value: TextDataDetectorConfig = ({types: typesTmpResult, onDetectResultUpdate: onDetectResultUpdateTmpResult, color: colorTmpResult, decoration: decorationTmpResult, enablePreviewMenu: enablePreviewMenuTmpResult} as TextDataDetectorConfig)
         return value
     }
 }
-
 export class ColorShaderStyleInternal {
     public static fromPtr(ptr: KPointer): ColorShaderStyle {
-        return new ColorShaderStyle(false, ptr)
+        return new ColorShaderStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ColorShaderStyle extends ShaderStyle implements MaterializedBase {
-    get color(): ResourceColor {
-        return this.getColor()
-    }
-    set color(color: ResourceColor) {
-        this.setColor(color)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public color: ResourceColor
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.color = this.getColor()
     }
     constructor(color: ResourceColor) {
-        this(false, ColorShaderStyle.construct(color))
+        this(MaterializedBaseTag.NOP, ColorShaderStyle.construct(color))
+        this.color = this.getColor()
     }
     static construct(color: ResourceColor): KPointer {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (color instanceof Color) {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (color instanceof arkui_component_enums_Color) {
             thisSerializer.writeInt8((0).toByte())
-            const colorForIdx0  = color as Color
-            thisSerializer.writeInt32(colorForIdx0.getOrdinal())
+            const colorForIdx0 = color as arkui_component_enums_Color
+            thisSerializer.writeInt32((colorForIdx0.getOrdinal()) % (12))
         } else if (color instanceof int32) {
             thisSerializer.writeInt8((1).toByte())
-            const colorForIdx1  = color as int32
+            const colorForIdx1 = color as int32
             thisSerializer.writeInt32(colorForIdx1)
         } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toByte())
-            const colorForIdx2  = color as string
+            const colorForIdx2 = color as string
             thisSerializer.writeString(colorForIdx2)
-        } else if (color instanceof Resource) {
+        } else if (color instanceof arkui_component_units_Resource) {
             thisSerializer.writeInt8((3).toByte())
-            const colorForIdx3  = color as Resource
-            Resource_serializer.write(thisSerializer, colorForIdx3)
+            const colorForIdx3 = color as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, colorForIdx3)
         }
-        const retval  = ArkUIGeneratedNativeModule._ColorShaderStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._ColorShaderStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -2070,27 +2095,42 @@ export class ColorShaderStyle extends ShaderStyle implements MaterializedBase {
         return
     }
     private getColor_serialize(): ResourceColor {
-        const retval  = ArkUIGeneratedNativeModule._ColorShaderStyle_getColor(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const retval = ArkUIGeneratedNativeModule._ColorShaderStyle_getColor(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferUnionSelector: int32 = retvalDeserializer.readInt8()
+        let buffer: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+        if (bufferUnionSelector == (0).toByte()) {
+            buffer = arkui_component_enums_Color.values()[retvalDeserializer.readInt32()]
+        } else if (bufferUnionSelector == (1).toByte()) {
+            buffer = retvalDeserializer.readInt32()
+        } else if (bufferUnionSelector == (2).toByte()) {
+            buffer = (retvalDeserializer.readString() as string)
+        } else if (bufferUnionSelector == (3).toByte()) {
+            buffer = global_resource_Resource_serializer.read(retvalDeserializer)
+        } else {
+            throw new Error('One of the branches for buffer has to be chosen through deserialisation.')
+        }
+        const returnResult: ResourceColor = (buffer as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        return returnResult
     }
     private setColor_serialize(color: ResourceColor): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (color instanceof Color) {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (color instanceof arkui_component_enums_Color) {
             thisSerializer.writeInt8((0).toByte())
-            const colorForIdx0  = color as Color
-            thisSerializer.writeInt32(colorForIdx0.getOrdinal())
+            const colorForIdx0 = color as arkui_component_enums_Color
+            thisSerializer.writeInt32((colorForIdx0.getOrdinal()) % (12))
         } else if (color instanceof int32) {
             thisSerializer.writeInt8((1).toByte())
-            const colorForIdx1  = color as int32
+            const colorForIdx1 = color as int32
             thisSerializer.writeInt32(colorForIdx1)
         } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toByte())
-            const colorForIdx2  = color as string
+            const colorForIdx2 = color as string
             thisSerializer.writeString(colorForIdx2)
-        } else if (color instanceof Resource) {
+        } else if (color instanceof arkui_component_units_Resource) {
             thisSerializer.writeInt8((3).toByte())
-            const colorForIdx3  = color as Resource
-            Resource_serializer.write(thisSerializer, colorForIdx3)
+            const colorForIdx3 = color as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         ArkUIGeneratedNativeModule._ColorShaderStyle_setColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2098,26 +2138,23 @@ export class ColorShaderStyle extends ShaderStyle implements MaterializedBase {
 }
 export class LinearGradientStyleInternal {
     public static fromPtr(ptr: KPointer): LinearGradientStyle {
-        return new LinearGradientStyle(false, ptr)
+        return new LinearGradientStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class LinearGradientStyle extends ShaderStyle implements MaterializedBase {
-    get options(): LinearGradientOptions {
-        return this.getOptions()
-    }
-    set options(options: LinearGradientOptions) {
-        this.setOptions(options)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public options: LinearGradientOptions
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.options = this.getOptions()
     }
     constructor(options: LinearGradientOptions) {
-        this(false, LinearGradientStyle.construct(options))
+        this(MaterializedBaseTag.NOP, LinearGradientStyle.construct(options))
+        this.options = this.getOptions()
     }
     static construct(options: LinearGradientOptions): KPointer {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         LinearGradientOptions_serializer.write(thisSerializer, options)
-        const retval  = ArkUIGeneratedNativeModule._LinearGradientStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LinearGradientStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -2133,13 +2170,13 @@ export class LinearGradientStyle extends ShaderStyle implements MaterializedBase
         return
     }
     private getOptions_serialize(): LinearGradientOptions {
-        const retval  = ArkUIGeneratedNativeModule._LinearGradientStyle_getOptions(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : LinearGradientOptions = LinearGradientOptions_serializer.read(retvalDeserializer)
+        const retval = ArkUIGeneratedNativeModule._LinearGradientStyle_getOptions(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: LinearGradientOptions = LinearGradientOptions_serializer.read(retvalDeserializer)
         return returnResult
     }
     private setOptions_serialize(options: LinearGradientOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         LinearGradientOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._LinearGradientStyle_setOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2147,40 +2184,32 @@ export class LinearGradientStyle extends ShaderStyle implements MaterializedBase
 }
 export class NumericTextTransitionInternal {
     public static fromPtr(ptr: KPointer): NumericTextTransition {
-        return new NumericTextTransition(false, ptr)
+        return new NumericTextTransition(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class NumericTextTransition extends ContentTransition implements MaterializedBase {
-    get flipDirection(): FlipDirection | undefined {
-        return this.getFlipDirection()
-    }
-    set flipDirection(flipDirection: FlipDirection | undefined) {
-        const flipDirection_NonNull  = (flipDirection as FlipDirection | undefined)
-        this.setFlipDirection(flipDirection_NonNull)
-    }
-    get enableBlur(): boolean | undefined {
-        return this.getEnableBlur()
-    }
-    set enableBlur(enableBlur: boolean | undefined) {
-        const enableBlur_NonNull  = (enableBlur as boolean | undefined)
-        this.setEnableBlur(enableBlur_NonNull)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public flipDirection?: FlipDirection | undefined
+    public enableBlur?: boolean | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.flipDirection = this.getFlipDirection()
+        this.enableBlur = this.getEnableBlur()
     }
     constructor(options?: NumericTextTransitionOptions) {
-        this(false, NumericTextTransition.construct(options))
+        this(MaterializedBaseTag.NOP, NumericTextTransition.construct(options))
+        this.flipDirection = this.getFlipDirection()
+        this.enableBlur = this.getEnableBlur()
     }
     static construct(options?: NumericTextTransitionOptions): KPointer {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             NumericTextTransitionOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const retval  = ArkUIGeneratedNativeModule._NumericTextTransition_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._NumericTextTransition_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -2204,21 +2233,21 @@ export class NumericTextTransition extends ContentTransition implements Material
         return
     }
     private getFlipDirection_serialize(): FlipDirection | undefined {
-        const retval  = ArkUIGeneratedNativeModule._NumericTextTransition_getFlipDirection(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : FlipDirection | undefined = undefined
+        const retval = ArkUIGeneratedNativeModule._NumericTextTransition_getFlipDirection(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: FlipDirection | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = FlipDirection.fromValue(retvalDeserializer.readInt32())
         }
-        const returnResult : FlipDirection | undefined = buffer
+        const returnResult: FlipDirection | undefined = buffer
         return returnResult
     }
     private setFlipDirection_serialize(flipDirection: FlipDirection | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (flipDirection !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const flipDirectionTmpValue  = (flipDirection as FlipDirection)
+            const flipDirectionTmpValue = (flipDirection as FlipDirection)
             thisSerializer.writeInt32(flipDirectionTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2227,21 +2256,21 @@ export class NumericTextTransition extends ContentTransition implements Material
         thisSerializer.release()
     }
     private getEnableBlur_serialize(): boolean | undefined {
-        const retval  = ArkUIGeneratedNativeModule._NumericTextTransition_getEnableBlur(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : boolean | undefined = undefined
+        const retval = ArkUIGeneratedNativeModule._NumericTextTransition_getEnableBlur(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: boolean | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
-        const returnResult : boolean | undefined = buffer
+        const returnResult: boolean | undefined = buffer
         return returnResult
     }
     private setEnableBlur_serialize(enableBlur: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (enableBlur !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const enableBlurTmpValue  = enableBlur!
+            const enableBlurTmpValue = enableBlur!
             thisSerializer.writeBoolean(enableBlurTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2252,26 +2281,23 @@ export class NumericTextTransition extends ContentTransition implements Material
 }
 export class RadialGradientStyleInternal {
     public static fromPtr(ptr: KPointer): RadialGradientStyle {
-        return new RadialGradientStyle(false, ptr)
+        return new RadialGradientStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class RadialGradientStyle extends ShaderStyle implements MaterializedBase {
-    get options(): RadialGradientOptions {
-        return this.getOptions()
-    }
-    set options(options: RadialGradientOptions) {
-        this.setOptions(options)
-    }
-    constructor(_0: boolean, peerPtr: KPointer) {
-        super(peerPtr)
+    public options: RadialGradientOptions
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
+        this.options = this.getOptions()
     }
     constructor(options: RadialGradientOptions) {
-        this(false, RadialGradientStyle.construct(options))
+        this(MaterializedBaseTag.NOP, RadialGradientStyle.construct(options))
+        this.options = this.getOptions()
     }
     static construct(options: RadialGradientOptions): KPointer {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         RadialGradientOptions_serializer.write(thisSerializer, options)
-        const retval  = ArkUIGeneratedNativeModule._RadialGradientStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._RadialGradientStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -2287,41 +2313,41 @@ export class RadialGradientStyle extends ShaderStyle implements MaterializedBase
         return
     }
     private getOptions_serialize(): RadialGradientOptions {
-        const retval  = ArkUIGeneratedNativeModule._RadialGradientStyle_getOptions(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RadialGradientOptions = RadialGradientOptions_serializer.read(retvalDeserializer)
+        const retval = ArkUIGeneratedNativeModule._RadialGradientStyle_getOptions(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: RadialGradientOptions = RadialGradientOptions_serializer.read(retvalDeserializer)
         return returnResult
     }
     private setOptions_serialize(options: RadialGradientOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         RadialGradientOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._RadialGradientStyle_setOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
-export interface TextEditControllerEx {
+export interface TextEditControllerEx extends TextBaseController {
     isEditing(): boolean | undefined
     stopEditing(): void
-    setCaretOffset(offset: number): boolean | undefined
-    getCaretOffset(): number | undefined
+    setCaretOffset(offset: int32): boolean | undefined
+    getCaretOffset(): int32 | undefined
     getPreviewText(): PreviewText | undefined
 }
 export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
     constructor() {
-        this(TextEditControllerExInternal.construct())
+        this(MaterializedBaseTag.NOP, TextEditControllerExInternal.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_construct()
+        const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextEditControllerEx_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
-        return new TextEditControllerExInternal(ptr)
+        return new TextEditControllerExInternal(MaterializedBaseTag.NOP, ptr)
     }
     public isEditing(): boolean | undefined {
         return this.isEditing_serialize()
@@ -2330,61 +2356,61 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
         this.stopEditing_serialize()
         return
     }
-    public setCaretOffset(offset: number): boolean | undefined {
-        const offset_casted = offset as (number)
+    public setCaretOffset(offset: int32): boolean | undefined {
+        const offset_casted = offset as (int32)
         return this.setCaretOffset_serialize(offset_casted)
     }
-    public getCaretOffset(): number | undefined {
+    public getCaretOffset(): int32 | undefined {
         return this.getCaretOffset_serialize()
     }
     public getPreviewText(): PreviewText | undefined {
         return this.getPreviewText_serialize()
     }
-    isEditing_serialize(): boolean | undefined {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : boolean | undefined = undefined
+    private isEditing_serialize(): boolean | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_isEditing(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: boolean | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
-        const returnResult : boolean | undefined = buffer
+        const returnResult: boolean | undefined = buffer
         return returnResult
     }
-    stopEditing_serialize(): void {
+    private stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
     }
-    setCaretOffset_serialize(offset: number): boolean | undefined {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : boolean | undefined = undefined
+    private setCaretOffset_serialize(offset: int32): boolean | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_setCaretOffset(this.peer!.ptr, offset)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: boolean | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
-        const returnResult : boolean | undefined = buffer
+        const returnResult: boolean | undefined = buffer
         return returnResult
     }
-    getCaretOffset_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+    private getCaretOffset_serialize(): int32 | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readInt32()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult: int32 | undefined = buffer
         return returnResult
     }
-    getPreviewText_serialize(): PreviewText | undefined {
-        const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : PreviewText | undefined = undefined
+    private getPreviewText_serialize(): PreviewText | undefined {
+        const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: PreviewText | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = PreviewText_serializer.read(retvalDeserializer)
         }
-        const returnResult : PreviewText | undefined = buffer
+        const returnResult: PreviewText | undefined = buffer
         return returnResult
     }
 }

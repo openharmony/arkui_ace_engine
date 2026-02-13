@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,25 +16,31 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, extractors } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, UndoStyle, RichEditorAttribute, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from './component/richEditor'
+import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, extractors } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorAttribute, UndoStyle, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from "./component/richEditor"
-import { int32 } from "@koalaui/common"
-import { CommonMethod } from "./component/common"
-import { VoidCallback, ResourceColor, ResourceStr } from "./component/units"
-import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, IMEClient } from "./component/textCommon"
-import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
-import { Resource } from "global.resource"
-import { EnterKeyType, SubmitEvent } from "./component/textInput"
-import { ColorMetrics } from "arkui.Graphics"
-import { CustomBuilder } from "./component/builder"
-import { ComponentContentBase } from "arkui.ComponentContent"
+import { CommonMethod, Callback as arkui_component_common_Callback } from './component/common'
+import { VoidCallback, ResourceColor, Resource as arkui_component_units_Resource, ResourceStr } from './component/units'
+import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, IMEClient, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle } from './component/textCommon'
+import { CopyOptions, Color as arkui_component_enums_Color, BarState, ResponseType } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { EnterKeyType, SubmitEvent } from './component/textInput'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { CustomBuilder } from './component/builder'
+import { ComponentContentBase } from 'arkui.ComponentContent'
 export class RichEditorModifier extends CommonMethodModifier implements RichEditorAttribute,AttributeModifier<RichEditorAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -44,871 +50,795 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     applyFocusedAttribute(instance: RichEditorAttribute): void { }
     applyDisabledAttribute(instance: RichEditorAttribute): void { }
     applySelectedAttribute(instance: RichEditorAttribute): void { }
-    _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onReady_0_0value?: VoidCallback | undefined
-    _onSelect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSelect_0_0value?: ((value0: RichEditorSelection) => void) | undefined
-    _onSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSelectionChange_0_0value?: ((value0: RichEditorRange) => void) | undefined
-    _aboutToIMEInput_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _aboutToIMEInput_0_0value?: ((value0: RichEditorInsertValue) => boolean) | undefined
-    _onIMEInputComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onIMEInputComplete_0_0value?: ((value0: RichEditorTextSpanResult) => void) | undefined
-    _onDidIMEInput_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDidIMEInput_0_0value?: ((value0: TextRange) => void) | undefined
-    _aboutToDelete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _aboutToDelete_0_0value?: ((value0: RichEditorDeleteValue) => boolean) | undefined
-    _onDeleteComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDeleteComplete_0_0value?: VoidCallback | undefined
-    _copyOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _copyOptions_0_0value?: CopyOptions | undefined
-    _onPaste_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPaste_0_0value?: PasteEventCallback | undefined
-    _enableDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableDataDetector_0_0value?: boolean | undefined
-    _enablePreviewText_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enablePreviewText_0_0value?: boolean | undefined
-    _dataDetectorConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
-    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableSelectedDataDetector_0_0value?: boolean | undefined
-    _caretColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _caretColor_0_0value?: ResourceColor | undefined
-    _selectedBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedBackgroundColor_0_0value?: ResourceColor | undefined
-    _onEditingChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onEditingChange_0_0value?: ((value0: boolean) => void) | undefined
-    _enterKeyType_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enterKeyType_0_0value?: EnterKeyType | undefined
-    _onSubmit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSubmit_0_0value?: SubmitCallback | undefined
-    _onWillChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillChange_0_0value?: ((value0: RichEditorChangeValue) => boolean) | undefined
-    _onDidChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDidChange_0_0value?: OnDidChangeCallback | undefined
-    _onCut_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onCut_0_0value?: ((value0: CutEvent) => void) | undefined
-    _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onCopy_0_0value?: ((value0: CopyEvent) => void) | undefined
-    _onWillAttachIME_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillAttachIME_0_0value?: ((value0: IMEClient) => void) | undefined
-    _editMenuOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _editMenuOptions_0_0value?: EditMenuOptions | undefined
-    _enableKeyboardOnFocus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableKeyboardOnFocus_0_0value?: boolean | undefined
-    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableHapticFeedback_0_0value?: boolean | undefined
-    _barState_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barState_0_0value?: BarState | undefined
-    _maxLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLength_0_0value?: int32 | undefined
-    _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maxLines_0_0value?: int32 | undefined
-    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableAutoSpacing_0_0value?: boolean | undefined
-    _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
-    _stopBackPress_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stopBackPress_0_0value?: boolean | undefined
-    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: ColorMetrics | undefined
-    _undoStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _undoStyle_0_0value?: UndoStyle | undefined
-    _singleLine_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _singleLine_0_0value?: boolean | undefined
-    _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _compressLeadingPunctuation_0_0value?: boolean | undefined
-    _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _includeFontPadding_0_0value?: boolean | undefined
-    _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fallbackLineSpacing_0_0value?: boolean | undefined
-    _bindSelectionMenu_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _bindSelectionMenu_0_0value?: RichEditorSpanType | undefined
-    _bindSelectionMenu_0_1value?: CustomBuilder | undefined
-    _bindSelectionMenu_0_2value?: ResponseType | RichEditorResponseType | undefined
-    _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
-    _selectedDragPreviewStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
-    _customKeyboard_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customKeyboard_0_0value?: CustomBuilder | ComponentContentBase | undefined
-    _customKeyboard_0_1value?: KeyboardOptions | undefined
-    _placeholder_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _placeholder_0_0value?: ResourceStr | undefined
-    _placeholder_0_1value?: PlaceholderStyle | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _onReady_0_0value?: VoidCallback | undefined
+    public _onSelect_0_0value?: arkui_component_common_Callback<RichEditorSelection, void> | undefined
+    public _onSelectionChange_0_0value?: arkui_component_common_Callback<RichEditorRange, void> | undefined
+    public _aboutToIMEInput_0_0value?: arkui_component_common_Callback<RichEditorInsertValue, boolean> | undefined
+    public _onIMEInputComplete_0_0value?: arkui_component_common_Callback<RichEditorTextSpanResult, void> | undefined
+    public _onDidIMEInput_0_0value?: arkui_component_common_Callback<TextRange, void> | undefined
+    public _aboutToDelete_0_0value?: arkui_component_common_Callback<RichEditorDeleteValue, boolean> | undefined
+    public _onDeleteComplete_0_0value?: VoidCallback | undefined
+    public _copyOptions_0_0value?: CopyOptions | undefined
+    public _onPaste_0_0value?: PasteEventCallback | undefined
+    public _enableDataDetector_0_0value?: boolean | undefined
+    public _enablePreviewText_0_0value?: boolean | undefined
+    public _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
+    public _enableSelectedDataDetector_0_0value?: boolean | undefined
+    public _caretColor_0_0value?: ResourceColor | undefined
+    public _selectedBackgroundColor_0_0value?: ResourceColor | undefined
+    public _onEditingChange_0_0value?: arkui_component_common_Callback<boolean, void> | undefined
+    public _enterKeyType_0_0value?: EnterKeyType | undefined
+    public _onSubmit_0_0value?: SubmitCallback | undefined
+    public _onWillChange_0_0value?: arkui_component_common_Callback<RichEditorChangeValue, boolean> | undefined
+    public _onDidChange_0_0value?: OnDidChangeCallback | undefined
+    public _onCut_0_0value?: arkui_component_common_Callback<CutEvent, void> | undefined
+    public _onCopy_0_0value?: arkui_component_common_Callback<CopyEvent, void> | undefined
+    public _onWillAttachIME_0_0value?: arkui_component_common_Callback<IMEClient, void> | undefined
+    public _editMenuOptions_0_0value?: EditMenuOptions | undefined
+    public _enableKeyboardOnFocus_0_0value?: boolean | undefined
+    public _enableHapticFeedback_0_0value?: boolean | undefined
+    public _barState_0_0value?: BarState | undefined
+    public _maxLength_0_0value?: int32 | undefined
+    public _maxLines_0_0value?: int32 | undefined
+    public _enableAutoSpacing_0_0value?: boolean | undefined
+    public _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    public _undoStyle_0_0value?: UndoStyle | undefined
+    public _scrollBarColor_0_0value?: arkui_Graphics_ColorMetrics | undefined
+    public _stopBackPress_0_0value?: boolean | undefined
+    public _includeFontPadding_0_0value?: boolean | undefined
+    public _fallbackLineSpacing_0_0value?: boolean | undefined
+    public _singleLine_0_0value?: boolean | undefined
+    public _compressLeadingPunctuation_0_0value?: boolean | undefined
+    public _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
+    public _bindSelectionMenu_0_0value?: RichEditorSpanType | undefined
+    public _bindSelectionMenu_0_1value?: CustomBuilder | undefined
+    public _bindSelectionMenu_0_2value?: ResponseType | RichEditorResponseType | undefined
+    public _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
+    public _customKeyboard_0_0value?: CustomBuilder | ComponentContentBase | undefined
+    public _customKeyboard_0_1value?: KeyboardOptions | undefined
+    public _placeholder_0_0value?: ResourceStr | undefined
+    public _placeholder_0_1value?: PlaceholderStyle | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkRichEditorPeer;
-        if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onReady_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+        this.applyModifierPatch1(peer, flagArray);
+        this.applyModifierPatch2(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkRichEditorPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setOnReadyAttribute((this._onReady_0_0value as VoidCallback | undefined));
-                    this._onReady_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onReady_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._onReady_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setOnReadyAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._onSelect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSelect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSelectAttribute((this._onSelect_0_0value as ((value0: RichEditorSelection) => void) | undefined));
-                    this._onSelect_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setOnSelectAttribute((this._onSelect_0_0value as arkui_component_common_Callback<RichEditorSelection, void> | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSelect_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onSelect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSelectAttribute((undefined as ((value0: RichEditorSelection) => void) | undefined));
-                }
-            }
-        }
-        if (this._onSelectionChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSelectionChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSelectionChangeAttribute((this._onSelectionChange_0_0value as ((value0: RichEditorRange) => void) | undefined));
-                    this._onSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._onSelectionChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSelectionChangeAttribute((undefined as ((value0: RichEditorRange) => void) | undefined));
+                    flagArray[1] = 0;
+                    peer.setOnSelectAttribute((undefined as arkui_component_common_Callback<RichEditorSelection, void> | undefined));
                 }
             }
         }
-        if (this._aboutToIMEInput_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._aboutToIMEInput_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAboutToIMEInputAttribute((this._aboutToIMEInput_0_0value as ((value0: RichEditorInsertValue) => boolean) | undefined));
-                    this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setOnSelectionChangeAttribute((this._onSelectionChange_0_0value as arkui_component_common_Callback<RichEditorRange, void> | undefined));
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAboutToIMEInputAttribute((undefined as ((value0: RichEditorInsertValue) => boolean) | undefined));
+                    flagArray[2] = 0;
+                    peer.setOnSelectionChangeAttribute((undefined as arkui_component_common_Callback<RichEditorRange, void> | undefined));
                 }
             }
         }
-        if (this._onIMEInputComplete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onIMEInputComplete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnIMEInputCompleteAttribute((this._onIMEInputComplete_0_0value as ((value0: RichEditorTextSpanResult) => void) | undefined));
-                    this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
+                    peer.setAboutToIMEInputAttribute((this._aboutToIMEInput_0_0value as arkui_component_common_Callback<RichEditorInsertValue, boolean> | undefined));
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnIMEInputCompleteAttribute((undefined as ((value0: RichEditorTextSpanResult) => void) | undefined));
+                    flagArray[3] = 0;
+                    peer.setAboutToIMEInputAttribute((undefined as arkui_component_common_Callback<RichEditorInsertValue, boolean> | undefined));
                 }
             }
         }
-        if (this._onDidIMEInput_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDidIMEInput_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDidIMEInputAttribute((this._onDidIMEInput_0_0value as ((value0: TextRange) => void) | undefined));
-                    this._onDidIMEInput_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
+                    peer.setOnIMEInputCompleteAttribute((this._onIMEInputComplete_0_0value as arkui_component_common_Callback<RichEditorTextSpanResult, void> | undefined));
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDidIMEInput_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._onDidIMEInput_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDidIMEInputAttribute((undefined as ((value0: TextRange) => void) | undefined));
+                    flagArray[4] = 0;
+                    peer.setOnIMEInputCompleteAttribute((undefined as arkui_component_common_Callback<RichEditorTextSpanResult, void> | undefined));
                 }
             }
         }
-        if (this._aboutToDelete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._aboutToDelete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAboutToDeleteAttribute((this._aboutToDelete_0_0value as ((value0: RichEditorDeleteValue) => boolean) | undefined));
-                    this._aboutToDelete_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setOnDidIMEInputAttribute((this._onDidIMEInput_0_0value as arkui_component_common_Callback<TextRange, void> | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._aboutToDelete_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._aboutToDelete_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAboutToDeleteAttribute((undefined as ((value0: RichEditorDeleteValue) => boolean) | undefined));
+                    flagArray[5] = 0;
+                    peer.setOnDidIMEInputAttribute((undefined as arkui_component_common_Callback<TextRange, void> | undefined));
                 }
             }
         }
-        if (this._onDeleteComplete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDeleteComplete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
+                    peer.setAboutToDeleteAttribute((this._aboutToDelete_0_0value as arkui_component_common_Callback<RichEditorDeleteValue, boolean> | undefined));
+                    flagArray[6] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[6] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[6] = 0;
+                    peer.setAboutToDeleteAttribute((undefined as arkui_component_common_Callback<RichEditorDeleteValue, boolean> | undefined));
+                }
+            }
+        }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
                     peer.setOnDeleteCompleteAttribute((this._onDeleteComplete_0_0value as VoidCallback | undefined));
-                    this._onDeleteComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDeleteComplete_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._onDeleteComplete_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[7] = 0;
                     peer.setOnDeleteCompleteAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._copyOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._copyOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
                     peer.setCopyOptionsAttribute((this._copyOptions_0_0value as CopyOptions | undefined));
-                    this._copyOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._copyOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._copyOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[8] = 0;
                     peer.setCopyOptionsAttribute((undefined as CopyOptions | undefined));
                 }
             }
         }
-        if (this._onPaste_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onPaste_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setOnPasteAttribute((this._onPaste_0_0value as PasteEventCallback | undefined));
-                    this._onPaste_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onPaste_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._onPaste_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setOnPasteAttribute((undefined as PasteEventCallback | undefined));
                 }
             }
         }
-        if (this._enableDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setEnableDataDetectorAttribute((this._enableDataDetector_0_0value as boolean | undefined));
-                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setEnableDataDetectorAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._enablePreviewText_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enablePreviewText_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1: {
                     peer.setEnablePreviewTextAttribute((this._enablePreviewText_0_0value as boolean | undefined));
-                    this._enablePreviewText_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[11] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enablePreviewText_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[11] = 2;
                     break;
                 }
                 default: {
-                    this._enablePreviewText_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[11] = 0;
                     peer.setEnablePreviewTextAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._dataDetectorConfig_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._dataDetectorConfig_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
                     peer.setDataDetectorConfigAttribute((this._dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
-                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[12] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[12] = 2;
                     break;
                 }
                 default: {
-                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[12] = 0;
                     peer.setDataDetectorConfigAttribute((undefined as TextDataDetectorConfig | undefined));
                 }
             }
         }
-        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
                     peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[13] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[13] = 2;
                     break;
                 }
                 default: {
-                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[13] = 0;
                     peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._caretColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._caretColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1: {
                     peer.setCaretColorAttribute((this._caretColor_0_0value as ResourceColor | undefined));
-                    this._caretColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[14] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._caretColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[14] = 2;
                     break;
                 }
                 default: {
-                    this._caretColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[14] = 0;
                     peer.setCaretColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._selectedBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1: {
                     peer.setSelectedBackgroundColorAttribute((this._selectedBackgroundColor_0_0value as ResourceColor | undefined));
-                    this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[15] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[15] = 2;
                     break;
                 }
                 default: {
-                    this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[15] = 0;
                     peer.setSelectedBackgroundColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._onEditingChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onEditingChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnEditingChangeAttribute((this._onEditingChange_0_0value as ((value0: boolean) => void) | undefined));
-                    this._onEditingChange_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1: {
+                    peer.setOnEditingChangeAttribute((this._onEditingChange_0_0value as arkui_component_common_Callback<boolean, void> | undefined));
+                    flagArray[16] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onEditingChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[16] = 2;
                     break;
                 }
                 default: {
-                    this._onEditingChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnEditingChangeAttribute((undefined as ((value0: boolean) => void) | undefined));
+                    flagArray[16] = 0;
+                    peer.setOnEditingChangeAttribute((undefined as arkui_component_common_Callback<boolean, void> | undefined));
                 }
             }
         }
-        if (this._enterKeyType_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enterKeyType_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1: {
                     peer.setEnterKeyTypeAttribute((this._enterKeyType_0_0value as EnterKeyType | undefined));
-                    this._enterKeyType_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[17] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enterKeyType_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[17] = 2;
                     break;
                 }
                 default: {
-                    this._enterKeyType_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[17] = 0;
                     peer.setEnterKeyTypeAttribute((undefined as EnterKeyType | undefined));
                 }
             }
         }
-        if (this._onSubmit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSubmit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1: {
                     peer.setOnSubmitAttribute((this._onSubmit_0_0value as SubmitCallback | undefined));
-                    this._onSubmit_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[18] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSubmit_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[18] = 2;
                     break;
                 }
                 default: {
-                    this._onSubmit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[18] = 0;
                     peer.setOnSubmitAttribute((undefined as SubmitCallback | undefined));
                 }
             }
         }
-        if (this._onWillChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnWillChangeAttribute((this._onWillChange_0_0value as ((value0: RichEditorChangeValue) => boolean) | undefined));
-                    this._onWillChange_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1: {
+                    peer.setOnWillChangeAttribute((this._onWillChange_0_0value as arkui_component_common_Callback<RichEditorChangeValue, boolean> | undefined));
+                    flagArray[19] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[19] = 2;
                     break;
                 }
                 default: {
-                    this._onWillChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnWillChangeAttribute((undefined as ((value0: RichEditorChangeValue) => boolean) | undefined));
+                    flagArray[19] = 0;
+                    peer.setOnWillChangeAttribute((undefined as arkui_component_common_Callback<RichEditorChangeValue, boolean> | undefined));
                 }
             }
         }
-        if (this._onDidChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDidChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch1(peer: ArkRichEditorPeer, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1: {
                     peer.setOnDidChangeAttribute((this._onDidChange_0_0value as OnDidChangeCallback | undefined));
-                    this._onDidChange_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[20] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDidChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[20] = 2;
                     break;
                 }
                 default: {
-                    this._onDidChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[20] = 0;
                     peer.setOnDidChangeAttribute((undefined as OnDidChangeCallback | undefined));
                 }
             }
         }
-        if (this._onCut_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onCut_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnCutAttribute((this._onCut_0_0value as ((value0: CutEvent) => void) | undefined));
-                    this._onCut_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1: {
+                    peer.setOnCutAttribute((this._onCut_0_0value as arkui_component_common_Callback<CutEvent, void> | undefined));
+                    flagArray[21] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onCut_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onCut_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnCutAttribute((undefined as ((value0: CutEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onCopy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onCopy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnCopyAttribute((this._onCopy_0_0value as ((value0: CopyEvent) => void) | undefined));
-                    this._onCopy_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onCopy_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[21] = 2;
                     break;
                 }
                 default: {
-                    this._onCopy_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnCopyAttribute((undefined as ((value0: CopyEvent) => void) | undefined));
+                    flagArray[21] = 0;
+                    peer.setOnCutAttribute((undefined as arkui_component_common_Callback<CutEvent, void> | undefined));
                 }
             }
         }
-        if (this._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillAttachIME_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as ((value0: IMEClient) => void) | undefined));
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1: {
+                    peer.setOnCopyAttribute((this._onCopy_0_0value as arkui_component_common_Callback<CopyEvent, void> | undefined));
+                    flagArray[22] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[22] = 2;
                     break;
                 }
                 default: {
-                    this._onWillAttachIME_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnWillAttachIMEAttribute((undefined as ((value0: IMEClient) => void) | undefined));
+                    flagArray[22] = 0;
+                    peer.setOnCopyAttribute((undefined as arkui_component_common_Callback<CopyEvent, void> | undefined));
                 }
             }
         }
-        if (this._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._editMenuOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1: {
+                    peer.setOnWillAttachIMEAttribute((this._onWillAttachIME_0_0value as arkui_component_common_Callback<IMEClient, void> | undefined));
+                    flagArray[23] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[23] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[23] = 0;
+                    peer.setOnWillAttachIMEAttribute((undefined as arkui_component_common_Callback<IMEClient, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1: {
                     peer.setEditMenuOptionsAttribute((this._editMenuOptions_0_0value as EditMenuOptions | undefined));
-                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[24] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[24] = 2;
                     break;
                 }
                 default: {
-                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[24] = 0;
                     peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
                 }
             }
         }
-        if (this._enableKeyboardOnFocus_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableKeyboardOnFocus_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1: {
                     peer.setEnableKeyboardOnFocusAttribute((this._enableKeyboardOnFocus_0_0value as boolean | undefined));
-                    this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[25] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[25] = 2;
                     break;
                 }
                 default: {
-                    this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[25] = 0;
                     peer.setEnableKeyboardOnFocusAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1: {
                     peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[26] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[26] = 2;
                     break;
                 }
                 default: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[26] = 0;
                     peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._barState_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barState_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1: {
                     peer.setBarStateAttribute((this._barState_0_0value as BarState | undefined));
-                    this._barState_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[27] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barState_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[27] = 2;
                     break;
                 }
                 default: {
-                    this._barState_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[27] = 0;
                     peer.setBarStateAttribute((undefined as BarState | undefined));
                 }
             }
         }
-        if (this._maxLength_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._maxLength_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1: {
                     peer.setMaxLengthAttribute((this._maxLength_0_0value as int32 | undefined));
-                    this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[28] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._maxLength_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[28] = 2;
                     break;
                 }
                 default: {
-                    this._maxLength_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[28] = 0;
                     peer.setMaxLengthAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._maxLines_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._maxLines_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1: {
                     peer.setMaxLinesAttribute((this._maxLines_0_0value as int32 | undefined));
-                    this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[29] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[29] = 2;
                     break;
                 }
                 default: {
-                    this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[29] = 0;
                     peer.setMaxLinesAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1: {
                     peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[30] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[30] = 2;
                     break;
                 }
                 default: {
-                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[30] = 0;
                     peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._keyboardAppearance_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._keyboardAppearance_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1: {
                     peer.setKeyboardAppearanceAttribute((this._keyboardAppearance_0_0value as KeyboardAppearance | undefined));
-                    this._keyboardAppearance_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[31] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._keyboardAppearance_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[31] = 2;
                     break;
                 }
                 default: {
-                    this._keyboardAppearance_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[31] = 0;
                     peer.setKeyboardAppearanceAttribute((undefined as KeyboardAppearance | undefined));
                 }
             }
         }
-        if (this._stopBackPress_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._stopBackPress_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStopBackPressAttribute((this._stopBackPress_0_0value as boolean | undefined));
-                    this._stopBackPress_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._stopBackPress_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._stopBackPress_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStopBackPressAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._singleLine_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._singleLine_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSingleLineAttribute((this._singleLine_0_0value as boolean | undefined));
-                    this._singleLine_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._singleLine_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._singleLine_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSingleLineAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._compressLeadingPunctuation_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
-                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._includeFontPadding_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
-                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._includeFontPadding_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fallbackLineSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
-                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollBarColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as ColorMetrics | undefined));
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as ColorMetrics | undefined));
-                }
-            }
-        }
-        if (this._undoStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._undoStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
+                case 1: {
                     peer.setUndoStyleAttribute((this._undoStyle_0_0value as UndoStyle | undefined));
-                    this._undoStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[32] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._undoStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[32] = 2;
                     break;
                 }
                 default: {
-                    this._undoStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[32] = 0;
                     peer.setUndoStyleAttribute((undefined as UndoStyle | undefined));
                 }
             }
         }
-        if (this._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._bindSelectionMenu_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as RichEditorSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as ResponseType | RichEditorResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
-                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1: {
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as arkui_Graphics_ColorMetrics | undefined));
+                    flagArray[33] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[33] = 2;
                     break;
                 }
                 default: {
-                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBindSelectionMenuAttribute((undefined as RichEditorSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as ResponseType | RichEditorResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                    flagArray[33] = 0;
+                    peer.setScrollBarColorAttribute((undefined as arkui_Graphics_ColorMetrics | undefined));
                 }
             }
         }
-        if (this._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedDragPreviewStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
-                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1: {
+                    peer.setStopBackPressAttribute((this._stopBackPress_0_0value as boolean | undefined));
+                    flagArray[34] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[34] = 2;
                     break;
                 }
                 default: {
-                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[34] = 0;
+                    peer.setStopBackPressAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
+                case 1: {
+                    peer.setIncludeFontPaddingAttribute((this._includeFontPadding_0_0value as boolean | undefined));
+                    flagArray[35] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[35] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[35] = 0;
+                    peer.setIncludeFontPaddingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
+                case 1: {
+                    peer.setFallbackLineSpacingAttribute((this._fallbackLineSpacing_0_0value as boolean | undefined));
+                    flagArray[36] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[36] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[36] = 0;
+                    peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
+                case 1: {
+                    peer.setSingleLineAttribute((this._singleLine_0_0value as boolean | undefined));
+                    flagArray[37] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[37] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[37] = 0;
+                    peer.setSingleLineAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1: {
+                    peer.setCompressLeadingPunctuationAttribute((this._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    flagArray[38] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[38] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[38] = 0;
+                    peer.setCompressLeadingPunctuationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1: {
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    flagArray[39] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[39] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[39] = 0;
                     peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
                 }
             }
         }
-        if (this._customKeyboard_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._customKeyboard_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
-                    this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
+    }
+    applyModifierPatch2(peer: ArkRichEditorPeer, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1: {
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as RichEditorSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as ResponseType | RichEditorResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined | undefined));
+                    flagArray[40] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._customKeyboard_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[40] = 2;
                     break;
                 }
                 default: {
-                    this._customKeyboard_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[40] = 0;
+                    peer.setBindSelectionMenuAttribute((undefined as RichEditorSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as ResponseType | RichEditorResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
+                case 1: {
+                    peer.setCustomKeyboardAttribute((this._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (this._customKeyboard_0_1value as KeyboardOptions | undefined | undefined));
+                    flagArray[41] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[41] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[41] = 0;
                     peer.setCustomKeyboardAttribute((undefined as CustomBuilder | ComponentContentBase | undefined), (undefined as KeyboardOptions | undefined | undefined));
                 }
             }
         }
-        if (this._placeholder_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._placeholder_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
+                case 1: {
                     peer.setPlaceholderAttribute((this._placeholder_0_0value as ResourceStr | undefined), (this._placeholder_0_1value as PlaceholderStyle | undefined | undefined));
-                    this._placeholder_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[42] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._placeholder_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[42] = 2;
                     break;
                 }
                 default: {
-                    this._placeholder_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[42] = 0;
                     peer.setPlaceholderAttribute((undefined as ResourceStr | undefined), (undefined as PlaceholderStyle | undefined | undefined));
                 }
             }
@@ -917,12 +847,17 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     mergeModifier(modifier: RichEditorModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onReady_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onReady(modifier._onReady_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+        this.mergeModifier1(modifier, flagArray);
+        this.mergeModifier2(modifier, flagArray);
+    }
+    mergeModifier0(modifier: RichEditorModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.onReady((modifier._onReady_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -930,90 +865,83 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._onSelect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSelect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onSelect(modifier._onSelect_0_0value);
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.onSelect((modifier._onSelect_0_0value as arkui_component_common_Callback<RichEditorSelection, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onSelect((undefined as ((value0: RichEditorSelection) => void) | undefined));
+                    this.onSelect((undefined as arkui_component_common_Callback<RichEditorSelection, void> | undefined));
                 }
             }
         }
-        if (modifier._onSelectionChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSelectionChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onSelectionChange(modifier._onSelectionChange_0_0value);
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
+                    this.onSelectionChange((modifier._onSelectionChange_0_0value as arkui_component_common_Callback<RichEditorRange, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onSelectionChange((undefined as ((value0: RichEditorRange) => void) | undefined));
+                    this.onSelectionChange((undefined as arkui_component_common_Callback<RichEditorRange, void> | undefined));
                 }
             }
         }
-        if (modifier._aboutToIMEInput_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._aboutToIMEInput_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.aboutToIMEInput(modifier._aboutToIMEInput_0_0value);
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
+                    this.aboutToIMEInput((modifier._aboutToIMEInput_0_0value as arkui_component_common_Callback<RichEditorInsertValue, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.aboutToIMEInput((undefined as ((value0: RichEditorInsertValue) => boolean) | undefined));
+                    this.aboutToIMEInput((undefined as arkui_component_common_Callback<RichEditorInsertValue, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onIMEInputComplete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onIMEInputComplete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onIMEInputComplete(modifier._onIMEInputComplete_0_0value);
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
+                    this.onIMEInputComplete((modifier._onIMEInputComplete_0_0value as arkui_component_common_Callback<RichEditorTextSpanResult, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onIMEInputComplete((undefined as ((value0: RichEditorTextSpanResult) => void) | undefined));
+                    this.onIMEInputComplete((undefined as arkui_component_common_Callback<RichEditorTextSpanResult, void> | undefined));
                 }
             }
         }
-        if (modifier._onDidIMEInput_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDidIMEInput_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onDidIMEInput(modifier._onDidIMEInput_0_0value);
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
+                    this.onDidIMEInput((modifier._onDidIMEInput_0_0value as arkui_component_common_Callback<TextRange, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onDidIMEInput((undefined as ((value0: TextRange) => void) | undefined));
+                    this.onDidIMEInput((undefined as arkui_component_common_Callback<TextRange, void> | undefined));
                 }
             }
         }
-        if (modifier._aboutToDelete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._aboutToDelete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.aboutToDelete(modifier._aboutToDelete_0_0value);
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
+                    this.aboutToDelete((modifier._aboutToDelete_0_0value as arkui_component_common_Callback<RichEditorDeleteValue, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.aboutToDelete((undefined as ((value0: RichEditorDeleteValue) => boolean) | undefined));
+                    this.aboutToDelete((undefined as arkui_component_common_Callback<RichEditorDeleteValue, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onDeleteComplete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDeleteComplete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onDeleteComplete(modifier._onDeleteComplete_0_0value);
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
+                    this.onDeleteComplete((modifier._onDeleteComplete_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -1021,12 +949,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._copyOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._copyOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.copyOptions(modifier._copyOptions_0_0value);
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
+                    this.copyOptions((modifier._copyOptions_0_0value as CopyOptions | undefined));
                     break;
                 }
                 default: {
@@ -1034,12 +961,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._onPaste_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onPaste_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onPaste(modifier._onPaste_0_0value);
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
+                    this.onPaste((modifier._onPaste_0_0value as PasteEventCallback | undefined));
                     break;
                 }
                 default: {
@@ -1047,12 +973,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._enableDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableDataDetector(modifier._enableDataDetector_0_0value);
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
+                    this.enableDataDetector((modifier._enableDataDetector_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1060,12 +985,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._enablePreviewText_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enablePreviewText_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enablePreviewText(modifier._enablePreviewText_0_0value);
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
+                    this.enablePreviewText((modifier._enablePreviewText_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1073,12 +997,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._dataDetectorConfig_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._dataDetectorConfig_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.dataDetectorConfig(modifier._dataDetectorConfig_0_0value);
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1:
+                case 3: {
+                    this.dataDetectorConfig((modifier._dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
                     break;
                 }
                 default: {
@@ -1086,12 +1009,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableSelectedDataDetector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1:
+                case 3: {
+                    this.enableSelectedDataDetector((modifier._enableSelectedDataDetector_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1099,12 +1021,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._caretColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._caretColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.caretColor(modifier._caretColor_0_0value);
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1:
+                case 3: {
+                    this.caretColor((modifier._caretColor_0_0value as ResourceColor | undefined));
                     break;
                 }
                 default: {
@@ -1112,12 +1033,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._selectedBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.selectedBackgroundColor(modifier._selectedBackgroundColor_0_0value);
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1:
+                case 3: {
+                    this.selectedBackgroundColor((modifier._selectedBackgroundColor_0_0value as ResourceColor | undefined));
                     break;
                 }
                 default: {
@@ -1125,25 +1045,23 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._onEditingChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onEditingChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onEditingChange(modifier._onEditingChange_0_0value);
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
+                    this.onEditingChange((modifier._onEditingChange_0_0value as arkui_component_common_Callback<boolean, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onEditingChange((undefined as ((value0: boolean) => void) | undefined));
+                    this.onEditingChange((undefined as arkui_component_common_Callback<boolean, void> | undefined));
                 }
             }
         }
-        if (modifier._enterKeyType_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enterKeyType_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enterKeyType(modifier._enterKeyType_0_0value);
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
+                    this.enterKeyType((modifier._enterKeyType_0_0value as EnterKeyType | undefined));
                     break;
                 }
                 default: {
@@ -1151,12 +1069,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._onSubmit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSubmit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onSubmit(modifier._onSubmit_0_0value);
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
+                    this.onSubmit((modifier._onSubmit_0_0value as SubmitCallback | undefined));
                     break;
                 }
                 default: {
@@ -1164,25 +1081,25 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._onWillChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillChange(modifier._onWillChange_0_0value);
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1:
+                case 3: {
+                    this.onWillChange((modifier._onWillChange_0_0value as arkui_component_common_Callback<RichEditorChangeValue, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.onWillChange((undefined as ((value0: RichEditorChangeValue) => boolean) | undefined));
+                    this.onWillChange((undefined as arkui_component_common_Callback<RichEditorChangeValue, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onDidChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDidChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onDidChange(modifier._onDidChange_0_0value);
+    }
+    mergeModifier1(modifier: RichEditorModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1:
+                case 3: {
+                    this.onDidChange((modifier._onDidChange_0_0value as OnDidChangeCallback | undefined));
                     break;
                 }
                 default: {
@@ -1190,51 +1107,47 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._onCut_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onCut_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onCut(modifier._onCut_0_0value);
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1:
+                case 3: {
+                    this.onCut((modifier._onCut_0_0value as arkui_component_common_Callback<CutEvent, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onCut((undefined as ((value0: CutEvent) => void) | undefined));
+                    this.onCut((undefined as arkui_component_common_Callback<CutEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onCopy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onCopy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onCopy(modifier._onCopy_0_0value);
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1:
+                case 3: {
+                    this.onCopy((modifier._onCopy_0_0value as arkui_component_common_Callback<CopyEvent, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onCopy((undefined as ((value0: CopyEvent) => void) | undefined));
+                    this.onCopy((undefined as arkui_component_common_Callback<CopyEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onWillAttachIME_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillAttachIME_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillAttachIME(modifier._onWillAttachIME_0_0value);
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1:
+                case 3: {
+                    this.onWillAttachIME((modifier._onWillAttachIME_0_0value as arkui_component_common_Callback<IMEClient, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onWillAttachIME((undefined as ((value0: IMEClient) => void) | undefined));
+                    this.onWillAttachIME((undefined as arkui_component_common_Callback<IMEClient, void> | undefined));
                 }
             }
         }
-        if (modifier._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._editMenuOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.editMenuOptions(modifier._editMenuOptions_0_0value);
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1:
+                case 3: {
+                    this.editMenuOptions((modifier._editMenuOptions_0_0value as EditMenuOptions | undefined));
                     break;
                 }
                 default: {
@@ -1242,12 +1155,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._enableKeyboardOnFocus_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableKeyboardOnFocus_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableKeyboardOnFocus(modifier._enableKeyboardOnFocus_0_0value);
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1:
+                case 3: {
+                    this.enableKeyboardOnFocus((modifier._enableKeyboardOnFocus_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1255,12 +1167,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1:
+                case 3: {
+                    this.enableHapticFeedback((modifier._enableHapticFeedback_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1268,12 +1179,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._barState_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barState_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barState(modifier._barState_0_0value);
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1:
+                case 3: {
+                    this.barState((modifier._barState_0_0value as BarState | undefined));
                     break;
                 }
                 default: {
@@ -1281,12 +1191,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._maxLength_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._maxLength_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.maxLength(modifier._maxLength_0_0value);
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1:
+                case 3: {
+                    this.maxLength((modifier._maxLength_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -1294,12 +1203,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._maxLines_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._maxLines_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.maxLines(modifier._maxLines_0_0value);
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1:
+                case 3: {
+                    this.maxLines((modifier._maxLines_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -1307,12 +1215,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableAutoSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1:
+                case 3: {
+                    this.enableAutoSpacing((modifier._enableAutoSpacing_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1320,12 +1227,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._keyboardAppearance_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._keyboardAppearance_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.keyboardAppearance(modifier._keyboardAppearance_0_0value);
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1:
+                case 3: {
+                    this.keyboardAppearance((modifier._keyboardAppearance_0_0value as KeyboardAppearance | undefined));
                     break;
                 }
                 default: {
@@ -1333,90 +1239,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._stopBackPress_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._stopBackPress_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.stopBackPress(modifier._stopBackPress_0_0value);
-                    break;
-                }
-                default: {
-                    this.stopBackPress((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._singleLine_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._singleLine_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.singleLine(modifier._singleLine_0_0value);
-                    break;
-                }
-                default: {
-                    this.singleLine((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._compressLeadingPunctuation_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.compressLeadingPunctuation(modifier._compressLeadingPunctuation_0_0value);
-                    break;
-                }
-                default: {
-                    this.compressLeadingPunctuation((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._includeFontPadding_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._includeFontPadding_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.includeFontPadding(modifier._includeFontPadding_0_0value);
-                    break;
-                }
-                default: {
-                    this.includeFontPadding((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._fallbackLineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fallbackLineSpacing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.fallbackLineSpacing(modifier._fallbackLineSpacing_0_0value);
-                    break;
-                }
-                default: {
-                    this.fallbackLineSpacing((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollBarColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.scrollBarColor((undefined as ColorMetrics | undefined));
-                }
-            }
-        }
-        if (modifier._undoStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._undoStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.undoStyle(modifier._undoStyle_0_0value);
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
+                case 1:
+                case 3: {
+                    this.undoStyle((modifier._undoStyle_0_0value as UndoStyle | undefined));
                     break;
                 }
                 default: {
@@ -1424,25 +1251,83 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._bindSelectionMenu_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.bindSelectionMenu(modifier._bindSelectionMenu_0_0value, modifier._bindSelectionMenu_0_1value, modifier._bindSelectionMenu_0_2value, modifier._bindSelectionMenu_0_3value);
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1:
+                case 3: {
+                    this.scrollBarColor((modifier._scrollBarColor_0_0value as arkui_Graphics_ColorMetrics | undefined));
                     break;
                 }
                 default: {
-                    this.bindSelectionMenu((undefined as RichEditorSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as ResponseType | RichEditorResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                    this.scrollBarColor((undefined as arkui_Graphics_ColorMetrics | undefined));
                 }
             }
         }
-        if (modifier._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedDragPreviewStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.selectedDragPreviewStyle(modifier._selectedDragPreviewStyle_0_0value);
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1:
+                case 3: {
+                    this.stopBackPress((modifier._stopBackPress_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.stopBackPress((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
+                case 1:
+                case 3: {
+                    this.includeFontPadding((modifier._includeFontPadding_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.includeFontPadding((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
+                case 1:
+                case 3: {
+                    this.fallbackLineSpacing((modifier._fallbackLineSpacing_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
+                case 1:
+                case 3: {
+                    this.singleLine((modifier._singleLine_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.singleLine((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1:
+                case 3: {
+                    this.compressLeadingPunctuation((modifier._compressLeadingPunctuation_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.compressLeadingPunctuation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1:
+                case 3: {
+                    this.selectedDragPreviewStyle((modifier._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
                     break;
                 }
                 default: {
@@ -1450,12 +1335,25 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._customKeyboard_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._customKeyboard_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.customKeyboard(modifier._customKeyboard_0_0value, modifier._customKeyboard_0_1value);
+    }
+    mergeModifier2(modifier: RichEditorModifier, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1:
+                case 3: {
+                    this.bindSelectionMenu((modifier._bindSelectionMenu_0_0value as RichEditorSpanType | undefined), (modifier._bindSelectionMenu_0_1value as CustomBuilder | undefined), (modifier._bindSelectionMenu_0_2value as ResponseType | RichEditorResponseType | undefined), (modifier._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindSelectionMenu((undefined as RichEditorSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as ResponseType | RichEditorResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
+                case 1:
+                case 3: {
+                    this.customKeyboard((modifier._customKeyboard_0_0value as CustomBuilder | ComponentContentBase | undefined), (modifier._customKeyboard_0_1value as KeyboardOptions | undefined));
                     break;
                 }
                 default: {
@@ -1463,12 +1361,11 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
-        if (modifier._placeholder_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._placeholder_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.placeholder(modifier._placeholder_0_0value, modifier._placeholder_0_1value);
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
+                case 1:
+                case 3: {
+                    this.placeholder((modifier._placeholder_0_0value as ResourceStr | undefined), (modifier._placeholder_0_1value as PlaceholderStyle | undefined));
                     break;
                 }
                 default: {
@@ -1478,522 +1375,441 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
     }
     onReady(value: VoidCallback | undefined): this {
-        if (((this._onReady_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._onReady_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onReady_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    onSelect(value: ((value0: RichEditorSelection) => void) | undefined): this {
-        if (((this._onSelect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
+    onSelect(value: arkui_component_common_Callback<RichEditorSelection, void> | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._onSelect_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSelect_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
-    onSelectionChange(value: ((value0: RichEditorRange) => void) | undefined): this {
-        if (((this._onSelectionChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onSelectionChange(value: arkui_component_common_Callback<RichEditorRange, void> | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._onSelectionChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
-    aboutToIMEInput(value: ((value0: RichEditorInsertValue) => boolean) | undefined): this {
-        if (((this._aboutToIMEInput_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.UPDATE
+    aboutToIMEInput(value: arkui_component_common_Callback<RichEditorInsertValue, boolean> | undefined): this {
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._aboutToIMEInput_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
-    onIMEInputComplete(value: ((value0: RichEditorTextSpanResult) => void) | undefined): this {
-        if (((this._onIMEInputComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.UPDATE
+    onIMEInputComplete(value: arkui_component_common_Callback<RichEditorTextSpanResult, void> | undefined): this {
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._onIMEInputComplete_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    onDidIMEInput(value: ((value0: TextRange) => void) | undefined): this {
-        if (((this._onDidIMEInput_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDidIMEInput_0_flag = AttributeUpdaterFlag.UPDATE
+    onDidIMEInput(value: arkui_component_common_Callback<TextRange, void> | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._onDidIMEInput_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDidIMEInput_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
-    aboutToDelete(value: ((value0: RichEditorDeleteValue) => boolean) | undefined): this {
-        if (((this._aboutToDelete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._aboutToDelete_0_flag = AttributeUpdaterFlag.UPDATE
+    aboutToDelete(value: arkui_component_common_Callback<RichEditorDeleteValue, boolean> | undefined): this {
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._aboutToDelete_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._aboutToDelete_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     onDeleteComplete(value: VoidCallback | undefined): this {
-        if (((this._onDeleteComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDeleteComplete_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
             this._onDeleteComplete_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDeleteComplete_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     copyOptions(value: CopyOptions | undefined): this {
-        if (((this._copyOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._copyOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
             this._copyOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._copyOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     onPaste(value: PasteEventCallback | undefined): this {
-        if (((this._onPaste_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onPaste_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._onPaste_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onPaste_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     enableDataDetector(value: boolean | undefined): this {
-        if (((this._enableDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDataDetector_0_0value) !== (value)))
-        {
-            this._enableDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[10]) == (0)) || ((this._enableDataDetector_0_0value) !== (value))) {
+            this._flagArray[10] = 1
             this._enableDataDetector_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     enablePreviewText(value: boolean | undefined): this {
-        if (((this._enablePreviewText_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enablePreviewText_0_0value) !== (value)))
-        {
-            this._enablePreviewText_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[11]) == (0)) || ((this._enablePreviewText_0_0value) !== (value))) {
+            this._flagArray[11] = 1
             this._enablePreviewText_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enablePreviewText_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[11] = 3
         }
         return this
     }
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
-        if (((this._dataDetectorConfig_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[12]) == (0)) || (true)) {
+            this._flagArray[12] = 1
             this._dataDetectorConfig_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[12] = 3
         }
         return this
     }
     enableSelectedDataDetector(value: boolean | undefined): this {
-        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[13]) == (0)) || ((this._enableSelectedDataDetector_0_0value) !== (value))) {
+            this._flagArray[13] = 1
             this._enableSelectedDataDetector_0_0value = value
-        } else
-        {
-            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[13] = 3
         }
         return this
     }
     caretColor(value: ResourceColor | undefined): this {
-        if (((this._caretColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._caretColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[14]) == (0)) || (true)) {
+            this._flagArray[14] = 1
             this._caretColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._caretColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[14] = 3
         }
         return this
     }
     selectedBackgroundColor(value: ResourceColor | undefined): this {
-        if (((this._selectedBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[15]) == (0)) || (true)) {
+            this._flagArray[15] = 1
             this._selectedBackgroundColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[15] = 3
         }
         return this
     }
-    onEditingChange(value: ((value0: boolean) => void) | undefined): this {
-        if (((this._onEditingChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onEditingChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onEditingChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        if (((this._flagArray[16]) == (0)) || (true)) {
+            this._flagArray[16] = 1
             this._onEditingChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onEditingChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[16] = 3
         }
         return this
     }
     enterKeyType(value: EnterKeyType | undefined): this {
-        if (((this._enterKeyType_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._enterKeyType_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[17]) == (0)) || (true)) {
+            this._flagArray[17] = 1
             this._enterKeyType_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enterKeyType_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[17] = 3
         }
         return this
     }
     onSubmit(value: SubmitCallback | undefined): this {
-        if (((this._onSubmit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[18]) == (0)) || (true)) {
+            this._flagArray[18] = 1
             this._onSubmit_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSubmit_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[18] = 3
         }
         return this
     }
-    onWillChange(value: ((value0: RichEditorChangeValue) => boolean) | undefined): this {
-        if (((this._onWillChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onWillChange(value: arkui_component_common_Callback<RichEditorChangeValue, boolean> | undefined): this {
+        if (((this._flagArray[19]) == (0)) || (true)) {
+            this._flagArray[19] = 1
             this._onWillChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onWillChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[19] = 3
         }
         return this
     }
     onDidChange(value: OnDidChangeCallback | undefined): this {
-        if (((this._onDidChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDidChange_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[20]) == (0)) || (true)) {
+            this._flagArray[20] = 1
             this._onDidChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDidChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[20] = 3
         }
         return this
     }
-    onCut(value: ((value0: CutEvent) => void) | undefined): this {
-        if (((this._onCut_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onCut_0_flag = AttributeUpdaterFlag.UPDATE
+    onCut(value: arkui_component_common_Callback<CutEvent, void> | undefined): this {
+        if (((this._flagArray[21]) == (0)) || (true)) {
+            this._flagArray[21] = 1
             this._onCut_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onCut_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[21] = 3
         }
         return this
     }
-    onCopy(value: ((value0: CopyEvent) => void) | undefined): this {
-        if (((this._onCopy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
+    onCopy(value: arkui_component_common_Callback<CopyEvent, void> | undefined): this {
+        if (((this._flagArray[22]) == (0)) || (true)) {
+            this._flagArray[22] = 1
             this._onCopy_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[22] = 3
         }
         return this
     }
-    onWillAttachIME(value: ((value0: IMEClient) => void) | undefined): this {
-        if (((this._onWillAttachIME_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.UPDATE
+    onWillAttachIME(value: arkui_component_common_Callback<IMEClient, void> | undefined): this {
+        if (((this._flagArray[23]) == (0)) || (true)) {
+            this._flagArray[23] = 1
             this._onWillAttachIME_0_0value = value
-        } else
-        {
-            this._onWillAttachIME_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[23] = 3
         }
         return this
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
-        if (((this._editMenuOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[24]) == (0)) || (true)) {
+            this._flagArray[24] = 1
             this._editMenuOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[24] = 3
         }
         return this
     }
     enableKeyboardOnFocus(value: boolean | undefined): this {
-        if (((this._enableKeyboardOnFocus_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableKeyboardOnFocus_0_0value) !== (value)))
-        {
-            this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[25]) == (0)) || ((this._enableKeyboardOnFocus_0_0value) !== (value))) {
+            this._flagArray[25] = 1
             this._enableKeyboardOnFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[25] = 3
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[26]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
+            this._flagArray[26] = 1
             this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[26] = 3
         }
         return this
     }
     barState(value: BarState | undefined): this {
-        if (((this._barState_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barState_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[27]) == (0)) || (true)) {
+            this._flagArray[27] = 1
             this._barState_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._barState_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[27] = 3
         }
         return this
     }
     maxLength(value: int32 | undefined): this {
-        if (((this._maxLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLength_0_0value) !== (value)))
-        {
-            this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[28]) == (0)) || ((this._maxLength_0_0value) !== (value))) {
+            this._flagArray[28] = 1
             this._maxLength_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._maxLength_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[28] = 3
         }
         return this
     }
     maxLines(value: int32 | undefined): this {
-        if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
-        {
-            this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[29]) == (0)) || ((this._maxLines_0_0value) !== (value))) {
+            this._flagArray[29] = 1
             this._maxLines_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[29] = 3
         }
         return this
     }
     enableAutoSpacing(value: boolean | undefined): this {
-        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[30]) == (0)) || ((this._enableAutoSpacing_0_0value) !== (value))) {
+            this._flagArray[30] = 1
             this._enableAutoSpacing_0_0value = value
-        } else
-        {
-            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[30] = 3
         }
         return this
     }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
-        if (((this._keyboardAppearance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._keyboardAppearance_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[31]) == (0)) || (true)) {
+            this._flagArray[31] = 1
             this._keyboardAppearance_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    stopBackPress(value: boolean | undefined): this {
-        if (((this._stopBackPress_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stopBackPress_0_0value) !== (value)))
-        {
-            this._stopBackPress_0_flag = AttributeUpdaterFlag.UPDATE
-            this._stopBackPress_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._stopBackPress_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    singleLine(value: boolean | undefined): this {
-        if (((this._singleLine_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._singleLine_0_0value) !== (value)))
-        {
-            this._singleLine_0_flag = AttributeUpdaterFlag.UPDATE
-            this._singleLine_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._singleLine_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    compressLeadingPunctuation(value: boolean | undefined): this {
-        if (((this._compressLeadingPunctuation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._compressLeadingPunctuation_0_0value) !== (value)))
-        {
-            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
-            this._compressLeadingPunctuation_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    includeFontPadding(value: boolean | undefined): this {
-        if (((this._includeFontPadding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._includeFontPadding_0_0value) !== (value)))
-        {
-            this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
-            this._includeFontPadding_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    fallbackLineSpacing(value: boolean | undefined): this {
-        if (((this._fallbackLineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fallbackLineSpacing_0_0value) !== (value)))
-        {
-            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
-            this._fallbackLineSpacing_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    scrollBarColor(value: ColorMetrics | undefined): this {
-        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._scrollBarColor_0_0value = value
-        } else
-        {
-            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[31] = 3
         }
         return this
     }
     undoStyle(value: UndoStyle | undefined): this {
-        if (((this._undoStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._undoStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[32]) == (0)) || (true)) {
+            this._flagArray[32] = 1
             this._undoStyle_0_0value = value
-        } else
-        {
-            this._undoStyle_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[32] = 3
+        }
+        return this
+    }
+    scrollBarColor(value: arkui_Graphics_ColorMetrics | undefined): this {
+        if (((this._flagArray[33]) == (0)) || (true)) {
+            this._flagArray[33] = 1
+            this._scrollBarColor_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[33] = 3
+        }
+        return this
+    }
+    stopBackPress(value: boolean | undefined): this {
+        if (((this._flagArray[34]) == (0)) || ((this._stopBackPress_0_0value) !== (value))) {
+            this._flagArray[34] = 1
+            this._stopBackPress_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[34] = 3
+        }
+        return this
+    }
+    includeFontPadding(value: boolean | undefined): this {
+        if (((this._flagArray[35]) == (0)) || ((this._includeFontPadding_0_0value) !== (value))) {
+            this._flagArray[35] = 1
+            this._includeFontPadding_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[35] = 3
+        }
+        return this
+    }
+    fallbackLineSpacing(value: boolean | undefined): this {
+        if (((this._flagArray[36]) == (0)) || ((this._fallbackLineSpacing_0_0value) !== (value))) {
+            this._flagArray[36] = 1
+            this._fallbackLineSpacing_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[36] = 3
+        }
+        return this
+    }
+    singleLine(value: boolean | undefined): this {
+        if (((this._flagArray[37]) == (0)) || ((this._singleLine_0_0value) !== (value))) {
+            this._flagArray[37] = 1
+            this._singleLine_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[37] = 3
+        }
+        return this
+    }
+    compressLeadingPunctuation(value: boolean | undefined): this {
+        if (((this._flagArray[38]) == (0)) || ((this._compressLeadingPunctuation_0_0value) !== (value))) {
+            this._flagArray[38] = 1
+            this._compressLeadingPunctuation_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[38] = 3
+        }
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._flagArray[39]) == (0)) || (true)) {
+            this._flagArray[39] = 1
+            this._selectedDragPreviewStyle_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[39] = 3
         }
         return this
     }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
-        if (((this._bindSelectionMenu_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true) || (true) || (true))
-        {
-            this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[40]) == (0)) || (true) || (true) || (true) || (true)) {
+            this._flagArray[40] = 1
             this._bindSelectionMenu_0_0value = spanType
             this._bindSelectionMenu_0_1value = content
             this._bindSelectionMenu_0_2value = responseType
             this._bindSelectionMenu_0_3value = options
             this._state.fireChange()
-        } else
-        {
-            this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
-        if (((this._selectedDragPreviewStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
-            this._selectedDragPreviewStyle_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[40] = 3
         }
         return this
     }
     customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
-        if (((this._customKeyboard_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[41]) == (0)) || (true) || (true)) {
+            this._flagArray[41] = 1
             this._customKeyboard_0_0value = value
             this._customKeyboard_0_1value = options
             this._state.fireChange()
-        } else
-        {
-            this._customKeyboard_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[41] = 3
         }
         return this
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
-        if (((this._placeholder_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._placeholder_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[42]) == (0)) || (true) || (true)) {
+            this._flagArray[42] = 1
             this._placeholder_0_0value = value
             this._placeholder_0_1value = style
             this._state.fireChange()
-        } else
-        {
-            this._placeholder_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[42] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

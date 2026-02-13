@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { extractors } from "#handwritten"
-import { RenderNode } from "arkui.RenderNode"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./CallbackTransformer"
+import { extractors } from '#handwritten'
+import { RenderNode } from 'arkui.RenderNode'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class RenderNode_serializer {
     public static write(buffer: SerializerBase, value: RenderNode): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(extractors.toRenderNodePtr(value))
     }
     public static read(buffer: DeserializerBase): RenderNode {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return extractors.fromRenderNodePtr(ptr)
     }
 }

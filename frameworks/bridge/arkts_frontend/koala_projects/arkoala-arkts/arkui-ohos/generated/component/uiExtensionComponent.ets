@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,97 +16,86 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { ArkThemeScopeManager } from "#arktheme"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ErrorCallback, BusinessError, RecordData } from "@ohos.base"
-import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { default as Want } from "@ohos.app.ability.Want"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ComponentContentBase } from "arkui.ComponentContent"
-import { UIExtensionComponentModifier } from "./../UIExtensionComponentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentContentBase_serializer } from "./../ComponentContent"
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { RecordData, Callback as ohos_base_Callback, ErrorCallback, BusinessError } from '@ohos.base'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent } from './common'
+import { extractors, AttributeModifier, hookUIExtensionComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { VoidCallback } from './units'
+import { default as Want } from '@ohos.app.ability.Want'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ComponentContentBase } from 'arkui.ComponentContent'
+import { UIExtensionComponentModifier } from './../UIExtensionComponentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 export interface UIExtensionProxy {
     send(data: Record<string, RecordData>): void
     sendSync(data: Record<string, RecordData>): Record<string, RecordData>
-    onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
-    onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
-    offAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
-    offSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
+    onAsyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy>): void
+    onSyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy>): void
+    offAsyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy> | undefined): void
+    offSyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy> | undefined): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, UIExtensionProxyInternal.getFinalizer())
     }
     constructor() {
-        this(UIExtensionProxyInternal.construct())
+        this(MaterializedBaseTag.NOP, UIExtensionProxyInternal.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_construct()
+        const retval = ArkUIGeneratedNativeModule._UIExtensionProxy_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._UIExtensionProxy_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): UIExtensionProxyInternal {
-        return new UIExtensionProxyInternal(ptr)
+        return new UIExtensionProxyInternal(MaterializedBaseTag.NOP, ptr)
     }
     public send(data: Record<string, RecordData>): void {
         const data_casted = data as (Record<string, RecordData>)
-        ArkUIAniUiextensionProxyModal._Send_Data(this.peer!.ptr, data_casted)
+        this.send_serialize(data_casted)
         return
     }
     public sendSync(data: Record<string, RecordData>): Record<string, RecordData> {
         const data_casted = data as (Record<string, RecordData>)
-        return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data_casted)
+        return this.sendSync_serialize(data_casted)
     }
-    public onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
-        const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
-        this.onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
+    public onAsyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy>): void {
+        const callback__casted = callback_ as (ohos_base_Callback<UIExtensionProxy>)
+        this.onAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
-        const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
-        this.onSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
+    public onSyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy>): void {
+        const callback__casted = callback_ as (ohos_base_Callback<UIExtensionProxy>)
+        this.onSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offAsyncReceiverRegisterAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
-        const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
-        this.offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
+    public offAsyncReceiverRegister(callback_?: ohos_base_Callback<UIExtensionProxy>): void {
+        const callback__casted = callback_ as (ohos_base_Callback<UIExtensionProxy> | undefined)
+        this.offAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offSyncReceiverRegisterSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
-        const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
-        this.offSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
+    public offSyncReceiverRegister(callback_?: ohos_base_Callback<UIExtensionProxy>): void {
+        const callback__casted = callback_ as (ohos_base_Callback<UIExtensionProxy> | undefined)
+        this.offSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
-        this.onAsyncReceiverRegisterAsyncReceiverRegister(callback_)
-    }
-    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
-        this.onSyncReceiverRegisterSyncReceiverRegister(callback_)
-    }
-    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
-        this.offAsyncReceiverRegisterAsyncReceiverRegister(callback_)
-    }
-    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
-        this.offSyncReceiverRegisterSyncReceiverRegister(callback_)
-    }
-    send_serialize(data: Map<string, RecordData>): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private send_serialize(data: Record<string, RecordData>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((data.size).toInt())
         for (const pair of data) {
             const dataKeyVar = pair[0]
@@ -114,7 +103,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             thisSerializer.writeString(dataKeyVar)
             if (dataValueVar !== undefined && dataValueVar !== null) {
                 thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const dataValueVarTmpValue  = dataValueVar!
+                const dataValueVarTmpValue = dataValueVar!
                 thisSerializer.holdAndWriteObject(dataValueVarTmpValue)
             } else {
                 thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -123,8 +112,8 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         ArkUIGeneratedNativeModule._UIExtensionProxy_send(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    sendSync_serialize(data: Map<string, RecordData>): Map<string, RecordData> {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private sendSync_serialize(data: Record<string, RecordData>): Record<string, RecordData> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((data.size).toInt())
         for (const pair of data) {
             const dataKeyVar = pair[0]
@@ -132,90 +121,151 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             thisSerializer.writeString(dataKeyVar)
             if (dataValueVar !== undefined && dataValueVar !== null) {
                 thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const dataValueVarTmpValue  = dataValueVar!
+                const dataValueVarTmpValue = dataValueVar!
                 thisSerializer.holdAndWriteObject(dataValueVarTmpValue)
             } else {
                 thisSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferSizeVar : int32 = retvalDeserializer.readInt32()
-        let buffer : Map<string, RecordData> = new Map<string, RecordData>()
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferSizeVar: int32 = retvalDeserializer.readInt32()
+        let buffer: Record<string, RecordData> = new Record<string, RecordData>()
         // TODO: TS map resize
         for (let bufferIVar = 0; bufferIVar < bufferSizeVar; bufferIVar++) {
-            const bufferKeyVar : string = (retvalDeserializer.readString() as string)
-            const bufferValueVarTempBuf_runtimeType  = retvalDeserializer.readInt8().toInt()
-            let bufferValueVarTempBuf : Object | null | undefined = undefined
+            const bufferKeyVar: string = (retvalDeserializer.readString() as string)
+            const bufferValueVarTempBuf_runtimeType = retvalDeserializer.readInt8()!.toInt()
+            let bufferValueVarTempBuf: Object | null | undefined = undefined
             if ((bufferValueVarTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
                 bufferValueVarTempBuf = (retvalDeserializer.readObject() as object)
             }
-            const bufferValueVar : RecordData = bufferValueVarTempBuf
+            const bufferValueVar: RecordData = bufferValueVarTempBuf
             buffer.set(bufferKeyVar, bufferValueVar)
         }
-        const returnResult : Map<string, RecordData> = buffer
+        const returnResult: Record<string, RecordData> = buffer
         return returnResult
     }
-    onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback_: ((value0: UIExtensionProxy) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private onAsyncReceiverRegister_serialize(callback_: ohos_base_Callback<UIExtensionProxy>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._UIExtensionProxy_onAsyncReceiverRegisterAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_onAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onSyncReceiverRegisterSyncReceiverRegister_serialize(callback_: ((value0: UIExtensionProxy) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private onSyncReceiverRegister_serialize(callback_: ohos_base_Callback<UIExtensionProxy>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._UIExtensionProxy_onSyncReceiverRegisterSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_onSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback_?: ((value0: UIExtensionProxy) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private offAsyncReceiverRegister_serialize(callback_?: ohos_base_Callback<UIExtensionProxy>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const callback_TmpValue  = callback_!
+            const callback_TmpValue = callback_!
             thisSerializer.holdAndWriteCallback(callback_TmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_offAsyncReceiverRegisterAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_offAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    offSyncReceiverRegisterSyncReceiverRegister_serialize(callback_?: ((value0: UIExtensionProxy) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private offSyncReceiverRegister_serialize(callback_?: ohos_base_Callback<UIExtensionProxy>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const callback_TmpValue  = callback_!
+            const callback_TmpValue = callback_!
             thisSerializer.holdAndWriteCallback(callback_TmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_offSyncReceiverRegisterSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_offSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
-export class ArkUIExtensionComponentPeer extends ArkUIExtensionComponentPeerBase {
+export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: UIExtensionComponentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkUIExtensionComponentPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._UIExtensionComponent_construct(peerId, flags)
-        const _peer  = new ArkUIExtensionComponentPeer(_peerPtr, peerId, 'UIExtensionComponent', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._UIExtensionComponent_construct(peerId, flags)
+        const _peer = new ArkUIExtensionComponentPeer(_peerPtr, peerId, 'UIExtensionComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
-    setOnRemoteReadyAttribute(value: ((value0: UIExtensionProxy) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setUIExtensionComponentOptionsAttribute(want: Want, options?: UIExtensionOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            UIExtensionOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentInterface_setUIExtensionComponentOptions(this.peer.ptr, extractors.toWantPtr(want), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnRemoteReadyAttribute(value: ohos_base_Callback<UIExtensionProxy> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnRemoteReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnReceiveAttribute(value: ReceiveCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnErrorAttribute(value: ErrorCallback<BusinessError<void>> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnTerminatedAttribute(value: ohos_base_Callback<TerminationInfo> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDrawReadyAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnDrawReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -234,120 +284,70 @@ export interface UIExtensionOptions {
     dpiFollowStrategy?: DpiFollowStrategy;
     windowModeFollowStrategy?: WindowModeFollowStrategy;
 }
-export type ReceiveCallback = ((value0: Record<string, RecordData>) => void);
+export type ReceiveCallback = ohos_base_Callback<Record<string, RecordData>>;
 export interface UIExtensionComponentAttribute extends CommonMethod {
     setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
-        throw new Error("Unimplemented method setUIExtensionComponentOptions")
+        throw new Error('Unimplemented method setUIExtensionComponentOptions')
     }
-    onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
-        throw new Error("Unimplemented method onRemoteReady")
+    onRemoteReady(value: ohos_base_Callback<UIExtensionProxy> | undefined): this {
+        throw new Error('Unimplemented method onRemoteReady')
     }
-    onReceive(value: ((value0: Record<string, RecordData>) => void) | undefined): this {
-        throw new Error("Unimplemented method onReceive")
+    onReceive(value: ReceiveCallback | undefined): this {
+        throw new Error('Unimplemented method onReceive')
     }
-    onError(value: ErrorCallback<BusinessError> | undefined): this {
-        throw new Error("Unimplemented method onError")
+    onError(value: ErrorCallback<BusinessError<void>> | undefined): this {
+        throw new Error('Unimplemented method onError')
     }
-    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onTerminated")
+    onTerminated(value: ohos_base_Callback<TerminationInfo> | undefined): this {
+        throw new Error('Unimplemented method onTerminated')
     }
-    onDrawReady(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onDrawReady")
+    onDrawReady(value: VoidCallback | undefined): this {
+        throw new Error('Unimplemented method onDrawReady')
     }
     attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
-    onRemoteReady_value?: ((value0: UIExtensionProxy) => void) | undefined
-    onReceive_value?: ((value0: Record<string, RecordData>) => void) | undefined
-    onError_value?: ErrorCallback<BusinessError> | undefined
-    onTerminated_value?: ((value0: TerminationInfo) => void) | undefined
-    onDrawReady_value?: (() => void) | undefined
-    attributeModifier_value?: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
-        return this
-    }
-    onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
-        return this
-    }
-    onReceive(value: ((value0: Record<string, RecordData>) => void) | undefined): this {
-        return this
-    }
-    onError(value: ErrorCallback<BusinessError> | undefined): this {
-        return this
-    }
-    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
-        return this
-    }
-    onDrawReady(value: (() => void) | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent implements UIExtensionComponentAttribute {
     getPeer(): ArkUIExtensionComponentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkUIExtensionComponentPeer)
     }
     public setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
-        if (this.checkPriority("setUIExtensionComponentOptions")) {
-            const want_casted = want as (Want)
-            const options_casted = options as (UIExtensionOptions | undefined)
-            this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
-            this.applyOptionsFinish('UIExtensionComponentAttribute');
-            return this
-        }
+        const want_casted = want as (Want)
+        const options_casted = options as (UIExtensionOptions | undefined)
+        this.getPeer()?.setUIExtensionComponentOptionsAttribute(want_casted, options_casted)
+        this.applyOptionsFinish('UIExtensionComponentAttribute');
         return this
     }
-    public onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
-        if (this.checkPriority("onRemoteReady")) {
-            const value_casted = value as (((value0: UIExtensionProxy) => void) | undefined)
-            this.getPeer()?.setOnRemoteReadyAttribute(value_casted)
-            return this
-        }
+    public onRemoteReady(value: ohos_base_Callback<UIExtensionProxy> | undefined): this {
+        const value_casted = value as (ohos_base_Callback<UIExtensionProxy> | undefined)
+        this.getPeer()?.setOnRemoteReadyAttribute(value_casted)
         return this
     }
-    public onReceive(value: ((value0: Record<string, RecordData>) => void) | undefined): this {
-        if (this.checkPriority("onReceive")) {
-            const value_casted = value as (((value0: Record<string, RecordData>) => void) | undefined)
-            this.getPeer()?.setOnReceiveAttribute(value_casted)
-            return this
-        }
+    public onReceive(value: ReceiveCallback | undefined): this {
+        const value_casted = value as (ReceiveCallback | undefined)
+        this.getPeer()?.setOnReceiveAttribute(value_casted)
         return this
     }
-    public onError(value: ErrorCallback<BusinessError> | undefined): this {
-        if (this.checkPriority("onError")) {
-            const value_casted = value as (ErrorCallback<BusinessError> | undefined)
-            this.getPeer()?.setOnErrorAttribute(value_casted)
-            return this
-        }
+    public onError(value: ErrorCallback<BusinessError<void>> | undefined): this {
+        const value_casted = value as (ErrorCallback<BusinessError<void>> | undefined)
+        this.getPeer()?.setOnErrorAttribute(value_casted)
         return this
     }
-    public onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
-        if (this.checkPriority("onTerminated")) {
-            const value_casted = value as (((value0: TerminationInfo) => void) | undefined)
-            this.getPeer()?.setOnTerminatedAttribute(value_casted)
-            return this
-        }
+    public onTerminated(value: ohos_base_Callback<TerminationInfo> | undefined): this {
+        const value_casted = value as (ohos_base_Callback<TerminationInfo> | undefined)
+        this.getPeer()?.setOnTerminatedAttribute(value_casted)
         return this
     }
-    public onDrawReady(value: (() => void) | undefined): this {
-        if (this.checkPriority("onDrawReady")) {
-            const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.setOnDrawReadyAttribute(value_casted)
-            return this
-        }
+    public onDrawReady(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnDrawReadyAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookUIExtensionComponentAttributeModifier(this, value);
+            hookUIExtensionComponentAttributeModifier(this, value);
         })
         return this
     }
@@ -362,53 +362,51 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
 
 @memo
 export function UIExtensionComponentImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
 ): void {
     const receiver = remember<ArkUIExtensionComponentComponent>((): ArkUIExtensionComponentComponent => {
         return new ArkUIExtensionComponentComponent()
     })
-    NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (peer: ArkUIExtensionComponentPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (_: ArkUIExtensionComponentPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
     })
 }
 
 export class UIExtensionProxy_serializer {
     public static write(buffer: SerializerBase, value: UIExtensionProxy): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): UIExtensionProxy {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return UIExtensionProxyInternal.fromPtr(ptr)
     }
 }
 export class UIExtensionOptions_serializer {
     public static write(buffer: SerializerBase, value: UIExtensionOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForIsTransferringCaller  = value.isTransferringCaller
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForIsTransferringCaller = value.isTransferringCaller
         if (valueHolderForIsTransferringCaller !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForIsTransferringCallerTmpValue  = valueHolderForIsTransferringCaller!
+            const valueHolderForIsTransferringCallerTmpValue = valueHolderForIsTransferringCaller!
             valueSerializer.writeBoolean(valueHolderForIsTransferringCallerTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForPlaceholder  = value.placeholder
+        const valueHolderForPlaceholder = value.placeholder
         if (valueHolderForPlaceholder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
+            const valueHolderForPlaceholderTmpValue = valueHolderForPlaceholder!
             ComponentContentBase_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForAreaChangePlaceholder  = value.areaChangePlaceholder
+        const valueHolderForAreaChangePlaceholder = value.areaChangePlaceholder
         if (valueHolderForAreaChangePlaceholder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAreaChangePlaceholderTmpValue  = valueHolderForAreaChangePlaceholder!
+            const valueHolderForAreaChangePlaceholderTmpValue = valueHolderForAreaChangePlaceholder!
             valueSerializer.writeInt32((valueHolderForAreaChangePlaceholderTmpValue.size).toInt())
             for (const pair of valueHolderForAreaChangePlaceholderTmpValue) {
                 const valueHolderForAreaChangePlaceholderTmpValueKeyVar = pair[0]
@@ -419,64 +417,64 @@ export class UIExtensionOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForDpiFollowStrategy  = value.dpiFollowStrategy
+        const valueHolderForDpiFollowStrategy = value.dpiFollowStrategy
         if (valueHolderForDpiFollowStrategy !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDpiFollowStrategyTmpValue  = (valueHolderForDpiFollowStrategy as DpiFollowStrategy)
+            const valueHolderForDpiFollowStrategyTmpValue = (valueHolderForDpiFollowStrategy as DpiFollowStrategy)
             valueSerializer.writeInt32(valueHolderForDpiFollowStrategyTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForWindowModeFollowStrategy  = value.windowModeFollowStrategy
+        const valueHolderForWindowModeFollowStrategy = value.windowModeFollowStrategy
         if (valueHolderForWindowModeFollowStrategy !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWindowModeFollowStrategyTmpValue  = (valueHolderForWindowModeFollowStrategy as WindowModeFollowStrategy)
+            const valueHolderForWindowModeFollowStrategyTmpValue = (valueHolderForWindowModeFollowStrategy as WindowModeFollowStrategy)
             valueSerializer.writeInt32(valueHolderForWindowModeFollowStrategyTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): UIExtensionOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const isTransferringCallerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isTransferringCallerTmpBuf : boolean | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const isTransferringCallerTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let isTransferringCallerTmpBuf: boolean | undefined = undefined
         if ((isTransferringCallerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             isTransferringCallerTmpBuf = valueDeserializer.readBoolean()
         }
-        const isTransferringCallerTmpResult : boolean | undefined = isTransferringCallerTmpBuf
-        // const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placeholderTmpBuf : ComponentContentBase | undefined = undefined
-        // if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-        //     placeholderTmpBuf = (valueDeserializer.readObject() as ComponentContentBase)
-        // }
-        const placeholderTmpResult : ComponentContentBase | undefined = undefined
-        // const areaChangePlaceholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        // let areaChangePlaceholderTmpBuf : Map<string, ComponentContentBase> | undefined = undefined
-        // if ((areaChangePlaceholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-        //     const areaChangePlaceholderTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
-        //     let areaChangePlaceholderTmpBuf_ : Map<string, ComponentContentBase> = new Map<string, ComponentContentBase>()
-        //     // TODO: TS map resize
-        //     for (let areaChangePlaceholderTmpBuf_IVar = 0; areaChangePlaceholderTmpBuf_IVar < areaChangePlaceholderTmpBuf_SizeVar; areaChangePlaceholderTmpBuf_IVar++) {
-        //         const areaChangePlaceholderTmpBuf_KeyVar : string = (valueDeserializer.readString() as string)
-        //         const areaChangePlaceholderTmpBuf_ValueVar : ComponentContentBase = (valueDeserializer.readObject() as ComponentContentBase)
-        //         areaChangePlaceholderTmpBuf_.set(areaChangePlaceholderTmpBuf_KeyVar, areaChangePlaceholderTmpBuf_ValueVar)
-        //     }
-        //     areaChangePlaceholderTmpBuf = areaChangePlaceholderTmpBuf_
-        // }
-        const areaChangePlaceholderTmpResult : Map<string, ComponentContentBase> | undefined = undefined
-        const dpiFollowStrategyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let dpiFollowStrategyTmpBuf : DpiFollowStrategy | undefined = undefined
+        const isTransferringCallerTmpResult: boolean | undefined = isTransferringCallerTmpBuf
+        const placeholderTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let placeholderTmpBuf: ComponentContentBase | undefined = undefined
+        if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            placeholderTmpBuf = (ComponentContentBase_serializer.read(valueDeserializer) as ComponentContentBase)
+        }
+        const placeholderTmpResult: ComponentContentBase | undefined = placeholderTmpBuf
+        const areaChangePlaceholderTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let areaChangePlaceholderTmpBuf: Record<string, ComponentContentBase> | undefined = undefined
+        if ((areaChangePlaceholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const areaChangePlaceholderTmpBufOptSizeVar: int32 = valueDeserializer.readInt32()
+            let areaChangePlaceholderTmpBufOpt: Record<string, ComponentContentBase> = new Record<string, ComponentContentBase>()
+            // TODO: TS map resize
+            for (let areaChangePlaceholderTmpBufOptIVar = 0; areaChangePlaceholderTmpBufOptIVar < areaChangePlaceholderTmpBufOptSizeVar; areaChangePlaceholderTmpBufOptIVar++) {
+                const areaChangePlaceholderTmpBufOptKeyVar: string = (valueDeserializer.readString() as string)
+                const areaChangePlaceholderTmpBufOptValueVar: ComponentContentBase = (ComponentContentBase_serializer.read(valueDeserializer) as ComponentContentBase)
+                areaChangePlaceholderTmpBufOpt.set(areaChangePlaceholderTmpBufOptKeyVar, areaChangePlaceholderTmpBufOptValueVar)
+            }
+            areaChangePlaceholderTmpBuf = areaChangePlaceholderTmpBufOpt
+        }
+        const areaChangePlaceholderTmpResult: Record<string, ComponentContentBase> | undefined = areaChangePlaceholderTmpBuf
+        const dpiFollowStrategyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let dpiFollowStrategyTmpBuf: DpiFollowStrategy | undefined = undefined
         if ((dpiFollowStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dpiFollowStrategyTmpBuf = DpiFollowStrategy.fromValue(valueDeserializer.readInt32())
         }
-        const dpiFollowStrategyTmpResult : DpiFollowStrategy | undefined = dpiFollowStrategyTmpBuf
-        const windowModeFollowStrategyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let windowModeFollowStrategyTmpBuf : WindowModeFollowStrategy | undefined = undefined
+        const dpiFollowStrategyTmpResult: DpiFollowStrategy | undefined = dpiFollowStrategyTmpBuf
+        const windowModeFollowStrategyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let windowModeFollowStrategyTmpBuf: WindowModeFollowStrategy | undefined = undefined
         if ((windowModeFollowStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             windowModeFollowStrategyTmpBuf = WindowModeFollowStrategy.fromValue(valueDeserializer.readInt32())
         }
-        const windowModeFollowStrategyTmpResult : WindowModeFollowStrategy | undefined = windowModeFollowStrategyTmpBuf
-        let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCallerTmpResult, placeholder: placeholderTmpResult, areaChangePlaceholder: areaChangePlaceholderTmpResult, dpiFollowStrategy: dpiFollowStrategyTmpResult, windowModeFollowStrategy: windowModeFollowStrategyTmpResult} as UIExtensionOptions)
+        const windowModeFollowStrategyTmpResult: WindowModeFollowStrategy | undefined = windowModeFollowStrategyTmpBuf
+        let value: UIExtensionOptions = ({isTransferringCaller: isTransferringCallerTmpResult, placeholder: placeholderTmpResult, areaChangePlaceholder: areaChangePlaceholderTmpResult, dpiFollowStrategy: dpiFollowStrategyTmpResult, windowModeFollowStrategy: windowModeFollowStrategyTmpResult} as UIExtensionOptions)
         return value
     }
 }

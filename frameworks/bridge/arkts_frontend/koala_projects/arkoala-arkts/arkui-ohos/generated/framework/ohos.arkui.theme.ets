@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,35 +16,45 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CustomTheme, CustomColors } from "@ohos.arkui.theme"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { CustomTheme, CustomColors as ohos_arkui_theme_CustomColors, CustomDarkColors } from '@ohos.arkui.theme'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class CustomTheme_serializer {
     public static write(buffer: SerializerBase, value: CustomTheme): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForColors  = value.colors
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForColors = value.colors
         if (valueHolderForColors !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorsTmpValue  = valueHolderForColors!
+            const valueHolderForColorsTmpValue = valueHolderForColors!
             valueSerializer.holdAndWriteObject(valueHolderForColorsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForDarkColors = value.darkColors
+        if (valueHolderForDarkColors !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDarkColorsTmpValue = valueHolderForDarkColors!
+            valueSerializer.holdAndWriteObject(valueHolderForDarkColorsTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CustomTheme {
-        // instructive changes, need to be removed
-        throw new Error("Not implemented");
-        // let valueDeserializer : DeserializerBase = buffer
-        // const colorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        // let colorsTmpBuf : CustomColors | undefined
-        // if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-        //     colorsTmpBuf = (valueDeserializer.readObject() as object)
-        // }
-        // const colorsTmpResult : CustomColors | undefined = colorsTmpBuf
-        // let value : CustomTheme = ({colors: colorsTmpResult} as CustomTheme)
-        // return value
-        // instructive changes, need to be removed
+        let valueDeserializer: DeserializerBase = buffer
+        const colorsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorsTmpBuf: ohos_arkui_theme_CustomColors | undefined = undefined
+        if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorsTmpBuf = (valueDeserializer.readObject() as object)
+        }
+        const colorsTmpResult: ohos_arkui_theme_CustomColors | undefined = colorsTmpBuf
+        const darkColorsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let darkColorsTmpBuf: CustomDarkColors | undefined = undefined
+        if ((darkColorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            darkColorsTmpBuf = (valueDeserializer.readObject() as object)
+        }
+        const darkColorsTmpResult: CustomDarkColors | undefined = darkColorsTmpBuf
+        let value: CustomTheme = ({colors: colorsTmpResult, darkColors: darkColorsTmpResult} as CustomTheme)
+        return value
     }
 }

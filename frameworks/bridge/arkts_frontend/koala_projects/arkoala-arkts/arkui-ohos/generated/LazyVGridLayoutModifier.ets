@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,19 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod } from "./component/common"
-import { extractors, AttributeModifier } from "#handwritten"
-import { LengthMetrics } from "arkui.Graphics"
-import { LazyGridLayoutAttribute, ArkLazyVGridLayoutPeer, LazyVGridLayoutAttribute } from "./component/lazyGridLayout"
-import { LazyGridLayoutModifier } from "./LazyGridLayoutModifier"
-import { CommonMethodModifier } from "./CommonMethodModifier"
+import { CommonMethod } from './component/common'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { LazyGridLayoutAttribute, ArkLazyVGridLayoutPeer, LazyVGridLayoutAttribute } from './component/lazyGridLayout'
+import { LazyGridLayoutModifier } from './LazyGridLayoutModifier'
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { int32 } from "@koalaui/common"
 export class LazyVGridLayoutModifier extends CommonMethodModifier implements LazyVGridLayoutAttribute,AttributeModifier<LazyVGridLayoutAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -38,67 +44,65 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
     applyFocusedAttribute(instance: LazyVGridLayoutAttribute): void { }
     applyDisabledAttribute(instance: LazyVGridLayoutAttribute): void { }
     applySelectedAttribute(instance: LazyVGridLayoutAttribute): void { }
-    _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _columnsTemplate_0_0value?: string | undefined
-    _rowsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _rowsGap_0_0value?: LengthMetrics | undefined
-    _columnsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _columnsGap_0_0value?: LengthMetrics | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _columnsTemplate_0_0value?: string | undefined
+    public _rowsGap_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    public _columnsGap_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkLazyVGridLayoutPeer;
-        if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._columnsTemplate_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkLazyVGridLayoutPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setColumnsTemplateAttribute((this._columnsTemplate_0_0value as string | undefined));
-                    this._columnsTemplate_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._columnsTemplate_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._columnsTemplate_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setColumnsTemplateAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._rowsGap_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._rowsGap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRowsGapAttribute((this._rowsGap_0_0value as LengthMetrics | undefined));
-                    this._rowsGap_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setRowsGapAttribute((this._rowsGap_0_0value as arkui_Graphics_LengthMetrics | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._rowsGap_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._rowsGap_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRowsGapAttribute((undefined as LengthMetrics | undefined));
+                    flagArray[1] = 0;
+                    peer.setRowsGapAttribute((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
-        if (this._columnsGap_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._columnsGap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColumnsGapAttribute((this._columnsGap_0_0value as LengthMetrics | undefined));
-                    this._columnsGap_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setColumnsGapAttribute((this._columnsGap_0_0value as arkui_Graphics_LengthMetrics | undefined));
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._columnsGap_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._columnsGap_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColumnsGapAttribute((undefined as LengthMetrics | undefined));
+                    flagArray[2] = 0;
+                    peer.setColumnsGapAttribute((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
@@ -106,12 +110,15 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
     mergeModifier(modifier: LazyVGridLayoutModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._columnsTemplate_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.columnsTemplate(modifier._columnsTemplate_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: LazyVGridLayoutModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.columnsTemplate((modifier._columnsTemplate_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -119,67 +126,62 @@ export class LazyVGridLayoutModifier extends CommonMethodModifier implements Laz
                 }
             }
         }
-        if (modifier._rowsGap_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._rowsGap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.rowsGap(modifier._rowsGap_0_0value);
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.rowsGap((modifier._rowsGap_0_0value as arkui_Graphics_LengthMetrics | undefined));
                     break;
                 }
                 default: {
-                    this.rowsGap((undefined as LengthMetrics | undefined));
+                    this.rowsGap((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
-        if (modifier._columnsGap_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._columnsGap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.columnsGap(modifier._columnsGap_0_0value);
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
+                    this.columnsGap((modifier._columnsGap_0_0value as arkui_Graphics_LengthMetrics | undefined));
                     break;
                 }
                 default: {
-                    this.columnsGap((undefined as LengthMetrics | undefined));
+                    this.columnsGap((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
     }
     columnsTemplate(value: string | undefined): this {
-        if (((this._columnsTemplate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnsTemplate_0_0value) !== (value)))
-        {
-            this._columnsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._columnsTemplate_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._columnsTemplate_0_0value = value
-        } else
-        {
-            this._columnsTemplate_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    rowsGap(value: LengthMetrics | undefined): this {
-        if (((this._rowsGap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._rowsGap_0_flag = AttributeUpdaterFlag.UPDATE
+    rowsGap(value: arkui_Graphics_LengthMetrics | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._rowsGap_0_0value = value
-        } else
-        {
-            this._rowsGap_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
-    columnsGap(value: LengthMetrics | undefined): this {
-        if (((this._columnsGap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._columnsGap_0_flag = AttributeUpdaterFlag.UPDATE
+    columnsGap(value: arkui_Graphics_LengthMetrics | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._columnsGap_0_0value = value
-        } else
-        {
-            this._columnsGap_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }
