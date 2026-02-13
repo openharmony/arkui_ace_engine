@@ -561,13 +561,6 @@ void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) co
     }
 }
 
-void FontManager::OpenLinkOnMapSearch(const std::string& address)
-{
-    if (startOpenLinkOnMapSearchHandler_) {
-        startOpenLinkOnMapSearchHandler_(address);
-    }
-}
-
 void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content)
 {
     if (type == TextDataDetectType::URL) {
@@ -580,10 +573,6 @@ void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::s
             url.replace(0, URL_HTTPS.length(), URL_HTTPS);
         }
         StartAbilityOnJumpBrowser(url);
-    }
-
-    if (type == TextDataDetectType::ADDRESS) {
-        OpenLinkOnMapSearch(content);
     }
 }
 

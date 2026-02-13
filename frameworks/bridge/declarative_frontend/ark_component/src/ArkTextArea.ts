@@ -1605,7 +1605,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     }
     return this;
   }
-  enableSelectedDataDetector(value) {
+  enableSelectedDataDetector(value): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
     return this;
   }

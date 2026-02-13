@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,6 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
     JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
     JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
-    JSClass<JSSearch>::StaticMethod("backgroundColor", &JSSearch::SetBackgroundColor, opt);
     JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
@@ -319,8 +318,11 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resourceObject;
     UnregisterResource("selectedBackgroundColor");
     if (!ParseJsColor(info[0], selectedColor, resourceObject)) {
-        SearchModel::GetInstance()->ResetSelectedBackgroundColor();
-        return;
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<Color>("selectedBackgroundColor", resourceObject, selectedColor);
@@ -677,19 +679,6 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetTextColor(colorVal);
 }
 
-void JSSearch::SetBackgroundColor(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
-        SearchModel::GetInstance()->ResetBackgroundColor();
-        return;
-    }
-    SearchModel::GetInstance()->SetBackgroundColor(colorVal);
-}
-
 void JSSearch::SetCaret(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
@@ -718,8 +707,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         auto caretColorProp = param->GetProperty("color");
         if (caretColorProp->IsUndefined() || caretColorProp->IsNull() ||
             !ParseJsColor(caretColorProp, caretColor, colorObject)) {
-            SearchModel::GetInstance()->ResetCaretColor();
-            return;
+            caretColor = textFieldTheme->GetCursorColor();
         }
         if (SystemProperties::ConfigChangePerform() && colorObject) {
             RegisterResource<Color>("caretColor", colorObject, caretColor);

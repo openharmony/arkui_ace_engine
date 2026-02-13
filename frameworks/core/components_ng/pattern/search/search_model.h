@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,6 @@ public:
     virtual void SetSearchButton(const std::string& text);
     virtual void SetCaretWidth(const Dimension& value);
     virtual void SetCaretColor(const Color& color);
-    virtual void ResetCaretColor();
     virtual void SetSearchIconSize(const Dimension& value);
     virtual void SetSearchIconColor(const Color& color) {};
     virtual void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
@@ -51,16 +50,14 @@ public:
     virtual void SetSearchButtonFontSize(const Dimension& value);
     virtual void SetSearchButtonFontColor(const Color& color, bool isTheme = false);
     virtual void SetSearchButtonAutoDisable(bool needToDisable);
-    virtual void SetPlaceholderColor(const Color& color);
-    virtual void ResetPlaceholderColor();
+    virtual void SetPlaceholderColor(const Color& color, bool isTheme = false);
+    virtual void ResetPlaceholderColor() {};
     virtual void SetPlaceholderFont(const Font& font);
     virtual void SetTextFont(const Font& font);
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetTextColor(const Color& color);
-    virtual void ResetTextColor();
-    virtual void SetBackgroundColor(const Color& color);
-    virtual void ResetBackgroundColor();
+    virtual void ResetTextColor() {};
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
     virtual void SetFocusable(bool focusable) {};
@@ -93,7 +90,7 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
-    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false);
+    virtual void SetCustomKeyboard(const std::function<void()> &&buildFunc, bool supportAvoidance = false);
     virtual void SetCustomKeyboardWithNode(NG::FrameNode* customKeyboard, bool supportAvoidance = false) {};
     virtual void SetSearchEnterKeyType(TextInputAction value);
     virtual void SetSearchCapitalizationMode(AutoCapitalizationMode value);
@@ -101,10 +98,9 @@ public:
     virtual void ResetMaxLength();
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetType(TextInputType value);
-    virtual void UpdateInspectorId(const std::string& key) {};
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
-    virtual void ResetSelectedBackgroundColor() {};
+    virtual void UpdateInspectorId(const std::string& key) {};
 
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
