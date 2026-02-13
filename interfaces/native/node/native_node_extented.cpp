@@ -1784,7 +1784,7 @@ OH_ArkUI_TextEditorSelectionMenuOptions* OH_ArkUI_TextEditorSelectionMenuOptions
     options->richEditorSpanType = OH_ArkUI_TextEditorSpanType::OH_ARKUI_TEXT_EDITOR_SPAN_TYPE_TEXT;
     options->responseType = OH_ArkUI_TextEditorResponseType::OH_ARKUI_TEXT_EDITOR_RESPONSE_TYPE_LONG_PRESS;
     options->menuType = OH_ArkUI_TextMenuType::OH_ARKUI_TEXT_EDITOR_SELECTION_MENU;
-    options->hapticFeedbackMode = ArkUI_HapticFeedbackMode::ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED;
+    options->hapticFeedbackMode = OH_ArkUI_HapticFeedbackMode::OH_ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED;
     return options;
 }
  
@@ -1910,7 +1910,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuDisappearC
 }
  
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetHapticFeedbackMode(
-    OH_ArkUI_TextEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode mode)
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_HapticFeedbackMode mode)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     options->hapticFeedbackMode = mode;
@@ -1918,7 +1918,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetHapticFeedbackMode(
 }
  
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetHapticFeedbackMode(
-    OH_ArkUI_TextEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode* mode)
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_HapticFeedbackMode* mode)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(mode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);

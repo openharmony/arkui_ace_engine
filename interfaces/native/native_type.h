@@ -6788,12 +6788,12 @@ typedef enum {
  */
 typedef enum {
     /** No haptic feedback. */
-    ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED = 0,
+    OH_ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED = 0,
     /**Defines always haptic feedback. */
-    ARKUI_HAPTIC_FEEDBACK_MODE_ENABLED  = 1,
+    OH_ARKUI_HAPTIC_FEEDBACK_MODE_ENABLED  = 1,
     /** Defines automatically haptic feedback. */
-    ARKUI_HAPTIC_FEEDBACK_MODE_AUTO = 2,
-} ArkUI_HapticFeedbackMode;
+    OH_ARKUI_HAPTIC_FEEDBACK_MODE_AUTO = 2,
+} OH_ArkUI_HapticFeedbackMode;
 
 typedef enum {
     /** The span type of text. */
@@ -6921,26 +6921,26 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetResponseType(ArkUI_TextSele
  * @brief Sets the haptic feedback mode of a configuration object for selected text recognition.
  *
  * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
- * @param hapticFeedbackMode The haptic feedback mode of {@link ArkUI_HapticFeedbackMode}.
+ * @param hapticFeedbackMode The haptic feedback mode of {@link OH_ArkUI_HapticFeedbackMode}.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
  * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode(
-    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_HapticFeedbackMode hapticFeedbackMode);
+    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, OH_ArkUI_HapticFeedbackMode hapticFeedbackMode);
 /**
  * @brief Gets the response type select menu options.
  *
  * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
- * @param mode The haptic feedback mode of {@link ArkUI_HapticFeedbackMode}.
+ * @param mode The haptic feedback mode of {@link OH_ArkUI_HapticFeedbackMode}.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
  * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode(
-    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_HapticFeedbackMode* mode);
+    ArkUI_TextSelectionMenuOptions* selectionMenuOptions, OH_ArkUI_HapticFeedbackMode* mode);
 
 /**
  * @brief Set the event to be called when selection menu show.
@@ -8572,6 +8572,18 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_DeleteBackward(
     OH_ArkUI_TextEditorStyledStringController* controller);
 
 /**
+ * @brief Close selection menu of text editor with styled string controller.
+ *
+ * @param controller <b>TextEditor</b> styled string controller.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_CloseSelectionMenu(
+    OH_ArkUI_TextEditorStyledStringController* controller);
+
+/**
  * @brief Defines paragraph style for text editor.
  * @since 24
  */
@@ -9601,7 +9613,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_RegisterOnMenuDisappearC
  * @since 24
  */
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetHapticFeedbackMode(
-    OH_ArkUI_TextEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode mode);
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_HapticFeedbackMode mode);
 
 /**
  * @brief Gets the haptic feedback mode of selection menu in TextEditor.
@@ -9614,7 +9626,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_SetHapticFeedbackMode(
  * @since 24
  */
 ArkUI_ErrorCode OH_ArkUI_TextEditorSelectionMenuOptions_GetHapticFeedbackMode(
-    OH_ArkUI_TextEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode* mode);
+    OH_ArkUI_TextEditorSelectionMenuOptions* options, OH_ArkUI_HapticFeedbackMode* mode);
 
 /**
  * @brief Defines the font weight configuration of text.

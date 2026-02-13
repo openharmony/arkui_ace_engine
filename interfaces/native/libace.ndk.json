@@ -5181,6 +5181,10 @@
     },
     {
         "first_introduced": "24",
+        "name": "OH_ArkUI_TextEditorStyledStringController_CloseSelectionMenu"
+    },
+    {
+        "first_introduced": "24",
         "name": "OH_ArkUI_TextEditorParagraphStyle_Create"
     },
     {

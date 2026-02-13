@@ -288,7 +288,7 @@ struct OH_ArkUI_TextEditorSelectionMenuOptions  {
     void* onMenuShowUserData;
     void* onMenuHide;
     void* onMenuHideUserData;
-    ArkUI_HapticFeedbackMode hapticFeedbackMode;
+    OH_ArkUI_HapticFeedbackMode hapticFeedbackMode;
 };
 
 #ifdef __cplusplus

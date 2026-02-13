@@ -254,7 +254,16 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_DeleteBackward(
 {
     CHECK_NULL_RETURN(controller && controller->node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
-    doRichEditorDeleteBackward(controller->node->uiNodeHandle);
+        doRichEditorDeleteBackward(controller->node->uiNodeHandle);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_CloseSelectionMenu(
+    OH_ArkUI_TextEditorStyledStringController* controller)
+{
+    CHECK_NULL_RETURN(controller && controller->node, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
+        closeSelectionMenu(controller->node->uiNodeHandle);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 

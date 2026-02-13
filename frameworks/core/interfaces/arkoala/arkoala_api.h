@@ -7959,6 +7959,7 @@ struct ArkUIRichEditorModifier {
     ArkUI_CharPtr (*getRichEditorPreviewTextValue)(ArkUINodeHandle node);
     ArkUIRect (*getRichEditorCaretRect)(ArkUINodeHandle node);
     void (*doRichEditorDeleteBackward)(ArkUINodeHandle node);
+    void (*closeSelectionMenu)(ArkUINodeHandle node);
     void (*setRichEditorSupportPreviewText)(ArkUINodeHandle node, ArkUI_Bool isSupportPreviewText);
     void (*resetRichEditorSupportPreviewText)(ArkUINodeHandle node);
     ArkUI_Bool (*getRichEditorSupportPreviewText)(ArkUINodeHandle node);
