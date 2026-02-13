@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,17 +38,16 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgCircle::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    RSRecordingPath path;
     /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && lengthRule_ == lengthRule) {
-        path = path_.value();
-    } else {
-        auto cx = GetMeasuredPosition(circleAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL);
-        auto cy = GetMeasuredPosition(circleAttr_.cy, lengthRule, SvgLengthType::VERTICAL);
-        path.AddCircle(cx, cy, GetMeasuredLength(circleAttr_.r, lengthRule, SvgLengthType::OTHER));
-        lengthRule_ = lengthRule;
-        path_ = path;
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
+        return path_.value();
     }
+    RSRecordingPath path;
+    auto cx = GetMeasuredPosition(circleAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL);
+    auto cy = GetMeasuredPosition(circleAttr_.cy, lengthRule, SvgLengthType::VERTICAL);
+    path.AddCircle(cx, cy, GetMeasuredLength(circleAttr_.r, lengthRule, SvgLengthType::OTHER));
+    lengthRule_ = lengthRule;
+    path_ = path;
     /* Apply path transform for clip-path only */
     if (lengthRule.GetPathTransform()) {
         ApplyTransform(path, lengthRule);

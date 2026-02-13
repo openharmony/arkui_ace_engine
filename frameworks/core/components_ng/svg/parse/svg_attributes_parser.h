@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,8 @@ public:
     static Dimension ParseDimension(const std::string& value, bool useVp = false);
     static double ParseDouble(const std::string& value);
     static bool CheckColorAlpha(const std::string& colorStr, Color& result);
+    static Color GetColorFromHexString(const std::string& value);
+    static Color GetColorFrom4HexString(const std::string& value);
     static std::pair<Dimension, Dimension> GetTransformOrigin(const std::string& transformOrigin);
     static std::vector<NG::TransformInfo> GetTransformInfo(const std::string& transform);
     static SvgAlign ParseSvgAlign(const std::string& value);
@@ -70,8 +72,6 @@ public:
         const SvgAlign& svgAlign, float& translateX, float& translateY);
     static void ComputeScale(const Size& viewBox, const Size& viewPort,
         const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY);
-    static Color GetColorFromHexString(const std::string& value);
-    static Color GetColorFrom4HexString(const std::string& value);
     static void StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension);
     static void ParseDimension(const std::string& value, Dimension& dimension, bool featureEnable, bool useVp = false);
 };
@@ -258,7 +258,6 @@ struct SvgBaseAttribute {
         }
     }
 };
-
 
 struct SvgAnimateAttribute {
     std::string attributeName;

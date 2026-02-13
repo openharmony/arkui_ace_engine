@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -302,6 +302,11 @@ Dimension SvgAttributesParser::ParseDimension(const std::string& value, bool use
     return StringUtils::StringToDimension(value, useVp);
 }
 
+double SvgAttributesParser::ParseDouble(const std::string& value)
+{
+    return StringUtils::StringToDouble(value);
+}
+
 void SvgAttributesParser::StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension)
 {
     errno = 0;
@@ -341,11 +346,6 @@ void SvgAttributesParser::ParseDimension(const std::string& value, Dimension& di
     StringToDimensionWithUnitSvg(value, dimension);
 }
 
-double SvgAttributesParser::ParseDouble(const std::string& value)
-{
-    return StringUtils::StringToDouble(value);
-}
-
 bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& result)
 {
     std::smatch matches;
@@ -361,6 +361,110 @@ bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& re
         }
     }
     return false;
+}
+
+SvgAlign SvgAttributesParser::ParseSvgAlign(const std::string& value)
+{
+    static const LinearMapNode<SvgAlign> SVG_ALIGN_ARRAY[] = {
+        { SVG_ALIGN_NONE, SvgAlign::ALIGN_NONE },
+        { SVG_ALIGN_XMAX_YMAX, SvgAlign::ALIGN_XMAX_YMAX },
+        { SVG_ALIGN_XMAX_YMID, SvgAlign::ALIGN_XMAX_YMID },
+        { SVG_ALIGN_XMAX_YMIN, SvgAlign::ALIGN_XMAX_YMIN },
+        { SVG_ALIGN_XMID_YMAX, SvgAlign::ALIGN_XMID_YMAX },
+        { SVG_ALIGN_XMID_YMID, SvgAlign::ALIGN_XMID_YMID },
+        { SVG_ALIGN_XMID_YMIN, SvgAlign::ALIGN_XMID_YMIN },
+        { SVG_ALIGN_XMIN_YMAX, SvgAlign::ALIGN_XMIN_YMAX },
+        { SVG_ALIGN_XMIN_YMID, SvgAlign::ALIGN_XMIN_YMID },
+        { SVG_ALIGN_XMIN_YMIN, SvgAlign::ALIGN_XMIN_YMIN },
+    };
+    auto attrIter = BinarySearchFindIndex(SVG_ALIGN_ARRAY, ArraySize(SVG_ALIGN_ARRAY), value.c_str());
+    if (attrIter != -1) {
+        return SVG_ALIGN_ARRAY[attrIter].value;
+    }
+    return SvgAlign::ALIGN_XMID_YMID;
+}
+
+SvgMeetOrSlice SvgAttributesParser::ParseSvgMeetOrSlice(const std::string& value)
+{
+    static const LinearMapNode<SvgMeetOrSlice> SVG_MEETORSLICE_ARRAY[] = {
+        { SVG_ALIGN_MEET, SvgMeetOrSlice::MEET },
+        { SVG_ALIGN_SLICE, SvgMeetOrSlice::SLICE },
+    };
+    auto attrIter = BinarySearchFindIndex(SVG_MEETORSLICE_ARRAY, ArraySize(SVG_MEETORSLICE_ARRAY), value.c_str());
+    if (attrIter != -1) {
+        return SVG_MEETORSLICE_ARRAY[attrIter].value;
+    }
+    return SvgMeetOrSlice::MEET;
+}
+
+void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& viewPort, const float scaleX,
+    const float scaleY, const SvgAlign& svgAlign, float& translateX, float& translateY)
+{
+    translateX = 0.0f;
+    translateY = 0.0f;
+    switch (svgAlign) {
+        /*translate x y eq 0.0f*/
+        case SvgAlign::ALIGN_XMIN_YMIN:
+            break;
+        /*translate x eq 0.0f*/
+        case SvgAlign::ALIGN_XMIN_YMID:
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
+            break;
+        /*translate x eq 0.0f*/
+        case SvgAlign::ALIGN_XMIN_YMAX:
+            translateY = viewPort.Height() - viewBox.Height() * scaleY;
+            break;
+        /*translate y eq 0.0f*/
+        case SvgAlign::ALIGN_XMID_YMIN:
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            break;
+        case SvgAlign::ALIGN_XMID_YMAX:
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            translateY = viewPort.Height() - viewBox.Height() * scaleY;
+            break;
+        /*translate y eq 0.0f*/
+        case SvgAlign::ALIGN_XMAX_YMIN:
+            translateX = viewPort.Width() - viewBox.Width() * scaleX;
+            break;
+        case SvgAlign::ALIGN_XMAX_YMID:
+            translateX = viewPort.Width() - viewBox.Width() * scaleX;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
+            break;
+        case SvgAlign::ALIGN_XMAX_YMAX:
+            translateX = viewPort.Width() - viewBox.Width() * scaleX;
+            translateY = viewPort.Height() - viewBox.Height() * scaleY;
+            break;
+        case SvgAlign::ALIGN_XMID_YMID:
+        default:
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
+            break;
+    }
+}
+
+void SvgAttributesParser::ComputeScale(const Size& viewBox, const Size& viewPort,
+    const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY)
+{
+    if (!viewBox.IsValid()) {
+        return;
+    }
+    float ratioX = viewPort.Width() / viewBox.Width();
+    float ratioY = viewPort.Height() / viewBox.Height();
+    if (preserveAspectRatio.svgAlign == SvgAlign::ALIGN_NONE) {
+        scaleX = ratioX;
+        scaleY = ratioY;
+        return;
+    }
+    switch (preserveAspectRatio.meetOrSlice) {
+        case SvgMeetOrSlice::SLICE:
+            scaleX = std::max(ratioX, ratioY);
+            break;
+        case SvgMeetOrSlice::MEET:
+        default:
+            scaleX = std::min(ratioX, ratioY);
+            break;
+    }
+    scaleY = scaleX;
 }
 
 std::pair<Dimension, Dimension> SvgAttributesParser::GetTransformOrigin(const std::string& transformOrigin)
@@ -479,110 +583,6 @@ std::vector<NG::TransformInfo> SvgAttributesParser::GetTransformInfo(const std::
         transformVec.push_back(transformInfo);
     }
     return transformVec;
-}
-
-SvgAlign SvgAttributesParser::ParseSvgAlign(const std::string& value)
-{
-    static const LinearMapNode<SvgAlign> SVG_ALIGN_ARRAY[] = {
-        { SVG_ALIGN_NONE, SvgAlign::ALIGN_NONE },
-        { SVG_ALIGN_XMAX_YMAX, SvgAlign::ALIGN_XMAX_YMAX },
-        { SVG_ALIGN_XMAX_YMID, SvgAlign::ALIGN_XMAX_YMID },
-        { SVG_ALIGN_XMAX_YMIN, SvgAlign::ALIGN_XMAX_YMIN },
-        { SVG_ALIGN_XMID_YMAX, SvgAlign::ALIGN_XMID_YMAX },
-        { SVG_ALIGN_XMID_YMID, SvgAlign::ALIGN_XMID_YMID },
-        { SVG_ALIGN_XMID_YMIN, SvgAlign::ALIGN_XMID_YMIN },
-        { SVG_ALIGN_XMIN_YMAX, SvgAlign::ALIGN_XMIN_YMAX },
-        { SVG_ALIGN_XMIN_YMID, SvgAlign::ALIGN_XMIN_YMID },
-        { SVG_ALIGN_XMIN_YMIN, SvgAlign::ALIGN_XMIN_YMIN },
-    };
-    auto attrIter = BinarySearchFindIndex(SVG_ALIGN_ARRAY, ArraySize(SVG_ALIGN_ARRAY), value.c_str());
-    if (attrIter != -1) {
-        return SVG_ALIGN_ARRAY[attrIter].value;
-    }
-    return SvgAlign::ALIGN_XMID_YMID;
-}
-
-SvgMeetOrSlice SvgAttributesParser::ParseSvgMeetOrSlice(const std::string& value)
-{
-    static const LinearMapNode<SvgMeetOrSlice> SVG_MEETORSLICE_ARRAY[] = {
-        { SVG_ALIGN_MEET, SvgMeetOrSlice::MEET },
-        { SVG_ALIGN_SLICE, SvgMeetOrSlice::SLICE },
-    };
-    auto attrIter = BinarySearchFindIndex(SVG_MEETORSLICE_ARRAY, ArraySize(SVG_MEETORSLICE_ARRAY), value.c_str());
-    if (attrIter != -1) {
-        return SVG_MEETORSLICE_ARRAY[attrIter].value;
-    }
-    return SvgMeetOrSlice::MEET;
-}
-
-void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& viewPort, const float scaleX,
-    const float scaleY, const SvgAlign& svgAlign, float& translateX, float& translateY)
-{
-    translateX = 0.0f;
-    translateY = 0.0f;
-    switch (svgAlign) {
-        /*translate x y eq 0.0f*/
-        case SvgAlign::ALIGN_XMIN_YMIN:
-            break;
-        /*translate x eq 0.0f*/
-        case SvgAlign::ALIGN_XMIN_YMID:
-            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
-            break;
-        /*translate x eq 0.0f*/
-        case SvgAlign::ALIGN_XMIN_YMAX:
-            translateY = viewPort.Height() - viewBox.Height() * scaleY;
-            break;
-        /*translate y eq 0.0f*/
-        case SvgAlign::ALIGN_XMID_YMIN:
-            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
-            break;
-        case SvgAlign::ALIGN_XMID_YMAX:
-            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
-            translateY = viewPort.Height() - viewBox.Height() * scaleY;
-            break;
-        /*translate y eq 0.0f*/
-        case SvgAlign::ALIGN_XMAX_YMIN:
-            translateX = viewPort.Width() - viewBox.Width() * scaleX;
-            break;
-        case SvgAlign::ALIGN_XMAX_YMID:
-            translateX = viewPort.Width() - viewBox.Width() * scaleX;
-            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
-            break;
-        case SvgAlign::ALIGN_XMAX_YMAX:
-            translateX = viewPort.Width() - viewBox.Width() * scaleX;
-            translateY = viewPort.Height() - viewBox.Height() * scaleY;
-            break;
-        case SvgAlign::ALIGN_XMID_YMID:
-        default:
-            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
-            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
-            break;
-    }
-}
-
-void SvgAttributesParser::ComputeScale(const Size& viewBox, const Size& viewPort,
-    const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY)
-{
-    if (!viewBox.IsValid()) {
-        return;
-    }
-    float ratioX = viewPort.Width() / viewBox.Width();
-    float ratioY = viewPort.Height() / viewBox.Height();
-    if (preserveAspectRatio.svgAlign == SvgAlign::ALIGN_NONE) {
-        scaleX = ratioX;
-        scaleY = ratioY;
-        return;
-    }
-    switch (preserveAspectRatio.meetOrSlice) {
-        case SvgMeetOrSlice::SLICE:
-            scaleX = std::max(ratioX, ratioY);
-            break;
-        case SvgMeetOrSlice::MEET:
-        default:
-            scaleX = std::min(ratioX, ratioY);
-            break;
-    }
-    scaleY = scaleX;
 }
 
 Color SvgAttributesParser::GetColorFromHexString(const std::string& value)
