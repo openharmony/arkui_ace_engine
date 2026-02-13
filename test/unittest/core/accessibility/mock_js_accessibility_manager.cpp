@@ -35,7 +35,7 @@ bool UIExtensionManager::IsShowPlaceholder(int32_t nodeId)
 }
 bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
 {
-    return false;
+    return elementId > UI_EXTENSION_OFFSET_MIN;
 }
 std::pair<int64_t, int64_t> UIExtensionManager::UnWrapExtensionAbilityId(
     int64_t extensionOffset,
