@@ -103,7 +103,8 @@ void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& but
 void ButtonModelNG::ParseButtonResColor(
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
-    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result);
+    bool adaptMaterial = buttonColorType == ButtonColorType::FONT_COLOR;
+    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result, adaptMaterial);
     CHECK_EQUAL_VOID(parseFlag, true);
     auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);

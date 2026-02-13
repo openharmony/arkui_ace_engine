@@ -6813,6 +6813,31 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     return ok;
 }
 
+bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
+    const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t type = UNKNOWN_RESOURCE_TYPE;
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
+    if (ok) {
+        JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
+        if (jsOpacityRatio->IsNumber()) {
+            double opacityRatio = jsOpacityRatio->ToNumber<double>();
+            result = result.BlendOpacity(opacityRatio);
+        }
+        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+            result.FillColorPlaceholderIfNeed(resIdNum);
+        }
+    }
+    return ok;
+}
+
 bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
     RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
 {
@@ -6995,6 +7020,34 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
     }
     state = ParseJsColorFromResource(jsValue, result, resObj);
     CompleteResourceObjectFromColor(resObj, result, state);
+    return state;
+}
+
+bool JSViewAbstract::ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    bool state = false;
+    if (jsValue->IsNumber()) {
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        CompleteResourceObjectFromColor(resObj, result, true);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        state = Color::ParseColorString(jsValue->ToString(), result);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
+    }
+    if (!jsValue->IsObject()) {
+        return state;
+    }
+    if (jsValue->IsObject()) {
+        if (ParseColorMetricsToColor(jsValue, result, resObj)) {
+            CompleteResourceObjectFromColor(resObj, result, true);
+            return true;
+        }
+        state = ParseJsColorFromResourceForMaterial(jsValue, result, resObj);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
+    }
     return state;
 }
 

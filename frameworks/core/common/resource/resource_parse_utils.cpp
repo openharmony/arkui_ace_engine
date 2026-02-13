@@ -407,7 +407,7 @@ bool ResourceParseUtils::ParseResColorWithName(const RefPtr<ResourceObject>& res
     return true;
 }
 
-bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result)
+bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result, bool adaptMaterial)
 {
     CHECK_NULL_RETURN(resObj, false);
 
@@ -451,6 +451,9 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId);
         result.SetResourceId(resId);
+        if (adaptMaterial) {
+            result.FillColorPlaceholderIfNeed(resId);
+        }
         InvertColorWithResource(resObj, result, colorMode);
         return true;
     }

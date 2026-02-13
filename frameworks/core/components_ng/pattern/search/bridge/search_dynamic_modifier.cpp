@@ -87,6 +87,16 @@ SearchModel* GetSearchModelImpl()
 }
 #endif
 
+void FillColorValueAndPlaceholder(Color& result, ArkUI_Int32 colorValue, ArkUI_Int32 colorPlaceholder)
+{
+    result.SetValue(colorValue);
+    if (colorPlaceholder > static_cast<ArkUI_Int32>(ColorPlaceholder::NONE) &&
+        colorPlaceholder <= static_cast<ArkUI_Int32>(ColorPlaceholder::MAX)) {
+        // no need to set ColorPlaceholder::NONE
+        result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
+    }
+}
+
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
@@ -125,16 +135,18 @@ void ResetSearchTextFont(ArkUINodeHandle node)
     }
 }
 
-void SetSearchPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetSearchPlaceholderColor(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* resRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetPlaceholderColor(frameNode, Color(color));
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    CHECK_NULL_VOID(colorPtr);
+    SearchModelNG::SetPlaceholderColor(frameNode, *colorPtr);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
+        pattern->RegisterResource<Color>("placeholderColor", resObj, *colorPtr, true);
     } else {
         pattern->UnRegisterResource("placeholderColor");
     }
@@ -166,13 +178,14 @@ void ResetSearchSelectionMenuHidden(ArkUINodeHandle node)
     SearchModelNG::SetSelectionMenuHidden(frameNode, DEFAULT_SELECTION_MENU_HIDDEN);
 }
 
-void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Uint32 caretColor,
-    void* widthRawPtr, void* colorRawPtr)
+void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit,
+    const ArkUI_InnerColor* caretColor, void* widthRawPtr, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    const auto* caretColorPtr = reinterpret_cast<const Color*>(caretColor);
     SearchModelNG::SetCaretWidth(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
+    SearchModelNG::SetCaretColor(frameNode, *caretColorPtr);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && widthRawPtr) {
@@ -184,7 +197,7 @@ void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI
     }
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(caretColor));
+        pattern->RegisterResource<Color>("caretColor", resObj, *caretColorPtr, true);
     } else {
         pattern->UnRegisterResource("caretColor");
     }
@@ -261,7 +274,7 @@ void RegisterSearchCancelButtonResources(const RefPtr<Pattern>& pattern, const s
     }
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
+        pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor, true);
     } else {
         pattern->UnRegisterResource("cancelButtonIconColor");
     }
@@ -285,7 +298,7 @@ void SetJsSearchCancelButton(ArkUI_Int32 style, const struct ArkUIIconOptionsStr
     std::string bundleNameStr(bundleName);
     std::string moduleNameStr(moduleName);
     if (value->color != INVALID_COLOR_VALUE) {
-        iconColor = Color(value->color);
+        FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
         cancelIconOptions =
             NG::IconOptions(iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
                 std::string(value->src), bundleNameStr, moduleNameStr);
@@ -308,18 +321,20 @@ void SetJsSearchDefaultCancelButton(ArkUI_Int32 style)
 }
 
 void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-    ArkUI_Uint32 color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes)
+    const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
     NG::IconOptions cancelIconOptions = NG::IconOptions(
-        Color(color), Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+        *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
     SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    struct ArkUIIconOptionsStruct value = {size->value, size->unit, color, src};
-    RegisterSearchCancelButtonResources(pattern, &value, imageIconRes, Color(color));
+    struct ArkUIIconOptionsStruct value = { size->value, size->unit, static_cast<ArkUI_Int32>(colorPtr->GetValue()),
+        static_cast<ArkUI_Int32>(colorPtr->GetPlaceholder()), src };
+    RegisterSearchCancelButtonResources(pattern, &value, imageIconRes, *colorPtr);
 }
 
 void ResetSearchCancelButton(ArkUINodeHandle node)
@@ -407,7 +422,7 @@ void RegisterSearchIconResources(const RefPtr<Pattern>& pattern, const struct Ar
     }
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("searchIconColor", resObj, iconColor);
+        pattern->RegisterResource<Color>("searchIconColor", resObj, iconColor, true);
     } else {
         pattern->UnRegisterResource("searchIconColor");
     }
@@ -426,7 +441,7 @@ void SetSearchSearchIcon(
     CHECK_NULL_VOID(frameNode);
     Color iconColor;
     if (value->color != INVALID_COLOR_VALUE) {
-        iconColor = Color(value->color);
+        FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
     }
 
     NG::IconOptions cancelInconOptions = NG::IconOptions(
@@ -455,7 +470,7 @@ void SetJsSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsSt
     std::string bundleNameStr(bundleName);
     std::string moduleNameStr(moduleName);
     if (value->color != INVALID_COLOR_VALUE) {
-        iconColor = Color(value->color);
+        FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
         searchIconOptions =
             NG::IconOptions(iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
                 std::string(value->src), bundleNameStr, moduleNameStr);
@@ -571,16 +586,18 @@ void ResetSearchSearchButton(ArkUINodeHandle node)
     }
 }
 
-void SetSearchFontColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr)
+void SetSearchFontColor(ArkUINodeHandle node, const ArkUI_InnerColor* value, void* resRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetTextColor(frameNode, Color(value));
+    const auto* colorPtr = reinterpret_cast<const Color*>(value);
+    CHECK_NULL_VOID(colorPtr);
+    SearchModelNG::SetTextColor(frameNode, *colorPtr);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("fontColor", resObj, Color(value));
+        pattern->RegisterResource<Color>("fontColor", resObj, *colorPtr, true);
     } else {
         pattern->UnRegisterResource("fontColor");
     }
@@ -1860,9 +1877,11 @@ void SetBackBorder(ArkUINodeHandle node)
 }
 
 #ifndef CROSS_PLATFORM
-void SetSearchPlaceholderColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetSearchPlaceholderColorImpl(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* resRawPtr)
 {
-    GetSearchModelImpl()->SetPlaceholderColor(Color(color));
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    CHECK_NULL_VOID(colorPtr);
+    GetSearchModelImpl()->SetPlaceholderColor(*colorPtr);
 }
 
 void SetSearchTextFontImpl(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
