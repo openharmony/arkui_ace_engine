@@ -13,14 +13,14 @@
 * limitations under the License.
 */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_HYPERLINK_MODEL_IMPL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_HYPERLINK_MODEL_IMPL_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_HYPERLINK_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_HYPERLINK_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
 #include "core/components/hyperlink/hyperlink_component.h"
 
 namespace OHOS::Ace::Framework {
-class ACE_FORCE_EXPORT HyperlinkModelImpl : public HyperlinkModel {
+class ACE_EXPORT HyperlinkModelImpl : public HyperlinkModel {
 public:
     void Create(const std::string& address, const std::string& summary) override;
     void SetColor(const Color& value) override;
@@ -28,10 +28,8 @@ public:
     void SetDraggable(bool draggable) override {}
 
 private:
-    static void PopNew();
-
     RefPtr<HyperlinkComponent> GetComponent();
 };
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_HYPERLINK_MODEL_IMPL_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_HYPERLINK_MODEL_IMPL_H
