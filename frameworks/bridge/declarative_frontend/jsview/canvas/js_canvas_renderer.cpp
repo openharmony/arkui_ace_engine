@@ -163,6 +163,15 @@ static bool ProcessColorFromString(std::string colorStr, Color& color)
             Color::MatchColorSpecialString(colorStr, color));
 }
 
+void CreateZeroImageData(JSRef<JSObject> retObj)
+{
+    JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
+    auto zeroColorArray =
+        JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
+    retObj->SetProperty("width", 0);
+    retObj->SetProperty("height", 0);
+    retObj->SetPropertyObject("data", zeroColorArray);
+}
 } // namespace
 
 JSCanvasRenderer::JSCanvasRenderer()
@@ -695,12 +704,7 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
     // Height or Width is ZERO or Overflow.
     if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
-        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
-        auto zeroColorArray =
-            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
-        retObj->SetProperty("width", 0);
-        retObj->SetProperty("height", 0);
-        retObj->SetPropertyObject("data", zeroColorArray);
+        CreateZeroImageData(retObj);
         return;
     }
     for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
@@ -832,19 +836,36 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
-    auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
     // Height or Width is ZERO or Overflow.
-    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
-        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
-        auto zeroColorArray =
-            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
-        retObj->SetProperty("width", 0);
-        retObj->SetProperty("height", 0);
-        retObj->SetPropertyObject("data", zeroColorArray);
+    if (finalWidth == 0 || finalHeight == 0 || finalWidth > (UINT32_MAX / finalHeight)) {
+        CreateZeroImageData(retObj);
         return;
     }
-    renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
+    JSRef<JSArrayBuffer> arrayBuffer;
+    if (SystemProperties::GetLayoutTraceEnabled()) {
+        auto pixelmap = renderingContext2DModel_->GetPixelMap(imageSize);
+        if (!pixelmap) {
+            CreateZeroImageData(retObj);
+            return;
+        }
+        pixelmap->IncRefCount();
+        auto deleter = [](void* env, void* buffer, void* data) -> void {
+            Ace::PixelMap* rawPixelMap = reinterpret_cast<Ace::PixelMap*>(data);
+            if (rawPixelMap != nullptr) {
+                rawPixelMap->DecRefCount();
+            }
+        };
+        arrayBuffer = JSRef<JSArrayBuffer>::New(
+            pixelmap->GetWritablePixels(), finalWidth * finalHeight * PIXEL_SIZE, deleter, AceType::RawPtr(pixelmap));
+    } else {
+        arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
+        auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+        if (!buffer) {
+            CreateZeroImageData(retObj);
+            return;
+        }
+        renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
+    }
     auto colorArray = JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
     retObj->SetProperty("width", finalWidth);
     retObj->SetProperty("height", finalHeight);
