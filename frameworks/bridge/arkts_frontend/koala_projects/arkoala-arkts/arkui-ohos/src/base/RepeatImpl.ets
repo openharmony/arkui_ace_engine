@@ -62,19 +62,24 @@ export function RepeatImplForOptions<T>(
 }
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
-    private item_: T
+    private arr_: RepeatArray<T>;
     private index_: int32;
     private version: IMutableStateMeta;
 
-    constructor(item: T, index: int32) {
-        this.item_ = item;
+    constructor(arr: RepeatArray<T>, index: int32) {
+        this.arr_ = arr;
         this.index_ = index;
         this.version = FactoryInternal.mkMutableStateMeta('__backing_repeat_item_version');
     }
 
+    get arr(): RepeatArray<T> {
+        this.version;
+        return this.arr_;
+    }
+
     get item(): T {
         this.version;
-        return this.item_;
+        return this.arr_[this.index_];
     }
 
     get index(): int32 {
@@ -267,7 +272,7 @@ function virtualRender<T>(
 
     /** @memo */
     const itemGen = (item: T, index: int32): void => {
-        const ri = new RepeatItemImpl<T>(item, index);
+        const ri = new RepeatItemImpl<T>(arr, index);
         let _type: string = attributes.ttypeGenFunc_(item, index);
         if (!attributes.itemGenFuncs_.has(_type)) {
             _type = REPEAT_EACH_FUNC_TYPE;
@@ -318,7 +323,7 @@ function nonVirtualRender<T>(
     const itemGen = (ele: T, i: int32) => {
         /** @memo */
         const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
-        const ri = new RepeatItemImpl<T>(ele, i);
+        const ri = new RepeatItemImpl<T>(arr, i);
         const env = getCurrentEnv();
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             wrapBuilder(env, () => { itemGenerator(ri); })
