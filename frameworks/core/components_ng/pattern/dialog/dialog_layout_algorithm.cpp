@@ -83,6 +83,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isModal_ && !isShowInSubWindow_;
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
+    needAdaptForceSplitMode_ = pipeline->IsCurrentInForceSplitMode() && !IsEmbeddedDialog(hostNode);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
@@ -108,7 +109,11 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateSafeArea(hostNode);
     isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
     ResizeDialogSubwindow(dialogPattern->IsShowInFreeMultiWindow(), isShowInSubWindow_, isShowInFloatingWindow_);
-    const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
+    auto layoutConstraint = dialogProp->GetLayoutConstraint();
+    if (needAdaptForceSplitMode_) {
+        layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() / HALF);
+        layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() / HALF);
+    }
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
     // dialog size fit screen.
@@ -134,10 +139,12 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        return;
+    if (needAdaptForceSplitMode_) {
+        childLayoutConstraint.percentReference.SetWidth(childLayoutConstraint.percentReference.Width() / HALF);
+        childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() / HALF);
     }
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    CHECK_NULL_VOID(!children.empty());
     auto child = children.front();
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
@@ -158,13 +165,15 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.percentReference.SetHeight(
             std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     }
-    if (pipeline->IsCurrentInForceSplitMode()) {
-        childLayoutConstraint.percentReference.SetWidth(pipeline->GetRootWidth() / HALF);
-        childLayoutConstraint.maxSize.SetWidth(pipeline->GetRootWidth() / HALF);
-    }
 
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+        float widthRatio = needAdaptForceSplitMode_ ?
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+        childLayoutConstraint.maxSize.SetWidth(widthRatio);
+        if (needAdaptForceSplitMode_) {
+            childLayoutConstraint.percentReference.SetWidth(widthRatio);
+        }
     }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
@@ -472,7 +481,10 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
     if (isSuitableForElderly_) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             innerLayout.minSize = SizeF(width, 0.0);
-            innerLayout.maxSize.SetWidth(pipeline->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
+            float widthRatio = needAdaptForceSplitMode_ ?
+                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
+                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+            innerLayout.maxSize.SetWidth(widthRatio);
         }
     }
     // update percentRef
@@ -926,7 +938,11 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto pipelineContext = GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    const auto& layoutConstraint = prop->GetLayoutConstraint();
+    auto layoutConstraint = prop->GetLayoutConstraint();
+    if (needAdaptForceSplitMode_) {
+        layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() / HALF);
+        layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() / HALF);
+    }
     CHECK_NULL_RETURN(dialogTheme, OffsetF());
     auto dialogOffsetX =
         ConvertToPx(CalcLength(dialogOffset_.GetX()), layoutConstraint->scaleProperty, selfSize.Width());
@@ -935,9 +951,6 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
-    if (pipelineContext->IsCurrentInForceSplitMode()) {
-        maxSize.SetWidth(maxSize.Width() / HALF);
-    }
     wrapperSize_ = layoutConstraint->maxSize;
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
@@ -951,7 +964,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         needAvoidKeyboard = false;
     }
-    if (pipelineContext->IsCurrentInForceSplitMode()) {
+    if (needAdaptForceSplitMode_) {
         topLeftPoint.SetX(topLeftPoint.GetX() + pipelineContext->GetRootWidth() / HALF);
     }
     auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
