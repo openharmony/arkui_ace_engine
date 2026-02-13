@@ -17,7 +17,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_component_id_ffi.h"
 
 #include "core/components_ng/base/inspector.h"
-#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

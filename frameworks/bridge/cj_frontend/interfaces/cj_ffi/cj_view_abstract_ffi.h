@@ -632,8 +632,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId,
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(
-    double radius, int32_t direction, VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetWindowBlur(float progress, int32_t styleValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, double offsetX, double offsetY);
@@ -792,6 +792,10 @@ CJ_EXPORT void FFIOHOSAceFrameworkFocusScopePriority(const char* scopeId, int32_
 CJ_EXPORT void FFIOHOSAceFrameworkFocusScopeId(const char* id, bool isGroup, bool arrowStepOut);
 CJ_EXPORT uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overlayColor);
 
+CJ_EXPORT void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle);
+CJ_EXPORT void FFIOHOSAceFrameworkRestoreDefault();
+CJ_EXPORT void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize);
+
 CJ_EXPORT void FFISetWidthWithEmpty();
 CJ_EXPORT void FFISetHeightWithEmpty();
 
@@ -830,6 +834,7 @@ CJ_EXPORT void FFIOHOSAceFrameworkBindContentCoverV2(bool isShow, void (*builder
 CJ_EXPORT ExternalString FFIGetResourceString(NativeResourceObject obj);
 CJ_EXPORT ExternalString FFIGetResourceMedia(NativeResourceObject obj);
 CJ_EXPORT uint32_t FFIGetResourceColor(NativeResourceObject obj);
+CJ_EXPORT ExternalString FFIGetResourceColorString(NativeResourceObject obj);
 CJ_EXPORT RetDimension FFIGetResourceDimension(NativeResourceObject obj);
 CJ_EXPORT double FFIGetResourceDouble(NativeResourceObject obj);
 CJ_EXPORT int32_t FFIGetResourceInt32(NativeResourceObject obj);
@@ -837,9 +842,6 @@ CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
 CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
-CJ_EXPORT void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle);
-CJ_EXPORT void FFIOHOSAceFrameworkRestoreDefault();
-CJ_EXPORT void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize);
 CJ_EXPORT void FfiOHOSAceFrameworkPopupDismiss();
 
 struct CBorderImageOption {

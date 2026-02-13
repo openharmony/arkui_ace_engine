@@ -81,9 +81,4 @@ void FfiOHOSAceFrameworkRowSetWidth(double width, int32_t unit)
     FlexModel::GetInstance()->SetHasWidth();
     return;
 }
-
-void FfiOHOSAceFrameworkRowSetReverse(bool value)
-{
-    RowModel::GetInstance()->SetIsReverse(value);
-}
 }

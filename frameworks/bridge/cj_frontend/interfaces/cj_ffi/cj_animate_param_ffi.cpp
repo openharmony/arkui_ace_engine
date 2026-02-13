@@ -17,6 +17,7 @@
 
 #include "cj_lambda.h"
 
+#include "base/utils/system_properties.h"
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -29,6 +30,21 @@ const std::vector<AnimationDirection> ANIMATION_DIRECTION = { AnimationDirection
     AnimationDirection::ALTERNATE, AnimationDirection::ALTERNATE_REVERSE };
 const std::vector<FinishCallbackType> FINISH_CALLBACK_TYPE = { FinishCallbackType::REMOVED,
     FinishCallbackType::LOGICALLY };
+
+void ParseTempo(const NativeAnimateParam& animationValue, AnimationOption& result)
+{
+    if (!animationValue.tempo.hasValue) {
+        return;
+    }
+    float tempo = animationValue.tempo.value;
+    if (LessNotEqual(tempo, 0.0f)) {
+        tempo = 1.0f;
+    }
+    if (SystemProperties::GetRosenBackendEnabled() && NearZero(static_cast<double>(tempo))) {
+        result.SetDuration(0);
+    }
+    result.SetTempo(tempo);
+}
 } // namespace
 
 namespace OHOS::Ace::Framework {
@@ -46,16 +62,9 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetIteration(animationValue.iterations.value);
     }
 
-    if (animationValue.tempo.hasValue) {
-        float tempo = animationValue.tempo.value;
-        if (NonPositive(tempo)) {
-            tempo = 1.0f;
-        }
-        result.SetTempo(tempo);
-    }
+    ParseTempo(animationValue, result);
 
-    if (animationValue.playMode.hasValue && animationValue.playMode.value >= 0 &&
-        animationValue.playMode.value < static_cast<int32_t>(ANIMATION_DIRECTION.size())) {
+    if (animationValue.playMode.hasValue) {
         result.SetAnimationDirection(ANIMATION_DIRECTION[animationValue.playMode.value]);
     }
 
@@ -64,8 +73,7 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetCurve(curve);
     }
 
-    if (animationValue.finishCallbackType.hasValue && animationValue.finishCallbackType.value >= 0 &&
-        animationValue.finishCallbackType.value < static_cast<int32_t>(FINISH_CALLBACK_TYPE.size())) {
+    if (animationValue.finishCallbackType.hasValue) {
         result.SetFinishCallbackType(FINISH_CALLBACK_TYPE[animationValue.finishCallbackType.value]);
     }
 

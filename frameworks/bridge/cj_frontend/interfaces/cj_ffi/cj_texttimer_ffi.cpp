@@ -17,6 +17,7 @@
 
 #include <regex>
 #include <string>
+
 #include "cj_lambda.h"
 #include "bridge/common/utils/utils.h"
 
@@ -105,8 +106,9 @@ void FfiOHOSAceFrameworkTextTimerCreate(bool isCountDown, int64_t count, int64_t
 
 void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value)
 {
-    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
-        std::string valueString(value);
+    bool isApi23OrAbove = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE);
+    if (!isApi23OrAbove) {
+        std::string valueString = static_cast<std::string>(value);
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
         if (!std::regex_match(value, pattern)) {
@@ -134,6 +136,7 @@ void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value)
     if (pos != std::string::npos) {
         format.replace(pos, sizeof("hh") - 1, "HH");
     }
+
     TextTimerModel::GetInstance()->SetFormat(format);
 }
 

@@ -448,7 +448,6 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
         }
     }
 
-
     int32_t topValue = cjValue.top;
     if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size())) {
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
@@ -1100,8 +1099,8 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
     ViewAbstractModel::GetInstance()->SetColorBlend(Color(color));
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(
-    double radius, int32_t direction, VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
+void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
 {
     double blurRadius = radius;
     std::vector<std::pair<float, float>> fractionStops;
@@ -1111,7 +1110,7 @@ void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(
         return;
     }
     float tmpPos = -1.0f;
-    for (size_t i = 0; i < blurVector.size(); i++) {
+    for (size_t i = 0; i <blurVector.size(); i++) {
         std::pair<float, float> fractionStop;
         fractionStop.first = static_cast<float>(std::clamp(blurVector[i], 0.0, 1.0));
         fractionStop.second = static_cast<float>(std::clamp(positionVector[i], 0.0, 1.0));
@@ -1331,11 +1330,11 @@ void FfiOHOSAceFrameworkViewAbstractSetOutlineStyle(int32_t style)
     ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[style]);
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(
-    int32_t styleTop, int32_t styleRight, int32_t styleBottom, int32_t styleLeft)
+void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(int32_t styleTop, int32_t styleRight,
+    int32_t styleBottom, int32_t styleLeft)
 {
-    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(
-        BORDER_STYLES[styleLeft], BORDER_STYLES[styleRight], BORDER_STYLES[styleTop], BORDER_STYLES[styleBottom]);
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[styleLeft],
+        BORDER_STYLES[styleRight], BORDER_STYLES[styleTop], BORDER_STYLES[styleBottom]);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetOutlineWidth(double width, int32_t unit)
@@ -1377,11 +1376,11 @@ void FfiOHOSAceFrameworkViewAbstractSetOutlineColor(uint32_t value)
     ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(value));
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(
-    uint32_t colorTop, uint32_t colorRight, uint32_t colorBottom, uint32_t colorLeft)
+void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(uint32_t colorTop, uint32_t colorRight,
+    uint32_t colorBottom, uint32_t colorLeft)
 {
-    ViewAbstractModel::GetInstance()->SetOuterBorderColor(
-        Color(colorLeft), Color(colorRight), Color(colorTop), Color(colorBottom));
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(colorLeft), Color(colorRight),
+        Color(colorTop), Color(colorBottom));
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetOutlineRadius(double radius, int32_t unit)
@@ -2575,20 +2574,20 @@ void ParseSheetCallbackV2(CJSheetOptionsV2 options, std::function<void()>& onApp
         sheetSpringBack = CJLambda::Create(options.onWillSpringBackWhenDismiss.value);
     }
     if (options.onHeightDidChange.hasValue) {
-        onHeightDidChange = [lambda = CJLambda::Create(options.onHeightDidChange.value)](
-                                const float value) { lambda(value); };
+        onHeightDidChange =
+            [lambda = CJLambda::Create(options.onHeightDidChange.value)](const float value) { lambda(value); };
     }
     if (options.onDetentsDidChange.hasValue) {
-        onDetentsDidChange = [lambda = CJLambda::Create(options.onDetentsDidChange.value)](
-                                 const float value) { lambda(value); };
+        onDetentsDidChange =
+            [lambda = CJLambda::Create(options.onDetentsDidChange.value)](const float value) { lambda(value); };
     }
     if (options.onWidthDidChange.hasValue) {
-        onWidthDidChange = [lambda = CJLambda::Create(options.onWidthDidChange.value)](
-                               const float value) { lambda(value); };
+        onWidthDidChange =
+            [lambda = CJLambda::Create(options.onWidthDidChange.value)](const float value) { lambda(value); };
     }
     if (options.onTypeDidChange.hasValue) {
-        onTypeDidChange = [lambda = CJLambda::Create(options.onTypeDidChange.value)](
-                              const float value) { lambda(value); };
+        onTypeDidChange =
+            [lambda = CJLambda::Create(options.onTypeDidChange.value)](const float value) { lambda(value); };
     }
 }
 
@@ -2950,6 +2949,43 @@ void FFIOHOSAceFrameworkFocusScopeId(const char* id, bool isGroup, bool arrowSte
     ViewAbstractModel::GetInstance()->SetFocusScopeId(id, isGroup, arrowStepOut);
 }
 
+void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        LOGE("pipeline context is non-valid");
+        return;
+    }
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("TaskExecutor is non-valid");
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, pointerStyle]() { pipelineContext->SetCursor(pointerStyle); }, TaskExecutor::TaskType::UI,
+        "ArkUICjSetCursor");
+}
+
+void FFIOHOSAceFrameworkRestoreDefault()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        LOGE("pipeline context is non-valid");
+        return;
+    }
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("TaskExecutor is non-valid");
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(0, MouseStyleChangeReason::USER_SET_MOUSESTYLE); },
+        TaskExecutor::TaskType::UI, "ArkUICjRestoreDefault");
+}
+
+void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize)
+{
+    ViewAbstractModel::GetInstance()->SetMonopolizeEvents(monopolize);
+}
+
 uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overlayColor)
 {
     return Color(color).BlendColor(Color(overlayColor)).GetValue();
@@ -3068,6 +3104,17 @@ uint32_t FFIGetResourceSymbolId(NativeResourceObject obj)
     return symbolId;
 }
 
+ExternalString FFIGetResourceColorString(NativeResourceObject obj)
+{
+    Color color;
+    if (!ViewAbstract::ParseCjColor(obj, color)) {
+        LOGE("Parse color failed.");
+        return ::Utils::MallocCString("");
+    }
+    std::string result = color.ToString();
+    return ::Utils::MallocCString(result);
+}
+
 uint32_t FFIGetResourceColor(NativeResourceObject obj)
 {
     Color color;
@@ -3142,43 +3189,6 @@ VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj)
         LOGE("Parse string array failed.");
     }
     return result;
-}
-
-void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        LOGE("pipeline context is non-valid");
-        return;
-    }
-    if (!pipelineContext->GetTaskExecutor()) {
-        LOGE("TaskExecutor is non-valid");
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext, pointerStyle]() { pipelineContext->SetCursor(pointerStyle); }, TaskExecutor::TaskType::UI,
-        "ArkUICjSetCursor");
-}
-
-void FFIOHOSAceFrameworkRestoreDefault()
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        LOGE("pipeline context is non-valid");
-        return;
-    }
-    if (!pipelineContext->GetTaskExecutor()) {
-        LOGE("TaskExecutor is non-valid");
-        return;
-    }
-    pipelineContext->GetTaskExecutor()->PostSyncTask(
-        [pipelineContext]() { pipelineContext->RestoreDefault(0, MouseStyleChangeReason::USER_SET_MOUSESTYLE); },
-        TaskExecutor::TaskType::UI, "ArkUICjRestoreDefault");
-}
-
-void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize)
-{
-    ViewAbstractModel::GetInstance()->SetMonopolizeEvents(monopolize);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value)

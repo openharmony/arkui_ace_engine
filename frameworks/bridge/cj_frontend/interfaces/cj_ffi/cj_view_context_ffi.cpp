@@ -21,7 +21,6 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -51,11 +50,7 @@ int64_t GetDurationInterval(int64_t interval)
 bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option)
 {
     CHECK_NULL_RETURN(pipelineContext, false);
-    int64_t interval = GetFormAnimationTimeInterval(pipelineContext);
-    int64_t duration = 0;
-    if (interval < DEFAULT_DURATION) {
-        duration = DEFAULT_DURATION - interval;
-    }
+    int64_t duration = GetDurationInterval(GetFormAnimationTimeInterval(pipelineContext));
     return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
         option.GetDuration() > duration;
 }

@@ -116,7 +116,7 @@ void FfiOHOSAceFrameworkRefreshCreateWithChangeEvent(
 void FfiOHOSAceFrameworkRefreshPop()
 {
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshPop, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->Pop();
@@ -131,7 +131,7 @@ void FfiOHOSAceFrameworkRefreshOnStateChange(void (*callback)(const int32_t valu
         func(key);
     };
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshOnStateChange, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
@@ -146,7 +146,7 @@ void FfiOHOSAceFrameworkRefreshOnRefreshing(void (*callback)())
         func();
     };
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshOnRefreshing, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
@@ -161,7 +161,7 @@ void FfiOHOSAceFrameworkRefreshOnOffsetChange(void (*callback)(const float value
         func(value);
     };
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshOnOffsetChange, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->SetOnOffsetChange(std::move(onOffsetChange));
@@ -197,7 +197,7 @@ void FfiOHOSAceFrameworkRefreshPullDownRatio(double ratio)
     value = ratio;
     std::optional<float> ratioValue = value;
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshPullDownRatio, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->SetPullDownRatio(ratioValue);
@@ -207,7 +207,7 @@ void FfiOHOSAceFrameworkRefreshResetPullDownRatio()
 {
     std::optional<float> ratioValue = std::nullopt;
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshResetPullDownRatio, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->SetPullDownRatio(ratioValue);

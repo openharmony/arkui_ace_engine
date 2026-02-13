@@ -38,7 +38,6 @@ void FfiOHOSAceFrameworkLoadingProgressSetEnableLoading(bool enable)
 
 void FfiOHOSAceFrameworkLoadingProgressForegroundColor(uint32_t color)
 {
-    LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(false);
     LoadingProgressModel::GetInstance()->SetColor(Color(color));
 }
 

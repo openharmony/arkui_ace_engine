@@ -179,8 +179,8 @@ void ParseOnGestureJudgeFuncCJBaseEvent(
     ffiBaseEvent.timestamp = info->GetTimeStamp().time_since_epoch().count();
     ffiBaseEvent.source = static_cast<int32_t>(info->GetSourceDevice());
     ffiBaseEvent.pressure = info->GetForce();
-    ffiBaseEvent.tiltX = info->GetTiltX().value();
-    ffiBaseEvent.tiltY = info->GetTiltY().value();
+    ffiBaseEvent.tiltX = info->GetTiltX().value_or(0.0f);
+    ffiBaseEvent.tiltY = info->GetTiltY().value_or(0.0f);
     ffiBaseEvent.sourceTool = static_cast<int32_t>(info->GetSourceTool());
     ffiBaseEvent.target = &ffiEventTarget;
     ffiBaseEvent.deviceId = info->GetDeviceId();
@@ -1000,11 +1000,10 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
 void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
     int32_t (*callback)(CJBaseGestureEvent, int64_t, VectorInt64Handle), bool exposeInnerGesture)
 {
-    auto onGestureRecognizerJudgeFunc = [ffiCallback = CJLambda::Create(callback)](
-        const std::shared_ptr<BaseGestureEvent>& info,
-        const RefPtr<NG::NGGestureRecognizer>& current,
-        const std::list<WeakPtr<NG::NGGestureRecognizer>>& others
-    )-> GestureJudgeResult {
+    auto onGestureRecognizerJudgeFunc =
+        [ffiCallback = CJLambda::Create(callback)](const std::shared_ptr<BaseGestureEvent>& info,
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::list<WeakPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
         ACE_SCORING_EVENT("onGestureRecognizerJudgeBegin");
         CJBaseGestureEvent baseGestureEvent;
         CJBaseEvent ffiBaseEvent {};
@@ -1044,7 +1043,7 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
             ids[i] = gestureRecognizerArray[i]->GetID();
         }
         auto result = ffiCallback(baseGestureEvent, currentObj->GetID(), &ids);
-        delete baseGestureEvent.fingerList;
+        delete[] baseGestureEvent.fingerList;
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(
@@ -1053,10 +1052,9 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureRecognizerJudgeBegin(
 
 void FfiOHOSAceFrameworkViewAbstractShouldBuiltInRecognizerParallelWith(int64_t (*callback)(int64_t, VectorInt64Handle))
 {
-    auto shouldBuiltInRecognizerParallelWithFunc = [fficallback = CJLambda::Create(callback)](
-        const RefPtr<NG::NGGestureRecognizer>& recognizer,
-        const std::vector<RefPtr<NG::NGGestureRecognizer>> recognizerArray
-    ) -> RefPtr<NG::NGGestureRecognizer> {
+    auto shouldBuiltInRecognizerParallelWithFunc =
+        [fficallback = CJLambda::Create(callback)](const RefPtr<NG::NGGestureRecognizer>& recognizer,
+            const std::vector<RefPtr<NG::NGGestureRecognizer>> recognizerArray) -> RefPtr<NG::NGGestureRecognizer> {
         ACE_SCORING_EVENT("shouldBuiltInRecognizerParallelWith");
         auto gestureRecognizer = CreateRecognizerObject(recognizer);
         auto gestureRecognizerArray = std::vector<OHOS::sptr<Framework::CJGestureRecognizer>>(recognizerArray.size());

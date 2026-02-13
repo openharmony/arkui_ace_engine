@@ -159,7 +159,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetDirection(int64_t contextId
 CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetFilter(int64_t contextId, const char* filterStr);
 CJ_EXPORT double FfiOHOSAceFrameworkRenderingContextGetHight(int64_t contextId);
 CJ_EXPORT double FfiOHOSAceFrameworkRenderingContextGetWidth(int64_t contextId);
-CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSaveLayer(int64_t contextId);
 
 // Rendering Context Function
 CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextFillRect(
