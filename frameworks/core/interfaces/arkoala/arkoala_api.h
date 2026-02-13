@@ -2958,9 +2958,6 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
     void (*resetClickEffect)(ArkUINodeHandle node);
-    void (*setEnableClickSoundEffect)(ArkUINodeHandle node, ArkUI_Bool value);
-    void (*resetEnableClickSoundEffect)(ArkUINodeHandle node);
-    ArkUI_Bool (*getEnableClickSoundEffect)(ArkUINodeHandle node);
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);

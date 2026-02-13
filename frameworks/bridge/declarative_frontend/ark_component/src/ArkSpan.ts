@@ -757,10 +757,6 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new BusinessError(100201, 'clickEffect function not supported in attributeModifier scenario.');
   }
 
-  enableClickSoundEffect(enabled: boolean | undefined): this {
-    throw new BusinessError(100201, 'enableClickSoundEffect function not supported in attributeModifier scenario.');
-  }
-
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
     throw new BusinessError(100201, 'onDragStart function not supported in attributeModifier scenario.');
   }

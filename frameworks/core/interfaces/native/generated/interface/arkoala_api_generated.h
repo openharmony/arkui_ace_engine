@@ -24133,8 +24133,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                            const Opt_Number* value);
     void (*setClickEffect)(Ark_NativePointer node,
                            const Opt_ClickEffect* value);
-    void (*setEnableClickSoundEffect)(Ark_NativePointer node,
-                                    const Opt_Boolean* value);
     void (*setOnDragStart)(Ark_NativePointer node,
                            const Opt_Type_CommonMethod_onDragStart* value);
     void (*setOnDragEnter)(Ark_NativePointer node,

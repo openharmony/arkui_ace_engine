@@ -3502,20 +3502,6 @@ class ClickEffectModifier extends ModifierWithKey {
   }
 }
 ClickEffectModifier.identity = Symbol('clickEffect');
-class EnableClickSoundEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.resetEnableClickSoundEffect(node);
-    }
-    else {
-      getUINativeModule().common.setEnableClickSoundEffect(node, this.value);
-    }
-  }
-}
-EnableClickSoundEffectModifier.identity = Symbol('enableClickSoundEffect');
 class KeyBoardShortCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5135,10 +5121,6 @@ class ArkComponent {
   }
   clickEffect(value) {
     modifierWithKey(this._modifiersWithKeys, ClickEffectModifier.identity, ClickEffectModifier, value);
-    return this;
-  }
-  enableClickSoundEffect(value) {
-    modifierWithKey(this._modifiersWithKeys, EnableClickSoundEffectModifier.identity, EnableClickSoundEffectModifier, value);
     return this;
   }
   onDragStart(event) {
@@ -13104,9 +13086,6 @@ class ArkSpanComponent {
   }
   clickEffect(value) {
     throw new BusinessError(100201, 'clickEffect function not supported in attributeModifier scenario.');
-  }
-  enableClickSoundEffect(value) {
-    throw new BusinessError(100201, 'enableClickSoundEffect function not supported in attributeModifier scenario.');
   }
   onDragStart(event) {
     throw new BusinessError(100201, 'onDragStart function not supported in attributeModifier scenario.');

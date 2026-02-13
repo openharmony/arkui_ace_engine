@@ -349,7 +349,6 @@ public:
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsOnTouchTestDone(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
-    static void JsSetEnableClickSoundEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);

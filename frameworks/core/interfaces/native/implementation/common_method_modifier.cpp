@@ -4468,18 +4468,6 @@ void SetClickEffectImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetClickEffectLevel(frameNode, level, scaleValue);
 }
-void SetEnableClickSoundEffectImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        frameNode->SetEnableClickSoundEffect(true);
-        return;
-    }
-    frameNode->SetEnableClickSoundEffect(*convValue);
-}
 void SetOnDragStartImpl(Ark_NativePointer node,
                         const Opt_Type_CommonMethod_onDragStart* value)
 {
@@ -6841,7 +6829,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAlignRulesImpl,
         CommonMethodModifier::SetAspectRatioImpl,
         CommonMethodModifier::SetClickEffectImpl,
-        CommonMethodModifier::SetEnableClickSoundEffectImpl,
         CommonMethodModifier::SetOnDragStartImpl,
         CommonMethodModifier::SetOnDragEnterImpl,
         CommonMethodModifier::SetOnDragMoveImpl,

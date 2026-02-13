@@ -411,7 +411,6 @@ ohos_source_set("ace_components_manager") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/adapter/ohos/osal/click_sound_effect_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/avoid_info/avoid_info_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",

@@ -2154,23 +2154,6 @@ typedef enum {
      */
     NODE_PIXEL_ROUND = 109,
     /**
-     * @brief Set whether to enable the default click sound effect for this component.
-     * It only takes effect on supported devices, such as TV. Whether it can produce sound depends on the device's
-     * sound-related settings. For example, sound effects will not be played in silent mode.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: The parameter value is either 1 or 0. 1 indicates the default click sound effect is enabled,
-     * while 0 indicates it is disabled. The default value is 1.\n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: Indicates whether the default click sound effect is enabled for this node.\n
-     * The parameter value is either 1 or 0. 1 indicates the default click sound effect is enabled,
-     * while 0 indicates it is disabled.\n
-     *
-     * @since 24
-     */
-    NODE_ENABLE_CLICK_SOUND_EFFECT = 110,
-    /**
      * @brief Defines the motion path attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n

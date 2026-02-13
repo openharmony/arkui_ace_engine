@@ -317,7 +317,6 @@ export class CommonMethodModifier implements CommonMethod {
     _accessibilityGroup_1_1value?: AccessibilityOptions | undefined
     _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
     _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
-    _enableClickSoundEffect_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
@@ -4149,24 +4148,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[210] != 0)
-        {
-            switch (flagArray[210]) {
-                case 1: {
-                    peer.setEnableClickSoundEffectAttribute((this._enableClickSoundEffect_0_0value as boolean | undefined));
-                    flagArray[210] = 2;
-                    break;
-                }
-                case 3: {
-                    flagArray[210] = 2;
-                    break;
-                }
-                default: {
-                    flagArray[210] = 0;
-                    peer.setEnableClickSoundEffectAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6944,19 +6925,6 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[210] != 0)
-        {
-            switch (flagArray[210]) {
-                case 1:
-                case 3: {
-                    this.enableClickSoundEffect(modifier._enableClickSoundEffect_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableClickSoundEffect((undefined as boolean | undefined));
-                }
-            }
-        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
@@ -9601,18 +9569,6 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[209] = 3
-        }
-        return this
-    }
-    enableClickSoundEffect(value: boolean | undefined): this {
-        if (((this._flagArray[210]) == (0)) || ((this._enableClickSoundEffect_0_0value) !== (value)))
-        {
-            this._flagArray[210] = 1
-            this._enableClickSoundEffect_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._flagArray[210] = 3
         }
         return this
     }

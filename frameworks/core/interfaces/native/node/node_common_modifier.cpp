@@ -5796,29 +5796,6 @@ void ResetClickEffect(ArkUINodeHandle node)
     ViewAbstract::SetClickEffectLevel(frameNode, OHOS::Ace::ClickEffectLevel::UNDEFINED, 0.9f);
 }
 
-void SetEnableClickSoundEffect(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    bool enabled = true;
-    enabled = static_cast<bool>(value);
-    ViewAbstract::SetEnableClickSoundEffect(frameNode, enabled);
-}
-
-void ResetEnableClickSoundEffect(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetEnableClickSoundEffect(frameNode, true);
-}
-
-ArkUI_Bool GetEnableClickSoundEffect(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetEnableClickSoundEffect();
-}
-
 void SetKeyBoardShortCut(ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10774,9 +10751,6 @@ const ArkUICommonModifier* GetCommonModifier()
         .getHoverEffect = GetHoverEffect,
         .setClickEffect = SetClickEffect,
         .resetClickEffect = ResetClickEffect,
-        .setEnableClickSoundEffect = SetEnableClickSoundEffect,
-        .resetEnableClickSoundEffect = ResetEnableClickSoundEffect,
-        .getEnableClickSoundEffect = GetEnableClickSoundEffect,
         .setKeyBoardShortCut = SetKeyBoardShortCut,
         .resetKeyBoardShortCut = ResetKeyBoardShortCut,
         .setPointLightPosition = SetPointLightPosition,
@@ -11287,8 +11261,6 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getHoverEffect = GetHoverEffect,
         .setClickEffect = SetClickEffect,
         .resetClickEffect = ResetClickEffect,
-        .setEnableClickSoundEffect = SetEnableClickSoundEffect,
-        .resetEnableClickSoundEffect = ResetEnableClickSoundEffect,
         .setKeyBoardShortCut = SetKeyBoardShortCut,
         .resetKeyBoardShortCut = ResetKeyBoardShortCut,
         .setPointLightPosition = SetPointLightPosition,
