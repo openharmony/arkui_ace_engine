@@ -92,10 +92,8 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("CheckIsPrebuildTimeout",
         &JSViewStackProcessor::JsCheckIsPrebuildTimeout, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
-#ifdef ACE_STATIC
     JSClass<JSViewStackProcessor>::StaticMethod("push", &JSViewStackProcessor::JsPush, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("pop", &JSViewStackProcessor::JsPop, opt);
-#endif
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
