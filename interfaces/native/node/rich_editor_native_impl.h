@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-struct ArkUI_RichEditorPlaceholderOptions {
+struct OH_ArkUI_TextEditorPlaceholderOptions {
     std::string value;
     uint32_t fontWeight;
     float fontSize;
@@ -31,23 +31,23 @@ struct ArkUI_RichEditorPlaceholderOptions {
     uint32_t fontColor;
 };
 
-struct ArkUI_RichEditorStyledStringController {
+struct OH_ArkUI_TextEditorStyledStringController {
     ArkUI_NodeHandle node;
 };
 
-struct ArkUI_RichEditorParagraphStyle {
+struct OH_ArkUI_TextEditorParagraphStyle {
     ArkUI_TextAlignment textAlign;
     OH_PixelmapNative* leadingMarginPixelMap;
     uint32_t width;
     uint32_t height;
     ArkUI_WordBreak wordBreak;
-    ArkUI_LineBreakStrategy lineBreakStrategy;
+    OH_ArkUI_LineBreakStrategy lineBreakStrategy;
     uint32_t paragraphSpacing;
     ArkUI_TextVerticalAlignment textVerticalAlignment;
     ArkUI_TextDirection textDirection;
 };
 
-struct ArkUI_ShadowOptions {
+struct OH_ArkUI_ShadowOptions {
     float radius;
     ArkUI_ShadowType type;
     uint32_t color;
@@ -56,13 +56,13 @@ struct ArkUI_ShadowOptions {
     bool isFill;
 };
 
-struct ArkUI_RichEditorTextStyle {
+struct OH_ArkUI_TextEditorTextStyle {
     uint32_t fontColor;
     ArkUI_FontStyle fontStyle;
     float fontSize;
     uint32_t fontWeight;
     std::string fontFamily;
-    ArkUI_DecorationStyleOptions decoration;
+    OH_ArkUI_DecorationStyleOptions decoration;
     int32_t lineHeight;
     int32_t letterSpacing;
     std::string fontFeature;
@@ -74,7 +74,7 @@ struct ArkUI_RichEditorTextStyle {
     float textBackgroundBottomRightRadius;
     int32_t strokeWidth;
     uint32_t strokeColor;
-    std::vector<ArkUI_ShadowOptions> textShadow;
+    std::vector<OH_ArkUI_ShadowOptions> textShadow;
 };
 #ifdef __cplusplus
 }

@@ -312,7 +312,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE), "XComponentTexture" },
     { static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT), "EmbeddedComponent" },
     { static_cast<uint32_t>(ARKUI_NODE_PICKER), "Picker" },
-    { static_cast<uint32_t>(ARKUI_NODE_RICH_EDITOR), "RichEditor" },
+    { static_cast<uint32_t>(ARKUI_NODE_TEXT_EDITOR), "TextEditor" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -355,7 +355,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "XComponentTexture", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE) },
     { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
     { "Picker", static_cast<uint32_t>(ARKUI_NODE_PICKER) },
-    { "RichEditor", static_cast<uint32_t>(ARKUI_NODE_RICH_EDITOR) },
+    { "TextEditor", static_cast<uint32_t>(ARKUI_NODE_TEXT_EDITOR) },
 };
 
 void ResetAttributeItem()
@@ -4781,7 +4781,7 @@ int32_t SetCompressLeadingPunctuation(ArkUI_NodeHandle node, const ArkUI_Attribu
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCompressLeadingPunctuation(
                 node->uiNodeHandle, item->value[0].i32);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCompressLeadingPunctuation(
                 node->uiNodeHandle, item->value[0].i32);
             break;
@@ -4802,7 +4802,7 @@ const ArkUI_AttributeItem* GetCompressLeadingPunctuation(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getTextInputModifier()->
             getTextInputCompressLeadingPunctuation(node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
             getRichEditorCompressLeadingPunctuation(node->uiNodeHandle);
     }
@@ -4825,7 +4825,7 @@ void ResetCompressLeadingPunctuation(ArkUI_NodeHandle node)
             fullImpl->getNodeModifiers()->getTextInputModifier()->
                 resetTextInputCompressLeadingPunctuation(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->
                 resetRichEditorCompressLeadingPunctuation(node->uiNodeHandle);
             break;
@@ -5108,7 +5108,7 @@ int32_t SetCaretColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaCaretColor(
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCaretColor(
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
@@ -5126,7 +5126,7 @@ const ArkUI_AttributeItem* GetCaretColor(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         resultValue = GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaCaretColor(
             node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorCaretColor(
             node->uiNodeHandle);
     }
@@ -5144,7 +5144,7 @@ void ResetCaretColor(ArkUI_NodeHandle node)
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaCaretColor(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorCaretColor(node->uiNodeHandle);
             break;
         default:
@@ -5221,7 +5221,7 @@ int32_t SetMaxLength(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLength(
             node->uiNodeHandle, item->value[NUM_0].i32);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorMaxLength(
             node->uiNodeHandle, item->value[NUM_0].i32);
     } else {
@@ -5239,7 +5239,7 @@ const ArkUI_AttributeItem* GetMaxLength(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         resultValue = GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaMaxLength(
             node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorMaxLength(
             node->uiNodeHandle);
     }
@@ -5257,7 +5257,7 @@ void ResetMaxLength(ArkUI_NodeHandle node)
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaMaxLength(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLength(node->uiNodeHandle);
             break;
         default:
@@ -5451,7 +5451,7 @@ int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_Attrib
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
-    auto* menuOptions = reinterpret_cast<ArkUI_RichEditorSelectionMenuOptions*>(item->object);
+    auto* menuOptions = reinterpret_cast<OH_ArkUI_TextEditorSelectionMenuOptions*>(item->object);
     CHECK_NULL_RETURN(menuOptions->contentNode, ERROR_CODE_PARAM_INVALID);
     ArkUIRichEditorBindMenuParam richEditorBindMenuParam;
     richEditorBindMenuParam.richEditorSpanType = static_cast<ArkUI_Int32>(menuOptions->richEditorSpanType);
@@ -5559,7 +5559,7 @@ int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_Attri
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
-    auto* dataDetectorConfig = reinterpret_cast<ArkUI_TextDataDetectorConfig*>(item->object);
+    auto* dataDetectorConfig = reinterpret_cast<OH_ArkUI_TextDataDetectorConfig*>(item->object);
  
     ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string typesString;
@@ -5596,7 +5596,7 @@ void ResetRichEditorDataDetectorConfig(ArkUI_NodeHandle node)
 int32_t SetRichEditorPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
-    auto* options = reinterpret_cast<ArkUI_RichEditorPlaceholderOptions*>(item->object);
+    auto* options = reinterpret_cast<OH_ArkUI_TextEditorPlaceholderOptions*>(item->object);
     ArkUIRichEditorPlaceholderOptionsStruct placeholderOptions;
     placeholderOptions.value = options->value;
     placeholderOptions.fontWeight = options->fontWeight;
@@ -5617,7 +5617,7 @@ void ResetRichEditorPlaceholder(ArkUI_NodeHandle node)
 int32_t SetRichEditorStyledStringController(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
-    auto* controller = reinterpret_cast<ArkUI_RichEditorStyledStringController*>(item->object);
+    auto* controller = reinterpret_cast<OH_ArkUI_TextEditorStyledStringController*>(item->object);
     controller->node = node;
     return ERROR_CODE_NO_ERROR;
 }
@@ -5756,7 +5756,7 @@ int32_t SetEnableKeyboardOnFocus(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorEnableKeyboardOnFocus(
             node->uiNodeHandle, item->value[0].u32);
     } else {
@@ -5768,7 +5768,7 @@ int32_t SetEnableKeyboardOnFocus(ArkUI_NodeHandle node, const ArkUI_AttributeIte
 
 const ArkUI_AttributeItem* GetEnableKeyboardOnFocus(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorEnableKeyboardOnFocus(
             node->uiNodeHandle);
     } else {
@@ -5781,7 +5781,7 @@ const ArkUI_AttributeItem* GetEnableKeyboardOnFocus(ArkUI_NodeHandle node)
 void ResetEnableKeyboardOnFocus(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorEnableKeyboardOnFocus(
             node->uiNodeHandle);
     } else {
@@ -5825,7 +5825,7 @@ int32_t SetSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorSelectedBackgroundColor(
             node->uiNodeHandle, item->value[0].u32, nullptr);
     } else {
@@ -5837,7 +5837,7 @@ int32_t SetSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
 
 const ArkUI_AttributeItem* GetSelectedBackgroundColor(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         g_numberValues[0].u32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorSelectedBackgroundColor(
             node->uiNodeHandle);
     } else {
@@ -5850,7 +5850,7 @@ const ArkUI_AttributeItem* GetSelectedBackgroundColor(ArkUI_NodeHandle node)
 void ResetSelectedBackgroundColor(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorSelectedBackgroundColor(
             node->uiNodeHandle);
     } else {
@@ -6482,13 +6482,13 @@ int32_t SetKeyboardAppearance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 {
     auto* fullImpl = GetFullImpl();
     if (item->size != 1 || !CheckAttributeIsKeyboardAppearance(item->value[0].i32)) {
-        if (node->type != ARKUI_NODE_RICH_EDITOR) {
+        if (node->type != ARKUI_NODE_TEXT_EDITOR) {
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(
                 node->uiNodeHandle, ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
         }
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorKeyboardAppearance(
             node->uiNodeHandle, item->value[0].i32);
     } else {
@@ -6500,7 +6500,7 @@ int32_t SetKeyboardAppearance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 
 const ArkUI_AttributeItem* GetKeyboardAppearance(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
             getRichEditorKeyboardAppearance(node->uiNodeHandle);
     } else {
@@ -6514,7 +6514,7 @@ const ArkUI_AttributeItem* GetKeyboardAppearance(ArkUI_NodeHandle node)
 void ResetKeyboardAppearance(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorKeyboardAppearance(
             node->uiNodeHandle, ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
     } else {
@@ -10721,7 +10721,7 @@ void ResetTextCopyOption(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->resetTextCopyOption(node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorCAPICopyOptions(node->uiNodeHandle);
     }
 }
@@ -10735,7 +10735,7 @@ int32_t SetTextCopyOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextCopyOption(node->uiNodeHandle, item->value[0].i32);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCopyOptions(
             node->uiNodeHandle, item->value[0].i32);
     } else {
@@ -10746,7 +10746,7 @@ int32_t SetTextCopyOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
 const ArkUI_AttributeItem* GetTextCopyOption(ArkUI_NodeHandle node)
 {
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()
             ->getRichEditorModifier()->getRichEditorCopyOptions(node->uiNodeHandle);
     } else {
@@ -13090,7 +13090,7 @@ int32_t SetMaxLines(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
                     node->uiNodeHandle, item->value[0].i32, 0);
             }
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorMaxLines(
                 node->uiNodeHandle, item->value[0].i32);
             break;
@@ -13773,7 +13773,7 @@ int32_t SetSelectDetectorEnable(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         fullImpl->getNodeModifiers()->getTextInputModifier()->setSelectDetectorEnable(
             node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
     }
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setSelectDetectorEnable(
             node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
     }
@@ -13795,7 +13795,7 @@ const ArkUI_AttributeItem* GetSelectDetectorEnable(ArkUI_NodeHandle node)
         g_numberValues[0].i32 =
             fullImpl->getNodeModifiers()->getTextInputModifier()->getSelectDetectorEnable(node->uiNodeHandle);
     }
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         g_numberValues[0].i32 =
             fullImpl->getNodeModifiers()->getRichEditorModifier()->getSelectDetectorEnable(node->uiNodeHandle);
     }
@@ -13815,7 +13815,7 @@ void ResetSelectDetectorEnable(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->resetSelectDetectorEnable(node->uiNodeHandle);
     }
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetSelectDetectorEnable(node->uiNodeHandle);
     }
 }
@@ -13967,7 +13967,7 @@ int32_t SetEditMenuOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
         editMenuParam.clickUserData = menuOptions->clickUserData;
     }
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorNapiEditMenuOptions(
             node->uiNodeHandle, &editMenuParam);
     } else {
@@ -13979,7 +13979,7 @@ int32_t SetEditMenuOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 void ResetEditMenuOption(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorEditMenuOptions(
             node->uiNodeHandle);
     } else {
@@ -14040,7 +14040,7 @@ int32_t SetSelectedDragPreviewStyle(ArkUI_NodeHandle node, const ArkUI_Attribute
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaSelectedDragPreviewStyle(
                 node->uiNodeHandle, selectedDragPreviewStyle.color, nullptr);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorSelectedDragPreviewStyle(
                 node->uiNodeHandle, selectedDragPreviewStyle.color, nullptr);
             break;
@@ -14059,7 +14059,7 @@ void ResetSelectedDragPreviewStyle(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputSelectedDragPreviewStyle(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaSelectedDragPreviewStyle(node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->
             resetRichEditorSelectedDragPreviewStyle(node->uiNodeHandle);
     }
@@ -14083,7 +14083,7 @@ const ArkUI_AttributeItem* GetSelectedDragPreviewStyle(ArkUI_NodeHandle node)
             config->color.value = fullImpl->getNodeModifiers()->getTextAreaModifier()->
                 getTextAreaSelectedDragPreviewStyle(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             config->color.value = fullImpl->getNodeModifiers()->getRichEditorModifier()->
                 getRichEditorSelectedDragPreviewStyle(node->uiNodeHandle);
             break;
@@ -14119,7 +14119,7 @@ int32_t SetIncludeFontPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setIncludeFontPadding(
                 node->uiNodeHandle, item->value[0].i32);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorIncludeFontPadding(
                 node->uiNodeHandle, item->value[0].i32);
             break;
@@ -14138,7 +14138,7 @@ void ResetIncludeFontPadding(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getTextInputModifier()->resetIncludeFontPadding(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetIncludeFontPadding(node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorIncludeFontPadding(node->uiNodeHandle);
     }
 }
@@ -14161,7 +14161,7 @@ const ArkUI_AttributeItem* GetIncludeFontPadding(ArkUI_NodeHandle node)
             resultValue = fullImpl->getNodeModifiers()->getTextAreaModifier()->
                 getIncludeFontPadding(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             resultValue = fullImpl->getNodeModifiers()->getRichEditorModifier()->
                 getRichEditorIncludeFontPadding(node->uiNodeHandle);
             break;
@@ -14197,7 +14197,7 @@ int32_t SetFallbackLineSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setFallbackLineSpacing(
                 node->uiNodeHandle, item->value[0].i32);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorFallbackLineSpacing(
                 node->uiNodeHandle, item->value[0].i32);
             break;
@@ -14216,7 +14216,7 @@ void ResetFallbackLineSpacing(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getTextInputModifier()->resetFallbackLineSpacing(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetFallbackLineSpacing(node->uiNodeHandle);
-    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+    } else if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorFallbackLineSpacing(node->uiNodeHandle);
     }
 }
@@ -14239,7 +14239,7 @@ const ArkUI_AttributeItem* GetFallbackLineSpacing(ArkUI_NodeHandle node)
             resultValue = fullImpl->getNodeModifiers()->getTextAreaModifier()->
                 getFallbackLineSpacing(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             resultValue = fullImpl->getNodeModifiers()->getRichEditorModifier()->
                 getRichEditorFallbackLineSpacing(node->uiNodeHandle);
             break;
@@ -15611,7 +15611,7 @@ void ResetMaxLines(ArkUI_NodeHandle node)
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaMaxLines(node->uiNodeHandle);
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorMaxLines(node->uiNodeHandle);
             break;
         default:
@@ -16368,7 +16368,7 @@ const ArkUI_AttributeItem* GetMaxLines(ArkUI_NodeHandle node)
                 fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaMaxLines(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
-        case ARKUI_NODE_RICH_EDITOR:
+        case ARKUI_NODE_TEXT_EDITOR:
             g_numberValues[NUM_0].i32 =
                 fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorMaxLines(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
