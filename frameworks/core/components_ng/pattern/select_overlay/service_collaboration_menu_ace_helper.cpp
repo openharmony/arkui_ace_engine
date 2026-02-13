@@ -812,7 +812,7 @@ void ServiceCollaborationAceCallback::RemovePopupNode()
     CHECK_NULL_VOID(info_->pattern.Upgrade()->GetHost());
     auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
     CHECK_NULL_VOID(pattern);
-    pattern->RegisiterCaretChangeListener(nullptr);
+    pattern->RegisterCaretChangeListener(nullptr);
     auto targetId = info_->pattern.Upgrade()->GetHost()->GetId();
     auto popupInfo = overlay->GetPopupInfo(targetId);
     popupInfo.markNeedUpdate = true;
@@ -873,7 +873,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
                 callback->info_ = nullptr;
             }
         };
-        pattern->RegisiterCaretChangeListener(std::move(func));
+        pattern->RegisterCaretChangeListener(std::move(func));
         auto row = CreateCustomPopUpNode(category, "");
         CHECK_NULL_RETURN(row, -1);
         ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
@@ -903,11 +903,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
-    auto toastInfo = NG::ToastInfo { .message = category,
-        .duration = TOAST_DURATION,
-        .alignment = -1
-    };
-    overlay->ShowToast(toastInfo, nullptr);
+    overlay->ShowToast({ .message = category, .duration = TOAST_DURATION, .alignment = -1 }, nullptr);
     info_ = nullptr;
     return 0;
 }
@@ -1013,7 +1009,8 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, -1);
-    taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan");
+    taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan",
+                           PriorityType::VIP);
     return 0;
 }
 } // namespace OHOS::Ace::NG
