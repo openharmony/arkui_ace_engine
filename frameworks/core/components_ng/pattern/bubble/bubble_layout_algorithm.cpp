@@ -1010,11 +1010,12 @@ void BubbleLayoutAlgorithm::InitWrapperRect(
         }
     }
 }
-
+ 
 void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper)
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
+
     auto columnNode = AceType::DynamicCast<FrameNode>(bubbleNode->GetLastChild());
     CHECK_NULL_VOID(columnNode);
     auto lastColumnNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
@@ -1022,16 +1023,15 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper)
     auto buttonRowNode = AceType::DynamicCast<FrameNode>(lastColumnNode->GetLastChild());
     CHECK_NULL_VOID(buttonRowNode);
 
-    auto columnProperty = lastColumnNode->GetLayoutProperty();
-    CHECK_NULL_VOID(columnProperty);
-    columnProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
-
     if (buttonRowNode->GetChildren().empty()) {
         return;
     }
     const auto& lastChildren = lastColumnNode->GetChildren();
     buttonRowSize_ = buttonRowNode->GetGeometryNode()->GetFrameSize();
+    auto columnProperty = lastColumnNode->GetLayoutProperty();
+    CHECK_NULL_VOID(columnProperty);
+    columnProperty->UpdateCalcMaxSize(
+        CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
     
     for (const auto& uinode : lastChildren) {
         if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {

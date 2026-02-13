@@ -18,12 +18,12 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -496,14 +496,14 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
-    auto enableHoverModeValue = popupObj->GetProperty("enableHoverMode");
-    if (enableHoverModeValue->IsBoolean()) {
-        popupParam->SetEnableHoverMode(enableHoverModeValue->ToBoolean());
-    }
-
     auto followTransformOfTargetValue = popupObj->GetProperty("followTransformOfTarget");
     if (followTransformOfTargetValue->IsBoolean()) {
         popupParam->SetFollowTransformOfTarget(followTransformOfTargetValue->ToBoolean());
+    }
+
+    auto enableHoverModeValue = popupObj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        popupParam->SetEnableHoverMode(enableHoverModeValue->ToBoolean());
     }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
@@ -1905,16 +1905,12 @@ void JSViewAbstract::SetPopupDismiss(
         bool onWillDismissBool = onWillDismissFunc->ToBoolean();
         popupParam->SetInteractiveDismiss(onWillDismissBool);
         popupParam->SetOnWillDismiss(nullptr);
-        if (onWillDismissBool) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
-        }
+        TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss, type is bool.");
     } else if (onWillDismissFunc->IsFunction()) {
         auto onWillDismissCallback = ParsePopupCallback(info, popupObj);
         popupParam->SetOnWillDismiss(std::move(onWillDismissCallback));
         popupParam->SetInteractiveDismiss(true);
-        if (onWillDismissCallback != nullptr) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
-        }
+        TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss, type is function.");
     }
 }
 
@@ -1992,6 +1988,7 @@ int32_t JSViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG
 {
     return ViewAbstractModel::GetInstance()->GetPopupParam(param, customNode);
 }
+#endif
 
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
@@ -2079,7 +2076,6 @@ void JSViewAbstract::JsBindContextMenuWithResponse(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->BindContextMenu(buildFuncWithType, menuParam, previewBuildFunc);
 }
-#endif
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
 {
@@ -3305,7 +3301,6 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(
         outlineWidth.AddResource("outlineWidth.width", borderWidthResObj, std::move(updateFunc));
     }
 }
-
 void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObject>& leftResObj,
     const RefPtr<ResourceObject>& rightResObj, const RefPtr<ResourceObject>& topResObj,
     const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth)
@@ -3355,7 +3350,6 @@ void JSViewPopups::ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObj
         outlineWidth.AddResource("outlineWidth.bottom", bottomResObj, std::move(updateFunc));
     }
 }
-
 void JSViewPopups::ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam)
 {
     NG::BorderColorProperty outlineColor;
