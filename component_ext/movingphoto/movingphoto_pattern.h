@@ -326,7 +326,7 @@ private:
 
     SharedFd fd_;
     bool isRepeatChangePlayMode_ = false;
- 	bool notifyTransitionFlag_ = false;
+    bool notifyTransitionFlag_ = false;
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     float hdrBrightness_ = 1.0f;
