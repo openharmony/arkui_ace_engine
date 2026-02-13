@@ -46,7 +46,7 @@ struct Index {
     { title: "示例20：菜单基本功能_12_预览图scale/hoverScale", url: "pages/Examples/MenuTestLevel0_17" },
     { title: "示例21：菜单基本功能_13_预览图尺寸/圆角", url: "pages/Examples/MenuTestLevel0_18" },
     { title: "示例22：菜单基本功能_18_预览图缩放/布局", url: "pages/Examples/MenuTestLevel0_24" },
-    { title: '示例23：菜单基本功能_19_生命周期通知target/BindMenu_NonIsShow', url: 'pages/Examples/BindMenu_NonIsShow' },
+    { title: '示例23：菜单基本功能_19_生命周期通知target/BindMenu_NonIsShow', url: 'pages/Examples/BindMenu_NoIsShow' },
     { title: '示例24：菜单基本功能_19_生命周期通知target/BindMenu_IsShow', url: 'pages/Examples/BindMenu_IsShow' },
     { title: '示例25：菜单基本功能_19_生命周期通知target/BindContextMenu_RightClick', url: 'pages/Examples/BindContextMenu_RightClick' },
     { title: '示例26：菜单基本功能_19_生命周期通知target/BindContextMenu_LongPress', url: 'pages/Examples/BindContextMenu_LongPress' },
