@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace {
 
-// only for 1.2
 RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
 {
     return nullptr;
