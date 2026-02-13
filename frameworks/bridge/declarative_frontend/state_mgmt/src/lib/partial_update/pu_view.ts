@@ -177,7 +177,7 @@ abstract class ViewPU extends PUV2ViewBase
         const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
         // toolchain can check
-        throw new BusinessError(USE_V1_STATE_IN_COMPONENTV2, error);
+        throw new Error(error);
       }
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
@@ -736,7 +736,7 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride: boolean = false) {
     if (!allowOverride && this.findProvidePU__(providedPropName)) {
-      throw new BusinessError(DUPLICATE_PROVIDE_KEY, `${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
+      throw new BusinessError(DUPLICATE_PROVIDE_KEY, `${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already.`);
     }
     store.setDecoratorInfo('@Provide');
     this.getOrCreateProvidedVars().set(providedPropName, store);
