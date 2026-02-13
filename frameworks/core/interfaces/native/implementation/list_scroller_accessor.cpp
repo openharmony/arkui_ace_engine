@@ -129,9 +129,7 @@ Ark_VisibleListContentInfo GetVisibleListContentInfoImpl(Ark_VMContext vmContext
 
     auto convX = Converter::Convert<double>(x);
     auto convY = Converter::Convert<double>(y);
-    auto deltaX = PipelineBase::Vp2PxWithCurrentDensity(convX);
-    auto deltaY = PipelineBase::Vp2PxWithCurrentDensity(convY);
-    auto retVal = scrollController->GetItemIndexInGroup(deltaX, deltaY);
+    auto retVal = scrollController->GetItemIndexInGroup(convX, convY);
     return Converter::ArkValue<Ark_VisibleListContentInfo>(retVal);
 }
 } // ListScrollerAccessor

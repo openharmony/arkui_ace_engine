@@ -18,6 +18,7 @@
 #include "interfaces/native/node/node_model.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -489,6 +490,24 @@ void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
     ListModelNG::SetListScrollBarColor(frameNode, value);
 }
 
+void SetListScrollBarColorPtr(ArkUINodeHandle node, ArkUI_Int32 color, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    auto value = Color(color).ColorToString();
+    ListModelNG::SetListScrollBarColor(frameNode, value);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ListModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+    }
+}
+
 void ResetListScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -580,6 +599,40 @@ void ListSetDivider(
 
     V2::ItemDivider divider;
     divider.color = Color(color);
+    divider.strokeWidth =
+        Dimension(values[CALL_STROKE_WIDTH], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_STROKE_WIDTH]));
+    divider.startMargin =
+        Dimension(values[CALL_START_MARGIN], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_START_MARGIN]));
+    divider.endMargin =
+        Dimension(values[CALL_END_MARGIN], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_END_MARGIN]));
+
+    ListModelNG::SetDivider(frameNode, divider);
+}
+
+void ListSetDividerPtr(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32 *values, const int32_t *units,
+    ArkUI_Int32 length, void *colorRawPtr)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+
+    V2::ItemDivider divider;
+
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(colorRawPtr));
+        }
+        ListModelNG::ParseResObjDividerColor(frameNode, resObj);
+    }
+    divider.color = Color(color);
+
     divider.strokeWidth =
         Dimension(values[CALL_STROKE_WIDTH], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_STROKE_WIDTH]));
     divider.startMargin =
@@ -1055,6 +1108,7 @@ const ArkUIListModifier* GetListModifier()
         .resetListScrollBarWidth = ResetListScrollBarWidth,
         .getListScrollBarColor = GetListScrollBarColor,
         .setListScrollBarColor = SetListScrollBarColor,
+        .setListScrollBarColorPtr = SetListScrollBarColorPtr,
         .resetListScrollBarColor = ResetListScrollBarColor,
         .getAlignListItem = GetAlignListItem,
         .setAlignListItem = SetAlignListItem,
@@ -1063,6 +1117,7 @@ const ArkUIListModifier* GetListModifier()
         .resetScrollSnapAlign = ResetScrollSnapAlign,
         .getScrollSnapAlign = GetScrollSnapAlign,
         .listSetDivider = ListSetDivider,
+        .listSetDividerPtr = ListSetDividerPtr,
         .listResetDivider = ListResetDivider,
         .setChainAnimationOptions = SetChainAnimationOptions,
         .resetChainAnimationOptions = ResetChainAnimationOptions,

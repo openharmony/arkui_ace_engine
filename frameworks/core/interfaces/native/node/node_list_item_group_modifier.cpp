@@ -16,6 +16,7 @@
 
 #include "interfaces/native/node/list_option.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
@@ -37,6 +38,37 @@ void ListItemGroupSetDivider(
 
     V2::ItemDivider divider;
     divider.color = Color(color);
+    divider.strokeWidth = Dimension(values[CALL_ARG_0], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_0]));
+    divider.startMargin = Dimension(values[CALL_ARG_1], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_1]));
+    divider.endMargin = Dimension(values[CALL_ARG_2], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_2]));
+
+    ListItemGroupModelNG::SetDivider(frameNode, divider);
+}
+
+void ListItemGroupSetDividerPtr(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_GROUP_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+
+    V2::ItemDivider divider;
+
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ListItemGroupModelNG::ParseResObjDividerColor(frameNode, resObj);
+    }
+    divider.color = Color(color);
+
     divider.strokeWidth = Dimension(values[CALL_ARG_0], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_0]));
     divider.startMargin = Dimension(values[CALL_ARG_1], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_1]));
     divider.endMargin = Dimension(values[CALL_ARG_2], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_2]));
@@ -220,6 +252,7 @@ const ArkUIListItemGroupModifier* GetListItemGroupModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIListItemGroupModifier modifier = {
         .listItemGroupSetDivider = ListItemGroupSetDivider,
+        .listItemGroupSetDividerPtr = ListItemGroupSetDividerPtr,
         .listItemGroupResetDivider = ListItemGroupResetDivider,
         .listItemGroupSetHeader = ListItemGroupSetHeader,
         .listItemGroupResetHeader = ListItemGroupResetHeader,

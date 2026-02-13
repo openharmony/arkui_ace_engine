@@ -7085,14 +7085,12 @@ int32_t SetScrollScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     auto fullImpl = GetFullImpl();
     auto color = item->value[NUM_0].u32;
     if (node->type == ARKUI_NODE_LIST) {
-        auto value = Color(color).ColorToString();
-        fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarColor(node->uiNodeHandle, value.c_str());
+        fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarColorPtr(node->uiNodeHandle, color, nullptr);
     } else if (node->type == ARKUI_NODE_SCROLL) {
-        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarColor(node->uiNodeHandle, color);
+        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarColorPtr(node->uiNodeHandle, color, nullptr);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        auto value = Color(color).ColorToString();
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(
-            node->uiNodeHandle, value.c_str());
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColorPtr(
+            node->uiNodeHandle, color, nullptr);
     } else if (node->type == ARKUI_NODE_GRID) {
         fullImpl->getNodeModifiers()->getGridModifier()->setGridScrollBarColorPtr(node->uiNodeHandle, color, nullptr);
     }
@@ -8100,7 +8098,7 @@ int32_t SetListDivider(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     ArkUI_Float32 values[NUM_3] = { item->value[NUM_1].f32, item->value[NUM_2].f32, item->value[NUM_3].f32 };
     ArkUI_Int32 units[NUM_3] = { unit, unit, unit };
 
-    fullImpl->getNodeModifiers()->getListModifier()->listSetDivider(node->uiNodeHandle, color, values, units, NUM_3);
+    fullImpl->getNodeModifiers()->getListModifier()->listSetDividerPtr(node->uiNodeHandle, color, values, units, NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10839,8 +10837,8 @@ int32_t SetListItemGroupDivider(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     ArkUI_Float32 values[NUM_3] = { item->value[NUM_1].f32, item->value[NUM_2].f32, item->value[NUM_3].f32 };
     ArkUI_Int32 units[NUM_3] = { unit, unit, unit };
 
-    fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupSetDivider(
-        node->uiNodeHandle, color, values, units, NUM_3);
+    fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupSetDividerPtr(
+        node->uiNodeHandle, color, values, units, NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

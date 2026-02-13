@@ -4228,60 +4228,60 @@ void ScrollablePattern::GetEventDumpInfo()
     onScrollStart ? DumpLog::GetInstance().AddDesc("hasOnScrollStart: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollStart: false");
     auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
-    onJSFrameNodeScrollStart ? DumpLog::GetInstance().AddDesc("nodeOnScrollStart: true")
-                             : DumpLog::GetInstance().AddDesc("nodeOnScrollStart: false");
+    onJSFrameNodeScrollStart ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStart: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStart: false");
     auto onScrollStop = hub->GetOnScrollStop();
     onScrollStop ? DumpLog::GetInstance().AddDesc("hasOnScrollStop: true")
                  : DumpLog::GetInstance().AddDesc("hasOnScrollStop: false");
     auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
-    onJSFrameNodeScrollStop ? DumpLog::GetInstance().AddDesc("nodeOnScrollStop: true")
-                            : DumpLog::GetInstance().AddDesc("nodeOnScrollStop: false");
+    onJSFrameNodeScrollStop ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: true")
+                            : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: false");
     auto scrollHub = host->GetEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
                      : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
         auto onJSFrameNodeScrollWillScroll = scrollHub->GetJSFrameNodeOnScrollWillScroll();
-        onJSFrameNodeScrollWillScroll ? DumpLog::GetInstance().AddDesc("nodeOnWillScroll: true")
-                                      : DumpLog::GetInstance().AddDesc("nodeOnWillScroll: false");
+        onJSFrameNodeScrollWillScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: true")
+                                      : DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: false");
         auto onDidScroll = scrollHub->GetOnDidScrollEvent();
         onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
                     : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
         auto onJSFrameNodeScrollDidScroll = scrollHub->GetJSFrameNodeOnScrollDidScroll();
-        onJSFrameNodeScrollDidScroll ? DumpLog::GetInstance().AddDesc("nodeOnDidScroll: true")
-                                     : DumpLog::GetInstance().AddDesc("nodeOnDidScroll: false");
+        onJSFrameNodeScrollDidScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: true")
+                                     : DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: false");
     } else {
         auto onWillScroll = hub->GetOnWillScroll();
         onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
                      : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
         auto onJSFrameNodeWillScroll = hub->GetJSFrameNodeOnWillScroll();
-        onJSFrameNodeWillScroll ? DumpLog::GetInstance().AddDesc("nodeOnWillScroll: true")
-                                : DumpLog::GetInstance().AddDesc("nodeOnWillScroll: false");
+        onJSFrameNodeWillScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: true")
+                                : DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: false");
         auto onDidScroll = hub->GetOnDidScroll();
         onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
                     : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
         auto onJSFrameNodeDidScroll = hub->GetJSFrameNodeOnDidScroll();
-        onJSFrameNodeDidScroll ? DumpLog::GetInstance().AddDesc("nodeOnDidScroll: true")
-                               : DumpLog::GetInstance().AddDesc("nodeOnDidScroll: false");
+        onJSFrameNodeDidScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: true")
+                               : DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: false");
     }
     auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
-    onScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasOnScrollBegin: true")
-                       : DumpLog::GetInstance().AddDesc("hasOnScrollBegin: false");
+    onScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: true")
+                       : DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: false");
     auto onJSFrameNodeScrollFrameBegin = hub->GetJSFrameNodeOnScrollFrameBegin();
-    onJSFrameNodeScrollFrameBegin ? DumpLog::GetInstance().AddDesc("nodeOnScrollBegin: true")
-                                  : DumpLog::GetInstance().AddDesc("nodeOnScrollBegin: false");
+    onJSFrameNodeScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollFrameBegin: true")
+                                  : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollFrameBegin: false");
     auto onReachStart = hub->GetOnReachStart();
     onReachStart ? DumpLog::GetInstance().AddDesc("hasOnReachStart: true")
                  : DumpLog::GetInstance().AddDesc("hasOnReachStart: false");
     auto onJSFrameNodeReachStart = hub->GetJSFrameNodeOnReachStart();
-    onJSFrameNodeReachStart ? DumpLog::GetInstance().AddDesc("nodeOnReachStart: true")
-                            : DumpLog::GetInstance().AddDesc("nodeOnReachStart: false");
+    onJSFrameNodeReachStart ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachStart: true")
+                            : DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachStart: false");
     auto onReachEnd = hub->GetOnReachEnd();
     onReachEnd ? DumpLog::GetInstance().AddDesc("hasOnReachEnd: true")
                : DumpLog::GetInstance().AddDesc("hasOnReachEnd: false");
     auto onJSFrameNodeReachEnd = hub->GetJSFrameNodeOnReachEnd();
-    onJSFrameNodeReachEnd ? DumpLog::GetInstance().AddDesc("nodeOnReachEnd: true")
-                          : DumpLog::GetInstance().AddDesc("nodeOnReachEnd: false");
+    onJSFrameNodeReachEnd ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachEnd: true")
+                          : DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachEnd: false");
 }
 
 void ScrollablePattern::DumpAdvanceInfo()
@@ -4511,48 +4511,48 @@ void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollStart = hub->GetOnScrollStart();
     json->Put("hasOnScrollStart", onScrollStart ? "true" : "false");
     auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
-    json->Put("nodeOnScrollStart", onJSFrameNodeScrollStart ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollStart", onJSFrameNodeScrollStart ? "true" : "false");
     auto onScrollStop = hub->GetOnScrollStop();
     json->Put("hasOnScrollStop", onScrollStop ? "true" : "false");
     auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
-    json->Put("nodeOnScrollStop", onJSFrameNodeScrollStop ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollStop", onJSFrameNodeScrollStop ? "true" : "false");
 
     auto scrollHub = host->GetEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
         auto onJSFrameNodeScrollWillScroll = scrollHub->GetJSFrameNodeOnScrollWillScroll();
-        json->Put("nodeOnWillScroll", onJSFrameNodeScrollWillScroll ? "true" : "false");
+        json->Put("hasFrameNodeOnWillScroll", onJSFrameNodeScrollWillScroll ? "true" : "false");
 
         auto onDidScroll = scrollHub->GetOnDidScrollEvent();
         json->Put("hasOnDidScroll", onDidScroll ? "true" : "false");
         auto onJSFrameNodeScrollDidScroll = scrollHub->GetJSFrameNodeOnScrollDidScroll();
-        json->Put("nodeOnDidScroll", onJSFrameNodeScrollDidScroll ? "true" : "false");
+        json->Put("hasFrameNodeOnDidScroll", onJSFrameNodeScrollDidScroll ? "true" : "false");
     } else {
         auto onWillScroll = hub->GetOnWillScroll();
         json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
         auto onJSFrameNodeWillScroll = hub->GetJSFrameNodeOnWillScroll();
-        json->Put("nodeOnWillScroll", onJSFrameNodeWillScroll ? "true" : "false");
+        json->Put("hasFrameNodeOnWillScroll", onJSFrameNodeWillScroll ? "true" : "false");
 
         auto onDidScroll = hub->GetOnDidScroll();
         json->Put("hasOnDidScroll", onDidScroll ? "true" : "false");
         auto onJSFrameNodeDidScroll = hub->GetJSFrameNodeOnDidScroll();
-        json->Put("nodeOnDidScroll", onJSFrameNodeDidScroll ? "true" : "false");
+        json->Put("hasFrameNodeOnDidScroll", onJSFrameNodeDidScroll ? "true" : "false");
     }
     auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
-    json->Put("hasOnScrollBegin", onScrollFrameBegin ? "true" : "false");
+    json->Put("hasOnScrollFrameBegin", onScrollFrameBegin ? "true" : "false");
     auto onJSFrameNodeScrollFrameBegin = hub->GetJSFrameNodeOnScrollFrameBegin();
-    json->Put("nodeOnScrollBegin", onJSFrameNodeScrollFrameBegin ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollFrameBegin", onJSFrameNodeScrollFrameBegin ? "true" : "false");
 
     auto onReachStart = hub->GetOnReachStart();
     json->Put("hasOnReachStart", onReachStart ? "true" : "false");
     auto onJSFrameNodeReachStart = hub->GetJSFrameNodeOnReachStart();
-    json->Put("nodeOnReachStart", onJSFrameNodeReachStart ? "true" : "false");
+    json->Put("hasFrameNodeOnReachStart", onJSFrameNodeReachStart ? "true" : "false");
 
     auto onReachEnd = hub->GetOnReachEnd();
     json->Put("hasOnReachEnd", onReachEnd ? "true" : "false");
     auto onJSFrameNodeReachEnd = hub->GetJSFrameNodeOnReachEnd();
-    json->Put("nodeOnReachEnd", onJSFrameNodeReachEnd ? "true" : "false");
+    json->Put("hasFrameNodeOnReachEnd", onJSFrameNodeReachEnd ? "true" : "false");
 }
 
 void ScrollablePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

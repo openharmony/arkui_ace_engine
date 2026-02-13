@@ -689,8 +689,8 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     int32_t backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes_ - 1) / lanes_;
     int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
     int32_t forwardCachedCount = (forwardCachedIndex_ - endIndex + lanes_ - 1) / lanes_;
-    if (!(listSizeValues.forward && cacheCountForward > forwardCachedCount) &&
-        !(listSizeValues.backward && cacheCountBackward > backwardCachedCount)) {
+    if (!(listSizeValues.forward && cacheCountForward >= forwardCachedCount) &&
+        !(listSizeValues.backward && cacheCountBackward >= backwardCachedCount)) {
         return;
     }
     auto host = GetHost();
