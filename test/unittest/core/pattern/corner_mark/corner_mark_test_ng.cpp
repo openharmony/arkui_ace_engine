@@ -403,4 +403,172 @@ HWTEST_F(CornerMarkTestNg, UpdateCornerMarkNodeColorMode002, TestSize.Level1)
     std::u16string value = u"88";
     EXPECT_EQ(indexString.value(), value);
 }
+/**
+ * @tc.name: UpdateCornerMarkNodePosition001
+ * @tc.desc: Test UpdateCornerMarkNodePosition in non-RTL mode, should early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(CornerMarkTestNg, UpdateCornerMarkNodePosition001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto cornerMark = AceType::MakeRefPtr<CornerMark>();
+    ASSERT_NE(cornerMark, nullptr);
+    std::string index = "88";
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    int32_t result = cornerMark->AddCornerMarkNode(frameNode, index);
+    EXPECT_EQ(result, RET_SUCCESS);
+    auto markNode = frameNode->GetCornerMarkNode();
+    ASSERT_NE(markNode, nullptr);
+    auto markGeometryNode = markNode->GetGeometryNode();
+    ASSERT_NE(markGeometryNode, nullptr);
+    auto offsetBefore = markGeometryNode->GetFrameOffset();
+
+    // Non-RTL: should early return without changing geometry
+    CornerMark::UpdateCornerMarkNodePosition(frameNode);
+    EXPECT_EQ(markGeometryNode->GetFrameOffset(), offsetBefore);
+}
+
+/**
+ * @tc.name: UpdateCornerMarkNodePosition002
+ * @tc.desc: Test UpdateCornerMarkNodePosition in RTL mode without corner mark node
+ * @tc.type: FUNC
+ */
+HWTEST_F(CornerMarkTestNg, UpdateCornerMarkNodePosition002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    EXPECT_EQ(frameNode->GetCornerMarkNode(), nullptr);
+
+    // RTL but no corner mark node: should not crash
+    CornerMark::UpdateCornerMarkNodePosition(frameNode);
+    EXPECT_EQ(frameNode->GetCornerMarkNode(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateCornerMarkNodePosition003
+ * @tc.desc: Test UpdateCornerMarkNodePosition in RTL mode with corner mark node,
+ *           verify geometry is synced to correct position in current frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(CornerMarkTestNg, UpdateCornerMarkNodePosition003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto cornerMark = AceType::MakeRefPtr<CornerMark>();
+    ASSERT_NE(cornerMark, nullptr);
+
+    // Set up host geometry with a known width
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    constexpr float hostWidth = 200.0f;
+    geometryNode->SetFrameSize(SizeF(hostWidth, 100.0f));
+    frameNode->geometryNode_ = geometryNode;
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    std::string index = "1";
+    int32_t result = cornerMark->AddCornerMarkNode(frameNode, index);
+    EXPECT_EQ(result, RET_SUCCESS);
+    auto markNode = frameNode->GetCornerMarkNode();
+    ASSERT_NE(markNode, nullptr);
+
+    // Call UpdateCornerMarkNodePosition
+    CornerMark::UpdateCornerMarkNodePosition(frameNode);
+
+    // Verify geometry was synced directly (not deferred)
+    auto markGeometryNode = markNode->GetGeometryNode();
+    ASSERT_NE(markGeometryNode, nullptr);
+    auto container = Container::CurrentSafely();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto cornerMarkTheme = pipelineContext->GetTheme<CornerMarkTheme>();
+    ASSERT_NE(cornerMarkTheme, nullptr);
+    auto markWidth = cornerMarkTheme->GetWidth().ConvertToPx();
+    auto markHeight = cornerMarkTheme->GetHeight().ConvertToPx();
+    auto expectedLeft = hostWidth - markWidth;
+
+    EXPECT_EQ(markGeometryNode->GetFrameOffset(), OffsetF(expectedLeft, 0.0f));
+    EXPECT_EQ(markGeometryNode->GetFrameSize(), SizeF(markWidth, markHeight));
+
+    // Verify layoutRect was also updated
+    auto textLayoutProperty = markNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto layoutRect = textLayoutProperty->GetLayoutRect();
+    ASSERT_TRUE(layoutRect.has_value());
+    EXPECT_EQ(layoutRect.value(), RectF(expectedLeft, 0.0f, markWidth, markHeight));
+}
+
+/**
+ * @tc.name: UpdateCornerMarkNodePosition004
+ * @tc.desc: Test UpdateCornerMarkNodePosition in RTL mode with null geometryNode on host
+ * @tc.type: FUNC
+ */
+HWTEST_F(CornerMarkTestNg, UpdateCornerMarkNodePosition004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto cornerMark = AceType::MakeRefPtr<CornerMark>();
+    ASSERT_NE(cornerMark, nullptr);
+    std::string index = "1";
+    int32_t result = cornerMark->AddCornerMarkNode(frameNode, index);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    // Set host geometryNode to null
+    frameNode->geometryNode_ = nullptr;
+
+    // Should not crash, early return at CHECK_NULL_VOID(geometryNode)
+    CornerMark::UpdateCornerMarkNodePosition(frameNode);
+    EXPECT_NE(frameNode->GetCornerMarkNode(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateCornerMarkNodePosition005
+ * @tc.desc: Test UpdateCornerMarkNodePosition updates correctly when host width changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(CornerMarkTestNg, UpdateCornerMarkNodePosition005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    auto cornerMark = AceType::MakeRefPtr<CornerMark>();
+    ASSERT_NE(cornerMark, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    constexpr float initalWidth = 300.0f;
+    geometryNode->SetFrameSize(SizeF(initalWidth, 100.0f));
+    frameNode->geometryNode_ = geometryNode;
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    std::string index = "5";
+    int32_t result = cornerMark->AddCornerMarkNode(frameNode, index);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    auto container = Container::CurrentSafely();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto cornerMarkTheme = pipelineContext->GetTheme<CornerMarkTheme>();
+    ASSERT_NE(cornerMarkTheme, nullptr);
+    auto markWidth = cornerMarkTheme->GetWidth().ConvertToPx();
+    auto markHeight = cornerMarkTheme->GetHeight().ConvertToPx();
+
+    // First call with initial width
+    CornerMark::UpdateCornerMarkNodePosition(frameNode);
+    auto markNode = frameNode->GetCornerMarkNode();
+    ASSERT_NE(markNode, nullptr);
+    auto markGeometryNode = markNode->GetGeometryNode();
+    ASSERT_NE(markGeometryNode, nullptr);
+    EXPECT_EQ(markGeometryNode->GetFrameOffset(), OffsetF(initalWidth - markWidth, 0.0f));
+
+    // Simulate host width change (e.g. during animation)
+    constexpr float newWidth = 500.0f;
+    geometryNode->SetFrameSize(SizeF(newWidth, 100.0f));
+    CornerMark::UpdateCornerMarkNodePosition(frameNode);
+    EXPECT_EQ(markGeometryNode->GetFrameOffset(), OffsetF(newWidth - markWidth, 0.0f));
+    EXPECT_EQ(markGeometryNode->GetFrameSize(), SizeF(markWidth, markHeight));
+}
 } // namespace OHOS::Ace::NG
