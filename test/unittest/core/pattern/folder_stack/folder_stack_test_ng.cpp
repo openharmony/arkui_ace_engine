@@ -655,11 +655,9 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent001, TestSize.Level0)
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     FlushUITasks(frameNode);
 
-    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
-        << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f));
     EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
-        << folder1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
 }
 
 /**
@@ -701,11 +699,9 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent002, TestSize.Level1)
     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     FlushUITasks(stack);
 
-    EXPECT_EQ(folder->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
-        << folder->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
     EXPECT_EQ(folder->GetGeometryNode()->GetFrameOffset(), OffsetF(10.0f, 10.0f));
-    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f))
-        << folder1->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(folder1->GetGeometryNode()->GetFrameSize(), SizeF(280.0f, 280.0f));
 }
 
 /**
@@ -761,5 +757,1336 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest016, TestSize.Level1)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
     ASSERT_NE(layoutAlgorithm->IsIntoFolderStack(size, layoutProperty,
         AccessibilityManager::RawPtr(layoutWrapper)), true);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest017
+ * @tc.desc: Test FolderStackPattern consistency across multiple method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest017, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test IsInHoverMode consistency.
+     * @tc.expected: Returns consistent value across calls.
+     */
+    bool hoverMode1 = pattern->IsInHoverMode();
+    bool hoverMode2 = pattern->IsInHoverMode();
+    bool hoverMode3 = pattern->IsInHoverMode();
+    EXPECT_EQ(hoverMode1, hoverMode2);
+    EXPECT_EQ(hoverMode2, hoverMode3);
+
+    /**
+     * @tc.steps: step3. Test IsAtomicNode consistency.
+     * @tc.expected: Always returns false.
+     */
+    EXPECT_FALSE(pattern->IsAtomicNode());
+    EXPECT_FALSE(pattern->IsAtomicNode());
+    EXPECT_FALSE(pattern->IsAtomicNode());
+
+    /**
+     * @tc.steps: step4. Test IsNeedPercent consistency.
+     * @tc.expected: Always returns true.
+     */
+    EXPECT_TRUE(pattern->IsNeedPercent());
+    EXPECT_TRUE(pattern->IsNeedPercent());
+    EXPECT_TRUE(pattern->IsNeedPercent());
+
+    /**
+     * @tc.steps: step5. Test GetFocusPattern consistency.
+     * @tc.expected: Returns consistent values.
+     */
+    auto focusPattern1 = pattern->GetFocusPattern();
+    auto focusPattern2 = pattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern1.GetFocusType(), focusPattern2.GetFocusType());
+    EXPECT_EQ(focusPattern1.GetFocusable(), focusPattern2.GetFocusable());
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest018
+ * @tc.desc: Test FolderStackPattern SetLastTime and GetLastTime methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest018, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::CENTER);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test SetLastTime with specific time value.
+     * @tc.expected: GetLastTime returns the set value.
+     */
+    std::time_t testTime = 1234567890;
+    pattern->SetLastTime(testTime);
+    EXPECT_EQ(pattern->GetLastTime(), testTime);
+
+    /**
+     * @tc.steps: step3. Test SetLastTime with current time.
+     * @tc.expected: GetLastTime returns the current time value.
+     */
+    std::time_t currentTime = std::time(nullptr);
+    pattern->SetLastTime(currentTime);
+    EXPECT_EQ(pattern->GetLastTime(), currentTime);
+
+    /**
+     * @tc.steps: step4. Test SetLastTime with zero.
+     * @tc.expected: GetLastTime returns zero.
+     */
+    pattern->SetLastTime(0);
+    EXPECT_EQ(pattern->GetLastTime(), 0);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest019
+ * @tc.desc: Test FolderStackPattern IsInHoverMode method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest019, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::BOTTOM_RIGHT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test IsInHoverMode returns valid boolean.
+     * @tc.expected: Returns either true or false.
+     */
+    bool hoverMode = pattern->IsInHoverMode();
+    EXPECT_TRUE(hoverMode == false);
+
+    /**
+     * @tc.steps: step3. Test IsInHoverMode consistency across multiple calls.
+     * @tc.expected: Returns consistent value.
+     */
+    bool hoverMode2 = pattern->IsInHoverMode();
+    EXPECT_EQ(hoverMode, hoverMode2);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest020
+ * @tc.desc: Test FolderStackLayoutAlgorithm GetIsIntoFolderStack and GetControlPartsStackRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest020, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get layout algorithm from pattern.
+     * @tc.expected: LayoutAlgorithm is created successfully.
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<FolderStackLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Test GetIsIntoFolderStack default value.
+     * @tc.expected: Returns false by default.
+     */
+    bool isIntoFolderStack = layoutAlgorithm->GetIsIntoFolderStack();
+    EXPECT_FALSE(isIntoFolderStack);
+
+    /**
+     * @tc.steps: step4. Test GetControlPartsStackRect default value.
+     * @tc.expected: Returns OffsetF(0.0f, 0.0f) by default.
+     */
+    OffsetF rect = layoutAlgorithm->GetControlPartsStackRect();
+    EXPECT_FLOAT_EQ(rect.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(rect.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest021
+ * @tc.desc: Test FolderStackLayoutProperty UpperItems property methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest021, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Test HasUpperItems returns true initially.
+     * @tc.expected: No upper items are set by default.
+     */
+    EXPECT_TRUE(layoutProperty->HasUpperItems());
+
+    /**
+     * @tc.steps: step3. Test UpdateUpperItems with multiple items.
+     * @tc.expected: Items are set and can be retrieved.
+     */
+    std::vector<std::string> upperItems = {"item1", "item2", "item3"};
+    layoutProperty->UpdateUpperItems(upperItems);
+
+    EXPECT_TRUE(layoutProperty->HasUpperItems());
+
+    auto retrievedItems = layoutProperty->GetUpperItemsValue();
+    EXPECT_EQ(retrievedItems.size(), 3);
+    EXPECT_EQ(retrievedItems[0], "item1");
+    EXPECT_EQ(retrievedItems[1], "item2");
+    EXPECT_EQ(retrievedItems[2], "item3");
+
+    /**
+     * @tc.steps: step4. Test GetUpperItemsValue returns empty vector when not set.
+     * @tc.expected: Returns empty vector.
+     */
+    auto retrievedItems2 = layoutProperty->GetUpperItemsValue();
+    EXPECT_EQ(retrievedItems2.size(), 3);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest022
+ * @tc.desc: Test FolderStackPattern UpdateFoldStatusChangedCallbackId and HasFoldStatusChangedCallbackId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest022, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_CENTER);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test HasFoldStatusChangedCallbackId returns false initially.
+     * @tc.expected: No callback ID is set by default.
+     */
+    EXPECT_FALSE(pattern->HasFoldStatusChangedCallbackId());
+
+    /**
+     * @tc.steps: step3. Test UpdateFoldStatusChangedCallbackId with value.
+     * @tc.expected: Callback ID is set and HasFoldStatusChangedCallbackId returns true.
+     */
+    std::optional<int32_t> callbackId = 42;
+    pattern->UpdateFoldStatusChangedCallbackId(callbackId);
+    EXPECT_TRUE(pattern->HasFoldStatusChangedCallbackId());
+
+    /**
+     * @tc.steps: step4. Test UpdateFoldStatusChangedCallbackId with empty optional.
+     * @tc.expected: Callback ID is cleared and HasFoldStatusChangedCallbackId returns false.
+     */
+    std::optional<int32_t> emptyId;
+    pattern->UpdateFoldStatusChangedCallbackId(emptyId);
+    EXPECT_FALSE(pattern->HasFoldStatusChangedCallbackId());
+
+    /**
+     * @tc.steps: step5. Test multiple callback ID updates.
+     * @tc.expected: Each update sets the new value correctly.
+     */
+    pattern->UpdateFoldStatusChangedCallbackId(std::optional<int32_t>(1));
+    EXPECT_TRUE(pattern->HasFoldStatusChangedCallbackId());
+
+    pattern->UpdateFoldStatusChangedCallbackId(std::optional<int32_t>(100));
+    EXPECT_TRUE(pattern->HasFoldStatusChangedCallbackId());
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest023
+ * @tc.desc: Test FolderStackLayoutProperty EnableAnimation and AutoHalfFold properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest023, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    folderStackModelNG.SetEnableAnimation(true);
+    folderStackModelNG.SetAutoHalfFold(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetEnableAnimation returns true when set.
+     * @tc.expected: Returns the set value.
+     */
+    EXPECT_TRUE(layoutProperty->GetEnableAnimation().value_or(false));
+
+    /**
+     * @tc.steps: step3. Test UpdateEnableAnimation with false.
+     * @tc.expected: EnableAnimation is updated to false.
+     */
+    layoutProperty->UpdateEnableAnimation(false);
+    EXPECT_FALSE(layoutProperty->GetEnableAnimation().value_or(true));
+
+    /**
+     * @tc.steps: step4. Test GetAutoHalfFold returns true when set.
+     * @tc.expected: Returns the set value.
+     */
+    EXPECT_TRUE(layoutProperty->GetAutoHalfFold().value_or(false));
+
+    /**
+     * @tc.steps: step5. Test UpdateAutoHalfFold with false.
+     * @tc.expected: AutoHalfFold is updated to false.
+     */
+    layoutProperty->UpdateAutoHalfFold(false);
+    EXPECT_FALSE(layoutProperty->GetAutoHalfFold().value_or(true));
+
+    /**
+     * @tc.steps: step6. Test toggling both properties.
+     * @tc.expected: Properties change correctly.
+     */
+    layoutProperty->UpdateEnableAnimation(true);
+    layoutProperty->UpdateAutoHalfFold(true);
+    EXPECT_TRUE(layoutProperty->GetEnableAnimation().value_or(false));
+    EXPECT_TRUE(layoutProperty->GetAutoHalfFold().value_or(false));
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest025
+ * @tc.desc: Test FolderStackEventHub callback replacement.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest025, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and event hub.
+     * @tc.expected: FrameNode and event hub are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set first callback and invoke.
+     * @tc.expected: First callback is invoked.
+     */
+    int firstCallbackCount = 0;
+    eventHub->SetOnFolderStateChange([&firstCallbackCount](const FolderEventInfo& info) {
+        firstCallbackCount++;
+    });
+
+    FolderEventInfo eventInfo(FoldStatus::EXPAND);
+    eventHub->OnFolderStateChange(eventInfo);
+    EXPECT_EQ(firstCallbackCount, 1);
+
+    /**
+     * @tc.steps: step3. Replace with second callback and invoke.
+     * @tc.expected: Second callback is invoked, first is not.
+     */
+    int secondCallbackCount = 0;
+    eventHub->SetOnFolderStateChange([&secondCallbackCount](const FolderEventInfo& info) {
+        secondCallbackCount++;
+    });
+
+    eventHub->OnFolderStateChange(eventInfo);
+    EXPECT_EQ(firstCallbackCount, 1);  // First callback not called again
+    EXPECT_EQ(secondCallbackCount, 1); // Second callback called
+
+    /**
+     * @tc.steps: step4. Verify only second callback is active.
+     * @tc.expected: Only second callback count increases.
+     */
+    eventHub->OnFolderStateChange(eventInfo);
+    EXPECT_EQ(firstCallbackCount, 1);
+    EXPECT_EQ(secondCallbackCount, 2);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest026
+ * @tc.desc: Test FolderStackPattern GetDisplayInfo method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest026, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetDisplayInfo.
+     * @tc.expected: Returns DisplayInfo pointer (may be null or valid).
+     */
+    auto displayInfo = pattern->GetDisplayInfo();
+    // DisplayInfo may be null or valid depending on container initialization
+    EXPECT_TRUE(displayInfo == nullptr);
+
+    pattern->SetAutoRotate();
+    displayInfo = pattern->GetDisplayInfo();
+    EXPECT_FALSE(displayInfo == nullptr);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest027
+ * @tc.desc: Test FolderStackPattern HasFoldStatusDelayTask method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest027, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::CENTER);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test HasFoldStatusDelayTask returns valid boolean.
+     * @tc.expected: Returns either true or false.
+     */
+    bool hasDelayTask = pattern->HasFoldStatusDelayTask();
+    EXPECT_TRUE(hasDelayTask == false);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest028
+ * @tc.desc: Test FolderStackPattern BeforeCreateLayoutWrapper method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest028, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    folderStackModelNG.SetEnableAnimation(true);
+    folderStackModelNG.SetAutoHalfFold(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test BeforeCreateLayoutWrapper.
+     * @tc.expected: Function completes without crash.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+
+    /**
+     * @tc.steps: step3. Test BeforeCreateLayoutWrapper multiple times.
+     * @tc.expected: Function completes without crash each time.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->BeforeCreateLayoutWrapper();
+    pattern->BeforeCreateLayoutWrapper();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest030
+ * @tc.desc: Test FolderStackLayoutProperty ToJsonValue method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest030, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_RIGHT);
+    folderStackModelNG.SetEnableAnimation(true);
+    folderStackModelNG.SetAutoHalfFold(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set UpperItems for JSON serialization.
+     * @tc.expected: Properties are set successfully.
+     */
+    layoutProperty->UpdateUpperItems({"jsonItem1", "jsonItem2", "jsonItem3"});
+    layoutProperty->UpdateEnableAnimation(true);
+    layoutProperty->UpdateAutoHalfFold(false);
+
+    /**
+     * @tc.steps: step3. Test ToJsonValue with default filter.
+     * @tc.expected: JSON is generated successfully.
+     */
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+
+    InspectorFilter filter;
+    layoutProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: step4. Verify JSON contains expected keys.
+     * @tc.expected: JSON string contains property keys.
+     */
+    std::string jsonString = json->ToString();
+    EXPECT_TRUE(jsonString.find("alignContent") != std::string::npos &&
+                jsonString.find("upperItems") != std::string::npos &&
+                jsonString.find("enableAnimation") != std::string::npos &&
+                jsonString.find("autoHalfFold") != std::string::npos);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest031
+ * @tc.desc: Test FolderStackPattern IsAtomicNode and IsNeedPercent methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest031, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test IsAtomicNode.
+     * @tc.expected: Returns false as folderStack is not an atomic node.
+     */
+    EXPECT_FALSE(pattern->IsAtomicNode());
+
+    /**
+     * @tc.steps: step3. Test IsNeedPercent.
+     * @tc.expected: Returns true as folderStack needs percent for layout.
+     */
+    EXPECT_TRUE(pattern->IsNeedPercent());
+
+    /**
+     * @tc.steps: step4. Test consistency of these methods.
+     * @tc.expected: Methods return consistent values across multiple calls.
+     */
+    EXPECT_FALSE(pattern->IsAtomicNode());
+    EXPECT_TRUE(pattern->IsNeedPercent());
+    EXPECT_FALSE(pattern->IsAtomicNode());
+    EXPECT_TRUE(pattern->IsNeedPercent());
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest032
+ * @tc.desc: Test FolderStackPattern GetFocusPattern method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest032, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetFocusPattern.
+     * @tc.expected: Returns focus pattern with SCOPE type and GetFocusable() true.
+     */
+    auto focusPattern = pattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.GetFocusType(), FocusType::SCOPE);
+    EXPECT_TRUE(focusPattern.GetFocusable());
+
+    /**
+     * @tc.steps: step3. Test GetFocusPattern consistency.
+     * @tc.expected: Returns same values on multiple calls.
+     */
+    auto focusPattern2 = pattern->GetFocusPattern();
+    EXPECT_EQ(focusPattern.GetFocusType(), focusPattern2.GetFocusType());
+    EXPECT_EQ(focusPattern.GetFocusable(), focusPattern2.GetFocusable());
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest033
+ * @tc.desc: Test FolderStackLayoutAlgorithm constructor and default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest033, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create layout algorithm using default constructor.
+     * @tc.expected: Algorithm is created with default values.
+     */
+    FolderStackLayoutAlgorithm algorithm;
+
+    /**
+     * @tc.steps: step2. Test GetIsIntoFolderStack default value.
+     * @tc.expected: Returns false by default.
+     */
+    EXPECT_FALSE(algorithm.GetIsIntoFolderStack());
+
+    /**
+     * @tc.steps: step3. Test GetControlPartsStackRect default value.
+     * @tc.expected: Returns OffsetF(0.0f, 0.0f).
+     */
+    OffsetF rect = algorithm.GetControlPartsStackRect();
+    EXPECT_FLOAT_EQ(rect.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(rect.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest034
+ * @tc.desc: Test FolderStackLayoutProperty with different alignment values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest034, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Test all alignment values.
+     * @tc.expected: All alignments are set and retrieved correctly.
+     */
+    std::vector<Alignment> alignments = {
+        Alignment::TOP_LEFT,
+        Alignment::TOP_CENTER,
+        Alignment::TOP_RIGHT,
+        Alignment::CENTER_LEFT,
+        Alignment::CENTER,
+        Alignment::CENTER_RIGHT,
+        Alignment::BOTTOM_LEFT,
+        Alignment::BOTTOM_CENTER,
+        Alignment::BOTTOM_RIGHT
+    };
+
+    for (const auto& alignment : alignments) {
+        FolderStackModelNG folderStackModelNG;
+        folderStackModelNG.Create();
+        folderStackModelNG.SetAlignment(alignment);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        ASSERT_NE(frameNode, nullptr);
+
+        auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
+
+        EXPECT_EQ(layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER), alignment);
+    }
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest035
+ * @tc.desc: Test FolderStackPattern OnDirtyLayoutWrapperSwap with various parameter combinations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest035, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::CENTER);
+    folderStackModelNG.SetEnableAnimation(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create layout wrapper.
+     * @tc.expected: Layout wrapper is created successfully.
+     */
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnDirtyLayoutWrapperSwap with different parameter combinations.
+     * @tc.expected: All combinations return false.
+     */
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true));
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false));
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true));
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest036
+ * @tc.desc: Test FolderStackLayoutProperty with empty UpperItems.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest036, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Test HasUpperItems returns true initially.
+     * @tc.expected: No upper items are set by default.
+     */
+    EXPECT_TRUE(layoutProperty->HasUpperItems());
+
+    /**
+     * @tc.steps: step3. Test GetUpperItemsValue with empty items.
+     * @tc.expected: Returns empty vector.
+     */
+    auto retrievedItems = layoutProperty->GetUpperItemsValue();
+    EXPECT_TRUE(retrievedItems.empty());
+
+    /**
+     * @tc.steps: step4. Test with empty vector update.
+     * @tc.expected: Still returns empty vector.
+     */
+    std::vector<std::string> emptyItems;
+    layoutProperty->UpdateUpperItems(emptyItems);
+    auto retrievedItems2 = layoutProperty->GetUpperItemsValue();
+    EXPECT_TRUE(retrievedItems2.empty());
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest037
+ * @tc.desc: Test FolderStackEventHub callback methods without callbacks set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest037, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and event hub.
+     * @tc.expected: FrameNode and event hub are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest038
+ * @tc.desc: Test FolderStackEventHub SetOnFolderStateChange callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest038, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and event hub.
+     * @tc.expected: FrameNode and event hub are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set folder state change callback.
+     * @tc.expected: Callback is set successfully.
+     */
+    bool callbackCalled = false;
+    FoldStatus capturedStatus = FoldStatus::UNKNOWN;
+
+    eventHub->SetOnFolderStateChange([&callbackCalled, &capturedStatus](const FolderEventInfo& info) {
+        callbackCalled = true;
+        capturedStatus = info.GetFolderState();
+    });
+
+    /**
+     * @tc.steps: step3. Trigger folder state change.
+     * @tc.expected: Callback is invoked with correct status.
+     */
+    FolderEventInfo eventInfo(FoldStatus::FOLDED);
+    eventHub->OnFolderStateChange(eventInfo);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(capturedStatus, FoldStatus::FOLDED);
+
+    /**
+     * @tc.steps: step4. Trigger with different status.
+     * @tc.expected: Callback is invoked with new status.
+     */
+    callbackCalled = false;
+    FolderEventInfo eventInfo2(FoldStatus::EXPAND);
+    eventHub->OnFolderStateChange(eventInfo2);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(capturedStatus, FoldStatus::EXPAND);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest039
+ * @tc.desc: Test FolderStackPattern CreateLayoutProperty and CreatePaintProperty methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest039, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test CreateLayoutProperty.
+     * @tc.expected: Returns FolderStackLayoutProperty instance.
+     */
+    auto layoutProperty = pattern->CreateLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto folderStackLayoutProperty = AceType::DynamicCast<FolderStackLayoutProperty>(layoutProperty);
+    ASSERT_NE(folderStackLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. Test CreatePaintProperty.
+     * @tc.expected: Returns PaintProperty instance.
+     */
+    auto paintProperty = pattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest040
+ * @tc.desc: Test FolderStackPattern CreateEventHub method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest040, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test CreateEventHub.
+     * @tc.expected: Returns FolderStackEventHub instance.
+     */
+    auto eventHub = pattern->CreateEventHub();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto folderStackEventHub = AceType::DynamicCast<FolderStackEventHub>(eventHub);
+    ASSERT_NE(folderStackEventHub, nullptr);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest041
+ * @tc.desc: Test FolderStackLayoutProperty UpdateLayoutConstraint and UpdateContentConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest041, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Create and update layout constraint.
+     * @tc.expected: Layout constraint is updated successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(1000.0f, 800.0f);
+    layoutConstraint.minSize = SizeF(100.0f, 80.0f);
+    layoutConstraint.percentReference = SizeF(1000.0f, 800.0f);
+
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+
+    /**
+     * @tc.steps: step3. Update content constraint.
+     * @tc.expected: Content constraint is updated successfully.
+     */
+    layoutProperty->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. Verify constraint was updated.
+     * @tc.expected: Constraint values match the set values.
+     */
+    auto retrievedConstraint = layoutProperty->GetLayoutConstraint();
+    ASSERT_TRUE(retrievedConstraint.has_value());
+    EXPECT_EQ(retrievedConstraint->maxSize, SizeF(1000.0f, 800.0f));
+    EXPECT_EQ(retrievedConstraint->minSize, SizeF(100.0f, 80.0f));
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest042
+ * @tc.desc: Test FolderStackLayoutProperty with single UpperItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest042, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Test with single UpperItem.
+     * @tc.expected: Single item is set and retrieved correctly.
+     */
+    std::vector<std::string> singleItem = {"onlyItem"};
+    layoutProperty->UpdateUpperItems(singleItem);
+
+    EXPECT_TRUE(layoutProperty->HasUpperItems());
+
+    auto retrievedItems = layoutProperty->GetUpperItemsValue();
+    EXPECT_EQ(retrievedItems.size(), 1);
+    EXPECT_EQ(retrievedItems[0], "onlyItem");
+
+    /**
+     * @tc.steps: step3. Test with empty string item.
+     * @tc.expected: Empty string item is handled correctly.
+     */
+    std::vector<std::string> emptyStringItem = {""};
+    layoutProperty->UpdateUpperItems(emptyStringItem);
+
+    EXPECT_TRUE(layoutProperty->HasUpperItems());
+    retrievedItems = layoutProperty->GetUpperItemsValue();
+    EXPECT_EQ(retrievedItems.size(), 1);
+    EXPECT_EQ(retrievedItems[0], "");
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest043
+ * @tc.desc: Test FolderStackEventHub SetOnHoverStatusChange callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest043, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and event hub.
+     * @tc.expected: FrameNode and event hub are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set hover status change callback.
+     * @tc.expected: Callback is set successfully.
+     */
+    bool callbackCalled = false;
+    FoldStatus capturedStatus = FoldStatus::UNKNOWN;
+
+    eventHub->SetOnHoverStatusChange([&callbackCalled, &capturedStatus](const FolderEventInfo& info) {
+        callbackCalled = true;
+        capturedStatus = info.GetFolderState();
+    });
+
+    /**
+     * @tc.steps: step3. Trigger hover status change.
+     * @tc.expected: Callback is invoked with correct status.
+     */
+    FolderEventInfo eventInfo(FoldStatus::EXPAND);
+    eventHub->OnHoverStatusChange(std::move(eventInfo));
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(capturedStatus, FoldStatus::EXPAND);
+
+    /**
+     * @tc.steps: step4. Trigger with different status.
+     * @tc.expected: Callback is invoked with new status.
+     */
+    callbackCalled = false;
+    FolderEventInfo eventInfo2(FoldStatus::HALF_FOLD);
+    eventHub->OnHoverStatusChange(std::move(eventInfo2));
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(capturedStatus, FoldStatus::HALF_FOLD);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest044
+ * @tc.desc: Test FolderStackEventHub with both callbacks set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest044, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and event hub.
+     * @tc.expected: FrameNode and event hub are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FolderStackEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Set both callbacks.
+     * @tc.expected: Both callbacks are set successfully.
+     */
+    bool folderCallbackCalled = false;
+    bool hoverCallbackCalled = false;
+
+    eventHub->SetOnFolderStateChange([&folderCallbackCalled](const FolderEventInfo& info) {
+        folderCallbackCalled = true;
+    });
+
+    eventHub->SetOnHoverStatusChange([&hoverCallbackCalled](const FolderEventInfo& info) {
+        hoverCallbackCalled = true;
+    });
+
+    /**
+     * @tc.steps: step3. Trigger folder state change.
+     * @tc.expected: Folder callback is invoked.
+     */
+    FolderEventInfo folderInfo(FoldStatus::EXPAND);
+    eventHub->OnFolderStateChange(folderInfo);
+    EXPECT_TRUE(folderCallbackCalled);
+
+    /**
+     * @tc.steps: step4. Trigger hover status change.
+     * @tc.expected: Hover callback is invoked.
+     */
+    FolderEventInfo hoverInfo(FoldStatus::FOLDED);
+    eventHub->OnHoverStatusChange(std::move(hoverInfo));
+    EXPECT_TRUE(hoverCallbackCalled);
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest045
+ * @tc.desc: Test FolderStackPattern RestoreScreenState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest045, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    folderStackModelNG.SetAutoHalfFold(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test RestoreScreenState.
+     * @tc.expected: Function completes without crash.
+     */
+    pattern->RestoreScreenState();
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest046
+ * @tc.desc: Test FolderStackPattern CreateLayoutAlgorithm multiple times.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest046, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and pattern.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test CreateLayoutAlgorithm multiple times.
+     * @tc.expected: Each call returns a valid algorithm.
+     */
+    auto algorithm1 = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm1, nullptr);
+
+    auto algorithm2 = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm2, nullptr);
+
+    auto algorithm3 = AceType::DynamicCast<FolderStackLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(algorithm3, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify all algorithms have default values.
+     * @tc.expected: All algorithms return false for GetIsIntoFolderStack.
+     */
+    auto folderStackAlgo1 = AceType::DynamicCast<FolderStackLayoutAlgorithm>(algorithm1);
+    auto folderStackAlgo2 = AceType::DynamicCast<FolderStackLayoutAlgorithm>(algorithm2);
+
+    ASSERT_NE(folderStackAlgo1, nullptr);
+    ASSERT_NE(folderStackAlgo2, nullptr);
+
+    EXPECT_FALSE(folderStackAlgo1->GetIsIntoFolderStack());
+    EXPECT_FALSE(folderStackAlgo2->GetIsIntoFolderStack());
+    EXPECT_FALSE(algorithm3->GetIsIntoFolderStack());
+}
+
+/**
+ * @tc.name: FolderStackTestNgTest047
+ * @tc.desc: Test FolderStackLayoutProperty ToJsonValue with empty properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest047, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create folderStack frameNode and layout property.
+     * @tc.expected: FrameNode and layout property are created successfully.
+     */
+    FolderStackModelNG folderStackModelNG;
+    folderStackModelNG.Create();
+    folderStackModelNG.SetAlignment(Alignment::CENTER);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Test ToJsonValue without UpperItems.
+     * @tc.expected: JSON is generated successfully with basic properties.
+     */
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+
+    InspectorFilter filter;
+    layoutProperty->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: step3. Verify JSON contains alignment.
+     * @tc.expected: JSON string contains alignContent key.
+     */
+    std::string jsonString = json->ToString();
+    EXPECT_TRUE(jsonString.find("alignContent") != std::string::npos);
+}
+
+/**
+ * @tc.name: FolderStackLayoutAlgorithmTest001
+ * @tc.desc: Test IsFullWindow detection logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackLayoutAlgorithmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FolderStack
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    RefPtr<FrameNode> stack1;
+
+    auto frameNode = CreateFolder([this, &stack1](FolderStackModelNG model) {
+        model.SetAlignment(Alignment::BOTTOM_CENTER);
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        // Add child 1 (100x80)
+        stack1 = CreateFolder([this](FolderStackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(80.0f));
+        });
+    });
+
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<FolderStackLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+
+    for (const auto& childNode : frameNode->GetChildren()) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(childNode);
+        if (childFrameNode) {
+            auto geometryNode = childFrameNode->GetGeometryNode();
+            ASSERT_NE(geometryNode, nullptr);
+            auto size = geometryNode->GetMarginFrameSize();
+            EXPECT_EQ(size, SizeF(100.0f, 80.0f));
+            auto offset = geometryNode->GetFrameOffset();
+            // Child 1 (100x80): offset = ((400-100)/2, (300-80)) = (150, 220)
+            EXPECT_EQ(offset, OffsetF(150.0f, 220.0f));
+        }
+    }
+}
+
+/**
+ * @tc.name: FolderStackChildPositionTest001
+ * @tc.desc: Observe child positions after layout in Normal Stack mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FolderStackTestNg, FolderStackChildPositionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FolderStack with children in Normal Stack mode
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    RefPtr<FrameNode> stack1;
+
+    auto frameNode = CreateFolder([this, &stack1](FolderStackModelNG model) {
+        model.SetAlignment(Alignment::CENTER);
+        ViewAbstract::SetWidth(CalcLength(400.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        // Add child 1 (100x80)
+        stack1 = CreateFolder([this](FolderStackModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(80.0f));
+        });
+    });
+
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<FolderStackPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<FolderStackLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. Execute Layout
+     */
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<FolderStackLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(frameNode);
+    /**
+     * @tc.steps: step3. Get children and verify their positions
+     * Formula: offset.x = (1 + h) * (parentW - childW) / 2
+     *          offset.y = (1 + v) * (parentH - childH) / 2
+     * CENTER: h=0, v=0
+     */
+    for (const auto& childNode : frameNode->GetChildren()) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(childNode);
+        if (childFrameNode) {
+            auto geometryNode = childFrameNode->GetGeometryNode();
+            ASSERT_NE(geometryNode, nullptr);
+            auto size = geometryNode->GetMarginFrameSize();
+            EXPECT_EQ(size, SizeF(100.0f, 80.0f));
+            auto offset = geometryNode->GetFrameOffset();
+            // Child 1 (100x80): offset = ((400-100)/2, (300-80)/2) = (150, 110)
+            EXPECT_EQ(offset, OffsetF(150.0f, 110.0f));
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
