@@ -360,15 +360,22 @@ void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
     }
 }
 
-bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
+bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, SnapshotDFXInfo& dfxInfo)
 {
     CHECK_NULL_RETURN(node, false);
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    if (frameNode && !frameNode->IsVisible()) {
-        return true;
+    if (frameNode) {
+        dfxInfo.nodeCount++;
+        if (frameNode->GetIsDelete()) {
+            dfxInfo.deletedCount++;
+        }
+        if (!frameNode->IsVisible()) {
+            dfxInfo.invisibleCount++;
+            return true;
+        }
     }
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
-        imageCount++;
+        dfxInfo.imageCount++;
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_RETURN(imageNode, false);
         auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
@@ -389,7 +396,7 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
 
     auto children = node->GetChildren();
     for (const auto& child : children) {
-        if (!CheckImageSuccessfullyLoad(child, imageCount)) {
+        if (!CheckImageSuccessfullyLoad(child, dfxInfo)) {
             return false;
         }
     }
@@ -499,13 +506,13 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::Get_key=%s_Id=%d_RsId=%s", componentId.c_str(), node->GetId(),
         std::to_string(rsNode->GetId()).c_str());
-    int32_t imageCount = 0;
-    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    bool checkImage = CheckImageSuccessfullyLoad(node, dfxInfo);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Get ComponentSnapshot options=%{public}s Id=" SEC_PLD(%{public}d) " Depth=%{public}d Tag=%{public}s "
         "imageCount=%{public}d checkImage=%{public}d RsNodeId=%{public}" PRIu64 "",
         options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
-        imageCount, checkImage, rsNode->GetId());
+        dfxInfo.imageCount, checkImage, rsNode->GetId());
     TakeCaptureWithCallback(node, rsNode, options, callback);
 }
 
@@ -544,12 +551,13 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
         return;
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::GetByUniqueId_Id=%d_RsId=%" PRIu64 "", node->GetId(), rsNode->GetId());
-    int32_t imageCount = 0;
-    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    bool checkImage = CheckImageSuccessfullyLoad(node, dfxInfo);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "GetByUniqueId ComponentSnapshot options=%{public}s Id=%{public}d Tag=%{public}s imageCount=%{public}d "
         "checkImage=%{public}d RsNodeId=%{public}" PRIu64 "",
-        options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), imageCount, checkImage, rsNode->GetId());
+        options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), dfxInfo.imageCount, checkImage,
+        rsNode->GetId());
     TakeCaptureWithCallback(node, rsNode, options, callback);
 }
 
@@ -631,8 +639,8 @@ void ComponentSnapshot::PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& exec
 void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode>& node, bool enableInspector,
     const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param)
 {
-    int32_t imageCount = 0;
-    auto checkResult = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    auto checkResult = CheckImageSuccessfullyLoad(node, dfxInfo);
     if (param.checkImageStatus && !checkResult) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=%{public}d rootNode=%{public}s",
@@ -651,8 +659,8 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to take surfaceCapture for ui, rootId=" SEC_PLD(%{public}d) " depth=%{public}d param=%{public}s "
-        "imageCount=%{public}d size=%{public}s, regionMode=%{public}d",
-        SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), imageCount,
+        "dfxInfo=%{public}s size=%{public}s, regionMode=%{public}d",
+        SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), dfxInfo.ToString().c_str(),
         node->GetGeometryNode()->GetFrameSize().ToString().c_str(), param.options.regionMode);
     if (param.options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         Rosen::RSSurfaceCaptureConfig rsConfig; 
@@ -877,8 +885,8 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         node->GetInspectorId().value_or("").c_str());
     std::string imageIds = "";
     HandleCreateSyncNode(node, pipeline, imageIds);
-    int32_t imageCount = 0;
-    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    SnapshotDFXInfo dfxInfo;
+    bool checkImage = CheckImageSuccessfullyLoad(node, dfxInfo);
     if (!checkImage) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=" SEC_PLD(%{public}d) " depth=%{public}d rootNode=%{public}s",

@@ -92,5 +92,18 @@ struct SnapshotParam {
             std::to_string(options.scale) + ", " + (options.waitUntilRenderFinished ? "true}" : "false}");
     }
 };
+
+struct SnapshotDFXInfo {
+    int32_t imageCount = 0;
+    int32_t nodeCount = 0;
+    int32_t invisibleCount = 0;
+    int32_t deletedCount = 0;
+
+    std::string ToString() const
+    {
+        return "{" + std::to_string(imageCount) + ", " + std::to_string(nodeCount) + ", " +
+               std::to_string(invisibleCount) + ", " + std::to_string(deletedCount) + "}";
+    }
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H

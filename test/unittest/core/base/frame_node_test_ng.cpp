@@ -773,7 +773,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     VisibleCallbackInfo callbackInfo;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.0f }, callbackInfo);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(1);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 1, 0 });
 
     /**
      * @tc.steps: step2. callback SetParent
@@ -781,18 +781,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     auto parentNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
     FRAME_NODE2->SetParent(FRAME_NODE3);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(2);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 2, 0 });
     auto parent = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent, 1);
 
     auto parentNode1 = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> frameNodes[3] = { parentNode1, nullptr, nullptr };
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(3);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 3, 0 });
     auto parent1 = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent1, 1);
 
     FRAME_NODE2->lastVisibleRatio_ = 1.0;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(4);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 4, 0 });
 
     /**
      * @tc.steps: step3. set onShow_ and call TriggerVisibleAreaChangeCallback
@@ -800,17 +800,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     auto context = PipelineContext::GetCurrentContext();
     context->onShow_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(5);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 5, 0 });
     auto testNode_ = TestNode::CreateTestNode(101);
     FRAME_NODE3->SetParent(testNode_);
     FRAME_NODE3->isActive_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(6);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 6, 0 });
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
     FRAME_NODE2->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(7);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 7, 0 });
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(8);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback({ 8, 0 });
     EXPECT_TRUE(context->GetOnShow());
     EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 1);
 }
