@@ -512,6 +512,9 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             context->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
         }
         context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FA_APP_START);
+        if (frontendType == FrontendType::DECLARATIVE_JS) {
+            context->GetStatisticEventReporter()->SendEvent(StatisticEventType::FA_AND_DECLARATIVE_APP_START);
+        }
     }
 
     // get url

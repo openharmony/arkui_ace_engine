@@ -90,7 +90,7 @@ typedef struct ArkUI_TouchTestInfoItem ArkUI_TouchTestInfoItem;
 typedef ArkUI_TouchTestInfoItem* ArkUI_TouchTestInfoItemHandle;
 
 /**
- * @brief Defines the touch test info item handle array.
+ * @brief Defines the gesture recognizer handle array.
  *
  * @since 22
  */
@@ -372,7 +372,7 @@ typedef enum {
  * @since 15
  */
 typedef enum {
-    /** UnKnown. */
+    /** Unknown. */
     ARKUI_EVENT_HAND_NONE = 0,
     /** Left hand. */
     ARKUI_EVENT_HAND_LEFT = 1,
@@ -1253,6 +1253,126 @@ int32_t OH_ArkUI_MouseEvent_GetPressedButtons(
 int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event);
 
 /**
+ * @brief Creates a cloned event pointer based on an event pointer.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param clonedEvent Pointer to the cloned <b>ArkUI_UIInputEvent</b> object.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent);
+ 
+/**
+ * @brief Destroys a cloned event pointer.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *          cloned event pointer.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_DestroyClonedEvent(const ArkUI_UIInputEvent* event);
+ 
+/**
+ * @brief Sets the X and Y coordinates of a cloned event relative to the upper left corner of the current component.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param x X coordinate of the event relative to the upper left corner of the current component.
+ * @param y Y coordinate of the event relative to the upper left corner of the current component.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *          cloned event pointer.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(const ArkUI_UIInputEvent* event, float x, float y);
+ 
+/**
+ * @brief Sets the X and Y coordinates of a specific contact point of a cloned event relative to the upper left corner
+ * of the current component.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param x X coordinate of the event relative to the upper left corner of the current component.
+ * @param y Y coordinate of the event relative to the upper left corner of the current component.
+ * @param pointerIndex Index of the target touch point in the multi-touch data list.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *          cloned event pointer.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(
+    const ArkUI_UIInputEvent* event, float x, float y, int32_t pointerIndex);
+ 
+/**
+ * @brief Sets the action type of a cloned event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param actionType Action type of the cloned event.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *          cloned event pointer.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventActionType(const ArkUI_UIInputEvent* event, int32_t actionType);
+ 
+/**
+ * @brief Sets the touch point ID of a cloned pointer event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param fingerId ID of the touch point that triggers the event.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *          cloned event pointer.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(const ArkUI_UIInputEvent* event, int32_t fingerId);
+ 
+ /**
+ * @brief Sets the touch point ID of a specific contact point of a cloned event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param fingerId Touch point ID of the specific contact point.
+ * @param pointerIndex Index of the target touch point in the multi-touch data list.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *          cloned event pointer.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
+    const ArkUI_UIInputEvent* event, int32_t fingerId, int32_t pointerIndex);
+ 
+/**
+ * @brief Posts a cloned event to a specific node.
+ *
+ * @param node Target node.
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the input event pointer is not a
+ *         cloned event pointer.
+ *         Returns {@link ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL}
+ *         if the component status abnormal.
+ *         Returns {@link ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT}
+ *         if no component hit to response to the event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
+
+/**
  * @brief Sets whether to enable axis event propagation.
  *
  * @param event Pointer to the UI input event.
@@ -1274,125 +1394,11 @@ int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool 
 int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event);
 
 /**
- * @brief Create cloned pointer event from the original pointer event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param clonedEvent Pointer to an <b>ArkUI_UIInputEvent</b> pointer.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent);
-
-/**
- * @brief Destroy the cloned pointer event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_DestroyClonedEvent(const ArkUI_UIInputEvent* event);
-
-/**
- * @brief Set the position relative to the upper left corner of the current component from a cloned directional
- * input event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param x The X coordinate relative to the upper left corner of the current component, in px.
- * @param y The Y coordinate relative to the upper left corner of the current component, in px.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(const ArkUI_UIInputEvent* event, float x, float y);
-
-/**
- * @brief Set the position of a specific touch point relative to the upper left corner of the current component
- * from a cloned directional input event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param x The X coordinate relative to the upper left corner of the current component, in px.
- * @param y The Y coordinate relative to the upper left corner of the current component, in px.
- * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(
-    const ArkUI_UIInputEvent* event, float x, float y, int32_t pointerIndex);
-
-/**
- * @brief Set the action type of the cloned pointer event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param actionType The action type of pointer event.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_SetClonedEventActionType(const ArkUI_UIInputEvent* event, int32_t actionType);
-
-/**
- * @brief Set the ID of the touch point that triggers the current cloned pointer event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param fingerId The ID of the touch point that triggers the current pointer event.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(const ArkUI_UIInputEvent* event, int32_t fingerId);
-
-/**
- * @brief Set the ID of a touch point from a cloned directional input event.
- *
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @param fingerId The ID of the touch point.
- * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
-    const ArkUI_UIInputEvent* event, int32_t fingerId, int32_t pointerIndex);
-
-/**
- * @brief Post a cloned event to a specific node.
- *
- * @param node Target node.
- * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
- * @return Returns the result code.
- *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- *          Returns {@link ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
- *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL }
- *          if the component status abnormal.
- *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT }
- *          if no component hit to respond to the event.
- * @since 15
- */
-int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
-
-/**
  * @brief Obtains the result code of the most recent API call related to an <b>ArkUI_UIInputEvent</b> object.
  * This API is typically unnecessary for normal operations, but can be used to verify ambiguous return values
  * (for example, when <b>0.0</b> might be either a valid float result or an error).
  *      float x = OH_ArkUI_PointerEvent_GetX(event);
- *      if (ARKUI_ERROR_CODE_NO_ERROR != OH_Arkui_UIInputEvent_GetlatestStatus()) {
+ *      if (ARKUI_ERROR_CODE_NO_ERROR != OH_ArkUI_UIInputEvent_GetLatestStatus()) {
  *          // error
  *          return;
  *      }
