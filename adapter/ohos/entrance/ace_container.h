@@ -411,13 +411,6 @@ public:
         }
     }
 
-    void OnOpenLinkOnMapSearch(const std::string& address)
-    {
-        if (linkOnMapSearch_) {
-            linkOnMapSearch_(address);
-        }
-    }
-
     void OnStartAbilityOnCalendar(const std::map<std::string, std::string>& params)
     {
         if (abilityOnCalendar_) {
@@ -527,11 +520,6 @@ public:
     void SetAbilityOnJumpBrowser(AbilityOnQueryCallback&& callback)
     {
         abilityOnJumpBrowser_ = std::move(callback);
-    }
-
-    void SetOpenLinkOnMapSearch(AbilityOnQueryCallback&& callback)
-    {
-        linkOnMapSearch_ = std::move(callback);
     }
 
     void SetAbilityOnCalendar(AbilityOnCalendarCallback&& callback)
@@ -1078,7 +1066,6 @@ private:
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
     AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
     AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
-    AbilityOnQueryCallback linkOnMapSearch_ = nullptr;
     AbilityOnCalendarCallback abilityOnCalendar_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
