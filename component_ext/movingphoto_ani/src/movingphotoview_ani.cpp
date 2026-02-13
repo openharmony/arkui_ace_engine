@@ -414,7 +414,7 @@ void MovingPhotoAni::SetMovingPhotoUri(ani_env *env, NG::MovingPhotoNode* moving
         return;
     }
     ani_class stringClass {};
- 	ani_object ani_obj = static_cast<ani_object>(fn_ref);
+    ani_object ani_obj = static_cast<ani_object>(fn_ref);
     env->FindClass("std.core.String", &stringClass);
     ani_boolean isString = ANI_FALSE;
     env->Object_InstanceOf(ani_obj, stringClass, &isString);
