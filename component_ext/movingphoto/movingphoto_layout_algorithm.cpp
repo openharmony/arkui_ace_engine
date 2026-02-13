@@ -193,7 +193,7 @@ SizeF MovingPhotoLayoutAlgorithm::GetXmageLayoutOffset(LayoutWrapper* layoutWrap
         if (!layoutProperty->HasXmageOffset()) {
             return ret;
         }
-        SizeF xmageOffset = ayoutProperty->HasXmageOffset() ? layoutProperty->GetXmageOffset().value() : SizeF(0, 0);
+        SizeF xmageOffset = layoutProperty->HasXmageOffset() ? layoutProperty->GetXmageOffset().value() : SizeF(0, 0);
         SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
         ret = SizeF(xmageOffset.Width() * xmageOffsetRatio.Width() - 1,
                     xmageOffset.Height() * xmageOffsetRatio.Height() - 1);
