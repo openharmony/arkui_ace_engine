@@ -175,19 +175,37 @@ void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribut
         dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.marginProp.value()));
     } else {
-        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
+        Ark_Padding defaultArkMargin = {
+            .top = ArkValue<Opt_Length>(0.0f),
+            .right = ArkValue<Opt_Length>(0.0f),
+            .bottom = ArkValue<Opt_Length>(0.0f),
+            .left = ArkValue<Opt_Length>(0.0f),
+        };
+        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(defaultArkMargin);
     }
     if (src.paddingProp) {
         dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.paddingProp.value()));
     } else {
-        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
+        Ark_Padding defaultArkPadding = {
+            .top = ArkValue<Opt_Length>(0.0f),
+            .right = ArkValue<Opt_Length>(0.0f),
+            .bottom = ArkValue<Opt_Length>(0.0f),
+            .left = ArkValue<Opt_Length>(0.0f),
+        };
+        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(defaultArkPadding);
     }
     if (src.borderRadius) {
         dst.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(
             ArkValueFromOptBorderRadius(src.borderRadius.value()));
     } else {
-        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty());
+        Ark_BorderRadiuses defaultArkBorder = {
+            .topLeft = ArkValue<Opt_Length>(0.0f),
+            .topRight = ArkValue<Opt_Length>(0.0f),
+            .bottomLeft = ArkValue<Opt_Length>(0.0f),
+            .bottomRight = ArkValue<Opt_Length>(0.0f),
+        };
+        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(defaultArkBorder);
     }
 }
 } // namespace Converter
