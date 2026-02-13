@@ -18,6 +18,8 @@
 #include <dlfcn.h>
 
 #include "base/log/log.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -41,7 +43,7 @@ ClickSoundEffectManager::~ClickSoundEffectManager()
 
 bool ClickSoundEffectManager::LoadProductPolicy()
 {
-    if (defaultClickSoundEffectSoLoaded_ && libraryHandle_ != nullptr && productPolicy_ != nullptr) {
+    if (libraryHandle_ != nullptr && productPolicy_ != nullptr) {
         return true;
     }
     libraryHandle_ = dlopen(DEFAULT_CLICK_SOUND_EFFECT_SO_PATH.c_str(), RTLD_LAZY);
@@ -62,7 +64,6 @@ bool ClickSoundEffectManager::LoadProductPolicy()
         return false;
     }
     productPolicy_ = reinterpret_cast<Kit::ClickSoundEffectPolicy*>(getClickSoundEffectPolicyInstance());
-    defaultClickSoundEffectSoLoaded_ = true;
     return true;
 }
 
@@ -71,7 +72,6 @@ void ClickSoundEffectManager::UnloadProductPolicy()
     productPolicy_ = nullptr;
     Close();
     libraryHandle_ = nullptr;
-    defaultClickSoundEffectSoLoaded_ = false;
 }
 
 void ClickSoundEffectManager::Close()
@@ -81,11 +81,26 @@ void ClickSoundEffectManager::Close()
     }
 }
 
-void ClickSoundEffectManager::PlayClickSoundEffect(int32_t abscissa, int32_t ordinate)
+void ClickSoundEffectManager::PlayClickSoundEffect(
+    const RefPtr<NG::FrameNode>& frameNode, int32_t abscissa, int32_t ordinate)
 {
-    if (productPolicy_) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "Load libdefault_click_sound_effect.z.so successfully");
-        productPolicy_->InteractiveSoundEffects(0, 0, abscissa, ordinate);
+#ifdef ENABLE_DEFAULT_CLICK_SOUND
+    CHECK_NULL_VOID(frameNode);
+    CHECK_EQUAL_VOID(frameNode->GetEnableClickSoundEffect(), false);
+    if (!LoadProductPolicy() || !productPolicy_) {
+        return;
     }
+    auto container = Container::GetContainer(Container::CurrentId());
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [policyPtr = productPolicy_, abscissa, ordinate]() {
+            if (policyPtr) {
+                policyPtr->InteractiveSoundEffects(0, 0, abscissa, ordinate);
+            }
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
+#endif
 }
 } // namespace OHOS::Ace

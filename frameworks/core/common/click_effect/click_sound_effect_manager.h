@@ -21,20 +21,22 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
+namespace NG {
+class FrameNode;
+}
 class ClickSoundEffectManager final : public NonCopyable, public AceType {
 public:
     static ClickSoundEffectManager& GetInstance();
-    bool LoadProductPolicy();
-    void UnloadProductPolicy();
     virtual ~ClickSoundEffectManager();
-    void PlayClickSoundEffect(int32_t abscissa, int32_t ordinate);
+    void PlayClickSoundEffect(const RefPtr<NG::FrameNode>& frameNode, int32_t abscissa, int32_t ordinate);
 
 private:
+    bool LoadProductPolicy();
+    void UnloadProductPolicy();
     void Close();
 #ifndef PREVIEW
     Kit::ClickSoundEffectPolicy* productPolicy_ = nullptr;
     void* libraryHandle_ = nullptr;
-    bool defaultClickSoundEffectSoLoaded_ = false;
 #endif
 };
 } // namespace OHOS::Ace

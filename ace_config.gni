@@ -94,6 +94,9 @@ declare_args() {
 
   # Enable skia upgrade
   ace_engine_feature_enable_upgrade_skia = true
+
+  #Enable default click sound
+  ace_engine_feature_enable_default_click_sound = false
 }
 
 enable_dump_drawcmd = false
@@ -377,4 +380,8 @@ ace_engine_feature_enable_static_instructive_code = false
 
 if (ace_engine_feature_enable_static_instructive_code) {
   ace_common_defines += [ "ACE_STATIC" ]
+}
+
+if (ace_engine_feature_enable_default_click_sound) {
+    ace_common_defines += [ "ENABLE_DEFAULT_CLICK_SOUND" ]
 }

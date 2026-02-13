@@ -14,6 +14,7 @@
  */
 #include "focus_event_handler.h"
 
+#include "core/common/click_effect/click_sound_effect_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components/theme/app_theme.h"
@@ -333,6 +334,9 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
             info.SetTarget(targetImpl().value_or(EventTarget()));
         }
         info.SetTargetDisplayId(event.targetDisplayId);
+        auto screenOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
+        ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(
+            node, static_cast<int32_t>(screenOffset.GetX()), static_cast<int32_t>(screenOffset.GetY()));
         onClickCallback(info);
         return true;
     }
