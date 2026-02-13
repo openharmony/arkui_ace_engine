@@ -112,6 +112,7 @@ void MovingPhotoLayoutAlgorithm::ChildMeasure(RefPtr<LayoutWrapper> childLayoutW
 
 void MovingPhotoLayoutAlgorithm::MeasureInXmageMode(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto layoutProperty = DynamicCast<MovingPhotoLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -132,7 +133,7 @@ void MovingPhotoLayoutAlgorithm::MeasureInXmageMode(LayoutWrapper* layoutWrapper
             auto layoutConstraintForColumn = layoutConstraint;
             auto columnSize = contentSize;
             SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
-            SizeF imageSize = layoutProperty->GetImageSize().value();
+            SizeF imageSize = layoutProperty->HasImageSize() ? layoutProperty->GetImageSize().value() : SizeF(0, 0);
             columnSize.SetHeight(imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
             columnSize.SetWidth(imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP);
             layoutConstraintForColumn.UpdateSelfMarginSizeWithCheck(OptionalSizeF(columnSize));
@@ -185,14 +186,14 @@ SizeF MovingPhotoLayoutAlgorithm::GetXmageLayoutOffset(LayoutWrapper* layoutWrap
     CHECK_NULL_RETURN(host, ret);
     auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
     CHECK_NULL_RETURN(pattern, ret);
-    if (pattern->GetXmageModeStatus() && (pattern->GetXmageModeValue() == ROUND_XMAGE_MODE_VALUE)) {
+    if (pattern->GetXmageModeStatus() && (pattern->GetXmageModeValue() != ROUND_XMAGE_MODE_VALUE)) {
         auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
         auto layoutProperty = DynamicCast<MovingPhotoLayoutProperty>(layoutWrapper->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, ret);
         if (!layoutProperty->HasXmageOffset()) {
             return ret;
         }
-        SizeF xmageOffset = layoutProperty->GetXmageOffset().value();
+        SizeF xmageOffset = ayoutProperty->HasXmageOffset() ? layoutProperty->GetXmageOffset().value() : SizeF(0, 0);
         SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
         ret = SizeF(xmageOffset.Width() * xmageOffsetRatio.Width() - 1,
                     xmageOffset.Height() * xmageOffsetRatio.Height() - 1);
