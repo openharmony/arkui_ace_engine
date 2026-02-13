@@ -590,7 +590,7 @@ public:
     void OnDetachFromMainTreeMultiThread();
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     
-    void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
+    void RegisiterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;
     }
@@ -1160,6 +1160,13 @@ public:
     void SetCaretColor(const Color& caretColor)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
+        caretColor_ = caretColor;
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
+    }
+
+    void ResetCaretColor(const std::optional<Color>& caretColor)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetCaretColor=%{public}s", caretColor->ToString().c_str());
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }

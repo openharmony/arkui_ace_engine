@@ -193,7 +193,7 @@ void RichEditorDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
     std::shared_ptr<RSPath> selPath = textDragPattern->GetSelBackgroundPath();
     RSBrush selBrush;
-    Color selColor = Color::WHITE;
+    Color selColor = color;
     if (type_ == DragAnimType::FLOATING) {
         selColor = selColor.BlendOpacity(selectedBackgroundOpacity_->Get());
     }
@@ -386,16 +386,8 @@ void RichEditorDragOverlayModifier::StartFloatingSelBackgroundAnimate()
 Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
 {
     CHECK_NULL_RETURN(!dragBackgroundColor_.has_value(), dragBackgroundColor_.value());
-    auto hostPattern = hostPattern_.Upgrade();
-    CHECK_NULL_RETURN(hostPattern, defaultColor);
-    auto host = hostPattern->GetHost();
-    CHECK_NULL_RETURN(host, defaultColor);
-    auto pipeline = host->GetContextRefPtr();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, defaultColor);
-    if (pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>(hostPattern->GetThemeScopeId());
-        CHECK_NULL_RETURN(richEditorTheme, defaultColor);
-    }
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, defaultColor);
     return richEditorTheme->GetDragBackgroundColor();
