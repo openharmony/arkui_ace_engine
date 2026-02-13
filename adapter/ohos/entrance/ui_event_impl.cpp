@@ -18,14 +18,13 @@
 #include <dlfcn.h>
 
 #include "ui_event_observer.h"
+#include "base/json/json_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/recorder/event_controller.h"
-#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/simplified_inspector.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
@@ -63,7 +62,7 @@ std::string GetCurrentPageParam()
     if (result.empty() || result == "{}") {
         result = delegate->GetInitParams();
     }
-    paramJson->Put("params", result.c_str());
+    paramJson->Put("param", result.c_str());
     return paramJson->ToString();
 }
 } // namespace

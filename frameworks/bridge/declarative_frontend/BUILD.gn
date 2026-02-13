@@ -56,7 +56,9 @@ template("declarative_frontend") {
     }
 
     if (ace_engine_feature_enable_split_mode) {
-      sources += [ "ng/force_split/parallel_page_router_manager.cpp" ]
+      sources += [ 
+        "ng/force_split/parallel_page_router_manager.cpp",
+        ]
     }
 
     deps = []
@@ -245,7 +247,6 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       ":mock",
       ":prefetcher",
-      ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
@@ -624,7 +625,9 @@ template("declarative_js_engine") {
           "jsview/models/web_model_impl.cpp",
         ]
       }
-      external_deps += [ "webview:libarkweb_utils" ]
+      external_deps += [
+        "webview:libarkweb_utils",
+      ]
     }
 
     if (defined(config.form_components_support) &&
@@ -1011,10 +1014,7 @@ template("declarative_js_engine_ng") {
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
 
-    external_deps = [
-      "graphic_2d:drawing_napi_impl",
-      "graphic_2d:text_napi_impl",
-    ]
+    external_deps = ["graphic_2d:drawing_napi_impl", "graphic_2d:text_napi_impl"]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -1143,6 +1143,7 @@ template("declarative_js_engine_ng") {
         deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
       }
     }
+    include_dirs = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -1154,6 +1155,7 @@ template("declarative_js_engine_ng") {
         "jsview/js_sec_button_base.cpp",
         "jsview/text_menu/js_text_menu.cpp",
       ]
+      include_dirs += [ "//commonlibrary/c_utils/base/include" ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [
         "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
@@ -1170,6 +1172,8 @@ template("declarative_js_engine_ng") {
         "napi:ace_napi",
       ]
     }
+
+    deps += [ ":shape" ]
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {

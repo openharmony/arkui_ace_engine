@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "napi/native_node_api.h"
 
 #include "base/log/log.h"

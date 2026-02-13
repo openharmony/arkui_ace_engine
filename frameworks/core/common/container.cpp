@@ -18,8 +18,7 @@
 #include <dirent.h>
 #include "iremote_object.h"
 
-#include "base/utils/utils.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "frameworks/base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -396,17 +395,17 @@ Window* Container::GetWindow() const
 bool Container::LessThanAPIVersion(PlatformVersion version)
 {
     return static_cast<int32_t>(version) < 15
-               ? PipelineBase::GetCurrentContext() &&
-                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-               : LessThanAPITargetVersion(version);
+                ? PipelineBase::GetCurrentContext() &&
+                      PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+                : LessThanAPITargetVersion(version);
 }
 
 bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
 {
     return static_cast<int32_t>(version) < 15
-               ? PipelineBase::GetCurrentContext() &&
-                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-               : GreatOrEqualAPITargetVersion(version);
+                ? PipelineBase::GetCurrentContext() &&
+                      PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+                : GreatOrEqualAPITargetVersion(version);
 }
 
 bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
