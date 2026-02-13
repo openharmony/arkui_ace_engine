@@ -570,11 +570,21 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export type OnGridScrollIndexCallback = (first: int32, last: int32) => void;
+export interface StartLineInfo {
+    startIndex: int32;
+    startLine: int32;
+    startOffset: double;
+    totalOffset: double;
+}
+export type OnGetStartIndexByOffsetCallback = (totalOffset: double) => StartLineInfo;
+export type OnGetStartIndexByIndexCallback = (targetIndex: int32) => StartLineInfo;
 export interface GridLayoutOptions {
     regularSize: [ int32, int32 ];
     irregularIndexes?: Array<int32>;
     onGetIrregularSizeByIndex?: ((index: int32) => [ int32, int32 ]);
     onGetRectByIndex?: ((index: int32) => [ int32, int32, int32, int32 ]);
+    onGetStartIndexByOffset?: OnGetStartIndexByOffsetCallback;
+    onGetStartIndexByIndex?: OnGetStartIndexByIndexCallback;
 }
 export enum GridDirection {
     ROW = 0,
@@ -1175,6 +1185,29 @@ export function GridImpl(
     })
 }
 
+export class StartLineInfo_serializer {
+    public static write(buffer: SerializerBase, value: StartLineInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForStartIndex  = value.startIndex
+        valueSerializer.writeInt32(valueHolderForStartIndex)
+        const valueHolderForStartLine  = value.startLine
+        valueSerializer.writeInt32(valueHolderForStartLine)
+        const valueHolderForStartOffset  = value.startOffset
+        valueSerializer.writeFloat64(valueHolderForStartOffset)
+        const valueHolderForTotalOffset  = value.totalOffset
+        valueSerializer.writeFloat64(valueHolderForTotalOffset)
+    }
+    public static read(buffer: DeserializerBase): StartLineInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const startIndexTmpResult : int32 = valueDeserializer.readInt32()
+        const startLineTmpResult : int32 = valueDeserializer.readInt32()
+        const startOffsetTmpResult : double = valueDeserializer.readFloat64()
+        const totalOffsetTmpResult : double = valueDeserializer.readFloat64()
+        let value : StartLineInfo = ({startIndex: startIndexTmpResult, startLine: startLineTmpResult, startOffset: startOffsetTmpResult, totalOffset: totalOffsetTmpResult} as StartLineInfo)
+        return value
+    }
+}
+
 export class UIGridEvent_serializer {
     public static write(buffer: SerializerBase, value: UIGridEvent): void {
         let valueSerializer : SerializerBase = buffer
@@ -1305,7 +1338,53 @@ export class GridLayoutOptions_serializer {
             onGetRectByIndexTmpBuf = onGetRectByIndexTmpBuf_Closure
         }
         const onGetRectByIndexTmpResult : ((index: int32) => [ int32, int32, int32, int32 ]) | undefined = onGetRectByIndexTmpBuf
-        let value : GridLayoutOptions = ({regularSize: regularSizeTmpResult, irregularIndexes: irregularIndexesTmpResult, onGetIrregularSizeByIndex: onGetIrregularSizeByIndexTmpResult, onGetRectByIndex: onGetRectByIndexTmpResult} as GridLayoutOptions)
+        const onGetStartIndexByOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetStartIndexByOffsetTmpBuf : OnGetStartIndexByOffsetCallback | undefined = undefined
+        if ((onGetStartIndexByOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetStartIndexByOffsetTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetStartIndexByOffsetTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetStartIndexByOffsetTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetStartIndexByOffsetTmpBuf = (totalOffset: double):StartLineInfo => {
+                const onGetStartIndexByOffsetTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.writeInt32(onGetStartIndexByOffsetTmpBuf_BufResource.resourceId);
+                onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.writePointer(onGetStartIndexByOffsetTmpBuf_BufCall);
+                onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.writePointer(onGetStartIndexByOffsetTmpBuf_BufCallSync);
+                onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.writeFloat64(totalOffset);
+                let onGetStartIndexByOffsetTmpBuf_BufContinuationValue : StartLineInfo | undefined;
+                const onGetStartIndexByOffsetTmpBuf_BufContinuationCallback : ((value: StartLineInfo) => void) = (value: StartLineInfo):void => {
+                onGetStartIndexByOffsetTmpBuf_BufContinuationValue = value;
+            }
+                onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetStartIndexByOffsetTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, -141251740, onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.asBuffer(), onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.length());
+                onGetStartIndexByOffsetTmpBuf_BufArgsSerializer.release();
+                return (onGetStartIndexByOffsetTmpBuf_BufContinuationValue as StartLineInfo);
+            }
+        }
+        const onGetStartIndexByOffsetTmpResult : OnGetStartIndexByOffsetCallback | undefined = onGetStartIndexByOffsetTmpBuf
+        const onGetStartIndexByIndexTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetStartIndexByIndexTmpBuf : OnGetStartIndexByIndexCallback | undefined = undefined
+        if ((onGetStartIndexByIndexTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetStartIndexByIndexTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetStartIndexByIndexTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetStartIndexByIndexTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetStartIndexByIndexTmpBuf = (targetIndex: int32):StartLineInfo => {
+                const onGetStartIndexByIndexTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetStartIndexByIndexTmpBuf_BufArgsSerializer.writeInt32(onGetStartIndexByIndexTmpBuf_BufResource.resourceId);
+                onGetStartIndexByIndexTmpBuf_BufArgsSerializer.writePointer(onGetStartIndexByIndexTmpBuf_BufCall);
+                onGetStartIndexByIndexTmpBuf_BufArgsSerializer.writePointer(onGetStartIndexByIndexTmpBuf_BufCallSync);
+                onGetStartIndexByIndexTmpBuf_BufArgsSerializer.writeInt32(targetIndex);
+                let onGetStartIndexByIndexTmpBuf_BufContinuationValue : StartLineInfo | undefined;
+                const onGetStartIndexByIndexTmpBuf_BufContinuationCallback : ((value: StartLineInfo) => void) = (value: StartLineInfo):void => {
+                onGetStartIndexByIndexTmpBuf_BufContinuationValue = value;
+            }
+                onGetStartIndexByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetStartIndexByIndexTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, -115606345, onGetStartIndexByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetStartIndexByIndexTmpBuf_BufArgsSerializer.length());
+                onGetStartIndexByIndexTmpBuf_BufArgsSerializer.release();
+                return (onGetStartIndexByIndexTmpBuf_BufContinuationValue as StartLineInfo);
+            }
+        }
+        const onGetStartIndexByIndexTmpResult : OnGetStartIndexByIndexCallback | undefined = onGetStartIndexByIndexTmpBuf
+        let value : GridLayoutOptions = ({regularSize: regularSizeTmpResult, irregularIndexes: irregularIndexesTmpResult, onGetIrregularSizeByIndex: onGetIrregularSizeByIndexTmpResult, onGetRectByIndex: onGetRectByIndexTmpResult, onGetStartIndexByOffset: onGetStartIndexByOffsetTmpResult, onGetStartIndexByIndex: onGetStartIndexByIndexTmpResult} as GridLayoutOptions)
         return value
     }
 }
