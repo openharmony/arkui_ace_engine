@@ -363,7 +363,8 @@ void SystemWindowScene::RegisterFocusCallback()
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             CHECK_NULL_VOID(self->GetSession());
-            pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
+            pipeline->RestoreDefault(self->GetSession()->GetPersistentId(),
+                MouseStyleChangeReason::WINDOW_SCENE_LOST_FOCUS_RESET_MOUSESTYLE);
         }, "ArkUIWindowLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
