@@ -72,7 +72,13 @@ void FfiOHOSAceFrameworkImageSpanCreateWithUrl(const char* url)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    FfiOHOSAceFrameworkImageCreateWithUrl(url);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(std::string(url));
+    imageInfoConfig.bundleName = "";
+    imageInfoConfig.moduleName = "";
+    imageInfoConfig.isUriPureNumber = false;
+    imageInfoConfig.isImageSpan = true;
+    ImageModel::GetInstance()->Create(imageInfoConfig);
     NG::ImageSpanView::Create();
 }
 
@@ -81,7 +87,23 @@ void FfiOHOSAceFrameworkImageSpanCreateWithPixelMap(int64_t id)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    FfiOHOSAceFrameworkImageCreateWithPixelMap(id);
+#ifndef __NON_OHOS__
+    auto instance = OHOS::FFI::FFIData::GetData<OHOS::Media::PixelMapImpl>(id);
+    if (!instance) {
+        LOGE("[PixelMap] instance not exist %{public}" PRId64, id);
+        return;
+    }
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = instance->GetRealPixelMap();
+    RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&pixelMap);
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = nullptr;
+    imageInfoConfig.pixelMap = pixelMapRef;
+    imageInfoConfig.bundleName = "";
+    imageInfoConfig.moduleName = "";
+    imageInfoConfig.isUriPureNumber = false;
+    imageInfoConfig.isImageSpan = true;
+    ImageModel::GetInstance()->Create(imageInfoConfig);
+#endif
     NG::ImageSpanView::Create();
 }
 
