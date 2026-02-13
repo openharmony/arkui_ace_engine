@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -793,7 +793,7 @@ export class TipsDialog extends ViewPU {
                 params: ['sys.color.font_primary'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
-        };
+            };
         let uiContext = this.getUIContext();
         this.appMaxFontScale = uiContext.getMaxFontScale();
         this.initButtons();
@@ -3038,8 +3038,8 @@ class CustomDialogContentComponent extends ViewPU {
     aboutToAppear() {
         try {
             let uiContext = this.getUIContext();
-            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-            this.appMaxFontScale = uiContext?.getMaxFontScale();
+            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+            this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
         }
         catch (err) {
             let code = err?.code;

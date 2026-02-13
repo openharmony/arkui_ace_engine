@@ -323,10 +323,8 @@ export class ProgressButton extends ViewPU {
       Progress.borderRadius(this.buttonBorderRadius);
       Progress.width('100%');
       Progress.hoverEffect(HoverEffect.None);
-      Progress.style({
-        borderColor: this.colorOptions?.borderColor ? this.colorOptions?.borderColor : this.containerBorderColor,
-        borderRadius: this.getProgressButtonRadius()
-      });
+      Progress.style(this.progressButtonRadius ?
+        { borderRadius: this.getProgressButtonRadius() } : {});
       Progress.clip(false);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
       Progress.color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor);
