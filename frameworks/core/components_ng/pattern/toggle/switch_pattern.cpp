@@ -81,10 +81,14 @@ void SwitchPattern::OnModifyDone()
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     switchTheme_ = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(switchTheme_);
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
-    InitFocusEvent();
+    auto isUseDiffPointColor = switchTheme_->GetSwitchUseDiffPointColor();
+    if (isUseDiffPointColor) {
+        InitFocusEvent();
+    }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -118,6 +122,16 @@ void SwitchPattern::InitFocusEvent()
 
 void SwitchPattern::HandleBlurEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto isUseDiffPointColor = switchTheme->GetSwitchUseDiffPointColor();
+    if (!isUseDiffPointColor) {
+        isFocus_ = false;
+    }
     RemoveIsFocusActiveUpdateEvent();
     OnIsFocusActiveUpdate(false);
 }
@@ -128,6 +142,12 @@ void SwitchPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto isUseDiffPointColor = switchTheme->GetSwitchUseDiffPointColor();
+    if (!isUseDiffPointColor) {
+        isFocus_ = true;
+    }
     AddIsFocusActiveUpdateEvent();
     if (pipeline->GetIsFocusActive()) {
         OnIsFocusActiveUpdate(true);
@@ -397,10 +417,16 @@ void SwitchPattern::OnClick()
     }
     isOn_ = !isOn_.value_or(false);
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch click result %{public}d", isOn_.value_or(false));
-    UpdateColorWhenIsOn(isOn_.value_or(false));
-    OnChange();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto isUseDiffPointColor = switchTheme->GetSwitchUseDiffPointColor();
+    if (isUseDiffPointColor) {
+        UpdateColorWhenIsOn(isOn_.value_or(false));
+    }
+    OnChange();
     host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
 }
 
@@ -410,21 +436,28 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
     CHECK_NULL_VOID(host);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    switchTheme_ = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme_);
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
 
-    Color onBgColor = switchTheme_->GetActiveColor();
-    Color offBgColor = switchTheme_->GetInactiveColor();
+    if (!onBgColor_.has_value()) {
+        onBgColor_ = switchTheme_->GetActiveColor();
+    }
+    if (!offBgColor_.has_value()) {
+        offBgColor_ = switchTheme_->GetInactiveColor();
+    }
     if (isOn) {
-        if (switchPaintProperty->HasSelectedColor() && switchPaintProperty->GetSelectedColor() == onBgColor) {
-            switchPaintProperty->UpdateSelectedColor(onBgColor);
+        if (switchPaintProperty->HasSelectedColor() && switchPaintProperty->GetSelectedColor() == onBgColor_) {
+            switchPaintProperty->UpdateSelectedColor(onBgColor_.value_or(switchTheme_->GetActiveColor()));
         }
     } else {
-        if (switchPaintProperty->HasUnselectedColor() && switchPaintProperty->GetUnselectedColor() == offBgColor) {
-            Color bgColor = isFocus_ ? switchTheme_->GetFocusedBGColorUnselected() : switchTheme_->GetInactiveColor();
-            switchPaintProperty->UpdateUnselectedColor(bgColor);
+        if (switchPaintProperty->HasUnselectedColor() && switchPaintProperty->GetUnselectedColor() == offBgColor_) {
+            offBgColor_ = isFocus_ ? switchTheme_->GetFocusedBGColorUnselected() : switchTheme_->GetInactiveColor();
+            switchPaintProperty->UpdateUnselectedColor(offBgColor_.value_or(switchTheme_->GetInactiveColor()));
         }
         if (isFocus_) {
             switchModifier->SetFocusPointColor(switchTheme_->GetPointColorUnselectedFocus());
@@ -765,6 +798,10 @@ void SwitchPattern::OnColorConfigurationUpdate()
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
     switchModifier->InitializeParam(host->GetThemeScopeId());
+    auto isUseDiffPointColor = switchTheme->GetSwitchUseDiffPointColor();
+    if (isUseDiffPointColor) {
+        UpdateColorWhenIsOn(isOn_.value_or(false));
+    }
     if (SystemProperties::ConfigChangePerform()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);

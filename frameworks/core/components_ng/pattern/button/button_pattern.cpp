@@ -407,6 +407,7 @@ void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorTy
     CHECK_NULL_VOID(textRenderContext);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+
     if (pipelineContext->IsSystemColorChange()) {
         switch (buttonColorType) {
             case ButtonColorType::FONT_COLOR:
@@ -900,7 +901,6 @@ void ButtonPattern::HandleBackgroundColor()
         renderContext->ResetBackgroundColor();
         return;
     }
-
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
@@ -1218,11 +1218,11 @@ void ButtonPattern::FireBuilder()
     CHECK_NULL_VOID(gestureEventHub);
     if (!makeFunc_.has_value()) {
         gestureEventHub->SetRedirectClick(false);
-        if (nodeId_ == -1) {
-            return;
-        }
         auto children = host->GetChildren();
         for (const auto& child : children) {
+            if (nodeId_ == -1) {
+                return;
+            }
             if (child->GetId() == nodeId_) {
                 host->RemoveChildAndReturnIndex(child);
                 host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
@@ -1350,7 +1350,7 @@ void ButtonPattern::UpdateTextFontScale(
         textLayoutProperty->ResetMinFontScale();
     }
 }
-
+ 
 void ButtonPattern::OnFontScaleConfigurationUpdate()
 {
     auto host = GetHost();
@@ -1381,16 +1381,6 @@ void ButtonPattern::OnFontScaleConfigurationUpdate()
         }
     }
     textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void ButtonPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
-{
-    Pattern::ToTreeJson(json, config);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    json->Put(TreeKey::CONTENT, layoutProperty->GetLabelValue("").c_str());
 }
 
 void ButtonPattern::AddIsFocusActiveUpdateEvent()
@@ -1583,6 +1573,16 @@ void ButtonPattern::HandleFocusStatusStyle()
         pattern->HandleBlurStyleTask();
     };
     focusHub->SetOnBlurInternal(blurTask);
+}
+
+void ButtonPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    json->Put(TreeKey::CONTENT, layoutProperty->GetLabelValue("").c_str());
 }
 
 void ButtonPattern::SetNavigationFocusBlendBgColor(const Color& navigationFocusBlendBgColor)

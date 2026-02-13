@@ -492,7 +492,7 @@ void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const Color& unsele
         paintProperty->UpdateUnselectedColor(unselectedColor);
     }
 }
-
+ 
 void ToggleModelNG::SetUnselectedColorSetByUser(FrameNode* frameNode, const bool flag)
 {
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
@@ -907,13 +907,13 @@ void ToggleModelNG::CreateWithButtonResourceObj(FrameNode* node, const ToggleCol
 }
 
 void ToggleModelNG::CreateWithResourceObj(
-    const FrameNode* node, const ToggleColorType toggleColorType, const RefPtr<ResourceObject>& resObj)
+    FrameNode* node, const ToggleColorType toggleColorType, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(node);
     std::string key = "toggle" + ColorTypeToString(toggleColorType);
-    CreateWithSwitchResourceObj(const_cast<FrameNode*>(node), toggleColorType, resObj, key);
-    CreateWithCheckBoxResourceObj(const_cast<FrameNode*>(node), toggleColorType, resObj, key);
-    CreateWithButtonResourceObj(const_cast<FrameNode*>(node), toggleColorType, resObj, key);
+    CreateWithSwitchResourceObj(node, toggleColorType, resObj, key);
+    CreateWithCheckBoxResourceObj(node, toggleColorType, resObj, key);
+    CreateWithButtonResourceObj(node, toggleColorType, resObj, key);
 }
 
 void ToggleModelNG::CreateWithDimensionVpResourceObj(
@@ -935,7 +935,8 @@ void ToggleModelNG::CreateWithResourceObj(
         pattern->RemoveResObj(key);
         return;
     }
-    auto&& updateFunc = [toggleDimensionType, weak = AceType::WeakClaim(node)](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [toggleDimensionType, weak = AceType::WeakClaim(node)](
+        const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         CHECK_NULL_VOID(resObj);

@@ -48,6 +48,7 @@ public:
     void SetUnselectedColor(const Color& unselectedColor) override;
     void SetTrackBorderRadius(const Dimension& borderRadius) override;
     void ResetTrackBorderRadius() override;
+    static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
     void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
         const ToggleColorType toggleColorType) override;
     void CreateWithDimensionVpResourceObj(const RefPtr<ResourceObject>& resObj,
@@ -57,7 +58,6 @@ public:
 
     static void SetUnselectedColorSetByUser(FrameNode* frameNode, const bool flag);
     static void SetSwitchPointColorSetByUser(FrameNode* frameNode, const bool flag);
-    static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
     static void ResetPointRadius(FrameNode* frameNode);
     static void SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor);
     static void SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius);
@@ -95,7 +95,7 @@ public:
     static void CreateWithResourceObj(
         FrameNode* node, const ToggleDimensionType toggleDimensionType, const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObj(
-        const FrameNode* node, const ToggleColorType toggleColorType, const RefPtr<ResourceObject>& resObj);
+        FrameNode* node, const ToggleColorType toggleColorType, const RefPtr<ResourceObject>& resObj);
 
 private:
     static void ReCreateFrameNode(

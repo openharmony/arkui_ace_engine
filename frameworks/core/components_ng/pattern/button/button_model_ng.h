@@ -133,8 +133,8 @@ private:
     static void Create(const std::string& tagName);
     static void SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect);
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
-    static void SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
-        RefPtr<ButtonTheme> buttonTheme);
+    static void SetButtonPadding(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
+        RefPtr<ButtonTheme> buttonTheme, bool isUpdateNode);
     static std::string ColorTypeToString(const ButtonColorType buttonColorType);
     static std::string StringTypeToStr(const ButtonStringType buttonStringType);
     static std::string DimensionTypeToString(const ButtonDimensionType buttonDimensionType);

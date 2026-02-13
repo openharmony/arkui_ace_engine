@@ -93,7 +93,7 @@ public:
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(switchTheme, FocusPattern());
 
-        auto focusPaintcolor = switchTheme->GetActiveColor();
+        auto focusPaintcolor = switchTheme->GetFocusLineColor();
         focusPaintParams.SetPaintColor(focusPaintcolor);
         focusPaintParams.SetFocusPadding(switchTheme->GetSwitchFocuPadding());
 
@@ -247,6 +247,8 @@ private:
     RefPtr<SwitchPaintMethod> paintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;
+    std::optional<Color> onBgColor_;
+    std::optional<Color> offBgColor_;
     Dimension hotZoneHorizontalSize_;
     Dimension hotZoneVerticalSize_;
 };

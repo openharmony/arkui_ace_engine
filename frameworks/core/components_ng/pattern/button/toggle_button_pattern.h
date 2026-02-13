@@ -148,9 +148,10 @@ private:
     bool isbgColorFocus_ = false;
     bool isFocus_ = false;
     bool isPress_ = false;
-    bool IsNeedToHandleHoverOpacity();
     bool isTextFadeOut_ = false;
     bool isHover_ = false;
+    bool IsNeedToHandleHoverOpacity();
+
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };
 } // namespace OHOS::Ace::NG
