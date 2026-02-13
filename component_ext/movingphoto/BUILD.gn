@@ -81,8 +81,14 @@ ohos_shared_library("movingphotoview") {
   ]
 
   if (defined(global_parts_info) &&
-      !defined(global_parts_info.multimedia_media_library)) {
+      defined(global_parts_info.multimedia_media_library)) {
     external_deps += [ "media_library:media_library_manager" ]
+    defines += [ "PLAYER_FRAMEWORK_EXISTS" ]
+  }
+
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux &&
+      enable_player_framework) {
+    external_deps += [ "player_framework:media_client" ]
   }
 
   ldflags = [ "-Wl,--gc-sections" ]

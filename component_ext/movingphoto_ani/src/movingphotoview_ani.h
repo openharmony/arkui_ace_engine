@@ -22,9 +22,9 @@
 
 namespace OHOS::Ace {
 
-constexpr const char* ANI_MOVINGPHOTO_NATIVE = "@ohos.multimedia.movingphotoview.MovingPhotoNative";
-constexpr const char* ANI_MOVINGPHOTO_DYNAMICRANGEMODE = "@ohos.multimedia.movingphotoview.DynamicRangeMode";
-constexpr const char* ANI_MOVINGPHOTO_PIXELMAPFORMAT = "@ohos.multimedia.movingphotoview.PixelMapFormat";
+constexpr const char* ANI_MOVINGPHOTO_NATIVE = "@ohos.multimedia.MovingPhotoView.MovingPhotoNative";
+constexpr const char* ANI_MOVINGPHOTO_DYNAMICRANGEMODE = "@ohos.multimedia.MovingPhotoView.DynamicRangeMode";
+constexpr const char* ANI_MOVINGPHOTO_PIXELMAPFORMAT = "@ohos.multimedia.MovingPhotoView.PixelMapFormat";
 constexpr const char* ANI_ARKUI_COMPONENT_ENUMS_IMAGEFIT = "arkui.component.enums.ImageFit";
 
 class MovingPhotoAni {
