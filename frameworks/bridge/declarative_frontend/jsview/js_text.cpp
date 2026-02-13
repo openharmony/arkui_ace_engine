@@ -282,7 +282,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resourceObject;
     UnRegisterResource("TextColor");
     JSRef<JSVal> args = info[0];
-    if (!ParseJsColor(args, textColor, resourceObject)) {
+    if (!ParseJsColorForMaterial(args, textColor, resourceObject)) {
         TAG_LOGW(AceLogTag::ACE_TEXT, "JSText::SetTextColor ParseJsColor failed!");
         TextModel::GetInstance()->ResetTextColor();
         return;

@@ -64,6 +64,35 @@ const LinearColor LinearColor::GREEN = LinearColor(0xff00ff00);
 const LinearColor LinearColor::BLUE = LinearColor(0xff0000ff);
 const LinearColor LinearColor::GRAY = LinearColor(0xffc0c0c0);
 
+const std::unordered_map<int32_t, ColorPlaceholder> g_specialResourceHolderMap = {
+    { 125830976, ColorPlaceholder::BRAND },
+    { 125830977, ColorPlaceholder::BRAND_FONT },
+    { 125830979, ColorPlaceholder::WARNING },
+    { 125830987, ColorPlaceholder::FONT_ON_PRIMARY },
+    { 125830982, ColorPlaceholder::FONT_PRIMARY },
+    { 125830983, ColorPlaceholder::FONT_SECONDARY },
+    { 125830984, ColorPlaceholder::FONT_TERTIARY },
+    { 125830985, ColorPlaceholder::FONT_FOURTH },
+    { 125830986, ColorPlaceholder::FONT_EMPHASIZE },
+    { 125830991, ColorPlaceholder::ICON_PRIMARY },
+    { 125830992, ColorPlaceholder::ICON_SECONDARY },
+    { 125830993, ColorPlaceholder::ICON_TERTIARY },
+    { 125830994, ColorPlaceholder::ICON_FOURTH },
+    { 125830995, ColorPlaceholder::ICON_EMPHASIZE },
+    { 125830996, ColorPlaceholder::ICON_SUB_EMPHASIZE },
+    { 125831005, ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY },
+    { 125834831, ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY_SECONDARY },
+    { 125831007, ColorPlaceholder::COMP_BACKGROUND_SECONDARY },
+    { 125831008, ColorPlaceholder::COMP_BACKGROUND_TERTIARY },
+    { 125831009, ColorPlaceholder::COMP_BACKGROUND_EMPHASIZE },
+    { 125831011, ColorPlaceholder::COMP_EMPHASIZE_SECONDARY },
+    { 125831012, ColorPlaceholder::COMP_EMPHASIZE_TERTIARY },
+    { 125831013, ColorPlaceholder::COMP_DIVIDER },
+    { 125831019, ColorPlaceholder::INTERACTIVE_HOVER },
+    { 125831021, ColorPlaceholder::INTERACTIVE_FOCUS },
+    { 125831020, ColorPlaceholder::INTERACTIVE_PRESSED },
+};
+
 unsigned long int HandleIncorrectColor(const std::string& newColorStr)
 {
     errno = 0;
@@ -232,7 +261,8 @@ Color Color::ColorFromString(const std::string& str)
 
 std::string Color::ToString() const
 {
-    if (IsPlaceholder()) {
+    if (IsPlaceholder() &&
+        static_cast<int32_t>(GetPlaceholder()) <= static_cast<int32_t>(ColorPlaceholder::FOREGROUND)) {
         // Provide readable placeholder tag for debugging/logging.
         std::ostringstream oss;
         oss << ColorToString() << "|PH:";

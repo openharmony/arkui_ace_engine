@@ -152,7 +152,7 @@ void JSSymbol::SetFontColor(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         UnRegisterResource("symbolColor");
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
-        if (!ParseJsSymbolColor(info[0], symbolColor, true, resObjArr)) {
+        if (!ParseJsSymbolColor(info[0], symbolColor, true, resObjArr, true)) {
             return;
         }
         if (!resObjArr.empty()) {
@@ -162,7 +162,7 @@ void JSSymbol::SetFontColor(const JSCallbackInfo& info)
         SymbolModel::GetInstance()->SetFontColor(symbolColor);
         return;
     }
-    if (!ParseJsSymbolColor(info[0], symbolColor)) {
+    if (!ParseJsSymbolColor(info[0], symbolColor, false, DEFAULT_RESOURCE_PAIR_ARRAY, true)) {
         return;
     }
     SymbolModel::GetInstance()->SetFontColor(symbolColor);

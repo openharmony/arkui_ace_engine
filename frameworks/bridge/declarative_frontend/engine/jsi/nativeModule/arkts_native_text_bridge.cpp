@@ -222,11 +222,11 @@ ArkUINativeModuleValue TextBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCal
     Color color;
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
+    if (!ArkTSUtils::ParseJsColorAlphaForMaterial(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getTextModifier()->resetFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextModifier()->setFontColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(colorResObj));
+        GetArkUINodeModifiers()->getTextModifier()->setFontColorPtr(
+            nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), AceType::RawPtr(colorResObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }
