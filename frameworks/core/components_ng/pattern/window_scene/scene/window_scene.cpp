@@ -34,7 +34,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeOut",            Curves::EASE_OUT    },
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
-const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
+const uint32_t CLEAN_WINDOW_DELAY_TIME = 3000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME_MS = 100;
@@ -581,7 +581,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     CHECK_EQUAL_VOID(CheckPrelaunchForBufferAvailableCallback(removeSnapshotWindowTask_, uiTask), true);
-    if (Rosen::SceneSessionManager::GetInstance().GetDelayRemoveSnapshot()) {
+    if (SystemProperties::IsSmallFoldProduct() && Rosen::SceneSessionManager::GetInstance().GetDelayRemoveSnapshot()) {
         Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
         removeSnapshotWindowTask_.Cancel();
         removeSnapshotWindowTask_.Reset(uiTask);

@@ -36,6 +36,11 @@
 #include "ui/rs_ui_context.h"
 #include "ui/rs_ui_director.h"
 
+#include "key_event.h"
+#include "pointer_event.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"

@@ -877,12 +877,16 @@ std::shared_ptr<Rosen::RSNode> WindowSceneLayoutManager::FindScenePanelRsNodeByZ
         return nullptr;
     }
     RefPtr<FrameNode> retNode = nullptr;
-    std::sort(scenePanelNodeArr.begin(), scenePanelNodeArr.end(),
-        [](const auto& a, const auto& b) {
-            return a.second > b.second;
+    uint32_t minDiff = std::numeric_limits<uint32_t>::max();
+    for (auto& p: scenePanelNodeArr) {
+        auto node = p.first;
+        uint32_t nodeZOrder = p.second;
+        if (targetZOrder - nodeZOrder < minDiff) {
+            minDiff = targetZOrder - nodeZOrder;
+            retNode = node;
         }
-    );
-    TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "Find node zOrder: %{public}d", scenePanelNodeArr.front().second);
-    return GetRSNode(scenePanelNodeArr.front().first);
+    }
+    TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "Find node zorder:%{public}d", GetNodeZIndex(retNode));
+    return GetRSNode(retNode);
 }
 } // namespace OHOS::Ace::NG

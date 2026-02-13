@@ -504,9 +504,9 @@ void WindowPattern::CreateASStartingWindow()
     std::string circleIcon = "";
 
 #ifdef ACE_ENGINE_PLUGIN_PATH
-    appNameInfo = sessionInfo.atomicServiceInfo_.appNameInfo;
-    eyelashRingIcon = sessionInfo.atomicServiceInfo_.eyelashRingIcon;
-    circleIcon = sessionInfo.atomicServiceInfo_.circleIcon;
+    appNameInfo = sessionInfo.atomicServiceInfo_.appNameInfo_;
+    eyelashRingIcon = sessionInfo.atomicServiceInfo_.eyelashRingIcon_;
+    circleIcon = sessionInfo.atomicServiceInfo_.circleIcon_;
 #endif // ACE_ENGINE_PLUGIN_PATH
 
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -645,7 +645,8 @@ void WindowPattern::CreateStartingWindow()
     startingWindowInfo.backgroundColorEarlyVersion_ =
         context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startingWindowInfo);
-    if (startingWindowInfo.configFileEnabled_) {
+    if (!(sessionInfo.startWindowOption != nullptr && sessionInfo.startWindowOption->hasStartWindow) &&
+        startingWindowInfo.configFileEnabled_) {
         CHECK_NULL_VOID(startingWindowLayoutHelper_);
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
