@@ -60,8 +60,6 @@ public:
     ModalUIExtensionCallbacks GetModalUIExtensionCallbacks(bool firstTry);
 #endif
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);
-    static void RegistAppBarNodeBuilder(
-        std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder);
     static int32_t AddRectChangeListener(
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
@@ -84,7 +82,6 @@ private:
 
     WeakPtr<FrameNode> atomicService_;
     RefPtr<FrameNode> contentStage_;
-    static std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

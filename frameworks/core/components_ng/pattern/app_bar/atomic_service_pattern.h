@@ -66,8 +66,6 @@ public:
     void SetMenuBarVisibleCallBack(bool visible);
     void ExtensionHostParamsCallBack();
     std::optional<bool> settedColorMode = std::nullopt;
-    ACE_FORCE_EXPORT static void RegisterBeforeCreateLayoutBuilder(
-        std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder);
     bool OnBackPressedCallback() override;
     void SetOnBackPressedConsumed();
     int32_t AddRectChangeListener(std::function<void(const RectF& rect)>&& listener);
@@ -83,7 +81,6 @@ private:
     void UpdateOverlayLayout();
     void MenuBarSafeAreaCallBack();
     void ContentSafeAreaCallBack();
-    static std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder_;
     std::optional<bool> onBackPressedConsumed_;
     std::optional<RectF> appBarRect_;
     std::unordered_map<int32_t, std::function<void(const RectF& rect)>> rectChangeListeners_;

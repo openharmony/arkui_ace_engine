@@ -15,10 +15,8 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_ng.h"
 
-#include "bridge/cj_frontend/frontend/cj_app_bar_utils.h"
 #include "bridge/cj_frontend/frontend/container_modal_cj_utils.h"
-#include "core/components_ng/pattern/app_bar/app_bar_view.h"
-#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+
 namespace OHOS::Ace::Framework {
 void CJFrontendNG::InternalInitialize()
 {
@@ -36,19 +34,6 @@ void CJFrontendNG::InternalInitialize()
                             const RefPtr<NG::FrameNode>& containerTitleRow) -> RefPtr<NG::FrameNode> {
         return OHOS::Ace::NG::AddControlButtonsForCj(weakPattern, containerTitleRow);
     };
-    std::function<RefPtr<NG::FrameNode>(NG::AppBarView * appbar, const RefPtr<NG::FrameNode>& stage)> appbar =
-        [](NG::AppBarView* appbar, const RefPtr<NG::FrameNode>& stage) -> RefPtr<NG::FrameNode> {
-        return OHOS::Ace::NG::BuildMenuBarRow(appbar, stage);
-    };
-
-    std::function<void(RefPtr<NG::FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder =
-        [](RefPtr<NG::FrameNode> host, std::optional<bool> settedColorMode) -> void {
-        return OHOS::Ace::NG::SetRegisterBeforeCreateLayoutBuilder(host, settedColorMode);
-    };
-
-    // regist builder
-    NG::AppBarView::RegistAppBarNodeBuilder(appbar);
-    NG::AtomicServicePattern::RegisterBeforeCreateLayoutBuilder(beforeCreateLayoutBuilder);
     NG::ContainerModalView::RegistCustomBuilder(title, controlButton);
 }
 
