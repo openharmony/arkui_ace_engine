@@ -16,13 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_H
 
-#include <bitset>
-#include <cstdint>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #include "advanced_text_style.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
@@ -958,18 +951,17 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         OptimizeTrailingSpace, bool, false, ParagraphStyleAttribute::RE_CREATE);
-    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
-        CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
-    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);
-
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         StrokeWidth, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(StrokeColor, Color, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(ColorShaderStyle, Color, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         Superscript, SuperscriptStyle, SuperscriptStyle::NORMAL, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
+        LineThicknessScale, float, 1.0f, TextStyleAttribute::DECORATION_THICKNESS_SCALE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        CompressLeadingPunctuation, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(EnableAutoSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(ColorShaderStyle, Color, TextStyleAttribute::FOREGROUND_BRUSH);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(IncludeFontPadding, bool, false, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(FallbackLineSpacing, bool, false, ParagraphStyleAttribute::RE_CREATE);
 
