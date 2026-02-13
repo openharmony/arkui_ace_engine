@@ -93,6 +93,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     hitTestRecordInfo_ = { isRealTouch, touchPoint.screenX, touchPoint.screenY, touchPoint.id, touchPoint.time,
         touchPoint.type };
+    if (touchHitTestInfos_.find(touchPoint.id) != touchHitTestInfos_.end()) {
+        touchHitTestInfos_.erase(touchPoint.id);
+    }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     NotifyHitTestFrameNodeListener(touchPoint);
