@@ -225,7 +225,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                 // unfreeze the component on reuse
                 this.unfreezeReusedComponent();
                 this.aboutToReuse();
-                this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_REUSE);
+                if (this['__newLifecycleNeedWork__Internal']) {
+                    this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_REUSE);
+                }
             }
         }, 'aboutToReuseInternal', this.constructor.name);
         ObserveV2.getObserve().updateDirty2(true, true);
@@ -247,9 +249,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
         stateMgmtConsole.debug(`ViewV2 ${this.debugInfo__()} aboutToRecycleInternal`);
 
-        // Calls the application's aboutToRecycle() method if defined
+        // Calls to application's aboutToRecycle() method if defined
         this.aboutToRecycle();
-        this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_RECYCLE);
+        if (this['__newLifecycleNeedWork__Internal']) {
+            this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_RECYCLE);
+        }
 
         // Freeze the component when its in recycle pool
         this.freezeRecycledComponent();
