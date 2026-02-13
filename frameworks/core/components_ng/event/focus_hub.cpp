@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -383,8 +384,59 @@ void FocusHub::DumpFocusUie()
     }
 }
 
+bool FocusHub::RequestFocusImmediatelyFromModalUEC(FocusReason focusReason)
+{
+    auto frameNode = GetFrameNode();
+    if (frameNode->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "not UEComponent, interrupt the request");
+        return false;
+    }
+    auto focusPattern = frameNode->GetPattern<UIExtensionPattern>();
+    if (focusPattern && !focusPattern->GetModalFlag()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "not modalUEC, interrupt the request");
+        return false;
+    }
+    auto focusManager = GetFocusManager();
+    if (focusManager && focusManager->IsModalFocusViewStackValid()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
+            " RequestFocusImmediatelyFromModalUEC isOnMainTree:%{public}d, intercept by existed modalFocusView",
+            GetFrameName().c_str(), SEC_PARAM(GetFrameId()), frameNode ? frameNode->IsOnMainTree() : -1);
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
+        " RequestFocusImmediatelyFromModalUEC isOnMainTree:%{public}d",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()), frameNode ? frameNode->IsOnMainTree() : -1);
+    return RequestFocusImmediatelyInner(focusReason);
+}
+
+bool FocusHub::ModalCheckBeforeRequestFocus()
+{
+    auto focusManager = GetFocusManager();
+    if (focusManager && focusManager->IsModalFocusViewStackValid()) {
+        RefPtr<FocusView> curFocusView = nullptr;
+        for (RefPtr<UINode> node = GetFrameNode(); node; node = node->GetParent()) {
+            auto frameNode = DynamicCast<FrameNode>(node);
+            CHECK_NULL_CONTINUE(frameNode);
+            auto focusView = frameNode->GetPattern<FocusView>();
+            CHECK_NULL_CONTINUE(focusView);
+            curFocusView = focusView;
+            break;
+        }
+        auto modalFocusView = focusManager->GetValidModalFocusView().Upgrade();
+        if (modalFocusView && curFocusView != modalFocusView && !curFocusView->IsChildFocusViewOf(modalFocusView)) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "ModalFocusViewStack is not empty, intercept focus request.");
+            return false;
+        }
+    }
+    return true;
+}
+
 bool FocusHub::RequestFocusImmediately(FocusReason focusReason)
 {
+    if (!ModalCheckBeforeRequestFocus()) {
+        return false;
+    }
+
     auto frameNode = GetFrameNode();
     TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
         " RequestFocusImmediately isOnMainTree:%{public}d",
@@ -449,6 +501,14 @@ bool FocusHub::IsViewRootScope()
 
 void FocusHub::LostFocusToViewRoot()
 {
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    if (focusManager->IsModalFocusViewStackValid()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "ModalFocusViewStack is not empty, intercept LostFocusToViewRoot.");
+        return;
+    }
     auto curFocusView = FocusView::GetCurrentFocusView();
     CHECK_NULL_VOID(curFocusView);
     auto viewRootScope = curFocusView->GetViewRootScope();

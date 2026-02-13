@@ -4815,6 +4815,14 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncR
     CHECK_NULL_RETURN(rootNode, false);
     auto focusHub = rootNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
+
+    auto focusManager = focusHub->GetFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    if (focusManager->IsModalFocusViewStackValid()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "ModalFocusViewStack is not empty, intercept focus request.");
+        return false;
+    }
+
     auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId, isSyncRequest);
     if (!isSubPipeline_ || currentFocusChecked) {
         return currentFocusChecked;
