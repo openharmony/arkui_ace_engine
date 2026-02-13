@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 /// <reference path="./frame_node.ts" />
-function createFrameNodeByTrans(nativePointer, uiContext, nodeType) {
-   return new TransFrameNode(uiContext, nodeType, undefined, nativePointer);
+function createFrameNodeByTrans(point, uiContext, nodeType) {
+   return new TransFrameNode(uiContext, nodeType, undefined, point);
 }
 
 class TransFrameNode extends FrameNode {
-    constructor(uiContext: UIContext, type: string, options?: object, nativePointer?: number) {
-        super(uiContext, type, options, nativePointer);
+    constructor(uiContext: UIContext, type: string, options?: object, point?: number) {
+        super(uiContext, type, options, point);
     }
     public isTransferred(): boolean {
         return true;

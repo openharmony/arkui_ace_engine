@@ -192,7 +192,6 @@ void ShapeAbstractModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::v
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
-    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("ShapeAbstractStrokeDashArray", resObj, std::move(updateFunc));
 }

@@ -318,7 +318,6 @@ void RectModelNG::SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX,
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
-    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     std::string radiusType = RADIUS_TYPES[index];
     std::string key = std::string("RectRadius") + radiusType;

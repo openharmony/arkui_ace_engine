@@ -99,7 +99,6 @@ void LineModelNG::StartPoint(
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
-    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("LineStartPoint", resObj, std::move(updateFunc));
 }
@@ -144,7 +143,6 @@ void LineModelNG::EndPoint(
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
-    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("LineEndPoint", resObj, std::move(updateFunc));
 }

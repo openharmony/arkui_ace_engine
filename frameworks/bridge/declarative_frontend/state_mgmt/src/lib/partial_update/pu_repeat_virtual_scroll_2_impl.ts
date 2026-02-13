@@ -1508,7 +1508,7 @@ class __RepeatVirtualScroll2Impl<T> {
         
         if (this.lazyLoadingIndex_ !== -1 && arrChange !== 'set') {
             const msg = `onLazyLoading function executed illegal operation: ${arrChange}!`;
-            throw new BusinessError(103804, `${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
+            throw new BusinessError(103804,`${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
         }
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayout for '${arrChange}'`,
@@ -1548,7 +1548,7 @@ class __RepeatVirtualScroll2Impl<T> {
             const changeIndex = args[0] as number;
             if (this.lazyLoadingIndex_ !== -1 && changeIndex !== this.lazyLoadingIndex_) {
                 const msg = `onLazyLoading function illegally set to index: ${changeIndex}`;
-                throw new BusinessError(103804, `${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
+                throw new BusinessError(103804,`${this.constructor.name}(${this.repeatElmtId_}) ${msg}`);
             }
             return (changeIndex >= 0) && this.tryFastRelayoutForChange(this.arr_.length, changeIndex, 0, 0);
         }

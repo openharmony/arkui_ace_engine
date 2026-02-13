@@ -189,7 +189,7 @@ ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(
         }
     }
 
-    // force update active range if GetFrameChildByIndex and DoSetActiveChildRange have different ranges.
+    // force update active range if GetFrameChildByIndex and DoSetActiveChiidRange have different ranges.
     if (!needRecordFirstFrameChild_ &&
         (static_cast<int32_t>(minFrameChildIndex_) != nStart || static_cast<int32_t>(maxFrameChildIndex_) != nEnd)) {
         forceRunDoSetActiveRange_ = true;
