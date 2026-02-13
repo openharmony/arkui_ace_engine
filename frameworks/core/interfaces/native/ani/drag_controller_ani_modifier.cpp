@@ -1164,7 +1164,7 @@ void ANISpringLoadingContextGetDragInfos(ani_long ptr, ArkUIDragInfos& info)
     CHECK_NULL_VOID(context);
     info.extraInfo = context->GetExtraInfos();
     auto summary = context->GetSummary();
-    auto summaryPtr = info.summary.GetSharedPtr();
+    auto summaryPtr = std::static_pointer_cast<UDMF::Summary>(info.summary.GetSharedPtr());
     UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr);
 }
 

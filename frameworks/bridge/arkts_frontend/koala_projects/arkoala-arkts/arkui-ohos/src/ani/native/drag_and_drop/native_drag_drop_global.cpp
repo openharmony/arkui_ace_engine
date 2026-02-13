@@ -96,11 +96,10 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     if (!modifier || !modifier->getDragAniModifier() || !env) {
         return result_obj;
     }
-    auto summary = SharedPointerWrapper(std::make_shared<OHOS::UDMF::Summary>());
+    auto summary = std::make_shared<OHOS::UDMF::Summary>();
     modifier->getDragAniModifier()->getDragSummary(dragEvent, summary);
-    std::shared_ptr<OHOS::UDMF::Summary> udmfSummary =
-        std::static_pointer_cast<OHOS::UDMF::Summary>(summary.GetSharedPtr());
-    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, udmfSummary);
+    
+    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
     ani_boolean isSummary;
     ani_class summaryClass;
     env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary", &summaryClass);

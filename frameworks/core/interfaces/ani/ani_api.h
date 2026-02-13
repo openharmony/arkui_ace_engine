@@ -37,7 +37,9 @@ const float DEFAULT_SNAPSHOT_SCALE = 1.f;
 const int32_t DEFAULT_DELAY_TIME = 300;
 const uint32_t DEFAULT_COLORSPACE_VALUE_SRGB = 4;
 const uint32_t DEFAULT_DYNAMICRANGE_VALUE_STANDARD = 2;
-
+namespace OHOS::UDMF {
+struct Summary;
+}
 struct _ArkUIStyledString;
 struct _ArkUINode;
 struct _ArkUIContentSlot;
@@ -502,7 +504,7 @@ struct ArkUIAniWebModifier {
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
     ani_ref (*getDragData)(ani_ref event);
-    void (*getDragSummary)(ani_ref event, SharedPointerWrapper& summaryPtr);
+    void (*getDragSummary)(ani_ref event, std::shared_ptr<OHOS::UDMF::Summary> summaryPtr);
     void (*setDragDataLoadParams)(ani_ref event, void* dataLoadParams);
     void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);

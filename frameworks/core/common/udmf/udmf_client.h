@@ -26,6 +26,10 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/components/form/resource/form_request_data.h"
 
+namespace OHOS::UDMF {
+struct Summary;
+}
+
 namespace OHOS::Ace {
 const std::string DROP_TYPE_PLAIN_TEXT = "general.plain-text";
 const std::string DROP_TYPE_HYPERLINK = "general.hyperlink";
@@ -99,7 +103,8 @@ public:
     virtual bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) = 0;
     virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
     virtual RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) = 0;
-    virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) = 0;
+    virtual void TransformSummaryANI(
+        std::map<std::string, int64_t>& summary, std::shared_ptr<OHOS::UDMF::Summary> summaryPtr) = 0;
 };
 } // namespace OHOS::Ace
 #endif
