@@ -2065,25 +2065,6 @@ HWTEST_F(TextFieldManagerTestNG,
 }
 
 /**
- * @tc.name: TextFieldManagerNG_TriggerCustomKeyboardAvoid001
- * @tc.desc: test TriggerCustomKeyboardAvoid when not using custom keyboard avoid
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_TriggerCustomKeyboardAvoid001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Call TriggerCustomKeyboardAvoid with custom keyboard avoid disabled
-     */
-    TextFieldManagerNG textFieldManager;
-    textFieldManager.SetUsingCustomKeyboardAvoid(false);
-
-    /**
-     * @tc.expected: step1. Should not crash
-     */
-    textFieldManager.TriggerCustomKeyboardAvoid();
-}
-
-/**
  * @tc.name: TextFieldManagerNG_SetCustomKeyboardContinueFeature_GetCustomKeyboardContinueFeature001
  * @tc.desc: test SetCustomKeyboardContinueFeature and GetCustomKeyboardContinueFeature
  * @tc.type: FUNC

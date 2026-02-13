@@ -100,8 +100,8 @@ const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
+const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = {
+    TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::MARQUEE, TextOverflow::DEFAULT};
 
 bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
 {
@@ -118,6 +118,7 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
+
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1829,6 +1830,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     }
 }
 
+
 void JSTextField::SetPasswordRules(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
@@ -2110,7 +2112,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }
 }
-
+ 
 void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2131,7 +2133,7 @@ void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
 }
-
+ 
 void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2157,7 +2159,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
-
+ 
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
@@ -2165,7 +2167,7 @@ void JSTextField::SetHeightAdaptivePolicy(int32_t value)
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
-
+ 
 void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -2181,7 +2183,7 @@ void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetLetterSpacing(value);
 }
-
+ 
 void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
