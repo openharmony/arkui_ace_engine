@@ -16,13 +16,12 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_grid_ffi.h"
 
 #include "cj_lambda.h"
-
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "base/utils/utils.h"
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
@@ -73,12 +72,7 @@ void FfiOHOSAceFrameworkGridCreateScroller(int64_t scrollerID)
 
 void FfiOHOSAceFrameworkGridSetCachedCount(int32_t cachedCount)
 {
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetCachedCount(cachedCount);
-    } else {
-        LOGE("Grid Instance is null");
-        return;
-    }
+    GridModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
 void FfiOHOSAceFrameworkGridColumnsTemplate(const char* value)
@@ -406,7 +400,9 @@ void FfiOHOSAceFrameworkGridOnItemDragStartWithBack(
     auto onItemDragStart = [node = targetNode, lambda](const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto x = dragInfo.GetX();
         auto y = dragInfo.GetY();
-        CJItemDragInfo itemDragInfo = { .x = x, .y = y };
+        CJItemDragInfo itemDragInfo = {
+            .x = x, .y = y
+        };
         LOGI("FfiOHOSAceFrameworkGridOnItemDragStartWithBack lambda start");
         auto ret = lambda(itemDragInfo, itemIndex);
         if (ret.builder == nullptr) {
@@ -419,12 +415,7 @@ void FfiOHOSAceFrameworkGridOnItemDragStartWithBack(
         PipelineContext::SetCallBackNode(node);
         builderFunc();
     };
-    if (GridModel::GetInstance()) {
-        GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
-    } else {
-        LOGE("Grid Instance is null");
-        return;
-    }
+    GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }
 
 void FfiOHOSAceFrameworkGridOnItemDragEnter(void (*callback)(CJItemDragInfo dragInfo))

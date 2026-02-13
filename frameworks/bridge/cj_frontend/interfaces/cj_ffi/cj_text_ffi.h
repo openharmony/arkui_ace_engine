@@ -91,6 +91,12 @@ using VectorStringPtr = void*;
 using VectorNativeShadowOptionsHandle = void*;
 using VectorTextMenuItemHandle = void*;
 
+struct FFiTextMenuItem {
+    char* content;
+    char* icon;
+    char* id;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkTextCreate(const char* content);
 CJ_EXPORT void FfiOHOSAceFrameworkTextCreateWithController(const char* content, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetWidth(double width, int32_t unit);

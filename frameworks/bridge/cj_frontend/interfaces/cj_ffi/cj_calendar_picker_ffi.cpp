@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_calendar_picker_ffi.h"
 
 #include "cj_lambda.h"
+
 #include "base/log/log_wrapper.h"
 #include "core/common/dynamic_module_helper.h"
 #include "bridge/common/utils/utils.h"
@@ -31,23 +32,30 @@ namespace {
 
 void SetRadius(NG::BorderRadiusProperty& dialogRadius, const Dimension& borderRadius)
 {
+#ifndef ARKUI_WEARABLE
     dialogRadius.radiusTopLeft = borderRadius;
     dialogRadius.radiusTopRight = borderRadius;
     dialogRadius.radiusBottomLeft = borderRadius;
     dialogRadius.radiusBottomRight = borderRadius;
+#endif
 }
 
 PickerDate ParseDate(const FfiTime& date)
 {
+#ifndef ARKUI_WEARABLE
     auto pickerDate = PickerDate();
     pickerDate.SetYear(date.year);
     pickerDate.SetMonth(date.month);
     pickerDate.SetDay(date.day);
     return pickerDate;
+#else
+    return PickerDate();
+#endif
 }
 
 NG::BorderRadiusProperty ParseNativeBorderRadiuses(const NativeBorderRadiuses& nativeBorderRadiuses)
 {
+#ifndef ARKUI_WEARABLE
     NG::BorderRadiusProperty radius;
     CalcDimension topLeft(
         nativeBorderRadiuses.topLeftRadiuses, static_cast<DimensionUnit>(nativeBorderRadiuses.topLeftUnit));
@@ -63,10 +71,14 @@ NG::BorderRadiusProperty ParseNativeBorderRadiuses(const NativeBorderRadiuses& n
     radius.radiusBottomRight = bottomRight;
     radius.multiValued = true;
     return radius;
+#else
+    return NG::BorderRadiusProperty();
+#endif
 }
 
 Shadow ParseNativeShadowOptions(NativeShadowOptions shadowOptions)
 {
+#ifndef ARKUI_WEARABLE
     Shadow shadow;
     if (LessNotEqual(shadowOptions.radius, 0.0)) {
         shadowOptions.radius = 0.0;
@@ -79,10 +91,14 @@ Shadow ParseNativeShadowOptions(NativeShadowOptions shadowOptions)
     shadow.SetOffsetX(shadowOptions.offsetX);
     shadow.SetOffsetY(shadowOptions.offsetY);
     return shadow;
+#else
+    return Shadow();
+#endif
 }
 
 FfiTime GetFfiTime(const std::string& date)
 {
+#ifndef ARKUI_WEARABLE
     auto json = JsonUtil::ParseJsonString(date);
     if (!json || json->IsNull()) {
         return FfiTime();
@@ -113,10 +129,14 @@ FfiTime GetFfiTime(const std::string& date)
         dateTime.sec = local->tm_sec;
     }
     return dateTime;
+#else
+    return FfiTime();
+#endif
 }
 
 void ParseFontOfButtonStyle(const NativePickerDialogButtonStyle& buttonStyle, ButtonInfo& buttonInfo)
 {
+#ifndef ARKUI_WEARABLE
     if (buttonStyle.fontSize.hasValue) {
         CalcDimension fontSize =
             CalcDimension(buttonStyle.fontSize.value.value, DimensionUnit(buttonStyle.fontSize.value.unitType));
@@ -139,11 +159,13 @@ void ParseFontOfButtonStyle(const NativePickerDialogButtonStyle& buttonStyle, Bu
     if (buttonStyle.fontFamily.hasValue) {
         buttonInfo.fontFamily = ConvertStrToFontFamilies(buttonStyle.fontFamily.value);
     }
+#endif
 }
 
 void AppearDialogEvent(
     const NativeCalendarDialogOptions& options, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+#ifndef ARKUI_WEARABLE
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (options.onDidAppear.hasValue) {
         auto didAppearId = [func = CJLambda::Create(options.onDidAppear.value), node = targetNode]() {
@@ -160,11 +182,13 @@ void AppearDialogEvent(
         };
         dialogLifeCycleEvent["willAppearId"] = willAppearId;
     }
+#endif
 }
 
 void DisappearDialogEvent(
     const NativeCalendarDialogOptions& options, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+#ifndef ARKUI_WEARABLE
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (options.onDidDisappear.hasValue) {
         auto didDisappearId = [func = CJLambda::Create(options.onDidDisappear.value), node = targetNode]() {
@@ -181,10 +205,12 @@ void DisappearDialogEvent(
         };
         dialogLifeCycleEvent["willDisappearId"] = willDisappearId;
     }
+#endif
 }
 
 ButtonInfo ParseButtonStyle(const NativePickerDialogButtonStyle& buttonStyle)
 {
+#ifndef ARKUI_WEARABLE
     ButtonInfo buttonInfo;
     if (buttonStyle.type.hasValue) {
         int32_t buttonTypeIntValue = buttonStyle.type.value;
@@ -221,10 +247,14 @@ ButtonInfo ParseButtonStyle(const NativePickerDialogButtonStyle& buttonStyle)
         buttonInfo.isPrimary = buttonStyle.primary.value;
     }
     return buttonInfo;
+#else
+    return ButtonInfo();
+#endif
 }
 
 std::vector<ButtonInfo> ParseButtonStyles(const NativeCalendarDialogOptions& options)
 {
+#ifndef ARKUI_WEARABLE
     std::vector<ButtonInfo> buttonInfos;
     if (options.acceptButtonStyle.hasValue) {
         buttonInfos.emplace_back(ParseButtonStyle(options.acceptButtonStyle.value));
@@ -236,10 +266,14 @@ std::vector<ButtonInfo> ParseButtonStyles(const NativeCalendarDialogOptions& opt
         buttonInfos.emplace_back(ParseButtonStyle(options.cancelButtonStyle.value));
     }
     return buttonInfos;
+#else
+    return {};
+#endif
 }
 
 std::map<std::string, NG::DialogEvent> ChangeDialogEvent(const NativeCalendarDialogOptions& options)
 {
+#ifndef ARKUI_WEARABLE
     std::map<std::string, NG::DialogEvent> dialogEvent;
     if (options.onChange.hasValue) {
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -260,10 +294,14 @@ std::map<std::string, NG::DialogEvent> ChangeDialogEvent(const NativeCalendarDia
         dialogEvent["acceptId"] = acceptId;
     }
     return dialogEvent;
+#else
+    return {};
+#endif
 }
 
 std::map<std::string, NG::DialogGestureEvent> DialogCancelEvent(const NativeCalendarDialogOptions& options)
 {
+#ifndef ARKUI_WEARABLE
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     if (options.onCancel.hasValue) {
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -275,14 +313,21 @@ std::map<std::string, NG::DialogGestureEvent> DialogCancelEvent(const NativeCale
         dialogCancelEvent["cancelId"] = cancelId;
     }
     return dialogCancelEvent;
+#else
+    return {};
+#endif
 }
 
 std::map<std::string, NG::DialogCancelEvent> LifeCycleDialogEvent(const NativeCalendarDialogOptions& options)
 {
+#ifndef ARKUI_WEARABLE
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
     AppearDialogEvent(options, dialogLifeCycleEvent);
     DisappearDialogEvent(options, dialogLifeCycleEvent);
     return dialogLifeCycleEvent;
+#else
+    return {};
+#endif
 }
 
 void CalendarPickerDialogShow(const NativeCalendarDialogOptions& options,
@@ -291,6 +336,7 @@ void CalendarPickerDialogShow(const NativeCalendarDialogOptions& options,
     const std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent,
     const std::vector<ButtonInfo>& buttonInfos)
 {
+#ifndef ARKUI_WEARABLE
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -331,8 +377,10 @@ void CalendarPickerDialogShow(const NativeCalendarDialogOptions& options,
     CHECK_NULL_VOID(overlayManager_);
     overlayManager_->ShowCalendarDialog(
         properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
+#endif
 }
 
+#ifndef ARKUI_WEARABLE
 NG::CalendarPickerModelNG* GetCalendarPickerModel()
 {
     static NG::CalendarPickerModelNG* cachedModel = nullptr;
@@ -346,30 +394,36 @@ NG::CalendarPickerModelNG* GetCalendarPickerModel()
     }
     return cachedModel;
 }
+#endif
 } // namespace
 
 extern "C" {
 void FfiOHOSAceFrameworkCalendarPickerCreate(double size, int32_t unit, FfiTime date)
 {
+#ifndef ARKUI_WEARABLE
     NG::CalendarSettingData settingData;
     CalcDimension dayRadius = { size, DimensionUnit(unit) };
     settingData.selectedDate = ParseDate(date);
     settingData.dayRadius = dayRadius;
     GetCalendarPickerModel()->Create(settingData);
+#endif
 }
 
 void FfiOHOSAceFrameworkCalendarPickerSetEdgeAlign(int32_t alignType, NativeOffset offset)
 {
+#ifndef ARKUI_WEARABLE
     NG::CalendarEdgeAlign alignType_ = static_cast<NG::CalendarEdgeAlign>(alignType);
     CalcDimension dx = CalcDimension(offset.dx.value, DimensionUnit(offset.dx.unitType));
     CalcDimension dy = CalcDimension(offset.dy.value, DimensionUnit(offset.dy.unitType));
     DimensionOffset offset_ = DimensionOffset(dx, dy);
     GetCalendarPickerModel()->SetEdgeAlign(alignType_, offset_);
+#endif
 }
 
 void FfiOHOSAceFrameworkCalendarPickerSetTextStyle(
     uint32_t color, NativeLength size, const char* weight, const char* family, uint32_t style)
 {
+#ifndef ARKUI_WEARABLE
     NG::PickerTextStyle textStyle;
     textStyle.textColor = Color(color);
     CalcDimension fontSize = CalcDimension(size.value, DimensionUnit(size.unitType));
@@ -377,10 +431,12 @@ void FfiOHOSAceFrameworkCalendarPickerSetTextStyle(
     textStyle.fontWeight = ConvertStrToFontWeight(weight);
     textStyle.fontFamily = ConvertStrToFontFamilies(family);
     GetCalendarPickerModel()->SetTextStyle(textStyle);
+#endif
 }
 
 void FfiOHOSAceFrameworkCalendarPickerSetOnChange(void (*callback)(FfiTime))
 {
+#ifndef ARKUI_WEARABLE
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [func = CJLambda::Create(callback), node = targetNode](const std::string& info) -> void {
         PipelineContext::SetCallBackNode(node);
@@ -388,10 +444,12 @@ void FfiOHOSAceFrameworkCalendarPickerSetOnChange(void (*callback)(FfiTime))
         func(time);
     };
     GetCalendarPickerModel()->SetOnChange(std::move(onChange));
+#endif
 }
 
 void FfiOHOSAceFrameworkCalendarPickerDialogShow(NativeCalendarDialogOptions options)
 {
+#ifndef ARKUI_WEARABLE
     if (Container::IsCurrentUseNewPipeline()) {
         auto buttonInfos = ParseButtonStyles(options);
         auto dialogEvent = ChangeDialogEvent(options);
@@ -399,5 +457,6 @@ void FfiOHOSAceFrameworkCalendarPickerDialogShow(NativeCalendarDialogOptions opt
         auto dialogLifeCycleEvent = LifeCycleDialogEvent(options);
         CalendarPickerDialogShow(options, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
     }
+#endif
 }
 }

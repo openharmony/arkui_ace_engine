@@ -18,7 +18,6 @@
 #include <cmath>
 #include "cj_lambda.h"
 #include "base/log/log_wrapper.h"
-#include "bridge/common/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
@@ -97,18 +96,14 @@ void FFICJVectorGaugeLinearGradientDelete(VecLinearGradientHandle vec)
 
 void FfiOHOSAceFrameworkGaugeCreate(double gaugeValue, double gaugeMin, double gaugeMax)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+    bool isApi23OrAbove = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE);
+    if ((isApi23OrAbove && gaugeMin > gaugeMax) || (!isApi23OrAbove && gaugeMin >= gaugeMax)) {
         if (LessNotEqual(gaugeMax, gaugeMin)) {
             gaugeMin = NG::DEFAULT_MIN_VALUE;
             gaugeMax = NG::DEFAULT_MAX_VALUE;
         }
-    } else {
-        if (LessOrEqual(gaugeMax, gaugeMin)) {
-            gaugeMin = NG::DEFAULT_MIN_VALUE;
-            gaugeMax = NG::DEFAULT_MAX_VALUE;
-        }
     }
-    if (LessNotEqual(gaugeValue, gaugeMin) || GreatNotEqual(gaugeValue, gaugeMax)) {
+    if (gaugeValue < gaugeMin || gaugeValue > gaugeMax) {
         gaugeValue = gaugeMin;
     }
     GetGaugeModel()->Create(gaugeValue, gaugeMin, gaugeMax);
@@ -263,13 +258,13 @@ void FfiOHOSAceFrameworkGaugeSetShadowOptions(double radius, double offsetX, dou
 {
     NG::GaugeShadowOptions shadowOptions;
     bool isApi23OrAbove = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE);
-    if (LessNotEqual(radius, 0.0) || (isApi23OrAbove && LessOrEqual(radius, 0.0))) {
+    if (radius < 0 || (radius <= 0 && isApi23OrAbove)) {
         radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
     }
-    if (LessNotEqual(offsetX, 0.0) && !isApi23OrAbove) {
+    if (offsetX < 0 && !isApi23OrAbove) {
         offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
     }
-    if (LessNotEqual(offsetY, 0.0) && !isApi23OrAbove) {
+    if (offsetY < 0 && !isApi23OrAbove) {
         offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
     }
     shadowOptions.radius = radius;

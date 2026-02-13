@@ -22,9 +22,18 @@ using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 
+namespace {
+// Tabs component tag constant, should match V2::TABS_ETS_TAG defined in inspector_constants.h
+constexpr const char* TABS_ETS_TAG = "Tabs";
+}
+
 extern "C" {
 void FfiOHOSAceFrameworkLazyForEachCreate(int64_t viewID, int64_t parentViewID, int64_t lazyForEachFuncsID)
 {
+    auto nativeParentView = FFIData::GetData<NativeView>(parentViewID);
+    if (nativeParentView == nullptr) {
+        return;
+    }
     auto lazyForeachFunc = LazyForEachFuncs::Create<LazyForEachFuncs>(lazyForEachFuncsID);
     auto builder = AceType::MakeRefPtr<CJLazyForEachBuilder>(std::move(lazyForeachFunc));
     LazyForEachModel::GetInstance()->Create(builder);
@@ -32,6 +41,10 @@ void FfiOHOSAceFrameworkLazyForEachCreate(int64_t viewID, int64_t parentViewID, 
 
 void FfiOHOSAceFrameworkLazyForEachPop()
 {
+    auto* stack = NG::ViewStackProcessor::GetInstance();
+    if (stack->GetMainFrameNode() && stack->GetMainFrameNode()->GetTag() == TABS_ETS_TAG) {
+        return;
+    }
     ViewStackModel::GetInstance()->PopContainer();
 }
 }

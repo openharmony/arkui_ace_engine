@@ -16,6 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_span_ffi.h"
 #include "cj_lambda.h"
 
+#include "cj_lambda.h"
+
 #include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/text/span_model.h"

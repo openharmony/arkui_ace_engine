@@ -392,11 +392,10 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
     DialogProperties dialogProperties = {
         .autoCancel = options.autoCancel,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
-        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
         .isShowInSubWindow = options.showInSubWindow,
+        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
         .isModal = options.isModal,
         .enableHoverMode = options.enableHoverMode,
-        .isSysBlurStyle = false,
         .shadow = shadow,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
         .transitionEffect = chainedEffect
@@ -519,9 +518,6 @@ void FfiPromptOpenCustomDialog(void (*builder)(), NativeBaseOption options, void
 
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
 
-    if (options.alignment < 0 || options.alignment >= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
-        return;
-    }
     auto alignment = DIALOG_ALIGNMENT[options.alignment];
 
     // parse maskRect

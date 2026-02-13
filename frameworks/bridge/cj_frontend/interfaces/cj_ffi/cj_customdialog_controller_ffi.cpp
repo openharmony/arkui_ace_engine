@@ -110,9 +110,7 @@ NativeCustomDialogController::NativeCustomDialogController(NativeCustomDialogCon
     dialogProperties_.onCancel = onCancel;
     dialogProperties_.autoCancel = options.autoCancel;
     dialogProperties_.customStyle = options.customStyle;
-    if (options.alignment >= 0 && options.alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
-        dialogProperties_.alignment = DIALOG_ALIGNMENT[options.alignment];
-    }
+    dialogProperties_.alignment = DIALOG_ALIGNMENT[options.alignment];
     DimensionOffset offset_;
     ParseCjCustomDialogControllerOffset(offset_, options);
     dialogProperties_.offset = offset_;

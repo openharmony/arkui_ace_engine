@@ -15,8 +15,6 @@
 
 #include "cj_pixel_unit_convert_ffi.h"
 
-#include "core/pipeline/pipeline_base.h"
-
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
@@ -70,10 +68,13 @@ double FfiOHOSAceFrameworkFp2Px(double value)
 double FfiOHOSAceFrameworkPx2Fp(double value)
 {
     double fp2PxGap = GetFp2PxParam();
-    if (fp2PxGap > 0) {
-        return value / fp2PxGap;
-    } else {
+    if (std::isnan(fp2PxGap)) {
+        return NAN;
+    }
+    if (fp2PxGap == 0) {
         return value;
+    } else {
+        return value / fp2PxGap;
     }
 }
 
@@ -107,10 +108,13 @@ double FfiOHOSAceFrameworkLpx2Px(double value)
 double FfiOHOSAceFrameworkPx2Lpx(double value)
 {
     auto designWidthScale = GetdesignWidthScale();
-    if (designWidthScale > 0) {
-        return value / designWidthScale;
-    } else {
+    if (std::isnan(designWidthScale)) {
+        return NAN;
+    }
+    if (designWidthScale == 0) {
         return value;
+    } else {
+        return value / designWidthScale;
     }
 }
 }
