@@ -329,10 +329,10 @@ private:
     OffsetF childOffset_;
     // Offset from upper left corner of the screen
     OffsetF childOffsetForPaint_;
-    // top right bottom left
-    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     OffsetF arrowPosition_;
     OffsetF arrowPositionForPaint_;
+    // top right bottom left
+    std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     SizeF selfSize_;
     RectF touchRegion_;
     Rect hostWindowRect_;

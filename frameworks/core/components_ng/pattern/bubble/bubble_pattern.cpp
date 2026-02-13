@@ -166,6 +166,12 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
         pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
     }
     pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_);
+
+    // Clear JS callbacks to prevent memory leaks
+    if (popupParam_) {
+        popupParam_->SetOnWillDismiss(nullptr);
+        popupParam_->SetOnStateChange(nullptr);
+    }
 }
 
 void BubblePattern::OnAttachToMainTree()
@@ -900,7 +906,11 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
     renderContext->UpdateBackBlurStyle(styleOption);
     if (needUpdateShadow) {
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        CHECK_NULL_VOID(shadowTheme);
+        Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
         renderContext->UpdateBackShadow(shadow);
     }
 }
@@ -933,7 +943,6 @@ void BubblePattern::UpdateShadow()
 
 void BubblePattern::OnColorConfigurationUpdate()
 {
-    // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
     if (isTips_) {
         UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
     } else {
@@ -978,7 +987,6 @@ void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
     auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(popupPaintProp);
     popupPaintProp->UpdateBackgroundColor(value);
-    CHECK_NULL_VOID(popupParam_);
     UpdateStyleOption(popupParam_->GetBlurStyle(), false);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1015,7 +1023,6 @@ void BubblePattern::UpdateArrowWidth(const CalcDimension& dimension)
     if (dimension.Value() > 0 && dimension.Unit() != DimensionUnit::PERCENT) {
         popupLayoutProp->UpdateArrowWidth(dimension);
     }
-
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -1048,7 +1055,7 @@ void BubblePattern::UpdateWidth(const CalcDimension& dimension)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void BubblePattern::UpdateBubbleGradient(const int32_t index, const Color& result, bool isOutlineGradient)
+void BubblePattern::UpdateBubbleGradient(const uint32_t index, const Color& result, bool isOutlineGradient)
 {
     if (isOutlineGradient) {
         if (outlineLinearGradient_.gradientColors.size() > index) {
@@ -1072,6 +1079,5 @@ void BubblePattern::UpdateRadius(const CalcDimension& dimension)
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
-
 
 } // namespace OHOS::Ace::NG

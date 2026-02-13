@@ -396,10 +396,14 @@ export struct PopupComponent {
 
   private getMessagePadding(): LocalizedPadding {
     let padding: LocalizedPadding
+    if (this.title.text !== '' && this.title.text !== void (0)) {
+      padding = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) }
+    } else {
       padding = {
         start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
         end: LengthMetrics.vp(this.theme.closeButton.margin.end.value)
       }
+    }
     return padding
   }
 

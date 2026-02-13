@@ -99,7 +99,15 @@ public:
                 pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
                 "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
-            ParseAdditionalStylePattern(pattern, theme);
+            theme->targetSpace_ = pattern->GetAttr<Dimension>("popup_target_space", TARGET_SPACE);
+            theme->defaultBGColor_ = pattern->GetAttr<Color>("popup_default_bg_color", Color::TRANSPARENT);
+            theme->borderColor_ = pattern->GetAttr<Color>("popup_border_color", Color::BLACK);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("popup_border_width", 0.0_vp);
+            theme->minHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
+            theme->bubbleMiniMumHeight_ =
+                pattern->GetAttr<Dimension>("bubble_min_mum_height", theme->bubbleMiniMumHeight_);
+            theme->popupMaxColumns_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_max_columns", 0));
+            theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
             ParseTipsPattern(pattern, theme);
         }
         void ParseTipsPattern(const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
@@ -119,19 +127,6 @@ public:
                 pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp),
                 pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
                 pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp));
-        }
-        void ParseAdditionalStylePattern(
-            const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
-        {
-            theme->targetSpace_ = pattern->GetAttr<Dimension>("popup_target_space", TARGET_SPACE);
-            theme->defaultBGColor_ = pattern->GetAttr<Color>("popup_default_bg_color", Color::TRANSPARENT);
-            theme->borderColor_ = pattern->GetAttr<Color>("popup_border_color", Color::BLACK);
-            theme->borderWidth_ = pattern->GetAttr<Dimension>("popup_border_width", 0.0_vp);
-            theme->minHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
-            theme->popupMaxColumns_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_max_columns", 0));
-            theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
-            theme->bubbleMiniMumHeight_ =
-                pattern->GetAttr<Dimension>("bubble_min_mum_height", theme->bubbleMiniMumHeight_);
             theme->buttonHeight_ = pattern->GetAttr<Dimension>("popup_button_height", 40.0_vp);
             theme->buttonType_ = pattern->GetAttr<int>("popup_button_type", static_cast<int>(ButtonType::CAPSULE));
             theme->buttonTextFontWeight_ = pattern->GetAttr<int>(

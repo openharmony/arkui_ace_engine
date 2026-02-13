@@ -46,6 +46,7 @@ import {
   ScrollDirection,
   SizeOptions,
   SymbolGlyph,
+  SymbolGlyphModifier,
   Text,
   TextAlign,
   TextOverflow,
@@ -54,7 +55,6 @@ import {
   $r
 } from '@ohos.arkui.component';
 
-import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { Theme } from '@ohos.arkui.theme';
 import { State, Watch, PropRef } from '@ohos.arkui.stateManagement';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
@@ -619,7 +619,7 @@ export struct PopupComponent {
       .focusable(true)
       .draggable(false)
   }
-
+ 
   @Builder
   closeButtonBuilderSymbolGlyph(symbolGlyphModifier : SymbolGlyphModifier) {
     SymbolGlyph()

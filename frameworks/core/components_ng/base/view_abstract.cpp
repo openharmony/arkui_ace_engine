@@ -3841,7 +3841,7 @@ void ViewAbstract::UpdatePopupBorderColorResource(const PopupLinearGradientPrope
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    int32_t index = 0;
+    uint32_t index = 0;
     for (const auto& objParam : gradientProperties.gradientColors) {
         RefPtr<ResourceObject> resValueObj = objParam.gradientColorObj;
         std::string keyValue = "popupborderColor" + std::to_string(index);
@@ -3856,7 +3856,7 @@ void ViewAbstract::UpdatePopupBorderColorResource(const PopupLinearGradientPrope
 }
 
 void ViewAbstract::AddResObjWithCallBack(
-    std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+    std::string key, const RefPtr<ResourceObject>& resObj, const uint32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
