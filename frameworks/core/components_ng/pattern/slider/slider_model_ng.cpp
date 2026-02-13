@@ -451,11 +451,13 @@ void SliderModelNG::SetTrackBorderRadius(FrameNode* frameNode, const Dimension& 
 }
 void SliderModelNG::SetStepColor(FrameNode* frameNode, const Color& value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepColorSetByUser, true, frameNode);
 }
 void SliderModelNG::SetBlockBorderColor(FrameNode* frameNode, const Color& value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColorSetByUser, true, frameNode);
 }
@@ -928,6 +930,7 @@ void SliderModelNG::CreateWithColorResourceObj(
         Gradient gradient = SliderModelNG::CreateSolidGradient(result);
         pattern->UpdateSliderComponentColor(result, sliderColorType, gradient);
     };
+    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -962,6 +965,7 @@ void SliderModelNG::CreateWithMediaResourceObj(FrameNode* frameNode, const RefPt
             pattern->UpdateSliderComponentMedia();
         }
     };
+    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -990,6 +994,7 @@ void SliderModelNG::CreateWithStringResourceObj(FrameNode* frameNode, const RefP
             pattern->UpdateSliderComponentString(isShowTips, result);
         }
     };
+    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -1119,14 +1124,14 @@ void SliderModelNG::ResetBlockColor(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
         BlockGradientColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
-
+ 
 void SliderModelNG::ResetSelectColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectIsResourceColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectGradientColor, PROPERTY_UPDATE_RENDER);
 }
-
+ 
 void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor,
@@ -1136,14 +1141,14 @@ void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
         SelectGradientColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
-
+ 
 void SliderModelNG::ResetTrackColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColorSetByUser, PROPERTY_UPDATE_RENDER);
 }
-
+ 
 void SliderModelNG::ResetTrackColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,

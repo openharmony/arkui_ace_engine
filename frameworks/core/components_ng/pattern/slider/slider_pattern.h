@@ -222,7 +222,7 @@ public:
     void PlayHapticFeedback(bool isShowSteps);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
-
+    
     void InitPrefixSuffixRow();
     void SetPrefix(const RefPtr<NG::UINode>& prefix, const NG::SliderPrefixOptions& options);
     void SetSuffix(const RefPtr<NG::UINode>& suffix, const NG::SliderSuffixOptions& options);
@@ -230,6 +230,7 @@ public:
     void ResetSuffix();
     void UpdatePrefixPosition();
     void UpdateSuffixPosition();
+    void CheckShowTips();
     void UpdateEndsIsShowStepsPosition(
         PointF& EndsPosition, PointF& block, SizeF& endsSize, float outsetoffset, bool side);
     void UpdateEndsNotShowStepsPosition(
@@ -262,11 +263,10 @@ public:
     {
         return sliderContentModifier_;
     }
-
+    Axis GetDirection() const;
     void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
     void UpdateSliderComponentMedia();
     void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
-    Axis GetDirection() const;
 
 private:
     void OnAttachToFrameNode() override;
@@ -294,7 +294,6 @@ private:
     void InitializeBubble();
     void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
         const RectF& rect, float rectRadius);
-
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
     bool AtPanArea(const Offset& offset, const SourceType& sourceType);
@@ -334,13 +333,13 @@ private:
         auto sliderTheme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(sliderTheme);
         crownDisplayControlRatio_ = sliderTheme->GetCrownDisplayControlRatio();
-
         auto onCrownEvent = [weak = WeakClaim(this)](const CrownEvent& event) -> bool {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
             pattern->HandleCrownEvent(event);
             return true;
         };
+        CHECK_NULL_VOID(focusHub);
         focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
     }
     void HandleCrownEvent(const CrownEvent& event)
@@ -459,7 +458,6 @@ private:
         RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options);
 
     void RemoveCallbackOnDetach(FrameNode* frameNode);
-
     int32_t CheckAccessibilityStepCount();
 
     Axis direction_ = Axis::HORIZONTAL;
@@ -487,6 +485,7 @@ private:
     int32_t fingerId_ = -1;
     std::optional<Offset> lastTouchLocation_ = std::nullopt;
 
+    float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
@@ -517,6 +516,7 @@ private:
     std::vector<PointF> stepPoints_;
     PointF blockStart_ = { 0.0f, 0.0f };
     PointF blockEnd_ = { 0.0f, 0.0f };
+    PointF stepsLength_ = { 0.0f, 0.0f };
     PointF prefixPosition_ = { 0.0f, 0.0f };
     PointF suffixPosition_ = { 0.0f, 0.0f };
     SizeF prefixSize_ = { 0.0f, 0.0f };
