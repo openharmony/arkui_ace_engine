@@ -28,5 +28,8 @@ ace_unittest("select_overlay_test_ng") {
     "select_overlay_testsix_ng.cpp",
     "select_overlay_testthree_ng.cpp",
     "select_overlay_testtwo_ng.cpp",
+    "select_overlay_layout_algorithm_test_tdd.cpp",
+    "select_overlay_node_test_tdd.cpp",
+    "select_overlay_pattern_test_tdd.cpp",
   ]
 }
