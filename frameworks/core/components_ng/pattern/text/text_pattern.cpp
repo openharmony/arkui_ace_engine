@@ -4512,20 +4512,24 @@ void TextPattern::ProcessOverlayAfterLayout()
     }
 }
 
+bool TextPattern::CheckMeasureFlag()
+{
+    auto paintProperty = GetPaintProperty<PaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto flag = paintProperty->GetPropertyChangeFlag();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto layoutFlag = textLayoutProperty->GetPropertyChangeFlag();
+    return CheckNeedMeasure(flag) || CheckNeedMeasure(layoutFlag);
+}
+
 void TextPattern::PreCreateLayoutWrapper()
 {
     auto host = GetContentHost();
     CHECK_NULL_VOID(host);
-
-    auto paintProperty = GetPaintProperty<PaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto flag = paintProperty->GetPropertyChangeFlag();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto layoutFlag = textLayoutProperty->GetPropertyChangeFlag();
-    if (!CheckNeedMeasure(flag) && !CheckNeedMeasure(layoutFlag)) {
-        return;
-    }
+    CHECK_NULL_VOID(CheckMeasureFlag());
     auto beforeSpanSize = spans_.size();
     spans_.clear();
     childNodes_.clear();

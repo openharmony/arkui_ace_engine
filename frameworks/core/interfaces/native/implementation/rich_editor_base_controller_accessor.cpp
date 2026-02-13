@@ -24,6 +24,7 @@
 
 #include "arkoala_api_generated.h"
 #include "rich_editor_base_controller_peer_impl.h"
+#include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<> TextStyle Convert(const Ark_RichEditorTextStyle& src);
@@ -290,6 +291,14 @@ void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
     CHECK_NULL_VOID(peer);
     peer->DeleteBackward();
 }
+
+void SetStyledPlaceholderImpl(Ark_RichEditorBaseController peer, Ark_StyledString styledString)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(styledString);
+    peer->SetStyledPlaceholder(styledString->spanString);
+}
+
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
 {
@@ -310,6 +319,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
         RichEditorBaseControllerAccessor::GetCaretRectImpl,
         RichEditorBaseControllerAccessor::DeleteBackwardImpl,
+        RichEditorBaseControllerAccessor::SetStyledPlaceholderImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }

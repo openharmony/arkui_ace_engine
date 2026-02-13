@@ -293,9 +293,14 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         pattern->SetSupportSvg2(options.imageAttribute.value().supportSvg2);
     }
     auto index = host->GetChildren().size();
-    imageNodes.push_back(imageNode);
     imageNode->MountToParent(host, index);
-    HandleImageDrag(imageNode);
+    bool isPlaceholder = spans_.empty() && styledPlaceholder_;
+    if (isPlaceholder) {
+        placeholderImageNodes_.push_back(imageNode);
+    } else {
+        imageNodes.push_back(imageNode);
+        HandleImageDrag(imageNode);
+    }
     SetImageLayoutProperty(imageNode, options);
     imageItem->nodeId_ = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
@@ -718,9 +723,24 @@ void RichEditorPattern::HandleEnabled()
     }
 }
 
+void RichEditorPattern::ProcessStyledPlaceholder()
+{
+    CHECK_NULL_VOID(!placeholderImageNodes_.empty());
+    auto host = GetContentHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(CheckMeasureFlag());
+    for (const auto& node : placeholderImageNodes_) {
+        auto imageNode = node.Upgrade();
+        CHECK_NULL_CONTINUE(imageNode);
+        host->RemoveChild(imageNode);
+    }
+    placeholderImageNodes_.clear();
+}
+
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
     ACE_SCOPED_TRACE("RichEditorBeforeCreateLayoutWrapper");
+    ProcessStyledPlaceholder();
     if (!isSpanStringMode_) {
         TextPattern::PreCreateLayoutWrapper();
         hasUrlSpan_ = std::any_of(spans_.begin(), spans_.end(), URL_SPAN_FILTER);
@@ -2444,6 +2464,16 @@ void RichEditorPattern::SetTypingParagraphStyle(std::optional<struct UpdateParag
     bool isReset = styleManager_->HasTypingParagraphStyle() && !typingParagraphStyle.has_value();
     styleManager_->SetTypingParagraphStyle(typingParagraphStyle);
     UpdateCaretStyleByTypingStyle(isReset);
+}
+
+void RichEditorPattern::SetPlaceholderStyledString(const RefPtr<SpanString>& value)
+{
+    CHECK_NULL_VOID(value);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPlaceholderStyledString, len=%{public}d", value->GetLength());
+    styledPlaceholder_ = value->GetSubSpanString(0, value->GetLength());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
@@ -11351,6 +11381,26 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
         isShowPlaceholder_ = false;
         return false;
     }
+    return styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
+}
+
+bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
+{
+    CHECK_NULL_RETURN(styledPlaceholder_, false);
+    auto spans = styledPlaceholder_->GetSpanItems();
+    placeholderImageNodes_.clear();
+    for (const auto& span : spans) {
+        auto imageSpan = DynamicCast<ImageSpanItem>(span);
+        CHECK_NULL_CONTINUE(imageSpan);
+        MountImageNode(imageSpan);
+    }
+    spanItemList = RichEditorLayoutAlgorithm::ConstructParagraphSpans(spans, isSingleLineMode_);
+    isShowPlaceholder_ = true;
+    return true;
+}
+
+bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
+{
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();

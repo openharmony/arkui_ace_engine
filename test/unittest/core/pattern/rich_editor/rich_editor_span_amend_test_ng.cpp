@@ -335,4 +335,25 @@ HWTEST_F(RichEditorSpanAmendTestNg, SymbolTest001, TestSize.Level0)
     ClearSpan();
 }
 
+/**
+ * @tc.name: SetPlaceHolderStyledString
+ * @tc.desc: test SetPlaceHolderStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    richEditorController->SetPlaceholderStyledString(spanString);
+    EXPECT_NE(richEditorPattern->styledPlaceholder_, nullptr);
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(spans.size(), 1);
+}
+
 } // namespace OHOS::Ace::NG

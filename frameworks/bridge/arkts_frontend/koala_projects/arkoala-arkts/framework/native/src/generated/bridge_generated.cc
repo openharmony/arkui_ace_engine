@@ -39550,6 +39550,12 @@ void impl_RichEditorBaseController_deleteBackward(Ark_NativePointer thisPtr) {
         GetAccessors()->getRichEditorBaseControllerAccessor()->deleteBackward(self);
 }
 KOALA_INTEROP_DIRECT_V1(RichEditorBaseController_deleteBackward, Ark_NativePointer)
+void impl_RichEditorBaseController_setStyledPlaceholder(Ark_NativePointer thisPtr, Ark_NativePointer styledString) {
+        Ark_RichEditorBaseController self = reinterpret_cast<Ark_RichEditorBaseController>(thisPtr);
+        GetAccessors()->getRichEditorBaseControllerAccessor()
+            ->setStyledPlaceholder(self, static_cast<Ark_StyledString>(styledString));
+}
+KOALA_INTEROP_DIRECT_V2(RichEditorBaseController_setStyledPlaceholder, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_RichEditorController_construct() {
         return GetAccessors()->getRichEditorControllerAccessor()->construct();
 }

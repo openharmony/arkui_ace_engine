@@ -848,6 +848,7 @@ public:
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);    
     void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
+    void SetPlaceholderStyledString(const RefPtr<SpanString>& value);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpanFromCollaboration(const ImageSpanOptions& options, bool updateCaret);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
@@ -1124,6 +1125,8 @@ public:
     bool IsSelectAreaVisible();
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    bool SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    bool SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
     std::string GetPlaceHolder() const;
 
@@ -1604,6 +1607,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void ProcessStyledPlaceholder();
     void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
@@ -2004,6 +2008,8 @@ private:
     bool adjusted_ = false;
     bool isShowMenu_ = true;
     bool isShowPlaceholder_ = false;
+    RefPtr<SpanString> styledPlaceholder_;
+    std::list<WeakPtr<FrameNode>> placeholderImageNodes_;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
     FloatingCaretState floatingCaretState_;
