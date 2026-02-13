@@ -76,6 +76,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
@@ -464,19 +465,18 @@ ArkUINativeModuleValue ArkUINativeModule::SetMarqueeFrameRateRange(ArkUIRuntimeC
     auto maxValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "max"))->Int32Value(vm);
     auto expectValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "expected"))->Int32Value(vm);
 
+    auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(minValue, maxValue, expectValue);
     auto value = thirdArg->Int32Value(vm);
+    auto type = static_cast<MarqueeDynamicSyncSceneType>(value);
     auto nativePointer = marqueeNode->ToNativePointer(vm);
     if (nativePointer.IsEmpty()) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto nativeNode = nodePtr(nativePointer->Value());
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
-
-    auto nodeModifier = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, panda::JSValueRef::Undefined(vm));
-    auto marqueeModifier = nodeModifier->getMarqueeModifier();
-    CHECK_NULL_RETURN(marqueeModifier, panda::JSValueRef::Undefined(vm));
-    marqueeModifier->setMarqueeFrameRateRange(nativeNode, minValue, maxValue, expectValue, value);
+    auto* marqueeFrameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(marqueeFrameNode, panda::JSValueRef::Undefined(vm));
+    MarqueeModelNG::SetMarqueeFrameRateRange(marqueeFrameNode, frameRateRange, type);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -496,7 +496,6 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"Rating"},
         { "ColumnSplit" },
         { "RowSplit" },
-        { "Marquee" },
         { "Stepper" },
         { "StepperItem" },
         {"Radio"},
@@ -1980,6 +1979,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterMenuItemGroupAttributes(object, vm);
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
+    RegisterMarqueeAttributes(object, vm);
     RegisterDatePickerAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
@@ -1990,6 +1990,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterScrollAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
     RegisterGridItemAttributes(object, vm);
+    RegisterMarqueeAttributes(object, vm);
     RegisterProgressAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
@@ -3971,6 +3972,50 @@ void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object,
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
 }
 
+void ArkUINativeModule::RegisterMarqueeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto marquee = panda::ObjectRef::New(vm);
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAllowScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), MarqueeBridge::SetAllowScale));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAllowScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), MarqueeBridge::ResetAllowScale));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), MarqueeBridge::SetFontWeight));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), MarqueeBridge::ResetFontWeight));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), MarqueeBridge::SetFontFamily));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), MarqueeBridge::ResetFontFamily));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetFontSize));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetFontSize));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetFontColor));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetFontColor));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeUpdateStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeUpdateStrategy));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeUpdateStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeUpdateStrategy));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnStart));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnStart));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOnBounce"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnBounce));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOnBounce"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnBounce));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnFinish));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnFinish));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetInitialize));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "marquee"), marquee);
+}
+
 void ArkUINativeModule::RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto gridItem = panda::ObjectRef::New(vm);
@@ -5652,6 +5697,7 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterListAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterLoadingProgressAttributes(object, vm);
+    RegisterMarqueeAttributes(object, vm);
     RegisterPathAttributes(object, vm);
     RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);

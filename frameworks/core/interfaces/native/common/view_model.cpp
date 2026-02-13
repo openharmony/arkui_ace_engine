@@ -607,11 +607,10 @@ void* createTextTimerNode(ArkUI_Int32 nodeId)
 
 void* createMarqueeNode(ArkUI_Int32 nodeId)
 {
-    auto nodeModifier = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, nullptr);
-    auto marqueeModifier = nodeModifier->getMarqueeModifier();
-    CHECK_NULL_RETURN(marqueeModifier, nullptr);
-    return marqueeModifier->createMarqueeFrameNode(nodeId);
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createCheckboxGroupNode(ArkUI_Int32 nodeId)

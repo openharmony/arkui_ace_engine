@@ -84,7 +84,7 @@ public:
     void InitSelectOverlay();
     void InitMenuCallback();
     void RequestOpenSelectOverlay(ClientOverlayInfo& overlayInfo);
-    ACE_FORCE_EXPORT virtual void RequestCloseSelectOverlay(bool animation);
+    virtual void RequestCloseSelectOverlay(bool animation);
     bool SelectOverlayIsOn();
 
     virtual bool CheckHandleVisible(const RectF& paintRect)
@@ -121,13 +121,13 @@ public:
 
     void UpdateSelectInfo(const std::string& selectInfo);
 
-    ACE_FORCE_EXPORT virtual void OnParentScrollStartOrEnd(bool isEnd, bool noAnimation = false);
+    virtual void OnParentScrollStartOrEnd(bool isEnd, bool noAnimation = false);
 
     virtual void OnParentScrollCallback(Axis axis, int32_t offset) {};
 
     void StartListeningScrollableParent(const RefPtr<FrameNode>& host);
 
-    ACE_FORCE_EXPORT void StopListeningScrollableParent(const RefPtr<FrameNode>& host);
+    void StopListeningScrollableParent(const RefPtr<FrameNode>& host);
 
     void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo&)> updateAction);
 

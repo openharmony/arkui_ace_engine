@@ -17,11 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ADAPTER_H
 
 #include <string>
-#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_FORCE_EXPORT TextLayoutadapter {
+class TextLayoutadapter {
 public:
     static bool IsLeftToRight(int32_t charOfShowingText);
     static bool IsRightToLeft(int32_t charOfShowingText);

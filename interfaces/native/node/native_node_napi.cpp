@@ -218,7 +218,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkcheckboxgroup", "arkui.components.arkrating", "arkui.components.arkwaterflow",
             "arkui.components.arkflowitem", "arkui.components.arkcalendarpicker", "arkui.components.arktimepicker",
             "arkui.components.arkhyperlink", "arkui.components.arksearch", "arkui.components.arksymbolglyph",
-            "arkui.components.arkmarquee", "arkui.components.arkrowsplit", "arkui.components.arkcolumnsplit",
+            "arkui.components.arkrowsplit", "arkui.components.arkcolumnsplit",
             "arkui.components.arkfolderstack", "arkui.components.arkstepper", "arkui.components.arkstepperitem",
             "arkui.components.arksidebarcontainer", "arkui.components.arkslider", "arkui.components.arkradio",
             "arkui.components.arkmenu", "arkui.components.arkmenuitem", "arkui.components.arkmenuitemgroup",

@@ -44,7 +44,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {

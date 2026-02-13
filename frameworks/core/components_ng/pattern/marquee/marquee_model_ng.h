@@ -19,8 +19,6 @@
 #include "core/components_ng/pattern/marquee/marquee_model.h"
 
 namespace OHOS::Ace::NG {
-const char MARQUEE_ETS_TAG[] = "Marquee";
-const char TEXT_ETS_TAG[] = "Text";
 class ACE_EXPORT MarqueeModelNG : public OHOS::Ace::MarqueeModel {
 public:
     void Create() override;
