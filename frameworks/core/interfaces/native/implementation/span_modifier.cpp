@@ -109,7 +109,7 @@ void SetFontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<FontWeight>(value);
+    auto convValue = Converter::OptConvertPtr<FontWeight>(weight);
     SpanModelStatic::SetFontWeight(frameNode, convValue);
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
