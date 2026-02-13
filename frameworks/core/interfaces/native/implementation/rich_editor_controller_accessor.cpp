@@ -545,7 +545,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
 }
 

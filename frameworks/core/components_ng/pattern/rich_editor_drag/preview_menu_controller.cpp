@@ -39,11 +39,14 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {

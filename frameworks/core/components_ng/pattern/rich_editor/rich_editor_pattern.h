@@ -1164,6 +1164,13 @@ public:
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
+    void ResetCaretColor(const std::optional<Color>& caretColor)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ResetCaretColor=%{public}s", caretColor->ToString().c_str());
+        caretColor_ = caretColor;
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
+    }
+
     Color GetCaretColor() const;
 
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)

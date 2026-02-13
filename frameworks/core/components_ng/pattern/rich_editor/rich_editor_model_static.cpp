@@ -138,14 +138,20 @@ void RichEditorModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, con
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    // pattern->SetSelectedBackgroundColor(selectedColor);
+    if (selectedColor.has_value()) {
+        pattern->SetSelectedBackgroundColor(selectedColor.value());
+    }
 }
 
 void RichEditorModelStatic::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    // pattern->SetCaretColor(color);
+    if (color.has_value()) {
+        pattern->SetCaretColor(color.value());
+    } else {
+        pattern->ResetCaretColor(color);
+    }
 }
 
 void RichEditorModelStatic::SetAboutToDelete(
@@ -224,14 +230,6 @@ void RichEditorModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
         nullptr);
 }
 
-void RichEditorModelStatic::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetMaxLength(value);
-}
-
 void RichEditorModelStatic::SetMaxLines(FrameNode* frameNode, uint32_t value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -240,6 +238,14 @@ void RichEditorModelStatic::SetMaxLines(FrameNode* frameNode, uint32_t value)
     pattern->SetMaxLinesHeight(FLT_MAX);
     pattern->SetMaxLines(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
+}
+
+void RichEditorModelStatic::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLength(value);
 }
 
 void RichEditorModelStatic::SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue)

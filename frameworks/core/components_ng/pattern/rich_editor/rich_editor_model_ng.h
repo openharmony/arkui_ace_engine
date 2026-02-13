@@ -60,16 +60,16 @@ public:
         const OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
+    void SetBarState(DisplayMode mode) override;
     void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
         const SelectMenuParam& menuParam) override;
-    void SetBarState(DisplayMode mode) override;
     void SetMaxLength(std::optional<int32_t> value) override;
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
     void SetEnableAutoSpacing(bool enabled) override;
-    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
@@ -149,22 +149,22 @@ public:
     static void SetSelectionMenuOptions(FrameNode* frameNode,
         const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick,
         const OnPrepareMenuCallback&& onPrepareMenuCallback);
-    static void SetPreviewMenuParam(FrameNode* frameNode,
-        TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
     static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
+    static void SetPreviewMenuParam(FrameNode* frameNode,
+        TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static int32_t GetMaxLength(FrameNode* frameNode);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static int32_t GetMaxLines(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool IsEnableAutoSpacing(FrameNode* frameNode);
-    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
-    static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
     static bool IsIncludeFontPadding(FrameNode* frameNode);
     static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
     static bool IsFallbackLineSpacing(FrameNode* frameNode);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static bool IsStopBackPress(FrameNode* frameNode);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
@@ -174,13 +174,13 @@ public:
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static bool IsSupportStyledUndo(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
-    static Color GetScrollBarColor(FrameNode* frameNode);
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSingleLine(FrameNode* frameNode, bool enabled);
     static void ResetSingleLine(FrameNode* frameNode);
     static bool GetSingleLine(FrameNode* frameNode);
+    static Color GetScrollBarColor(FrameNode* frameNode);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
         TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void ResetBindSelectionMenu(FrameNode* frameNode);

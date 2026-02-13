@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,11 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H
 
-#include "base/utils/device_config.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace::Framework {
 class JSRichEditor : public JSContainerBase {
@@ -62,7 +61,6 @@ public:
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnShare(const JSCallbackInfo& info);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
     static JSRef<JSVal> CreateJSSelectionRange(const SelectionRangeInfo& selectRange);
@@ -73,10 +71,11 @@ public:
     static JSRef<JSObject> CreateJSLayoutStyle(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
+    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetSelectedDragPreviewStyle(const JSCallbackInfo& info);
-    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
