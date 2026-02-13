@@ -14297,7 +14297,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ForEachOpsAccessor
     namespace FrameNodeExtenderAccessor {
-    Ark_NativePointer ConstructorFrameNodeImpl()
+    Ark_NativePointer ConstructorFrameNodeImpl(Ark_Boolean supportMultiThread)
     {
         return {};
     }
@@ -14559,7 +14559,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type)
+    Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type,
+                                               Ark_Boolean supportMultiThread)
     {
         return {};
     }
@@ -15445,21 +15446,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // IndicatorComponentControllerAccessor
     namespace IUIContextAccessor {
-    void DestroyPeerImpl(Ark_IUIContext peer)
-    {
-        auto peerImpl = reinterpret_cast<IUIContextPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_IUIContext ConstructImpl()
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -15516,7 +15502,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
     {
     }
-    Ark_arkui_component_idlize_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+    Ark_arkui_component_idlize_Magnifier GetMagnifierImpl()
     {
         return {};
     }
@@ -22714,9 +22700,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
-            IUIContextAccessor::DestroyPeerImpl,
-            IUIContextAccessor::ConstructImpl,
-            IUIContextAccessor::GetFinalizerImpl,
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
             IUIContextAccessor::DispatchKeyEventImpl,
@@ -22733,9 +22716,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &IUIContextAccessorImpl;
     }
 
-    struct IUIContextPeer {
-        virtual ~IUIContextPeer() = default;
-    };
     const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     {
         static const GENERATED_ArkUIJsGeolocationAccessor JsGeolocationAccessorImpl {

@@ -32871,7 +32871,7 @@ KOALA_INTEROP_DIRECT_V3(ForEachOps_SyncOnMoveOps, Ark_NativePointer, KSerializer
 Ark_NativePointer impl_FrameNodeExtender_constructorFrameNode(Ark_Boolean supportMultiThread) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->constructorFrameNode(supportMultiThread);
 }
-KOALA_INTEROP_DIRECT_1(FrameNodeExtender_constructorFrameNode, Ark_NativePointer, Ark_Boolean)
+KOALA_INTEROP_1(FrameNodeExtender_constructorFrameNode, Ark_NativePointer, Ark_Boolean)
 Ark_NativePointer impl_FrameNodeExtender_getDestroy() {
         return GetAccessors()->getFrameNodeExtenderAccessor()->getDestroy();
 }
@@ -34617,14 +34617,6 @@ void impl_IndicatorComponentController_changeIndex(Ark_NativePointer thisPtr, KS
         GetAccessors()->getIndicatorComponentControllerAccessor()->changeIndex(self, static_cast<Opt_Int32*>(&indexValueTemp), static_cast<Opt_Boolean*>(&useAnimationValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(IndicatorComponentController_changeIndex, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_IUIContext_construct() {
-        return GetAccessors()->getIUIContextAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(IUIContext_construct, Ark_NativePointer)
-Ark_NativePointer impl_IUIContext_getFinalizer() {
-        return GetAccessors()->getIUIContextAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(IUIContext_getFinalizer, Ark_NativePointer)
 void impl_IUIContext_freezeUINode0(const KStringPtr& id, Ark_Boolean isFrozen) {
         GetAccessors()->getIUIContextAccessor()->freezeUINode0((const Ark_String*) (&id), isFrozen);
 }
@@ -34711,11 +34703,10 @@ void impl_IUIContext_setCustomKeyboardContinueFeature(Ark_Int32 feature) {
         GetAccessors()->getIUIContextAccessor()->setCustomKeyboardContinueFeature(static_cast<Ark_CustomKeyboardContinueFeature>(feature));
 }
 KOALA_INTEROP_DIRECT_V1(IUIContext_setCustomKeyboardContinueFeature, Ark_Int32)
-Ark_NativePointer impl_IUIContext_getMagnifier(Ark_NativePointer thisPtr) {
-        Ark_IUIContext self = reinterpret_cast<Ark_IUIContext>(thisPtr);
-        return GetAccessors()->getIUIContextAccessor()->getMagnifier(self);
+Ark_NativePointer impl_IUIContext_getMagnifier() {
+        return GetAccessors()->getIUIContextAccessor()->getMagnifier();
 }
-KOALA_INTEROP_DIRECT_1(IUIContext_getMagnifier, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_0(IUIContext_getMagnifier, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_construct() {
         return GetAccessors()->getJsGeolocationAccessor()->construct();
 }

@@ -2132,8 +2132,9 @@ export class ForEachOps {
     }
 }
 export class FrameNodeExtender {
-    public static constructorFrameNode(): KPointer {
-        return FrameNodeExtender.constructorFrameNode_serialize()
+    public static constructorFrameNode(supportMultiThread: boolean): KPointer {
+        const supportMultiThread_casted = supportMultiThread as (boolean)
+        return FrameNodeExtender.constructorFrameNode_serialize(supportMultiThread_casted)
     }
     public static getDestroy(): KPointer {
         return FrameNodeExtender.getDestroy_serialize()
@@ -2412,9 +2413,10 @@ export class FrameNodeExtender {
         const node_casted = node as (FrameNode)
         return FrameNodeExtender.getFrameNodePtr_serialize(node_casted)
     }
-    public static createTypedFrameNode(type: string): KPointer {
+    public static createTypedFrameNode(type: string, supportMultiThread: boolean): KPointer {
         const type_casted = type as (string)
-        return FrameNodeExtender.createTypedFrameNode_serialize(type_casted)
+        const supportMultiThread_casted = supportMultiThread as (boolean)
+        return FrameNodeExtender.createTypedFrameNode_serialize(type_casted, supportMultiThread_casted)
     }
     public static createByRawPtr(ptr: KPointer): KPointer {
         const ptr_casted = ptr as (KPointer)
@@ -2476,8 +2478,8 @@ export class FrameNodeExtender {
         FrameNodeExtender.applyAttributesFinish_serialize(peer_casted)
         return
     }
-    private static constructorFrameNode_serialize(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode()
+    private static constructorFrameNode_serialize(supportMultiThread: boolean): KPointer {
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_constructorFrameNode(supportMultiThread ? true : false)
         return retval
     }
     private static getDestroy_serialize(): KPointer {
@@ -2785,8 +2787,8 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodePtr(extractors.toFrameNodePtr(node))
         return retval
     }
-    private static createTypedFrameNode_serialize(type: string): KPointer {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type)
+    private static createTypedFrameNode_serialize(type: string, supportMultiThread: boolean): KPointer {
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_createTypedFrameNode(type, supportMultiThread ? true : false)
         return retval
     }
     private static createByRawPtr_serialize(ptr: KPointer): KPointer {
@@ -3349,29 +3351,7 @@ export class GlobalScopeUicontextTextMenu {
         thisSerializer.release()
     }
 }
-export class IUIContextInternal {
-    public static fromPtr(ptr: KPointer): IUIContext {
-        return new IUIContext(MaterializedBaseTag.NOP, ptr)
-    }
-}
-export class IUIContext implements MaterializedBase {
-    public peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, IUIContext.getFinalizer())
-    }
-    constructor() {
-        this(MaterializedBaseTag.NOP, IUIContext.construct())
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._IUIContext_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._IUIContext_getFinalizer()
-    }
+export class IUIContext {
     public static freezeUINode(id: string, isFrozen: boolean): void {
         const id_casted = id as (string)
         const isFrozen_casted = isFrozen as (boolean)
@@ -3435,6 +3415,9 @@ export class IUIContext implements MaterializedBase {
         const feature_casted = feature as (CustomKeyboardContinueFeature)
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
+    }
+    public static getMagnifier(): Magnifier {
+        return IUIContext.getMagnifier_serialize()
     }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
@@ -3515,11 +3498,8 @@ export class IUIContext implements MaterializedBase {
     private static setCustomKeyboardContinueFeature_serialize(feature: CustomKeyboardContinueFeature): void {
         ArkUIGeneratedNativeModule._IUIContext_setCustomKeyboardContinueFeature(feature.valueOf())
     }
-    public getMagnifier(): Magnifier {
-        return this.getMagnifier_serialize()
-    }
-    private getMagnifier_serialize(): Magnifier {
-        const retval = ArkUIGeneratedNativeModule._IUIContext_getMagnifier(this.peer!.ptr)
+    private static getMagnifier_serialize(): Magnifier {
+        const retval = ArkUIGeneratedNativeModule._IUIContext_getMagnifier()
         const obj: Magnifier = MagnifierInternal.fromPtr(retval)
         return obj
     }
@@ -6950,17 +6930,6 @@ export class InnerGestureTriggerInfo_serializer {
         const currentPhaseTmpResult: GestureActionPhase = GestureActionPhase.fromValue(valueDeserializer.readInt32())
         let value: InnerGestureTriggerInfo = ({event: eventTmpResult, current: currentTmpResult, currentPhase: currentPhaseTmpResult} as InnerGestureTriggerInfo)
         return value
-    }
-}
-export class IUIContext_serializer {
-    public static write(buffer: SerializerBase, value: IUIContext): void {
-        let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): IUIContext {
-        let valueDeserializer: DeserializerBase = buffer
-        let ptr: KPointer = valueDeserializer.readPointer()
-        return IUIContextInternal.fromPtr(ptr)
     }
 }
 export class LevelOrderExtender_serializer {

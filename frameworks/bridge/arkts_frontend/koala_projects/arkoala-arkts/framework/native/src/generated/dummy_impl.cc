@@ -30771,12 +30771,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // ForEachOpsAccessor
     namespace FrameNodeExtenderAccessor {
-    Ark_NativePointer ConstructorFrameNodeImpl()
+    Ark_NativePointer ConstructorFrameNodeImpl(Ark_Boolean supportMultiThread)
     {
         if (!needGroupedLog(1)) {
             return nullptr;
         }
         string out("constructorFrameNode(");
+        WriteToString(&out, supportMultiThread);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
@@ -31540,13 +31541,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type)
+    Ark_NativePointer CreateTypedFrameNodeImpl(const Ark_String* type,
+                                               Ark_Boolean supportMultiThread)
     {
         if (!needGroupedLog(1)) {
             return nullptr;
         }
         string out("createTypedFrameNode(");
         WriteToString(&out, type);
+        out.append(", ");
+        WriteToString(&out, supportMultiThread);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
@@ -33725,37 +33729,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // IndicatorComponentControllerAccessor
     namespace IUIContextAccessor {
-    void DestroyPeerImpl(Ark_IUIContext peer)
-    {
-        if (!needGroupedLog(1)) {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_IUIContext ConstructImpl()
-    {
-        if (!needGroupedLog(1)) {
-            return reinterpret_cast<Ark_IUIContext>(100);
-        }
-        string out("new IUIContext(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_IUIContext>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_IUIContext>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1)) {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
     void FreezeUINode0Impl(const Ark_String* id,
                            Ark_Boolean isFrozen)
     {
@@ -33922,7 +33895,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_arkui_component_idlize_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+    Ark_arkui_component_idlize_Magnifier GetMagnifierImpl()
     {
         if (!needGroupedLog(1)) {
             return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(300);
@@ -49149,9 +49122,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     {
         static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
-            IUIContextAccessor::DestroyPeerImpl,
-            IUIContextAccessor::ConstructImpl,
-            IUIContextAccessor::GetFinalizerImpl,
             IUIContextAccessor::FreezeUINode0Impl,
             IUIContextAccessor::FreezeUINode1Impl,
             IUIContextAccessor::DispatchKeyEventImpl,
@@ -49168,9 +49138,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &IUIContextAccessorImpl;
     }
 
-    struct IUIContextPeer {
-        virtual ~IUIContextPeer() = default;
-    };
     const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     {
         static const GENERATED_ArkUIJsGeolocationAccessor JsGeolocationAccessorImpl {

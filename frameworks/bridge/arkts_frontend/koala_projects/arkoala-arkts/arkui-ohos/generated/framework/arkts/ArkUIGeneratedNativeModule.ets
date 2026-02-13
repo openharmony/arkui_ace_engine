@@ -4475,8 +4475,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct
     native static _ForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _FrameNodeExtender_constructorFrameNode(supportMultiThread: KInt): KPointer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_constructorFrameNode(supportMultiThread: boolean): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getDestroy(): KPointer
     @ani.unsafe.Direct
@@ -4598,7 +4598,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodePtr(node: KPointer): KPointer
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_createTypedFrameNode(type: KStringPtr, supportMultiThread: KInt): KPointer
+    native static _FrameNodeExtender_createTypedFrameNode(type: KStringPtr, supportMultiThread: boolean): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_createByRawPtr(ptr: KPointer): KPointer
     @ani.unsafe.Direct
@@ -4939,10 +4939,6 @@ export class ArkUIGeneratedNativeModule {
     native static _IndicatorComponentController_showPrevious(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _IndicatorComponentController_changeIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
-    native static _IUIContext_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _IUIContext_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: boolean): void
     @ani.unsafe.Quick
@@ -4963,7 +4959,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IUIContext_setCustomKeyboardContinueFeature(feature: KInt): void
     @ani.unsafe.Direct
-    native static _IUIContext_getMagnifier(ptr: KPointer): KPointer
+    native static _IUIContext_getMagnifier(): KPointer
     @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct
