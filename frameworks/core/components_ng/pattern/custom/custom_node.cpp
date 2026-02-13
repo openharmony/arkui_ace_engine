@@ -42,8 +42,6 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 
 bool CustomNode::Render(int64_t deadline)
 {
-    // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
-    bool needMarkParentBak = needMarkParent_;
     needMarkParent_ = false;
     if (renderFunction_) {
         RenderFunction renderFunction = nullptr;
@@ -99,7 +97,7 @@ bool CustomNode::Render(int64_t deadline)
             AceScopedPerformanceCheck::ReportAllRecord();
         }
     }
-    needMarkParent_ = needMarkParentBak;
+    needMarkParent_ = true;
     return true;
 }
 
