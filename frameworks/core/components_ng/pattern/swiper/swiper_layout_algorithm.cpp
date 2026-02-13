@@ -153,7 +153,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 contentIdealSize.SetMainSize(contentMainSize_, axis_);
             } else {
                 mainSizeIsMeasured_ = false;
-                jumpIndex_ = jumpIndex_.value_or(currentIndex_);
             }
         }
     } else {
