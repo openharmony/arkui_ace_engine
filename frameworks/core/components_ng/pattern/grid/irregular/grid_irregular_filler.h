@@ -88,6 +88,22 @@ public:
     void FillMatrixFromStartIndex(int32_t startLine, int32_t startIndex, int32_t targetIdx);
 
     /**
+     * @brief Fills gridMatrix and measures items in one pass, returning target line and height.
+     *
+     * Unlike FillMatrixFromStartIndex which only fills the matrix without measuring,
+     * this method fills the matrix AND measures items, then calculates the total height
+     * of the rows occupied by the target item (handling multi-row items like 2x2).
+     *
+     * @param params The FillParameters object containing the fill parameters.
+     * @param startLine The starting line index.
+     * @param startIndex The starting item index.
+     * @param targetIdx The target item index to fill and measure up to.
+     * @return FillWithMeasureResult containing the target line accumulated height.
+     */
+    float FillMatrixFromStartIndexWithMeasure(
+        const FillParameters& params, int32_t startLine, int32_t startIndex, int32_t targetIdx);
+
+    /**
      * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled.
      * Measure isn't performed, and lineHeightMap_ isn't updated.
      *
@@ -143,15 +159,6 @@ public:
      */
     std::pair<float, LayoutConstraintF> MeasureItem(
         const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
-
-    /**
-     * @brief Measures the current row, fills the matrix and measures all items in the row.
-     *
-     * @param params The FillParameters object containing the fill parameters.
-     * @param itemIdx The index of the target GridItem.
-     * @return The total height of the startIndex item.
-     */
-    float MeasureCurrentRow(const FillParameters& params, int32_t itemIdx);
 
 private:
     /**

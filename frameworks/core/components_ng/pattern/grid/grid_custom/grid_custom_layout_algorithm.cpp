@@ -46,6 +46,12 @@ GridIrregularFiller::FillParameters GetFillParameters(const RefPtr<FrameNode>& h
     crossGap = res.second;
     return { crossLens, crossGap, mainGap };
 }
+
+inline void PrepareJumpOnReset(GridLayoutInfo& info)
+{
+    info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
+    info.scrollAlign_ = ScrollAlign::START;
+}
 } // namespace
 
 void GridCustomLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -183,6 +189,16 @@ void GridCustomLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 
 void GridCustomLayoutAlgorithm::ClearCache()
 {
+    info_.lineHeightMap_.clear();
+    info_.gridMatrix_.clear();
+    info_.endIndex_ = -1;
+    info_.endMainLineIndex_ = 0;
+    info_.prevOffset_ = info_.currentOffset_;
+    info_.ResetPositionFlags();
+}
+
+void GridCustomLayoutAlgorithm::ClearCacheForReload()
+{
     info_.lastCrossCount_ = info_.crossCount_;
     info_.lineHeightMap_.clear();
     info_.gridMatrix_.clear();
@@ -199,15 +215,25 @@ void GridCustomLayoutAlgorithm::CheckForReset()
 {
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (info_.IsResetted() || updateIdx == 0 || (updateIdx != -1 && updateIdx <= info_.endIndex_)) {
-        if (info_.lastCrossCount_ != info_.crossCount_) {
-            info_.jumpIndex_ = std::min(info_.startIndex_, info_.GetChildrenCount() - 1);
-            info_.scrollAlign_ = ScrollAlign::START;
-            info_.extraOffset_ = info_.currentOffset_;
+        if (info_.lastCrossCount_ != info_.crossCount_ && info_.jumpIndex_ == EMPTY_JUMP_INDEX) {
+            PrepareJumpOnReset(info_);
+            adjustOffset_ = info_.currentOffset_;
         }
-        ClearCache();
+        ClearCacheForReload();
         reloadFlag_ = true;
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
+    }
+
+    auto property = wrapper_->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    if (property->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        reloadFlag_ = true;
+        return;
+    }
+
+    if (wrapper_->ConstraintChanged()) {
+        reloadFlag_ = true;
     }
 }
 
@@ -384,6 +410,7 @@ void GridCustomLayoutAlgorithm::MeasureOnJump(float mainSize)
     // 1. Validate the legality of jumpIndex
     if (info_.jumpIndex_ < 0 || info_.jumpIndex_ >= info_.GetChildrenCount()) {
         info_.jumpIndex_ = EMPTY_JUMP_INDEX;
+        adjustOffset_.reset(); // Clear adjustment offset
         return;
     }
     if (info_.scrollAlign_ == ScrollAlign::AUTO) {
@@ -391,26 +418,13 @@ void GridCustomLayoutAlgorithm::MeasureOnJump(float mainSize)
         info_.scrollAlign_ = info_.TransformAutoScrollAlign(info_.jumpIndex_, height, mainSize, mainGap_);
         if (info_.scrollAlign_ == ScrollAlign::NONE) {
             info_.jumpIndex_ = EMPTY_JUMP_INDEX;
+            adjustOffset_.reset(); // Clear adjustment offset
             return;
         }
     }
 
-    // 2. Check if current row is in cache
-    bool isInCache = IsTargetRowInCache(info_.jumpIndex_);
-    auto targetRow = info_.GetItemPos(info_.jumpIndex_);
-
-    float itemHeight = 0.f;
-    // 3. Handle based on cache status
-    if (!isInCache) {
-        // Not in cache, perform jump
-        itemHeight = JumpToTargetIndex(mainSize, info_.jumpIndex_);
-    } else {
-        UpdateTotalOffset(info_, targetRow.second, mainGap_);
-        info_.startMainLineIndex_ = targetRow.second;
-        info_.UpdateStartIndexByStartLine();
-        GridIrregularFiller filler(&info_, wrapper_);
-        itemHeight = filler.MeasureCurrentRow({ crossLens_, crossGap_, mainGap_ }, info_.jumpIndex_);
-    }
+    // Not in cache, perform jump
+    float itemHeight = JumpToTargetIndex(mainSize, info_.jumpIndex_);
 
     // 4. Adjust currentOffset_ based on scrollAlign, extraOffset and contentStartOffset or contentEndOffset
     info_.prevOffset_ = info_.currentOffset_;
@@ -439,6 +453,13 @@ void GridCustomLayoutAlgorithm::MeasureOnJump(float mainSize)
     if (info_.extraOffset_ && !NearZero(*info_.extraOffset_)) {
         info_.currentOffset_ += *info_.extraOffset_;
     }
+
+    // Handle adjustOffset_ (adjustment offset for crossCount change)
+    if (adjustOffset_ && !NearZero(*adjustOffset_)) {
+        info_.currentOffset_ += *adjustOffset_;
+        adjustOffset_.reset(); // Clear immediately after use
+    }
+
     info_.currentDelta_ = info_.currentOffset_ - info_.prevOffset_;
     // 5. Call MeasureOnOffset for layout
     MeasureOnOffset(mainSize);
@@ -463,7 +484,6 @@ float GridCustomLayoutAlgorithm::JumpToTargetIndex(float mainSize, int32_t targe
     ClearCache();
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     const auto& opts = *props->GetLayoutOptions();
-
     auto startLineInfo = GetStartIndexByIndex(targetIndex, opts);
     info_.startIndex_ = startLineInfo.startIndex;
     info_.startMainLineIndex_ = startLineInfo.startLine;
@@ -471,7 +491,9 @@ float GridCustomLayoutAlgorithm::JumpToTargetIndex(float mainSize, int32_t targe
     info_.totalOffset_ = startLineInfo.totalOffset;
 
     GridIrregularFiller filler(&info_, wrapper_);
-    return filler.MeasureCurrentRow({ crossLens_, crossGap_, mainGap_ }, targetIndex);
+    auto heightInRange = filler.FillMatrixFromStartIndexWithMeasure(
+        { crossLens_, crossGap_, mainGap_ }, info_.startMainLineIndex_, info_.startIndex_, targetIndex);
+    return heightInRange;
 }
 
 GridStartLineInfo GridCustomLayoutAlgorithm::GetStartIndexByIndex(int32_t index, const GridLayoutOptions& options)
@@ -682,8 +704,8 @@ bool GridCustomLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
 void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
 {
     std::list<GridPreloadItem> itemsToPreload;
-    int32_t startIndex = 0;
-    int32_t endIndex = 0;
+    int32_t startIndex = info_.startIndex_;
+    int32_t endIndex = info_.endIndex_;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
         auto itemWrapper = wrapper_->GetChildByIndex(l, true);
@@ -697,6 +719,9 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             itemsToPreload.emplace_back(r);
             endIndex = r;
         }
+    }
+    if (itemsToPreload.empty()) {
+        return;
     }
     int32_t startLine = 0;
     const auto pos = info_.GetItemPos(startIndex);

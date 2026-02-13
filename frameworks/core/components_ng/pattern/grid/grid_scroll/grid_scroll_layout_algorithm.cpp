@@ -92,8 +92,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize_.SetWidth(round(frameSize_.Width()));
             frameSize_.SetHeight(round(frameSize_.Height()));
         }
-        // fix layout bug when children are not GridItems
-        if (pipeline && pipeline->GetFrontendType() == FrontendType::ARK_TS) {
+        if (pipeline && pipeline->GetFrontendType() == FrontendType::ARK_TS) { // fix layout bug when children are not GridItems
             currentItemRowSpan_ = 1;
             currentItemColSpan_ = 1;
         }
@@ -127,6 +126,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update cache info.
     auto cache = CalculateCachedCount(layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_));
     const int32_t cacheCnt = std::max(cache.first, cache.second);
+    cacheEnd_ = std::max(info_.GetChildrenCount(), cache.second + info_.endIndex_ + 1);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     info_.lastMainSize_ = mainSize;
@@ -254,10 +254,8 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
     idealSize.SetMainSize(gridMainSize, info_.axis_);
     AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    if (!NearEqual(info_.lastMainSize_, gridMainSize)) {
-        info_.lastMainSize_ = gridMainSize;
-        TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
-    }
+    info_.lastMainSize_ = gridMainSize;
+    TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
 }
 
 void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize)
