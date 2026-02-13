@@ -4899,6 +4899,16 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
+#ifdef IS_RELEASE_VERSION
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "ITK Id:%{public}d, axisId:%{public}d, type=%{public}d, inject=%{public}d",
+            event.touchEventId, event.id, (int32_t)event.action, event.isInjected);
+#else
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "ITK id:%{public}d, axisId:%{public}d, x=%{public}.3f, y=%{public}.3f, "
+            "type=%{public}d, inject=%{public}d",
+            event.touchEventId, event.id, event.x, event.y, (int32_t)event.action, event.isInjected);
+#endif
     }
     if (eventManager_->HandleAxisEventWithDifferentDeviceId(scaleEvent, node)) {
         return;

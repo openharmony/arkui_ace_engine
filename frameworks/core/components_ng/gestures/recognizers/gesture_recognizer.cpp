@@ -629,6 +629,11 @@ bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)
     if (!isInAttachedNode) {
         return false;
     }
+    if (!CheckNeedAddCurrentFingerInfo(event)) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Recognizer don't add fid:%{public}d for %{public}s", event.id, extraInfo_.c_str());
+        return false;
+    }
     if (fingersId_.find(event.id) != fingersId_.end()) {
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,

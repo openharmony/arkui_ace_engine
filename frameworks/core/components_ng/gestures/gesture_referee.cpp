@@ -473,7 +473,7 @@ void GestureReferee::RecallOnAcceptGesture()
     delayRecognizer_.Reset();
 }
 
-bool GestureReferee::CheckRecognizerInInnerContainer(const RefPtr<NGGestureRecognizer>& recognizer)
+bool GestureReferee::CheckRecognizerInInnerContiner(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     constexpr size_t MIN_POSTINPUTEVENT_MOUSE_ID = 100000;
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
@@ -486,7 +486,7 @@ bool GestureReferee::CheckRecognizerInInnerContainer(const RefPtr<NGGestureRecog
 
 void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    if (recognizerDelayStatus_ == RecognizerDelayStatus::START && CheckRecognizerInInnerContainer(recognizer)) {
+    if (recognizerDelayStatus_ == RecognizerDelayStatus::START && CheckRecognizerInInnerContiner(recognizer)) {
         delayRecognizer_ = recognizer;
         return;
     }

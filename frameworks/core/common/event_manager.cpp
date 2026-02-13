@@ -1282,7 +1282,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
         }
     }
 
-    ACE_FUNCTION_TRACE_COMMERCIAL();
+    ACE_SCOPED_TRACE_COMMERCIAL("DispatchTouchEvent id:%d, pointX=%f pointY=%f action=%d",
+        event.id, event.x, event.y, (int)event.action);
     for (const auto& entry : curResultIter->second) {
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (!recognizer && !sendOnTouch) {

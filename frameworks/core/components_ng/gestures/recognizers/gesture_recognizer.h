@@ -498,6 +498,11 @@ protected:
     }
     virtual std::string GetGestureInfoString() const;
 
+    virtual bool CheckNeedAddCurrentFingerInfo(const TouchEvent& event)
+    {
+        return true;
+    }
+
     RefereeState refereeState_ = RefereeState::READY;
 
     RefereeState lastRefereeState_ = RefereeState::READY;
