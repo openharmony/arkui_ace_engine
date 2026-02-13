@@ -337,17 +337,6 @@ std::optional<int32_t> ConvertNumber(const Ark_Union_Number_String& src)
 }
 } // namespace
 namespace IUIContextAccessor {
-void DestroyPeerImpl(Ark_IUIContext peer)
-{
-}
-Ark_IUIContext ConstructImpl()
-{
-    return {};
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void FreezeUINode0Impl(const Ark_String* id,
                        Ark_Boolean isFrozen)
 {
@@ -502,7 +491,7 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
-Ark_arkui_component_idlize_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+Ark_arkui_component_idlize_Magnifier GetMagnifierImpl()
 {
     return {};
 }
@@ -510,9 +499,6 @@ Ark_arkui_component_idlize_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
     static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
-        IUIContextAccessor::DestroyPeerImpl,
-        IUIContextAccessor::ConstructImpl,
-        IUIContextAccessor::GetFinalizerImpl,
         IUIContextAccessor::FreezeUINode0Impl,
         IUIContextAccessor::FreezeUINode1Impl,
         IUIContextAccessor::DispatchKeyEventImpl,

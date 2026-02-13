@@ -575,9 +575,6 @@ typedef struct Ark_InvertOptions Ark_InvertOptions;
 typedef struct Opt_InvertOptions Opt_InvertOptions;
 typedef struct Ark_ItemDragInfo Ark_ItemDragInfo;
 typedef struct Opt_ItemDragInfo Opt_ItemDragInfo;
-typedef struct IUIContextPeer IUIContextPeer;
-typedef struct IUIContextPeer* Ark_IUIContext;
-typedef struct Opt_IUIContext Opt_IUIContext;
 typedef struct JsGeolocationPeer JsGeolocationPeer;
 typedef struct JsGeolocationPeer* Ark_JsGeolocation;
 typedef struct Opt_JsGeolocation Opt_JsGeolocation;
@@ -8332,10 +8329,6 @@ typedef struct Opt_ItemDragInfo {
     Ark_Tag tag;
     Ark_ItemDragInfo value;
 } Opt_ItemDragInfo;
-typedef struct Opt_IUIContext {
-    Ark_Tag tag;
-    Ark_IUIContext value;
-} Opt_IUIContext;
 typedef struct Opt_JsGeolocation {
     Ark_Tag tag;
     Ark_JsGeolocation value;
@@ -28867,9 +28860,6 @@ typedef struct GENERATED_ArkUIIndicatorComponentControllerAccessor {
 } GENERATED_ArkUIIndicatorComponentControllerAccessor;
 
 typedef struct GENERATED_ArkUIIUIContextAccessor {
-    void (*destroyPeer)(Ark_IUIContext peer);
-    Ark_IUIContext (*construct)();
-    Ark_NativePointer (*getFinalizer)();
     void (*freezeUINode0)(const Ark_String* id,
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(Ark_Int32 id,
@@ -28903,7 +28893,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
-    Ark_arkui_component_idlize_Magnifier (*getMagnifier)(Ark_IUIContext peer);
+    Ark_arkui_component_idlize_Magnifier (*getMagnifier)();
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
