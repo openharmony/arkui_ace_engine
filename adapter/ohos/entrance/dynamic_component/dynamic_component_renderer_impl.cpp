@@ -790,7 +790,14 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             config.SetPosition(offset.GetX(), offset.GetY());
         }
         auto removeTransaction = [hostRSTransaction, reason, uiContent, aceLogTag, syncId]() {
-            if (hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION) {
+            if (reason != Rosen::SizeChangeReason::ROTATION) {
+                return;
+            }
+
+            CHECK_NULL_VOID(uiContent);
+            uiContent->NotifyRotationAnimationEnd();
+
+            if (hostRSTransaction) {
                 auto subRSUIContext =
                     DynamicComponentRendererImpl::GetRSUIContextByInstanceId(uiContent->GetInstanceId());
                 CHECK_NULL_VOID(subRSUIContext);
