@@ -14,6 +14,7 @@
  */
 
 #include <sstream>
+#include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/paste_event_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/text_area_controller_peer.h"
@@ -165,7 +166,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetFontStyle(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -713,8 +714,6 @@ void SetAutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto capitalization = Converter::OptConvertPtr<AutoCapitalizationMode>(value);
-    TextFieldModelStatic::SetAutoCapitalizationMode(frameNode, capitalization);
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -861,7 +860,7 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto keyboardOptions = Converter::GetOptPtr(options);
+    auto keyboardOptions = Converter::OptConvertPtr<Ark_KeyboardOptions>(options);
     bool supportAvoidance = keyboardOptions &&
         Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
     auto optValue = Converter::GetOptPtr(value);
