@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,7 @@ public:
     void SetTextIndent(const Dimension& value) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
@@ -98,14 +99,12 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
-    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
-    void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void SetEnablePreviewText(bool enablePreviewText) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
-    void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetBackBorderRadius() override;
     void SetStopBackPress(bool isStopBackPress) override;
@@ -136,6 +135,7 @@ public:
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
+    void UpdateInspectorId(const std::string& key) override;
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetCustomKeyboard(
         FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
@@ -165,8 +165,6 @@ public:
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
-    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
-    static void SetId(FrameNode* frameNode, const std::string& key);
     static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
@@ -183,7 +181,7 @@ public:
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
-                                    std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
+                                std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
     static void SetType(FrameNode* frameNode, TextInputType value);
@@ -205,6 +203,8 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
+    static void SetId(FrameNode* frameNode, const std::string& key);
     static void OnPrepareMenuCallbackUpdate(
         FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
@@ -235,10 +235,6 @@ public:
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);
-    static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::u16string>& value,
-        const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon);
-    static void UpdateSearchNodeBorderProps(const RefPtr<SearchNode>& frameNode,
-        const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::u16string>& placeholder,
         const std::optional<std::u16string>& value, bool hasTextFieldNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
@@ -246,10 +242,14 @@ private:
         const std::optional<std::u16string>& placeholder,
         const std::optional<std::u16string>& value, bool hasTextFieldNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
+    static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::u16string>& value,
+        const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode,
-        const  RefPtr<SearchTheme>& searchTheme = nullptr);
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
+    static void UpdateSearchNodeBorderProps(const RefPtr<SearchNode>& frameNode,
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
