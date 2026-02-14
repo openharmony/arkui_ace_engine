@@ -109,7 +109,6 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
-#include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -786,15 +785,12 @@ void* createLineNode(ArkUI_Int32 nodeId)
 
 void* createLocationButtonNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = LocationButtonModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 {
-    return createImageNode(nodeId);
+    return nullptr;
 }
 
 void* createMenuNode(ArkUI_Int32 nodeId)
