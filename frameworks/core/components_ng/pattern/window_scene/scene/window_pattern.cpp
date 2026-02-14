@@ -732,7 +732,7 @@ bool WindowPattern::IsSnapshotSizeChanged()
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, last:%{public}s, cur:%{public}s",
              session_->GetPersistentId(), lastRect.ToString().c_str(), curRect.ToString().c_str());
     if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
-        NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
+        (!NearEqual(lastRect.width_, curRect.width_, 1.0f) || !NearEqual(lastRect.height_, curRect.height_, 1.0f))) {
         return true;
     }
     return false;
