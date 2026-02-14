@@ -105,6 +105,9 @@ declare class MonitorV2 {
 
 }
 
+declare const ObservedV2: <TFunction extends Function>(target: TFunction) => TFunction | void;
+declare const Local: (target: Object, propertyKey: string | symbol) => void;
+
 // Locally defined classes for testing purposes
 @ObservedV2
 class TestClass {

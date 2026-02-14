@@ -16,6 +16,8 @@
 import { CommonTestsV2 } from '../../v1_tests/commonTestsV1'
 import { LocalStorageTestsV1 } from '../../v1_tests/localStorageTestsV1'
 import { AppStorageTestsV1 } from '../../v1_tests/appStorageTestsV1'
+import { PersistentStorageTestsV1 } from '../../v1_tests/persistentStorageTestsV1'
+import { EnvironmentTestsV1 } from '../../v1_tests/environmentTestsV1'
 import { TestRunner } from '../../lib/testRunner'
 import { PageController } from '../../lib/pageController'
 import router from '@system.router'
@@ -35,6 +37,8 @@ struct Parent {
       TestRunner.bind(this)(new CommonTestsV2('V1_common'));
       TestRunner.bind(this)(new LocalStorageTestsV1('V1_localstorage'));
       TestRunner.bind(this)(new AppStorageTestsV1('V1_appstorage'));
+      TestRunner.bind(this)(new PersistentStorageTestsV1('V1_persistentstorage'));
+      TestRunner.bind(this)(new EnvironmentTestsV1('V1_environment'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
