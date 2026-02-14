@@ -273,9 +273,9 @@ private:
     void RestartVideo();
     void SetEnableTransition(bool enabled);
     bool GetEnableTransition();
+    float GetGlobalInfo();
     bool SetPlaybackPeriod(int64_t startTime, int64_t endTime);
     void EnableAutoPlay(bool enabled);
-    float GetGlobalInfo();
     void SetStartPlaybackImpl(const SingleTaskExecutor& uiTaskExecutor);
     void SetStopPlaybackImpl(const SingleTaskExecutor& uiTaskExecutor);
     void SetRefreshMovingPhotoImpl(const SingleTaskExecutor& uiTaskExecutor);
@@ -325,8 +325,8 @@ private:
     RefPtr<PixelMap> pixelMap_;
 
     SharedFd fd_;
-    bool isRepeatChangePlayMode_ = false;
     bool notifyTransitionFlag_ = false;
+    bool isRepeatChangePlayMode_ = false;
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     float hdrBrightness_ = 1.0f;
