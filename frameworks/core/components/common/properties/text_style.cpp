@@ -324,6 +324,6 @@ void TextStyle::UpdateFontSizeOrColorChanged()
         isFontSizeOrColorChanged_ = false;
         return;
     }
-    isFontSizeOrColorChanged_ = (reLayoutTextStyleBitmap_ & allowedMask).any();
+    isFontSizeOrColorChanged_ &= (reLayoutTextStyleBitmap_ & allowedMask).any();
 }
 }  // namespace OHOS::Ace

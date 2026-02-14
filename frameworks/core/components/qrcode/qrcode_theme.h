@@ -76,6 +76,11 @@ public:
 
     ~QrcodeTheme() override = default;
 
+    const Dimension& GetQrcodeDefaultSize() const
+    {
+        return qrcodeDefaultSize_;
+    }
+
     const Color& GetQrcodeColor() const
     {
         return qrcodeColor_;
@@ -104,11 +109,6 @@ public:
     const Dimension& GetQrcodeHeight() const
     {
         return qrcodeHeight_;
-    }
-
-    const Dimension& GetQrcodeDefaultSize() const
-    {
-        return qrcodeDefaultSize_;
     }
 
     double GetFocusStyleType() const
