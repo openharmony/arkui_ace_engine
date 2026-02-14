@@ -45,6 +45,7 @@ ani_long NodeAdapterConstruct(NodeAdapterInfo&& info)
     auto ref = AceType::MakeRefPtr<UINodeAdapter>(handle);
     ref->IncRefCount();
     auto attachfunc = [func = std::move(info.onAttachToNode)](ArkUINodeHandle node) {
+        CHECK_NULL_VOID(func);
         auto uiNode = reinterpret_cast<UINode*>(node);
         CHECK_NULL_VOID(uiNode && func);
         ani_double nodeId = uiNode->GetId();
@@ -54,24 +55,26 @@ ani_long NodeAdapterConstruct(NodeAdapterInfo&& info)
     ref->SetOnDetachFromNodeFunc(std::move(info.onDetachFromNode));
     ref->SetOnGetChildIdFunc(std::move(info.onGetId));
     auto onCreateChild = [func = std::move(info.onCreateChild)](uint32_t index) -> ArkUINodeHandle {
-        ani_long node = func(index);
+        ani_long node = func(static_cast<ani_double>(index));
         auto frameNode = FrameNodePeer::GetFrameNodeByPeer(reinterpret_cast<FrameNodePeer*>(node));
         return ConvertToNodeHandle(frameNode);
     };
     ref->SetOnCreateNewChild(std::move(onCreateChild));
     auto onDisposeChild = [func = std::move(info.onDisposeChild)](ArkUINodeHandle node, int32_t id) {
+        CHECK_NULL_VOID(func);
         ani_double nodeId = reinterpret_cast<NG::UINode*>(node) ? reinterpret_cast<NG::UINode*>(node)->GetId() : -2;
         ani_double index = id;
         func(nodeId, index);
     };
     ref->SetOnDisposeChild(std::move(onDisposeChild));
 
-    // auto onUpdateChild = [func = std::move(info.onUpdateChild)](ArkUINodeHandle node, int32_t id) {
-    //     ani_double nodeId = reinterpret_cast<NG::UINode*>(node) ? reinterpret_cast<NG::UINode*>(node)->GetId() : -2;
-    //     ani_double index = id;
-    //     func(nodeId, index);
-    // };
-    // ref->SetOnUpdateChild(std::move(onUpdateChild));
+    auto onUpdateChild = [func = std::move(info.onUpdateChild)](ArkUINodeHandle node, int32_t id) {
+        CHECK_NULL_VOID(func);
+        ani_double nodeId = reinterpret_cast<NG::UINode*>(node) ? reinterpret_cast<NG::UINode*>(node)->GetId() : -2;
+        ani_double index = id;
+        func(nodeId, index);
+    };
+    ref->SetOnUpdateChind(std::move(onUpdateChild));
     return reinterpret_cast<ani_long>(AceType::RawPtr(ref));
 }
 

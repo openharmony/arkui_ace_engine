@@ -1295,4 +1295,31 @@ HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnDisappear001, TestSize.
     eventHub->FireOnDisappear();
     EXPECT_EQ(flag, 1);
 }
+
+/**
+ * @tc.name: NodeContainerFireOnBind001
+ * @tc.desc: Test the FireOnBind function of NodeContainerEventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerFireOnBind001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onBindCallback = [&flag](int32_t containerId) { flag = 1; };
+
+    /**
+     * @tc.steps: step2. call FireOnBind when onBindCallback_ is nullptr.
+     * @tc.expected: callback is not triggered.
+     */
+    eventHub->SetControllerOnBind(onBindCallback);
+    eventHub->SetControllerOnBind(nullptr);
+    eventHub->FireOnBind(1);
+    EXPECT_EQ(flag, 0);
+}
 } // namespace OHOS::Ace::NG
