@@ -278,14 +278,14 @@ napi_value PatternLockControllerConstructor(napi_env env, napi_callback_info inf
     if (wrapper == nullptr) {
         return CommonNapiUtils::CreateNull(env);
     }
-    status = napi_wrap_s(
+    status = napi_wrap(
         env, thisVar, wrapper,
         [](napi_env env, void* data, void* hint) {
             auto* wrapper = reinterpret_cast<PatternLockController*>(data);
             delete wrapper;
             wrapper = nullptr;
         },
-        nullptr, &PATTERN_LOCK_CONTROLLER_TYPE_TAG, nullptr);
+        nullptr, nullptr);
     if (status != napi_ok) {
         delete wrapper;
         return CommonNapiUtils::CreateNull(env);

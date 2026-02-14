@@ -20,13 +20,6 @@
 #include "napi/native_node_api.h"
 
 namespace OHOS::Ace {
-
-// Type tag for napi_wrap_s/napi_unwrap_s type safety
-constexpr napi_type_tag PATTERN_LOCK_CONTROLLER_TYPE_TAG = {
-    .lower = 0x9E4F7A3C2B8D1E6F,
-    .upper = 0x5A7C3D9E2B6F8A1C,
-};
-
 napi_value Create(napi_env env, napi_callback_info info);
 napi_value SideLength(napi_env env, napi_callback_info info);
 napi_value CircleRadius(napi_env env, napi_callback_info info);
