@@ -19,16 +19,17 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-07）：
+**统计数据**（截至 2026-02-11）：
 
-- 总知识库文档: 35 个
+- 总知识库文档: 38 个
 - 组件知识库: 27 个
 - SDK API 知识库: 2 个
+- 系统功能知识库: 2 个
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
 - 架构文档: 1 个
 - 覆盖组件: 26 个
-- 检索关键词: 220+ 个
+- 检索关键词: 260+ 个
 
 ---
 
@@ -36,52 +37,46 @@
 
 ```
 knowledge_base/
-├── README.md              # 本文件，知识库索引和说明
-├── cj_frontend/           # CJ Frontend 桥接层知识库
-│   └── CJ_Frontend_Guide.md                   # 综合指南
-├── sdk/                   # SDK 相关知识库
-│   ├── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
-│   └── Component_API_Knowledge_Base_CN.md     # ArkUI 组件 API 知识库
-├── architecture/          # 架构文档
-│   └── ThemeManager_Architecture_CN.md        # ThemeManager 主题系统架构
-├── pattern/               # 组件模式知识库
-│   ├── badge/
-│   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
-│   ├── calendar_picker/
-│   │   └── Calendar_Picker_Knowledge_Base.md  # CalendarPicker 组件知识库
-│   ├── counter/
-│   │   └── Counter_Knowledge_Base.md          # Counter 组件知识库
-│   ├── flex/
-│   │   └── Flex_Knowledge_Base.md             # Flex/Row/Column/Wrap 组件知识库
-│   ├── gauge/
-│   │   └── Gauge_Knowledge_Base.md             # Gauge 组件知识库
-│   ├── grid/
-│   │   └── Grid_Knowledge_Base.md          # Grid 组件知识库
-│   ├── image/
-│   │   └── Image_Knowledge_Base.md             # Image 组件知识库
-│   ├── container_picker/
-│   │   └── Container_Picker_Knowledge_Base.md # ContainerPicker 组件知识库
-│   ├── counter/
-│   │   └── Counter_Knowledge_Base.md          # Counter 组件知识库
-│   ├── flex/
-│   │   └── Flex_Knowledge_Base.md             # Flex/Row/Column/Wrap 组件知识库
-│   ├── gauge/
-│   │   └── Gauge_Knowledge_Base.md             # Gauge 组件知识库
-│   ├── image/
-│   │   └── Image_Knowledge_Base.md             # Image 组件知识库
-│   ├── image_animator/
-│   │   └── Image_Animator_Knowledge_Base.md    # ImageAnimator 组件知识库
-│   ├── marquee/
-│   │   └── Marquee_Knowledge_Base.md           # Marquee 组件知识库
-│   ├── menu/
-│   │   └── Menu_Knowledge_Base.md              # Menu 组件知识库
-│   ├── picker/
-│   │   └── Date_Picker_Knowledge_Base.md        # DatePicker 组件知识库
-│   ├── qrcode/
-│   │   └── QRCode_Knowledge_Base.md            # QRCode 组件知识库
-│   ├── refresh/
-│   │   └── Refresh_Knowledge_Base.md           # Refresh 组件知识库
-│   ├── sheet/
+ ├── README.md              # 本文件，知识库索引和说明
+ ├── cj_frontend/           # CJ Frontend 桥接层知识库
+ │   └── CJ_Frontend_Guide.md                   # 综合指南
+ ├── sdk/                   # SDK 相关知识库
+ │   ├── ArkUI_SDK_API_Knowledge_Base.md       # ArkUI SDK API 完整分析
+ │   └── Component_API_Knowledge_Base_CN.md     # ArkUI 组件 API 知识库
+  ├── common/                # 系统功能知识库
+  │   └── interaction/
+  │       ├── Gesture_Knowledge_Base_CN.md           # 手势系统知识库（基础层）
+  │       └── Drag_Drop_Knowledge_Base_CN.md         # 拖拽系统知识库（基于手势扩展的进阶层）
+ ├── architecture/          # 架构文档
+ │   └── ThemeManager_Architecture_CN.md        # ThemeManager 主题系统架构
+ ├── pattern/               # 组件模式知识库
+ │   ├── badge/
+ │   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库
+ │   ├── calendar_picker/
+ │   │   └── Calendar_Picker_Knowledge_Base.md  # CalendarPicker 组件知识库
+ │   ├── counter/
+ │   │   └── Counter_Knowledge_Base.md          # Counter 组件知识库
+ │   ├── flex/
+ │   │   └── Flex_Knowledge_Base.md             # Flex/Row/Column/Wrap 组件知识库
+ │   ├── gauge/
+ │   │   └── Gauge_Knowledge_Base.md             # Gauge 组件知识库
+ │   ├── grid/
+ │   │   └── Grid_Knowledge_Base.md          # Grid 组件知识库
+ │   ├── image/
+ │   │   └── Image_Knowledge_Base.md             # Image 组件知识库
+ │   ├── container_picker/
+ │   │   └── Container_Picker_Knowledge_Base.md # ContainerPicker 组件知识库
+ │   ├── image_animator/
+ │   │   └── Image_Animator_Knowledge_Base.md    # ImageAnimator 组件知识库
+ │   ├── marquee/
+ │   │   └── Marquee_Knowledge_Base.md           # Marquee 组件知识库
+ │   ├── menu/
+ │   │   └── Menu_Knowledge_Base.md              # Menu 组件知识库
+ │   ├── picker/
+ │   │   └── Date_Picker_Knowledge_Base.md        # DatePicker 组件知识库
+ │   ├── refresh/
+ │   │   └── Refresh_Knowledge_Base.md           # Refresh 组件知识库
+ │   ├── sheet/
 │   │   └── Sheet_Knowledge_Base_CN.md        # Sheet 组件知识库
 │   ├── scroll/
 │   │   └── Scroll_Knowledge_Base.md            # Scroll 组件知识库
@@ -222,6 +217,85 @@ knowledge_base/
 **相关资源**：
 - 组件 API 目录: `OpenHarmony/interface/sdk-js/api/@internal/component/ets/`
 - ArkUI SDK API 知识库: [ArkUI_SDK_API_Knowledge_Base.md](./sdk/ArkUI_SDK_API_Knowledge_Base.md)
+
+---
+
+### Gesture System Knowledge Base
+
+**位置**: `common/interaction/Gesture_Knowledge_Base_CN.md`
+
+**完整指南** - 手势识别系统的基础层知识库
+
+**包含内容**：
+
+- **概述**: 手势系统定位、技术架构、与拖拽系统的关系
+- **系统架构**: 完整的调用链（输入事件 → 手势识别器 → 手势仲裁 → 回调触发）
+- **核心类继承关系**: NGGestureRecognizer、MultiFingersRecognizer、各种识别器
+- **手势识别器详解**:
+  - 基础手势: ClickRecognizer、TapRecognizer、LongPressRecognizer
+  - 滑动手势: PanRecognizer、SwipeRecognizer
+  - 缩放旋转: PinchRecognizer、RotationRecognizer
+  - 手势组合: ParallelRecognizer、SequencedRecognizer、ExclusiveRecognizer
+- **手势仲裁器**: GestureReferee、GestureScope、仲裁流程
+- **完整 API 清单**: 基础手势、滑动手势、缩放旋转手势、手势组合 API
+- **核心实现细节**: 速度追踪算法（最小二乘法）、距离计算算法、手势仲裁机制
+- **使用示例**: 点击、长按、滑动、捏合、手势组合等 6+ 完整示例
+- **调试指南**: 手势识别调试、手势冲突解决、性能优化
+
+**代码规模**：
+
+- 核心文件: 约 40 个文件
+- 核心代码: 约 15,000+ 行 C++ 代码
+- 手势识别器: 7 种基础手势 + 3 种组合模式
+
+**与拖拽系统的关系**:
+
+- **拖拽启动**: 基于 Pan 手势识别,当滑动距离超过阈值时触发拖拽
+- **拖拽移动**: 延续 Pan 手势的 Move 事件处理
+- **拖拽释放**: 对应 Pan 手势的 Up 事件
+
+**适用场景**：手势系统开发、手势识别实现、手势仲裁调试时参考
+
+**相关文档**: [拖拽系统知识库](./Drag_Drop_Knowledge_Base_CN.md)（基于手势扩展的进阶层）
+
+---
+
+### Drag & Drop System Knowledge Base
+
+**位置**: `common/interaction/Drag_Drop_Knowledge_Base_CN.md`
+
+**完整指南** - 拖拽系统的进阶层知识库（基于手势系统）
+
+**包含内容**：
+
+- **概述**: 拖拽系统定位、与手势系统的关系、技术架构
+- **系统架构**: 完整的拖拽流程（启动 → 创建预览 → 移动 → 释放）
+- **拖拽管理器**: DragDropManager、拖拽事件处理
+- **拖拽状态机**: DragDropInitiatingStateMachine（Idle→Press→Ready→Lifting→Moving）
+- **拖拽预览系统**: DragPreviewOption、PixelMap 截图、自定义预览、拖拽动画
+- **拖拽代理**: DragDropProxy、OverlayWindow 管理
+- **UDMF 数据传递**: 统一数据管理框架、跨应用拖拽
+- **Spring Loading**: 弹性加载检测、边缘自动滚动
+- **完整 API 清单**: 基础拖拽、拖拽预览、UDMF 数据 API
+- **核心实现细节**: 拖拽启动检测、拖拽预览生成、UDMF 数据传递、Spring Loading 机制
+- **使用示例**: 简单文本拖拽、自定义预览、列表拖拽排序、跨应用拖拽等 4+ 完整示例
+- **调试指南**: 拖拽调试、常见问题排查、性能优化
+
+**代码规模**：
+
+- 核心文件: 约 20 个文件
+- 核心代码: 约 10,000+ 行 C++ 代码
+- 拖拽状态: 6 个主要状态
+
+**依赖关系**:
+
+- **前置知识**: 手势系统（[Gesture_Knowledge_Base_CN.md](./Gesture_Knowledge_Base_CN.md)）
+- **基础**: Pan 手势识别
+- **扩展**: 拖拽预览、拖拽状态机、UDMF 数据传递
+
+**适用场景**：拖拽系统开发、拖拽功能实现、跨应用拖拽时参考
+
+**相关文档**: [手势系统知识库](./Gesture_Knowledge_Base_CN.md)（拖拽系统的基础）
 
 ---
 
