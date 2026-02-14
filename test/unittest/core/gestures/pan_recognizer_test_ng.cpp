@@ -3288,11 +3288,11 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDirectionTest001, TestSize.Leve
 }
 
 /**
- * @tc.name: PanRecognizerChangeDistanceTest001
- * @tc.desc: Test ChangeDistance updates distance when in READY state
+ * @tc.name: PanRecognizerUpdateDistanceTest001
+ * @tc.desc: Test UpdateDistance updates distance when in READY state
  * @tc.type: FUNC
  */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest001, TestSize.Level1)
+HWTEST_F(PanRecognizerTestNg, PanRecognizerUpdateDistanceTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create PanRecognizer in READY state
@@ -3305,7 +3305,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest001, TestSize.Level
     panRecognizer.newDistance_ = originalDistance;
 
     /**
-     * @tc.steps: step2. Call ChangeDistance with different value
+     * @tc.steps: step2. Call UpdateDistance with different value
      * @tc.expected: step2. Both distance_ and newDistance_ should be updated
      */
     double newDistance = 20.0;
@@ -3315,11 +3315,11 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest001, TestSize.Level
 }
 
 /**
- * @tc.name: PanRecognizerChangeDistanceTest002
- * @tc.desc: Test ChangeDistance updates distance when in DETECTING state
+ * @tc.name: PanRecognizerUpdateDistanceTest002
+ * @tc.desc: Test UpdateDistance updates distance when in DETECTING state
  * @tc.type: FUNC
  */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest002, TestSize.Level1)
+HWTEST_F(PanRecognizerTestNg, PanRecognizerUpdateDistanceTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create PanRecognizer in DETECTING state
@@ -3332,7 +3332,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest002, TestSize.Level
     panRecognizer.newDistance_ = originalDistance;
 
     /**
-     * @tc.steps: step2. Call ChangeDistance with different value
+     * @tc.steps: step2. Call UpdateDistance with different value
      * @tc.expected: step2. Both distance_ and newDistance_ should be updated
      */
     double newDistance = 20.0;
@@ -3342,11 +3342,11 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest002, TestSize.Level
 }
 
 /**
- * @tc.name: PanRecognizerChangeDistanceTest003
- * @tc.desc: Test ChangeDistance does not update distance when in SUCCEED state
+ * @tc.name: PanRecognizerUpdateDistanceTest003
+ * @tc.desc: Test UpdateDistance does not update distance when in SUCCEED state
  * @tc.type: FUNC
  */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest003, TestSize.Level1)
+HWTEST_F(PanRecognizerTestNg, PanRecognizerUpdateDistanceTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create PanRecognizer in SUCCEED state
@@ -3359,7 +3359,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest003, TestSize.Level
     panRecognizer.newDistance_ = originalDistance;
 
     /**
-     * @tc.steps: step2. Call ChangeDistance with different value
+     * @tc.steps: step2. Call UpdateDistance with different value
      * @tc.expected: step2. distance_ should remain unchanged, newDistance_ should be updated
      */
     double newDistance = 20.0;
@@ -3369,11 +3369,11 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest003, TestSize.Level
 }
 
 /**
- * @tc.name: PanRecognizerChangeDistanceTest004
- * @tc.desc: Test ChangeDistance updates mouseDistance
+ * @tc.name: PanRecognizerUpdateDistanceTest004
+ * @tc.desc: Test UpdateDistance updates mouseDistance
  * @tc.type: FUNC
  */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest004, TestSize.Level1)
+HWTEST_F(PanRecognizerTestNg, PanRecognizerUpdateDistanceTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create PanRecognizer in READY state
@@ -3387,7 +3387,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerChangeDistanceTest004, TestSize.Level
     panRecognizer.mouseDistance_ = originalDistance;
 
     /**
-     * @tc.steps: step2. Call ChangeDistance with different value
+     * @tc.steps: step2. Call UpdateDistance with different value
      * @tc.expected: step2. mouseDistance_ should also be updated
      */
     double newDistance = 20.0;
