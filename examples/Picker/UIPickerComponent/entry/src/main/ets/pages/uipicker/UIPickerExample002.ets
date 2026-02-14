@@ -615,3 +615,185 @@ export struct UIPickerExample019 {
     .backgroundColor('#F5F5F5')
   }
 }
+
+/**
+ * UIPickerExample010: 图标文本混合选择器
+ */
+@Component
+export struct UIPickerExample010 {
+  private items: IconTextItem[] = []
+
+  aboutToAppear(): void {
+    const icons: string[] = ['😀', '😎', '🥳', '🎉', '⭐', '🌟', '✨', '💫', '🔥', '💎']
+    const labels: string[] = ['开心', '酷炫', '庆祝', '派对', '星星', '闪亮', '光芒', '彗星', '火焰', '钻石']
+    for (let i = 0; i < 10; i++) {
+      this.items.push({ icon: icons[i], label: labels[i] })
+    }
+  }
+
+  build() {
+    Column() {
+      Text('图标文本混合选择器')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      UIPickerComponent() {
+        ForEach(this.items, (item: IconTextItem) => {
+          Row() {
+            Text(item.icon)
+              .fontSize(24)
+            Text(item.label)
+              .fontSize(16)
+              .margin({ left: 8 })
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Center)
+        })
+      }
+      .width('70%')
+      .height(200)
+      .selectionIndicator({
+        type: PickerIndicatorType.BACKGROUND,
+        backgroundColor: '#FFF9C4'
+      })
+
+      Text('提示: 图标和文本混合显示')
+        .fontSize(14)
+        .fontColor('#999999')
+        .margin({ top: 20 })
+    }
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#F5F5F5')
+  }
+}
+
+interface IconTextItem {
+  icon: string
+  label: string
+}
+
+/**
+ * UIPickerExample011: 单列短数据选择器
+ */
+@Component
+export struct UIPickerExample011 {
+  private priorityLevels: string[] = ['低优先级', '中优先级', '高优先级', '紧急']
+  @State selectedPriority: number = 1
+
+  build() {
+    Column() {
+      Text('单列短数据选择器')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      UIPickerComponent({
+        selectedIndex: this.selectedPriority
+      }) {
+        ForEach(this.priorityLevels, (level: string) => {
+          Text(level)
+            .fontSize(16)
+            .fontColor('#333333')
+        })
+      }
+      .width('70%')
+      .height(180)
+      .selectionIndicator({
+        type: PickerIndicatorType.BACKGROUND
+      })
+      .onChange((selectedIndex: number) => {
+        this.selectedPriority = selectedIndex
+      })
+
+      Text('当前优先级: ' + this.priorityLevels[this.selectedPriority])
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .margin({ top: 20 })
+        .fontColor(this.selectedPriority === 3 ? '#F44336' : this.selectedPriority === 2 ? '#FF9800' : this.selectedPriority === 1 ? '#FFC107' : '#4CAF50')
+
+      Text('提示: 少量选项的快速选择')
+        .fontSize(14)
+        .fontColor('#999999')
+        .margin({ top: 20 })
+    }
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#F5F5F5')
+  }
+}
+
+/**
+ * UIPickerExample012: 数字密码选择器
+ */
+@Component
+export struct UIPickerExample012 {
+  @State digit1: number = 0
+  @State digit2: number = 0
+  @State digit3: number = 0
+  @State digit4: number = 0
+
+  private digits: string[] = []
+
+  aboutToAppear(): void {
+    for (let i = 0; i <= 9; i++) {
+      this.digits.push(i.toString())
+    }
+  }
+
+  getPinCode(): string {
+    return this.digits[this.digit1] + this.digits[this.digit2] + this.digits[this.digit3] + this.digits[this.digit4]
+  }
+
+  build() {
+    Column() {
+      Text('数字密码选择器')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      Row() {
+        ForEach([this.digit1, this.digit2, this.digit3, this.digit4], (digitIndex: number, index: number) => {
+          UIPickerComponent({
+            selectedIndex: digitIndex
+          }) {
+            ForEach(this.digits, (digit: string) => {
+              Text(digit)
+                .fontSize(32)
+                .fontWeight(FontWeight.Bold)
+                .fontColor('#333333')
+            })
+          }
+          .width('20%')
+          .height(150)
+          .selectionIndicator({
+            type: PickerIndicatorType.DIVIDER
+          })
+          .onChange((selectedIndex: number) => {
+            if (index === 0) this.digit1 = selectedIndex
+            else if (index === 1) this.digit2 = selectedIndex
+            else if (index === 2) this.digit3 = selectedIndex
+            else if (index === 3) this.digit4 = selectedIndex
+          })
+        })
+      }
+      .width('80%')
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      Text('PIN码: ' + this.getPinCode())
+        .fontSize(24)
+        .fontWeight(FontWeight.Bold)
+        .margin({ top: 30 })
+        .letterSpacing(8)
+
+      Text('提示: 四位数字密码组合选择')
+        .fontSize(14)
+        .fontColor('#999999')
+        .margin({ top: 20 })
+    }
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#F5F5F5')
+  }
+}
