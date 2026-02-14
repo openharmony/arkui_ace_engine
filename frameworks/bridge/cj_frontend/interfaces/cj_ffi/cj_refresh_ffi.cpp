@@ -170,7 +170,7 @@ void FfiOHOSAceFrameworkRefreshOnOffsetChange(void (*callback)(const float value
 void FfiOHOSAceFrameworkRefreshOffset(double offsetValue, int32_t offsetUnit)
 {
     if (RefreshModel::GetInstance() == nullptr) {
-        LOGE("FfiOHOSAceFrameworkRefreshOffset, Refresh Instance is null");
+        LOGE("FfiOHOSAceFrameworkRefreshPullToRefresh, Refresh Instance is null");
         return;
     }
     RefreshModel::GetInstance()->SetRefreshOffset(

@@ -98,10 +98,8 @@ void FfiOHOSAceFrameworkGaugeCreate(double gaugeValue, double gaugeMin, double g
 {
     bool isApi23OrAbove = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_THREE);
     if ((isApi23OrAbove && gaugeMin > gaugeMax) || (!isApi23OrAbove && gaugeMin >= gaugeMax)) {
-        if (LessNotEqual(gaugeMax, gaugeMin)) {
-            gaugeMin = NG::DEFAULT_MIN_VALUE;
-            gaugeMax = NG::DEFAULT_MAX_VALUE;
-        }
+        gaugeMin = NG::DEFAULT_MIN_VALUE;
+        gaugeMax = NG::DEFAULT_MAX_VALUE;
     }
     if (gaugeValue < gaugeMin || gaugeValue > gaugeMax) {
         gaugeValue = gaugeMin;
