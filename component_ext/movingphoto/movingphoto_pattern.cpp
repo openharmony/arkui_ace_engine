@@ -277,7 +277,7 @@ void MovingPhotoPattern::OnRebuildFrame()
     CHECK_NULL_VOID(host);
     auto movingPhotoNode = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhotoNode);
-    int32_t childCount = host->GetTotalChildCount();
+    int32_t childCount = movingPhotoNode->GetTotalChildCount();
     CHECK_NULL_VOID(childCount >= 1);
     auto column = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetColumn(childCount - 1));
     CHECK_NULL_VOID(column);
@@ -1665,7 +1665,7 @@ void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContex
         isRefreshMovingPhoto_ || !isEnableTransition_) {
         videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
         imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-    } else {
+        } else {
 #if defined(PLAYER_FRAMEWORK_EXISTS)
         float scale = isEnableTransition_ ? GetGlobalInfo() : ZOOM_IN_SCALE;
         if (isXmageMode_) {
