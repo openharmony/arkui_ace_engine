@@ -481,17 +481,17 @@ import { Size } from '@ohos.arkui.node'
 
     export interface ScrollEventInfo {
         id: string;
-        uniqueId: int;
+        uniqueId: number;
         scrollEvent: ScrollEventType;
-        offset: double;
+        offset: number;
         axis: Axis;
     }
 
     export class ScrollEventInfoImpl implements ScrollEventInfo{
         id: string;
-        uniqueId: int;
+        uniqueId: number;
         scrollEvent: ScrollEventType;
-        offset: double;
+        offset: number;
         axis: Axis;
 
         static castToScrollEventType(value: number): ScrollEventType {
@@ -529,7 +529,7 @@ import { Size } from '@ohos.arkui.node'
             if (!uniqueId.isNumber()) {
                 throw Error("uniqueId in ScrollEventInfo type Error");
             }
-            staticValue.uniqueId = Double.toInt(uniqueId.toNumber());
+            staticValue.uniqueId = uniqueId.toNumber();
 
             let scrollEvent = dynamicValue.getProperty("scrollEvent");
             if (!scrollEvent.isNumber()) {

@@ -540,6 +540,24 @@ void SetWaterFlowScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
     WaterFlowModelNG::SetScrollBarColor(frameNode, value);
 }
 
+void SetWaterFlowScrollBarColorPtr(ArkUINodeHandle node, ArkUI_Int32 color, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        WaterFlowModelNG::ParseResObjScrollBarColor(frameNode, resObj);
+    }
+    auto value = Color(color).ColorToString();
+    WaterFlowModelNG::SetScrollBarColor(frameNode, value);
+}
+
 void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -861,6 +879,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .resetWaterFlowScrollBarWidth = ResetWaterFlowBarWidth,
         .getWaterFlowScrollBarWidth = GetWaterFlowBarWidth,
         .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColor,
+        .setWaterFlowScrollBarColorPtr = SetWaterFlowScrollBarColorPtr,
         .resetWaterFlowScrollBarColor = ResetWaterFlowScrollBarColor,
         .getWaterFlowScrollBarColor = GetWaterFlowScrollBarColor,
         .getEdgeEffect = GetEdgeEffect,

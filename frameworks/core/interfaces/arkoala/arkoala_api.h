@@ -3938,6 +3938,7 @@ struct ArkUIListModifier {
     void (*resetListScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getListScrollBarColor)(ArkUINodeHandle node);
     void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setListScrollBarColorPtr)(ArkUINodeHandle node, ArkUI_Int32 color, void* colorRawPtr);
     void (*resetListScrollBarColor)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAlignListItem)(ArkUINodeHandle node);
     void (*setAlignListItem)(ArkUINodeHandle node, ArkUI_Int32 listItemAlign);
@@ -3947,6 +3948,8 @@ struct ArkUIListModifier {
     ArkUI_Int32 (*getScrollSnapAlign)(ArkUINodeHandle node);
     void (*listSetDivider)(ArkUINodeHandle node, const ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*listSetDividerPtr)(ArkUINodeHandle node, const ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length, void* colorRawPtr);
     void (*listResetDivider)(ArkUINodeHandle node);
     void (*setChainAnimationOptions)(
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
@@ -4040,6 +4043,8 @@ struct ArkUIListModifier {
 struct ArkUIListItemGroupModifier {
     void (*listItemGroupSetDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*listItemGroupSetDividerPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length, void* colorRawPtr);
     void (*listItemGroupResetDivider)(ArkUINodeHandle node);
     void (*listItemGroupSetHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
     void (*listItemGroupResetHeader)(ArkUINodeHandle node);
@@ -4613,6 +4618,7 @@ struct ArkUIScrollModifier {
     void (*resetScrollScrollable)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getScrollScrollBarColor)(ArkUINodeHandle node);
     void (*setScrollScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 scrollBarColor);
+    void (*setScrollScrollBarColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 scrollBarColor, void* colorRawPtr);
     void (*resetScrollScrollBarColor)(ArkUINodeHandle node);
     ArkUI_Float32 (*getScrollScrollBarWidth)(ArkUINodeHandle node);
     void (*setScrollScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -6239,6 +6245,7 @@ struct ArkUIWaterFlowModifier {
     void (*resetWaterFlowScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowScrollBarWidth)(ArkUINodeHandle node);
     void (*setWaterFlowScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setWaterFlowScrollBarColorPtr)(ArkUINodeHandle node, ArkUI_Int32 color, void* colorRawPtr);
     void (*resetWaterFlowScrollBarColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getWaterFlowScrollBarColor)(ArkUINodeHandle node);
     ArkUI_Int32 (*getEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);

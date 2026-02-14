@@ -3151,15 +3151,15 @@ void ListPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnListScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
     auto onScrollVisibleContentChange = hub->GetOnScrollVisibleContentChange();
-    onScrollVisibleContentChange ? DumpLog::GetInstance().AddDesc("hasOnScrollChange: true")
-                                 : DumpLog::GetInstance().AddDesc("hasOnScrollChange: false");
+    onScrollVisibleContentChange ? DumpLog::GetInstance().AddDesc("hasOnScrollVisibleContentChange: true")
+                                 : DumpLog::GetInstance().AddDesc("hasOnScrollVisibleContentChange: false");
     auto onJSFrameNodeScrollVisibleContentChange = hub->GetJSFrameNodeOnScrollVisibleContentChange();
     onJSFrameNodeScrollVisibleContentChange
-        ? DumpLog::GetInstance().AddDesc("nodeOnScrollChange: true")
-        : DumpLog::GetInstance().AddDesc("nodeOnScrollChange: false");
+        ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollVisibleContentChange: true")
+        : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollVisibleContentChange: false");
 }
 
 void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -3172,11 +3172,12 @@ void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnListScrollIndex();
-    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+
     auto onScrollVisibleContentChange = hub->GetOnScrollVisibleContentChange();
-    json->Put("hasOnScrollChange", onScrollVisibleContentChange ? "true" : "false");
+    json->Put("hasOnScrollVisibleContentChange", onScrollVisibleContentChange ? "true" : "false");
     auto onJSFrameNodeScrollVisibleContentChange = hub->GetJSFrameNodeOnScrollVisibleContentChange();
-    json->Put("nodeOnScrollChange", onJSFrameNodeScrollVisibleContentChange ? "true" : "false");
+    json->Put("hasFrameNodeOnScrollVisibleContentChange", onJSFrameNodeScrollVisibleContentChange ? "true" : "false");
 }
 
 DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const

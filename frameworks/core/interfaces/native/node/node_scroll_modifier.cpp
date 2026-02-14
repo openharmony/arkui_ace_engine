@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
 #include "interfaces/native/node/node_model.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -260,6 +261,23 @@ void SetScrollScrollBarColor(ArkUINodeHandle node, uint32_t scrollBarColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetScrollBarColor(frameNode, Color(scrollBarColor));
+}
+
+void SetScrollScrollBarColorPtr(ArkUINodeHandle node, uint32_t scrollBarColor, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(scrollBarColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        ScrollModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
+    }
     ScrollModelNG::SetScrollBarColor(frameNode, Color(scrollBarColor));
 }
 
@@ -794,6 +812,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         .resetScrollScrollable = ResetScrollScrollable,
         .getScrollScrollBarColor = GetScrollScrollBarColor,
         .setScrollScrollBarColor = SetScrollScrollBarColor,
+        .setScrollScrollBarColorPtr = SetScrollScrollBarColorPtr,
         .resetScrollScrollBarColor = ResetScrollScrollBarColor,
         .getScrollScrollBarWidth = GetScrollScrollBarWidth,
         .setScrollScrollBarWidth = SetScrollScrollBarWidth,

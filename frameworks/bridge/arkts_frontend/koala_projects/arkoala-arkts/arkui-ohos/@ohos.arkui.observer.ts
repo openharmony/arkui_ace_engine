@@ -157,9 +157,9 @@ declare namespace uiObserver {
 
     export interface ScrollEventInfo {
         id: string;
-        uniqueId: int;
+        uniqueId: number;
         scrollEvent: ScrollEventType;
-        offset: double;
+        offset: number;
         axis: Axis;
     }
 
