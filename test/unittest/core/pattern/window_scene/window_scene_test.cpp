@@ -998,12 +998,14 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
 
     session->state_ = Rosen::SessionState::STATE_BACKGROUND;
     session->SetShowRecent(false);
+    usleep(WAIT_SYNC_IN_NS);
     session->isAppLockControl_.store(false);
     session->scenePersistence_->hasSnapshot_[key] = true;
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
 
     session->SetShowRecent(false);
+    usleep(WAIT_SYNC_IN_NS);
     session->isAppLockControl_.store(true);
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
@@ -1020,6 +1022,7 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
 
     session->state_ = Rosen::SessionState::STATE_ACTIVE;
     session->SetShowRecent(false);
+    usleep(WAIT_SYNC_IN_NS);
     session->isAppLockControl_.store(false);
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
@@ -1119,7 +1122,9 @@ HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level0)
     windowScene->OnBoundsChanged(bounds);
     EXPECT_EQ(session->GetShowRecent(), true);
     session->SetShowRecent(false);
+    usleep(WAIT_SYNC_IN_NS);
     windowScene->OnBoundsChanged(bounds);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(session->GetShowRecent(), false);
     bounds.x_ = 0.0;
     bounds.y_ = 2.0;
@@ -1127,5 +1132,6 @@ HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level0)
     session->SetShowRecent(true);
     windowScene->OnBoundsChanged(bounds);
     EXPECT_EQ(session->GetShowRecent(), true);
+    usleep(WAIT_SYNC_IN_NS);
 }
 } // namespace OHOS::Ace::NG
