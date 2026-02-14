@@ -5535,6 +5535,11 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChang
                     reason == WindowSizeChangeReason::DRAG_MOVE)) {
                 sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
+            auto sheetObject = sheetPattern->GetSheetObject();
+            CHECK_NULL_VOID(sheetObject);
+            if (sheetObject->GetSheetType() == SheetType::SHEET_POPUP && !sheetWrapperPattern->ShowInUEC()) {
+                sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
     }
 }
