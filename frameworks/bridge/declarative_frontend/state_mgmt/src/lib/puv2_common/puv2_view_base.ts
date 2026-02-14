@@ -113,9 +113,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   protected isPrebuilding_: boolean = false;
   protected static prebuildingElmtId_: number = -1;
 
-  // it only exists when native id is different with the front id
-  private __nativeId__Internal__?: number;
-
   static readonly doRecycle: boolean = true;
   static readonly doReuse: boolean = false;
 
@@ -131,17 +128,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU/V2 object by given elmtId
-    if (elmtId === UINodeRegisterProxy.notRecordingDependencies) {
-      // Check if native side has already allocated an elmtId via StartGetAccessRecordingFor
-      // This ensures consistency between TS and native sides, especially for LoadNamedRouterSource
-      const assignedElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-      if (assignedElmtId !== UINodeRegisterProxy.notRecordingDependencies) {
-        this.__nativeId__Internal__ = assignedElmtId;
-      }
-      this.id_ = SubscriberManager.MakeId();
-    } else {
-      this.id_ = elmtId;
-    }
+    this.id_ = elmtId === UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
 
     stateMgmtConsole.debug(`PUV2ViewBase constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
@@ -176,10 +163,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       this.__lifecycle__Internal = new CustomComponentLifecycle(this);
     }
     return this.__lifecycle__Internal;
-  }
-
-  public get __nativeId__Internal(): number {
-    return this.__nativeId__Internal__ ? this.__nativeId__Internal__ : this.id_;
   }
 
   public __customComponentExecuteInit__Internal(): void {
