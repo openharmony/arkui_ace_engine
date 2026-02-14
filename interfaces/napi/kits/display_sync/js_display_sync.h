@@ -26,6 +26,13 @@
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace::Napi {
+
+// Type tag for napi_wrap_s/napi_unwrap_s type safety
+constexpr napi_type_tag DISPLAY_SYNC_LISTENER_TYPE_TAG = {
+    .lower = 0x4F8B6D3E9C5A2E7F,
+    .upper = 0x7E9C5D2F8B4A6E1D,
+};
+
 enum class CallbackType {
     ONFRAME = 0,
     UNKNOW,
