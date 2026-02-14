@@ -76,7 +76,7 @@ public:
         napi_env env, napi_value node, SurfaceCallbackMode mode);
 
     /**
-     * @brief set typeNode.XComponent's SurfaceCallbackMode
+     * @brief set typedNode.XComponent's SurfaceCallbackMode
      *
      */
     static XComponentControllerErrorCode SetSurfaceCallbackModeFromAniValue(

@@ -429,7 +429,7 @@ protected:
 
 private:
     void OnAreaChangedInner() override;
-    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -467,7 +467,11 @@ private:
     void HandleFocusEvent();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleBlurEvent();
+    void ReportChangeEvent(const TouchEventInfo& info, const Offset& screenOffset,
+        const TouchLocationInfo& touchInfo);
     ExternalEvent CreateExternalEvent();
+    void RegisterNode();
+    void UnregisterNode();
 
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
@@ -488,8 +492,6 @@ private:
     void RegisterSurfaceRenderContext();
     void UnregisterSurfaceRenderContext();
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
-    void RegisterNode();
-    void UnregisterNode();
 
     void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
     void InitControllerMultiThread();

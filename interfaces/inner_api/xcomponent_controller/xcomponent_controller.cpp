@@ -90,19 +90,19 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue env is null");
         return nullptr;
     }
-    ani_ref ref;
-    if (env->Object_GetFieldByName_Ref(controller, "peer", &ref) != ANI_OK) {
+    ani_ref a1;
+    if (env->Object_GetFieldByName_Ref(controller, "peer", &a1) != ANI_OK) {
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get peer");
         return nullptr;
     }
-    ani_object obj = static_cast<ani_object>(ref);
-    ani_long ptr;
-    auto ret = env->Object_GetFieldByName_Long(obj, "ptr", &ptr);
+    ani_object a1_obj = static_cast<ani_object>(a1);
+    ani_long a2_ptr;
+    auto ret = env->Object_GetFieldByName_Long(a1_obj, "ptr", &a2_ptr);
     if (ret != ANI_OK) {
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get ptr %{public}d", ret);
         return nullptr;
     }
-    auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(ptr);
+    auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(a2_ptr);
     if (controllerPeer == nullptr) {
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue controllerPeer is null");
         return nullptr;
@@ -138,12 +138,12 @@ XComponentControllerErrorCode XComponentController::SetSurfaceCallbackModeFromAn
         HILOG_ERROR("XComponentController SetSurfaceCallbackModeFromAniValue env is null");
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
-    ani_ref framenodePeerRef;
-    if (env->Object_GetFieldByName_Ref(node, "nodePtr_", &framenodePeerRef) != ANI_OK) {
+    ani_ref frameNodePeerRef;
+    if (env->Object_GetFieldByName_Ref(node, "nodePtr_", &frameNodePeerRef) != ANI_OK) {
         HILOG_ERROR("XComponentController fail to get nodePtr in node");
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
-    ani_object frameNodePeerObj = static_cast<ani_object>(framenodePeerRef);
+    ani_object frameNodePeerObj = static_cast<ani_object>(frameNodePeerRef);
     ani_class pointerClass;
     env->FindClass("std.core.Long", &pointerClass);
     ani_boolean isPointer;
@@ -153,9 +153,9 @@ XComponentControllerErrorCode XComponentController::SetSurfaceCallbackModeFromAn
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
     ani_long frameNodePeerPtr;
-    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "toLong", ":l", &frameNodePeerPtr);
+    status = env->Object_CallMethodByName_Long(frameNodePeerObj,"toLong", ":l" , &frameNodePeerPtr);
     if (status != ANI_OK) {
-        HILOG_ERROR("XComponentController fail to unbox frameNodePeerPtr");
+        HILOG_ERROR("XComponentController fail to unbox frameNodePeerObj");
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
     auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(frameNodePeerPtr);
