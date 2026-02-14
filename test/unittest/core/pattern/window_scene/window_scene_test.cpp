@@ -1030,6 +1030,7 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
     session->isAppLockControl_.store(true);
     windowScene->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene->attachToFrameNodeFlag_, true);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
