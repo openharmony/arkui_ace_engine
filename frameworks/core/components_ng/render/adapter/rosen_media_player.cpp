@@ -587,7 +587,7 @@ int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
     return mediaPlayer_->SetParameter(format);
 }
 
-int32_t GetGlobalInfo(std::shared_ptr<OHOS.Media.Meta> &globalInfo)
+int32_t RosenMediaPlayer::GetGlobalInfo(std::shared_ptr<OHOS.Media.Meta> &globalInfo)
 {
     LOGI("Media player start to GetGlobalInfo.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
