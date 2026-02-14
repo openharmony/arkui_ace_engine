@@ -102,6 +102,11 @@ public:
 
     void CopyInnerEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator);
 
+    bool IsEventEmpty() const
+    {
+        return longPressEvent_ == nullptr;
+    }
+
 private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;

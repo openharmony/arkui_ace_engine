@@ -1381,6 +1381,13 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest046, TestSize.Lev
     gestureEventHubNew->longPressEventActuator_ =
         AceType::MakeRefPtr<LongPressEventActuator>(gestureEventHubNew);
     result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, false);
+ 	 
+    auto longPressCallback = [](GestureEvent& info) {
+    };
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureEventHubNew->SetLongPressEvent(longPressEvent);
+    result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
     EXPECT_EQ(result, true);
 
     gestureEventHubNew->clickEventActuator_ =
