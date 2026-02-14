@@ -59,6 +59,7 @@ struct RotateTransform {
 class ComposedElement;
 class PipelineBase;
 
+
 struct AccessibilityEvent {
     int64_t nodeId = 0;
     int64_t stackNodeId = -1;
@@ -121,7 +122,6 @@ struct AccessibilityWindowInfo {
 struct AccessibilityWorkMode {
     bool isTouchExplorationEnabled = true;
 };
-
 
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
@@ -209,7 +209,6 @@ public:
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
     virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) {}
-
     virtual bool IsTouchExplorationEnabled()
     {
         return true;
