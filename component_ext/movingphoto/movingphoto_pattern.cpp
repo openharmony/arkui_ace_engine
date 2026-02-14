@@ -1843,7 +1843,7 @@ void MovingPhotoPattern::EnableAutoPlay(bool enabled)
         return;
     }
     if (!isPlayByController_ &&
-        currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE || currentPlayStatus_ == PlaybackStatus::PAUSED) {
+        (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE || currentPlayStatus_ == PlaybackStatus::PAUSED)) {
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set autoplay period.");
         SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     }
